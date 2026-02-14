@@ -1,0 +1,78 @@
+using BonniePDF.Drawing;
+using BonniePDF.Models;
+
+namespace BonniePDF.Charts;
+
+/// <summary>
+/// Base class for all charts that provides common functionality for drawing charts
+/// using the ICanvas interface. This ensures charts can be rendered to any backend
+/// (PDF, SVG, etc.) without modification.
+/// </summary>
+public abstract class ChartBase
+{
+    // Title styling constants (matching SVG chart implementation)
+    private const float TitleFontSize = 20;
+    private const float TitleY = 35;
+    private const string TitleFontFamily = "Arial, sans-serif";
+    private static readonly Color TitleColor = Color.FromHex("#333333");
+
+    /// <summary>
+    /// Width of the chart canvas in points
+    /// </summary>
+    public float Width { get; set; } = 800;
+
+    /// <summary>
+    /// Height of the chart canvas in points
+    /// </summary>
+    public float Height { get; set; } = 450;
+
+    /// <summary>
+    /// Background color for the chart (default: null/transparent).
+    /// When null, no background is drawn, allowing the chart to blend with document content.
+    /// Set to Color.White for standalone chart images.
+    /// </summary>
+    public Color? BackgroundColor { get; set; } = null;
+
+    /// <summary>
+    /// When true, the chart will stretch to fill the container width.
+    /// The Width property will be set automatically by the ChartElement.
+    /// </summary>
+    public bool StretchToFit { get; set; } = false;
+
+    /// <summary>
+    /// Draws the chart to the specified canvas.
+    /// This method handles the common setup (background, title) and calls the abstract DrawContent method.
+    /// </summary>
+    /// <param name="canvas">The canvas to draw to</param>
+    /// <param name="data">The chart data to render</param>
+    public void Draw(ICanvas canvas, ChartData data)
+    {
+        // Draw background only if a color is specified
+        if (BackgroundColor.HasValue) canvas.FillRect(0, 0, Width, Height, BackgroundColor.Value);
+
+        // Draw title if present
+        if (!string.IsNullOrEmpty(data.Title)) DrawTitle(canvas, data.Title);
+
+        // Draw chart-specific content
+        DrawContent(canvas, data);
+    }
+
+    /// <summary>
+    /// Draws the chart title centered at the top.
+    /// </summary>
+    /// <param name="canvas">The canvas to draw to</param>
+    /// <param name="title">The title text</param>
+    protected virtual void DrawTitle(ICanvas canvas, string title)
+    {
+        float centerX = Width / 2;
+        canvas.DrawText(centerX, TitleY, title, TitleColor, TitleFontSize, TitleFontFamily, TextAlignment.Center);
+    }
+
+    /// <summary>
+    /// Draws the chart-specific content.
+    /// Derived classes must implement this to provide their specific drawing logic.
+    /// </summary>
+    /// <param name="canvas">The canvas to draw to</param>
+    /// <param name="data">The chart data to render</param>
+    protected abstract void DrawContent(ICanvas canvas, ChartData data);
+}

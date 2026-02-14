@@ -1,0 +1,168 @@
+using System;
+using System.Collections.Generic;
+using BonniePDF.Layout.Elements;
+using BonniePDF.Models;
+using BonniePDF.Security.Models;
+
+namespace BonniePDF.Configuration;
+
+/// <summary>
+/// Configuration settings for PDF document creation and display
+/// </summary>
+public class DocumentSettings
+{
+    /// <summary>
+    /// Creates a new instance of DocumentSettings with default values
+    /// </summary>
+    public DocumentSettings()
+    {
+    }
+
+    /// <summary>
+    /// Creates a new instance of DocumentSettings with the specified page size and margin
+    /// </summary>
+    public DocumentSettings(PdfSize pageSize, float margin)
+    {
+        PageSize = pageSize;
+        Margin = margin;
+    }
+
+    /// <summary>
+    /// Creates a new instance of DocumentSettings with the specified page size, orientation, and margin
+    /// </summary>
+    public DocumentSettings(PdfSize pageSize, PageOrientation orientation, float margin)
+    {
+        PageSize = pageSize;
+        Orientation = orientation;
+        Margin = margin;
+    }
+
+    /// <summary>
+    /// Creates a new instance of DocumentSettings with the specified page size and orientation
+    /// </summary>
+    public DocumentSettings(PdfSize pageSize, PageOrientation orientation)
+    {
+        PageSize = pageSize;
+        Orientation = orientation;
+    }
+
+    /// <summary>
+    /// Template function for generating page headers.
+    /// Called with the page number (1-based) and should return an IElement to render at the top of each page.
+    /// The returned element is rendered at the top margin position.
+    /// </summary>
+    public Func<int, IElement?>? HeaderTemplate { get; set; }
+
+    /// <summary>
+    /// Template function for generating page footers.
+    /// Called with the page number (1-based) and should return an IElement to render at the bottom of each page.
+    /// The returned element is rendered at the bottom margin position.
+    /// </summary>
+    public Func<int, IElement?>? FooterTemplate { get; set; }
+
+    /// <summary>
+    /// The page size for the document (default: A4)
+    /// </summary>
+    public PdfSize PageSize { get; set; } = PdfSize.A4;
+
+    /// <summary>
+    /// The page orientation for the document (default: Portrait)
+    /// </summary>
+    public PageOrientation Orientation { get; set; } = PageOrientation.Portrait;
+
+    /// <summary>
+    /// The margin size in points for all pages (default: 50)
+    /// </summary>
+    public float Margin { get; set; } = 50;
+
+    /// <summary>
+    /// The default zoom level when the PDF is opened (default: FitPage)
+    /// </summary>
+    public ZoomLevel DefaultZoom { get; set; } = ZoomLevel.FitPage;
+
+    /// <summary>
+    /// Custom zoom level for ZoomLevel.Custom (1.0 = 100%, default: 1.0)
+    /// </summary>
+    public double CustomZoomLevel { get; set; } = 1.0;
+
+    /// <summary>
+    /// How the PDF document should be displayed when opened (default: UseNone)
+    /// </summary>
+    public PageMode PageMode { get; set; } = PageMode.UseNone;
+
+    /// <summary>
+    /// Whether to hide the toolbar in the PDF viewer (default: false)
+    /// </summary>
+    public bool HideToolbar { get; set; } = false;
+
+    /// <summary>
+    /// Whether to hide the menubar in the PDF viewer (default: false)
+    /// </summary>
+    public bool HideMenubar { get; set; } = false;
+
+    /// <summary>
+    /// Whether to hide the window UI in the PDF viewer (default: false)
+    /// </summary>
+    public bool HideWindowUI { get; set; } = false;
+
+    /// <summary>
+    /// Whether to fit the document window to the first page (default: false)
+    /// </summary>
+    public bool FitWindow { get; set; } = false;
+
+    /// <summary>
+    /// Whether to center the document window on screen (default: false)
+    /// </summary>
+    public bool CenterWindow { get; set; } = false;
+
+    /// <summary>
+    /// Whether to display the document title in the title bar instead of filename (default: false)
+    /// </summary>
+    public bool DisplayDocTitle { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the PDF version for the output document (default: PDF 1.4).
+    /// </summary>
+    public PdfVersion Version { get; set; } = PdfVersion.Pdf14;
+
+    /// <summary>
+    /// Gets or sets whether PDF/A-1b archival mode is enabled.
+    /// Requires Version == Pdf17. Cannot be used with encryption.
+    /// </summary>
+    public bool PdfAEnabled { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the bookmark items for the document outline tree.
+    /// </summary>
+    public List<BookmarkItem> Bookmarks { get; set; } = new();
+
+    /// <summary>
+    /// Gets whether the document has any bookmarks defined.
+    /// </summary>
+    public bool HasBookmarks => Bookmarks != null && Bookmarks.Count > 0;
+
+    /// <summary>
+    /// Gets or sets the watermark settings for the document.
+    /// When null, no watermark is rendered.
+    /// </summary>
+    public WatermarkSettings Watermark { get; set; }
+
+    /// <summary>
+    /// Gets or sets the encryption settings for the document.
+    /// When null, the document is not encrypted.
+    /// </summary>
+    public EncryptionSettings Encryption { get; set; }
+
+    /// <summary>
+    /// Gets whether encryption is enabled for this document.
+    /// </summary>
+    public bool IsEncrypted => Encryption != null;
+
+    /// <summary>
+    /// Gets the actual page size with orientation applied
+    /// </summary>
+    public PdfSize GetOrientedPageSize()
+    {
+        return PageSize.GetOrientedSize(Orientation);
+    }
+}
