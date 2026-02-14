@@ -21,6 +21,7 @@ obj
 # Visual Studio cache/options directory
 .vs/
 
+
 # Visual Studio Code
 .vscode/
 !.vscode/settings.json
@@ -301,3 +302,5 @@ FodyWeavers.xsd
 # Test Coverage 
 CoverageReport
 coverage.cobertura.xml
+
+.md
