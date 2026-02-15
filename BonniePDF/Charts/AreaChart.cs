@@ -28,16 +28,6 @@ public class AreaChart : CartesianChartBase
     public float LineWidth { get; set; } = 2f;
 
     /// <summary>
-    /// Font size for value labels above data points
-    /// </summary>
-    public float LabelFontSize { get; set; } = 9;
-
-    /// <summary>
-    /// Whether to show value labels above each data point
-    /// </summary>
-    public bool ShowValueLabels { get; set; } = true;
-
-    /// <summary>
     /// Draws the area chart elements (area fill and connecting line).
     /// </summary>
     protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
@@ -51,24 +41,14 @@ public class AreaChart : CartesianChartBase
     }
 
     /// <summary>
-    /// Draws value labels above each data point.
+    /// Gets the color to use for value labels.
     /// </summary>
-    protected override void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
-    {
-        if (!ShowValueLabels) return;
+    protected override Color GetLabelColor() => AreaColor;
 
-        Color labelColor = AreaColor;
-
-        for (int i = 0; i < data.DataPoints.Count; i++)
-        {
-            (float x, float y) = coordinates[i];
-            string text = data.DataPoints[i].FormattedValue;
-
-            // Draw text above the data point
-            canvas.DrawText(x, y - 7 - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
-                TextAlignment.Center);
-        }
-    }
+    /// <summary>
+    /// Gets the vertical offset for value labels (simple spacing above area/line).
+    /// </summary>
+    protected override float GetLabelVerticalOffset() => 7;
 
     /// <summary>
     /// Draws the area fill using a series of thin vertical rectangles.

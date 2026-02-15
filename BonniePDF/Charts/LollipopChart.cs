@@ -29,16 +29,6 @@ public class LollipopChart : CartesianChartBase
     public float HeadRadius { get; set; } = CircleRadius;
 
     /// <summary>
-    /// Font size for value labels above lollipop heads
-    /// </summary>
-    public float LabelFontSize { get; set; } = 9;
-
-    /// <summary>
-    /// Whether to show value labels above each lollipop
-    /// </summary>
-    public bool ShowValueLabels { get; set; } = true;
-
-    /// <summary>
     /// Draws the lollipop chart elements (stems and heads).
     /// </summary>
     protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
@@ -52,24 +42,14 @@ public class LollipopChart : CartesianChartBase
     }
 
     /// <summary>
-    /// Draws value labels above each lollipop head.
+    /// Gets the color to use for value labels.
     /// </summary>
-    protected override void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
-    {
-        if (!ShowValueLabels) return;
+    protected override Color GetLabelColor() => LollipopColor;
 
-        Color labelColor = LollipopColor;
-
-        for (int i = 0; i < data.DataPoints.Count; i++)
-        {
-            (float x, float y) = coordinates[i];
-            string text = data.DataPoints[i].FormattedValue;
-
-            // Draw text above the lollipop head
-            canvas.DrawText(x, y - HeadRadius - 7 - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
-                TextAlignment.Center);
-        }
-    }
+    /// <summary>
+    /// Gets the vertical offset for value labels (accounts for lollipop head radius).
+    /// </summary>
+    protected override float GetLabelVerticalOffset() => HeadRadius + 7;
 
     /// <summary>
     /// Draws the lollipop stems (vertical lines from baseline to data point).

@@ -24,16 +24,6 @@ public class LineChart : CartesianChartBase
     public float LineWidth { get; set; } = 2f;
 
     /// <summary>
-    /// Font size for value labels above data points
-    /// </summary>
-    public float LabelFontSize { get; set; } = 9;
-
-    /// <summary>
-    /// Whether to show value labels above each data point
-    /// </summary>
-    public bool ShowValueLabels { get; set; } = true;
-
-    /// <summary>
     /// Whether to show circular markers at data points
     /// </summary>
     public bool ShowDataPointMarkers { get; set; } = true;
@@ -53,24 +43,14 @@ public class LineChart : CartesianChartBase
     }
 
     /// <summary>
-    /// Draws value labels above each data point.
+    /// Gets the color to use for value labels.
     /// </summary>
-    protected override void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
-    {
-        if (!ShowValueLabels) return;
+    protected override Color GetLabelColor() => LineColor;
 
-        Color labelColor = LineColor;
-
-        for (int i = 0; i < data.DataPoints.Count; i++)
-        {
-            (float x, float y) = coordinates[i];
-            string text = data.DataPoints[i].FormattedValue;
-
-            // Draw text above the data point
-            canvas.DrawText(x, y - DataPointRadius - 7 - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
-                TextAlignment.Center);
-        }
-    }
+    /// <summary>
+    /// Gets the vertical offset for value labels (accounts for data point marker radius).
+    /// </summary>
+    protected override float GetLabelVerticalOffset() => DataPointRadius + 7;
 
     /// <summary>
     /// Draws the connecting line between all data points.

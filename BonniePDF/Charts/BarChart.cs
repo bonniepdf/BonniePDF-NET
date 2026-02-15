@@ -19,16 +19,6 @@ public class BarChart : CartesianChartBase
     public Color BarColor { get; set; } = Color.FromHex(BarColorHex);
 
     /// <summary>
-    /// Font size for value labels above bars
-    /// </summary>
-    public float LabelFontSize { get; set; } = 9;
-
-    /// <summary>
-    /// Whether to show value labels above each bar
-    /// </summary>
-    public bool ShowValueLabels { get; set; } = true;
-
-    /// <summary>
     /// Draws the bar chart elements (vertical bars).
     /// </summary>
     protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
@@ -44,24 +34,14 @@ public class BarChart : CartesianChartBase
     }
 
     /// <summary>
-    /// Draws value labels above each bar.
+    /// Gets the color to use for value labels.
     /// </summary>
-    protected override void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
-    {
-        if (!ShowValueLabels) return;
+    protected override Color GetLabelColor() => BarColor;
 
-        Color labelColor = BarColor;
-
-        for (int i = 0; i < data.DataPoints.Count; i++)
-        {
-            (float x, float y) = coordinates[i];
-            string text = data.DataPoints[i].FormattedValue;
-
-            // Draw text above the bar (y - 7 for spacing)
-            canvas.DrawText(x, y - 7 - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
-                TextAlignment.Center);
-        }
-    }
+    /// <summary>
+    /// Gets the vertical offset for value labels (simple spacing above bars).
+    /// </summary>
+    protected override float GetLabelVerticalOffset() => 7;
 
     /// <summary>
     /// Draws the bars for each data point.

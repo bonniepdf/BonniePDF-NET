@@ -24,16 +24,6 @@ public class DotPlotChart : CartesianChartBase
     public float DotRadius { get; set; } = CircleRadius;
 
     /// <summary>
-    /// Font size for value labels above data points
-    /// </summary>
-    public float LabelFontSize { get; set; } = 9;
-
-    /// <summary>
-    /// Whether to show value labels above each data point
-    /// </summary>
-    public bool ShowValueLabels { get; set; } = true;
-
-    /// <summary>
     /// Draws the dot plot chart elements (circular data points).
     /// </summary>
     protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
@@ -44,24 +34,14 @@ public class DotPlotChart : CartesianChartBase
     }
 
     /// <summary>
-    /// Draws value labels above each data point.
+    /// Gets the color to use for value labels.
     /// </summary>
-    protected override void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
-    {
-        if (!ShowValueLabels) return;
+    protected override Color GetLabelColor() => DotColor;
 
-        Color labelColor = DotColor;
-
-        for (int i = 0; i < data.DataPoints.Count; i++)
-        {
-            (float x, float y) = coordinates[i];
-            string text = data.DataPoints[i].FormattedValue;
-
-            // Draw text above the data point
-            canvas.DrawText(x, y - DotRadius - 7 - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
-                TextAlignment.Center);
-        }
-    }
+    /// <summary>
+    /// Gets the vertical offset for value labels (accounts for dot radius).
+    /// </summary>
+    protected override float GetLabelVerticalOffset() => DotRadius + 7;
 
     /// <summary>
     /// Draws the data point circles.

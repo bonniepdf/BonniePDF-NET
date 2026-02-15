@@ -31,6 +31,16 @@ public abstract class CartesianChartBase : ChartBase
     public string FontFamily { get; set; } = "Arial, sans-serif";
 
     /// <summary>
+    /// Whether to show value labels above each data point
+    /// </summary>
+    public bool ShowValueLabels { get; set; } = true;
+
+    /// <summary>
+    /// Font size for value labels above data points
+    /// </summary>
+    public float LabelFontSize { get; set; } = 9;
+
+    /// <summary>
     /// Draws the chart content using a Template Method pattern.
     /// This ensures consistent drawing order across all Cartesian chart types:
     /// 1. Grid lines (behind everything)
@@ -95,14 +105,39 @@ public abstract class CartesianChartBase : ChartBase
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY);
 
     /// <summary>
-    /// Draws value labels above data points. Can be overridden by derived classes.
-    /// Default implementation does nothing (derived classes can override if they show value labels).
+    /// Draws value labels above data points.
+    /// Default implementation uses GetLabelColor() and GetLabelVerticalOffset() to customize appearance.
+    /// Derived classes can override completely if they need custom behavior.
     /// </summary>
     protected virtual void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
     {
-        // Default: no value labels
-        // Derived classes can override this to show value labels above data points
+        if (!ShowValueLabels) return;
+
+        Color labelColor = GetLabelColor();
+        float verticalOffset = GetLabelVerticalOffset();
+
+        for (int i = 0; i < data.DataPoints.Count; i++)
+        {
+            (float x, float y) = coordinates[i];
+            string text = data.DataPoints[i].FormattedValue;
+
+            // Draw text above the data point
+            canvas.DrawText(x, y - verticalOffset - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
+                TextAlignment.Center);
+        }
     }
+
+    /// <summary>
+    /// Gets the color to use for value labels. Derived classes must implement this.
+    /// </summary>
+    protected abstract Color GetLabelColor();
+
+    /// <summary>
+    /// Gets the vertical offset (in points) to apply when positioning value labels above data points.
+    /// This accounts for any visual elements (like markers or bars) that need space above the data point.
+    /// Derived classes must implement this.
+    /// </summary>
+    protected abstract float GetLabelVerticalOffset();
 
     /// <summary>
     /// Draws horizontal grid lines across the chart area.
