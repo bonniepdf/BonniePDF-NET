@@ -57,7 +57,7 @@ public class Container : BorderedElementBase
         {
             float rectX = ctx.CurrentX;
             float rectWidth = effectiveWidth;
-            float rectY = ctx.PageHeight - ctx.CurrentY - containerHeight;
+            float rectY = ctx.PageSize.Height - ctx.CurrentY - containerHeight;
 
             if (BackgroundColor.HasValue)
                 DrawBackground(ctx, rectX, ctx.CurrentY, rectWidth, containerHeight, BackgroundColor.Value);

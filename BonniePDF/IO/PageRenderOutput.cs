@@ -9,7 +9,6 @@ namespace BonniePDF.IO;
 public class PageRenderOutput
 {
     public string ContentStream { get; set; }
-    public float Width { get; set; }
-    public float Height { get; set; }
+    public PdfSize Size { get; set; }
     public List<Hyperlink> Hyperlinks { get; set; }
 }

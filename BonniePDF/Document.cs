@@ -322,7 +322,7 @@ public class Document : IDisposable
             {
                 ["/Type"] = "/Page",
                 ["/Parent"] = $"{pagesId} 0 R", // Refers to the parent we write later
-                ["/MediaBox"] = $"[0 0 {pageOutput.Width} {pageOutput.Height}]",
+                ["/MediaBox"] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
                 ["/Contents"] = $"{contentId} 0 R"
             };
 
@@ -501,7 +501,7 @@ public class Document : IDisposable
             {
                 ["/Type"] = "/Page",
                 ["/Parent"] = $"{pagesId} 0 R", // Refers to the parent we write later
-                ["/MediaBox"] = $"[0 0 {pageOutput.Width} {pageOutput.Height}]",
+                ["/MediaBox"] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
                 ["/Contents"] = $"{contentId} 0 R"
             };
 

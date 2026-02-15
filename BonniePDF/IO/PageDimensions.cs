@@ -1,3 +1,5 @@
+using BonniePDF.Models;
+
 namespace BonniePDF.IO;
 
 /// <summary>
@@ -5,7 +7,6 @@ namespace BonniePDF.IO;
 /// </summary>
 public class PageDimensions
 {
-    public float Width { get; set; }
-    public float Height { get; set; }
+    public PdfSize Size { get; set; }
     public float Margin { get; set; }
 }

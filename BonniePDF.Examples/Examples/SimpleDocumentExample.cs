@@ -121,6 +121,27 @@ public class SimpleDocumentExample
             TextColor = Color.Slate600
         });
 
+        // Add a custom size page (Square)
+        PdfSize customSize = new PdfSize(300, 300, "Square Card");
+        doc.AddPage(customSize);
+        doc.Add(new TextBlock
+        {
+            Text = $"Page 3: {customSize.Name}",
+            FontName = File.Exists(fontPath) ? fontPath : StandardFonts.HelveticaBold,
+            FontSize = 16,
+            TextColor = Color.Slate800,
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 50, 0, 0)
+        });
+        doc.Add(new TextBlock
+        {
+            Text = $"{customSize.Width}pt x {customSize.Height}pt",
+            FontName = File.Exists(fontPath) ? fontPath : StandardFonts.Helvetica,
+            FontSize = 12,
+            TextColor = Color.Slate600,
+            Alignment = TextAlignment.Center
+        });
+
         // Save the document
         doc.Save(outputPath);
 

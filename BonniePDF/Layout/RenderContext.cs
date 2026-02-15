@@ -24,8 +24,6 @@ public class RenderContext
     {
         IsSvgMode = isSvgMode;
         PageSize = size;
-        PageWidth = size.Width;
-        PageHeight = size.Height;
         Margin = margin;
         Pages.Add(new StringBuilder());
         CurrentX = Margin;
@@ -109,11 +107,9 @@ public class RenderContext
 
     public float CurrentX { get; set; }
     public float CurrentY { get; set; }
-    public float PageWidth { get; set; }
-    public float PageHeight { get; set; }
     public PdfSize PageSize { get; set; }
     public float Margin { get; set; }
-    public float MaxY => PageHeight - Margin;
+    public float MaxY => PageSize.Height - Margin;
 
     /// <summary>
     /// Event raised when a new page is created.
@@ -127,9 +123,9 @@ public class RenderContext
     private void UpdateCanvas()
     {
         if (IsSvgMode)
-            Canvas = new SvgCanvas(PageWidth, PageHeight, 0, 0, CurrentStream, true);
+            Canvas = new SvgCanvas(PageSize.Width, PageSize.Height, 0, 0, CurrentStream, true);
         else
-            Canvas = new PdfCanvas(CurrentStream, PageHeight, 0, 0, RegisterFont, ResolveImageResource,
+            Canvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
                 ResolveEmbeddedFont, TrackGlyphUsage);
     }
 
@@ -138,9 +134,9 @@ public class RenderContext
     /// </summary>
     public ICanvas GetCanvas(float x, float y)
     {
-        if (IsSvgMode) return new SvgCanvas(PageWidth, PageHeight, x, y, CurrentStream, false);
+        if (IsSvgMode) return new SvgCanvas(PageSize.Width, PageSize.Height, x, y, CurrentStream, false);
 
-        return new PdfCanvas(CurrentStream, PageHeight, x, y, RegisterFont, ResolveImageResource, ResolveEmbeddedFont, TrackGlyphUsage);
+        return new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource, ResolveEmbeddedFont, TrackGlyphUsage);
     }
 
     private string ResolveImageResource(ImageInfo info)

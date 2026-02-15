@@ -62,9 +62,7 @@ public static class PdfRenderPipeline
             float pageHeight = page.Height;
             float pageMargin = page.Margin;
 
-            ctx.PageWidth = pageWidth;
-            ctx.PageHeight = pageHeight;
-            ctx.PageSize = new PdfSize(pageWidth, pageHeight);
+            ctx.PageSize = page.Size;
             ctx.Margin = pageMargin;
 
             ctx.SwitchToPage(currentOutputIndex);
@@ -79,8 +77,7 @@ public static class PdfRenderPipeline
             // Store page dimensions for the start page
             result.PageDimensions[currentOutputIndex] = new PageDimensions
             {
-                Width = pageWidth,
-                Height = pageHeight,
+                Size = page.Size,
                 Margin = pageMargin
             };
 
@@ -91,8 +88,7 @@ public static class PdfRenderPipeline
             for (int i = currentOutputIndex + 1; i <= ctx.CurrentPageIndex; i++)
                 result.PageDimensions[i] = new PageDimensions
                 {
-                    Width = pageWidth,
-                    Height = pageHeight,
+                    Size = page.Size,
                     Margin = pageMargin
                 };
 
@@ -235,9 +231,7 @@ public static class PdfRenderPipeline
             float pageHeight = page.Height;
             float pageMargin = page.Margin;
 
-            ctx.PageWidth = pageWidth;
-            ctx.PageHeight = pageHeight;
-            ctx.PageSize = new PdfSize(pageWidth, pageHeight);
+            ctx.PageSize = page.Size;
             ctx.Margin = pageMargin;
 
             ctx.SwitchToPage(currentOutputIndex);
@@ -250,8 +244,7 @@ public static class PdfRenderPipeline
             // Store page dimensions for this index
             pageDimensions[currentOutputIndex] = new RenderedPageDimensions
             {
-                Width = pageWidth,
-                Height = pageHeight,
+                Size = page.Size,
                 Margin = pageMargin
             };
 
@@ -262,8 +255,7 @@ public static class PdfRenderPipeline
             for (int i = currentOutputIndex + 1; i <= ctx.CurrentPageIndex; i++)
                 pageDimensions[i] = new RenderedPageDimensions
                 {
-                    Width = pageWidth,
-                    Height = pageHeight,
+                    Size = page.Size,
                     Margin = pageMargin
                 };
 
@@ -281,24 +273,21 @@ public static class PdfRenderPipeline
         for (int i = 0; i < totalPages; i++)
         {
             // Get dimensions for this page (use stored dimensions or defaults)
-            float width = ctx.PageWidth;
-            float height = ctx.PageHeight;
+            PdfSize pageSize = ctx.PageSize;
 
             if (pageDimensions.ContainsKey(i))
             {
-                width = pageDimensions[i].Width;
-                height = pageDimensions[i].Height;
+                pageSize = pageDimensions[i].Size;
             }
 
             // Prepare context for template rendering
             // Set dimensions BEFORE SwitchToPage so the canvas uses correct PageHeight
-            ctx.PageWidth = width;
-            ctx.PageHeight = height;
+            ctx.PageSize = pageSize;
             ctx.Margin = pageDimensions.ContainsKey(i) ? pageDimensions[i].Margin : settings.Margin;
             ctx.SwitchToPage(i);
 
             // Render Watermark (behind all content — prepended to stream)
-            RenderWatermark(ctx, settings, i, width, height);
+            RenderWatermark(ctx, settings, i, pageSize.Width, pageSize.Height);
 
             // Render Templates (Headers/Footers)
             RenderTemplate(ctx, settings, i);
@@ -306,8 +295,7 @@ public static class PdfRenderPipeline
             PageRenderOutput output = new()
             {
                 ContentStream = ctx.Pages[i].ToString(),
-                Width = width,
-                Height = height,
+                Size = pageSize,
                 // Capture hyperlinks for this page index
                 Hyperlinks = ctx.PageHyperlinks.ContainsKey(i)
                     ? ctx.PageHyperlinks[i]
@@ -397,7 +385,7 @@ public static class PdfRenderPipeline
 
         try
         {
-            float contentWidth = ctx.PageWidth - ctx.Margin * 2;
+            float contentWidth = ctx.PageSize.Width - ctx.Margin * 2;
             float startX = ctx.Margin;
 
             // Render Header
@@ -421,7 +409,7 @@ public static class PdfRenderPipeline
                 {
                     // Position at start of bottom margin
                     ctx.CurrentX = startX;
-                    ctx.CurrentY = ctx.PageHeight - ctx.Margin;
+                    ctx.CurrentY = ctx.PageSize.Height - ctx.Margin;
                     footerElement.Render(ctx, contentWidth);
                 }
             }

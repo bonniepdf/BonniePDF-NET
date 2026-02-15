@@ -61,7 +61,7 @@ public static class TemplateRenderer
         ctx.CurrentY = ctx.Margin / 2; // Half-way into the top margin
 
         // Calculate content width
-        float contentWidth = ctx.PageWidth - 2 * ctx.Margin;
+        float contentWidth = ctx.PageSize.Width - 2 * ctx.Margin;
 
         // Render the header
         element.Render(ctx, contentWidth);
@@ -84,11 +84,11 @@ public static class TemplateRenderer
         ctx.CurrentX = ctx.Margin;
 
         // Measure footer height to position it properly
-        float contentWidth = ctx.PageWidth - 2 * ctx.Margin;
+        float contentWidth = ctx.PageSize.Width - 2 * ctx.Margin;
         float footerHeight = element.MeasureHeight(contentWidth);
 
         // Position footer in the bottom margin
-        ctx.CurrentY = ctx.PageHeight - ctx.Margin + (ctx.Margin - footerHeight) / 2;
+        ctx.CurrentY = ctx.PageSize.Height - ctx.Margin + (ctx.Margin - footerHeight) / 2;
 
         // Render the footer
         element.Render(ctx, contentWidth);

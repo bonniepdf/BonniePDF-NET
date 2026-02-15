@@ -118,7 +118,7 @@ public class Hyperlink : IElement
             if (lineWidth > maxWidth)
                 maxWidth = lineWidth;
 
-            float pdfY = ctx.PageHeight - (localY + FontSize);
+            float pdfY = ctx.PageSize.Height - (localY + FontSize);
 
             PdfOperators.SetTextPosition(ctx.CurrentStream, ctx.CurrentX + Margin.Left, pdfY);
 
@@ -139,7 +139,7 @@ public class Hyperlink : IElement
         // The rectangle should be in PDF coordinates where (0,0) is bottom-left
         RenderX = ctx.CurrentX + Margin.Left;
         // Convert from top-down to bottom-up coordinates
-        RenderY = ctx.PageHeight - (startY + Margin.Top + contentHeight);
+        RenderY = ctx.PageSize.Height - (startY + Margin.Top + contentHeight);
         RenderWidth = maxWidth;
         RenderHeight = contentHeight;
 

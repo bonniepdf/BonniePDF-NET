@@ -2,7 +2,6 @@ using BonniePDF.Configuration;
 using BonniePDF.Layout.Elements;
 using BonniePDF.Models;
 using System.Linq;
-using System.Reflection;
 
 namespace BonniePDF.Examples;
 
@@ -10,7 +9,6 @@ public class AllPagesExample
 {
     public static string GenerateAllPageSizes(string outputPath = "all_page_sizes.pdf")
     {
-        // 1. Initialize Document with a default (will be overridden per page)
         Document doc = new(new DocumentSettings
         {
             PageSize = PdfSize.A4,
@@ -27,18 +25,13 @@ public class AllPagesExample
 
         doc.Metadata.Title = "Standard PDF Page Formats Gallery";
 
-        // 2. Use Reflection to get all static properties from our new PdfSize struct
-        var standardSizes = typeof(PdfSize)
-            .GetProperties(BindingFlags.Public | BindingFlags.Static)
-            .Where(p => p.PropertyType == typeof(PdfSize))
-            .OrderBy(p => p.Name);
+        var standardSizes = PdfSize.AllSizes.OrderBy(s => s.Name);
 
         bool isFirstPage = true;
 
-        foreach (var prop in standardSizes)
+        foreach (var size in standardSizes)
         {
-            PdfSize size = (PdfSize)prop.GetValue(null)!;
-            string formatName = prop.Name;
+            string formatName = size.Name ?? "Custom";
 
             // Generate both Portrait and Landscape for each standard
             foreach (var orientation in new[] { PageOrientation.Portrait, PageOrientation.Landscape })

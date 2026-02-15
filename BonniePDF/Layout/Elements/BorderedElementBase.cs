@@ -35,7 +35,7 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
     /// </summary>
     protected void DrawBackground(RenderContext ctx, float x, float y, float width, float height, Color color)
     {
-        float pdfY = ctx.PageHeight - y - height;
+        float pdfY = ctx.PageSize.Height - y - height;
         if (CornerRadius > 0)
         {
             PdfDrawing.FillRoundedRect(ctx.CurrentStream, x, pdfY, width, height, CornerRadius, color);
@@ -57,7 +57,7 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
     protected void DrawBorder(RenderContext ctx, float x, float y, float width, float height, Border border,
         BorderColors borderColors)
     {
-        float pdfY = ctx.PageHeight - y - height;
+        float pdfY = ctx.PageSize.Height - y - height;
 
         // Rounded borders: use a single rounded rect stroke (uniform border only)
         if (CornerRadius > 0 && border.HasAnyBorder)

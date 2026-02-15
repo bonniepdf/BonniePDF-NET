@@ -17,8 +17,7 @@ public class Page
     /// </summary>
     public Page(float width, float height, float margin)
     {
-        Width = width;
-        Height = height;
+        Size = new PdfSize(width, height);
         Margin = margin;
     }
 
@@ -27,8 +26,7 @@ public class Page
     /// </summary>
     public Page(PdfSize pageSize, float margin)
     {
-        Width = pageSize.Width;
-        Height = pageSize.Height;
+        Size = pageSize;
         Margin = margin;
     }
 
@@ -38,14 +36,19 @@ public class Page
     public IReadOnlyList<IElement> Elements => _elements.AsReadOnly();
 
     /// <summary>
+    /// Gets the page size
+    /// </summary>
+    public PdfSize Size { get; }
+
+    /// <summary>
     /// Gets the page width in points
     /// </summary>
-    public float Width { get; }
+    public float Width => Size.Width;
 
     /// <summary>
     /// Gets the page height in points
     /// </summary>
-    public float Height { get; }
+    public float Height => Size.Height;
 
     /// <summary>
     /// Gets the page margin in points

@@ -37,7 +37,7 @@ public class GroupedBarChartElement : ElementBase
         if (_chart.StretchToFit) _chart.Width = contentWidth;
 
         // Create a PdfCanvas that wraps the current PDF content stream
-        PdfCanvas pdfCanvas = new(ctx.CurrentStream, ctx.PageHeight, ctx.CurrentX, ctx.CurrentY);
+        PdfCanvas pdfCanvas = new(ctx.CurrentStream, ctx.PageSize.Height, ctx.CurrentX, ctx.CurrentY);
 
         // Create a dummy ChartData for the Draw method (won't be used for grouped bars)
         ChartData dummyData = new();
