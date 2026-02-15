@@ -34,58 +34,22 @@ public class DotPlotChart : CartesianChartBase
     public bool ShowValueLabels { get; set; } = true;
 
     /// <summary>
-    /// Draws the dot plot chart content.
+    /// Draws the dot plot chart elements (circular data points).
     /// </summary>
-    protected override void DrawContent(ICanvas canvas, ChartData data)
+    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
-        int dataPointCount = data.DataPoints.Count;
-        if (dataPointCount == 0) return;
-
-        // Calculate dynamic layout based on chart dimensions
-        (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) = CalculateLayout();
-
-        // Calculate coordinates for all data points
-        List<(float x, float y)> coordinates = CalculateCoordinates(data, chartAreaWidth, chartAreaHeight, baselineY);
-
-        // Draw grid lines first (behind everything)
-        if (data.YAxis.ShowGridLines) DrawGridLines(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
-
-        // Draw axis lines
-        DrawAxisLines(canvas, chartAreaWidth, baselineY, topY);
-
-        // Draw Y-axis labels
-        DrawYAxisLabels(canvas, data, chartAreaHeight, baselineY, topY);
-
-        // Draw Y-axis legend
-        if (!string.IsNullOrEmpty(data.YAxis.Legend)) DrawYAxisLegend(canvas, data.YAxis.Legend, chartAreaHeight, topY);
-
         // Draw data point circles
         DrawDataPoints(canvas, coordinates);
-
-        // Draw value labels above data points
-        if (ShowValueLabels) DrawValueLabels(canvas, data, coordinates);
-
-        // Draw X-axis labels (data point labels)
-        DrawXAxisLabels(canvas, data, coordinates, baselineY);
-
-        // Draw X-axis legend
-        if (!string.IsNullOrEmpty(data.XAxis.Legend))
-            DrawXAxisLegend(canvas, data.XAxis.Legend, chartAreaWidth, baselineY);
-    }
-
-    /// <summary>
-    /// Draws the data point circles.
-    /// </summary>
-    private void DrawDataPoints(ICanvas canvas, List<(float x, float y)> coordinates)
-    {
-        foreach ((float x, float y) in coordinates) canvas.FillCircle(x, y, DotRadius, DotColor);
     }
 
     /// <summary>
     /// Draws value labels above each data point.
     /// </summary>
-    private void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
+    protected override void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
     {
+        if (!ShowValueLabels) return;
+
         Color labelColor = DotColor;
 
         for (int i = 0; i < data.DataPoints.Count; i++)
@@ -97,5 +61,13 @@ public class DotPlotChart : CartesianChartBase
             canvas.DrawText(x, y - DotRadius - 7 - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
                 TextAlignment.Center);
         }
+    }
+
+    /// <summary>
+    /// Draws the data point circles.
+    /// </summary>
+    private void DrawDataPoints(ICanvas canvas, List<(float x, float y)> coordinates)
+    {
+        foreach ((float x, float y) in coordinates) canvas.FillCircle(x, y, DotRadius, DotColor);
     }
 }

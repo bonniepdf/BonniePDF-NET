@@ -38,46 +38,36 @@ public class AreaChart : CartesianChartBase
     public bool ShowValueLabels { get; set; } = true;
 
     /// <summary>
-    /// Draws the area chart content.
+    /// Draws the area chart elements (area fill and connecting line).
     /// </summary>
-    protected override void DrawContent(ICanvas canvas, ChartData data)
+    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
-        int dataPointCount = data.DataPoints.Count;
-        if (dataPointCount == 0) return;
-
-        // Calculate dynamic layout based on chart dimensions
-        (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) = CalculateLayout();
-
-        // Calculate coordinates for all data points
-        List<(float x, float y)> coordinates = CalculateCoordinates(data, chartAreaWidth, chartAreaHeight, baselineY);
-
-        // Draw grid lines first (behind everything)
-        if (data.YAxis.ShowGridLines) DrawGridLines(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
-
-        // Draw axis lines
-        DrawAxisLines(canvas, chartAreaWidth, baselineY, topY);
-
-        // Draw Y-axis labels
-        DrawYAxisLabels(canvas, data, chartAreaHeight, baselineY, topY);
-
-        // Draw Y-axis legend
-        if (!string.IsNullOrEmpty(data.YAxis.Legend)) DrawYAxisLegend(canvas, data.YAxis.Legend, chartAreaHeight, topY);
-
         // Draw the area fill (behind the line)
         DrawAreaFill(canvas, coordinates, baselineY);
 
         // Draw the line on top
         DrawConnectingLine(canvas, coordinates);
+    }
 
-        // Draw value labels above data points
-        if (ShowValueLabels) DrawValueLabels(canvas, data, coordinates);
+    /// <summary>
+    /// Draws value labels above each data point.
+    /// </summary>
+    protected override void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
+    {
+        if (!ShowValueLabels) return;
 
-        // Draw X-axis labels (data point labels)
-        DrawXAxisLabels(canvas, data, coordinates, baselineY);
+        Color labelColor = AreaColor;
 
-        // Draw X-axis legend
-        if (!string.IsNullOrEmpty(data.XAxis.Legend))
-            DrawXAxisLegend(canvas, data.XAxis.Legend, chartAreaWidth, baselineY);
+        for (int i = 0; i < data.DataPoints.Count; i++)
+        {
+            (float x, float y) = coordinates[i];
+            string text = data.DataPoints[i].FormattedValue;
+
+            // Draw text above the data point
+            canvas.DrawText(x, y - 7 - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
+                TextAlignment.Center);
+        }
     }
 
     /// <summary>
@@ -157,24 +147,6 @@ public class AreaChart : CartesianChartBase
             (float x2, float y2) = coordinates[i + 1];
 
             canvas.DrawLine(x1, y1, x2, y2, AreaColor, LineWidth);
-        }
-    }
-
-    /// <summary>
-    /// Draws value labels above each data point.
-    /// </summary>
-    private void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
-    {
-        Color labelColor = AreaColor;
-
-        for (int i = 0; i < data.DataPoints.Count; i++)
-        {
-            (float x, float y) = coordinates[i];
-            string text = data.DataPoints[i].FormattedValue;
-
-            // Draw text above the data point
-            canvas.DrawText(x, y - 7 - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
-                TextAlignment.Center);
         }
     }
 }

@@ -7,6 +7,7 @@ namespace BonniePDF.Charts;
 /// <summary>
 /// Base class for Cartesian charts (charts with X and Y axes).
 /// Provides common functionality for drawing axes, grid lines, labels, and legends.
+/// Uses the Template Method pattern to ensure consistent drawing order across all derived charts.
 /// </summary>
 public abstract class CartesianChartBase : ChartBase
 {
@@ -28,6 +29,80 @@ public abstract class CartesianChartBase : ChartBase
     /// Font family for labels
     /// </summary>
     public string FontFamily { get; set; } = "Arial, sans-serif";
+
+    /// <summary>
+    /// Draws the chart content using a Template Method pattern.
+    /// This ensures consistent drawing order across all Cartesian chart types:
+    /// 1. Grid lines (behind everything)
+    /// 2. Y-axis labels and legend (behind data)
+    /// 3. Chart-specific data elements (bars, lines, etc.)
+    /// 4. Value labels (on top of data)
+    /// 5. X-axis labels and legend
+    /// 6. Axis lines (on top of everything to prevent overlap)
+    /// </summary>
+    protected sealed override void DrawContent(ICanvas canvas, ChartData data)
+    {
+        int dataPointCount = data.DataPoints.Count;
+        if (dataPointCount == 0) return;
+
+        // Calculate dynamic layout based on chart dimensions
+        (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) = CalculateLayout();
+
+        // Calculate coordinates for all data points
+        List<(float x, float y)> coordinates = CalculateCoordinates(data, chartAreaWidth, chartAreaHeight, baselineY);
+
+        // 1. Draw grid lines first (behind everything)
+        if (data.YAxis.ShowGridLines)
+            DrawGridLines(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
+
+        // 2. Draw Y-axis labels (behind data)
+        DrawYAxisLabels(canvas, data, chartAreaHeight, baselineY, topY);
+
+        // 3. Draw Y-axis legend (behind data)
+        if (!string.IsNullOrEmpty(data.YAxis.Legend))
+            DrawYAxisLegend(canvas, data.YAxis.Legend, chartAreaHeight, topY);
+
+        // 4. Draw chart-specific data elements (bars, lines, area, etc.)
+        DrawChartElements(canvas, data, coordinates, chartAreaWidth, chartAreaHeight, baselineY, topY);
+
+        // 5. Draw value labels on top of data
+        DrawValueLabels(canvas, data, coordinates);
+
+        // 6. Draw X-axis labels (data point labels)
+        DrawXAxisLabels(canvas, data, coordinates, baselineY);
+
+        // 7. Draw X-axis legend
+        if (!string.IsNullOrEmpty(data.XAxis.Legend))
+            DrawXAxisLegend(canvas, data.XAxis.Legend, chartAreaWidth, baselineY);
+
+        // 8. Draw axis lines LAST (on top of everything to prevent overlap)
+        DrawAxisLines(canvas, chartAreaWidth, baselineY, topY);
+    }
+
+    /// <summary>
+    /// Draws the chart-specific data elements (bars, lines, area, dots, etc.).
+    /// Derived classes must implement this to provide their specific drawing logic.
+    /// This is called after grid lines and axis labels, but before axis lines are drawn on top.
+    /// </summary>
+    /// <param name="canvas">The canvas to draw to</param>
+    /// <param name="data">The chart data to render</param>
+    /// <param name="coordinates">Pre-calculated coordinates for all data points</param>
+    /// <param name="chartAreaWidth">Width of the chart drawing area</param>
+    /// <param name="chartAreaHeight">Height of the chart drawing area</param>
+    /// <param name="baselineY">Y coordinate of the x-axis (bottom of chart area)</param>
+    /// <param name="topY">Y coordinate of the top of the chart area</param>
+    protected abstract void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY);
+
+    /// <summary>
+    /// Draws value labels above data points. Can be overridden by derived classes.
+    /// Default implementation does nothing (derived classes can override if they show value labels).
+    /// </summary>
+    protected virtual void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
+    {
+        // Default: no value labels
+        // Derived classes can override this to show value labels above data points
+    }
 
     /// <summary>
     /// Draws horizontal grid lines across the chart area.
