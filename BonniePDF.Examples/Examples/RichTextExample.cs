@@ -20,6 +20,9 @@ public class RichTextExample
             Margin = 60
         });
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "Rich Text";
         doc.Metadata.Author = "BonniePDF";
 

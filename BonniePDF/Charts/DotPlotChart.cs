@@ -6,48 +6,81 @@ namespace BonniePDF.Charts;
 
 /// <summary>
 /// Dot plot chart that renders circular data points with value labels.
+/// Now supports multiple series for comparing datasets.
 /// Uses the ICanvas interface for rendering, making it backend-agnostic.
 /// </summary>
 public class DotPlotChart : CartesianChartBase
 {
-    private const string ColorHex = "#4f46e5";
-    private const float CircleRadius = 10;
+    private const string DefaultColorHex = "#4f46e5";
+    private const float DefaultDotRadiusValue = 10;
 
     /// <summary>
-    /// Color for the data point circles
+    /// Default dot radius for all series (can be overridden per series via Style).
     /// </summary>
-    public Color DotColor { get; set; } = Color.FromHex(ColorHex);
+    public float DefaultDotRadius { get; set; } = DefaultDotRadiusValue;
 
     /// <summary>
-    /// Radius of the data point circles
+    /// Color for the data point circles (backward compatibility).
     /// </summary>
-    public float DotRadius { get; set; } = CircleRadius;
+    public Color DotColor { get; set; } = Color.FromHex(DefaultColorHex);
 
     /// <summary>
-    /// Draws the dot plot chart elements (circular data points).
+    /// Radius of the data point circles (backward compatibility).
     /// </summary>
-    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
+    public float DotRadius { get; set; } = DefaultDotRadiusValue;
+
+    /// <summary>
+    /// Draws the dot plot chart elements for a single series (circular data points).
+    /// </summary>
+    protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
+        List<(float x, float y)> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
-        // Draw data point circles
-        DrawDataPoints(canvas, coordinates);
-    }
+        // Get series-specific styling or use defaults
+        float dotRadius = series.Style?.MarkerRadius > 0 ? series.Style.MarkerRadius : DefaultDotRadius;
 
-    /// <summary>
-    /// Gets the color to use for value labels.
-    /// </summary>
-    protected override Color GetLabelColor() => DotColor;
+        // Draw data point circles
+        DrawDataPoints(canvas, coordinates, series.Color, dotRadius);
+    }
 
     /// <summary>
     /// Gets the vertical offset for value labels (accounts for dot radius).
     /// </summary>
-    protected override float GetLabelVerticalOffset() => DotRadius + 7;
+    protected override float GetLabelVerticalOffset(ChartSeries series)
+    {
+        float dotRadius = series.Style?.MarkerRadius > 0 ? series.Style.MarkerRadius : DefaultDotRadius;
+        return dotRadius + 7;
+    }
 
     /// <summary>
-    /// Draws the data point circles.
+    /// Draws the data point circles for a series.
     /// </summary>
-    private void DrawDataPoints(ICanvas canvas, List<(float x, float y)> coordinates)
+    private void DrawDataPoints(ICanvas canvas, List<(float x, float y)> coordinates, Color color, float radius)
     {
-        foreach ((float x, float y) in coordinates) canvas.FillCircle(x, y, DotRadius, DotColor);
+        foreach ((float x, float y) in coordinates)
+            canvas.FillCircle(x, y, radius, color);
     }
+
+    /// <summary>
+    /// Gets the default color for the series when converting from old API (DataPoints) to new API (Series).
+    /// Returns the chart's DotColor property for backward compatibility.
+    /// </summary>
+    protected override Color GetDefaultSeriesColor() => DotColor;
+
+    #region Backward Compatibility - Obsolete Methods
+
+    /// <summary>
+    /// Draws the dot plot chart elements (circular data points).
+    /// OBSOLETE: Use DrawSeriesElements instead for multi-series support.
+    /// </summary>
+    [System.Obsolete("Use DrawSeriesElements instead for multi-series support")]
+    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
+    {
+        // For backward compatibility, treat as single series
+        var series = data.Series.Count > 0 ? data.Series[0] : new ChartSeries { Color = DotColor };
+        DrawSeriesElements(canvas, data, series, coordinates, chartAreaWidth, chartAreaHeight, baselineY, topY);
+    }
+
+    #endregion
 }

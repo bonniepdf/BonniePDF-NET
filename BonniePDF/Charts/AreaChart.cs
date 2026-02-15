@@ -6,60 +6,71 @@ namespace BonniePDF.Charts;
 
 /// <summary>
 /// Area chart that renders a filled polygon with a line overlay.
+/// Now supports multiple series with transparency for overlapping areas.
 /// Uses the ICanvas interface for rendering, making it backend-agnostic.
 /// </summary>
 public class AreaChart : CartesianChartBase
 {
-    private const string AreaColorHex = "#4f46e5";
+    private const string DefaultAreaColorHex = "#4f46e5";
 
     /// <summary>
-    /// Color for the area fill and line
+    /// Default fill opacity for all series (can be overridden per series via Style).
     /// </summary>
-    public Color AreaColor { get; set; } = Color.FromHex(AreaColorHex);
+    public float DefaultFillOpacity { get; set; } = 0.3f;
 
     /// <summary>
-    /// Opacity for the area fill (0.0 to 1.0)
+    /// Default line width for all series (can be overridden per series via Style).
+    /// </summary>
+    public float DefaultLineWidth { get; set; } = 2f;
+
+    /// <summary>
+    /// Color for the area fill and line (backward compatibility for single-series charts).
+    /// </summary>
+    public Color AreaColor { get; set; } = Color.FromHex(DefaultAreaColorHex);
+
+    /// <summary>
+    /// Opacity for the area fill (backward compatibility for single-series charts).
     /// </summary>
     public float FillOpacity { get; set; } = 0.3f;
 
     /// <summary>
-    /// Width of the line stroke
+    /// Width of the line stroke (backward compatibility for single-series charts).
     /// </summary>
     public float LineWidth { get; set; } = 2f;
 
     /// <summary>
-    /// Draws the area chart elements (area fill and connecting line).
+    /// Draws the area chart elements for a single series (area fill and connecting line).
     /// </summary>
-    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
+    protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
+        List<(float x, float y)> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
+        // Get series-specific styling or use defaults
+        float fillOpacity = series.Style?.FillOpacity > 0 ? series.Style.FillOpacity : DefaultFillOpacity;
+        float lineWidth = series.Style?.LineWidth > 0 ? series.Style.LineWidth : DefaultLineWidth;
+
         // Draw the area fill (behind the line)
-        DrawAreaFill(canvas, coordinates, baselineY);
+        DrawAreaFill(canvas, coordinates, baselineY, series.Color, fillOpacity);
 
         // Draw the line on top
-        DrawConnectingLine(canvas, coordinates);
+        DrawConnectingLine(canvas, coordinates, series.Color, lineWidth);
     }
-
-    /// <summary>
-    /// Gets the color to use for value labels.
-    /// </summary>
-    protected override Color GetLabelColor() => AreaColor;
 
     /// <summary>
     /// Gets the vertical offset for value labels (simple spacing above area/line).
     /// </summary>
-    protected override float GetLabelVerticalOffset() => 7;
+    protected override float GetLabelVerticalOffset(ChartSeries series) => 7;
 
     /// <summary>
     /// Draws the area fill using a series of thin vertical rectangles.
     /// This approximates the area under the line connecting data points.
     /// </summary>
-    private void DrawAreaFill(ICanvas canvas, List<(float x, float y)> coordinates, float baselineY)
+    private void DrawAreaFill(ICanvas canvas, List<(float x, float y)> coordinates, float baselineY, Color color, float opacity)
     {
         if (coordinates.Count < 2) return;
 
         // Create a semi-transparent color for the fill
-        Color fillColor = AreaColor.WithAlpha(FillOpacity);
+        Color fillColor = color.WithAlpha(opacity);
 
         // Use a small step size for smooth area fill
         const float stepSize = 2f;
@@ -115,9 +126,9 @@ public class AreaChart : CartesianChartBase
     }
 
     /// <summary>
-    /// Draws the connecting line on top of the area fill.
+    /// Draws the connecting line on top of the area fill for a series.
     /// </summary>
-    private void DrawConnectingLine(ICanvas canvas, List<(float x, float y)> coordinates)
+    private void DrawConnectingLine(ICanvas canvas, List<(float x, float y)> coordinates, Color color, float lineWidth)
     {
         if (coordinates.Count < 2) return;
 
@@ -126,7 +137,30 @@ public class AreaChart : CartesianChartBase
             (float x1, float y1) = coordinates[i];
             (float x2, float y2) = coordinates[i + 1];
 
-            canvas.DrawLine(x1, y1, x2, y2, AreaColor, LineWidth);
+            canvas.DrawLine(x1, y1, x2, y2, color, lineWidth);
         }
     }
+
+    /// <summary>
+    /// Gets the default color for the series when converting from old API (DataPoints) to new API (Series).
+    /// Returns the chart's AreaColor property for backward compatibility.
+    /// </summary>
+    protected override Color GetDefaultSeriesColor() => AreaColor;
+
+    #region Backward Compatibility - Obsolete Methods
+
+    /// <summary>
+    /// Draws the area chart elements (area fill and connecting line).
+    /// OBSOLETE: Use DrawSeriesElements instead for multi-series support.
+    /// </summary>
+    [System.Obsolete("Use DrawSeriesElements instead for multi-series support")]
+    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
+    {
+        // For backward compatibility, treat as single series
+        var series = data.Series.Count > 0 ? data.Series[0] : new ChartSeries { Color = AreaColor };
+        DrawSeriesElements(canvas, data, series, coordinates, chartAreaWidth, chartAreaHeight, baselineY, topY);
+    }
+
+    #endregion
 }

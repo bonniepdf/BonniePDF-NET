@@ -2,6 +2,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using BonniePDF.Layout.Elements;
+using BonniePDF.Configuration;
 using BonniePDF.Models;
 
 namespace BonniePDF.Examples.Examples;
@@ -17,6 +18,9 @@ public class AsyncExample
     public static async Task<string> GenerateAsync(string outputPath = "async_document.pdf")
     {
         Document doc = new();
+
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         // Set document metadata
         doc.Metadata.Title = "Async PDF Generation";
@@ -85,6 +89,9 @@ public class AsyncExample
     {
         Document doc = new();
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "In-Memory PDF";
         doc.Metadata.Author = "BonniePDF";
 
@@ -119,6 +126,9 @@ public class AsyncExample
         CancellationToken cancellationToken = default)
     {
         Document doc = new();
+
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         doc.Metadata.Title = "Cancellable PDF";
         doc.Metadata.Author = "BonniePDF";

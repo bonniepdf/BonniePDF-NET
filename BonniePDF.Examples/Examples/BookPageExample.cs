@@ -18,6 +18,9 @@ public class BookPageExample
             Margin = 60
         });
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "The Architecture of Memory";
         doc.Metadata.Author = "Professor Halloway";
 

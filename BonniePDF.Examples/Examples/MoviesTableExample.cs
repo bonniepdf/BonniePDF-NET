@@ -24,6 +24,9 @@ public class MoviesTableExample
             Margin = 40
         });
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "Classic Movies Collection";
         doc.Metadata.Author = "Classic Cinema Archive";
 

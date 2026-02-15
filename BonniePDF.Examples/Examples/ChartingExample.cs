@@ -29,7 +29,7 @@ public class ChartingExample
                     Alignment = HorizontalAlignment.Center // Vertically align items
                 };
 
-                // Left: Title
+                // Left: Title (auto-width, left-aligned)
                 outerStack.AddChild(new TextBlock
                 {
                     Text = "BonniePDF Charting Examples",
@@ -38,10 +38,7 @@ public class ChartingExample
                     TextColor = Color.Slate500
                 }, null); // Auto width
 
-                // Middle: Spacer to push items apart
-                outerStack.AddChild(new Container(), 1f);
-
-                // Right: Page Numbers (using token injection)
+                // Right: Page Numbers (weighted to fill remaining space, right-aligned within that space)
                 outerStack.AddChild(new TextBlock
                 {
                     Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
@@ -49,11 +46,12 @@ public class ChartingExample
                     FontSize = 10,
                     TextColor = Color.Slate500,
                     Alignment = TextAlignment.Right
-                }, null); // Auto width
+                }, 1f); // Takes all remaining space and right-aligns within it
 
                 return outerStack;
             }
         });
+
         document.Settings.Version = PdfVersion.Pdf17;
         document.Settings.PdfAEnabled = true;
 
@@ -62,34 +60,38 @@ public class ChartingExample
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Charting Examples demonstrating all chart types";
 
-        // 1. Bar Chart (on the first page)
+        // 1. Bar Chart (on first page)
         AddBarChart(document);
 
-        // 2. Grouped Bar Chart
+        // 2. Grouped Bar Chart (on second page)
         document.AddPage();
         AddGroupedBarChart(document);
 
-        // 3. Line Chart
+        // 3. Line Chart (on third page)
         document.AddPage();
         AddLineChart(document);
 
-        // 4. Area Chart
+        // 4. Area Chart (on fourth page)
         document.AddPage();
         AddAreaChart(document);
 
-        // 5. Lollipop Chart
+        // 5. Lollipop Chart (on fifth page)
         document.AddPage();
         AddLollipopChart(document);
 
-        // 6. Dot Plot Chart
+        // 6. Dot Plot Chart (on sixth page)
         document.AddPage();
         AddDotPlotChart(document);
 
-        // 7. Pie Chart
+        // 7. Pie Chart (on seventh page)
         document.AddPage();
         AddPieChart(document);
 
-        // Save the document
+        // 8. Multi-Series Line Chart (on eighth page)
+        document.AddPage();
+        AddMultiSeriesLineChart(document);
+
+        // Save document
         document.Save(outputPath);
 
         return outputPath;
@@ -108,7 +110,7 @@ public class ChartingExample
 
         document.Add(new TextBlock
         {
-            Text = "Generated using the new ICanvas architecture",
+            Text = "Generated using new ICanvas architecture",
             FontSize = 14,
             TextColor = Color.Slate600,
             Alignment = TextAlignment.Center
@@ -127,7 +129,7 @@ public class ChartingExample
             }
         };
 
-        // Create the bar chart
+        // Create bar chart
         BarChart barChart = new()
         {
             Height = 400,
@@ -138,6 +140,7 @@ public class ChartingExample
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
+        // Add chart to document
         document.Add(new ChartElement(barChart, chartData));
     }
 
@@ -160,7 +163,7 @@ public class ChartingExample
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
-        // Create the grouped bar chart with 3 series
+        // Create grouped bar chart with 3 series
         GroupedBarChart groupedBarChart = new()
         {
             Height = 400,
@@ -209,7 +212,7 @@ public class ChartingExample
             CategoryLabels = ExampleChartData.MonthLabels
         };
 
-        // Add the chart to the document
+        // Add chart to document
         document.Add(new GroupedBarChartElement(groupedBarChart));
     }
 
@@ -221,6 +224,14 @@ public class ChartingExample
             Text = "Line Chart: Monthly Revenue Trends",
             FontSize = 24,
             TextColor = Color.Slate800,
+            Alignment = TextAlignment.Center
+        }.Padding(0, 0, 0, 20));
+
+        document.Add(new TextBlock
+        {
+            Text = "Generated using new ICanvas architecture",
+            FontSize = 14,
+            TextColor = Color.Slate600,
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -242,7 +253,7 @@ public class ChartingExample
             }
         };
 
-        // Create the line chart
+        // Create line chart
         LineChart lineChart = new()
         {
             Height = 400,
@@ -256,7 +267,102 @@ public class ChartingExample
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
-        // Add the chart to the document
+        // Add chart to document
+        document.Add(new ChartElement(lineChart, chartData));
+    }
+
+    private static void AddMultiSeriesLineChart(Document document)
+    {
+        // Add a title
+        document.Add(new TextBlock
+        {
+            Text = "Multi-Series Line Chart: Year-over-Year Comparison",
+            FontSize = 24,
+            TextColor = Color.Slate800,
+            Alignment = TextAlignment.Center
+        }.Padding(0, 0, 0, 20));
+
+        document.Add(new TextBlock
+        {
+            Text = "Comparing 2023 and 2024 revenue with multiple series",
+            FontSize = 14,
+            TextColor = Color.Slate600,
+            Alignment = TextAlignment.Center
+        }.Padding(0, 0, 0, 20));
+
+        // Create chart data with multiple series
+        ChartData chartData = new()
+        {
+            Title = "Year-over-Year Revenue Comparison",
+            Series = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    Name = "2023",
+                    Color = Color.FromHex(ChartColors.Indigo),
+                    DataPoints = new List<ChartDataPoint>
+                    {
+                        new ChartDataPoint { Label = "Jan", Value = 65000 },
+                        new ChartDataPoint { Label = "Feb", Value = 69000 },
+                        new ChartDataPoint { Label = "Mar", Value = 80000 },
+                        new ChartDataPoint { Label = "Apr", Value = 72000 },
+                        new ChartDataPoint { Label = "May", Value = 85000 },
+                        new ChartDataPoint { Label = "Jun", Value = 88000 },
+                        new ChartDataPoint { Label = "Jul", Value = 72000 },
+                        new ChartDataPoint { Label = "Aug", Value = 68000 },
+                        new ChartDataPoint { Label = "Sep", Value = 75000 },
+                        new ChartDataPoint { Label = "Oct", Value = 81000 },
+                        new ChartDataPoint { Label = "Nov", Value = 92000 },
+                        new ChartDataPoint { Label = "Dec", Value = 105000 }
+                    }
+                },
+                new ChartSeries
+                {
+                    Name = "2024",
+                    Color = Color.FromHex(ChartColors.Violet),
+                    DataPoints = new List<ChartDataPoint>
+                    {
+                        new ChartDataPoint { Label = "Jan", Value = 75000 },
+                        new ChartDataPoint { Label = "Feb", Value = 78000 },
+                        new ChartDataPoint { Label = "Mar", Value = 85000 },
+                        new ChartDataPoint { Label = "Apr", Value = 78000 },
+                        new ChartDataPoint { Label = "May", Value = 92000 },
+                        new ChartDataPoint { Label = "Jun", Value = 95000 },
+                        new ChartDataPoint { Label = "Jul", Value = 87000 },
+                        new ChartDataPoint { Label = "Aug", Value = 78000 },
+                        new ChartDataPoint { Label = "Sep", Value = 82000 },
+                        new ChartDataPoint { Label = "Oct", Value = 91000 },
+                        new ChartDataPoint { Label = "Nov", Value = 97000 },
+                        new ChartDataPoint { Label = "Dec", Value = 118000 }
+                    }
+                }
+            },
+            YAxis = new AxisOptions
+            {
+                Prefix = "£",
+                MaxValue = 150000,
+                StepCount = 5,
+                Legend = "Revenue"
+            },
+            XAxis = new AxisOptions
+            {
+                Legend = "Month"
+            }
+        };
+
+        // Create line chart with multiple series
+        LineChart lineChart = new()
+        {
+            Height = 400,
+            StretchToFit = true,
+            FontFamily = "Arial, sans-serif",
+            LabelFontSize = 9,
+            ShowValueLabels = true,
+            ShowDataPointMarkers = true,
+            BackgroundColor = Color.FromHex("#fafafa")
+        };
+
+        // Add chart to document
         document.Add(new ChartElement(lineChart, chartData));
     }
 
@@ -268,6 +374,14 @@ public class ChartingExample
             Text = "Area Chart: Monthly Sales Performance",
             FontSize = 24,
             TextColor = Color.Slate800,
+            Alignment = TextAlignment.Center
+        }.Padding(0, 0, 0, 20));
+
+        document.Add(new TextBlock
+        {
+            Text = "Generated using new ICanvas architecture",
+            FontSize = 14,
+            TextColor = Color.Slate600,
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -289,7 +403,7 @@ public class ChartingExample
             }
         };
 
-        // Create the area chart
+        // Create area chart
         AreaChart areaChart = new()
         {
             Height = 400,
@@ -303,7 +417,7 @@ public class ChartingExample
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
-        // Add the chart to the document
+        // Add chart to document
         document.Add(new ChartElement(areaChart, chartData));
     }
 
@@ -315,6 +429,14 @@ public class ChartingExample
             Text = "Lollipop Chart: Quarterly Metrics",
             FontSize = 24,
             TextColor = Color.Slate800,
+            Alignment = TextAlignment.Center
+        }.Padding(0, 0, 0, 20));
+
+        document.Add(new TextBlock
+        {
+            Text = "Generated using new ICanvas architecture",
+            FontSize = 14,
+            TextColor = Color.Slate600,
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -336,7 +458,7 @@ public class ChartingExample
             }
         };
 
-        // Create the lollipop chart
+        // Create lollipop chart
         LollipopChart lollipopChart = new()
         {
             Height = 400,
@@ -350,7 +472,7 @@ public class ChartingExample
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
-        // Add the chart to the document
+        // Add chart to document
         document.Add(new ChartElement(lollipopChart, chartData));
     }
 
@@ -362,6 +484,14 @@ public class ChartingExample
             Text = "Dot Plot Chart: Product Performance",
             FontSize = 24,
             TextColor = Color.Slate800,
+            Alignment = TextAlignment.Center
+        }.Padding(0, 0, 0, 20));
+
+        document.Add(new TextBlock
+        {
+            Text = "Generated using new ICanvas architecture",
+            FontSize = 14,
+            TextColor = Color.Slate600,
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -383,7 +513,7 @@ public class ChartingExample
             }
         };
 
-        // Create the dot plot chart
+        // Create dot plot chart
         DotPlotChart dotPlotChart = new()
         {
             Height = 400,
@@ -396,7 +526,7 @@ public class ChartingExample
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
-        // Add the chart to the document
+        // Add chart to document
         document.Add(new ChartElement(dotPlotChart, chartData));
     }
 
@@ -411,6 +541,14 @@ public class ChartingExample
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
+        document.Add(new TextBlock
+        {
+            Text = "Generated using new ICanvas architecture",
+            FontSize = 14,
+            TextColor = Color.Slate600,
+            Alignment = TextAlignment.Center
+        }.Padding(0, 0, 0, 20));
+
         // Create chart data with all 12 months
         ChartData chartData = new()
         {
@@ -418,11 +556,11 @@ public class ChartingExample
             DataPoints = ExampleChartData.PieChartSales
         };
 
-        // Create the pie chart
+        // Create pie chart
         PieChart pieChart = new()
         {
-            Height = 500,
-            StretchToFit = false,
+            Height = 400,
+            StretchToFit = true,
             IsDonut = true,
             TotalLabel = "Total",
             ShowLegend = true,
@@ -430,7 +568,7 @@ public class ChartingExample
             BackgroundColor = Color.White
         };
 
-        // Add the chart to the document
+        // Add chart to document
         document.Add(new ChartElement(pieChart, chartData));
     }
 }

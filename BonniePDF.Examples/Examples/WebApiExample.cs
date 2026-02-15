@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using BonniePDF.Configuration;
 using BonniePDF.Layout.Elements;
 using BonniePDF.Models;
 
@@ -19,6 +20,9 @@ public class WebApiExample
     public static async Task<byte[]> GeneratePdfForWebApiAsync()
     {
         Document doc = new();
+
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         // Set metadata
         doc.Metadata.Title = "Web API PDF";
@@ -104,6 +108,9 @@ public class WebApiExample
     {
         Document doc = new();
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = $"Invoice {invoiceNumber}";
         doc.Metadata.Author = "MyCompany";
 
@@ -177,6 +184,9 @@ public class WebApiExample
     public static async Task GenerateReportToStreamAsync(Stream outputStream)
     {
         Document doc = new();
+
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         doc.Metadata.Title = "Monthly Report";
         doc.Metadata.Author = "Report Generator";

@@ -20,6 +20,9 @@ public class RoundedRectangleExample
             Margin = 50
         });
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "Rounded Rectangles";
         doc.Metadata.Author = "BonniePDF";
 

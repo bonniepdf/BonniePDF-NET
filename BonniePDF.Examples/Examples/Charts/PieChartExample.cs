@@ -23,6 +23,9 @@ public class PieChartExample
             Orientation = PageOrientation.Landscape
         });
 
+        document.Settings.Version = PdfVersion.Pdf17;
+        document.Settings.PdfAEnabled = true;
+
         // Set document metadata
         document.Metadata.Title = "Pie Chart Example";
         document.Metadata.Author = "BonniePDF";
@@ -55,8 +58,8 @@ public class PieChartExample
         // Create the pie chart with custom colors matching the SVG
         PieChart pieChart = new()
         {
-            Height = 500,
-            StretchToFit = false,
+            Height = 400,
+            StretchToFit = true,
             IsDonut = true,
             TotalLabel = "Total",
             ShowLegend = true,

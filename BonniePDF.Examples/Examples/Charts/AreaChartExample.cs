@@ -21,6 +21,9 @@ public class AreaChartExample
             Orientation = PageOrientation.Landscape
         });
 
+        document.Settings.Version = PdfVersion.Pdf17;
+        document.Settings.PdfAEnabled = true;
+
         // Set document metadata
         document.Metadata.Title = "Area Chart Example";
         document.Metadata.Author = "BonniePDF";

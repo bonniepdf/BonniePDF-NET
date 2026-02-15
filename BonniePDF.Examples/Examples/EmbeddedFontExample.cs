@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using BonniePDF.Configuration;
 using BonniePDF.Layout.Elements;
 using BonniePDF.Models;
 
@@ -29,6 +30,9 @@ public class EmbeddedFontExample
         }
 
         Document doc = new();
+
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         // Set metadata
         doc.Metadata.Title = "Embedded Font Example";

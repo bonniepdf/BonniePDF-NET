@@ -28,6 +28,9 @@ public class InvoiceExample
             Margin = 36
         });
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "Invoice INV-2024-001";
         doc.Metadata.Author = "Studio Eleven";
 

@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using BonniePDF.Layout.Elements;
+using BonniePDF.Configuration;
 using BonniePDF.Models;
 
 namespace BonniePDF.Examples.Examples.Images;
@@ -24,6 +25,8 @@ public class ImageExample
         if (!File.Exists(alphaPngPath)) CreateAlphaTestPng(alphaPngPath);
 
         Document doc = new();
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
         doc.Metadata.Title = "Image Support Demo";
         doc.Metadata.Author = "BonniePDF";
 

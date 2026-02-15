@@ -1,3 +1,4 @@
+using BonniePDF.Configuration;
 using BonniePDF.Layout.Elements;
 using BonniePDF.Models;
 
@@ -11,6 +12,9 @@ public class MarginExample
     public static string Generate(string outputPath = "margin_example.pdf")
     {
         Document doc = new();
+
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         doc.Metadata.Title = "Margin Example";
         doc.Metadata.Author = "BonniePDF";

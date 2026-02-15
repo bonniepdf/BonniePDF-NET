@@ -23,6 +23,9 @@ public class UsersTableExample
             Margin = 40
         });
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "User Directory";
         doc.Metadata.Author = "Company HR";
 

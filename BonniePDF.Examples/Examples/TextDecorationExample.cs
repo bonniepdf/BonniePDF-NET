@@ -20,6 +20,9 @@ public class TextDecorationExample
             Margin = 60
         });
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "Text Decorations";
         doc.Metadata.Author = "BonniePDF";
 

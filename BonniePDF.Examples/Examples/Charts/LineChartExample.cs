@@ -22,6 +22,9 @@ public class LineChartExample
             Orientation = PageOrientation.Landscape
         });
 
+        document.Settings.Version = PdfVersion.Pdf17;
+        document.Settings.PdfAEnabled = true;
+
         // Set document metadata
         document.Metadata.Title = "Line Chart Example";
         document.Metadata.Author = "BonniePDF";

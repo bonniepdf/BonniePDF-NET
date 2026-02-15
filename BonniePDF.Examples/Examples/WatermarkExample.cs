@@ -23,6 +23,9 @@ public class WatermarkExample
             Margin = 60
         });
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "Draft Document with Watermark";
         doc.Metadata.Author = "BonniePDF";
 
@@ -110,6 +113,9 @@ public class WatermarkExample
             Margin = 60
         });
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "Confidential Report";
         doc.Metadata.Author = "BonniePDF";
 
@@ -175,6 +181,9 @@ public class WatermarkExample
             PageSize = PdfSize.A4,
             Margin = 60
         });
+
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         doc.Metadata.Title = "Watermark Fluent API";
         doc.Metadata.Author = "BonniePDF";

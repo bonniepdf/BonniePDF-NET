@@ -1,3 +1,4 @@
+using BonniePDF.Configuration;
 using BonniePDF.Layout.Elements;
 using BonniePDF.Models;
 
@@ -11,6 +12,9 @@ public class ListExample
     public static string Generate(string outputPath = "list_example.pdf")
     {
         Document doc = new();
+
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         // Set document metadata
         doc.Metadata.Title = "List Examples";

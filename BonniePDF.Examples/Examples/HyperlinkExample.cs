@@ -14,6 +14,9 @@ public class HyperlinkExample
         // Create a document with metadata
         Document doc = new();
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         // Set document metadata
         doc.Metadata.Title = "Hyperlink Examples";
         doc.Metadata.Author = "BonniePDF";

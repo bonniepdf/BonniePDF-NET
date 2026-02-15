@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BonniePDF.Drawing;
 using BonniePDF.Models;
@@ -6,7 +7,10 @@ namespace BonniePDF.Charts;
 
 /// <summary>
 /// Represents a single data series in a grouped bar chart.
+/// OBSOLETE: Use ChartSeries instead for consistency with other chart types.
+/// This class is maintained for backward compatibility.
 /// </summary>
+[Obsolete("Use ChartSeries instead for consistency with other chart types")]
 public class BarSeries
 {
     /// <summary>
@@ -27,227 +31,189 @@ public class BarSeries
 
 /// <summary>
 /// Grouped bar chart that renders multiple bars per category.
+/// Now extends CartesianChartBase and uses standard ChartData model with ChartSeries.
+/// This eliminates code duplication and provides consistent API with other chart types.
 /// Uses the ICanvas interface for rendering, making it backend-agnostic.
 /// </summary>
-public class GroupedBarChart : ChartBase
+public class GroupedBarChart : CartesianChartBase
 {
-    // Layout constants (relative to chart height)
-    private const float TitleAreaHeight = 60; // Space for title at top
-    private const float BottomPadding = 100; // Space for x-axis labels, legend, and series names
-    private const float LeftPadding = 80; // Space for y-axis labels and legend
-    private const float RightPadding = 40; // Right margin
-    private const float AxisLineWidth = 1f;
-    private const float GridLineWidth = 0.5f;
-    private const float AxisLabelFontSize = 10;
-    private const float LegendFontSize = 11;
-    private const float SeriesLabelFontSize = 9;
-
-    // Styling constants
-    private static readonly Color AxisColor = Color.FromHex("#666666");
-    private static readonly Color GridLineColor = Color.FromHex("#e0e0e0");
+    /// <summary>
+    /// Width of bars as percentage of available space (0.0 to 1.0, default: 0.6).
+    /// </summary>
+    public float BarWidthRatio { get; set; } = 0.6f;
 
     /// <summary>
-    /// The data series to display (each series will have bars in a different color)
+    /// Gap between groups as percentage of available space (0.0 to 1.0, default: 0.2).
     /// </summary>
+    public float GroupGapRatio { get; set; } = 0.2f;
+
+    #region Backward Compatibility Properties
+
+    /// <summary>
+    /// The data series to display (each series will have bars in a different color).
+    /// OBSOLETE: Use ChartData.Series instead via standard ChartData model.
+    /// </summary>
+    [Obsolete("Use ChartData.Series instead via standard ChartData model")]
     public List<BarSeries> Series { get; set; } = new();
 
     /// <summary>
-    /// The labels for each category/group on the x-axis
+    /// The labels for each category/group on x-axis.
+    /// OBSOLETE: Use ChartSeries[].DataPoints[].Label instead.
     /// </summary>
+    [Obsolete("Use ChartSeries[].DataPoints[].Label instead")]
     public List<string> CategoryLabels { get; set; } = new();
 
     /// <summary>
-    /// Maximum value for the y-axis
+    /// Maximum value for y-axis.
+    /// OBSOLETE: Use ChartData.YAxis.MaxValue instead.
     /// </summary>
+    [Obsolete("Use ChartData.YAxis.MaxValue instead")]
     public decimal YAxisMaxValue { get; set; }
 
     /// <summary>
-    /// Prefix for y-axis values (e.g., "£", "$")
+    /// Prefix for y-axis values (e.g., "£", "$").
+    /// OBSOLETE: Use ChartData.YAxis.Prefix instead.
     /// </summary>
+    [Obsolete("Use ChartData.YAxis.Prefix instead")]
     public string YAxisPrefix { get; set; } = string.Empty;
 
     /// <summary>
-    /// Number of grid lines/steps on the y-axis
+    /// Number of grid lines/steps on y-axis.
+    /// OBSOLETE: Use ChartData.YAxis.StepCount instead.
     /// </summary>
+    [Obsolete("Use ChartData.YAxis.StepCount instead")]
     public int YAxisStepCount { get; set; } = 5;
 
     /// <summary>
-    /// Font family for labels
+    /// Whether to show grid lines.
+    /// OBSOLETE: Use ChartData.YAxis.ShowGridLines instead.
     /// </summary>
-    public string FontFamily { get; set; } = "Arial, sans-serif";
-
-    /// <summary>
-    /// Whether to show value labels above each bar
-    /// </summary>
-    public bool ShowValueLabels { get; set; } = true;
-
-    /// <summary>
-    /// Whether to show grid lines
-    /// </summary>
+    [Obsolete("Use ChartData.YAxis.ShowGridLines instead")]
     public bool ShowGridLines { get; set; } = true;
 
+    #endregion
+
     /// <summary>
-    /// Draws the grouped bar chart content.
+    /// Draws chart to specified canvas.
+    /// OVERRIDE to handle backward compatibility by converting old API to new format before rendering.
+    /// This is called before DrawContent, so we can populate data.Series before base class checks it.
     /// </summary>
-    protected override void DrawContent(ICanvas canvas, ChartData data)
+    public override void Draw(ICanvas canvas, ChartData data)
     {
-        int categoryCount = CategoryLabels.Count;
-        int seriesCount = Series.Count;
-
-        if (categoryCount == 0 || seriesCount == 0) return;
-
-        // Calculate dynamic layout based on chart dimensions
-        float chartAreaWidth = Width - LeftPadding - RightPadding;
-        float chartAreaHeight = Height - TitleAreaHeight - BottomPadding;
-        float baselineY = TitleAreaHeight + chartAreaHeight;
-        float topY = TitleAreaHeight;
-
-        // Calculate bar dimensions
-        float totalGroupSpace = chartAreaWidth / categoryCount;
-        float groupPadding = totalGroupSpace * 0.2f; // 20% padding between groups
-        float barGroupWidth = totalGroupSpace - groupPadding;
-        float barWidth = barGroupWidth / seriesCount;
-
-        // Draw grid lines first (behind everything)
-        if (ShowGridLines) DrawGridLines(canvas, chartAreaWidth, chartAreaHeight, baselineY, topY);
-
-        // Draw axis lines
-        DrawAxisLines(canvas, chartAreaWidth, baselineY, topY);
-
-        // Draw Y-axis labels
-        DrawYAxisLabels(canvas, chartAreaHeight, baselineY, topY);
-
-        // Draw bars for each series
-        for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++)
+        // Handle backward compatibility: if old API is used, convert to new format BEFORE base class renders
+        if (Series.Count > 0 && data.Series.Count == 0)
         {
-            BarSeries series = Series[seriesIndex];
-
-            for (int categoryIndex = 0; categoryIndex < categoryCount; categoryIndex++)
+            // Convert old BarSeries format to new ChartSeries format
+            foreach (var oldSeries in Series)
             {
-                if (categoryIndex >= series.Values.Count) continue;
-
-                // Calculate bar position
-                float groupStartX = LeftPadding + categoryIndex * totalGroupSpace + groupPadding / 2;
-                float barX = groupStartX + seriesIndex * barWidth;
-
-                // Calculate bar height
-                decimal value = series.Values[categoryIndex];
-                decimal normalizedValue = value / YAxisMaxValue;
-                float barHeight = (float)(normalizedValue * (decimal)chartAreaHeight);
-                float barY = baselineY - barHeight;
-
-                // Draw the bar
-                canvas.FillRect(barX, barY, barWidth - 2, barHeight, series.Color); // -2 for small gap between bars
-
-                // Draw value label if enabled
-                if (ShowValueLabels)
+                var newSeries = new ChartSeries
                 {
-                    string label = $"{YAxisPrefix}{value:N0}";
-                    canvas.DrawText(barX + barWidth / 2 - 1, barY - 7 - SeriesLabelFontSize,
-                        label, series.Color, SeriesLabelFontSize, FontFamily, TextAlignment.Center);
+                    Name = oldSeries.Name,
+                    Color = oldSeries.Color
+                };
+
+                // Convert decimal values to ChartDataPoint
+                for (int i = 0; i < oldSeries.Values.Count; i++)
+                {
+                    string label = i < CategoryLabels.Count ? CategoryLabels[i] : $"Cat{i}";
+                    newSeries.DataPoints.Add(new ChartDataPoint
+                    {
+                        Label = label,
+                        Value = oldSeries.Values[i]
+                    });
                 }
+
+                data.Series.Add(newSeries);
             }
+
+            // Set Y-axis options from old properties
+            if (YAxisMaxValue > 0)
+                data.YAxis.MaxValue = YAxisMaxValue;
+            if (!string.IsNullOrEmpty(YAxisPrefix))
+                data.YAxis.Prefix = YAxisPrefix;
+            if (YAxisStepCount > 0)
+                data.YAxis.StepCount = YAxisStepCount;
+            data.YAxis.ShowGridLines = ShowGridLines;
         }
 
-        // Draw category labels
-        DrawCategoryLabels(canvas, categoryCount, totalGroupSpace, baselineY);
-
-        // Draw legend
-        DrawLegend(canvas, seriesCount);
+        // Call base implementation to draw chart
+        base.Draw(canvas, data);
     }
 
     /// <summary>
-    /// Draws horizontal grid lines across the chart area.
+    /// Draws the grouped bar chart elements for a single series.
     /// </summary>
-    private void DrawGridLines(ICanvas canvas, float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
+    protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
+        List<(float x, float y)> coordinates,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
-        int stepCount = YAxisStepCount;
-        if (stepCount <= 0) stepCount = 5;
+        // Calculate bar dimensions
+        int seriesCount = data.Series.Count;
+        int categoryCount = series.DataPoints.Count;
 
-        float stepHeight = chartAreaHeight / stepCount;
+        float totalGroupSpace = chartAreaWidth / categoryCount;
+        float groupPadding = totalGroupSpace * GroupGapRatio;
+        float barGroupWidth = totalGroupSpace - groupPadding;
+        float barWidth = (barGroupWidth / seriesCount) * BarWidthRatio;
 
-        for (int i = 1; i <= stepCount; i++)
+        // Find this series' index
+        int seriesIndex = data.Series.IndexOf(series);
+
+        // Draw bars
+        for (int i = 0; i < coordinates.Count; i++)
         {
-            float y = baselineY - i * stepHeight;
-            float x1 = LeftPadding;
-            float x2 = LeftPadding + chartAreaWidth;
+            (float x, float y) = coordinates[i];
+            float barHeight = baselineY - y;
 
-            canvas.DrawLine(x1, y, x2, y, GridLineColor, GridLineWidth);
+            // Calculate bar position within group
+            float groupStartX = LeftPadding + i * totalGroupSpace + groupPadding / 2;
+            float barX = groupStartX + seriesIndex * (barGroupWidth / seriesCount) +
+                         (barGroupWidth / seriesCount - barWidth) / 2;
+
+            canvas.FillRect(barX, y, barWidth, barHeight, series.Color);
         }
     }
 
     /// <summary>
-    /// Draws the X and Y axis lines.
+    /// Gets the vertical offset for value labels (simple spacing above bars).
     /// </summary>
-    private void DrawAxisLines(ICanvas canvas, float chartAreaWidth, float baselineY, float topY)
-    {
-        // Y-axis (vertical line on the left)
-        canvas.DrawLine(LeftPadding, topY, LeftPadding, baselineY, AxisColor, AxisLineWidth);
-
-        // X-axis (horizontal line at the bottom)
-        canvas.DrawLine(LeftPadding, baselineY, LeftPadding + chartAreaWidth, baselineY, AxisColor, AxisLineWidth);
-    }
+    protected override float GetLabelVerticalOffset(ChartSeries series) => 7;
 
     /// <summary>
-    /// Draws Y-axis value labels.
+    /// Draws X-axis labels using first series' category labels.
     /// </summary>
-    private void DrawYAxisLabels(ICanvas canvas, float chartAreaHeight, float baselineY, float topY)
+    protected override void DrawXAxisLabels(ICanvas canvas, ChartData data, float chartAreaWidth, float baselineY)
     {
-        int stepCount = YAxisStepCount;
-        if (stepCount <= 0) stepCount = 5;
+        if (data.Series.Count == 0) return;
 
-        decimal stepValue = YAxisMaxValue / stepCount;
-        float stepHeight = chartAreaHeight / stepCount;
+        // Use the first series' labels for the X-axis
+        ChartSeries firstSeries = data.Series[0];
+        int dataPointCount = firstSeries.DataPoints.Count;
 
-        for (int i = 0; i <= stepCount; i++)
-        {
-            float y = baselineY - i * stepHeight;
-            decimal value = i * stepValue;
-
-            string label = $"{YAxisPrefix}{value:N0}";
-
-            canvas.DrawText(LeftPadding - 8, y - AxisLabelFontSize / 2, label, AxisColor, AxisLabelFontSize, FontFamily,
-                TextAlignment.Right);
-        }
-    }
-
-    /// <summary>
-    /// Draws category labels below each group of bars.
-    /// </summary>
-    private void DrawCategoryLabels(ICanvas canvas, int categoryCount, float totalGroupSpace, float baselineY)
-    {
         float labelY = baselineY + 15;
+        float totalGroupSpace = chartAreaWidth / dataPointCount;
 
-        for (int i = 0; i < categoryCount; i++)
+        for (int i = 0; i < dataPointCount; i++)
         {
             float x = LeftPadding + i * totalGroupSpace + totalGroupSpace / 2;
-            string label = CategoryLabels[i];
+            string label = firstSeries.DataPoints[i].Label;
 
             canvas.DrawText(x, labelY, label, AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Center);
         }
     }
 
+    #region Backward Compatibility - Obsolete Method
+
     /// <summary>
-    /// Draws the legend showing series names and colors.
+    /// OBSOLETE: This method is no longer needed as we extend CartesianChartBase.
     /// </summary>
-    private void DrawLegend(ICanvas canvas, int seriesCount)
+    [Obsolete("This method is no longer needed as we extend CartesianChartBase")]
+    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
-        float legendY = Height - 40;
-        float legendStartX = LeftPadding;
-        float legendItemWidth = 150;
-        float colorBoxSize = 12;
-
-        for (int i = 0; i < seriesCount; i++)
-        {
-            BarSeries series = Series[i];
-            float x = legendStartX + i * legendItemWidth;
-
-            // Draw color box
-            canvas.FillRect(x, legendY, colorBoxSize, colorBoxSize, series.Color);
-
-            // Draw series name
-            canvas.DrawText(x + colorBoxSize + 5, legendY + colorBoxSize / 2 - LegendFontSize / 2,
-                series.Name, AxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
-        }
+        // Not used anymore - handled by DrawSeriesElements
+        throw new NotImplementedException("Use DrawSeriesElements instead");
     }
+
+    #endregion
 }

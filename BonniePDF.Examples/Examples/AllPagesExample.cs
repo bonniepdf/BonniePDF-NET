@@ -23,6 +23,9 @@ public class AllPagesExample
             }
         });
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "Standard PDF Page Formats Gallery";
 
         var standardSizes = PdfSize.AllSizes.OrderBy(s => s.Name);

@@ -18,6 +18,8 @@ public static class FlowArchitectureExample
     public static string GenerateTextBlockOverflow(string outputPath = "textblock_overflow.pdf")
     {
         using Document doc = new();
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
         doc.Settings.FooterTemplate = pageNumber => new TextBlock
         {
             Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
@@ -73,6 +75,8 @@ public static class FlowArchitectureExample
     public static string GenerateVerticalStackOverflow(string outputPath = "verticalstack_overflow.pdf")
     {
         using Document doc = new();
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         doc.Metadata.Title = "VerticalStack Overflow Demo";
         doc.Metadata.Author = "BonniePDF";
@@ -171,6 +175,8 @@ public static class FlowArchitectureExample
         };
 
         using Document doc = new(settings);
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         doc.Metadata.Title = "Headers and Footers Demo";
         doc.Metadata.Author = "BonniePDF";
@@ -252,6 +258,8 @@ public static class FlowArchitectureExample
         };
 
         using Document doc = new(settings);
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         doc.Metadata.Title = "Flow Architecture Demo";
         doc.Metadata.Author = "BonniePDF";

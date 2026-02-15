@@ -19,6 +19,9 @@ public class JustifiedTextExample
             Margin = 60
         });
 
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
+
         doc.Metadata.Title = "Justified Text Alignment";
         doc.Metadata.Author = "BonniePDF";
 

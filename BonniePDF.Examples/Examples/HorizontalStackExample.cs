@@ -1,3 +1,4 @@
+using BonniePDF.Configuration;
 using BonniePDF.Layout.Elements;
 using BonniePDF.Models;
 
@@ -11,6 +12,9 @@ public class HorizontalStackExample
     public static string Generate(string outputPath = "horizontal_stack_example.pdf")
     {
         Document doc = new();
+
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.PdfAEnabled = true;
 
         // Set document metadata
         doc.Metadata.Title = "Horizontal Stack Example";

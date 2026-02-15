@@ -45,7 +45,7 @@ public abstract class ChartBase
     /// </summary>
     /// <param name="canvas">The canvas to draw to</param>
     /// <param name="data">The chart data to render</param>
-    public void Draw(ICanvas canvas, ChartData data)
+    public virtual void Draw(ICanvas canvas, ChartData data)
     {
         // Draw background only if a color is specified
         if (BackgroundColor.HasValue) canvas.FillRect(0, 0, Width, Height, BackgroundColor.Value);

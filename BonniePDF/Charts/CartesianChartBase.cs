@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BonniePDF.Drawing;
 using BonniePDF.Models;
@@ -45,21 +46,32 @@ public abstract class CartesianChartBase : ChartBase
     /// This ensures consistent drawing order across all Cartesian chart types:
     /// 1. Grid lines (behind everything)
     /// 2. Y-axis labels and legend (behind data)
-    /// 3. Chart-specific data elements (bars, lines, etc.)
+    /// 3. Chart-specific data elements (bars, lines, etc.) - now supports multiple series
     /// 4. Value labels (on top of data)
     /// 5. X-axis labels and legend
     /// 6. Axis lines (on top of everything to prevent overlap)
+    /// 7. Legend (for multi-series charts)
     /// </summary>
     protected sealed override void DrawContent(ICanvas canvas, ChartData data)
     {
-        int dataPointCount = data.DataPoints.Count;
-        if (dataPointCount == 0) return;
+        // Handle backward compatibility: if old API is used (DataPoints), convert to new format (Series)
+        if (data.Series.Count == 0 && data.DataPoints.Count > 0)
+        {
+            // Convert old DataPoints format to new ChartSeries format
+            var defaultSeries = new ChartSeries
+            {
+                Name = "Series",
+                Color = GetDefaultSeriesColor(),
+                DataPoints = data.DataPoints
+            };
+            data.Series.Add(defaultSeries);
+        }
+
+        // Validate data - support both old (DataPoints) and new (Series) API
+        if (data.Series.Count == 0) return;
 
         // Calculate dynamic layout based on chart dimensions
         (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) = CalculateLayout();
-
-        // Calculate coordinates for all data points
-        List<(float x, float y)> coordinates = CalculateCoordinates(data, chartAreaWidth, chartAreaHeight, baselineY);
 
         // 1. Draw grid lines first (behind everything)
         if (data.YAxis.ShowGridLines)
@@ -72,14 +84,15 @@ public abstract class CartesianChartBase : ChartBase
         if (!string.IsNullOrEmpty(data.YAxis.Legend))
             DrawYAxisLegend(canvas, data.YAxis.Legend, chartAreaHeight, topY);
 
-        // 4. Draw chart-specific data elements (bars, lines, area, etc.)
-        DrawChartElements(canvas, data, coordinates, chartAreaWidth, chartAreaHeight, baselineY, topY);
+        // 4. Draw chart-specific data elements (bars, lines, area, etc.) - now supports multiple series
+        DrawAllSeries(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
 
         // 5. Draw value labels on top of data
-        DrawValueLabels(canvas, data, coordinates);
+        if (ShowValueLabels)
+            DrawValueLabels(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
 
         // 6. Draw X-axis labels (data point labels)
-        DrawXAxisLabels(canvas, data, coordinates, baselineY);
+        DrawXAxisLabels(canvas, data, chartAreaWidth, baselineY);
 
         // 7. Draw X-axis legend
         if (!string.IsNullOrEmpty(data.XAxis.Legend))
@@ -87,6 +100,10 @@ public abstract class CartesianChartBase : ChartBase
 
         // 8. Draw axis lines LAST (on top of everything to prevent overlap)
         DrawAxisLines(canvas, chartAreaWidth, baselineY, topY);
+
+        // 9. Draw legend for multi-series charts
+        if (ShowLegend && data.Series.Count > 1)
+            DrawLegend(canvas, data, chartAreaWidth);
     }
 
     /// <summary>
@@ -101,43 +118,134 @@ public abstract class CartesianChartBase : ChartBase
     /// <param name="chartAreaHeight">Height of the chart drawing area</param>
     /// <param name="baselineY">Y coordinate of the x-axis (bottom of chart area)</param>
     /// <param name="topY">Y coordinate of the top of the chart area</param>
+    [Obsolete("Use DrawSeriesElements instead for multi-series support")]
     protected abstract void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY);
 
     /// <summary>
-    /// Draws value labels above data points.
-    /// Default implementation uses GetLabelColor() and GetLabelVerticalOffset() to customize appearance.
-    /// Derived classes can override completely if they need custom behavior.
+    /// Whether to show a legend for multiple series (default: true).
     /// </summary>
-    protected virtual void DrawValueLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates)
+    public bool ShowLegend { get; set; } = true;
+
+    /// <summary>
+    /// Draws all series in the chart.
+    /// This method iterates through each series and calls DrawSeriesElements for each one.
+    /// </summary>
+    protected virtual void DrawAllSeries(ICanvas canvas, ChartData data,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
-        if (!ShowValueLabels) return;
-
-        Color labelColor = GetLabelColor();
-        float verticalOffset = GetLabelVerticalOffset();
-
-        for (int i = 0; i < data.DataPoints.Count; i++)
+        foreach (ChartSeries series in data.Series)
         {
-            (float x, float y) = coordinates[i];
-            string text = data.DataPoints[i].FormattedValue;
+            List<(float x, float y)> coordinates = CalculateSeriesCoordinates(
+                series, data, chartAreaWidth, chartAreaHeight, baselineY);
 
-            // Draw text above the data point
-            canvas.DrawText(x, y - verticalOffset - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
-                TextAlignment.Center);
+            DrawSeriesElements(canvas, data, series, coordinates,
+                chartAreaWidth, chartAreaHeight, baselineY, topY);
         }
     }
 
     /// <summary>
-    /// Gets the color to use for value labels. Derived classes must implement this.
+    /// Calculates coordinates for a specific series based on chart dimensions.
     /// </summary>
-    protected abstract Color GetLabelColor();
+    protected List<(float x, float y)> CalculateSeriesCoordinates(
+        ChartSeries series, ChartData data,
+        float chartAreaWidth, float chartAreaHeight, float baselineY)
+    {
+        int dataPointCount = series.DataPoints.Count;
+        List<(float x, float y)> coordinates = new();
+
+        float totalSpace = chartAreaWidth / dataPointCount;
+        float spacing = totalSpace;
+
+        for (int i = 0; i < dataPointCount; i++)
+        {
+            float x = LeftPadding + i * spacing + spacing / 2;
+
+            decimal normalizedValue = series.DataPoints[i].Value / data.YAxis.MaxValue;
+            float y = baselineY - (float)(normalizedValue * (decimal)chartAreaHeight);
+
+            coordinates.Add((x, y));
+        }
+
+        return coordinates;
+    }
+
+    /// <summary>
+    /// Draws the chart-specific elements for a single series.
+    /// Derived classes must implement this to provide their specific drawing logic for each series.
+    /// </summary>
+    /// <param name="canvas">The canvas to draw to</param>
+    /// <param name="data">The chart data containing all series</param>
+    /// <param name="series">The specific series to draw</param>
+    /// <param name="coordinates">Pre-calculated coordinates for this series' data points</param>
+    /// <param name="chartAreaWidth">Width of the chart drawing area</param>
+    /// <param name="chartAreaHeight">Height of the chart drawing area</param>
+    /// <param name="baselineY">Y coordinate of the x-axis (bottom of chart area)</param>
+    /// <param name="topY">Y coordinate of the top of the chart area</param>
+    protected abstract void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
+        List<(float x, float y)> coordinates,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY);
+
+    /// <summary>
+    /// Draws value labels above data points for all series.
+    /// Default implementation uses GetLabelVerticalOffset() to customize appearance.
+    /// Derived classes can override completely if they need custom behavior.
+    /// </summary>
+    protected virtual void DrawValueLabels(ICanvas canvas, ChartData data,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
+    {
+        if (!ShowValueLabels) return;
+
+        foreach (ChartSeries series in data.Series)
+        {
+            List<(float x, float y)> coordinates = CalculateSeriesCoordinates(
+                series, data, chartAreaWidth, chartAreaHeight, baselineY);
+
+            Color labelColor = series.Color;
+            float verticalOffset = GetLabelVerticalOffset(series);
+
+            for (int i = 0; i < series.DataPoints.Count; i++)
+            {
+                (float x, float y) = coordinates[i];
+                string text = series.DataPoints[i].FormattedValue;
+
+                // Draw text above the data point
+                canvas.DrawText(x, y - verticalOffset - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
+                    TextAlignment.Center);
+            }
+        }
+    }
 
     /// <summary>
     /// Gets the vertical offset (in points) to apply when positioning value labels above data points.
     /// This accounts for any visual elements (like markers or bars) that need space above the data point.
-    /// Derived classes must implement this.
+    /// Default implementation returns 7. Derived classes can override for custom behavior.
     /// </summary>
-    protected abstract float GetLabelVerticalOffset();
+    protected virtual float GetLabelVerticalOffset(ChartSeries series) => 7;
+
+    /// <summary>
+    /// Draws the legend showing all series names and colors.
+    /// </summary>
+    protected virtual void DrawLegend(ICanvas canvas, ChartData data, float chartAreaWidth)
+    {
+        float legendY = Height - 40;
+        float legendStartX = LeftPadding;
+        float legendItemWidth = 150;
+        float colorBoxSize = 12;
+
+        for (int i = 0; i < data.Series.Count; i++)
+        {
+            ChartSeries series = data.Series[i];
+            float x = legendStartX + i * legendItemWidth;
+
+            // Draw color box
+            canvas.FillRect(x, legendY, colorBoxSize, colorBoxSize, series.Color);
+
+            // Draw series name
+            canvas.DrawText(x + colorBoxSize + 5, legendY + colorBoxSize / 2 - LegendFontSize / 2,
+                series.Name, AxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
+        }
+    }
 
     /// <summary>
     /// Draws horizontal grid lines across the chart area.
@@ -228,16 +336,24 @@ public abstract class CartesianChartBase : ChartBase
 
     /// <summary>
     /// Draws X-axis labels (data point labels below each point).
+    /// Uses labels from the first series for all series.
     /// </summary>
-    protected void DrawXAxisLabels(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
-        float baselineY)
+    protected virtual void DrawXAxisLabels(ICanvas canvas, ChartData data, float chartAreaWidth, float baselineY)
     {
-        float labelY = baselineY + 15;
+        if (data.Series.Count == 0) return;
 
-        for (int i = 0; i < data.DataPoints.Count; i++)
+        // Use the first series' labels for the X-axis
+        ChartSeries firstSeries = data.Series[0];
+        int dataPointCount = firstSeries.DataPoints.Count;
+
+        float labelY = baselineY + 15;
+        float totalSpace = chartAreaWidth / dataPointCount;
+        float spacing = totalSpace;
+
+        for (int i = 0; i < dataPointCount; i++)
         {
-            (float x, _) = coordinates[i];
-            string label = data.DataPoints[i].Label;
+            float x = LeftPadding + i * spacing + spacing / 2;
+            string label = firstSeries.DataPoints[i].Label;
 
             canvas.DrawText(x, labelY, label, AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Center);
         }
@@ -270,6 +386,12 @@ public abstract class CartesianChartBase : ChartBase
 
         return coordinates;
     }
+
+    /// <summary>
+    /// Gets the default color for the series when converting from old API (DataPoints) to new API (Series).
+    /// Derived classes can override this to provide their specific default color.
+    /// </summary>
+    protected virtual Color GetDefaultSeriesColor() => Color.Blue600;
 
     /// <summary>
     /// Calculates the chart layout dimensions.
