@@ -87,7 +87,7 @@ public class ImageWriter
 
         if (writeSmask && PdfAEnabled)
         {
-            pixelData = FlattenAlpha(image.Data, image.AlphaData, image.Components);
+            pixelData = FlattenAlpha(image.Data, image.AlphaData, image.Components, image.BitsPerComponent);
             writeSmask = false;
         }
 
@@ -295,7 +295,7 @@ public class ImageWriter
 
         if (writeSmask && PdfAEnabled)
         {
-            pixelData = FlattenAlpha(image.Data, image.AlphaData, image.Components);
+            pixelData = FlattenAlpha(image.Data, image.AlphaData, image.Components, image.BitsPerComponent);
             writeSmask = false;
         }
 
@@ -374,5 +374,61 @@ public class ImageWriter
         {
             ArrayPool<byte>.Shared.Return(compressedBuffer);
         }
+    }
+
+    /// <summary>
+    /// Flattens alpha channel by compositing against white background
+    /// </summary>
+    private byte[] FlattenAlpha(byte[] data, byte[] alphaData, int components, int bitsPerComponent)
+    {
+        if (bitsPerComponent != 8)
+            throw new NotSupportedException($"Flattening alpha for {bitsPerComponent}-bit images is not supported yet.");
+
+        // Validation
+        if (data.Length != alphaData.Length * components)
+            throw new ArgumentException("Data length does not match alpha length and component count.");
+
+        byte[] result = new byte[data.Length];
+        int pixelCount = alphaData.Length;
+
+        for (int i = 0; i < pixelCount; i++)
+        {
+            byte alpha = alphaData[i];
+            int offset = i * components;
+
+            if (alpha == 255)
+            {
+                // Opaque - copy directly
+                for (int c = 0; c < components; c++)
+                {
+                    result[offset + c] = data[offset + c];
+                }
+            }
+            else if (alpha == 0)
+            {
+                // Transparent - set to white (255)
+                for (int c = 0; c < components; c++)
+                {
+                    result[offset + c] = 255;
+                }
+            }
+            else
+            {
+                // Blend: (Foreground * Alpha + Background * (255 - Alpha)) / 255
+                // Background = 255 => 255 * (255 - alpha)
+                int invAlpha = 255 - alpha;
+                int bgComponent = 255 * invAlpha;
+
+                for (int c = 0; c < components; c++)
+                {
+                    int fg = data[offset + c];
+                    // Integer blend
+                    int blended = (fg * alpha + bgComponent) / 255;
+                    result[offset + c] = (byte)blended;
+                }
+            }
+        }
+
+        return result;
     }
 }

@@ -284,6 +284,7 @@ public class Document : IDisposable
     {
         FontWriter fontWriter = new(writer);
         ImageWriter imageWriter = new(writer);
+        imageWriter.PdfAEnabled = Settings.PdfAEnabled;
 
         // 0. Set up encryption if configured
         int encryptId = 0;
@@ -302,7 +303,7 @@ public class Document : IDisposable
         // 2. Initialize Shared Context
         PdfSize orientedPageSize = Settings.GetOrientedPageSize();
         RenderContext ctx = new(orientedPageSize, Settings.Margin);
-       // ctx.PdfAEnabled = Settings.PdfAEnabled;
+        ctx.PdfAEnabled = Settings.PdfAEnabled;
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = new();
@@ -659,6 +660,7 @@ public class Document : IDisposable
         CancellationToken cancellationToken)
     {
         ImageWriter imageWriter = new(writer);
+        imageWriter.PdfAEnabled = ctx.PdfAEnabled;
 
         _imagePdfObjectIds.Clear();
 
