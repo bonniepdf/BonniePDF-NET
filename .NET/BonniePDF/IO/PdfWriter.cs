@@ -182,6 +182,7 @@ public class PdfWriter : IPdfWriter, IDisposable
             ["/Type"] = "/Annot",
             ["/Subtype"] = "/Link",
             ["/Rect"] = hyperlink.GetRectangleString(),
+            ["/F"] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
             ["/A"] = $"<< /S /URI /URI ({PdfSyntax.Escape(hyperlink.Uri)}) >>"
         };
 

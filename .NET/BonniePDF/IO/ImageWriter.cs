@@ -19,6 +19,11 @@ public class ImageWriter
     private readonly IPdfWriter _writer;
 
     /// <summary>
+    /// When true, PDF/A-1B constraints are enforced (e.g. alpha channels are flattened).
+    /// </summary>
+    public bool PdfAEnabled { get; set; }
+
+    /// <summary>
     /// Creates an ImageWriter for synchronous operations
     /// </summary>
     public ImageWriter(IPdfWriter writer)
@@ -76,8 +81,18 @@ public class ImageWriter
     /// </summary>
     public int WritePngImage(int id, ImageInfo image, string resourceName)
     {
+        // PDF/A-1B forbids SMask — flatten alpha by compositing against white
+        byte[] pixelData = image.Data;
+        bool writeSmask = image.HasAlpha && image.AlphaData.Length > 0;
+
+        if (writeSmask && PdfAEnabled)
+        {
+            pixelData = FlattenAlpha(image.Data, image.AlphaData, image.Components);
+            writeSmask = false;
+        }
+
         // Compress pixel data using zlib/Deflate
-        byte[] compressedData = CompressData(image.Data);
+        byte[] compressedData = CompressData(pixelData);
 
         Dictionary<string, string> dict = new()
         {
@@ -103,7 +118,7 @@ public class ImageWriter
         }
 
         // Handle alpha channel (soft mask)
-        if (image.HasAlpha && image.AlphaData.Length > 0)
+        if (writeSmask)
         {
             int smaskId = _writer.GetNewId();
             WriteSoftMask(smaskId, image);
@@ -274,8 +289,18 @@ public class ImageWriter
     public async Task<int> WritePngImageAsync(int id, ImageInfo image, string resourceName,
         CancellationToken cancellationToken = default)
     {
+        // PDF/A-1B forbids SMask — flatten alpha by compositing against white
+        byte[] pixelData = image.Data;
+        bool writeSmask = image.HasAlpha && image.AlphaData.Length > 0;
+
+        if (writeSmask && PdfAEnabled)
+        {
+            pixelData = FlattenAlpha(image.Data, image.AlphaData, image.Components);
+            writeSmask = false;
+        }
+
         // Compress using ArrayPool
-        (byte[] compressedBuffer, int compressedLength) = CompressDataToPool(image.Data);
+        (byte[] compressedBuffer, int compressedLength) = CompressDataToPool(pixelData);
 
         try
         {
@@ -302,7 +327,7 @@ public class ImageWriter
             }
 
             // Handle alpha channel (soft mask)
-            if (image.HasAlpha && image.AlphaData.Length > 0)
+            if (writeSmask)
             {
                 int smaskId = _asyncWriter.GetNewId();
                 await WriteSoftMaskAsync(smaskId, image, cancellationToken).ConfigureAwait(false);

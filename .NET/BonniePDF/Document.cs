@@ -302,6 +302,7 @@ public class Document : IDisposable
         // 2. Initialize Shared Context
         PdfSize orientedPageSize = Settings.GetOrientedPageSize();
         RenderContext ctx = new(orientedPageSize, Settings.Margin);
+       // ctx.PdfAEnabled = Settings.PdfAEnabled;
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = new();
@@ -362,7 +363,8 @@ public class Document : IDisposable
         if (Settings.Watermark != null)
         {
             int gsId = writer.GetNewId();
-            float opacity = Settings.Watermark.Opacity;
+            // PDF/A-1B forbids CA/ca < 1.0 — use full opacity and blend the color instead
+            float opacity = Settings.PdfAEnabled ? 1.0f : Settings.Watermark.Opacity;
             writer.WriteObject(gsId, new Dictionary<string, string>
             {
                 ["/Type"] = "/ExtGState",
@@ -480,6 +482,7 @@ public class Document : IDisposable
         // 2. Initialize Shared Context
         PdfSize orientedPageSize = Settings.GetOrientedPageSize();
         RenderContext ctx = new(orientedPageSize, Settings.Margin);
+        ctx.PdfAEnabled = Settings.PdfAEnabled;
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = new();
@@ -543,7 +546,8 @@ public class Document : IDisposable
         if (Settings.Watermark != null)
         {
             int gsId = writer.GetNewId();
-            float opacity = Settings.Watermark.Opacity;
+            // PDF/A-1B forbids CA/ca < 1.0 — use full opacity and blend the color instead
+            float opacity = Settings.PdfAEnabled ? 1.0f : Settings.Watermark.Opacity;
             await writer.WriteObjectAsync(gsId, new Dictionary<string, string>
             {
                 ["/Type"] = "/ExtGState",

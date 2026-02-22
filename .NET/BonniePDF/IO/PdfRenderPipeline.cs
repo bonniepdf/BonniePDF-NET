@@ -351,7 +351,19 @@ public static class PdfRenderPipeline
         PdfOperators.ConcatMatrix(wmOps, cos, sin, -sin, cos, cx, cy);
         PdfOperators.BeginText(wmOps);
         PdfOperators.SetFont(wmOps, fontResourceName, wm.FontSize);
-        PdfOperators.SetFillColor(wmOps, wm.TextColor);
+
+        // PDF/A-1B forbids transparency — blend the color toward white to simulate opacity
+        Color fillColor = wm.TextColor;
+        if (ctx.PdfAEnabled && wm.Opacity < 1.0f)
+        {
+            float o = wm.Opacity;
+            fillColor = Color.FromScRgb(
+                o * fillColor.R / 255f + (1f - o),
+                o * fillColor.G / 255f + (1f - o),
+                o * fillColor.B / 255f + (1f - o));
+        }
+
+        PdfOperators.SetFillColor(wmOps, fillColor);
         PdfOperators.SetTextPosition(wmOps, -textWidth / 2f, 0);
         PdfOperators.ShowText(wmOps, textOperand);
         PdfOperators.EndText(wmOps);
