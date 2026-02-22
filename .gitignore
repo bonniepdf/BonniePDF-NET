@@ -292,9 +292,6 @@ FodyWeavers.xsd
 *.sln.iml
 .idea/
 
-# Markdown files
-*.md
-
 # Claude AI files
 .claude/
 *.claude*
@@ -304,3 +301,4 @@ CoverageReport
 coverage.cobertura.xml
 
 plans/
+BenchmarkReports/
