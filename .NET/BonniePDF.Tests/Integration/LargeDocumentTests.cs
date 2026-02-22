@@ -76,7 +76,7 @@ public class LargeDocumentTests : IntegrationTestBase
         AssertValidPdf(outputPath);
         AssertPdfHasPages(outputPath, 10); // Content auto-flows, expect at least 10 pages
         AssertPdfHasFonts(outputPath);
-        AssertMinimumFileSize(outputPath, 14_000); // At least 14KB (compressed) - adjusted based on actual output
+        AssertMinimumFileSize(outputPath, 13_000); // At least 13KB (compressed with FlateDecode on font streams)
 
         // Performance assertion: Should complete in reasonable time (< 30 seconds)
         Assert.True(sw.ElapsedMilliseconds < 30_000,

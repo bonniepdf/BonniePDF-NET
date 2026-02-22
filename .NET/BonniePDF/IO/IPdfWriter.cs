@@ -37,6 +37,11 @@ public interface IPdfWriter
     void WriteBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent);
 
     /// <summary>
+    /// Compresses binary data using FlateDecode and writes it as a PDF stream object
+    /// </summary>
+    void WriteCompressedBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent);
+
+    /// <summary>
     /// Writes a link annotation object for a hyperlink
     /// </summary>
     int WriteLinkAnnotation(int id, Hyperlink hyperlink);

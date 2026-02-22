@@ -34,6 +34,11 @@ public class ImageWriterTests
             throw new NotImplementedException();
         }
 
+        public void WriteCompressedBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent)
+        {
+            throw new NotImplementedException();
+        }
+
         public int WriteLinkAnnotation(int id, BonniePDF.Models.Hyperlink hyperlink)
         {
             throw new NotImplementedException();

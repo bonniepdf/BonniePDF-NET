@@ -411,6 +411,32 @@ public class PdfWriter : IPdfWriter, IDisposable
     }
 
     /// <summary>
+    /// Compresses binary data using ZLib (FlateDecode) and writes it as a PDF stream object.
+    /// Used for font data (FontFile2, CIDToGIDMap, CIDSet) to reduce file size.
+    /// </summary>
+    /// <param name="id">The object ID</param>
+    /// <param name="dict">Key-value pairs for the object dictionary</param>
+    /// <param name="streamContent">Binary data to compress and write</param>
+    public void WriteCompressedBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent)
+    {
+        if (!InternalConfiguration.EnableCompression)
+        {
+            WriteBinaryObject(id, dict, streamContent);
+            return;
+        }
+
+        using MemoryStream memoryStream = new();
+        using (ZLibStream zlib = new(memoryStream, CompressionLevel.Optimal))
+        {
+            zlib.Write(streamContent, 0, streamContent.Length);
+        }
+
+        byte[] compressedBytes = memoryStream.ToArray();
+        dict["/Filter"] = "/FlateDecode";
+        WriteBinaryObject(id, dict, compressedBytes);
+    }
+
+    /// <summary>
     /// Writes a PDF object with binary stream content (for font embedding).
     /// Unlike WriteObject which uses ASCII encoding, this writes raw binary data.
     /// Encrypts the stream content if encryption is enabled.

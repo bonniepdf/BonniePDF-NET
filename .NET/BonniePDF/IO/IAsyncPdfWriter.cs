@@ -43,6 +43,12 @@ public interface IAsyncPdfWriter : IAsyncDisposable
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Compresses binary data using FlateDecode and writes it as a PDF stream object
+    /// </summary>
+    Task WriteCompressedBinaryObjectAsync(int id, Dictionary<string, string> dict, byte[] streamContent, int length,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Writes a link annotation object for a hyperlink
     /// </summary>
     Task<int> WriteLinkAnnotationAsync(int id, Hyperlink hyperlink, CancellationToken cancellationToken = default);

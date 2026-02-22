@@ -141,7 +141,7 @@ public class FontWriter
     /// </summary>
     private void WriteFontFile2(int id, byte[] fontData)
     {
-        _writer.WriteBinaryObject(id, new Dictionary<string, string>
+        _writer.WriteCompressedBinaryObject(id, new Dictionary<string, string>
         {
             ["/Length1"] = fontData.Length.ToString()
         }, fontData);
@@ -191,7 +191,7 @@ public class FontWriter
     private void WriteCIDSet(int id, IReadOnlySet<ushort> usedGlyphIds)
     {
         byte[] cidSetData = BuildCIDSetData(usedGlyphIds);
-        _writer.WriteBinaryObject(id, new Dictionary<string, string>(), cidSetData);
+        _writer.WriteCompressedBinaryObject(id, new Dictionary<string, string>(), cidSetData);
     }
 
     /// <summary>
@@ -262,7 +262,7 @@ public class FontWriter
             }
         }
 
-        _writer.WriteBinaryObject(id, new Dictionary<string, string>(), mapData);
+        _writer.WriteCompressedBinaryObject(id, new Dictionary<string, string>(), mapData);
     }
 
     /// <summary>
@@ -416,13 +416,13 @@ public class FontWriter
     /// </summary>
     private async Task WriteFontFile2Async(int id, byte[] fontData, CancellationToken cancellationToken)
     {
-        await _asyncWriter.WriteBinaryObjectAsync(id, new Dictionary<string, string>
+        await _asyncWriter.WriteCompressedBinaryObjectAsync(id, new Dictionary<string, string>
             {
                 // /Length1 is specific to FontFile2 (TrueType) and represents the length of the font file itself
                 ["/Length1"] = fontData.Length.ToString()
             },
             fontData,
-            fontData.Length, // <--- Explicit length now required
+            fontData.Length,
             cancellationToken).ConfigureAwait(false);
     }
 
@@ -469,7 +469,7 @@ public class FontWriter
     private async Task WriteCIDSetAsync(int id, IReadOnlySet<ushort> usedGlyphIds, CancellationToken cancellationToken)
     {
         byte[] cidSetData = BuildCIDSetData(usedGlyphIds);
-        await _asyncWriter.WriteBinaryObjectAsync(id, new Dictionary<string, string>(), cidSetData,
+        await _asyncWriter.WriteCompressedBinaryObjectAsync(id, new Dictionary<string, string>(), cidSetData,
             cidSetData.Length, cancellationToken).ConfigureAwait(false);
     }
 
@@ -528,11 +528,11 @@ public class FontWriter
             }
 
             // Pass the rented buffer and the EXACT mapSize
-            await _asyncWriter.WriteBinaryObjectAsync(
+            await _asyncWriter.WriteCompressedBinaryObjectAsync(
                 id,
                 new Dictionary<string, string>(),
                 rentedBuffer,
-                mapSize, // <--- Only write the valid map data, not the whole buffer
+                mapSize, // <--- Only compress/write the valid map data, not the whole buffer
                 cancellationToken
             ).ConfigureAwait(false);
         }

@@ -423,6 +423,30 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
     }
 
     /// <summary>
+    /// Compresses binary data using ZLib (FlateDecode) and writes it as a PDF stream object.
+    /// Used for font data (FontFile2, CIDToGIDMap, CIDSet) to reduce file size.
+    /// </summary>
+    /// <param name="id">The object ID</param>
+    /// <param name="dict">Key-value pairs for the object dictionary</param>
+    /// <param name="streamContent">Binary data to compress and write</param>
+    /// <param name="length">The actual number of bytes to compress from the buffer</param>
+    /// <param name="cancellationToken">Cancellation token for the operation</param>
+    public async Task WriteCompressedBinaryObjectAsync(int id, Dictionary<string, string> dict, byte[] streamContent,
+        int length, CancellationToken cancellationToken = default)
+    {
+        using MemoryStream memoryStream = new();
+        using (ZLibStream zlib = new(memoryStream, CompressionLevel.Optimal, leaveOpen: true))
+        {
+            await zlib.WriteAsync(streamContent, 0, length, cancellationToken).ConfigureAwait(false);
+        }
+
+        byte[] compressedBytes = memoryStream.ToArray();
+        dict["/Filter"] = "/FlateDecode";
+        await WriteBinaryObjectAsync(id, dict, compressedBytes, compressedBytes.Length, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Writes a PDF object with binary stream content.
     /// Updated to accept an explicit length to support rented buffers (ArrayPool)
     /// where the buffer size may be larger than the actual content.

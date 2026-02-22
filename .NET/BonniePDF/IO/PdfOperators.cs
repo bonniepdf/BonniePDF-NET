@@ -30,21 +30,22 @@ internal static class PdfOperators
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=211"/>
     /// </summary>
     internal static void Translate(StringBuilder s, float x, float y)
-        => s.AppendLine($"1 0 0 1 {x:F4} {y:F4} cm");
+        => s.AppendLine($"1 0 0 1 {PdfSyntax.FormatDecimal(x)} {PdfSyntax.FormatDecimal(y)} cm");
 
     /// <summary>
     /// <c>cm</c> — Concatenate a scaling matrix.
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=211"/>
     /// </summary>
     internal static void Scale(StringBuilder s, float sx, float sy)
-        => s.AppendLine($"{sx:F4} 0 0 {sy:F4} 0 0 cm");
+        => s.AppendLine($"{PdfSyntax.FormatDecimal(sx)} 0 0 {PdfSyntax.FormatDecimal(sy)} 0 0 cm");
 
     /// <summary>
     /// <c>cm</c> — Concatenate a full 6-element transformation matrix <c>[a b c d e f]</c>.
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=211"/>
     /// </summary>
     internal static void ConcatMatrix(StringBuilder s, float a, float b, float c, float d, float e, float f)
-        => s.AppendLine($"{a:F4} {b:F4} {c:F4} {d:F4} {e:F4} {f:F4} cm");
+        => s.AppendLine(
+            $"{PdfSyntax.FormatDecimal(a)} {PdfSyntax.FormatDecimal(b)} {PdfSyntax.FormatDecimal(c)} {PdfSyntax.FormatDecimal(d)} {PdfSyntax.FormatDecimal(e)} {PdfSyntax.FormatDecimal(f)} cm");
 
     /// <summary>
     /// <c>gs</c> — Set the named graphics state dictionary.
@@ -76,7 +77,7 @@ internal static class PdfOperators
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=216"/>
     /// </summary>
     internal static void SetLineWidth(StringBuilder s, float width)
-        => s.AppendLine($"{width:F4} w");
+        => s.AppendLine($"{PdfSyntax.FormatDecimal(width)} w");
 
     /// <summary>
     /// <c>j</c> — Set the line join style (0=miter, 1=round, 2=bevel).
@@ -157,14 +158,15 @@ internal static class PdfOperators
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7.pdf#page=398"/>
     /// </summary>
     internal static void SetWordSpacing(StringBuilder s, float spacing)
-        => s.AppendLine($"{spacing:F4} Tw");
+        => s.AppendLine($"{PdfSyntax.FormatDecimal(spacing)} Tw");
 
     /// <summary>
     /// Convenience: <c>m … l S</c> — Draw and stroke a line between two points.
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7.pdf#page=226"/>
     /// </summary>
     internal static void StrokeLine(StringBuilder s, float x1, float y1, float x2, float y2)
-        => s.AppendLine($"{x1:F4} {y1:F4} m {x2:F4} {y2:F4} l S");
+        => s.AppendLine(
+            $"{PdfSyntax.FormatDecimal(x1)} {PdfSyntax.FormatDecimal(y1)} m {PdfSyntax.FormatDecimal(x2)} {PdfSyntax.FormatDecimal(y2)} l S");
 
     /// <summary>
     /// <c>f</c> — Fill the path using non-zero winding rule.
@@ -210,7 +212,7 @@ internal static class PdfOperators
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=406"/>
     /// </summary>
     internal static void SetTextPosition(StringBuilder s, float x, float y)
-        => s.AppendLine($"1 0 0 1 {x:F4} {y:F4} Tm");
+        => s.AppendLine($"1 0 0 1 {PdfSyntax.FormatDecimal(x)} {PdfSyntax.FormatDecimal(y)} Tm");
 
     /// <summary>
     /// <c>Tj</c> — Show a text string.
