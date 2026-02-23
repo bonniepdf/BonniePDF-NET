@@ -45,15 +45,6 @@ internal class Program
             reportGenerators.Add(new HtmlReportGenerator());
         }
         
-        // Create orchestrator
-        var orchestrator = new ValidationOrchestrator(
-            apiClient,
-            directoryProvider,
-            ui,
-            settings,
-            reportGenerators
-        );
-        
         // Display header
         ui.DisplayHeader();
         
@@ -79,6 +70,31 @@ internal class Program
             }
         }
         
+        // Create orchestrator
+        var orchestrator = new ValidationOrchestrator(
+            apiClient,
+            directoryProvider,
+            ui,
+            settings,
+            reportGenerators
+        );
+
+        // Delete existing reports
+        if (!string.IsNullOrEmpty(pdfDirectory))
+        {
+            string htmlReportPath = System.IO.Path.Combine(pdfDirectory, "validation-report.html");
+            if (System.IO.File.Exists(htmlReportPath))
+            {
+                System.IO.File.Delete(htmlReportPath);
+            }
+
+            string jsonReportPath = System.IO.Path.Combine(pdfDirectory, "validation-report.json");
+            if (System.IO.File.Exists(jsonReportPath))
+            {
+                System.IO.File.Delete(jsonReportPath);
+            }
+        }
+        
         // Run validation
         await orchestrator.ValidateAllAsync();
         
@@ -86,7 +102,7 @@ internal class Program
         if (settings.GenerateHtmlReport)
         {
             string htmlReportPath = System.IO.Path.Combine(pdfDirectory, "validation-report.html");
-            if (System.IO.File.Exists(htmlReportPath))
+            if (File.Exists(htmlReportPath))
             {
                 ui.DisplayMessage("");
                 ui.DisplayMessage("Opening validation report in browser...");
