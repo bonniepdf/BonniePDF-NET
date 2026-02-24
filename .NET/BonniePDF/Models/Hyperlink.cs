@@ -101,7 +101,8 @@ public class Hyperlink : IElement
 
         // Register font
         string fontResourceName = ctx.RegisterFont(FontName);
-        bool isEmbedded = ctx.IsEmbeddedFont(FontName);
+        TtfFont embeddedFont = ctx.ResolveEmbeddedFont(FontName);
+        bool isEmbedded = embeddedFont != null;
 
         float contentWidth = width - Margin.Left - Margin.Right;
         List<string> lines = ComputeLines(contentWidth);
@@ -198,22 +199,13 @@ public class Hyperlink : IElement
 
     private string EncodeTextAsGlyphIds(RenderContext ctx, string text)
     {
-        EmbeddedFontInfo fontInfo = ctx.GetEmbeddedFont(FontName);
-        if (fontInfo == null)
+        TtfFont font = ctx.ResolveEmbeddedFont(FontName);
+        if (font == null)
             return $"({PdfSyntax.Escape(text)})";
 
-        // Build hex string more efficiently using StringBuilder
-        StringBuilder sb = new(text.Length * 4 + 2);
-        sb.Append('<');
+        // Track glyph usage for font subsetting (alias-aware)
+        ctx.TrackGlyphUsage(FontName, text);
 
-        foreach (char c in text)
-        {
-            fontInfo.Tracker.MarkUsed(c);
-            ushort glyphId = fontInfo.Font.GetGlyphId(c);
-            sb.Append(glyphId.ToString("X4"));
-        }
-
-        sb.Append('>');
-        return sb.ToString();
+        return PdfSyntax.ToGlyphIdHexString(text, font);
     }
 }

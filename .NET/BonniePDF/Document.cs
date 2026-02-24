@@ -13,6 +13,7 @@ using BonniePDF.Layout.Elements;
 using BonniePDF.Metadata;
 using BonniePDF.Models;
 using BonniePDF.Security.Encryption;
+using BonniePDF.Typography;
 
 namespace BonniePDF;
 
@@ -630,6 +631,10 @@ public class Document : IDisposable
             string fontIdentifier = fontEntry.Key;
             string resourceName = fontEntry.Value; // e.g., "/F1"
 
+            // Skip alias entries (see WriteFontResources for explanation)
+            if (ctx.FontAliasMap.ContainsKey(fontIdentifier))
+                continue;
+
             if (ctx.IsEmbeddedFont(fontIdentifier))
             {
                 // Embedded TTF font - use async FontWriter
@@ -692,6 +697,13 @@ public class Document : IDisposable
             string fontIdentifier = fontEntry.Key;
             string resourceName = fontEntry.Value; // e.g., "/F1"
 
+            // Skip alias entries — these are standard font names (e.g. "Helvetica") that were
+            // auto-resolved to an embedded TTF path by PdfA mode. The TTF path entry in
+            // FontNameMap will handle writing the embedded font; writing the alias as a
+            // separate Type1 font would create a duplicate non-embedded entry.
+            if (ctx.FontAliasMap.ContainsKey(fontIdentifier))
+                continue;
+
             if (ctx.IsEmbeddedFont(fontIdentifier))
             {
                 // Embedded TTF font
@@ -725,6 +737,17 @@ public class Document : IDisposable
             var s when s.Contains("courier") || s.Contains("mono") => StandardFonts.Courier,
             _ => StandardFonts.Helvetica
         };
+    }
+
+    /// <summary>
+    /// Resolves a font identifier to its PDF object ID, following aliases when PdfA
+    /// auto-resolved a standard font name to an embedded TTF path.
+    /// </summary>
+    private static int ResolveFontObjectId(RenderContext ctx, string fontIdentifier)
+    {
+        if (ctx.FontAliasMap.TryGetValue(fontIdentifier, out string ttfPath))
+            return ctx.FontIdMap[ttfPath];
+        return ctx.FontIdMap[fontIdentifier];
     }
 
     // ---- Validation ----
@@ -1087,6 +1110,11 @@ public class Document : IDisposable
         {
             string fontIdentifier = fontEntry.Key;
             string resourceName = fontEntry.Value; // e.g., "/F1"
+
+            // Skip alias entries — the TTF path entry covers the same resource name
+            if (ctx.FontAliasMap.ContainsKey(fontIdentifier))
+                continue;
+
             int objectId = ctx.FontIdMap[fontIdentifier];
 
             fontRefs.Add($"{resourceName} {objectId} 0 R");
@@ -1202,19 +1230,33 @@ public class Document : IDisposable
             // We draw at (0, -FontSize) to position baseline correctly relative to Top-Left origin
             string text = totalPages.ToString();
             string colorCmd = $"{info.Color.ScR:F3} {info.Color.ScG:F3} {info.Color.ScB:F3} rg";
+
+            // Encode text appropriately — embedded fonts use hex glyph IDs
+            TtfFont embeddedFont = ctx.ResolveEmbeddedFont(info.FontIdentifier);
+            string textOperand;
+            if (embeddedFont != null)
+            {
+                ctx.TrackGlyphUsage(info.FontIdentifier, text);
+                textOperand = PdfSyntax.ToGlyphIdHexString(text, embeddedFont);
+            }
+            else
+            {
+                textOperand = $"({PdfSyntax.Escape(text)})";
+            }
+
             string content =
-                $"BT {info.FontResourceName} {info.FontSize} Tf {colorCmd} 0 -{info.FontSize} Td ({text}) Tj ET";
+                $"BT {info.FontResourceName} {info.FontSize} Tf {colorCmd} 0 -{info.FontSize} Td {textOperand} Tj ET";
 
             Dictionary<string, string> dict = new()
             {
                 ["/Type"] = "/XObject",
                 ["/Subtype"] = "/Form",
-                // BBox: Covers the text area. 
-                // X: 0 to 100 (plenty of space). 
+                // BBox: Covers the text area.
+                // X: 0 to 100 (plenty of space).
                 // Y: -FontSize*2 to 0 (covers the text drawn at -FontSize).
                 ["/BBox"] = $"[0 -{info.FontSize * 2} 100 0]",
                 // Font Resource for the text
-                ["/Resources"] = $"<< /Font << {info.FontResourceName} {ctx.FontIdMap[info.FontIdentifier]} 0 R >> >>"
+                ["/Resources"] = $"<< /Font << {info.FontResourceName} {ResolveFontObjectId(ctx, info.FontIdentifier)} 0 R >> >>"
             };
 
             writer.WriteObject(id, dict, content);
@@ -1235,15 +1277,29 @@ public class Document : IDisposable
 
             string text = totalPages.ToString();
             string colorCmd = $"{info.Color.ScR:F3} {info.Color.ScG:F3} {info.Color.ScB:F3} rg";
+
+            // Encode text appropriately — embedded fonts use hex glyph IDs
+            TtfFont embeddedFont = ctx.ResolveEmbeddedFont(info.FontIdentifier);
+            string textOperand;
+            if (embeddedFont != null)
+            {
+                ctx.TrackGlyphUsage(info.FontIdentifier, text);
+                textOperand = PdfSyntax.ToGlyphIdHexString(text, embeddedFont);
+            }
+            else
+            {
+                textOperand = $"({PdfSyntax.Escape(text)})";
+            }
+
             string content =
-                $"BT {info.FontResourceName} {info.FontSize} Tf {colorCmd} 0 -{info.FontSize} Td ({text}) Tj ET";
+                $"BT {info.FontResourceName} {info.FontSize} Tf {colorCmd} 0 -{info.FontSize} Td {textOperand} Tj ET";
 
             Dictionary<string, string> dict = new()
             {
                 ["/Type"] = "/XObject",
                 ["/Subtype"] = "/Form",
                 ["/BBox"] = $"[0 -{info.FontSize * 2} 100 0]",
-                ["/Resources"] = $"<< /Font << {info.FontResourceName} {ctx.FontIdMap[info.FontIdentifier]} 0 R >> >>"
+                ["/Resources"] = $"<< /Font << {info.FontResourceName} {ResolveFontObjectId(ctx, info.FontIdentifier)} 0 R >> >>"
             };
 
             await writer.WriteObjectAsync(id, dict, content, cancellationToken).ConfigureAwait(false);

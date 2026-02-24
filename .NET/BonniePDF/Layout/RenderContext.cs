@@ -43,7 +43,7 @@ public class RenderContext
     /// resolved TTF file path when PdfAEnabled is true. Used to look up the correct
     /// EmbeddedFontInfo for fonts registered under their original name.
     /// </summary>
-    private Dictionary<string, string> FontAliasMap { get; } = new();
+    internal Dictionary<string, string> FontAliasMap { get; } = new();
 
     /// <summary>
     /// Gets or sets whether the current page is the last page being rendered.
@@ -381,7 +381,7 @@ public class RenderContext
         return ImageIdMap[key];
     }
 
-    private string ComputeHash(byte[] data)
+    private static string ComputeHash(byte[] data)
     {
         using SHA256 sha = SHA256.Create();
         byte[] hash = sha.ComputeHash(data);

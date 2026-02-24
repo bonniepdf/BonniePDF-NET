@@ -108,6 +108,11 @@ internal static class PdfSyntax
 
         foreach (char c in text)
         {
+            // Skip control characters (newlines, tabs, etc.) — these are invisible
+            // in standard fonts and should not be encoded as glyphs
+            if (char.IsControl(c))
+                continue;
+
             // Get the specific Glyph ID from the TrueType font table
             ushort gid = font.GetGlyphId(c);
 

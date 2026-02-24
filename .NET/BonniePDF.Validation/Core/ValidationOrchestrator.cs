@@ -61,9 +61,14 @@ public class ValidationOrchestrator
         _ui.DisplayMessage("✓ VeraPDF API is accessible");
         _ui.DisplayMessage("");
 
-        // Get all PDF files
-        string[] pdfFiles = System.IO.Directory.GetFiles(pdfDirectory, "*.pdf", System.IO.SearchOption.TopDirectoryOnly);
-        
+        // Get all PDF files, excluding encrypted ones (encryption is forbidden by PDF/A)
+        string[] allPdfFiles = System.IO.Directory.GetFiles(pdfDirectory, "*.pdf", System.IO.SearchOption.TopDirectoryOnly);
+        string[] pdfFiles = allPdfFiles
+            .Where(f => !System.IO.Path.GetFileName(f).StartsWith("encrypted_", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+
+        int skipped = allPdfFiles.Length - pdfFiles.Length;
+
         if (pdfFiles.Length == 0)
         {
             _ui.DisplayMessage("No PDF files found in the specified directory.");
@@ -72,6 +77,8 @@ public class ValidationOrchestrator
         }
 
         _ui.DisplayMessage($"Found {pdfFiles.Length} PDF file(s) to validate");
+        if (skipped > 0)
+            _ui.DisplayMessage($"Skipped {skipped} encrypted PDF(s) (encryption is incompatible with PDF/A)");
         _ui.DisplayMessage("");
 
         // Validate each PDF
