@@ -8,6 +8,7 @@ namespace BonniePDF.Typography;
 /// <summary>
 /// Generates a ToUnicode CMap for text extraction support in PDFs.
 /// Maps glyph IDs to Unicode code points, enabling copy/paste functionality.
+/// Supports the full Unicode range including supplementary planes (emoji, CJK Extension B+).
 /// </summary>
 public class ToUnicodeCMapBuilder
 {
@@ -21,7 +22,7 @@ public class ToUnicodeCMapBuilder
     /// <summary>
     /// Adds a single glyph ID to Unicode mapping
     /// </summary>
-    public void AddMapping(ushort glyphId, char unicode)
+    public void AddMapping(ushort glyphId, int unicode)
     {
         // Skip .notdef (GID 0) as it doesn't map to a real character
         if (glyphId == 0) return;
@@ -30,11 +31,11 @@ public class ToUnicodeCMapBuilder
     }
 
     /// <summary>
-    /// Adds multiple mappings from a character-to-glyph dictionary
+    /// Adds multiple mappings from a codepoint-to-glyph dictionary
     /// </summary>
-    public void AddMappings(Dictionary<char, ushort> charToGlyph)
+    public void AddMappings(Dictionary<int, ushort> codepointToGlyph)
     {
-        foreach ((char c, ushort gid) in charToGlyph) AddMapping(gid, c);
+        foreach ((int cp, ushort gid) in codepointToGlyph) AddMapping(gid, cp);
     }
 
     /// <summary>
@@ -78,7 +79,7 @@ public class ToUnicodeCMapBuilder
             for (int j = 0; j < chunkSize; j++)
             {
                 (ushort gid, int unicode) = sorted[i + j];
-                sb.AppendLine($"<{gid:X4}> <{unicode:X4}>");
+                sb.AppendLine($"<{gid:X4}> {FormatUnicode(unicode)}");
             }
 
             sb.AppendLine("endbfchar");
@@ -91,6 +92,22 @@ public class ToUnicodeCMapBuilder
         sb.AppendLine("end");
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Formats a Unicode codepoint for the ToUnicode CMap.
+    /// BMP codepoints use 4-digit hex; supplementary codepoints use UTF-16 surrogate pairs.
+    /// </summary>
+    private static string FormatUnicode(int codepoint)
+    {
+        if (codepoint <= 0xFFFF)
+            return $"<{codepoint:X4}>";
+
+        // Supplementary plane: encode as UTF-16 surrogate pair
+        int offset = codepoint - 0x10000;
+        int highSurrogate = 0xD800 + (offset >> 10);
+        int lowSurrogate = 0xDC00 + (offset & 0x3FF);
+        return $"<{highSurrogate:X4}{lowSurrogate:X4}>";
     }
 
     private string BuildEmptyCMap()

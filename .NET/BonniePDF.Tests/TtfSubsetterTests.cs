@@ -35,7 +35,7 @@ public class TtfSubsetterTests
         // Create subset with just 'A'
         ushort glyphIdA = font.GetGlyphId('A');
         var usedGlyphs = new HashSet<ushort> { glyphIdA };
-        var charMap = new Dictionary<char, ushort> { ['A'] = glyphIdA };
+        var charMap = new Dictionary<int, ushort> { ['A'] = glyphIdA };
 
         byte[] subsetData = subsetter.CreateSubset(usedGlyphs, charMap);
 
@@ -64,7 +64,7 @@ public class TtfSubsetterTests
             font.GetGlyphId('C')
         };
 
-        var charMap = new Dictionary<char, ushort>
+        var charMap = new Dictionary<int, ushort>
         {
             ['A'] = font.GetGlyphId('A'),
             ['B'] = font.GetGlyphId('B'),
@@ -86,7 +86,7 @@ public class TtfSubsetterTests
         // Create subset WITHOUT explicitly including glyph 0
         ushort glyphIdA = font.GetGlyphId('A');
         var usedGlyphs = new HashSet<ushort> { glyphIdA };
-        var charMap = new Dictionary<char, ushort> { ['A'] = glyphIdA };
+        var charMap = new Dictionary<int, ushort> { ['A'] = glyphIdA };
 
         subsetter.CreateSubset(usedGlyphs, charMap);
 
@@ -104,7 +104,7 @@ public class TtfSubsetterTests
         ushort glyphIdB = font.GetGlyphId('B');
 
         var usedGlyphs = new HashSet<ushort> { glyphIdA, glyphIdB };
-        var charMap = new Dictionary<char, ushort>
+        var charMap = new Dictionary<int, ushort>
         {
             ['A'] = glyphIdA,
             ['B'] = glyphIdB
@@ -137,7 +137,7 @@ public class TtfSubsetterTests
         ushort glyphIdZ = font.GetGlyphId('Z');
 
         var usedGlyphs = new HashSet<ushort> { glyphIdA, glyphIdZ };
-        var charMap = new Dictionary<char, ushort>
+        var charMap = new Dictionary<int, ushort>
         {
             ['A'] = glyphIdA,
             ['Z'] = glyphIdZ
@@ -157,7 +157,7 @@ public class TtfSubsetterTests
         var subsetter = new TtfSubsetter(font);
 
         var usedGlyphs = new HashSet<ushort>();
-        var charMap = new Dictionary<char, ushort>();
+        var charMap = new Dictionary<int, ushort>();
 
         byte[] subsetData = subsetter.CreateSubset(usedGlyphs, charMap);
 
@@ -178,7 +178,7 @@ public class TtfSubsetterTests
         // Subset with just a few characters
         var chars = "ABC".ToCharArray();
         var usedGlyphs = new HashSet<ushort>(chars.Select(c => font.GetGlyphId(c)));
-        var charMap = chars.ToDictionary(c => c, c => font.GetGlyphId(c));
+        var charMap = chars.ToDictionary(c => (int)c, c => font.GetGlyphId(c));
 
         byte[] subsetData = subsetter.CreateSubset(usedGlyphs, charMap);
         byte[] originalData = font.GetRawFontData();
@@ -198,7 +198,7 @@ public class TtfSubsetterTests
         var chars = Enumerable.Range(32, 95).Select(i => (char)i).ToArray();
         var usedGlyphs = new HashSet<ushort>(chars.Select(c => font.GetGlyphId(c)).Where(g => g != 0));
         var charMap = chars.Where(c => font.GetGlyphId(c) != 0)
-                           .ToDictionary(c => c, c => font.GetGlyphId(c));
+                           .ToDictionary(c => (int)c, c => font.GetGlyphId(c));
 
         byte[] subsetData = subsetter.CreateSubset(usedGlyphs, charMap);
 
@@ -220,7 +220,7 @@ public class TtfSubsetterTests
         ushort gidC = font.GetGlyphId('C');
 
         var usedGlyphs = new HashSet<ushort> { gidA, gidB, gidC };
-        var charMap = new Dictionary<char, ushort>
+        var charMap = new Dictionary<int, ushort>
         {
             ['A'] = gidA,
             ['B'] = gidB,
@@ -246,7 +246,7 @@ public class TtfSubsetterTests
 
         var chars = "World".ToCharArray().Distinct().ToArray();
         var usedGlyphs = new HashSet<ushort>(chars.Select(c => font.GetGlyphId(c)));
-        var charMap = chars.ToDictionary(c => c, c => font.GetGlyphId(c));
+        var charMap = chars.ToDictionary(c => (int)c, c => font.GetGlyphId(c));
 
         // Create two subsetters
         var subsetter1 = new TtfSubsetter(font);
@@ -270,7 +270,7 @@ public class TtfSubsetterTests
         var chars = new[] { 'é', 'ñ', 'ü', 'A' };
         var usedGlyphs = new HashSet<ushort>(chars.Select(c => font.GetGlyphId(c)).Where(g => g != 0));
         var charMap = chars.Where(c => font.GetGlyphId(c) != 0)
-                           .ToDictionary(c => c, c => font.GetGlyphId(c));
+                           .ToDictionary(c => (int)c, c => font.GetGlyphId(c));
 
         byte[] subsetData = subsetter.CreateSubset(usedGlyphs, charMap);
 
@@ -286,7 +286,7 @@ public class TtfSubsetterTests
 
         ushort glyphId = font.GetGlyphId('A');
         var usedGlyphs = new HashSet<ushort> { glyphId };
-        var charMap = new Dictionary<char, ushort> { ['A'] = glyphId };
+        var charMap = new Dictionary<int, ushort> { ['A'] = glyphId };
 
         subsetter.CreateSubset(usedGlyphs, charMap);
 
@@ -306,7 +306,7 @@ public class TtfSubsetterTests
 
         // Add same glyph multiple times (should be deduplicated)
         var usedGlyphs = new HashSet<ushort> { glyphIdA, glyphIdA, glyphIdA };
-        var charMap = new Dictionary<char, ushort> { ['A'] = glyphIdA };
+        var charMap = new Dictionary<int, ushort> { ['A'] = glyphIdA };
 
         byte[] subsetData = subsetter.CreateSubset(usedGlyphs, charMap);
 

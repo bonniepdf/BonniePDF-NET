@@ -51,7 +51,7 @@ public class TtfSubsetter
     /// <param name="usedGlyphIds">Set of glyph IDs to include in the subset</param>
     /// <param name="charToGlyphMap">Mapping of Unicode characters to glyph IDs</param>
     /// <returns>The subset font data as a byte array</returns>
-    public byte[] CreateSubset(IReadOnlySet<ushort> usedGlyphIds, Dictionary<char, ushort> charToGlyphMap)
+    public byte[] CreateSubset(IReadOnlySet<ushort> usedGlyphIds, Dictionary<int, ushort> charToGlyphMap)
     {
         // 1. Build the GID remapping (always include GID 0 = .notdef)
         BuildGidMapping(usedGlyphIds);
@@ -376,39 +376,159 @@ public class TtfSubsetter
         return data;
     }
 
-    private byte[] BuildCmapTable(Dictionary<char, ushort> charToGlyphMap)
+    private byte[] BuildCmapTable(Dictionary<int, ushort> charToGlyphMap)
     {
-        // Build a simple Format 4 cmap subtable
-        Dictionary<ushort, ushort> mappings = new(); // Unicode -> new GID
+        // Split mappings into BMP and supplementary plane
+        Dictionary<ushort, ushort> bmpMappings = new();
+        Dictionary<uint, ushort> allMappings = new();
 
-        foreach (KeyValuePair<char, ushort> kvp in charToGlyphMap)
+        foreach (KeyValuePair<int, ushort> kvp in charToGlyphMap)
         {
-            ushort unicode = kvp.Key;
+            int codepoint = kvp.Key;
             ushort oldGid = kvp.Value;
 
-            if (_oldToNewGid.TryGetValue(oldGid, out ushort newGid)) mappings[unicode] = newGid;
+            if (!_oldToNewGid.TryGetValue(oldGid, out ushort newGid)) continue;
+
+            allMappings[(uint)codepoint] = newGid;
+            if (codepoint <= 0xFFFF)
+                bmpMappings[(ushort)codepoint] = newGid;
         }
 
-        return BuildCmapFormat4(mappings);
+        bool hasSupplementary = allMappings.Keys.Any(cp => cp > 0xFFFF);
+
+        if (hasSupplementary)
+            return BuildCmapWithFormat12(bmpMappings, allMappings);
+
+        return BuildCmapFormat4(bmpMappings);
     }
 
-    private byte[] BuildCmapFormat4(Dictionary<ushort, ushort> unicodeToGid)
+    private byte[] BuildCmapWithFormat12(Dictionary<ushort, ushort> bmpMappings, Dictionary<uint, ushort> allMappings)
     {
-        // Build segments from the mapping
-        List<(ushort startCode, ushort endCode, short idDelta)> segments = BuildCmapSegments(unicodeToGid);
+        // Build Format 4 subtable for BMP (compatibility with older viewers)
+        byte[] format4 = BuildCmapFormat4Subtable(bmpMappings);
+        // Build Format 12 subtable for full Unicode
+        byte[] format12 = BuildCmapFormat12Subtable(allMappings);
 
-        // Calculate table sizes
+        using MemoryStream ms = new();
+        using BinaryWriter writer = new(ms);
+
+        // cmap header
+        WriteUInt16BE(writer, 0); // version
+        WriteUInt16BE(writer, 2); // numTables (Format 4 + Format 12)
+
+        // Encoding records
+        uint recordsSize = 4 + 2 * 8; // header (4) + 2 records (8 each)
+        uint format4Offset = recordsSize;
+        uint format12Offset = recordsSize + (uint)format4.Length;
+
+        // Record 1: Windows Unicode BMP (3, 1) -> Format 4
+        WriteUInt16BE(writer, 3);  // platformID
+        WriteUInt16BE(writer, 1);  // encodingID
+        WriteUInt32BE(writer, format4Offset);
+
+        // Record 2: Windows Unicode full (3, 10) -> Format 12
+        WriteUInt16BE(writer, 3);  // platformID
+        WriteUInt16BE(writer, 10); // encodingID
+        WriteUInt32BE(writer, format12Offset);
+
+        writer.Write(format4);
+        writer.Write(format12);
+
+        return ms.ToArray();
+    }
+
+    private byte[] BuildCmapFormat12Subtable(Dictionary<uint, ushort> unicodeToGid)
+    {
+        // Build groups: consecutive codepoints with consecutive GIDs
+        List<(uint startCharCode, uint endCharCode, uint startGlyphId)> groups = new();
+        List<uint> sortedCodes = unicodeToGid.Keys.OrderBy(c => c).ToList();
+
+        if (sortedCodes.Count > 0)
+        {
+            int i = 0;
+            while (i < sortedCodes.Count)
+            {
+                uint startChar = sortedCodes[i];
+                uint startGid = unicodeToGid[startChar];
+                uint endChar = startChar;
+
+                while (i + 1 < sortedCodes.Count)
+                {
+                    uint nextChar = sortedCodes[i + 1];
+                    uint expectedGid = startGid + (nextChar - startChar);
+
+                    if (nextChar == endChar + 1 && unicodeToGid[nextChar] == expectedGid)
+                    {
+                        endChar = nextChar;
+                        i++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                groups.Add((startChar, endChar, startGid));
+                i++;
+            }
+        }
+
+        uint numGroups = (uint)groups.Count;
+        uint subtableLength = 16 + numGroups * 12; // fixed header (16) + groups (12 each)
+
+        using MemoryStream ms = new();
+        using BinaryWriter writer = new(ms);
+
+        WriteUInt16BE(writer, 12);    // format
+        WriteUInt16BE(writer, 0);     // reserved
+        WriteUInt32BE(writer, subtableLength);
+        WriteUInt32BE(writer, 0);     // language
+        WriteUInt32BE(writer, numGroups);
+
+        foreach ((uint startCharCode, uint endCharCode, uint startGlyphId) in groups)
+        {
+            WriteUInt32BE(writer, startCharCode);
+            WriteUInt32BE(writer, endCharCode);
+            WriteUInt32BE(writer, startGlyphId);
+        }
+
+        return ms.ToArray();
+    }
+
+    private byte[] BuildCmapFormat4Subtable(Dictionary<ushort, ushort> unicodeToGid)
+    {
+        List<(ushort startCode, ushort endCode, short idDelta)> segments = BuildCmapSegments(unicodeToGid);
         int segCount = segments.Count;
         int segCountX2 = segCount * 2;
         int searchRange = 2 * (1 << (int)Math.Floor(Math.Log(segCount, 2)));
         int entrySelector = (int)Math.Floor(Math.Log(segCount, 2));
         int rangeShift = segCountX2 - searchRange;
+        int subtableLength = 16 + segCount * 8;
 
-        // Calculate subtable length
-        int subtableLength = 16 + segCount * 8; // header + 4 arrays of segCount shorts
+        using MemoryStream ms = new();
+        using BinaryWriter writer = new(ms);
 
-        // Calculate cmap table length (header + encoding record + subtable)
-        int totalLength = 4 + 8 + subtableLength;
+        WriteUInt16BE(writer, 4); // format
+        WriteUInt16BE(writer, (ushort)subtableLength);
+        WriteUInt16BE(writer, 0); // language
+        WriteUInt16BE(writer, (ushort)segCountX2);
+        WriteUInt16BE(writer, (ushort)searchRange);
+        WriteUInt16BE(writer, (ushort)entrySelector);
+        WriteUInt16BE(writer, (ushort)rangeShift);
+
+        foreach (var seg in segments) WriteUInt16BE(writer, seg.endCode);
+        WriteUInt16BE(writer, 0); // reservedPad
+        foreach (var seg in segments) WriteUInt16BE(writer, seg.startCode);
+        foreach (var seg in segments) WriteInt16BE(writer, seg.idDelta);
+        foreach (var seg in segments) WriteUInt16BE(writer, 0);
+
+        return ms.ToArray();
+    }
+
+    private byte[] BuildCmapFormat4(Dictionary<ushort, ushort> unicodeToGid)
+    {
+        // BMP-only: single encoding record with Format 4 subtable
+        byte[] subtable = BuildCmapFormat4Subtable(unicodeToGid);
 
         using MemoryStream ms = new();
         using BinaryWriter writer = new(ms);
@@ -418,36 +538,11 @@ public class TtfSubsetter
         WriteUInt16BE(writer, 1); // numTables
 
         // Encoding record (Windows Unicode BMP)
-        WriteUInt16BE(writer, 3); // platformID
-        WriteUInt16BE(writer, 1); // encodingID
+        WriteUInt16BE(writer, 3);  // platformID
+        WriteUInt16BE(writer, 1);  // encodingID
         WriteUInt32BE(writer, 12); // offset to subtable
 
-        // Format 4 subtable
-        WriteUInt16BE(writer, 4); // format
-        WriteUInt16BE(writer, (ushort)subtableLength); // length
-        WriteUInt16BE(writer, 0); // language
-        WriteUInt16BE(writer, (ushort)segCountX2);
-        WriteUInt16BE(writer, (ushort)searchRange);
-        WriteUInt16BE(writer, (ushort)entrySelector);
-        WriteUInt16BE(writer, (ushort)rangeShift);
-
-        // endCode array
-        foreach ((ushort startCode, ushort endCode, short idDelta) seg in segments)
-            WriteUInt16BE(writer, seg.endCode);
-
-        WriteUInt16BE(writer, 0); // reservedPad
-
-        // startCode array
-        foreach ((ushort startCode, ushort endCode, short idDelta) seg in segments)
-            WriteUInt16BE(writer, seg.startCode);
-
-        // idDelta array
-        foreach ((ushort startCode, ushort endCode, short idDelta) seg in segments)
-            WriteInt16BE(writer, seg.idDelta);
-
-        // idRangeOffset array (all zeros since we use idDelta)
-        foreach ((ushort startCode, ushort endCode, short idDelta) seg in segments)
-            WriteUInt16BE(writer, 0);
+        writer.Write(subtable);
 
         return ms.ToArray();
     }

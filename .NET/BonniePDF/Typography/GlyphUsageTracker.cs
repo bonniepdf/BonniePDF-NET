@@ -1,17 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace BonniePDF.Typography;
 
 /// <summary>
 /// Tracks which characters/glyphs are used in a document.
 /// Used for generating ToUnicode CMap and future font subsetting.
+/// Supports the full Unicode range (BMP + supplementary planes).
 /// </summary>
 public class GlyphUsageTracker
 {
     private readonly TtfFont _font;
-    private readonly HashSet<char> _usedChars = new();
+    private readonly HashSet<int> _usedCodepoints = new();
     private readonly HashSet<ushort> _usedGlyphs = new();
 
     /// <summary>
@@ -26,9 +28,9 @@ public class GlyphUsageTracker
     }
 
     /// <summary>
-    /// Gets the set of used Unicode characters
+    /// Gets the set of used Unicode codepoints
     /// </summary>
-    public IReadOnlySet<char> UsedCharacters => _usedChars;
+    public IReadOnlySet<int> UsedCodepoints => _usedCodepoints;
 
     /// <summary>
     /// Gets the set of used glyph IDs
@@ -36,9 +38,9 @@ public class GlyphUsageTracker
     public IReadOnlySet<ushort> UsedGlyphIds => _usedGlyphs;
 
     /// <summary>
-    /// Gets the number of unique characters used
+    /// Gets the number of unique codepoints used
     /// </summary>
-    public int UsedCharacterCount => _usedChars.Count;
+    public int UsedCharacterCount => _usedCodepoints.Count;
 
     /// <summary>
     /// Gets the number of unique glyphs used
@@ -46,32 +48,38 @@ public class GlyphUsageTracker
     public int UsedGlyphCount => _usedGlyphs.Count;
 
     /// <summary>
-    /// Marks a character as used
+    /// Marks a Unicode codepoint as used
     /// </summary>
-    public void MarkUsed(char c)
+    public void MarkUsed(int codepoint)
     {
-        if (_usedChars.Add(c))
+        if (_usedCodepoints.Add(codepoint))
         {
-            ushort gid = _font.GetGlyphId(c);
+            ushort gid = _font.GetGlyphId(codepoint);
             _usedGlyphs.Add(gid);
         }
     }
 
     /// <summary>
-    /// Marks all characters in a string as used
+    /// Marks a BMP character as used
+    /// </summary>
+    public void MarkUsed(char c) => MarkUsed((int)c);
+
+    /// <summary>
+    /// Marks all characters in a string as used (handles surrogate pairs via Rune enumeration)
     /// </summary>
     public void MarkUsed(string text)
     {
         if (string.IsNullOrEmpty(text)) return;
 
-        foreach (char c in text) MarkUsed(c);
+        foreach (Rune rune in text.EnumerateRunes())
+            MarkUsed(rune.Value);
     }
 
     /// <summary>
-    /// Returns mapping of used characters to their glyph IDs
+    /// Returns mapping of used codepoints to their glyph IDs
     /// </summary>
-    public Dictionary<char, ushort> GetUsedCharToGlyphMap()
+    public Dictionary<int, ushort> GetUsedCharToGlyphMap()
     {
-        return _usedChars.ToDictionary(c => c, c => _font.GetGlyphId(c));
+        return _usedCodepoints.ToDictionary(cp => cp, cp => _font.GetGlyphId(cp));
     }
 }

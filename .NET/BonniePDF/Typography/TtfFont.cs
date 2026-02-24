@@ -13,7 +13,7 @@ namespace BonniePDF.Typography;
 /// </summary>
 public class TtfFont
 {
-    private readonly Dictionary<char, ushort> _charToGlyph = new(); // Unicode -> GID
+    private readonly Dictionary<int, ushort> _charToGlyph = new(); // Unicode codepoint -> GID
 
     // Glyph data
     private readonly Dictionary<ushort, int> _glyphWidths = new(); // GID -> width in font units
@@ -91,12 +91,17 @@ public class TtfFont
     // =====================================================
 
     /// <summary>
-    /// Gets the glyph ID for a Unicode character
+    /// Gets the glyph ID for a Unicode codepoint
     /// </summary>
-    public ushort GetGlyphId(char c)
+    public ushort GetGlyphId(int codepoint)
     {
-        return _charToGlyph.TryGetValue(c, out ushort gid) ? gid : (ushort)0;
+        return _charToGlyph.TryGetValue(codepoint, out ushort gid) ? gid : (ushort)0;
     }
+
+    /// <summary>
+    /// Gets the glyph ID for a Unicode character (BMP convenience overload)
+    /// </summary>
+    public ushort GetGlyphId(char c) => GetGlyphId((int)c);
 
     /// <summary>
     /// Gets the width of a glyph in font units
@@ -109,18 +114,18 @@ public class TtfFont
     /// <summary>
     /// Gets the width of a character in font units
     /// </summary>
-    public int GetCharWidth(char c)
+    public int GetCharWidth(int codepoint)
     {
-        ushort gid = GetGlyphId(c);
+        ushort gid = GetGlyphId(codepoint);
         return GetGlyphWidth(gid);
     }
 
     /// <summary>
     /// Gets the width of a character in points
     /// </summary>
-    public float GetCharWidthInPoints(char c, float fontSize)
+    public float GetCharWidthInPoints(int codepoint, float fontSize)
     {
-        int width = GetCharWidth(c);
+        int width = GetCharWidth(codepoint);
         return width / (float)UnitsPerEm * fontSize;
     }
 
@@ -133,9 +138,9 @@ public class TtfFont
     }
 
     /// <summary>
-    /// Gets a copy of the character to glyph mapping
+    /// Gets a copy of the codepoint to glyph mapping (supports full Unicode range)
     /// </summary>
-    public IReadOnlyDictionary<char, ushort> GetCharToGlyphMap()
+    public IReadOnlyDictionary<int, ushort> GetCharToGlyphMap()
     {
         return _charToGlyph;
     }
@@ -355,7 +360,7 @@ public class TtfFont
                         glyphId = (ushort)((glyphId + idDeltas[seg]) & 0xFFFF);
                 }
 
-                if (glyphId != 0 && charCode <= 0xFFFF) _charToGlyph[(char)charCode] = glyphId;
+                if (glyphId != 0) _charToGlyph[charCode] = glyphId;
             }
         }
     }
@@ -378,11 +383,10 @@ public class TtfFont
             uint endCharCode = reader.ReadUInt32();
             uint startGlyphId = reader.ReadUInt32();
 
-            // Only map BMP characters (0-0xFFFF) for now
-            for (uint charCode = startCharCode; charCode <= endCharCode && charCode <= 0xFFFF; charCode++)
+            for (uint charCode = startCharCode; charCode <= endCharCode; charCode++)
             {
                 ushort glyphId = (ushort)(startGlyphId + (charCode - startCharCode));
-                _charToGlyph[(char)charCode] = glyphId;
+                _charToGlyph[(int)charCode] = glyphId;
             }
         }
     }
@@ -511,7 +515,7 @@ public class TtfFont
             Flags |= 64; // Italic
 
         // Nonsymbolic (has standard Latin characters)
-        if (_charToGlyph.ContainsKey('A') && _charToGlyph.ContainsKey('a'))
+        if (_charToGlyph.ContainsKey((int)'A') && _charToGlyph.ContainsKey((int)'a'))
             Flags |= 32; // Nonsymbolic
         else
             Flags |= 4; // Symbolic

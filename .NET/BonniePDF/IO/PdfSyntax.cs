@@ -106,15 +106,16 @@ internal static class PdfSyntax
         StringBuilder sb = new(text.Length * 4 + 2);
         sb.Append('<');
 
-        foreach (char c in text)
+        // Use EnumerateRunes to correctly handle surrogate pairs (emoji, CJK Extension B+)
+        foreach (Rune rune in text.EnumerateRunes())
         {
             // Skip control characters (newlines, tabs, etc.) — these are invisible
             // in standard fonts and should not be encoded as glyphs
-            if (char.IsControl(c))
+            if (Rune.IsControl(rune))
                 continue;
 
             // Get the specific Glyph ID from the TrueType font table
-            ushort gid = font.GetGlyphId(c);
+            ushort gid = font.GetGlyphId(rune.Value);
 
             // Format as 4-digit uppercase hex (Big Endian)
             sb.Append(gid.ToString("X4"));

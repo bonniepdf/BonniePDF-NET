@@ -68,7 +68,9 @@ internal class Program
             new PdfExample("Rounded Rectangles", "rounded_rectangles.pdf",
                 path => RoundedRectangleExample.Generate(path)),
             new PdfExample("Rich Text (Mixed Styling)", "rich_text.pdf",
-                path => RichTextExample.Generate(path))
+                path => RichTextExample.Generate(path)),
+            new PdfExample("Emoji & Supplementary Unicode", "emoji_example.pdf",
+                path => EmojiExample.Generate(path))
         };
 
         //// Define conditional examples (may be skipped)
