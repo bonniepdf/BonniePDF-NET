@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Models;
+using BonniePDF.Rendering;
 
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements.Text;
 
 /// <summary>
 /// A text block element that supports word wrapping, alignment, font customization,

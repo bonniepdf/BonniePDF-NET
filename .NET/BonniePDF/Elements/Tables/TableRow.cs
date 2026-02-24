@@ -1,8 +1,8 @@
 using System.Linq;
-using BonniePDF.Layout.Elements;
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 
-namespace BonniePDF.Layout;
+namespace BonniePDF.Elements.Tables;
 
 /// <summary>
 /// A table row with support for custom styling and background color

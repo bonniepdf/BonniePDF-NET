@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using BonniePDF.Configuration;
-using BonniePDF.Metadata;
-using BonniePDF.Models;
+using BonniePDF.Core;
 using BonniePDF.Security.Encryption;
 
-namespace BonniePDF.IO;
+namespace BonniePDF.Rendering.Writers;
 
 /// <summary>
 /// Interface for async PDF writers

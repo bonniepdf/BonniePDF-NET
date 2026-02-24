@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using BonniePDF.Layout;
-using BonniePDF.Models;
+using BonniePDF.Configuration;
 
-namespace BonniePDF.IO;
+namespace BonniePDF.Rendering;
 
 /// <summary>
 /// Contains the results of the PDF rendering phase (Phase 1).

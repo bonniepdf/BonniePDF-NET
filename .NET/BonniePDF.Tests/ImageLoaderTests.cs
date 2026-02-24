@@ -1,7 +1,6 @@
 using System;
 using System.IO;
-using BonniePDF.IO;
-using BonniePDF.Models;
+using BonniePDF.Rendering.Images;
 using Xunit;
 
 namespace BonniePDF.Tests;

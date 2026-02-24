@@ -1,4 +1,4 @@
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements;
 
 /// <summary>
 /// Indicates the result of rendering an element to a page.

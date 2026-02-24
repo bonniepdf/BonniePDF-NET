@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BonniePDF.Models;
+namespace BonniePDF.Configuration;
 
 /// <summary>
 /// Represents a bookmark (outline) item in the PDF document.

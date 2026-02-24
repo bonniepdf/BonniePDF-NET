@@ -1,4 +1,4 @@
-namespace BonniePDF.Utilities;
+namespace BonniePDF.Charts;
 
 /// <summary>
 /// Provides coordinate calculation utilities for chart rendering.

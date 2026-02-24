@@ -1,4 +1,4 @@
-namespace BonniePDF.Models;
+namespace BonniePDF.Typography;
 
 /// <summary>
 /// Font weight values following the CSS/OpenType weight scale.

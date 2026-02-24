@@ -1,7 +1,8 @@
-using BonniePDF.IO;
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Rendering;
+using BonniePDF.Rendering.Pdf;
 
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements.Layout;
 
 /// <summary>
 /// Base class for elements with borders and background colors.

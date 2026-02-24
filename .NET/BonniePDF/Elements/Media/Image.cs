@@ -1,8 +1,8 @@
 using System;
-using BonniePDF.IO;
-using BonniePDF.Models;
+using BonniePDF.Rendering;
+using BonniePDF.Rendering.Images;
 
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements.Media;
 
 /// <summary>
 /// An image element that displays JPEG or PNG images in the PDF

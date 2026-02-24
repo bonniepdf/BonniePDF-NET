@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using BonniePDF.Core;
 
-namespace BonniePDF.Models;
+namespace BonniePDF.Configuration;
 
 /// <summary>
 /// Represents the size of a PDF page in points.

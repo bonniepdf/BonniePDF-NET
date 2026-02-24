@@ -1,7 +1,7 @@
 using System.Text;
-using BonniePDF.Models;
+using BonniePDF.Core;
 
-namespace BonniePDF.IO;
+namespace BonniePDF.Rendering.Pdf;
 
 /// <summary>
 /// Thin wrappers around PDF content stream operators (PDF Reference 1.7).

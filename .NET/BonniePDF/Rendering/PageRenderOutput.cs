@@ -1,7 +1,8 @@
 using System.Collections.Generic;
-using BonniePDF.Models;
+using BonniePDF.Configuration;
+using BonniePDF.Core;
 
-namespace BonniePDF.IO;
+namespace BonniePDF.Rendering;
 
 /// <summary>
 /// Data emitted for a single rendered page

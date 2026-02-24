@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using BonniePDF.IO;
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Elements.Text;
+using BonniePDF.Rendering.Images;
+using BonniePDF.Rendering.Pdf;
 using BonniePDF.Typography;
+using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF.Drawing;
 

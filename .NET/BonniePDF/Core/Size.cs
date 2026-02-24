@@ -1,4 +1,4 @@
-namespace BonniePDF.Models;
+namespace BonniePDF.Core;
 
 /// <summary>
 /// Represents a 2D size with width and height

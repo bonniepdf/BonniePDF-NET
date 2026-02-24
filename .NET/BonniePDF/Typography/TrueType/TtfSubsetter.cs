@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace BonniePDF.Typography;
+namespace BonniePDF.Typography.TrueType;
 
 /// <summary>
 /// Creates a subset TrueType font containing only the glyphs that are actually used.

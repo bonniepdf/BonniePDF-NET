@@ -1,6 +1,6 @@
 using System;
 
-namespace BonniePDF.Models;
+namespace BonniePDF.Elements.Text;
 
 /// <summary>
 /// Text decoration styles that can be combined using bitwise OR.

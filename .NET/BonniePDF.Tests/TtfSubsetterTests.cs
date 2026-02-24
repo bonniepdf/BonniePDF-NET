@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BonniePDF.Typography;
+using BonniePDF.Typography.TrueType;
 using Xunit;
 
 namespace BonniePDF.Tests;

@@ -1,6 +1,8 @@
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
+using BonniePDF.Rendering;
 
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements.Tables;
 
 /// <summary>
 /// A table cell with support for custom styling, background color, and padding overrides

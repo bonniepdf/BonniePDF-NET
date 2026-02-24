@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using BonniePDF.Charts;
+using BonniePDF.Charts.Models;
+using BonniePDF.Core;
 using BonniePDF.Extensions;
 using BonniePDF.Layout;
 using BonniePDF.Layout.Elements;
-using BonniePDF.Models;
 using Xunit;
 
 namespace BonniePDF.Tests;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace BonniePDF.Typography;
+namespace BonniePDF.Typography.TrueType;
 
 /// <summary>
 /// Generates a ToUnicode CMap for text extraction support in PDFs.

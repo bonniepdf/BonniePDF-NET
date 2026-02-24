@@ -1,4 +1,4 @@
-﻿namespace BonniePDF.Models;
+﻿namespace BonniePDF.Elements.Text;
 
 public enum TextAlignment
 {

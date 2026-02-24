@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Rendering;
 using BonniePDF.Typography;
 
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements.Text;
 
 /// <summary>
 /// A rich text element that supports mixed styling within a single flowing paragraph.

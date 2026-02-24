@@ -1,6 +1,4 @@
-using BonniePDF.Models;
-
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements.Text;
 
 /// <summary>
 /// A styled segment of text within a RichText element.

@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Text;
+using BonniePDF.Rendering;
 
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements.Tables;
 
 /// <summary>
 /// A table element with support for column weights, cell padding, borders, headers, and footers

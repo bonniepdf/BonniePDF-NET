@@ -1,7 +1,6 @@
 using System;
 using BonniePDF.Configuration;
 using BonniePDF.Extensions;
-using BonniePDF.Models;
 using BonniePDF.Security.Models;
 using Xunit;
 

@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using BonniePDF.Charts.Models;
+using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Models;
 
 namespace BonniePDF.Charts;
 

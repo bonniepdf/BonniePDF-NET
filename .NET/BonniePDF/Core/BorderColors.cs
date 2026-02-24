@@ -1,4 +1,4 @@
-namespace BonniePDF.Models;
+namespace BonniePDF.Core;
 
 /// <summary>
 /// Represents border colors for the four sides of an element

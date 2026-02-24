@@ -1,7 +1,10 @@
 using BonniePDF.Configuration;
-using BonniePDF.Layout.Elements;
-using BonniePDF.Models;
 using System.Linq;
+using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Shapes;
+using BonniePDF.Elements.Text;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples;
 

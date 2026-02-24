@@ -1,9 +1,10 @@
 using BonniePDF.Configuration;
-using BonniePDF.Layout;
-using BonniePDF.Layout.Elements;
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Elements;
+using BonniePDF.Elements.Text;
+using BonniePDF.Typography;
 
-namespace BonniePDF.IO;
+namespace BonniePDF.Rendering;
 
 /// <summary>
 /// Helper class for rendering page templates (headers and footers).

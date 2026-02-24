@@ -2,9 +2,12 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using BonniePDF.Layout.Elements;
 using BonniePDF.Configuration;
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Media;
+using BonniePDF.Elements.Text;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Examples.Images;
 

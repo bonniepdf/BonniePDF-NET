@@ -1,6 +1,6 @@
-using BonniePDF.Typography;
+using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Models;
+namespace BonniePDF.Typography;
 
 /// <summary>
 /// Contains all information about an embedded TrueType font

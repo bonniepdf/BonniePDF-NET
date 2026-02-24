@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BonniePDF.Models;
+namespace BonniePDF.Charts.Models;
 
 /// <summary>
 /// Data model for chart visualization.

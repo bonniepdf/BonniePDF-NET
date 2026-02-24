@@ -1,6 +1,6 @@
 using System;
 
-namespace BonniePDF.Metadata;
+namespace BonniePDF.Configuration;
 
 /// <summary>
 /// Contains metadata information about a PDF document

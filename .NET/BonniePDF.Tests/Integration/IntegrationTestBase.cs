@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
-using BonniePDF.Models;
+using BonniePDF.Charts.Models;
 using Xunit;
 
 namespace BonniePDF.Tests.Integration;

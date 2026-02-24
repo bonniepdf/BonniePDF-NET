@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using BonniePDF.IO;
+using BonniePDF.Rendering.Images;
 
-namespace BonniePDF.Typography;
+namespace BonniePDF.Typography.TrueType;
 
 /// <summary>
 /// TrueType font parser for PDF embedding.

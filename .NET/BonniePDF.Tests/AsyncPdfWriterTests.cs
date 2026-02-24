@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using BonniePDF.Configuration;
-using BonniePDF.IO;
+using BonniePDF.Rendering.Writers;
 using Xunit;
 
 namespace BonniePDF.Tests;

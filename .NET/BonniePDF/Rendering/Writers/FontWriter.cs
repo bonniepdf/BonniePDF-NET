@@ -6,10 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Models;
 using BonniePDF.Typography;
+using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.IO;
+namespace BonniePDF.Rendering.Writers;
 
 /// <summary>
 /// Writes font objects to PDF, handling both standard Type1 fonts and embedded TrueType fonts.

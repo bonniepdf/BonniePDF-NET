@@ -1,7 +1,7 @@
 using BonniePDF.Configuration;
+using BonniePDF.Core;
+using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
-using BonniePDF.Layout.Elements;
-using BonniePDF.Models;
 using BonniePDF.Security.Permissions;
 
 namespace BonniePDF.Examples;

@@ -1,4 +1,4 @@
-namespace BonniePDF.Models;
+namespace BonniePDF.Core;
 
 /// <summary>
 /// Provides semantic border width presets for common use cases.

@@ -1,4 +1,6 @@
-namespace BonniePDF.Layout.Elements;
+using BonniePDF.Rendering;
+
+namespace BonniePDF.Elements;
 
 /// <summary>
 /// Base class for stateful PDF elements that support rendering across page boundaries.

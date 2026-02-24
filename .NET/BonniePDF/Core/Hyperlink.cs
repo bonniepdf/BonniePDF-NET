@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using BonniePDF.IO;
-using BonniePDF.Layout;
-using BonniePDF.Layout.Elements;
+using BonniePDF.Elements;
+using BonniePDF.Rendering;
+using BonniePDF.Rendering.Pdf;
 using BonniePDF.Typography;
+using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Models;
+namespace BonniePDF.Core;
 
 /// <summary>
 /// Represents a hyperlink annotation in a PDF document.

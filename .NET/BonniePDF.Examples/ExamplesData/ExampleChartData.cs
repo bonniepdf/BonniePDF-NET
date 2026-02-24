@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using BonniePDF.Models;
+using BonniePDF.Charts.Models;
 
 namespace BonniePDF.Examples.ExamplesData;
 

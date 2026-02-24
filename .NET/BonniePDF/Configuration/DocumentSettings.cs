@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Layout.Elements;
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Elements;
 using BonniePDF.Security.Models;
 
 namespace BonniePDF.Configuration;

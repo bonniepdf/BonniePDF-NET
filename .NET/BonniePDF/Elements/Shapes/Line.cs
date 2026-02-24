@@ -1,6 +1,7 @@
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Rendering;
 
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements.Shapes;
 
 /// <summary>
 /// Represents a simple line element that can be horizontal or vertical.

@@ -1,6 +1,7 @@
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Rendering;
 
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements.Layout;
 
 /// <summary>
 /// A container element that supports padding, background color, and borders

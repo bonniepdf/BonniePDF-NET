@@ -1,9 +1,11 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Layout.Elements;
 using BonniePDF.Configuration;
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Text;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Examples;
 

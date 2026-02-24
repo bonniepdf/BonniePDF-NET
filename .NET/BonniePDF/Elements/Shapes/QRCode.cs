@@ -1,7 +1,7 @@
-﻿
-using BonniePDF.Models;
+﻿using BonniePDF.Core;
+using BonniePDF.Rendering;
 
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements.Shapes;
 
 /// <summary>
 /// A native, high-performance, vector-based QR Code element.

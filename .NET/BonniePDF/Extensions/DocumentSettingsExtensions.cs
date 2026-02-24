@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using BonniePDF.Configuration;
-using BonniePDF.Models;
 
 namespace BonniePDF.Extensions;
 

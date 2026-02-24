@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Text;
-using BonniePDF.Models;
+using BonniePDF.Core;
 
-namespace BonniePDF.IO;
+namespace BonniePDF.Rendering.Pdf;
 
 /// <summary>
 /// Helper methods for drawing common PDF primitives (boxes, borders, backgrounds).

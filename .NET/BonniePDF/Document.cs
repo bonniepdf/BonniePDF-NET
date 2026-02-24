@@ -7,13 +7,17 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BonniePDF.Configuration;
-using BonniePDF.IO;
-using BonniePDF.Layout;
-using BonniePDF.Layout.Elements;
+using BonniePDF.Core;
+using BonniePDF.Elements;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Metadata;
-using BonniePDF.Models;
+using BonniePDF.Rendering;
+using BonniePDF.Rendering.Images;
+using BonniePDF.Rendering.Pdf;
+using BonniePDF.Rendering.Writers;
 using BonniePDF.Security.Encryption;
 using BonniePDF.Typography;
+using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF;
 

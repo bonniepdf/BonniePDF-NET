@@ -1,4 +1,4 @@
-namespace BonniePDF.Models;
+namespace BonniePDF.Rendering.Images;
 
 /// <summary>
 /// Supported image formats

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BonniePDF.IO;
-using BonniePDF.Models;
+using BonniePDF.Configuration;
+using BonniePDF.Core;
+using BonniePDF.Rendering.Images;
+using BonniePDF.Rendering.Writers;
 using Xunit;
 
 namespace BonniePDF.Tests;
@@ -39,12 +41,12 @@ public class ImageWriterTests
             throw new NotImplementedException();
         }
 
-        public int WriteLinkAnnotation(int id, BonniePDF.Models.Hyperlink hyperlink)
+        public int WriteLinkAnnotation(int id, Hyperlink hyperlink)
         {
             throw new NotImplementedException();
         }
 
-        public int WriteDocumentInfo(int id, BonniePDF.Metadata.DocumentMetadata metadata)
+        public int WriteDocumentInfo(int id, DocumentMetadata metadata)
         {
             throw new NotImplementedException();
         }
@@ -54,7 +56,7 @@ public class ImageWriterTests
             throw new NotImplementedException();
         }
 
-        public void WriteCatalog(int id, int pagesId, int firstPageId, BonniePDF.Configuration.DocumentSettings settings, BonniePDF.IO.CatalogOptions options)
+        public void WriteCatalog(int id, int pagesId, int firstPageId, BonniePDF.Configuration.DocumentSettings settings, CatalogOptions options)
         {
             throw new NotImplementedException();
         }

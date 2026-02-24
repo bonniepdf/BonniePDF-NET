@@ -1,4 +1,4 @@
-using BonniePDF.Models;
+using BonniePDF.Core;
 
 namespace BonniePDF.Configuration;
 

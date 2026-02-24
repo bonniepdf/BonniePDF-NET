@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using BonniePDF.Configuration;
-using BonniePDF.Layout.Elements;
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Elements.Text;
 
 namespace BonniePDF.Examples.Examples;
 

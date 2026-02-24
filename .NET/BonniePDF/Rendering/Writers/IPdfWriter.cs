@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using BonniePDF.Configuration;
-using BonniePDF.Metadata;
-using BonniePDF.Models;
+using BonniePDF.Core;
 using BonniePDF.Security.Encryption;
 
-namespace BonniePDF.IO;
+namespace BonniePDF.Rendering.Writers;
 
 /// <summary>
 /// Interface for PDF writers, allowing both sync and async implementations

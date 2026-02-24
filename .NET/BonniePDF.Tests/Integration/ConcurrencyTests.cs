@@ -4,10 +4,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using BonniePDF.Charts;
+using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
+using BonniePDF.Core;
+using BonniePDF.Elements.Media;
+using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Layout.Elements;
-using BonniePDF.Models;
+using BonniePDF.Typography;
 using Xunit;
 
 namespace BonniePDF.Tests.Integration;

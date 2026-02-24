@@ -4,11 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using BonniePDF.Configuration;
+using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Models;
+using BonniePDF.Rendering.Images;
 using BonniePDF.Typography;
+using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Layout;
+namespace BonniePDF.Rendering;
 
 /// <summary>
 /// Context for rendering PDF elements, managing pages, fonts, and positioning

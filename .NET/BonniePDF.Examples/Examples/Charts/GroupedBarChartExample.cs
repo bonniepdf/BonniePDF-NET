@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.IO;
 using BonniePDF.Charts;
+using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
+using BonniePDF.Core;
+using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
-using BonniePDF.Layout.Elements;
-using BonniePDF.Models;
 
 namespace BonniePDF.Examples.Examples.Charts;
 

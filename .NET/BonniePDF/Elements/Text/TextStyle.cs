@@ -1,6 +1,7 @@
+using BonniePDF.Core;
 using BonniePDF.Typography;
 
-namespace BonniePDF.Models;
+namespace BonniePDF.Elements.Text;
 
 /// <summary>
 /// Defines the visual style for text rendering. Properties set to null inherit
@@ -83,7 +84,7 @@ public class TextStyle
     /// <summary>
     /// Returns the effective text color, defaulting to black if not set.
     /// </summary>
-    public Color EffectiveColor => Color ?? Models.Color.Black;
+    public Color EffectiveColor => Color ?? Core.Color.Black;
 
     /// <summary>
     /// Returns the effective font name, resolving family+weight+italic or defaulting to Helvetica.

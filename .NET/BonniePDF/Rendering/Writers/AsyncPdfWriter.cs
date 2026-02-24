@@ -7,11 +7,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BonniePDF.Configuration;
-using BonniePDF.Metadata;
-using BonniePDF.Models;
+using BonniePDF.Core;
+using BonniePDF.Rendering.Pdf;
 using BonniePDF.Security.Encryption;
 
-namespace BonniePDF.IO;
+namespace BonniePDF.Rendering.Writers;
 
 /// <summary>
 /// An async PDF writer that creates PDF 1.4 compliant files.

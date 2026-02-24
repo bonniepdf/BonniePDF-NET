@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using BonniePDF.IO;
+using BonniePDF.Rendering.Images;
 
 namespace BonniePDF.Typography;
 

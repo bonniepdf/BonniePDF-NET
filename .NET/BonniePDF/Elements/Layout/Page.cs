@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Layout.Elements;
-using BonniePDF.Models;
+using BonniePDF.Configuration;
 
-namespace BonniePDF.Layout;
+namespace BonniePDF.Elements.Layout;
 
 /// <summary>
 /// Represents a single page in a PDF document

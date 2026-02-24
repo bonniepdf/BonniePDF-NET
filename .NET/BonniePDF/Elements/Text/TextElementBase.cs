@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using BonniePDF.Models;
+using BonniePDF.Core;
 using BonniePDF.Typography;
 
-namespace BonniePDF.Layout.Elements;
+namespace BonniePDF.Elements.Text;
 
 /// <summary>
 /// Base class for text-based PDF elements that provides common functionality for

@@ -1,4 +1,4 @@
-namespace BonniePDF.Models;
+namespace BonniePDF.Elements.Lists;
 
 /// <summary>
 /// Bullet style options for unordered lists

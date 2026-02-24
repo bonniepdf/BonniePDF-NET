@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BonniePDF.IO;
+namespace BonniePDF.Rendering.Writers;
 
 /// <summary>
 /// Options for writing the PDF catalog dictionary.

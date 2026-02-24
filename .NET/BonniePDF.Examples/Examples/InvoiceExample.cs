@@ -1,8 +1,12 @@
 using System;
 using BonniePDF.Configuration;
+using BonniePDF.Core;
+using BonniePDF.Elements;
+using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Tables;
+using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
-using BonniePDF.Layout.Elements;
-using BonniePDF.Models;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Examples;
 

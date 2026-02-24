@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
-using BonniePDF.Models;
-using BonniePDF.Typography;
+using BonniePDF.Core;
+using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.IO;
+namespace BonniePDF.Rendering.Pdf;
 
 /// <summary>
 /// Shared utilities for PDF syntax encoding and formatting.
