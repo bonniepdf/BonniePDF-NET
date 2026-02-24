@@ -299,6 +299,12 @@ public class PdfWriter : IPdfWriter, IDisposable
         if (metadata.ModifiedDate.HasValue)
             dict["/ModDate"] = $"({PdfSyntax.FormatDate(metadata.ModifiedDate.Value)})";
 
+        if (metadata.Trapped.HasValue)
+            dict["/Trapped"] = metadata.Trapped.Value ? "/True" : "/False";
+
+        foreach (KeyValuePair<string, string> kvp in metadata.CustomProperties)
+            dict[$"/{PdfSyntax.Escape(kvp.Key)}"] = $"({PdfSyntax.Escape(kvp.Value)})";
+
         WriteObject(id, dict);
         return id;
     }

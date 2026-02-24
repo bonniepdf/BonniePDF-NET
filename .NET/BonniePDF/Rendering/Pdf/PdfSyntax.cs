@@ -42,14 +42,19 @@ internal static class PdfSyntax
     }
 
     /// <summary>
-    /// Formats a DateTime as a PDF date string (D:YYYYMMDDHHmmSSOHH'mm').
+    /// Formats a DateTimeOffset as a PDF date string (D:YYYYMMDDHHmmSSOHH'mm').
     /// </summary>
-    internal static string FormatDate(DateTime date)
+    internal static string FormatDate(DateTimeOffset date)
     {
         // PDF date format: D:YYYYMMDDHHmmSSOHH'mm'
-        // For simplicity, we'll treat all dates as local time or UTC based on Kind
-        string offset = date.Kind == DateTimeKind.Utc ? "Z" : "";
-        return $"D:{date:yyyyMMddHHmmss}{offset}";
+        // where O is '+', '-', or 'Z', and HH'mm' is the UTC offset
+        string datePart = date.ToString("yyyyMMddHHmmss");
+        TimeSpan offset = date.Offset;
+        if (offset == TimeSpan.Zero)
+            return $"D:{datePart}Z";
+        char sign = offset > TimeSpan.Zero ? '+' : '-';
+        TimeSpan abs = offset.Duration();
+        return $"D:{datePart}{sign}{abs.Hours:D2}'{abs.Minutes:D2}'";
     }
 
     /// <summary>

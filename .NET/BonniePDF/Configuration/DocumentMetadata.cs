@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace BonniePDF.Configuration;
 
@@ -47,12 +48,13 @@ public class DocumentMetadata
     public string Subject { get; set; }
 
     /// <summary>
-    /// Keywords associated with the document
+    /// Keywords associated with the document. For PDF generation, these are stored as a
+    /// comma-separated string. Use <see cref="SetKeywords"/> to set from a collection.
     /// </summary>
     public string Keywords { get; set; }
 
     /// <summary>
-    /// The application that created the document
+    /// The application that created the original content (e.g., "Microsoft Word")
     /// </summary>
     public string Creator { get; set; } = "BonniePDF";
 
@@ -62,12 +64,34 @@ public class DocumentMetadata
     public string Producer { get; set; } = "BonniePDF";
 
     /// <summary>
-    /// The date the document was created
+    /// The date and time the document was created, including timezone offset
     /// </summary>
-    public DateTime? CreationDate { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset? CreationDate { get; set; } = DateTimeOffset.UtcNow;
 
     /// <summary>
-    /// The date the document was last modified
+    /// The date and time the document was last modified, including timezone offset
     /// </summary>
-    public DateTime? ModifiedDate { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset? ModifiedDate { get; set; } = DateTimeOffset.UtcNow;
+
+    /// <summary>
+    /// Indicates whether document-level trapping has been applied for professional printing.
+    /// True means trapped, false means not trapped, null means not specified.
+    /// </summary>
+    public bool? Trapped { get; set; }
+
+    /// <summary>
+    /// A collection of custom metadata key-value pairs to embed in the document's
+    /// Information Dictionary alongside the standard entries.
+    /// </summary>
+    public Dictionary<string, string> CustomProperties { get; set; } = new Dictionary<string, string>();
+
+    /// <summary>
+    /// Sets the Keywords property from a collection of individual tags,
+    /// joining them as a comma-separated string.
+    /// </summary>
+    public void SetKeywords(IEnumerable<string> keywords)
+    {
+        if (keywords != null)
+            Keywords = string.Join(", ", keywords);
+    }
 }

@@ -105,12 +105,10 @@ internal static class XmpMetadataWriter
     }
 
     /// <summary>
-    /// Formats a DateTime as ISO 8601 string.
+    /// Formats a DateTimeOffset as ISO 8601 string.
     /// </summary>
-    private static string FormatIso8601(DateTime date)
+    private static string FormatIso8601(DateTimeOffset date)
     {
-        if (date.Kind == DateTimeKind.Utc)
-            return date.ToString("yyyy-MM-ddTHH:mm:ss+00:00");
         return date.ToString("yyyy-MM-ddTHH:mm:sszzz");
     }
 
