@@ -1,5 +1,6 @@
 using System;
-using System.Text;
+using System.IO;
+using System.Xml;
 using BonniePDF.Configuration;
 
 namespace BonniePDF.Metadata;
@@ -11,97 +12,112 @@ namespace BonniePDF.Metadata;
 /// </summary>
 internal static class XmpMetadataWriter
 {
+    private const string NsRdf    = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+    private const string NsDc     = "http://purl.org/dc/elements/1.1/";
+    private const string NsXmp    = "http://ns.adobe.com/xap/1.0/";
+    private const string NsPdf    = "http://ns.adobe.com/pdf/1.3/";
+    private const string NsPdfaid = "http://www.aiim.org/pdfa/ns/id/";
+    private const string NsXml    = "http://www.w3.org/XML/1998/namespace";
+
     /// <summary>
     /// Generates the XMP XML string from document metadata.
     /// </summary>
     public static string GenerateXmpXml(DocumentMetadata metadata, bool pdfA = false)
     {
-        StringBuilder sb = new();
+        var settings = new XmlWriterSettings
+        {
+            Indent             = true,
+            IndentChars        = "  ",
+            NewLineChars       = "\n",
+            OmitXmlDeclaration = true
+        };
 
-        sb.Append("<?xpacket begin=\"\xEF\xBB\xBF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>\n");
-        sb.Append("<x:xmpmeta xmlns:x=\"adobe:ns:meta/\">\n");
-        sb.Append("  <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n");
-        sb.Append("    <rdf:Description rdf:about=\"\"\n");
-        sb.Append("      xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n");
-        sb.Append("      xmlns:xmp=\"http://ns.adobe.com/xap/1.0/\"\n");
-        sb.Append("      xmlns:pdf=\"http://ns.adobe.com/pdf/1.3/\"\n");
-        sb.Append("      xmlns:pdfaid=\"http://www.aiim.org/pdfa/ns/id/\">\n");
+        using var sw = new StringWriter();
+        using (var xw = XmlWriter.Create(sw, settings))
+        {
+            xw.WriteProcessingInstruction("xpacket", "begin=\"\xEF\xBB\xBF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"");
 
-        // dc:title
+            xw.WriteStartElement("x",   "xmpmeta",     "adobe:ns:meta/");
+            xw.WriteStartElement("rdf", "RDF",         NsRdf);
+            xw.WriteStartElement("rdf", "Description", NsRdf);
+            xw.WriteAttributeString("rdf", "about", NsRdf, "");
+
+            WriteMetadataElements(xw, metadata, pdfA);
+
+            xw.WriteEndElement(); // rdf:Description
+            xw.WriteEndElement(); // rdf:RDF
+            xw.WriteEndElement(); // x:xmpmeta
+
+            xw.WriteProcessingInstruction("xpacket", "end=\"w\"");
+        }
+
+        return sw.ToString();
+    }
+
+    private static void WriteMetadataElements(XmlWriter xw, DocumentMetadata metadata, bool pdfA)
+    {
         if (!string.IsNullOrEmpty(metadata.Title))
         {
-            sb.Append("      <dc:title>\n");
-            sb.Append("        <rdf:Alt>\n");
-            sb.Append($"          <rdf:li xml:lang=\"x-default\">{EscapeXml(metadata.Title)}</rdf:li>\n");
-            sb.Append("        </rdf:Alt>\n");
-            sb.Append("      </dc:title>\n");
+            xw.WriteStartElement("dc", "title", NsDc);
+            xw.WriteStartElement("rdf", "Alt", NsRdf);
+            xw.WriteStartElement("rdf", "li", NsRdf);
+            xw.WriteAttributeString("xml", "lang", NsXml, "x-default");
+            xw.WriteString(metadata.Title);
+            xw.WriteEndElement(); // rdf:li
+            xw.WriteEndElement(); // rdf:Alt
+            xw.WriteEndElement(); // dc:title
         }
 
-        // dc:creator
         if (!string.IsNullOrEmpty(metadata.Author))
         {
-            sb.Append("      <dc:creator>\n");
-            sb.Append("        <rdf:Seq>\n");
-            sb.Append($"          <rdf:li>{EscapeXml(metadata.Author)}</rdf:li>\n");
-            sb.Append("        </rdf:Seq>\n");
-            sb.Append("      </dc:creator>\n");
+            xw.WriteStartElement("dc", "creator", NsDc);
+            xw.WriteStartElement("rdf", "Seq", NsRdf);
+            xw.WriteElementString("rdf", "li", NsRdf, metadata.Author);
+            xw.WriteEndElement(); // rdf:Seq
+            xw.WriteEndElement(); // dc:creator
         }
 
-        // dc:subject (keywords)
         if (!string.IsNullOrEmpty(metadata.Keywords))
         {
-            sb.Append("      <dc:subject>\n");
-            sb.Append("        <rdf:Bag>\n");
+            xw.WriteStartElement("dc", "subject", NsDc);
+            xw.WriteStartElement("rdf", "Bag", NsRdf);
             foreach (string keyword in metadata.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            {
-                sb.Append($"          <rdf:li>{EscapeXml(keyword)}</rdf:li>\n");
-            }
-            sb.Append("        </rdf:Bag>\n");
-            sb.Append("      </dc:subject>\n");
-            
-            // PDF/A requires pdf:Keywords to match the Info dictionary Keywords exactly
-            sb.Append($"      <pdf:Keywords>{EscapeXml(metadata.Keywords)}</pdf:Keywords>\n");
+                xw.WriteElementString("rdf", "li", NsRdf, keyword);
+            xw.WriteEndElement(); // rdf:Bag
+            xw.WriteEndElement(); // dc:subject
+
+            xw.WriteElementString("pdf", "Keywords", NsPdf, metadata.Keywords);
         }
 
-        // dc:description
         if (!string.IsNullOrEmpty(metadata.Subject))
         {
-            sb.Append("      <dc:description>\n");
-            sb.Append("        <rdf:Alt>\n");
-            sb.Append($"          <rdf:li xml:lang=\"x-default\">{EscapeXml(metadata.Subject)}</rdf:li>\n");
-            sb.Append("        </rdf:Alt>\n");
-            sb.Append("      </dc:description>\n");
+            xw.WriteStartElement("dc", "description", NsDc);
+            xw.WriteStartElement("rdf", "Alt", NsRdf);
+            xw.WriteStartElement("rdf", "li", NsRdf);
+            xw.WriteAttributeString("xml", "lang", NsXml, "x-default");
+            xw.WriteString(metadata.Subject);
+            xw.WriteEndElement(); // rdf:li
+            xw.WriteEndElement(); // rdf:Alt
+            xw.WriteEndElement(); // dc:description
         }
 
-        // xmp:CreatorTool
         if (!string.IsNullOrEmpty(metadata.Creator))
-            sb.Append($"      <xmp:CreatorTool>{EscapeXml(metadata.Creator)}</xmp:CreatorTool>\n");
+            xw.WriteElementString("xmp", "CreatorTool", NsXmp, metadata.Creator);
 
-        // xmp:CreateDate
         if (metadata.CreationDate.HasValue)
-            sb.Append($"      <xmp:CreateDate>{FormatIso8601(metadata.CreationDate.Value)}</xmp:CreateDate>\n");
+            xw.WriteElementString("xmp", "CreateDate", NsXmp, FormatIso8601(metadata.CreationDate.Value));
 
-        // xmp:ModifyDate
         if (metadata.ModifiedDate.HasValue)
-            sb.Append($"      <xmp:ModifyDate>{FormatIso8601(metadata.ModifiedDate.Value)}</xmp:ModifyDate>\n");
+            xw.WriteElementString("xmp", "ModifyDate", NsXmp, FormatIso8601(metadata.ModifiedDate.Value));
 
-        // pdf:Producer
         if (!string.IsNullOrEmpty(metadata.Producer))
-            sb.Append($"      <pdf:Producer>{EscapeXml(metadata.Producer)}</pdf:Producer>\n");
+            xw.WriteElementString("pdf", "Producer", NsPdf, metadata.Producer);
 
-        // PDF/A identification
         if (pdfA)
         {
-            sb.Append("      <pdfaid:part>1</pdfaid:part>\n");
-            sb.Append("      <pdfaid:conformance>B</pdfaid:conformance>\n");
+            xw.WriteElementString("pdfaid", "part",        NsPdfaid, "1");
+            xw.WriteElementString("pdfaid", "conformance", NsPdfaid, "B");
         }
-
-        sb.Append("    </rdf:Description>\n");
-        sb.Append("  </rdf:RDF>\n");
-        sb.Append("</x:xmpmeta>\n");
-        sb.Append("<?xpacket end=\"w\"?>");
-
-        return sb.ToString();
     }
 
     /// <summary>
@@ -110,21 +126,5 @@ internal static class XmpMetadataWriter
     private static string FormatIso8601(DateTimeOffset date)
     {
         return date.ToString("yyyy-MM-ddTHH:mm:sszzz");
-    }
-
-    /// <summary>
-    /// Escapes special characters for XML content.
-    /// </summary>
-    private static string EscapeXml(string input)
-    {
-        if (string.IsNullOrEmpty(input))
-            return input;
-
-        return input
-            .Replace("&", "&amp;")
-            .Replace("<", "&lt;")
-            .Replace(">", "&gt;")
-            .Replace("\"", "&quot;")
-            .Replace("'", "&apos;");
     }
 }
