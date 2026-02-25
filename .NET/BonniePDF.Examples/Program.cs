@@ -4,7 +4,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using BonniePDF.Examples.Examples;
-using BonniePDF.Examples.Examples.Images;
+using BonniePDF.Examples.Examples._01_Basics;
+using BonniePDF.Examples.Examples._02_Layout;
+using BonniePDF.Examples.Examples._03_Typography;
+using BonniePDF.Examples.Examples._04_Elements;
+using BonniePDF.Examples.Examples._05_Charting;
+using BonniePDF.Examples.Examples._06_Security;
+using BonniePDF.Examples.Examples._07_Templates;
 
 namespace BonniePDF.Examples;
 
