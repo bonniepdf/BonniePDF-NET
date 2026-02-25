@@ -108,56 +108,60 @@ public class Document : IDisposable
     public void AddRange(IEnumerable<IElement> elements)
     {
         ArgumentNullException.ThrowIfNull(elements);
-
         foreach (IElement element in elements) Add(element);
     }
 
     /// <summary>
     /// Adds a new page to the document
     /// </summary>
-    public void AddPage()
+    public Page AddPage()
     {
         PdfSize orientedPageSize = Settings.GetOrientedPageSize();
         Page page = new(orientedPageSize, Settings.Margin);
         _pages.Add(page);
+        return page;
     }
 
     /// <summary>
     /// Adds a new page with the specified page size
     /// </summary>
-    public void AddPage(PdfSize pageSize)
+    public Page AddPage(PdfSize pageSize)
     {
         Page page = new(pageSize, Settings.Margin);
         _pages.Add(page);
+        return page;
     }
 
     /// <summary>
     /// Adds a new page with the specified page size and margin
     /// </summary>
-    public void AddPage(PdfSize pageSize, float margin)
+    public Page AddPage(PdfSize pageSize, float margin)
     {
         Page page = new(pageSize, margin);
         _pages.Add(page);
+        return page;
     }
 
     /// <summary>
     /// Adds a new page with the specified page size and orientation
     /// </summary>
-    public void AddPage(PdfSize pageSize, PageOrientation orientation)
+    public Page AddPage(PdfSize pageSize, PageOrientation orientation)
     {
         PdfSize orientedSize = pageSize.GetOrientedSize(orientation);
         Page page = new(orientedSize, Settings.Margin);
         _pages.Add(page);
+        return page;
     }
 
     /// <summary>
     /// Adds a new page with the specified page size, orientation, and margin
     /// </summary>
-    public void AddPage(PdfSize pageSize, PageOrientation orientation, float margin)
+    public Page AddPage(PdfSize pageSize, PageOrientation orientation, float margin)
     {
         PdfSize orientedSize = pageSize.GetOrientedSize(orientation);
         Page page = new(orientedSize, margin);
         _pages.Add(page);
+        return page;
     }
 
     /// <summary>
@@ -288,8 +292,10 @@ public class Document : IDisposable
     private void SaveWithWriter(IPdfWriter writer)
     {
         FontWriter fontWriter = new(writer);
-        ImageWriter imageWriter = new(writer);
-        imageWriter.PdfAEnabled = Settings.PdfAEnabled;
+        ImageWriter imageWriter = new(writer)
+        {
+            PdfAEnabled = Settings.PdfAEnabled
+        };
 
         // 0. Set up encryption if configured
         int encryptId = 0;

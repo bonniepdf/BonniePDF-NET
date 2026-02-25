@@ -4,12 +4,6 @@
 		<ProjectReference Include="..\BonniePDF\BonniePDF.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Content Include="img\**\*">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net8.0</TargetFramework>

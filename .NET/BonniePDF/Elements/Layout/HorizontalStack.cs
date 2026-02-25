@@ -21,7 +21,7 @@ public class HorizontalStack : ElementBase, IStatefulElement
     public float Spacing { get; set; } = 10f;
 
     /// <summary>
-    /// Vertical alignment of children within the stack
+    /// Horizontal alignment of children within the stack
     /// </summary>
     public HorizontalAlignment Alignment { get; set; } = HorizontalAlignment.Start;
 

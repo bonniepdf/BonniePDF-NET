@@ -24,7 +24,7 @@ public abstract class TextElementBase : ElementBase
     /// <summary>
     /// Font size for text rendering
     /// </summary>
-    public int FontSize { get; set; } = 12;
+    public float FontSize { get; set; } = 12;
 
     /// <summary>
     /// TextBlock color for rendering

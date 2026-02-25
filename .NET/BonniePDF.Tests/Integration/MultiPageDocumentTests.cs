@@ -7,7 +7,6 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
-using BonniePDF.Layout.Elements;
 using BonniePDF.Typography;
 using Xunit;
 

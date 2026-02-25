@@ -33,7 +33,7 @@ public class DocumentMetadata
     }
 
     /// <summary>
-    /// The document's title
+    /// The document title
     /// </summary>
     public string Title { get; set; }
 
@@ -54,7 +54,7 @@ public class DocumentMetadata
     public string Keywords { get; set; }
 
     /// <summary>
-    /// The application that created the original content (e.g., "Microsoft Word")
+    /// The application that created the original content
     /// </summary>
     public string Creator { get; set; } = "BonniePDF";
 

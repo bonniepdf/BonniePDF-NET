@@ -5,8 +5,6 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
-using BonniePDF.Layout;
-using BonniePDF.Layout.Elements;
 using BonniePDF.Rendering;
 using Xunit;
 

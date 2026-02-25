@@ -12,12 +12,12 @@ namespace BonniePDF.Metadata;
 /// </summary>
 internal static class XmpMetadataWriter
 {
-    private const string NsRdf    = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-    private const string NsDc     = "http://purl.org/dc/elements/1.1/";
-    private const string NsXmp    = "http://ns.adobe.com/xap/1.0/";
-    private const string NsPdf    = "http://ns.adobe.com/pdf/1.3/";
+    private const string NsRdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+    private const string NsDc = "http://purl.org/dc/elements/1.1/";
+    private const string NsXmp = "http://ns.adobe.com/xap/1.0/";
+    private const string NsPdf = "http://ns.adobe.com/pdf/1.3/";
     private const string NsPdfaid = "http://www.aiim.org/pdfa/ns/id/";
-    private const string NsXml    = "http://www.w3.org/XML/1998/namespace";
+    private const string NsXml = "http://www.w3.org/XML/1998/namespace";
 
     /// <summary>
     /// Generates the XMP XML string from document metadata.
@@ -26,9 +26,9 @@ internal static class XmpMetadataWriter
     {
         var settings = new XmlWriterSettings
         {
-            Indent             = true,
-            IndentChars        = "  ",
-            NewLineChars       = "\n",
+            Indent = true,
+            IndentChars = "  ",
+            NewLineChars = "\n",
             OmitXmlDeclaration = true
         };
 
@@ -37,8 +37,8 @@ internal static class XmpMetadataWriter
         {
             xw.WriteProcessingInstruction("xpacket", "begin=\"\xEF\xBB\xBF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"");
 
-            xw.WriteStartElement("x",   "xmpmeta",     "adobe:ns:meta/");
-            xw.WriteStartElement("rdf", "RDF",         NsRdf);
+            xw.WriteStartElement("x", "xmpmeta", "adobe:ns:meta/");
+            xw.WriteStartElement("rdf", "RDF", NsRdf);
             xw.WriteStartElement("rdf", "Description", NsRdf);
             xw.WriteAttributeString("rdf", "about", NsRdf, "");
 
@@ -115,7 +115,7 @@ internal static class XmpMetadataWriter
 
         if (pdfA)
         {
-            xw.WriteElementString("pdfaid", "part",        NsPdfaid, "1");
+            xw.WriteElementString("pdfaid", "part", NsPdfaid, "1");
             xw.WriteElementString("pdfaid", "conformance", NsPdfaid, "B");
         }
     }

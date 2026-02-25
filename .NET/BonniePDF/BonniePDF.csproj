@@ -14,7 +14,7 @@
     <RepositoryUrl>https://github.com/bonniepdf/bonniepdf</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>pdf;generation;charting;report</PackageTags>
-    <PackageIcon>logo.png</PackageIcon>
+    <PackageIcon>BonniePDF.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" />
-    <None Include="logo.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

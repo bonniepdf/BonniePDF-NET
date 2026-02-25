@@ -2,8 +2,8 @@ using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
-using BonniePDF.Layout.Elements;
 using BonniePDF.Typography;
 using Xunit;
 

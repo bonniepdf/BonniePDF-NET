@@ -2,8 +2,6 @@ using BonniePDF.Configuration;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
-using BonniePDF.Layout;
-using BonniePDF.Layout.Elements;
 using BonniePDF.Rendering;
 using BonniePDF.Typography;
 using Xunit;

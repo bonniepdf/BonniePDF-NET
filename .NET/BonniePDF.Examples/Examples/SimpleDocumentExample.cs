@@ -35,18 +35,22 @@ public class SimpleDocumentExample
         // Create a document with metadata and settings
         Document doc = new();
 
-        // Set document metadata
-        doc.Metadata.Title = "Simple Document Example";
-        doc.Metadata.Author = "BonniePDF";
-        doc.Metadata.Subject = "Demonstrating the new Document API";
-        doc.Metadata.Keywords = "pdf, document, example, rawpdfengine";
+        doc.Metadata = new DocumentMetadata
+        {
+            Title = "Simple Document Example",
+            Author = "BonniePDF",
+            Subject = "Demonstrating the new Document API",
+            Keywords = "pdf, document, example, BonniePDF"
+        };
 
-        // Configure document settings
-        doc.Settings.DefaultZoom = ZoomLevel.FitPage;
-        doc.Settings.PageMode = PageMode.UseNone;
-        doc.Settings.DisplayDocTitle = false;
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        doc.Settings = new DocumentSettings
+        {
+            DefaultZoom = ZoomLevel.FitPage,
+            PageMode = PageMode.UseNone,
+            DisplayDocTitle = false,
+            Version = PdfVersion.Pdf17,
+            PdfAEnabled = true
+        };
 
         // Add content to the first page
         doc.Add(new TextBlock
@@ -106,6 +110,7 @@ public class SimpleDocumentExample
 
         // Add a second page
         doc.AddPage();
+
         doc.Add(new TextBlock
         {
             Text = "Page 2",
@@ -125,6 +130,7 @@ public class SimpleDocumentExample
 
         // Add a custom size page (Square)
         PdfSize customSize = new PdfSize(300, 300, "Square Card");
+
         doc.AddPage(customSize);
         doc.Add(new TextBlock
         {
@@ -135,6 +141,7 @@ public class SimpleDocumentExample
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 50, 0, 0)
         });
+
         doc.Add(new TextBlock
         {
             Text = $"{customSize.Width}pt x {customSize.Height}pt",

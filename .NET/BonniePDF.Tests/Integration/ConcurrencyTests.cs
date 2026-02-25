@@ -7,10 +7,10 @@ using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
-using BonniePDF.Layout.Elements;
 using BonniePDF.Typography;
 using Xunit;
 
