@@ -256,7 +256,7 @@ public static class FlowArchitectureExample
         {
             PageSize = PdfSize.A4,
             Orientation = PageOrientation.Landscape,
-            Margin = 100
+            Margin = 50
         };
 
         using Document doc = new(settings);
