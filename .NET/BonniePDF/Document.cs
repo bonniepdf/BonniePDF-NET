@@ -1,23 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
-using BonniePDF.Metadata;
 using BonniePDF.Rendering;
-using BonniePDF.Rendering.Images;
-using BonniePDF.Rendering.Pdf;
 using BonniePDF.Rendering.Writers;
-using BonniePDF.Security.Encryption;
-using BonniePDF.Typography;
-using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF;
 
@@ -346,13 +337,11 @@ public class Document : IDisposable
     /// </summary>
     protected virtual void Dispose(bool disposing)
     {
-        if (!_disposed)
-        {
-            if (disposing)
-                // Dispose managed resources
-                _pages.Clear();
+        if (_disposed) return;
+        if (disposing)
+            // Dispose managed resources
+            _pages.Clear();
 
-            _disposed = true;
-        }
+        _disposed = true;
     }
 }

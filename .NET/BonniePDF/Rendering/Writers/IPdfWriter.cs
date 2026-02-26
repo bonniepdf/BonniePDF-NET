@@ -46,6 +46,8 @@ public interface IPdfWriter
     int WriteLinkAnnotation(int id, Hyperlink hyperlink);
 
     /// Writes a viewer preferences dictionary
+    /// <summary>
+    /// Writes viewer preferences to the document catalog.
     /// </summary>
     int WriteViewerPreferences(int id, DocumentSettings settings);
 
