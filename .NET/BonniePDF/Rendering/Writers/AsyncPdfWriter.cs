@@ -271,52 +271,6 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
     }
 
     /// <summary>
-    /// Writes a document info dictionary with metadata
-    /// </summary>
-    /// <param name="id">The object ID for the info dictionary</param>
-    /// <param name="metadata">The document metadata</param>
-    /// <param name="cancellationToken">Cancellation token for the operation</param>
-    /// <returns>The object ID of the info dictionary</returns>
-    public async Task<int> WriteDocumentInfoAsync(int id, DocumentMetadata metadata,
-        CancellationToken cancellationToken = default)
-    {
-        Dictionary<string, string> dict = new();
-
-        if (!string.IsNullOrEmpty(metadata.Title))
-            dict["/Title"] = $"({PdfSyntax.Escape(metadata.Title)})";
-
-        if (!string.IsNullOrEmpty(metadata.Author))
-            dict["/Author"] = $"({PdfSyntax.Escape(metadata.Author)})";
-
-        if (!string.IsNullOrEmpty(metadata.Subject))
-            dict["/Subject"] = $"({PdfSyntax.Escape(metadata.Subject)})";
-
-        if (!string.IsNullOrEmpty(metadata.Keywords))
-            dict["/Keywords"] = $"({PdfSyntax.Escape(metadata.Keywords)})";
-
-        if (!string.IsNullOrEmpty(metadata.Creator))
-            dict["/Creator"] = $"({PdfSyntax.Escape(metadata.Creator)})";
-
-        if (!string.IsNullOrEmpty(metadata.Producer))
-            dict["/Producer"] = $"({PdfSyntax.Escape(metadata.Producer)})";
-
-        if (metadata.CreationDate.HasValue)
-            dict["/CreationDate"] = $"({PdfSyntax.FormatDate(metadata.CreationDate.Value)})";
-
-        if (metadata.ModifiedDate.HasValue)
-            dict["/ModDate"] = $"({PdfSyntax.FormatDate(metadata.ModifiedDate.Value)})";
-
-        if (metadata.Trapped.HasValue)
-            dict["/Trapped"] = metadata.Trapped.Value ? "/True" : "/False";
-
-        foreach (KeyValuePair<string, string> kvp in metadata.CustomProperties)
-            dict[$"/{PdfSyntax.Escape(kvp.Key)}"] = $"({PdfSyntax.Escape(kvp.Value)})";
-
-        await WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
-        return id;
-    }
-
-    /// <summary>
     /// Writes a viewer preferences dictionary
     /// </summary>
     /// <param name="id">The object ID for the viewer preferences</param>

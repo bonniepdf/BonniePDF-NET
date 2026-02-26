@@ -11,38 +11,38 @@ public static class FontFamilyResolver
     /// <summary>
     /// Registered custom font families mapping family name to variant paths.
     /// </summary>
-    private static readonly Dictionary<string, FontFamilyDefinition> _customFamilies = new();
+    private static readonly Dictionary<string, FontFamilyDefinition> CustomFamilies = new();
 
     /// <summary>
     /// Standard font family lookup: (family, isBold, isItalic) → PDF font name.
     /// Maps the 3 standard families (Helvetica, Times, Courier) to their 4 variants each.
     /// </summary>
-    private static readonly Dictionary<(string family, bool bold, bool italic), string> _standardFonts = new()
+    private static readonly Dictionary<(string family, bool bold, bool italic), string> StandardFonts = new()
     {
         // Helvetica family
-        [("Helvetica", false, false)] = StandardFonts.Helvetica,
-        [("Helvetica", true, false)] = StandardFonts.HelveticaBold,
-        [("Helvetica", false, true)] = StandardFonts.HelveticaOblique,
-        [("Helvetica", true, true)] = StandardFonts.HelveticaBoldOblique,
+        [("Helvetica", false, false)] = Typography.StandardFonts.Helvetica,
+        [("Helvetica", true, false)] = Typography.StandardFonts.HelveticaBold,
+        [("Helvetica", false, true)] = Typography.StandardFonts.HelveticaOblique,
+        [("Helvetica", true, true)] = Typography.StandardFonts.HelveticaBoldOblique,
 
         // Times family
-        [("Times", false, false)] = StandardFonts.TimesRoman,
-        [("Times", true, false)] = StandardFonts.TimesBold,
-        [("Times", false, true)] = StandardFonts.TimesItalic,
-        [("Times", true, true)] = StandardFonts.TimesBoldItalic,
+        [("Times", false, false)] = Typography.StandardFonts.TimesRoman,
+        [("Times", true, false)] = Typography.StandardFonts.TimesBold,
+        [("Times", false, true)] = Typography.StandardFonts.TimesItalic,
+        [("Times", true, true)] = Typography.StandardFonts.TimesBoldItalic,
 
         // Courier family
-        [("Courier", false, false)] = StandardFonts.Courier,
-        [("Courier", true, false)] = StandardFonts.CourierBold,
-        [("Courier", false, true)] = StandardFonts.CourierOblique,
-        [("Courier", true, true)] = StandardFonts.CourierBoldOblique
+        [("Courier", false, false)] = Typography.StandardFonts.Courier,
+        [("Courier", true, false)] = Typography.StandardFonts.CourierBold,
+        [("Courier", false, true)] = Typography.StandardFonts.CourierOblique,
+        [("Courier", true, true)] = Typography.StandardFonts.CourierBoldOblique
     };
 
     /// <summary>
     /// Maps family name aliases to their canonical family name.
     /// Allows users to specify "Arial" or "sans-serif" and get Helvetica.
     /// </summary>
-    private static readonly Dictionary<string, string> _familyAliases = new()
+    private static readonly Dictionary<string, string> FamilyAliases = new()
     {
         ["arial"] = "Helvetica",
         ["sans-serif"] = "Helvetica",
@@ -66,7 +66,7 @@ public static class FontFamilyResolver
     /// <returns>The resolved PDF font name or TTF file path</returns>
     public static string Resolve(string family, FontWeight weight, bool italic)
     {
-        if (string.IsNullOrEmpty(family)) return StandardFonts.Helvetica;
+        if (string.IsNullOrEmpty(family)) return Typography.StandardFonts.Helvetica;
 
         // If the family is already a fully-qualified standard font name, return it directly
         if (IsStandardFontName(family)) return family;
@@ -79,21 +79,18 @@ public static class FontFamilyResolver
         bool isBold = weight >= FontWeight.SemiBold;
 
         // Check custom registered families
-        if (_customFamilies.TryGetValue(family, out FontFamilyDefinition definition))
+        if (CustomFamilies.TryGetValue(family, out FontFamilyDefinition definition))
             return definition.GetVariant(isBold, italic);
 
         // Resolve alias to canonical family name
         string canonicalFamily = ResolveAlias(family);
 
         // Look up standard font
-        if (_standardFonts.TryGetValue((canonicalFamily, isBold, italic), out string fontName))
+        if (StandardFonts.TryGetValue((canonicalFamily, isBold, italic), out string fontName))
             return fontName;
 
         // Fallback: return Helvetica variant
-        if (_standardFonts.TryGetValue(("Helvetica", isBold, italic), out string fallback))
-            return fallback;
-
-        return StandardFonts.Helvetica;
+        return StandardFonts.GetValueOrDefault(("Helvetica", isBold, italic), Typography.StandardFonts.Helvetica);
     }
 
     /// <summary>
@@ -101,7 +98,7 @@ public static class FontFamilyResolver
     /// </summary>
     public static void RegisterFamily(string familyName, FontFamilyDefinition definition)
     {
-        _customFamilies[familyName] = definition;
+        CustomFamilies[familyName] = definition;
     }
 
     /// <summary>
@@ -109,7 +106,7 @@ public static class FontFamilyResolver
     /// </summary>
     public static void ClearCustomFamilies()
     {
-        _customFamilies.Clear();
+        CustomFamilies.Clear();
     }
 
     /// <summary>
@@ -119,7 +116,7 @@ public static class FontFamilyResolver
     private static string ResolveAlias(string family)
     {
         string lower = family.ToLowerInvariant().Trim();
-        return _familyAliases.TryGetValue(lower, out string canonical) ? canonical : family;
+        return FamilyAliases.TryGetValue(lower, out string canonical) ? canonical : family;
     }
 
     /// <summary>
@@ -130,13 +127,13 @@ public static class FontFamilyResolver
     {
         return name switch
         {
-            StandardFonts.Helvetica or StandardFonts.HelveticaBold
-                or StandardFonts.HelveticaOblique or StandardFonts.HelveticaBoldOblique
-                or StandardFonts.TimesRoman or StandardFonts.TimesBold
-                or StandardFonts.TimesItalic or StandardFonts.TimesBoldItalic
-                or StandardFonts.Courier or StandardFonts.CourierBold
-                or StandardFonts.CourierOblique or StandardFonts.CourierBoldOblique
-                or StandardFonts.Symbol or StandardFonts.ZapfDingbats => true,
+            Typography.StandardFonts.Helvetica or Typography.StandardFonts.HelveticaBold
+                or Typography.StandardFonts.HelveticaOblique or Typography.StandardFonts.HelveticaBoldOblique
+                or Typography.StandardFonts.TimesRoman or Typography.StandardFonts.TimesBold
+                or Typography.StandardFonts.TimesItalic or Typography.StandardFonts.TimesBoldItalic
+                or Typography.StandardFonts.Courier or Typography.StandardFonts.CourierBold
+                or Typography.StandardFonts.CourierOblique or Typography.StandardFonts.CourierBoldOblique
+                or Typography.StandardFonts.Symbol or Typography.StandardFonts.ZapfDingbats => true,
             _ => false
         };
     }

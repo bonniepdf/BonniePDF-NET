@@ -1,0 +1,343 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using BonniePDF.Configuration;
+using BonniePDF.Core;
+using BonniePDF.Rendering.Writers;
+
+namespace BonniePDF.Rendering;
+
+/// <summary>
+/// Orchestrates the process of rendering a Document and writing it to a PDF file.
+/// Separates the low-level serialization logic from the high-level Document API.
+/// </summary>
+public class PdfDocumentSerializer
+{
+    private readonly Document _document;
+
+    /// <summary>
+    /// Creates a new document serializer for a given document.
+    /// </summary>
+    /// <param name="document">The document to be serialized.</param>
+    public PdfDocumentSerializer(Document document)
+    {
+        _document = document ?? throw new ArgumentNullException(nameof(document));
+    }
+
+    /// <summary>
+    /// Serializes the document synchronously to the provided writer.
+    /// </summary>
+    public void Serialize(IPdfWriter writer)
+    {
+        // 0. Set up encryption if configured
+        int encryptId = 0;
+        if (_document.Settings.IsEncrypted)
+        {
+            writer.Encryptor = new Security.Encryption.PdfEncryptor(_document.Settings.Encryption);
+            encryptId = writer.GetNewId();
+        }
+
+        // 1. Allocate IDs
+        int catalogId = writer.GetNewId();
+        int infoId = writer.GetNewId();
+        int pagesId = writer.GetNewId(); // Parent object (written at the end)
+        int documentInfoId = infoId;
+
+        // 2. Initialize Shared Context
+        PdfSize orientedPageSize = _document.Settings.GetOrientedPageSize();
+        RenderContext ctx = new(orientedPageSize, _document.Settings.Margin)
+        {
+            PdfAEnabled = _document.Settings.PdfAEnabled
+        };
+
+        // 3. Stream Processing (Low Memory)
+        List<int> pageIds = [];
+
+        // We use the new Streaming pipeline
+        foreach (PageRenderOutput pageOutput in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, ctx))
+        {
+            int pageId = writer.GetNewId();
+            int contentId = writer.GetNewId();
+            pageIds.Add(pageId);
+
+            // A. Write Content Stream IMMEDIATELY (Flush memory)
+            writer.WriteCompressedObject(contentId, new Dictionary<string, string>(), pageOutput.ContentStream);
+
+            // B. Write Page Object IMMEDIATELY
+            // NOTICE: We removed "/Resources" from here! It will go on the Parent.
+            Dictionary<string, string> pageDict = new()
+            {
+                ["/Type"] = "/Page",
+                ["/Parent"] = $"{pagesId} 0 R", // Refers to the parent we write later
+                ["/MediaBox"] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
+                ["/Contents"] = $"{contentId} 0 R"
+            };
+
+            // Write link annotations if present
+            if (pageOutput.Hyperlinks.Count > 0)
+            {
+                List<int> annotIds = new();
+                foreach (Hyperlink link in pageOutput.Hyperlinks)
+                {
+                    int annotId = writer.GetNewId();
+                    writer.WriteLinkAnnotation(annotId, link);
+                    annotIds.Add(annotId);
+                }
+
+                pageDict["/Annots"] = "[ " + string.Join(" ", annotIds.Select(id => $"{id} 0 R")) + " ]";
+            }
+
+            writer.WriteObject(pageId, pageDict);
+        }
+
+        // 4. Post-Processing (Write Resources)
+        string globalResources = ctx.Resources.WriteResources(writer, pageIds.Count);
+
+        // Write ExtGState for watermark opacity if configured
+        if (_document.Settings.Watermark != null)
+        {
+            int gsId = writer.GetNewId();
+            // PDF/A-1B forbids CA/ca < 1.0 — use full opacity and blend the color instead
+            float opacity = _document.Settings.PdfAEnabled ? 1.0f : _document.Settings.Watermark.Opacity;
+            writer.WriteObject(gsId, new Dictionary<string, string>
+            {
+                ["/Type"] = "/ExtGState",
+                ["/ca"] = opacity.ToString("F4"),
+                ["/CA"] = opacity.ToString("F4")
+            });
+            string extGStateRes = $"<< /ExtGState << /GS_WM {gsId} 0 R >> >>";
+            
+            // Inline CombineResources equivalent
+            string MergeDicts(string d1, string d2)
+            {
+                if (string.IsNullOrEmpty(d2)) return d1;
+                string t2 = d2.StartsWith("<< ") ? d2.Substring(3) : d2;
+                t2 = t2.EndsWith(" >>") ? t2.Substring(0, t2.Length - 3) : t2;
+                string t1 = d1.EndsWith(" >>") ? d1.Substring(0, d1.Length - 3) : d1;
+                return t1 + " " + t2 + " >>";
+            }
+
+            globalResources = MergeDicts(globalResources, extGStateRes);
+        }
+
+        // 5. Write Parent Pages Object
+        string kids = string.Join(" ", pageIds.Select(id => $"{id} 0 R"));
+        writer.WriteObject(pagesId, new Dictionary<string, string>
+        {
+            ["/Type"] = "/Pages",
+            ["/Kids"] = $"[ {kids} ]",
+            ["/Count"] = pageIds.Count.ToString(),
+            ["/Resources"] = globalResources 
+        });
+
+        // 6. Write Metadata & Close
+        MetadataWriter metadataWriter = new(writer);
+        metadataWriter.WriteDocumentInfo(infoId, _document.Metadata);
+
+        CatalogOptions catalogOptions = new();
+
+        if (HasViewerPreferences(_document.Settings))
+        {
+            catalogOptions.ViewerPrefsId = writer.GetNewId();
+            writer.WriteViewerPreferences(catalogOptions.ViewerPrefsId, _document.Settings);
+        }
+
+        // Write XMP Metadata for PDF 1.7
+        if (_document.Settings.Version == PdfVersion.Pdf17)
+        {
+            catalogOptions.XmpMetadataId = writer.GetNewId();
+            metadataWriter.WriteXmpMetadata(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings.PdfAEnabled);
+        }
+
+        // Write Bookmarks for PDF 1.7
+        if (_document.Settings.Version == PdfVersion.Pdf17 && _document.Settings.HasBookmarks)
+        {
+            NavigationWriter navWriter = new(writer);
+            int outlinesStartId = writer.GetNewId();
+            catalogOptions.OutlinesId = navWriter.WriteOutlineTree(outlinesStartId, _document.Settings.Bookmarks, pageIds);
+        }
+
+        // Write PDF/A Output Intents
+        if (_document.Settings.PdfAEnabled && _document.Settings.Version == PdfVersion.Pdf17)
+        {
+            ComplianceWriter complianceWriter = new(writer);
+            catalogOptions.PdfAEnabled = true;
+            int iccProfileId = writer.GetNewId();
+            complianceWriter.WriteIccProfile(iccProfileId);
+            int outputIntentId = writer.GetNewId();
+            complianceWriter.WriteOutputIntent(outputIntentId, iccProfileId);
+            catalogOptions.OutputIntentIds = new List<int> { outputIntentId };
+        }
+
+        // Write Catalog
+        writer.WriteCatalog(catalogId, pagesId, pageIds[0], _document.Settings, catalogOptions);
+
+        // 7. Write encryption dictionary if encrypted
+        if (encryptId > 0) writer.WriteEncryptDictionary(encryptId);
+
+        writer.Close(catalogId, documentInfoId);
+    }
+
+    /// <summary>
+    /// Serializes the document asynchronously to the provided writer.
+    /// </summary>
+    public async Task SerializeAsync(IAsyncPdfWriter writer, CancellationToken cancellationToken)
+    {
+        // 0. Set up encryption if configured
+        int encryptId = 0;
+        if (_document.Settings.IsEncrypted)
+        {
+            writer.Encryptor = new Security.Encryption.PdfEncryptor(_document.Settings.Encryption);
+            encryptId = writer.GetNewId();
+        }
+
+        // 1. Allocate IDs
+        int catalogId = writer.GetNewId();
+        int infoId = writer.GetNewId();
+        int pagesId = writer.GetNewId(); // Parent object (written at the end)
+        int documentInfoId = infoId;
+
+        // 2. Initialize Shared Context
+        PdfSize orientedPageSize = _document.Settings.GetOrientedPageSize();
+        RenderContext ctx = new(orientedPageSize, _document.Settings.Margin);
+        ctx.PdfAEnabled = _document.Settings.PdfAEnabled;
+
+        // 3. Stream Processing (Low Memory)
+        List<int> pageIds = new();
+
+        // We use the new Streaming pipeline
+        foreach (PageRenderOutput pageOutput in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, ctx))
+        {
+            int pageId = writer.GetNewId();
+            int contentId = writer.GetNewId();
+            pageIds.Add(pageId);
+
+            // A. Write Content Stream IMMEDIATELY (Flush memory)
+            await writer.WriteCompressedObjectAsync(contentId, new Dictionary<string, string>(),
+                pageOutput.ContentStream, cancellationToken).ConfigureAwait(false);
+
+            // B. Write Page Object IMMEDIATELY
+            Dictionary<string, string> pageDict = new()
+            {
+                ["/Type"] = "/Page",
+                ["/Parent"] = $"{pagesId} 0 R", // Refers to the parent we write later
+                ["/MediaBox"] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
+                ["/Contents"] = $"{contentId} 0 R"
+            };
+
+            // Write link annotations if present
+            if (pageOutput.Hyperlinks.Count > 0)
+            {
+                List<int> annotIds = new();
+                foreach (Hyperlink link in pageOutput.Hyperlinks)
+                {
+                    int annotId = writer.GetNewId();
+                    await writer.WriteLinkAnnotationAsync(annotId, link, cancellationToken).ConfigureAwait(false);
+                    annotIds.Add(annotId);
+                }
+
+                pageDict["/Annots"] = "[ " + string.Join(" ", annotIds.Select(id => $"{id} 0 R")) + " ]";
+            }
+
+            await writer.WriteObjectAsync(pageId, pageDict, null, cancellationToken).ConfigureAwait(false);
+        }
+
+        // 4. Post-Processing (Write Resources)
+        string globalResources = await ctx.Resources.WriteResourcesAsync(writer, pageIds.Count, cancellationToken).ConfigureAwait(false);
+
+        // Write ExtGState for watermark opacity if configured
+        if (_document.Settings.Watermark != null)
+        {
+            int gsId = writer.GetNewId();
+            float opacity = _document.Settings.PdfAEnabled ? 1.0f : _document.Settings.Watermark.Opacity;
+            await writer.WriteObjectAsync(gsId, new Dictionary<string, string>
+            {
+                ["/Type"] = "/ExtGState",
+                ["/ca"] = opacity.ToString("F4"),
+                ["/CA"] = opacity.ToString("F4")
+            }, null, cancellationToken).ConfigureAwait(false);
+            string extGStateRes = $"<< /ExtGState << /GS_WM {gsId} 0 R >> >>";
+
+            string MergeDicts(string d1, string d2)
+            {
+                if (string.IsNullOrEmpty(d2)) return d1;
+                string t2 = d2.StartsWith("<< ") ? d2.Substring(3) : d2;
+                t2 = t2.EndsWith(" >>") ? t2.Substring(0, t2.Length - 3) : t2;
+                string t1 = d1.EndsWith(" >>") ? d1.Substring(0, d1.Length - 3) : d1;
+                return t1 + " " + t2 + " >>";
+            }
+
+            globalResources = MergeDicts(globalResources, extGStateRes);
+        }
+
+        // 5. Write Parent Pages Object
+        string kids = string.Join(" ", pageIds.Select(id => $"{id} 0 R"));
+        await writer.WriteObjectAsync(pagesId, new Dictionary<string, string>
+        {
+            ["/Type"] = "/Pages",
+            ["/Kids"] = $"[ {kids} ]",
+            ["/Count"] = pageIds.Count.ToString(),
+            ["/Resources"] = globalResources 
+        }, null, cancellationToken).ConfigureAwait(false);
+
+        // 6. Write Metadata & Close
+        MetadataWriter metadataWriter = new(writer);
+        await metadataWriter.WriteDocumentInfoAsync(infoId, _document.Metadata, cancellationToken).ConfigureAwait(false);
+
+        CatalogOptions catalogOptions = new();
+
+        if (HasViewerPreferences(_document.Settings))
+        {
+            catalogOptions.ViewerPrefsId = writer.GetNewId();
+            await writer.WriteViewerPreferencesAsync(catalogOptions.ViewerPrefsId, _document.Settings, cancellationToken).ConfigureAwait(false);
+        }
+
+        // Write XMP Metadata for PDF 1.7
+        if (_document.Settings.Version == PdfVersion.Pdf17)
+        {
+            catalogOptions.XmpMetadataId = writer.GetNewId();
+            await metadataWriter.WriteXmpMetadataAsync(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings.PdfAEnabled, cancellationToken).ConfigureAwait(false);
+        }
+
+        // Write Bookmarks for PDF 1.7
+        if (_document.Settings.Version == PdfVersion.Pdf17 && _document.Settings.HasBookmarks)
+        {
+            NavigationWriter navWriter = new(writer);
+            int outlinesStartId = writer.GetNewId();
+            catalogOptions.OutlinesId = await navWriter.WriteOutlineTreeAsync(outlinesStartId, _document.Settings.Bookmarks, pageIds, cancellationToken).ConfigureAwait(false);
+        }
+
+        // Write PDF/A Output Intents
+        if (_document.Settings.PdfAEnabled && _document.Settings.Version == PdfVersion.Pdf17)
+        {
+            ComplianceWriter complianceWriter = new(writer);
+            catalogOptions.PdfAEnabled = true;
+            int iccProfileId = writer.GetNewId();
+            await complianceWriter.WriteIccProfileAsync(iccProfileId, cancellationToken).ConfigureAwait(false);
+            int outputIntentId = writer.GetNewId();
+            await complianceWriter.WriteOutputIntentAsync(outputIntentId, iccProfileId, cancellationToken).ConfigureAwait(false);
+            catalogOptions.OutputIntentIds = new List<int> { outputIntentId };
+        }
+
+        // Write Catalog
+        await writer.WriteCatalogAsync(catalogId, pagesId, pageIds[0], _document.Settings, catalogOptions, cancellationToken)
+            .ConfigureAwait(false);
+
+        // 7. Write encryption dictionary if encrypted
+        if (encryptId > 0) await writer.WriteEncryptDictionaryAsync(encryptId, cancellationToken).ConfigureAwait(false);
+
+        await writer.CloseAsync(catalogId, documentInfoId, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static bool HasViewerPreferences(DocumentSettings settings)
+    {
+        return settings.HideToolbar ||
+               settings.HideMenubar ||
+               settings.HideWindowUI ||
+               settings.FitWindow ||
+               settings.CenterWindow ||
+               settings.DisplayDocTitle;
+    }
+}

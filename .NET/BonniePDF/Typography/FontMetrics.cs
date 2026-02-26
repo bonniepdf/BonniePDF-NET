@@ -12,7 +12,7 @@ namespace BonniePDF.Typography;
 public static class FontMetrics
 {
     // Cache for parsed TTF widths: "C:/Fonts/arial.ttf" -> int[95]
-    private static readonly Dictionary<string, int[]> _ttfCache = [];
+    private static readonly Dictionary<string, int[]> TtfCache = [];
 
     // -----------------------------------------------------------------------
     // RAW METRICS: Widths for ASCII 32 (' ') to 126 ('~') in 1/1000th of EM
@@ -69,10 +69,10 @@ public static class FontMetrics
     private static float GetTtfWidth(string text, string filepath, float fontSize)
     {
         // 1. Load into cache if missing
-        if (!_ttfCache.ContainsKey(filepath))
+        if (!TtfCache.ContainsKey(filepath))
             try
             {
-                _ttfCache[filepath] = SimpleTtfReader.GetWidths(filepath);
+                TtfCache[filepath] = SimpleTtfReader.GetWidths(filepath);
             }
             catch
             {
@@ -80,7 +80,7 @@ public static class FontMetrics
                 return text.Length * (fontSize * 0.5f);
             }
 
-        int[] widths = _ttfCache[filepath];
+        int[] widths = TtfCache[filepath];
         float totalWidth = 0;
 
         foreach (char c in text)

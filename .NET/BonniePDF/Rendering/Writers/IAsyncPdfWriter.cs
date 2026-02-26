@@ -52,12 +52,6 @@ public interface IAsyncPdfWriter : IAsyncDisposable
     /// </summary>
     Task<int> WriteLinkAnnotationAsync(int id, Hyperlink hyperlink, CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Writes a document info dictionary with metadata
-    /// </summary>
-    Task<int> WriteDocumentInfoAsync(int id, DocumentMetadata metadata, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Writes a viewer preferences dictionary
     /// </summary>
     Task<int> WriteViewerPreferencesAsync(int id, DocumentSettings settings,

@@ -45,12 +45,6 @@ public interface IPdfWriter
     /// </summary>
     int WriteLinkAnnotation(int id, Hyperlink hyperlink);
 
-    /// <summary>
-    /// Writes a document info dictionary with metadata
-    /// </summary>
-    int WriteDocumentInfo(int id, DocumentMetadata metadata);
-
-    /// <summary>
     /// Writes a viewer preferences dictionary
     /// </summary>
     int WriteViewerPreferences(int id, DocumentSettings settings);

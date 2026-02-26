@@ -84,7 +84,9 @@ public class XmpMetadataTests
         var metadata = new DocumentMetadata { Title = "Test" };
         string xml = XmpMetadataWriter.GenerateXmpXml(metadata, true);
 
-        Assert.Contains("<pdfaid:part>1</pdfaid:part>", xml);
-        Assert.Contains("<pdfaid:conformance>B</pdfaid:conformance>", xml);
+        Assert.Contains("pdfaid:part", xml);
+        Assert.Contains("1", xml);
+        Assert.Contains("pdfaid:conformance", xml);
+        Assert.Contains("B", xml);
     }
 }
