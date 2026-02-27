@@ -55,20 +55,6 @@ public abstract class CartesianChartBase : ChartBase
     /// </summary>
     protected sealed override void DrawContent(ICanvas canvas, ChartData data)
     {
-        // Handle backward compatibility: if old API is used (DataPoints), convert to new format (Series)
-        if (data.Series.Count == 0 && data.DataPoints.Count > 0)
-        {
-            // Convert old DataPoints format to new ChartSeries format
-            var defaultSeries = new ChartSeries
-            {
-                Name = "Series",
-                Color = GetDefaultSeriesColor(),
-                DataPoints = data.DataPoints
-            };
-            data.Series.Add(defaultSeries);
-        }
-
-        // Validate data - support both old (DataPoints) and new (Series) API
         if (data.Series.Count == 0) return;
 
         // Calculate dynamic layout based on chart dimensions
@@ -347,35 +333,7 @@ public abstract class CartesianChartBase : ChartBase
     }
 
     /// <summary>
-    /// Calculates coordinates for all data points based on chart dimensions.
-    /// </summary>
-    protected static IList<Point> CalculateCoordinates(ChartData data, float chartAreaWidth,
-        float chartAreaHeight, float baselineY)
-    {
-        int dataPointCount = data.DataPoints.Count;
-        List<Point> coordinates = new();
-
-        // Calculate horizontal spacing
-        float totalSpace = chartAreaWidth / dataPointCount;
-        float spacing = totalSpace;
-
-        for (int i = 0; i < dataPointCount; i++)
-        {
-            // Center each data point in its allocated space
-            float x = LeftPadding + i * spacing + spacing / 2;
-
-            // Calculate Y based on value
-            decimal normalizedValue = data.DataPoints[i].Value / data.YAxis.MaxValue;
-            float y = baselineY - (float)(normalizedValue * (decimal)chartAreaHeight);
-
-            coordinates.Add(new Point(x, y));
-        }
-
-        return coordinates;
-    }
-
-    /// <summary>
-    /// Gets the default color for the series when converting from old API (DataPoints) to new API (Series).
+    /// Gets the default color for the first series.
     /// Derived classes can override this to provide their specific default color.
     /// </summary>
     protected virtual Color GetDefaultSeriesColor() => Color.Blue600;

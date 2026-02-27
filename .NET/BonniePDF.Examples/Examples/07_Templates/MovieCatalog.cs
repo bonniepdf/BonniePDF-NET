@@ -32,7 +32,7 @@ public class MoviesTableExample
         doc.Metadata.Title = "Classic Movies Collection";
         doc.Metadata.Author = "Classic Cinema Archive";
 
-        List<Movie> movies = Movies.GetMockMovies();
+        IList<Movie> movies = Movies.GetMockMovies();
         // Title Section
         VerticalStack titleStack = new();
         titleStack.AddChild(new TextBlock

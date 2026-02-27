@@ -78,7 +78,7 @@ public class UsersTableExample
         );
 
         // Mock Users Data
-        List<User> users = Users.GetMockUsers();
+        IList<User> users = Users.GetMockUsers();
 
         int rowIndex = 0;
         foreach (User user in users)

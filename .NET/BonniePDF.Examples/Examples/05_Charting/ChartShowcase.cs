@@ -123,7 +123,7 @@ public class ChartingExample
         ChartData chartData = new()
         {
             Title = "Monthly Sales",
-            DataPoints = ExampleChartData.MonthlySales,
+            Series = [new ChartSeries { DataPoints = ExampleChartData.MonthlySales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -173,50 +173,42 @@ public class ChartingExample
             StretchToFit = true,
             FontFamily = "Arial, sans-serif",
             ShowValueLabels = true,
-            ShowGridLines = true,
-            YAxisMaxValue = 15000,
-            YAxisPrefix = "£",
-            YAxisStepCount = 5,
             BackgroundColor = Color.FromHex("#fafafa"),
-
-            // Define 3 series with different Tailwind colors
-            Series = new List<BarSeries>
-            {
-                new()
-                {
-                    Name = "Electronics",
-                    Color = Color.FromHex(ChartColors.Indigo),
-                    Values = new List<decimal>
-                    {
-                        4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800
-                    }
-                },
-                new()
-                {
-                    Name = "Clothing",
-                    Color = Color.FromHex(ChartColors.Rose),
-                    Values = new List<decimal>
-                    {
-                        3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200
-                    }
-                },
-                new()
-                {
-                    Name = "Home & Garden",
-                    Color = Color.FromHex(ChartColors.Green),
-                    Values = new List<decimal>
-                    {
-                        2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800
-                    }
-                }
-            },
-
-            // Category labels for all 12 months
-            CategoryLabels = ExampleChartData.MonthLabels
         };
 
+        IList<string> months = ExampleChartData.MonthLabels;
+        decimal[] electronicsValues = [4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800];
+        decimal[] clothingValues = [3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200];
+        decimal[] homeValues = [2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800];
+
+        ChartData groupedChartData = new()
+        {
+            YAxis =
+            {
+                MaxValue = 15000,
+                Prefix = "£",
+                StepCount = 5,
+                ShowGridLines = true
+            }
+        };
+
+        ChartSeries electronicsSeries = new() { Name = "Electronics", Color = Color.FromHex(ChartColors.Indigo) };
+        ChartSeries clothingSeries = new() { Name = "Clothing", Color = Color.FromHex(ChartColors.Rose) };
+        ChartSeries homeSeries = new() { Name = "Home & Garden", Color = Color.FromHex(ChartColors.Green) };
+
+        for (int i = 0; i < months.Count; i++)
+        {
+            electronicsSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = electronicsValues[i] });
+            clothingSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = clothingValues[i] });
+            homeSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = homeValues[i] });
+        }
+
+        groupedChartData.Series.Add(electronicsSeries);
+        groupedChartData.Series.Add(clothingSeries);
+        groupedChartData.Series.Add(homeSeries);
+
         // Add chart to document
-        document.Add(new GroupedBarChartElement(groupedBarChart));
+        document.Add(new GroupedBarChartElement(groupedBarChart, groupedChartData));
     }
 
     private static void AddLineChart(Document document)
@@ -242,7 +234,7 @@ public class ChartingExample
         ChartData chartData = new()
         {
             Title = "Monthly Revenue",
-            DataPoints = ExampleChartData.MonthlySales,
+            Series = [new ChartSeries { DataPoints = ExampleChartData.MonthlySales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -392,7 +384,7 @@ public class ChartingExample
         ChartData chartData = new()
         {
             Title = "Monthly Sales",
-            DataPoints = ExampleChartData.MonthlySales,
+            Series = [new ChartSeries { DataPoints = ExampleChartData.MonthlySales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -447,7 +439,7 @@ public class ChartingExample
         ChartData chartData = new()
         {
             Title = "Quarterly Revenue",
-            DataPoints = ExampleChartData.QuarterlyRevenue,
+            Series = [new ChartSeries { DataPoints = ExampleChartData.QuarterlyRevenue }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -502,7 +494,7 @@ public class ChartingExample
         ChartData chartData = new()
         {
             Title = "Product Sales",
-            DataPoints = ExampleChartData.ProductSales,
+            Series = [new ChartSeries { DataPoints = ExampleChartData.ProductSales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -556,7 +548,7 @@ public class ChartingExample
         ChartData chartData = new()
         {
             Title = "Monthly Sales 2024",
-            DataPoints = ExampleChartData.PieChartSales
+            Series = [new ChartSeries { DataPoints = ExampleChartData.PieChartSales }]
         };
 
         // Create pie chart

@@ -134,7 +134,7 @@ public class DocumentSettings
     /// <summary>
     /// Gets or sets the bookmark items for the document outline tree.
     /// </summary>
-    public List<BookmarkItem> Bookmarks { get; set; } = new();
+    public IList<BookmarkItem> Bookmarks { get; set; } = new List<BookmarkItem>();
 
     /// <summary>
     /// Gets whether the document has any bookmarks defined.

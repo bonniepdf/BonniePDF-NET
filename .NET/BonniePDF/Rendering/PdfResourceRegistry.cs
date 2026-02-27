@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -36,32 +37,32 @@ public class PdfResourceRegistry
     /// <summary>
     /// Maps font identifiers to their PDF resource name (e.g., /F1).
     /// </summary>
-    public Dictionary<string, string> FontNameMap { get; } = new();
+    public IDictionary<string, string> FontNameMap { get; } = new ConcurrentDictionary<string, string>();
     
     /// <summary>
     /// Maps font identifiers to their PDF object ID.
     /// </summary>
-    public Dictionary<string, int> FontIdMap { get; } = new();
+    public IDictionary<string, int> FontIdMap { get; } = new ConcurrentDictionary<string, int>();
 
     /// <summary>
     /// Tracks embedded fonts for subsetting.
     /// </summary>
-    public Dictionary<string, EmbeddedFontInfo> EmbeddedFonts { get; } = new();
+    public IDictionary<string, EmbeddedFontInfo> EmbeddedFonts { get; } = new ConcurrentDictionary<string, EmbeddedFontInfo>();
 
     /// <summary>
     /// Stores loaded images.
     /// </summary>
-    public Dictionary<string, ImageInfo> LoadedImages { get; } = new();
+    public IDictionary<string, ImageInfo> LoadedImages { get; } = new ConcurrentDictionary<string, ImageInfo>();
     
     /// <summary>
     /// Maps image keys to their internal integer ID.
     /// </summary>
-    public Dictionary<string, int> ImageIdMap { get; } = new();
+    public IDictionary<string, int> ImageIdMap { get; } = new ConcurrentDictionary<string, int>();
     
     /// <summary>
     /// Maps internal image IDs to their resource name (e.g., /I1).
     /// </summary>
-    public Dictionary<int, string> ImageResourceNames { get; } = new();
+    public IDictionary<int, string> ImageResourceNames { get; } = new ConcurrentDictionary<int, string>();
 
     // Map from ImageIdMap key to actual PDF object ID
     private readonly Dictionary<string, int> _imagePdfObjectIds = new();
@@ -69,7 +70,7 @@ public class PdfResourceRegistry
     /// <summary>
     /// Stores deferred form XObjects like Total Pages indicators.
     /// </summary>
-    public Dictionary<string, DeferredXObjectInfo> DeferredXObjects { get; } = new();
+    public IDictionary<string, DeferredXObjectInfo> DeferredXObjects { get; } = new ConcurrentDictionary<string, DeferredXObjectInfo>();
 
     /// <summary>
     /// Registers a font and returns its resource name (e.g., /F1).

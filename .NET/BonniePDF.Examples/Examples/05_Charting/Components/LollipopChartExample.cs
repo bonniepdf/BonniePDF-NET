@@ -51,13 +51,19 @@ public class LollipopChartExample
         ChartData chartData = new()
         {
             Title = "Quarterly Revenue",
-            DataPoints =
-            {
-                new ChartDataPoint { Label = "Q1", Value = 4500, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Q2", Value = 6200, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Q3", Value = 8500, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Q4", Value = 11500, LabelFormat = "'£'#,##0" }
-            },
+            Series =
+            [
+                new ChartSeries
+                {
+                    DataPoints =
+                    [
+                        new ChartDataPoint { Label = "Q1", Value = 4500, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Q2", Value = 6200, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Q3", Value = 8500, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Q4", Value = 11500, LabelFormat = "'£'#,##0" }
+                    ]
+                }
+            ],
             YAxis = new AxisOptions
             {
                 Prefix = "£",

@@ -23,22 +23,22 @@ public interface IPdfWriter
     /// <summary>
     /// Writes a PDF object with the specified ID and dictionary
     /// </summary>
-    void WriteObject(int id, Dictionary<string, string> dict, string streamContent = null);
+    void WriteObject(int id, IDictionary<string, string> dict, string streamContent = null);
 
     /// <summary>
     /// Compresses and writes a PDF object
     /// </summary>
-    void WriteCompressedObject(int id, Dictionary<string, string> dict, string content);
+    void WriteCompressedObject(int id, IDictionary<string, string> dict, string content);
 
     /// <summary>
     /// Writes a PDF object with binary stream content
     /// </summary>
-    void WriteBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent);
+    void WriteBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent);
 
     /// <summary>
     /// Compresses binary data using FlateDecode and writes it as a PDF stream object
     /// </summary>
-    void WriteCompressedBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent);
+    void WriteCompressedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent);
 
     /// <summary>
     /// Writes a link annotation object for a hyperlink
@@ -60,7 +60,7 @@ public interface IPdfWriter
     /// Writes an uncompressed binary stream object, bypassing encryption.
     /// Used for XMP metadata which must not be encrypted.
     /// </summary>
-    void WriteUnencryptedBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent);
+    void WriteUnencryptedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent);
 
     /// <summary>
     /// Finalizes the PDF by writing the xref table and trailer

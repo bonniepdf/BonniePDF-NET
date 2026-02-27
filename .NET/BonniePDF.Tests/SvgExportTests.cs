@@ -1,9 +1,7 @@
-using System.Collections.Generic;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Core;
 using BonniePDF.Extensions;
-using BonniePDF.Elements.Layout;
 using Xunit;
 
 namespace BonniePDF.Tests;
@@ -17,11 +15,7 @@ public class SvgExportTests
         var data = new ChartData
         {
             Title = "Test Chart",
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "A", Value = 10 },
-                new() { Label = "B", Value = 20 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 10 }, new() { Label = "B", Value = 20 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -39,10 +33,7 @@ public class SvgExportTests
         var data = new ChartData
         {
             Title = "My Test Chart",
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "X", Value = 100 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "X", Value = 100 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -57,11 +48,7 @@ public class SvgExportTests
         var data = new ChartData
         {
             Title = "Chart",
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "Alpha", Value = 50 },
-                new() { Label = "Beta", Value = 75 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "Alpha", Value = 50 }, new() { Label = "Beta", Value = 75 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -80,10 +67,7 @@ public class SvgExportTests
         };
         var data = new ChartData
         {
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "A", Value = 10 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 10 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -99,12 +83,7 @@ public class SvgExportTests
         var data = new ChartData
         {
             Title = "Line Chart",
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "P1", Value = 10 },
-                new() { Label = "P2", Value = 20 },
-                new() { Label = "P3", Value = 15 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "P1", Value = 10 }, new() { Label = "P2", Value = 20 }, new() { Label = "P3", Value = 15 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -122,11 +101,7 @@ public class SvgExportTests
         var chart = new AreaChart();
         var data = new ChartData
         {
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "A", Value = 10 },
-                new() { Label = "B", Value = 30 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 10 }, new() { Label = "B", Value = 30 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -144,11 +119,7 @@ public class SvgExportTests
         var data = new ChartData
         {
             Title = "Pie Chart",
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "Slice 1", Value = 30 },
-                new() { Label = "Slice 2", Value = 70 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "Slice 1", Value = 30 }, new() { Label = "Slice 2", Value = 70 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -164,11 +135,7 @@ public class SvgExportTests
         var chart = new DotPlotChart();
         var data = new ChartData
         {
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "D1", Value = 15 },
-                new() { Label = "D2", Value = 25 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "D1", Value = 15 }, new() { Label = "D2", Value = 25 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -185,10 +152,7 @@ public class SvgExportTests
         var chart = new LollipopChart();
         var data = new ChartData
         {
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "L1", Value = 40 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "L1", Value = 40 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -200,18 +164,32 @@ public class SvgExportTests
         Assert.Contains("<circle", svg);
     }
 
-    // Note: GroupedBarChart uses a different API (Series/CategoryLabels) instead of ChartData
-    // and doesn't support the ToSvg(ChartData) extension method
+    [Fact]
+    public void GroupedBarChart_ToSvg_ProducesValidSvg()
+    {
+        var chart = new GroupedBarChart();
+        var data = new ChartData
+        {
+            YAxis = { MaxValue = 30 },
+            Series =
+            [
+                new ChartSeries { Name = "A", DataPoints = [new() { Label = "Q1", Value = 10 }, new() { Label = "Q2", Value = 15 }] },
+                new ChartSeries { Name = "B", DataPoints = [new() { Label = "Q1", Value = 20 }, new() { Label = "Q2", Value = 25 }] }
+            ]
+        };
+
+        string svg = chart.ToSvg(data);
+
+        Assert.NotEmpty(svg);
+        Assert.Contains("<svg", svg);
+        Assert.Contains("</svg>", svg);
+    }
 
     [Fact]
     public void Chart_ToSvg_WithEmptyData_ProducesValidSvg()
     {
         var chart = new BarChart();
-        var data = new ChartData
-        {
-            Title = "Empty Chart",
-            DataPoints = new List<ChartDataPoint>()
-        };
+        var data = new ChartData { Title = "Empty Chart" };
 
         string svg = chart.ToSvg(data);
 
@@ -229,10 +207,7 @@ public class SvgExportTests
         var chart = new BarChart();
         var data = new ChartData
         {
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "Test", Value = 1 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "Test", Value = 1 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -247,10 +222,7 @@ public class SvgExportTests
         var chart = new BarChart();
         var data = new ChartData
         {
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "X", Value = 100 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "X", Value = 100 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -271,10 +243,7 @@ public class SvgExportTests
         };
         var data = new ChartData
         {
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "Red Bar", Value = 50 }
-            }
+            Series = [new ChartSeries { DataPoints = [new() { Label = "Red Bar", Value = 50 }] }]
         };
 
         string svg = chart.ToSvg(data);
@@ -290,10 +259,7 @@ public class SvgExportTests
         var chart = new BarChart();
         var data = new ChartData
         {
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "A", Value = 10 }
-            },
+            Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 10 }] }],
             XAxis = new AxisOptions { Legend = "X Axis Label" },
             YAxis = new AxisOptions { Legend = "Y Axis Label" }
         };

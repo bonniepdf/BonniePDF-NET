@@ -51,17 +51,23 @@ public class DotPlotChartExample
         ChartData chartData = new()
         {
             Title = "Product Sales",
-            DataPoints =
-            {
-                new ChartDataPoint { Label = "Prod A", Value = 4500, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Prod B", Value = 6200, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Prod C", Value = 5800, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Prod D", Value = 7200, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Prod E", Value = 8500, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Prod F", Value = 9100, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Prod G", Value = 8200, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Prod H", Value = 9500, LabelFormat = "'£'#,##0" }
-            },
+            Series =
+            [
+                new ChartSeries
+                {
+                    DataPoints =
+                    [
+                        new ChartDataPoint { Label = "Prod A", Value = 4500, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Prod B", Value = 6200, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Prod C", Value = 5800, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Prod D", Value = 7200, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Prod E", Value = 8500, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Prod F", Value = 9100, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Prod G", Value = 8200, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Prod H", Value = 9500, LabelFormat = "'£'#,##0" }
+                    ]
+                }
+            ],
             YAxis = new AxisOptions
             {
                 Prefix = "£",

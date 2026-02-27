@@ -11,7 +11,7 @@ namespace BonniePDF.Elements.Text;
 public class TextBlock : TextElementBase, IStatefulElement
 {
     private float _cachedContentWidth = -1;
-    private List<string>? _cachedLines;
+    private IList<string>? _cachedLines;
 
     // State tracking for multipage rendering
     private int _lastLineRendered = -1;
@@ -53,7 +53,7 @@ public class TextBlock : TextElementBase, IStatefulElement
         if (_lastLineRendered < 0) ctx.CurrentY += Margin.Top;
 
         float contentWidth = width - Margin.Left - Margin.Right;
-        List<string> lines = GetOrComputeLines(contentWidth);
+        IList<string> lines = GetOrComputeLines(contentWidth);
 
         // Start from the next unrendered line
         int startLine = _lastLineRendered + 1;
@@ -124,7 +124,7 @@ public class TextBlock : TextElementBase, IStatefulElement
     /// <summary>
     /// Renders lines from startLine (inclusive) to endLine (exclusive).
     /// </summary>
-    private RenderStatus RenderLines(RenderContext ctx, List<string> lines, int startLine, int endLine,
+    private RenderStatus RenderLines(RenderContext ctx, IList<string> lines, int startLine, int endLine,
         float contentWidth, float localY)
     {
         for (int i = startLine; i < endLine; i++)
@@ -163,13 +163,13 @@ public class TextBlock : TextElementBase, IStatefulElement
 
     protected override float MeasureContentHeight(float contentWidth)
     {
-        List<string> lines = GetOrComputeLines(contentWidth);
+        IList<string> lines = GetOrComputeLines(contentWidth);
         return lines.Count * LineHeight;
     }
 
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
-        List<string> lines = GetOrComputeLines(contentWidth);
+        IList<string> lines = GetOrComputeLines(contentWidth);
         float localY = ctx.CurrentY;
 
         for (int i = 0; i < lines.Count; i++)
@@ -346,7 +346,7 @@ public class TextBlock : TextElementBase, IStatefulElement
     /// Gets cached lines or computes them if needed.
     /// Caching prevents re-computation during multipage rendering.
     /// </summary>
-    private List<string> GetOrComputeLines(float contentWidth)
+    private IList<string> GetOrComputeLines(float contentWidth)
     {
         // Use tolerance for floating point comparison
         if (_cachedLines != null && Math.Abs(_cachedContentWidth - contentWidth) < 0.001f) return _cachedLines;

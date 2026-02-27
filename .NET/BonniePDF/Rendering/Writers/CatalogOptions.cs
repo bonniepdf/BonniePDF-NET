@@ -26,7 +26,7 @@ public class CatalogOptions
     /// <summary>
     /// Output intent object IDs for PDF/A compliance (null or empty if none).
     /// </summary>
-    public List<int> OutputIntentIds { get; set; }
+    public IList<int> OutputIntentIds { get; set; }
 
     /// <summary>
     /// Whether PDF/A mode is enabled (adds /MarkInfo to catalog).

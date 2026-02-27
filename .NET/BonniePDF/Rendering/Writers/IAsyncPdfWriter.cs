@@ -26,25 +26,25 @@ public interface IAsyncPdfWriter : IAsyncDisposable
     /// <summary>
     /// Writes a PDF object with the specified ID and dictionary
     /// </summary>
-    Task WriteObjectAsync(int id, Dictionary<string, string> dict, string streamContent = null,
+    Task WriteObjectAsync(int id, IDictionary<string, string> dict, string streamContent = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Compresses and writes a PDF object
     /// </summary>
-    Task WriteCompressedObjectAsync(int id, Dictionary<string, string> dict, string content,
+    Task WriteCompressedObjectAsync(int id, IDictionary<string, string> dict, string content,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Writes a PDF object with binary stream content
     /// </summary>
-    Task WriteBinaryObjectAsync(int id, Dictionary<string, string> dict, byte[] streamContent, int length,
+    Task WriteBinaryObjectAsync(int id, IDictionary<string, string> dict, byte[] streamContent, int length,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Compresses binary data using FlateDecode and writes it as a PDF stream object
     /// </summary>
-    Task WriteCompressedBinaryObjectAsync(int id, Dictionary<string, string> dict, byte[] streamContent, int length,
+    Task WriteCompressedBinaryObjectAsync(int id, IDictionary<string, string> dict, byte[] streamContent, int length,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -69,7 +69,7 @@ public interface IAsyncPdfWriter : IAsyncDisposable
     /// Writes an uncompressed binary stream object, bypassing encryption.
     /// Used for XMP metadata which must not be encrypted.
     /// </summary>
-    Task WriteUnencryptedBinaryObjectAsync(int id, Dictionary<string, string> dict, byte[] streamContent,
+    Task WriteUnencryptedBinaryObjectAsync(int id, IDictionary<string, string> dict, byte[] streamContent,
         CancellationToken cancellationToken = default);
 
     /// <summary>

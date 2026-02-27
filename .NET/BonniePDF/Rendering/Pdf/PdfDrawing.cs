@@ -93,7 +93,7 @@ internal static class PdfDrawing
     /// <param name="color">Fill color</param>
     public static void FillCircle(StringBuilder stream, float centerX, float centerY, float radius, Color color)
     {
-        // PDF doesn't have a circle primitive, so we approximate with Bezier curves
+        // PDF doesn't have a circle primitive, so we approximate with Bézier curves
         // The magic number 0.552284749831 is the control point distance for a good circle approximation
         const float k = 0.552284749831f;
         float kr = k * radius;

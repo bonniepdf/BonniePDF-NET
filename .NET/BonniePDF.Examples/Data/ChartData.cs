@@ -7,11 +7,11 @@ namespace BonniePDF.Examples.Data;
 
 public static class ExampleChartData
 {
-    public static List<string> MonthLabels => Enumerable.Range(1, 12)
+    public static IList<string> MonthLabels => Enumerable.Range(1, 12)
         .Select(m => DateTimeFormatInfo.CurrentInfo.GetAbbreviatedMonthName(m))
         .ToList();
 
-    public static List<ChartDataPoint> MonthlySales => new()
+    public static IList<ChartDataPoint> MonthlySales => new List<ChartDataPoint>
     {
         new ChartDataPoint { Label = MonthLabels[0], Value = 4500, LabelFormat = "'£'#,##0" },
         new ChartDataPoint { Label = MonthLabels[1], Value = 6200, LabelFormat = "'£'#,##0" },
@@ -27,7 +27,7 @@ public static class ExampleChartData
         new ChartDataPoint { Label = MonthLabels[11], Value = 12800, LabelFormat = "'£'#,##0" }
     };
 
-    public static List<ChartDataPoint> QuarterlyRevenue => new()
+    public static IList<ChartDataPoint> QuarterlyRevenue => new List<ChartDataPoint>()
     {
         new ChartDataPoint { Label = "Q1", Value = 4500, LabelFormat = "'£'#,##0" },
         new ChartDataPoint { Label = "Q2", Value = 6200, LabelFormat = "'£'#,##0" },
@@ -35,7 +35,7 @@ public static class ExampleChartData
         new ChartDataPoint { Label = "Q4", Value = 11500, LabelFormat = "'£'#,##0" }
     };
 
-    public static List<ChartDataPoint> ProductSales => new()
+    public static IList<ChartDataPoint> ProductSales => new List<ChartDataPoint>()
     {
         new ChartDataPoint { Label = "Prod A", Value = 4500, LabelFormat = "'£'#,##0" },
         new ChartDataPoint { Label = "Prod B", Value = 6200, LabelFormat = "'£'#,##0" },
@@ -47,7 +47,7 @@ public static class ExampleChartData
         new ChartDataPoint { Label = "Prod H", Value = 9500, LabelFormat = "'£'#,##0" }
     };
 
-    public static List<ChartDataPoint> PieChartSales => new()
+    public static IList<ChartDataPoint> PieChartSales => new List<ChartDataPoint>()
     {
         new ChartDataPoint { Label = MonthLabels[0], Value = 7234, LabelFormat = "'£'#,##0" },
         new ChartDataPoint { Label = MonthLabels[1], Value = 4891, LabelFormat = "'£'#,##0" },

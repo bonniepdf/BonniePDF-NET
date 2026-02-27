@@ -79,7 +79,7 @@ public class GlyphUsageTracker
     /// <summary>
     /// Returns mapping of used codepoints to their glyph IDs
     /// </summary>
-    public Dictionary<int, ushort> GetUsedCharToGlyphMap()
+    public IDictionary<int, ushort> GetUsedCharToGlyphMap()
     {
         return _usedCodepoints.ToDictionary(cp => cp, cp => _font.GetGlyphId(cp));
     }

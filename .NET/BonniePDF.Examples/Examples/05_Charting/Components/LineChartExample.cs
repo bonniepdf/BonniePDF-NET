@@ -52,7 +52,7 @@ public class LineChartExample
         ChartData chartData = new()
         {
             Title = "Monthly Revenue",
-            DataPoints = ExampleChartData.MonthlySales,
+            Series = [new ChartSeries { DataPoints = ExampleChartData.MonthlySales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",

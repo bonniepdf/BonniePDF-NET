@@ -76,24 +76,6 @@ internal static class PdfSyntax
     }
 
     /// <summary>
-    /// Encodes a string as a PDF hex string (surrounded by angle brackets).
-    /// Example: "AB" -&gt; "&lt;00410042&gt;"
-    /// Used for embedded font glyph IDs and high-ASCII strings.
-    /// </summary>
-    internal static string ToHexString(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return "<>";
-
-        StringBuilder sb = new(text.Length * 4 + 2);
-        sb.Append('<');
-        foreach (char c in text)
-            // Format as 4-digit hex for Unicode (UTF-16BE effectively)
-            sb.Append(((int)c).ToString("X4"));
-        sb.Append('>');
-        return sb.ToString();
-    }
-
-    /// <summary>
     /// Converts a string into a PDF hex string of Glyph IDs (GIDs) for a specific font.
     /// Example: "£" -&gt; "&lt;00A3&gt;"
     ///     (actual hex depends on the font's internal mapping)

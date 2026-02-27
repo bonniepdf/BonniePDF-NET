@@ -34,7 +34,7 @@ public abstract class ListElementBase : TextElementBase
 
         foreach (string item in items)
         {
-            List<string> lines = ComputeLines(item, itemWidth);
+            IList<string> lines = ComputeLines(item, itemWidth);
             totalHeight += lines.Count * LineHeight + ItemSpacing;
         }
 
@@ -72,7 +72,7 @@ public abstract class ListElementBase : TextElementBase
     /// <param name="markerWidth">The width of the marker</param>
     protected void RenderListItem(
         RenderContext ctx,
-        List<string> lines,
+        IList<string> lines,
         ref float localY,
         Action<float, float> renderMarker,
         float markerWidth)

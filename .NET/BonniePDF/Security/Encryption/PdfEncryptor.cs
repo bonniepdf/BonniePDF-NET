@@ -136,7 +136,7 @@ public sealed class PdfEncryptor
     /// <summary>
     /// Gets the /Encrypt dictionary entries for the PDF.
     /// </summary>
-    public Dictionary<string, string> GetEncryptDictionary()
+    public IDictionary<string, string> GetEncryptDictionary()
     {
         if (_isAes256)
             return GetAes256EncryptDictionary();

@@ -65,7 +65,7 @@ public class ChartTests
             Operations.Add($"FillCircle({cx},{cy},{radius})");
         }
 
-        public void FillPath(List<Point> points, Color color)
+        public void FillPath(IList<Point> points, Color color)
         {
             Operations.Add($"FillPath({points.Count} points)");
         }
@@ -97,12 +97,18 @@ public class ChartTests
         return new ChartData
         {
             Title = "Test Chart",
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "A", Value = 10 },
-                new() { Label = "B", Value = 20 },
-                new() { Label = "C", Value = 15 }
-            },
+            Series =
+            [
+                new ChartSeries
+                {
+                    DataPoints =
+                    [
+                        new() { Label = "A", Value = 10 },
+                        new() { Label = "B", Value = 20 },
+                        new() { Label = "C", Value = 15 }
+                    ]
+                }
+            ],
             XAxis = new AxisOptions { Legend = "X Axis" },
             YAxis = new AxisOptions { Legend = "Y Axis", ShowGridLines = true }
         };
@@ -128,8 +134,7 @@ public class ChartTests
         var canvas = new MockCanvas();
         var data = new ChartData
         {
-            Title = "Empty Chart",
-            DataPoints = new List<ChartDataPoint>()
+            Title = "Empty Chart"
         };
 
         chart.Draw(canvas, data);
@@ -302,20 +307,27 @@ public class ChartTests
     [Fact]
     public void GroupedBarChart_Draw_ExecutesDrawingOperations()
     {
-        var chart = new GroupedBarChart
-        {
-            CategoryLabels = new List<string> { "Q1", "Q2" },
-            Series = new List<BarSeries>
-            {
-                new() { Name = "Product A", Values = new List<decimal> { 10, 15 } },
-                new() { Name = "Product B", Values = new List<decimal> { 20, 25 } }
-            },
-            YAxisMaxValue = 30
-        };
+        var chart = new GroupedBarChart();
         var canvas = new MockCanvas();
-        var dummyData = new ChartData(); // GroupedBarChart ignores this parameter
+        var data = new ChartData
+        {
+            YAxis = { MaxValue = 30 },
+            Series =
+            [
+                new ChartSeries
+                {
+                    Name = "Product A",
+                    DataPoints = [new() { Label = "Q1", Value = 10 }, new() { Label = "Q2", Value = 15 }]
+                },
+                new ChartSeries
+                {
+                    Name = "Product B",
+                    DataPoints = [new() { Label = "Q1", Value = 20 }, new() { Label = "Q2", Value = 25 }]
+                }
+            ]
+        };
 
-        chart.Draw(canvas, dummyData);
+        chart.Draw(canvas, data);
 
         Assert.NotEmpty(canvas.Operations);
         // Should draw bars (2 categories * 2 series = 4 bars)
@@ -331,10 +343,10 @@ public class ChartTests
         var data = new ChartData
         {
             Title = null,
-            DataPoints = new List<ChartDataPoint>
-            {
-                new() { Label = "A", Value = 10 }
-            }
+            Series =
+            [
+                new ChartSeries { DataPoints = [new() { Label = "A", Value = 10 }] }
+            ]
         };
 
         chart.Draw(canvas, data);

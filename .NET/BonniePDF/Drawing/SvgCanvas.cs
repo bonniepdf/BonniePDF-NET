@@ -197,7 +197,7 @@ public class SvgCanvas : ICanvas
     /// Fills a closed path defined by a series of points.
     /// No coordinate transformation needed for SVG.
     /// </summary>
-    public void FillPath(List<Point> points, Color color)
+    public void FillPath(IList<Point> points, Color color)
     {
         if (points == null || points.Count < 3) return;
 

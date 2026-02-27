@@ -1,12 +1,10 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BonniePDF.Charts.Models;
 
 /// <summary>
 /// Data model for chart visualization.
-/// Supports both single-series (backward compatible) and multi-series charts.
+/// Supports single-series and multi-series charts.
 /// </summary>
 public class ChartData
 {
@@ -30,32 +28,4 @@ public class ChartData
     /// X-axis (horizontal) configuration
     /// </summary>
     public AxisOptions XAxis { get; set; } = new();
-
-    /// <summary>
-    /// Data points to display in the chart (single series).
-    /// <para>
-    /// <b>BACKWARD COMPATIBILITY:</b> This property provides backward compatibility with existing code.
-    /// When set, it automatically creates a single series named "Data".
-    /// When read, it returns the data points from the first series (or an empty list if no series exist).
-    /// </para>
-    /// <para>
-    /// <b>Recommended:</b> Use the <see cref="Series"/> property for new code to enable multi-series support.
-    /// </para>
-    /// </summary>
-    [Obsolete("Use Series property instead for multi-series support. This property is maintained for backward compatibility.")]
-    public IList<ChartDataPoint> DataPoints
-    {
-        get => Series.FirstOrDefault()?.DataPoints ?? new List<ChartDataPoint>();
-        set
-        {
-            if (Series.Count == 0)
-            {
-                Series.Add(new ChartSeries { Name = "Data", DataPoints = value });
-            }
-            else
-            {
-                Series[0].DataPoints = value;
-            }
-        }
-    }
 }

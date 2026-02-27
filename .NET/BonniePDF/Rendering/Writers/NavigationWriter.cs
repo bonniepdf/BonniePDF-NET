@@ -35,7 +35,7 @@ public class NavigationWriter
     /// <param name="bookmarks">The list of bookmarks.</param>
     /// <param name="pageIds">List of object IDs for the document's pages.</param>
     /// <returns>The root ID if outlines were written, 0 otherwise.</returns>
-    public int WriteOutlineTree(int rootId, List<BookmarkItem> bookmarks, List<int> pageIds)
+    public int WriteOutlineTree(int rootId, IList<BookmarkItem> bookmarks, IList<int> pageIds)
     {
         if (bookmarks == null || bookmarks.Count == 0)
             return 0;
@@ -145,7 +145,7 @@ public class NavigationWriter
     /// <param name="pageIds">List of object IDs for the document's pages.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The root ID if outlines were written, 0 otherwise.</returns>
-    public async Task<int> WriteOutlineTreeAsync(int rootId, List<BookmarkItem> bookmarks, List<int> pageIds, CancellationToken cancellationToken = default)
+    public async Task<int> WriteOutlineTreeAsync(int rootId, IList<BookmarkItem> bookmarks, IList<int> pageIds, CancellationToken cancellationToken = default)
     {
         if (bookmarks == null || bookmarks.Count == 0)
             return 0;

@@ -167,15 +167,17 @@ public abstract class IntegrationTestBase : IDisposable
     /// </summary>
     protected static ChartData CreateTestChartData(int points = 5)
     {
-        ChartData data = new();
+        ChartSeries series = new();
         for (int i = 0; i < points; i++)
         {
-            data.DataPoints.Add(new ChartDataPoint
+            series.DataPoints.Add(new ChartDataPoint
             {
                 Label = $"Item {i + 1}",
                 Value = i * 10 + 20
             });
         }
+        ChartData data = new();
+        data.Series.Add(series);
         return data;
     }
 

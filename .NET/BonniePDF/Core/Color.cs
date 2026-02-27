@@ -109,6 +109,7 @@ public readonly struct Color
     // --- Tailwind v4 Colors ---
 
     // Slate
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public static Color Slate50 => FromHex("f8fafc");
     public static Color Slate100 => FromHex("f1f5f9");
     public static Color Slate200 => FromHex("e2e8f0");
@@ -393,6 +394,7 @@ public readonly struct Color
     public static Color Rose800 => FromHex("a50036");
     public static Color Rose900 => FromHex("8b0836");
     public static Color Rose950 => FromHex("4d0218");
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
     /// <summary>
     /// Creates a Color from a hex string (e.g., "FF0000" or "#FF0000")

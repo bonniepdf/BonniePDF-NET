@@ -11,14 +11,17 @@ namespace BonniePDF.Charts;
 public class GroupedBarChartElement : ElementBase
 {
     private readonly GroupedBarChart _chart;
+    private readonly ChartData _data;
 
     /// <summary>
     /// Creates a new GroupedBarChartElement.
     /// </summary>
     /// <param name="chart">The grouped bar chart to render</param>
-    public GroupedBarChartElement(GroupedBarChart chart)
+    /// <param name="data">The chart data containing series, axis options, and title</param>
+    public GroupedBarChartElement(GroupedBarChart chart, ChartData data)
     {
         _chart = chart;
+        _data = data;
     }
 
     /// <summary>
@@ -40,11 +43,8 @@ public class GroupedBarChartElement : ElementBase
         // Create a PdfCanvas that wraps the current PDF content stream
         PdfCanvas pdfCanvas = new(ctx.CurrentStream, ctx.PageSize.Height, ctx.CurrentX, ctx.CurrentY);
 
-        // Create a dummy ChartData for the Draw method (won't be used for grouped bars)
-        ChartData dummyData = new();
-
         // Draw the chart using the ICanvas interface
-        _chart.Draw(pdfCanvas, dummyData);
+        _chart.Draw(pdfCanvas, _data);
 
         // Advance Y position by the chart height
         ctx.CurrentY += _chart.Height;

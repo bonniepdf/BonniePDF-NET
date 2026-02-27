@@ -51,7 +51,7 @@ public class TtfSubsetter
     /// <param name="usedGlyphIds">Set of glyph IDs to include in the subset</param>
     /// <param name="charToGlyphMap">Mapping of Unicode characters to glyph IDs</param>
     /// <returns>The subset font data as a byte array</returns>
-    public byte[] CreateSubset(IReadOnlySet<ushort> usedGlyphIds, Dictionary<int, ushort> charToGlyphMap)
+    public byte[] CreateSubset(IReadOnlySet<ushort> usedGlyphIds, IDictionary<int, ushort> charToGlyphMap)
     {
         // 1. Build the GID remapping (always include GID 0 = .notdef)
         BuildGidMapping(usedGlyphIds);
@@ -376,7 +376,7 @@ public class TtfSubsetter
         return data;
     }
 
-    private byte[] BuildCmapTable(Dictionary<int, ushort> charToGlyphMap)
+    private byte[] BuildCmapTable(IDictionary<int, ushort> charToGlyphMap)
     {
         // Split mappings into BMP and supplementary plane
         Dictionary<ushort, ushort> bmpMappings = new();

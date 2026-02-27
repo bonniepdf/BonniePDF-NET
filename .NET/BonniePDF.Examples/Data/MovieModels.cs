@@ -14,7 +14,7 @@ public class Movie
 
 public static class Movies
 {
-    public static List<Movie> GetMockMovies()
+    public static IList<Movie> GetMockMovies()
     {
         return new List<Movie>
         {

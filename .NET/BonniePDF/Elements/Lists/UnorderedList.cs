@@ -73,7 +73,7 @@ public class UnorderedList : ListElementBase
         // Render regular items
         foreach (string item in _items)
         {
-            List<string> lines = ComputeLines(item, itemWidth);
+            IList<string> lines = ComputeLines(item, itemWidth);
             float bulletWidth = MeasureTextWidth(BulletChar);
 
             // Render each line with the bullet

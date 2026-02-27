@@ -173,7 +173,7 @@ public class PdfCanvas : ICanvas
     /// Fills a closed path defined by a series of points.
     /// Converts all points from Top-Left to Bottom-Left coordinates.
     /// </summary>
-    public void FillPath(List<Point> points, Color color)
+    public void FillPath(IList<Point> points, Color color)
     {
         if (points == null || points.Count < 3) return;
 

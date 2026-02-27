@@ -11,5 +11,5 @@ public class PageRenderOutput
 {
     public string ContentStream { get; set; }
     public PdfSize Size { get; set; }
-    public List<Hyperlink> Hyperlinks { get; set; }
+    public IList<Hyperlink> Hyperlinks { get; set; }
 }

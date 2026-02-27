@@ -53,7 +53,7 @@ public class PieChartExample
         ChartData chartData = new()
         {
             Title = "Monthly Sales 2024",
-            DataPoints = ExampleChartData.PieChartSales
+            Series = [new ChartSeries { DataPoints = ExampleChartData.PieChartSales }]
         };
 
         // Create the pie chart with custom colors matching the SVG

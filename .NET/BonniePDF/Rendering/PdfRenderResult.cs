@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using BonniePDF.Configuration;
 
@@ -13,12 +14,12 @@ public class PdfRenderResult
     /// <summary>
     /// The rendered content streams for each page
     /// </summary>
-    public List<string> PageContentStreams { get; set; } = new();
+    public IList<string> PageContentStreams { get; set; } = new List<string>();
 
     /// <summary>
     /// Maps page indices to their dimensions (width, height, margin)
     /// </summary>
-    public Dictionary<int, PageDimensions> PageDimensions { get; set; } = new();
+    public IDictionary<int, PageDimensions> PageDimensions { get; set; } = new ConcurrentDictionary<int, PageDimensions>();
 
     /// <summary>
     /// The render context containing font mappings, image mappings, and hyperlinks

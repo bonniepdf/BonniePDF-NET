@@ -15,7 +15,7 @@ public class User
 
 public static class Users
 {
-    public static List<User> GetMockUsers()
+    public static IList<User> GetMockUsers()
     {
         return new List<User>
         {

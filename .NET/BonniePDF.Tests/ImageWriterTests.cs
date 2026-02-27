@@ -11,29 +11,29 @@ public class ImageWriterTests
     // Mock implementation of IPdfWriter for testing
     private sealed class MockPdfWriter : IPdfWriter
     {
-        public List<(int id, Dictionary<string, string> dict, byte[] data)> WrittenObjects { get; } = new();
+        public List<(int id, IDictionary<string, string> dict, byte[] data)> WrittenObjects { get; } = new();
         private int _nextId = 2; // Start from 2 to avoid conflicts with test-provided IDs
 
         public BonniePDF.Security.Encryption.PdfEncryptor Encryptor { get; set; }
 
         public int GetNewId() => _nextId++;
 
-        public void WriteBinaryObject(int id, Dictionary<string, string> dict, byte[] data)
+        public void WriteBinaryObject(int id, IDictionary<string, string> dict, byte[] data)
         {
             WrittenObjects.Add((id, dict, data));
         }
 
-        public void WriteObject(int id, Dictionary<string, string> dict, string streamContent = null)
+        public void WriteObject(int id, IDictionary<string, string> dict, string streamContent = null)
         {
             throw new NotImplementedException();
         }
 
-        public void WriteCompressedObject(int id, Dictionary<string, string> dict, string content)
+        public void WriteCompressedObject(int id, IDictionary<string, string> dict, string content)
         {
             throw new NotImplementedException();
         }
 
-        public void WriteCompressedBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent)
+        public void WriteCompressedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent)
         {
             throw new NotImplementedException();
         }
@@ -58,7 +58,7 @@ public class ImageWriterTests
             throw new NotImplementedException();
         }
 
-        public void WriteUnencryptedBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent)
+        public void WriteUnencryptedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent)
         {
             throw new NotImplementedException();
         }

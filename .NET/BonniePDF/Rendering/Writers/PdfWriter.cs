@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
@@ -103,7 +104,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="id">The object ID</param>
     /// <param name="dict">Key-value pairs for the object dictionary</param>
     /// <param name="streamContent">Optional stream content for the object</param>
-    public void WriteObject(int id, Dictionary<string, string> dict, string streamContent = null)
+    public void WriteObject(int id, IDictionary<string, string> dict, string streamContent = null)
     {
         _writer.Flush();
         _offsets[id] = _stream.Position;
@@ -142,7 +143,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="id">The object ID</param>
     /// <param name="dict">Key-value pairs for the object dictionary</param>
     /// <param name="content">String content to compress and write</param>
-    public void WriteCompressedObject(int id, Dictionary<string, string> dict, string content)
+    public void WriteCompressedObject(int id, IDictionary<string, string> dict, string content)
     {
         if (!InternalConfiguration.EnableCompression)
         {
@@ -201,7 +202,7 @@ public class PdfWriter : IPdfWriter, IDisposable
             return 0;
 
         _encryptId = id;
-        Dictionary<string, string> dict = Encryptor.GetEncryptDictionary();
+        IDictionary<string, string> dict = Encryptor.GetEncryptDictionary();
         WriteObject(id, dict);
         return id;
     }
@@ -339,7 +340,7 @@ public class PdfWriter : IPdfWriter, IDisposable
         // Add OutputIntents if provided (PDF/A)
         if (options?.OutputIntentIds is { Count: > 0 })
         {
-            string refs = string.Join(' ', options.OutputIntentIds.ConvertAll(oid => $"{oid} 0 R"));
+            string refs = string.Join(' ', options.OutputIntentIds.ToList().ConvertAll(oid => $"{oid} 0 R"));
             dict["/OutputIntents"] = $"[ {refs} ]";
         }
 
@@ -354,7 +355,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// Writes an uncompressed binary stream object, bypassing encryption.
     /// Used for XMP metadata which must not be encrypted even when encryption is active.
     /// </summary>
-    public void WriteUnencryptedBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent)
+    public void WriteUnencryptedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent)
     {
         _writer.Flush();
         _offsets[id] = _stream.Position;
@@ -380,7 +381,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="id">The object ID</param>
     /// <param name="dict">Key-value pairs for the object dictionary</param>
     /// <param name="streamContent">Binary data to compress and write</param>
-    public void WriteCompressedBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent)
+    public void WriteCompressedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent)
     {
         if (!InternalConfiguration.EnableCompression)
         {
@@ -407,7 +408,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="id">The object ID</param>
     /// <param name="dict">Key-value pairs for the object dictionary</param>
     /// <param name="streamContent">Binary stream content</param>
-    public void WriteBinaryObject(int id, Dictionary<string, string> dict, byte[] streamContent)
+    public void WriteBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent)
     {
         // Encrypt if encryptor is set
         byte[] contentToWrite;

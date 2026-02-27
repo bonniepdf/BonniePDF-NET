@@ -54,21 +54,27 @@ public class BarChartExample
         ChartData chartData = new()
         {
             Title = "Monthly Sales",
-            DataPoints =
-            {
-                new ChartDataPoint { Label = "Jan", Value = 4500, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Feb", Value = 6200, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Mar", Value = 5800, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Apr", Value = 7200, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "May", Value = 8500, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Jun", Value = 9100, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Jul", Value = 8200, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Aug", Value = 7800, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Sep", Value = 9500, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Oct", Value = 10200, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Nov", Value = 11500, LabelFormat = "'£'#,##0" },
-                new ChartDataPoint { Label = "Dec", Value = 12800, LabelFormat = "'£'#,##0" }
-            },
+            Series =
+            [
+                new ChartSeries
+                {
+                    DataPoints =
+                    [
+                        new ChartDataPoint { Label = "Jan", Value = 4500, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Feb", Value = 6200, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Mar", Value = 5800, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Apr", Value = 7200, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "May", Value = 8500, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Jun", Value = 9100, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Jul", Value = 8200, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Aug", Value = 7800, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Sep", Value = 9500, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Oct", Value = 10200, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Nov", Value = 11500, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Dec", Value = 12800, LabelFormat = "'£'#,##0" }
+                    ]
+                }
+            ],
             YAxis = new AxisOptions
             {
                 Prefix = "£",

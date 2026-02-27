@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,11 +19,11 @@ namespace BonniePDF.Rendering.Writers;
 /// Manages object writing, offset tracking, and the cross-reference table using async I/O.
 /// Supports optional encryption of stream contents.
 /// IMPORTANT: This class only implements IAsyncPdfWriter, not IPdfWriter.
-/// This prevents the sync-over-async anti-pattern where async methods are blocked
+/// This prevents the sync-over-async antipattern where async methods are blocked
 /// synchronously, which can cause thread pool starvation.
 /// Use SimplePdfWriter for synchronous operations, AsyncPdfWriter for async operations.
 /// </summary>
-public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
+public class AsyncPdfWriter : IAsyncPdfWriter
 {
     private readonly FileStream _fs;
     private readonly bool _leaveOpen;
@@ -94,7 +95,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
     /// <param name="dict">Key-value pairs for the object dictionary</param>
     /// <param name="streamContent">Optional stream content for the object</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
-    public async Task WriteObjectAsync(int id, Dictionary<string, string> dict, string streamContent = null,
+    public async Task WriteObjectAsync(int id, IDictionary<string, string> dict, string streamContent = null,
         CancellationToken cancellationToken = default)
     {
         await _writer.FlushAsync(cancellationToken).ConfigureAwait(false);
@@ -136,7 +137,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
     /// <param name="dict">Key-value pairs for the object dictionary</param>
     /// <param name="content">String content to compress and write</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
-    public async Task WriteCompressedObjectAsync(int id, Dictionary<string, string> dict, string content,
+    public async Task WriteCompressedObjectAsync(int id, IDictionary<string, string> dict, string content,
         CancellationToken cancellationToken = default)
     {
         // 1. Convert to bytes
@@ -217,7 +218,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
             return 0;
 
         _encryptId = id;
-        Dictionary<string, string> dict = Encryptor.GetEncryptDictionary();
+        IDictionary<string, string> dict = Encryptor.GetEncryptDictionary();
         await WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
         return id;
     }
@@ -348,7 +349,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
         // Add OutputIntents if provided (PDF/A)
         if (options?.OutputIntentIds is { Count: > 0 })
         {
-            string refs = string.Join(' ', options.OutputIntentIds.ConvertAll(oid => $"{oid} 0 R"));
+            string refs = string.Join(' ', options.OutputIntentIds.ToList().ConvertAll(oid => $"{oid} 0 R"));
             dict["/OutputIntents"] = $"[ {refs} ]";
         }
 
@@ -363,7 +364,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
     /// Writes an uncompressed binary stream object, bypassing encryption.
     /// Used for XMP metadata which must not be encrypted even when encryption is active.
     /// </summary>
-    public async Task WriteUnencryptedBinaryObjectAsync(int id, Dictionary<string, string> dict, byte[] streamContent,
+    public async Task WriteUnencryptedBinaryObjectAsync(int id, IDictionary<string, string> dict, byte[] streamContent,
         CancellationToken cancellationToken = default)
     {
         await _writer.FlushAsync(cancellationToken).ConfigureAwait(false);
@@ -392,7 +393,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
     /// <param name="streamContent">Binary data to compress and write</param>
     /// <param name="length">The actual number of bytes to compress from the buffer</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
-    public async Task WriteCompressedBinaryObjectAsync(int id, Dictionary<string, string> dict, byte[] streamContent,
+    public async Task WriteCompressedBinaryObjectAsync(int id, IDictionary<string, string> dict, byte[] streamContent,
         int length, CancellationToken cancellationToken = default)
     {
         using MemoryStream memoryStream = new();
@@ -418,7 +419,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
     /// <param name="streamContent">Binary stream content (buffer)</param>
     /// <param name="length">The actual number of bytes to write from the buffer</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
-    public async Task WriteBinaryObjectAsync(int id, Dictionary<string, string> dict, byte[] streamContent, int length,
+    public async Task WriteBinaryObjectAsync(int id, IDictionary<string, string> dict, byte[] streamContent, int length,
         CancellationToken cancellationToken = default)
     {
         // Encrypt if encryptor is set

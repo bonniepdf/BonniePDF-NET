@@ -48,7 +48,7 @@ public abstract class TextElementBase : ElementBase
     /// <param name="text">The text to wrap</param>
     /// <param name="maxWidth">The maximum width for a line</param>
     /// <returns>A list of lines, each fitting within the maximum width</returns>
-    protected List<string> ComputeLines(string text, float maxWidth)
+    protected IList<string> ComputeLines(string text, float maxWidth)
     {
         List<string> lines = [];
         if (string.IsNullOrEmpty(text)) return lines;

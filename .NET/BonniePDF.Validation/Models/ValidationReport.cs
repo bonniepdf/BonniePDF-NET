@@ -48,7 +48,7 @@ public class ValidationReport
     /// <summary>
     /// Gets the individual validation results
     /// </summary>
-    public List<ValidationResultItem> Results { get; set; } = new();
+    public IList<ValidationResultItem> Results { get; set; } = new List<ValidationResultItem>();
 
     /// <summary>
     /// Creates a validation report from a collection of results
@@ -97,7 +97,7 @@ public class ValidationResultItem
     public bool IsCompliant { get; set; }
     public string? ComplianceLevel { get; set; }
     public string? ErrorMessage { get; set; }
-    public List<string> Errors { get; set; } = new();
+    public IList<string> Errors { get; set; } = new List<string>();
     public string PdfFileName { get; set; } = string.Empty;
     public string FilePath { get; set; } = string.Empty;
     public long FileSize { get; set; }

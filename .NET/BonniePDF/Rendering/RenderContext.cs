@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using BonniePDF.Configuration;
@@ -45,13 +46,13 @@ public class RenderContext
     /// </summary>
     public bool IsLastPage { get; set; }
 
-    public List<StringBuilder> Pages { get; } = new();
+    public IList<StringBuilder> Pages { get; } = new List<StringBuilder>();
 
     /// <summary>
     /// Stores hyperlinks per page index
     /// Key: page index, Value: list of hyperlinks on that page
     /// </summary>
-    public Dictionary<int, List<Hyperlink>> PageHyperlinks { get; } = new();
+    public IDictionary<int, List<Hyperlink>> PageHyperlinks { get; } = new ConcurrentDictionary<int, List<Hyperlink>>();
 
     /// <summary>
     /// Gets the current drawing canvas.

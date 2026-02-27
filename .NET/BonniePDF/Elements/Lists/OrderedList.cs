@@ -68,7 +68,7 @@ public class OrderedList : ListElementBase
         // Render regular items
         foreach (string item in _items)
         {
-            List<string> lines = ComputeLines(item, itemWidth);
+            IList<string> lines = ComputeLines(item, itemWidth);
             string numberText = FormatNumber(currentItemNumber);
             float numberWidth = MeasureTextWidth(numberText + ".");
 

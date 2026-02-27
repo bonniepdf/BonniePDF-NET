@@ -17,7 +17,7 @@ public static class ChartColors
     public const string Teal = "#14b8a6";
     public const string Cyan = "#06b6d4";
 
-    public static readonly List<string> All =
+    public static readonly IList<string> All =
     [
         Indigo, Violet, Purple, Fuchsia, Pink, Rose,
         Orange, Yellow, Lime, Green, Teal, Cyan

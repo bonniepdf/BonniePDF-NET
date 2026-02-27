@@ -53,7 +53,7 @@ public class PieChart : ChartBase
     /// Custom colors to use for the pie slices.
     /// If null, uses the default color palette.
     /// </summary>
-    public List<string>? Colors { get; set; }
+    public IList<string>? Colors { get; set; }
 
     /// <summary>
     /// Whether to render as a donut chart with a center hole.
@@ -96,28 +96,30 @@ public class PieChart : ChartBase
     /// </summary>
     protected override void DrawContent(ICanvas canvas, ChartData data)
     {
-        if (data.DataPoints.Count == 0) return;
+        if (data.Series.Count == 0 || data.Series[0].DataPoints.Count == 0) return;
+
+        IList<ChartDataPoint> dataPoints = data.Series[0].DataPoints;
 
         // Calculate total value
-        decimal total = data.DataPoints.Sum(dp => dp.Value);
+        decimal total = dataPoints.Sum(dp => dp.Value);
 
         // Calculate dynamic layout
-        var layout = CalculateLayout(data.DataPoints.Count);
+        var layout = CalculateLayout(dataPoints.Count);
 
         // Calculate start angle for each slice
-        List<(float startAngle, float endAngle)> angles = CalculateSliceAngles(data.DataPoints, total);
+        List<(float startAngle, float endAngle)> angles = CalculateSliceAngles(dataPoints, total);
 
         // Get colors to use
-        List<Color> colors = GetColors(data.DataPoints.Count);
+        List<Color> colors = GetColors(dataPoints.Count);
 
         // Draw pie slices
-        DrawPieSlices(canvas, data.DataPoints, angles, colors, layout);
+        DrawPieSlices(canvas, dataPoints, angles, colors, layout);
 
         // Draw donut hole if enabled
-        if (IsDonut) DrawDonutHole(canvas, total, data.DataPoints, layout);
+        if (IsDonut) DrawDonutHole(canvas, total, dataPoints, layout);
 
         // Draw legend
-        if (ShowLegend) DrawLegend(canvas, data.DataPoints, colors, layout);
+        if (ShowLegend) DrawLegend(canvas, dataPoints, colors, layout);
     }
 
     /// <summary>
@@ -194,7 +196,7 @@ public class PieChart : ChartBase
     private List<Color> GetColors(int count)
     {
         List<Color> colors = new();
-        List<string> sourceColors = Colors ?? new List<string>(DefaultColors);
+        IList<string> sourceColors = Colors ?? new List<string>(DefaultColors);
 
         for (int i = 0; i < count; i++)
         {

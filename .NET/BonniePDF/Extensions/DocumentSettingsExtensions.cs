@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BonniePDF.Configuration;
 
 namespace BonniePDF.Extensions;
@@ -56,7 +57,7 @@ public static class DocumentSettingsExtensions
         if (settings == null) throw new ArgumentNullException(nameof(settings));
         if (bookmarks == null) throw new ArgumentNullException(nameof(bookmarks));
         settings.Version = PdfVersion.Pdf17;
-        settings.Bookmarks.AddRange(bookmarks);
+        settings.Bookmarks.ToList().AddRange(bookmarks);
         return settings;
     }
 
