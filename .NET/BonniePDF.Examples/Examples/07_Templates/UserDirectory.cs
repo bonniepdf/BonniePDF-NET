@@ -6,6 +6,7 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Examples.Data;
+using BonniePDF.Examples.Data.Models;
 using BonniePDF.Extensions;
 using BonniePDF.Typography;
 

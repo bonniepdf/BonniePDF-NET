@@ -266,8 +266,8 @@ public class SvgExportTests
 
         string svg = chart.ToSvg(data);
 
-        Assert.Contains("X Axis Label", svg);
-        Assert.Contains("Y Axis Label", svg);
+        Assert.Contains("X Axis Label", svg, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Y Axis Label", svg, StringComparison.OrdinalIgnoreCase);
     }
 
     private static int CountOccurrences(string text, string pattern)

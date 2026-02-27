@@ -27,6 +27,7 @@ public static class ExampleChartData
         new ChartDataPoint { Label = MonthLabels[11], Value = 12800, LabelFormat = "'£'#,##0" }
     };
 
+
     public static IList<ChartDataPoint> QuarterlyRevenue => new List<ChartDataPoint>()
     {
         new ChartDataPoint { Label = "Q1", Value = 4500, LabelFormat = "'£'#,##0" },

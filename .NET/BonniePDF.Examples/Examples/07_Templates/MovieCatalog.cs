@@ -7,6 +7,7 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Examples.Data;
+using BonniePDF.Examples.Data.Models;
 using BonniePDF.Extensions;
 using BonniePDF.Typography;
 
@@ -29,15 +30,15 @@ public class MoviesTableExample
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
 
-        doc.Metadata.Title = "Classic Movies Collection";
+        doc.Metadata.Title = "Classic MoviesData Collection";
         doc.Metadata.Author = "Classic Cinema Archive";
 
-        IList<Movie> movies = Movies.GetMockMovies();
+        IList<Movie> movies = MoviesData.GetMockMovies();
         // Title Section
         VerticalStack titleStack = new();
         titleStack.AddChild(new TextBlock
         {
-            Text = "Classic Movies Collection",
+            Text = "Classic MoviesData Collection",
             FontName = StandardFonts.TimesBold,
             FontSize = 26,
             TextColor = Color.Slate900
@@ -51,13 +52,13 @@ public class MoviesTableExample
         });
         titleStack.AddChild(new TextBlock
         {
-            Text = $"Total Movies: {Movies.GetMockMovies().Count} | Compiled: {DateTime.Now:MMMM yyyy}",
+            Text = $"Total MoviesData: {MoviesData.GetMockMovies().Count} | Compiled: {DateTime.Now:MMMM yyyy}",
             FontName = StandardFonts.Helvetica,
             FontSize = 10,
             TextColor = Color.Slate500
         });
 
-        // Movies Table
+        // MoviesData Table
         Table moviesTable = new(1f, 3f, 4f, 2f, 1.5f, 2f)
         {
             CellPadding = 8,

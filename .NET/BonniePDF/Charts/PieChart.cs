@@ -53,7 +53,7 @@ public class PieChart : ChartBase
     /// Custom colors to use for the pie slices.
     /// If null, uses the default color palette.
     /// </summary>
-    public IList<string>? Colors { get; set; }
+    public IList<string> Colors { get; set; }
 
     /// <summary>
     /// Whether to render as a donut chart with a center hole.

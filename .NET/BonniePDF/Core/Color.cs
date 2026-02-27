@@ -9,7 +9,7 @@ namespace BonniePDF.Core;
 /// Internally stores values as floats (0.0 to 1.0) for high-precision PDF operations.
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
-public readonly struct Color
+public readonly struct Color : IEquatable<Color>
 {
     // Internal storage as floats (0.0 - 1.0) for PDF compliance
     private readonly float _r;

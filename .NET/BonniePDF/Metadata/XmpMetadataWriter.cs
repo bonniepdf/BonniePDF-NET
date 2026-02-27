@@ -12,12 +12,67 @@ namespace BonniePDF.Metadata;
 /// </summary>
 internal static class XmpMetadataWriter
 {
-    private const string NsRdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-    private const string NsDc = "http://purl.org/dc/elements/1.1/";
-    private const string NsXmp = "http://ns.adobe.com/xap/1.0/";
-    private const string NsPdf = "http://ns.adobe.com/pdf/1.3/";
-    private const string NsPdfaid = "http://www.aiim.org/pdfa/ns/id/";
-    private const string NsXml = "http://www.w3.org/XML/1998/namespace";
+    private static class XmpNamespaces
+    {
+        public const string Rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+        public const string Dc = "http://purl.org/dc/elements/1.1/";
+        public const string Xmp = "http://ns.adobe.com/xap/1.0/";
+        public const string Pdf = "http://ns.adobe.com/pdf/1.3/";
+        public const string Pdfaid = "http://www.aiim.org/pdfa/ns/id/";
+        public const string Xml = "http://www.w3.org/XML/1998/namespace";
+        public const string AdobeMeta = "adobe:ns:meta/";
+    }
+
+    private static class XmlPrefixes
+    {
+        public const string Rdf = "rdf";
+        public const string Dc = "dc";
+        public const string Xmp = "xmp";
+        public const string Pdf = "pdf";
+        public const string Pdfaid = "pdfaid";
+        public const string Xml = "xml";
+        public const string AdobeX = "x";
+    }
+
+    private static class XmlElements
+    {
+        // RDF
+        public const string RdfRoot = "RDF";
+        public const string Description = "Description";
+        public const string Alt = "Alt";
+        public const string Seq = "Seq";
+        public const string Bag = "Bag";
+        public const string ListItem = "li";
+
+        // Dublin Core (DC)
+        public const string DcTitle = "title";
+        public const string DcCreator = "creator";
+        public const string DcSubject = "subject";
+        public const string DcDescription = "description";
+
+        // XMP / PDF
+        public const string XmpMeta = "xmpmeta";
+        public const string Keywords = "Keywords";
+        public const string CreatorTool = "CreatorTool";
+        public const string CreateDate = "CreateDate";
+        public const string ModifyDate = "ModifyDate";
+        public const string Producer = "Producer";
+
+        // PDF/A
+        public const string PdfaidPart = "part";
+        public const string PdfaidConformance = "conformance";
+    }
+
+    private static class XmpPacket
+    {
+        public const string InstructionName = "xpacket";
+        // The id is a standard GUID required by the XMP specification
+        public const string BeginAttribute = "begin=\"\xEF\xBB\xBF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"";
+        public const string EndAttribute = "end=\"w\"";
+    }
+
+    private const string Iso8601Format = "yyyy-MM-ddTHH:mm:sszzz";
+    private const string DefaultLanguage = "x-default";
 
     /// <summary>
     /// Generates the XMP XML string from document metadata.
@@ -35,12 +90,12 @@ internal static class XmpMetadataWriter
         using var sw = new StringWriter();
         using (var xw = XmlWriter.Create(sw, settings))
         {
-            xw.WriteProcessingInstruction("xpacket", "begin=\"\xEF\xBB\xBF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"");
+            xw.WriteProcessingInstruction(XmpPacket.InstructionName, XmpPacket.BeginAttribute);
 
-            xw.WriteStartElement("x", "xmpmeta", "adobe:ns:meta/");
-            xw.WriteStartElement("rdf", "RDF", NsRdf);
-            xw.WriteStartElement("rdf", "Description", NsRdf);
-            xw.WriteAttributeString("rdf", "about", NsRdf, "");
+            xw.WriteStartElement(XmlPrefixes.AdobeX, XmlElements.XmpMeta, XmpNamespaces.AdobeMeta);
+            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.RdfRoot, XmpNamespaces.Rdf);
+            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Description, XmpNamespaces.Rdf);
+            xw.WriteAttributeString(XmlPrefixes.Rdf, "about", XmpNamespaces.Rdf, string.Empty);
 
             WriteMetadataElements(xw, metadata, pdfA);
 
@@ -48,7 +103,7 @@ internal static class XmpMetadataWriter
             xw.WriteEndElement(); // rdf:RDF
             xw.WriteEndElement(); // x:xmpmeta
 
-            xw.WriteProcessingInstruction("xpacket", "end=\"w\"");
+            xw.WriteProcessingInstruction(XmpPacket.InstructionName, XmpPacket.EndAttribute);
         }
 
         return sw.ToString();
@@ -58,10 +113,10 @@ internal static class XmpMetadataWriter
     {
         if (!string.IsNullOrEmpty(metadata.Title))
         {
-            xw.WriteStartElement("dc", "title", NsDc);
-            xw.WriteStartElement("rdf", "Alt", NsRdf);
-            xw.WriteStartElement("rdf", "li", NsRdf);
-            xw.WriteAttributeString("xml", "lang", NsXml, "x-default");
+            xw.WriteStartElement(XmlPrefixes.Dc, XmlElements.DcTitle, XmpNamespaces.Dc);
+            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Alt, XmpNamespaces.Rdf);
+            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf);
+            xw.WriteAttributeString(XmlPrefixes.Xml, "lang", XmpNamespaces.Xml, DefaultLanguage);
             xw.WriteString(metadata.Title);
             xw.WriteEndElement(); // rdf:li
             xw.WriteEndElement(); // rdf:Alt
@@ -70,31 +125,36 @@ internal static class XmpMetadataWriter
 
         if (!string.IsNullOrEmpty(metadata.Author))
         {
-            xw.WriteStartElement("dc", "creator", NsDc);
-            xw.WriteStartElement("rdf", "Seq", NsRdf);
-            xw.WriteElementString("rdf", "li", NsRdf, metadata.Author);
+            xw.WriteStartElement(XmlPrefixes.Dc, XmlElements.DcCreator, XmpNamespaces.Dc);
+            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Seq, XmpNamespaces.Rdf);
+            xw.WriteElementString(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf, metadata.Author);
             xw.WriteEndElement(); // rdf:Seq
             xw.WriteEndElement(); // dc:creator
         }
 
         if (!string.IsNullOrEmpty(metadata.Keywords))
         {
-            xw.WriteStartElement("dc", "subject", NsDc);
-            xw.WriteStartElement("rdf", "Bag", NsRdf);
-            foreach (string keyword in metadata.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                xw.WriteElementString("rdf", "li", NsRdf, keyword);
+            xw.WriteStartElement(XmlPrefixes.Dc, XmlElements.DcSubject, XmpNamespaces.Dc);
+            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Bag, XmpNamespaces.Rdf);
+
+            var keywords = metadata.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            foreach (string keyword in keywords)
+            {
+                xw.WriteElementString(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf, keyword);
+            }
+
             xw.WriteEndElement(); // rdf:Bag
             xw.WriteEndElement(); // dc:subject
 
-            xw.WriteElementString("pdf", "Keywords", NsPdf, metadata.Keywords);
+            xw.WriteElementString(XmlPrefixes.Pdf, XmlElements.Keywords, XmpNamespaces.Pdf, metadata.Keywords);
         }
 
         if (!string.IsNullOrEmpty(metadata.Subject))
         {
-            xw.WriteStartElement("dc", "description", NsDc);
-            xw.WriteStartElement("rdf", "Alt", NsRdf);
-            xw.WriteStartElement("rdf", "li", NsRdf);
-            xw.WriteAttributeString("xml", "lang", NsXml, "x-default");
+            xw.WriteStartElement(XmlPrefixes.Dc, XmlElements.DcDescription, XmpNamespaces.Dc);
+            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Alt, XmpNamespaces.Rdf);
+            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf);
+            xw.WriteAttributeString(XmlPrefixes.Xml, "lang", XmpNamespaces.Xml, DefaultLanguage);
             xw.WriteString(metadata.Subject);
             xw.WriteEndElement(); // rdf:li
             xw.WriteEndElement(); // rdf:Alt
@@ -102,21 +162,21 @@ internal static class XmpMetadataWriter
         }
 
         if (!string.IsNullOrEmpty(metadata.Creator))
-            xw.WriteElementString("xmp", "CreatorTool", NsXmp, metadata.Creator);
+            xw.WriteElementString(XmlPrefixes.Xmp, XmlElements.CreatorTool, XmpNamespaces.Xmp, metadata.Creator);
 
         if (metadata.CreationDate.HasValue)
-            xw.WriteElementString("xmp", "CreateDate", NsXmp, FormatIso8601(metadata.CreationDate.Value));
+            xw.WriteElementString(XmlPrefixes.Xmp, XmlElements.CreateDate, XmpNamespaces.Xmp, FormatIso8601(metadata.CreationDate.Value));
 
         if (metadata.ModifiedDate.HasValue)
-            xw.WriteElementString("xmp", "ModifyDate", NsXmp, FormatIso8601(metadata.ModifiedDate.Value));
+            xw.WriteElementString(XmlPrefixes.Xmp, XmlElements.ModifyDate, XmpNamespaces.Xmp, FormatIso8601(metadata.ModifiedDate.Value));
 
         if (!string.IsNullOrEmpty(metadata.Producer))
-            xw.WriteElementString("pdf", "Producer", NsPdf, metadata.Producer);
+            xw.WriteElementString(XmlPrefixes.Pdf, XmlElements.Producer, XmpNamespaces.Pdf, metadata.Producer);
 
         if (pdfA)
         {
-            xw.WriteElementString("pdfaid", "part", NsPdfaid, "1");
-            xw.WriteElementString("pdfaid", "conformance", NsPdfaid, "B");
+            xw.WriteElementString(XmlPrefixes.Pdfaid, XmlElements.PdfaidPart, XmpNamespaces.Pdfaid, "1");
+            xw.WriteElementString(XmlPrefixes.Pdfaid, XmlElements.PdfaidConformance, XmpNamespaces.Pdfaid, "B");
         }
     }
 
@@ -125,6 +185,6 @@ internal static class XmpMetadataWriter
     /// </summary>
     private static string FormatIso8601(DateTimeOffset date)
     {
-        return date.ToString("yyyy-MM-ddTHH:mm:sszzz");
+        return date.ToString(Iso8601Format);
     }
 }

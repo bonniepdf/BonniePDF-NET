@@ -10,57 +10,86 @@ namespace BonniePDF.Metadata;
 /// </summary>
 internal static class SRgbIccProfile
 {
+    // --- Meaningful Constants ---
+
+    private static class IccSizes
+    {
+        public const int HeaderSize = 128;
+        public const int TagTableEntrySize = 12;
+        public const int TagTableHeaderSize = 4;
+    }
+
+    private static class IccSignatures
+    {
+        public const string ProfileSignature = "acsp";
+        public const string DeviceClassMonitor = "mntr";
+        public const string ColorSpaceRgb = "RGB ";
+        public const string PcsXyz = "XYZ ";
+        public const string PlatformNone = "NONE";
+
+        // Tag Signatures
+        public const string Desc = "desc";
+        public const string Copyright = "cprt";
+        public const string WhitePoint = "wtpt";
+        public const string RedMatrix = "rXYZ";
+        public const string GreenMatrix = "gXYZ";
+        public const string BlueMatrix = "bXYZ";
+        public const string RedTrc = "rTRC";
+        public const string GreenTrc = "gTRC";
+        public const string BlueTrc = "bTRC";
+
+        // Data Type Signatures
+        public const string TypeXyz = "XYZ ";
+        public const string TypeCurve = "curv";
+        public const string TypeText = "text";
+    }
+
+    private static class SrgbColorimetry
+    {
+        // Media white point (D50)
+        public const float WhiteX = 0.9505f;
+        public const float WhiteY = 1.0000f;
+        public const float WhiteZ = 1.0890f;
+
+        // D50 PCS Illuminant (for header)
+        public const float PcsIlluminantX = 0.9642f;
+        public const float PcsIlluminantY = 1.0000f;
+        public const float PcsIlluminantZ = 0.8249f;
+
+        // Matrix Columns
+        public const float RedX = 0.4360f, RedY = 0.2225f, RedZ = 0.0139f;
+        public const float GreenX = 0.3851f, GreenY = 0.7169f, GreenZ = 0.0971f;
+        public const float BlueX = 0.1431f, BlueY = 0.0606f, BlueZ = 0.7141f;
+
+        public const float Gamma = 2.2f;
+    }
+
+    private static class FixedPointMath
+    {
+        public const float S15Fixed16Multiplier = 65536.0f;
+        public const float U8Fixed8Multiplier = 256.0f;
+    }
+
     /// <summary>
     /// Generates a minimal sRGB ICC v2 profile.
     /// </summary>
     public static byte[] Generate()
     {
-        // We build a minimal ICC v2.1 profile with:
-        // - Profile header (128 bytes)
-        // - Tag table
-        // - Required tags: profileDescriptionTag, copyrightTag, mediaWhitePointTag,
-        //   redMatrixColumnTag, greenMatrixColumnTag, blueMatrixColumnTag,
-        //   redTRCTag, greenTRCTag, blueTRCTag
-
         List<byte> profile = new();
 
-        // We'll build the tag data first, then construct header + tag table
-        // sRGB primaries (D65 adapted, from IEC 61966-2.1)
-        // XYZ values are in s15Fixed16Number format (value * 65536)
-
-        // Media white point (D50, as required by ICC spec)
-        byte[] whitePointData = BuildXyzTag(0.9505f, 1.0000f, 1.0890f);
-
-        // Red matrix column (sRGB to XYZ D50)
-        byte[] redMatrixData = BuildXyzTag(0.4360f, 0.2225f, 0.0139f);
-
-        // Green matrix column
-        byte[] greenMatrixData = BuildXyzTag(0.3851f, 0.7169f, 0.0971f);
-
-        // Blue matrix column
-        byte[] blueMatrixData = BuildXyzTag(0.1431f, 0.0606f, 0.7141f);
-
-        // TRC (Tone Reproduction Curve) - use gamma 2.2 approximation
-        // curveType with single gamma value
-        byte[] trcData = BuildCurveTag(2.2f);
-
-        // Description tag
+        // Generate Tag Data Blocks
+        byte[] whitePointData = BuildXyzTag(SrgbColorimetry.WhiteX, SrgbColorimetry.WhiteY, SrgbColorimetry.WhiteZ);
+        byte[] redMatrixData = BuildXyzTag(SrgbColorimetry.RedX, SrgbColorimetry.RedY, SrgbColorimetry.RedZ);
+        byte[] greenMatrixData = BuildXyzTag(SrgbColorimetry.GreenX, SrgbColorimetry.GreenY, SrgbColorimetry.GreenZ);
+        byte[] blueMatrixData = BuildXyzTag(SrgbColorimetry.BlueX, SrgbColorimetry.BlueY, SrgbColorimetry.BlueZ);
+        byte[] trcData = BuildCurveTag(SrgbColorimetry.Gamma);
         byte[] descData = BuildTextDescriptionTag("sRGB IEC61966-2.1");
-
-        // Copyright tag
         byte[] copyrightData = BuildTextTag("Public Domain");
 
-        // Now compute offsets. Layout:
-        // [0..127] = header (128 bytes)
-        // [128..] = tag table (9 tags * 12 bytes each + 4 bytes count = 112 bytes)
-        // [240..] = tag data
-
-        int tagCount = 9;
-        int tagTableSize = 4 + tagCount * 12; // 4 for count + 12 per entry
-        int dataOffset = 128 + tagTableSize;
-
-        // Pad to 4-byte boundary
-        dataOffset = Align4(dataOffset);
+        // Layout Calculations
+        const int tagCount = 9;
+        int tagTableSize = IccSizes.TagTableHeaderSize + (tagCount * IccSizes.TagTableEntrySize);
+        int dataOffset = Align4(IccSizes.HeaderSize + tagTableSize);
 
         // Assign offsets for each tag data block
         int descOffset = dataOffset;
@@ -70,66 +99,54 @@ internal static class SRgbIccProfile
         int greenMatrixOffset = redMatrixOffset + Align4(redMatrixData.Length);
         int blueMatrixOffset = greenMatrixOffset + Align4(greenMatrixData.Length);
         int redTrcOffset = blueMatrixOffset + Align4(blueMatrixData.Length);
-        // Green and Blue TRC share the same data as Red TRC (identical gamma)
-        int greenTrcOffset = redTrcOffset;
-        int blueTrcOffset = redTrcOffset;
+        int greenTrcOffset = redTrcOffset; // Shared TRC data
+        int blueTrcOffset = redTrcOffset;  // Shared TRC data
 
         int totalSize = redTrcOffset + Align4(trcData.Length);
 
         // Build header (128 bytes)
-        byte[] header = new byte[128];
-        WriteUInt32BE(header, 0, (uint)totalSize);      // Profile size
-        WriteBytes(header, 4, "acsp");                    // Preferred CMM type (not specified)
-        WriteUInt32BE(header, 8, 0x02100000);            // Version 2.1.0
-        WriteBytes(header, 12, "mntr");                   // Device class: Monitor
-        WriteBytes(header, 16, "RGB ");                   // Color space: RGB
-        WriteBytes(header, 20, "XYZ ");                   // PCS: XYZ
-        // Date/time (bytes 24-35): 2000-01-01 00:00:00
-        WriteUInt16BE(header, 24, 2000);                  // Year
-        WriteUInt16BE(header, 26, 1);                     // Month
-        WriteUInt16BE(header, 28, 1);                     // Day
-        WriteBytes(header, 36, "acsp");                   // Profile file signature
-        WriteBytes(header, 40, "NONE");                   // Primary platform
-        // Profile flags, device manufacturer, device model: zeros
-        // Rendering intent: 0 = Perceptual
-        // PCS illuminant (D50): X=0.9642, Y=1.0, Z=0.8249 in s15Fixed16
-        WriteS15Fixed16(header, 68, 0.9642f);
-        WriteS15Fixed16(header, 72, 1.0000f);
-        WriteS15Fixed16(header, 76, 0.8249f);
+        byte[] header = new byte[IccSizes.HeaderSize];
+        WriteUInt32BE(header, 0, (uint)totalSize);
+        WriteBytes(header, 4, IccSignatures.ProfileSignature);
+        WriteUInt32BE(header, 8, 0x02100000); // Version 2.1.0
+        WriteBytes(header, 12, IccSignatures.DeviceClassMonitor);
+        WriteBytes(header, 16, IccSignatures.ColorSpaceRgb);
+        WriteBytes(header, 20, IccSignatures.PcsXyz);
+
+        // Date/time: 2000-01-01 00:00:00
+        WriteUInt16BE(header, 24, 2000);
+        WriteUInt16BE(header, 26, 1);
+        WriteUInt16BE(header, 28, 1);
+
+        WriteBytes(header, 36, IccSignatures.ProfileSignature);
+        WriteBytes(header, 40, IccSignatures.PlatformNone);
+
+        // PCS illuminant (D50)
+        WriteS15Fixed16(header, 68, SrgbColorimetry.PcsIlluminantX);
+        WriteS15Fixed16(header, 72, SrgbColorimetry.PcsIlluminantY);
+        WriteS15Fixed16(header, 76, SrgbColorimetry.PcsIlluminantZ);
 
         profile.AddRange(header);
 
         // Build tag table
         byte[] tagTable = new byte[tagTableSize];
-        WriteUInt32BE(tagTable, 0, (uint)tagCount);
+        WriteUInt32BE(tagTable, 0, tagCount);
 
         int idx = 4;
-        // desc
-        WriteTagEntry(tagTable, idx, "desc", descOffset, descData.Length); idx += 12;
-        // cprt
-        WriteTagEntry(tagTable, idx, "cprt", copyrightOffset, copyrightData.Length); idx += 12;
-        // wtpt
-        WriteTagEntry(tagTable, idx, "wtpt", whitePointOffset, whitePointData.Length); idx += 12;
-        // rXYZ
-        WriteTagEntry(tagTable, idx, "rXYZ", redMatrixOffset, redMatrixData.Length); idx += 12;
-        // gXYZ
-        WriteTagEntry(tagTable, idx, "gXYZ", greenMatrixOffset, greenMatrixData.Length); idx += 12;
-        // bXYZ
-        WriteTagEntry(tagTable, idx, "bXYZ", blueMatrixOffset, blueMatrixData.Length); idx += 12;
-        // rTRC
-        WriteTagEntry(tagTable, idx, "rTRC", redTrcOffset, trcData.Length); idx += 12;
-        // gTRC
-        WriteTagEntry(tagTable, idx, "gTRC", greenTrcOffset, trcData.Length); idx += 12;
-        // bTRC
-        WriteTagEntry(tagTable, idx, "bTRC", blueTrcOffset, trcData.Length);
+        WriteTagEntry(tagTable, ref idx, IccSignatures.Desc, descOffset, descData.Length);
+        WriteTagEntry(tagTable, ref idx, IccSignatures.Copyright, copyrightOffset, copyrightData.Length);
+        WriteTagEntry(tagTable, ref idx, IccSignatures.WhitePoint, whitePointOffset, whitePointData.Length);
+        WriteTagEntry(tagTable, ref idx, IccSignatures.RedMatrix, redMatrixOffset, redMatrixData.Length);
+        WriteTagEntry(tagTable, ref idx, IccSignatures.GreenMatrix, greenMatrixOffset, greenMatrixData.Length);
+        WriteTagEntry(tagTable, ref idx, IccSignatures.BlueMatrix, blueMatrixOffset, blueMatrixData.Length);
+        WriteTagEntry(tagTable, ref idx, IccSignatures.RedTrc, redTrcOffset, trcData.Length);
+        WriteTagEntry(tagTable, ref idx, IccSignatures.GreenTrc, greenTrcOffset, trcData.Length);
+        WriteTagEntry(tagTable, ref idx, IccSignatures.BlueTrc, blueTrcOffset, trcData.Length);
 
         profile.AddRange(tagTable);
 
-        // Pad to data offset
-        while (profile.Count < dataOffset)
-            profile.Add(0);
-
-        // Write tag data blocks
+        // Pad to data offset and write blocks
+        PadToOffset(profile, dataOffset);
         WriteAlignedBlock(profile, descOffset, descData);
         WriteAlignedBlock(profile, copyrightOffset, copyrightData);
         WriteAlignedBlock(profile, whitePointOffset, whitePointData);
@@ -138,20 +155,22 @@ internal static class SRgbIccProfile
         WriteAlignedBlock(profile, blueMatrixOffset, blueMatrixData);
         WriteAlignedBlock(profile, redTrcOffset, trcData);
 
-        // Ensure total size matches
-        while (profile.Count < totalSize)
-            profile.Add(0);
+        PadToOffset(profile, totalSize);
 
         return profile.ToArray();
     }
 
+    // --- Helper Methods ---
+
+    private static void PadToOffset(List<byte> profile, int targetOffset)
+    {
+        while (profile.Count < targetOffset)
+            profile.Add(0);
+    }
+
     private static void WriteAlignedBlock(List<byte> profile, int offset, byte[] data)
     {
-        // Ensure profile is large enough
-        while (profile.Count < offset + Align4(data.Length))
-            profile.Add(0);
-
-        // Write data at offset
+        PadToOffset(profile, offset + Align4(data.Length));
         for (int i = 0; i < data.Length; i++)
             profile[offset + i] = data[i];
     }
@@ -159,8 +178,7 @@ internal static class SRgbIccProfile
     private static byte[] BuildXyzTag(float x, float y, float z)
     {
         byte[] data = new byte[20];
-        WriteBytes(data, 0, "XYZ ");  // Type signature
-        // Reserved: 4 bytes zero
+        WriteBytes(data, 0, IccSignatures.TypeXyz);
         WriteS15Fixed16(data, 8, x);
         WriteS15Fixed16(data, 12, y);
         WriteS15Fixed16(data, 16, z);
@@ -170,14 +188,13 @@ internal static class SRgbIccProfile
     private static byte[] BuildCurveTag(float gamma)
     {
         byte[] data = new byte[12];
-        WriteBytes(data, 0, "curv");  // Type signature
-        // Reserved: 4 bytes zero
-        WriteUInt32BE(data, 8, 1);    // Count = 1 (single gamma value)
-        // Extend to include the u8Fixed8Number gamma
+        WriteBytes(data, 0, IccSignatures.TypeCurve);
+        WriteUInt32BE(data, 8, 1); // Count = 1
+
         byte[] result = new byte[14];
         Buffer.BlockCopy(data, 0, result, 0, 12);
-        // u8Fixed8Number: integer part in high byte, fraction in low byte
-        int gammaFixed = (int)(gamma * 256.0f);
+
+        int gammaFixed = (int)(gamma * FixedPointMath.U8Fixed8Multiplier);
         result[12] = (byte)(gammaFixed >> 8);
         result[13] = (byte)(gammaFixed & 0xFF);
         return result;
@@ -186,18 +203,12 @@ internal static class SRgbIccProfile
     private static byte[] BuildTextDescriptionTag(string text)
     {
         byte[] textBytes = Encoding.ASCII.GetBytes(text);
-        // desc type: 'desc' + reserved(4) + ASCII count(4) + ASCII string + null + padding
-        int size = 12 + textBytes.Length + 1;
-        // Add Unicode and ScriptCode placeholders (minimum)
-        size += 4 + 4 + 2 + 1 + 67; // Unicode count + Unicode string (empty) + ScriptCode
+        int size = 12 + textBytes.Length + 1 + 4 + 4 + 2 + 1 + 67;
         byte[] data = new byte[size];
-        WriteBytes(data, 0, "desc");
-        // Reserved: 4 bytes zero
+
+        WriteBytes(data, 0, IccSignatures.Desc);
         WriteUInt32BE(data, 8, (uint)(textBytes.Length + 1));
         Buffer.BlockCopy(textBytes, 0, data, 12, textBytes.Length);
-        // null terminator at data[12 + textBytes.Length] is already 0
-        // Unicode count = 0 at offset 12 + textBytes.Length + 1
-        // ScriptCode count = 0 at end
         return data;
     }
 
@@ -205,17 +216,19 @@ internal static class SRgbIccProfile
     {
         byte[] textBytes = Encoding.ASCII.GetBytes(text);
         byte[] data = new byte[8 + textBytes.Length + 1];
-        WriteBytes(data, 0, "text");
-        // Reserved: 4 bytes zero
+
+        WriteBytes(data, 0, IccSignatures.TypeText);
         Buffer.BlockCopy(textBytes, 0, data, 8, textBytes.Length);
         return data;
     }
 
-    private static void WriteTagEntry(byte[] table, int offset, string sig, int dataOffset, int dataSize)
+    // Notice 'offset' is passed by ref so we don't have to manually track `idx += 12`
+    private static void WriteTagEntry(byte[] table, ref int offset, string sig, int dataOffset, int dataSize)
     {
         WriteBytes(table, offset, sig);
         WriteUInt32BE(table, offset + 4, (uint)dataOffset);
         WriteUInt32BE(table, offset + 8, (uint)dataSize);
+        offset += IccSizes.TagTableEntrySize;
     }
 
     private static void WriteUInt32BE(byte[] data, int offset, uint value)
@@ -234,7 +247,7 @@ internal static class SRgbIccProfile
 
     private static void WriteS15Fixed16(byte[] data, int offset, float value)
     {
-        int fixedValue = (int)(value * 65536.0f);
+        int fixedValue = (int)(value * FixedPointMath.S15Fixed16Multiplier);
         WriteUInt32BE(data, offset, (uint)fixedValue);
     }
 
@@ -244,8 +257,5 @@ internal static class SRgbIccProfile
             data[offset + i] = (byte)ascii[i];
     }
 
-    private static int Align4(int value)
-    {
-        return (value + 3) & ~3;
-    }
+    private static int Align4(int value) => (value + 3) & ~3;
 }

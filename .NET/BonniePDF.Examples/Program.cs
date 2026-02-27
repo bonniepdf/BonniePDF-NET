@@ -31,7 +31,7 @@ internal sealed class Program
         {
             new PdfExample("Invoice/Quotation", "invoice.pdf", path => InvoiceExample.Generate(path)),
             new PdfExample("Users Directory (2-page PDF)", "users_list.pdf", path => UsersTableExample.Generate(path)),
-            new PdfExample("Movies Collection", "movies_list.pdf", path => MoviesTableExample.Generate(path)),
+            new PdfExample("MoviesData Collection", "movies_list.pdf", path => MoviesTableExample.Generate(path)),
             new PdfExample("Book Page (formatted text)", "book_page.pdf", path => BookPageExample.Generate(path)),
             new PdfExample("Simple Document (new Document API)", "simple_document.pdf",
                 path => SimpleDocumentExample.Generate(path)),

@@ -309,7 +309,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="pagesId">The pages object ID</param>
     /// <param name="firstPageId">The first page object ID (for OpenAction)</param>
     /// <param name="settings">The document settings</param>
-    /// <param name="viewerPrefsId">The viewer preferences object ID, or 0 if none</param>
+    /// <param name="options"></param>
     public void WriteCatalog(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions options)
     {
         Dictionary<string, string> dict = new()
@@ -450,7 +450,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     {
         string openAction;
 
-        switch (zoomType.ToUpper())
+        switch (zoomType.ToUpperInvariant())
         {
             case "FIT":
                 // Fit the page to the window

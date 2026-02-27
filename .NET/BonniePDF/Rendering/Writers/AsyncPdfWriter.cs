@@ -34,7 +34,6 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     private readonly StreamWriter _writer;
     private int _currentObjId;
     private int _encryptId;
-    private readonly PdfVersion _version;
 
     /// <summary>
     /// Creates a new async PDF writer that writes to a file
@@ -43,7 +42,6 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="version">The PDF version to emit</param>
     public AsyncPdfWriter(string filename, PdfVersion version = PdfVersion.Pdf14)
     {
-        _version = version;
         _fs = new FileStream(filename, FileMode.Create);
         _stream = _fs;
         _leaveOpen = false;
@@ -66,7 +64,6 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         if (!stream.CanWrite)
             throw new ArgumentException("Stream must be writable", nameof(stream));
 
-        _version = version;
         _fs = null;
         _stream = stream;
         _leaveOpen = leaveOpen;
@@ -316,7 +313,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="pagesId">The pages object ID</param>
     /// <param name="firstPageId">The first page object ID (for OpenAction)</param>
     /// <param name="settings">The document settings</param>
-    /// <param name="viewerPrefsId">The viewer preferences object ID, or 0 if none</param>
+    /// <param name="options"></param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     public async Task WriteCatalogAsync(int id, int pagesId, int firstPageId, DocumentSettings settings,
         CatalogOptions options, CancellationToken cancellationToken = default)
@@ -505,7 +502,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     {
         string openAction;
 
-        switch (zoomType.ToUpper())
+        switch (zoomType.ToUpperInvariant())
         {
             case "FIT":
                 // Fit the page to the window
