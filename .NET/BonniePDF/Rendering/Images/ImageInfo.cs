@@ -30,7 +30,7 @@ public class ImageInfo
     public int Components { get; set; } = 3;
 
     /// <summary>Whether the image has transparency (alpha channel)</summary>
-    public bool HasAlpha { get; set; } = false;
+    public bool HasAlpha { get; set; }
 
     /// <summary>Alpha channel data (if HasAlpha is true)</summary>
     public byte[] AlphaData { get; set; } = [];

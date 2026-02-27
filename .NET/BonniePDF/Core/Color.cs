@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace BonniePDF.Core;
 
@@ -7,6 +8,7 @@ namespace BonniePDF.Core;
 /// Represents an RGB color with values ranging from 0 to 255.
 /// Internally stores values as floats (0.0 to 1.0) for high-precision PDF operations.
 /// </summary>
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct Color
 {
     // Internal storage as floats (0.0 - 1.0) for PDF compliance
@@ -453,4 +455,17 @@ public readonly struct Color
     {
         return $"#{R:X2}{G:X2}{B:X2}";
     }
+
+    public bool Equals(Color other)
+        => _r == other._r && _g == other._g && _b == other._b && _a == other._a;
+
+    public override bool Equals(object? obj)
+        => obj is Color other && Equals(other);
+
+    public override int GetHashCode()
+        => HashCode.Combine(_r, _g, _b, _a);
+
+    public static bool operator ==(Color left, Color right) => left.Equals(right);
+
+    public static bool operator !=(Color left, Color right) => !left.Equals(right);
 }

@@ -86,7 +86,7 @@ public class PdfDocumentSerializer
                     annotIds.Add(annotId);
                 }
 
-                pageDict["/Annots"] = "[ " + string.Join(" ", annotIds.Select(id => $"{id} 0 R")) + " ]";
+                pageDict["/Annots"] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
             }
 
             writer.WriteObject(pageId, pageDict);
@@ -116,14 +116,14 @@ public class PdfDocumentSerializer
                 string t2 = d2.StartsWith("<< ") ? d2.Substring(3) : d2;
                 t2 = t2.EndsWith(" >>") ? t2.Substring(0, t2.Length - 3) : t2;
                 string t1 = d1.EndsWith(" >>") ? d1.Substring(0, d1.Length - 3) : d1;
-                return t1 + " " + t2 + " >>";
+                return t1 + ' ' + t2 + " >>";
             }
 
             globalResources = MergeDicts(globalResources, extGStateRes);
         }
 
         // 5. Write Parent Pages Object
-        string kids = string.Join(" ", pageIds.Select(id => $"{id} 0 R"));
+        string kids = string.Join(' ', pageIds.Select(id => $"{id} 0 R"));
         writer.WriteObject(pagesId, new Dictionary<string, string>
         {
             ["/Type"] = "/Pages",
@@ -238,7 +238,7 @@ public class PdfDocumentSerializer
                     annotIds.Add(annotId);
                 }
 
-                pageDict["/Annots"] = "[ " + string.Join(" ", annotIds.Select(id => $"{id} 0 R")) + " ]";
+                pageDict["/Annots"] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
             }
 
             await writer.WriteObjectAsync(pageId, pageDict, null, cancellationToken).ConfigureAwait(false);
@@ -266,14 +266,14 @@ public class PdfDocumentSerializer
                 string t2 = d2.StartsWith("<< ") ? d2.Substring(3) : d2;
                 t2 = t2.EndsWith(" >>") ? t2.Substring(0, t2.Length - 3) : t2;
                 string t1 = d1.EndsWith(" >>") ? d1.Substring(0, d1.Length - 3) : d1;
-                return t1 + " " + t2 + " >>";
+                return t1 + ' ' + t2 + " >>";
             }
 
             globalResources = MergeDicts(globalResources, extGStateRes);
         }
 
         // 5. Write Parent Pages Object
-        string kids = string.Join(" ", pageIds.Select(id => $"{id} 0 R"));
+        string kids = string.Join(' ', pageIds.Select(id => $"{id} 0 R"));
         await writer.WriteObjectAsync(pagesId, new Dictionary<string, string>
         {
             ["/Type"] = "/Pages",

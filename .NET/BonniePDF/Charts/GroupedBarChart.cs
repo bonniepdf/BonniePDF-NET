@@ -63,7 +63,7 @@ public class GroupedBarChart : CartesianChartBase
     /// OBSOLETE: Use ChartSeries[].DataPoints[].Label instead.
     /// </summary>
     [Obsolete("Use ChartSeries[].DataPoints[].Label instead")]
-    public List<string> CategoryLabels { get; set; } = new();
+    public List<string> CategoryLabels { get; set; } = new List<string>();
 
     /// <summary>
     /// Maximum value for y-axis.
@@ -146,7 +146,7 @@ public class GroupedBarChart : CartesianChartBase
     /// Draws the grouped bar chart elements for a single series.
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
-        List<(float x, float y)> coordinates,
+        IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
         // Calculate bar dimensions
@@ -164,15 +164,15 @@ public class GroupedBarChart : CartesianChartBase
         // Draw bars
         for (int i = 0; i < coordinates.Count; i++)
         {
-            (float x, float y) = coordinates[i];
-            float barHeight = baselineY - y;
+            var p = coordinates[i];
+            float barHeight = baselineY - p.Y;
 
             // Calculate bar position within group
             float groupStartX = LeftPadding + i * totalGroupSpace + groupPadding / 2;
             float barX = groupStartX + seriesIndex * (barGroupWidth / seriesCount) +
                          (barGroupWidth / seriesCount - barWidth) / 2;
 
-            canvas.FillRect(barX, y, barWidth, barHeight, series.Color);
+            canvas.FillRect(barX, p.Y, barWidth, barHeight, series.Color);
         }
     }
 
@@ -203,19 +203,4 @@ public class GroupedBarChart : CartesianChartBase
             canvas.DrawText(x, labelY, label, AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Center);
         }
     }
-
-    #region Backward Compatibility - Obsolete Method
-
-    /// <summary>
-    /// OBSOLETE: This method is no longer needed as we extend CartesianChartBase.
-    /// </summary>
-    [Obsolete("This method is no longer needed as we extend CartesianChartBase")]
-    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
-        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
-    {
-        // Not used anymore - handled by DrawSeriesElements
-        throw new NotImplementedException("Use DrawSeriesElements instead");
-    }
-
-    #endregion
 }

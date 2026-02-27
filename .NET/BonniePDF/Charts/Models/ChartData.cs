@@ -19,7 +19,7 @@ public class ChartData
     /// Multiple data series to display in the chart.
     /// Each series can have its own name, color, and data points.
     /// </summary>
-    public List<ChartSeries> Series { get; set; } = new();
+    public IList<ChartSeries> Series { get; set; } = new List<ChartSeries>();
 
     /// <summary>
     /// Y-axis (vertical) configuration
@@ -43,9 +43,9 @@ public class ChartData
     /// </para>
     /// </summary>
     [Obsolete("Use Series property instead for multi-series support. This property is maintained for backward compatibility.")]
-    public List<ChartDataPoint> DataPoints
+    public IList<ChartDataPoint> DataPoints
     {
-        get => Series.FirstOrDefault()?.DataPoints ?? new();
+        get => Series.FirstOrDefault()?.DataPoints ?? new List<ChartDataPoint>();
         set
         {
             if (Series.Count == 0)

@@ -62,7 +62,7 @@ public class PdfCanvas : ICanvas
     /// <summary>
     /// Gets the width of the canvas (not directly applicable to PDF streams, returns 0)
     /// </summary>
-    public float Width { get; } = 0;
+    public float Width { get; }
 
     /// <summary>
     /// Gets the height of the canvas (returns the page height)
@@ -173,17 +173,17 @@ public class PdfCanvas : ICanvas
     /// Fills a closed path defined by a series of points.
     /// Converts all points from Top-Left to Bottom-Left coordinates.
     /// </summary>
-    public void FillPath(List<(float x, float y)> points, Color color)
+    public void FillPath(List<Point> points, Color color)
     {
         if (points == null || points.Count < 3) return;
 
         // Convert all points from Top-Left to Bottom-Left coordinates
-        List<(float x, float y)> pdfPoints = new();
-        foreach ((float x, float y) in points)
+        List<Point> pdfPoints = new();
+        foreach (Point p in points)
         {
-            float pdfX = x + _xOffset;
-            float pdfY = Height - (y + _yOffset);
-            pdfPoints.Add((pdfX, pdfY));
+            float pdfX = p.X + _xOffset;
+            float pdfY = Height - (p.Y + _yOffset);
+            pdfPoints.Add(new Point(pdfX, pdfY));
         }
 
         PdfDrawing.FillPath(_stream, pdfPoints, color);

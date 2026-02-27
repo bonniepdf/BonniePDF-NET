@@ -44,17 +44,6 @@ public class NavigationWriter
         List<(BookmarkItem item, int id, int parentId, int depth)> flatList = new();
         int nextId = rootId + 1; // rootId is reserved for the /Outlines root
 
-        void Flatten(List<BookmarkItem> items, int parentId, int depth)
-        {
-            foreach (BookmarkItem item in items)
-            {
-                int itemId = _writer.GetNewId();
-                flatList.Add((item, itemId, parentId, depth));
-                if (item.Children.Count > 0)
-                    Flatten(item.Children, itemId, depth + 1);
-            }
-        }
-
         Flatten(bookmarks, rootId, 0);
 
         // Group children by parent
@@ -69,10 +58,10 @@ public class NavigationWriter
         // Count total visible items
         int CountVisible(int parentId)
         {
-            if (!childrenByParent.ContainsKey(parentId))
+            if (!childrenByParent.TryGetValue(parentId, out List<int> value))
                 return 0;
             int count = 0;
-            foreach (int idx in childrenByParent[parentId])
+            foreach (int idx in value)
             {
                 count++;
                 count += CountVisible(flatList[idx].id);
@@ -134,6 +123,17 @@ public class NavigationWriter
         }
 
         return rootId;
+
+        void Flatten(IList<BookmarkItem> items, int parentId, int depth)
+        {
+            foreach (BookmarkItem item in items)
+            {
+                int itemId = _writer.GetNewId();
+                flatList.Add((item, itemId, parentId, depth));
+                if (item.Children.Count > 0)
+                    Flatten(item.Children, itemId, depth + 1);
+            }
+        }
     }
 
     /// <summary>
@@ -152,17 +152,6 @@ public class NavigationWriter
 
         List<(BookmarkItem item, int id, int parentId, int depth)> flatList = new();
 
-        void Flatten(List<BookmarkItem> items, int parentId, int depth)
-        {
-            foreach (BookmarkItem item in items)
-            {
-                int itemId = _asyncWriter.GetNewId();
-                flatList.Add((item, itemId, parentId, depth));
-                if (item.Children.Count > 0)
-                    Flatten(item.Children, itemId, depth + 1);
-            }
-        }
-
         Flatten(bookmarks, rootId, 0);
 
         Dictionary<int, List<int>> childrenByParent = new();
@@ -175,10 +164,10 @@ public class NavigationWriter
 
         int CountVisible(int parentId)
         {
-            if (!childrenByParent.ContainsKey(parentId))
+            if (!childrenByParent.TryGetValue(parentId, out List<int> value))
                 return 0;
             int count = 0;
-            foreach (int idx in childrenByParent[parentId])
+            foreach (int idx in value)
             {
                 count++;
                 count += CountVisible(flatList[idx].id);
@@ -235,5 +224,16 @@ public class NavigationWriter
         }
 
         return rootId;
+
+        void Flatten(IList<BookmarkItem> items, int parentId, int depth)
+        {
+            foreach (BookmarkItem item in items)
+            {
+                int itemId = _asyncWriter.GetNewId();
+                flatList.Add((item, itemId, parentId, depth));
+                if (item.Children.Count > 0)
+                    Flatten(item.Children, itemId, depth + 1);
+            }
+        }
     }
 }

@@ -1,9 +1,12 @@
+using System.Runtime.InteropServices;
+
 namespace BonniePDF.Core;
 
 /// <summary>
 /// Represents border widths for the four sides of an element.
 /// All values are in points (1/72 inch).
 /// </summary>
+[StructLayout(LayoutKind.Sequential)]
 public struct Border
 {
     public float Left { get; set; }

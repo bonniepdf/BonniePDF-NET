@@ -142,7 +142,7 @@ public class TtfSubsetter
         _newToOldGid = new Dictionary<ushort, ushort>();
 
         // Always include GID 0 (.notdef)
-        List<ushort> sortedGlyphs = usedGlyphs.OrderBy(g => g).ToList();
+        List<ushort> sortedGlyphs = usedGlyphs.Order().ToList();
         if (!sortedGlyphs.Contains(0))
             sortedGlyphs.Insert(0, 0);
 
@@ -402,7 +402,7 @@ public class TtfSubsetter
         return BuildCmapFormat4(bmpMappings);
     }
 
-    private byte[] BuildCmapWithFormat12(Dictionary<ushort, ushort> bmpMappings, Dictionary<uint, ushort> allMappings)
+    private static byte[] BuildCmapWithFormat12(Dictionary<ushort, ushort> bmpMappings, Dictionary<uint, ushort> allMappings)
     {
         // Build Format 4 subtable for BMP (compatibility with older viewers)
         byte[] format4 = BuildCmapFormat4Subtable(bmpMappings);
@@ -437,11 +437,11 @@ public class TtfSubsetter
         return ms.ToArray();
     }
 
-    private byte[] BuildCmapFormat12Subtable(Dictionary<uint, ushort> unicodeToGid)
+    private static byte[] BuildCmapFormat12Subtable(Dictionary<uint, ushort> unicodeToGid)
     {
         // Build groups: consecutive codepoints with consecutive GIDs
         List<(uint startCharCode, uint endCharCode, uint startGlyphId)> groups = new();
-        List<uint> sortedCodes = unicodeToGid.Keys.OrderBy(c => c).ToList();
+        List<uint> sortedCodes = unicodeToGid.Keys.Order().ToList();
 
         if (sortedCodes.Count > 0)
         {
@@ -495,7 +495,7 @@ public class TtfSubsetter
         return ms.ToArray();
     }
 
-    private byte[] BuildCmapFormat4Subtable(Dictionary<ushort, ushort> unicodeToGid)
+    private static byte[] BuildCmapFormat4Subtable(Dictionary<ushort, ushort> unicodeToGid)
     {
         List<(ushort startCode, ushort endCode, short idDelta)> segments = BuildCmapSegments(unicodeToGid);
         int segCount = segments.Count;
@@ -525,7 +525,7 @@ public class TtfSubsetter
         return ms.ToArray();
     }
 
-    private byte[] BuildCmapFormat4(Dictionary<ushort, ushort> unicodeToGid)
+    private static byte[] BuildCmapFormat4(Dictionary<ushort, ushort> unicodeToGid)
     {
         // BMP-only: single encoding record with Format 4 subtable
         byte[] subtable = BuildCmapFormat4Subtable(unicodeToGid);
@@ -547,7 +547,7 @@ public class TtfSubsetter
         return ms.ToArray();
     }
 
-    private List<(ushort startCode, ushort endCode, short idDelta)> BuildCmapSegments(
+    private static List<(ushort startCode, ushort endCode, short idDelta)> BuildCmapSegments(
         Dictionary<ushort, ushort> unicodeToGid)
     {
         List<(ushort startCode, ushort endCode, short idDelta)> segments = new();
@@ -559,7 +559,7 @@ public class TtfSubsetter
             return segments;
         }
 
-        List<ushort> sortedCodes = unicodeToGid.Keys.OrderBy(c => c).ToList();
+        List<ushort> sortedCodes = unicodeToGid.Keys.Order().ToList();
 
         int i = 0;
         while (i < sortedCodes.Count)
@@ -725,7 +725,7 @@ public class TtfSubsetter
 
     #region Font Assembly
 
-    private byte[] AssembleFont(Dictionary<string, byte[]> tables)
+    private static byte[] AssembleFont(Dictionary<string, byte[]> tables)
     {
         // Calculate offsets and build the font
         int numTables = tables.Count;
@@ -737,7 +737,7 @@ public class TtfSubsetter
         int headerSize = 12 + numTables * 16;
 
         // Sort tables alphabetically (required by TrueType spec for some tools)
-        List<string> sortedTags = tables.Keys.OrderBy(t => t).ToList();
+        List<string> sortedTags = tables.Keys.Order().ToList();
 
         // Calculate table offsets (4-byte aligned)
         Dictionary<string, uint> tableOffsets = new();
@@ -790,7 +790,7 @@ public class TtfSubsetter
         return ms.ToArray();
     }
 
-    private uint CalculateChecksum(byte[] data)
+    private static uint CalculateChecksum(byte[] data)
     {
         uint sum = 0;
         int length = (data.Length + 3) / 4 * 4; // Round up to 4-byte boundary

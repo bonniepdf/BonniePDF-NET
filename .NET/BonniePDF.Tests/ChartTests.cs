@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Core;
@@ -13,7 +11,7 @@ namespace BonniePDF.Tests;
 public class ChartTests
 {
     // Mock canvas to test chart drawing
-    private class MockCanvas : ICanvas
+    private sealed class MockCanvas : ICanvas
     {
         public List<string> Operations { get; } = new();
 
@@ -67,7 +65,7 @@ public class ChartTests
             Operations.Add($"FillCircle({cx},{cy},{radius})");
         }
 
-        public void FillPath(List<(float x, float y)> points, Color color)
+        public void FillPath(List<Point> points, Color color)
         {
             Operations.Add($"FillPath({points.Count} points)");
         }

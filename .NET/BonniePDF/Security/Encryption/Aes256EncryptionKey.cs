@@ -205,8 +205,7 @@ internal sealed class Aes256EncryptionKey
 
     private static byte[] SHA256Hash(byte[] data)
     {
-        using SHA256 sha = SHA256.Create();
-        return sha.ComputeHash(data);
+        return SHA256.HashData(data);
     }
 
     private static byte[] Concatenate(params byte[][] arrays)

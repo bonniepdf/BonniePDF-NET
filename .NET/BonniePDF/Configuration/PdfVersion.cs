@@ -13,5 +13,5 @@ public enum PdfVersion
     /// <summary>
     /// PDF 1.7. AES-256 encryption, PDF/A-1b compliance, XMP metadata, and bookmarks.
     /// </summary>
-    Pdf17
+    Pdf17,
 }

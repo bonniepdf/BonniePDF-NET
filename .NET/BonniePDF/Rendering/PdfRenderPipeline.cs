@@ -277,15 +277,15 @@ public static class PdfRenderPipeline
             // Get dimensions for this page (use stored dimensions or defaults)
             PdfSize pageSize = ctx.PageSize;
 
-            if (pageDimensions.ContainsKey(i))
+            if (pageDimensions.TryGetValue(i, out var dimensions))
             {
-                pageSize = pageDimensions[i].Size;
+                pageSize = dimensions.Size;
             }
 
             // Prepare context for template rendering
             // Set dimensions BEFORE SwitchToPage so the canvas uses correct PageHeight
             ctx.PageSize = pageSize;
-            ctx.Margin = pageDimensions.ContainsKey(i) ? pageDimensions[i].Margin : settings.Margin;
+            ctx.Margin = pageDimensions.TryGetValue(i, out dimensions) ? dimensions.Margin : settings.Margin;
             ctx.SwitchToPage(i);
 
             // Render Watermark (behind all content — prepended to stream)
@@ -299,8 +299,8 @@ public static class PdfRenderPipeline
                 ContentStream = ctx.Pages[i].ToString(),
                 Size = pageSize,
                 // Capture hyperlinks for this page index
-                Hyperlinks = ctx.PageHyperlinks.ContainsKey(i)
-                    ? ctx.PageHyperlinks[i]
+                Hyperlinks = ctx.PageHyperlinks.TryGetValue(i, out var hyperlinks)
+                    ? hyperlinks
                     : new List<Hyperlink>()
             };
 
@@ -372,7 +372,7 @@ public static class PdfRenderPipeline
         PdfOperators.RestoreState(wmOps);
 
         // Prepend to page stream (painter's model: first drawn = behind)
-        ctx.Pages[pageIndex].Insert(0, wmOps.ToString());
+        ctx.Pages[pageIndex].Insert(0, wmOps);
     }
 
     /// <summary>

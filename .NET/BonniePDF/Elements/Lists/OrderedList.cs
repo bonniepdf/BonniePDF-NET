@@ -117,7 +117,7 @@ public class OrderedList : ListElementBase
         };
     }
 
-    private string ToRomanNumeral(int number)
+    private static string ToRomanNumeral(int number)
     {
         if (number <= 0 || number > 3999)
             return number.ToString();
@@ -133,7 +133,7 @@ public class OrderedList : ListElementBase
                ones[number % 10];
     }
 
-    private string ToAlpha(int number)
+    private static string ToAlpha(int number)
     {
         if (number <= 0)
             return number.ToString();

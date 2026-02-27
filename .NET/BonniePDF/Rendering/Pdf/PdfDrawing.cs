@@ -226,20 +226,20 @@ internal static class PdfDrawing
     /// <param name="stream">The PDF content stream to write to</param>
     /// <param name="points">The points that define the path in PDF coordinates</param>
     /// <param name="color">Fill color</param>
-    public static void FillPath(StringBuilder stream, List<(float x, float y)> points, Color color)
+    public static void FillPath(StringBuilder stream, List<Point> points, Color color)
     {
         if (points == null || points.Count < 3) return;
 
         PdfOperators.SaveState(stream);
         PdfOperators.SetFillColor(stream, color);
 
-        (float firstX, float firstY) = points[0];
-        PdfOperators.MoveTo(stream, firstX, firstY);
+        var first = points[0];
+        PdfOperators.MoveTo(stream, first.X, first.Y);
 
         for (int i = 1; i < points.Count; i++)
         {
-            (float x, float y) = points[i];
-            PdfOperators.LineTo(stream, x, y);
+            Point p = points[i];
+            PdfOperators.LineTo(stream, p.X, p.Y);
         }
 
         PdfOperators.ClosePath(stream);

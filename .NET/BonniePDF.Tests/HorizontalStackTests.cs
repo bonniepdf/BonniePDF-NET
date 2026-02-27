@@ -106,7 +106,7 @@ public class HorizontalStackTests
         Assert.Equal(200, item2.LastRenderWidth, 0.1);
     }
 
-    private class TestElement : ElementBase
+    private sealed class TestElement : ElementBase
     {
         public float PreferredWidth { get; set; }
         public float LastRenderWidth { get; private set; }

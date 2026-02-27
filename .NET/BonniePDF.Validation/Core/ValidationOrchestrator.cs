@@ -41,25 +41,25 @@ public class ValidationOrchestrator
         
         if (string.IsNullOrEmpty(pdfDirectory) || !System.IO.Directory.Exists(pdfDirectory))
         {
-            _ui.DisplayError("Invalid or non-existent directory.");
+            UI.ConsoleUserInterface.DisplayError("Invalid or non-existent directory.");
             return new ValidationSummary(0, 0, 0, 0, TimeSpan.Zero);
         }
 
-        _ui.DisplayMessage($"Validating PDFs in: {pdfDirectory}");
-        _ui.DisplayMessage($"Validation Profile: PDF/A-{GetProfileId(_settings.DefaultProfile).ToUpper()}");
-        _ui.DisplayMessage("");
+        UI.ConsoleUserInterface.DisplayMessage($"Validating PDFs in: {pdfDirectory}");
+        UI.ConsoleUserInterface.DisplayMessage($"Validation Profile: PDF/A-{GetProfileId(_settings.DefaultProfile).ToUpper()}");
+        UI.ConsoleUserInterface.DisplayMessage("");
 
         // Check if VeraPDF API is accessible
         if (!await _apiClient.IsApiRunningAsync())
         {
-            _ui.DisplayError("Cannot connect to VeraPDF API at http://localhost:8080/");
-            _ui.DisplayMessage("Please ensure the VeraPDF validation service is running.");
-            _ui.DisplayMessage("");
+            UI.ConsoleUserInterface.DisplayError("Cannot connect to VeraPDF API at http://localhost:8080/");
+            UI.ConsoleUserInterface.DisplayMessage("Please ensure the VeraPDF validation service is running.");
+            UI.ConsoleUserInterface.DisplayMessage("");
             return new ValidationSummary(0, 0, 0, 0, TimeSpan.Zero);
         }
 
-        _ui.DisplayMessage("✓ VeraPDF API is accessible");
-        _ui.DisplayMessage("");
+        UI.ConsoleUserInterface.DisplayMessage("✓ VeraPDF API is accessible");
+        UI.ConsoleUserInterface.DisplayMessage("");
 
         // Get all PDF files, excluding encrypted ones (encryption is forbidden by PDF/A)
         string[] allPdfFiles = System.IO.Directory.GetFiles(pdfDirectory, "*.pdf", System.IO.SearchOption.TopDirectoryOnly);
@@ -71,15 +71,15 @@ public class ValidationOrchestrator
 
         if (pdfFiles.Length == 0)
         {
-            _ui.DisplayMessage("No PDF files found in the specified directory.");
-            _ui.DisplayMessage("");
+            UI.ConsoleUserInterface.DisplayMessage("No PDF files found in the specified directory.");
+            UI.ConsoleUserInterface.DisplayMessage("");
             return new ValidationSummary(0, 0, 0, 0, TimeSpan.Zero);
         }
 
-        _ui.DisplayMessage($"Found {pdfFiles.Length} PDF file(s) to validate");
+        UI.ConsoleUserInterface.DisplayMessage($"Found {pdfFiles.Length} PDF file(s) to validate");
         if (skipped > 0)
-            _ui.DisplayMessage($"Skipped {skipped} encrypted PDF(s) (encryption is incompatible with PDF/A)");
-        _ui.DisplayMessage("");
+            UI.ConsoleUserInterface.DisplayMessage($"Skipped {skipped} encrypted PDF(s) (encryption is incompatible with PDF/A)");
+        UI.ConsoleUserInterface.DisplayMessage("");
 
         // Validate each PDF
         var results = new List<ValidationResult>();
@@ -89,18 +89,18 @@ public class ValidationOrchestrator
             string pdfFile = pdfFiles[i];
             string fileName = System.IO.Path.GetFileName(pdfFile);
             
-            _ui.DisplayProgress(i + 1, pdfFiles.Length, fileName);
+            UI.ConsoleUserInterface.DisplayProgress(i + 1, pdfFiles.Length, fileName);
             
             ValidationResult result = await ValidateSingleAsync(pdfFile);
             results.Add(result);
             
-            _ui.DisplayResult(result);
-            _ui.DisplayMessage("");
+            UI.ConsoleUserInterface.DisplayResult(result);
+            UI.ConsoleUserInterface.DisplayMessage("");
         }
 
         // Generate summary
         var summary = ValidationSummary.FromResults(results);
-        _ui.DisplaySummary(summary);
+        UI.ConsoleUserInterface.DisplaySummary(summary);
 
         // Generate reports
         if (_settings.GenerateReport && results.Count > 0)
@@ -143,16 +143,16 @@ public class ValidationOrchestrator
                 string outputPath = System.IO.Path.Combine(sourceDirectory, $"validation-report{extension}");
                 
                 await generator.GenerateAsync(results, profileId, sourceDirectory, outputPath);
-                _ui.DisplayMessage($"Report saved to: {outputPath}");
+                UI.ConsoleUserInterface.DisplayMessage($"Report saved to: {outputPath}");
             }
             catch (Exception ex)
             {
-                _ui.DisplayError($"Failed to generate report: {ex.Message}");
+                UI.ConsoleUserInterface.DisplayError($"Failed to generate report: {ex.Message}");
             }
         }
     }
 
-    private string GetProfileId(ValidationProfile profile)
+    private static string GetProfileId(ValidationProfile profile)
     {
         return profile switch
         {
@@ -166,7 +166,7 @@ public class ValidationOrchestrator
         };
     }
 
-    private string GetReportExtension(IReportGenerator generator)
+    private static string GetReportExtension(IReportGenerator generator)
     {
         // Simple heuristic to determine file extension
         var typeName = generator.GetType().Name;

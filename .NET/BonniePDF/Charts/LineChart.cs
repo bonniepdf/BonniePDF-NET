@@ -49,7 +49,7 @@ public class LineChart : CartesianChartBase
     /// Draws the line chart elements for a single series (connecting line and optional data point markers).
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
-        List<(float x, float y)> coordinates,
+        IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
         // Get series-specific styling or use defaults
@@ -77,26 +77,24 @@ public class LineChart : CartesianChartBase
     /// <summary>
     /// Draws the connecting line between all data points for a series.
     /// </summary>
-    private void DrawConnectingLine(ICanvas canvas, List<(float x, float y)> coordinates, Color color, float lineWidth)
+    private static void DrawConnectingLine(ICanvas canvas, IList<Point> coordinates, Color color, float lineWidth)
     {
         if (coordinates.Count < 2) return;
-
         for (int i = 0; i < coordinates.Count - 1; i++)
         {
-            (float x1, float y1) = coordinates[i];
-            (float x2, float y2) = coordinates[i + 1];
-
-            canvas.DrawLine(x1, y1, x2, y2, color, lineWidth);
+            var p1 = coordinates[i];
+            var p2 = coordinates[i + 1];
+            canvas.DrawLine(p1.X, p1.Y, p2.X, p2.Y, color, lineWidth);
         }
     }
 
     /// <summary>
     /// Draws circular markers at each data point for a series.
     /// </summary>
-    private void DrawDataPointMarkers(ICanvas canvas, List<(float x, float y)> coordinates, Color color, float radius)
+    private static void DrawDataPointMarkers(ICanvas canvas, IList<Point> coordinates, Color color, float radius)
     {
-        foreach ((float x, float y) in coordinates)
-            canvas.FillCircle(x, y, radius, color);
+        foreach (Point p in coordinates)
+            canvas.FillCircle(p.X, p.Y, radius, color);
     }
 
     /// <summary>
@@ -104,21 +102,4 @@ public class LineChart : CartesianChartBase
     /// Returns the chart's LineColor property for backward compatibility.
     /// </summary>
     protected override Color GetDefaultSeriesColor() => LineColor;
-
-    #region Backward Compatibility - Obsolete Methods
-
-    /// <summary>
-    /// Draws the line chart elements (connecting line and optional data point markers).
-    /// OBSOLETE: Use DrawSeriesElements instead for multi-series support.
-    /// </summary>
-    [System.Obsolete("Use DrawSeriesElements instead for multi-series support")]
-    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
-        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
-    {
-        // For backward compatibility, treat as single series
-        var series = data.Series.Count > 0 ? data.Series[0] : new ChartSeries { Color = LineColor };
-        DrawSeriesElements(canvas, data, series, coordinates, chartAreaWidth, chartAreaHeight, baselineY, topY);
-    }
-
-    #endregion
 }

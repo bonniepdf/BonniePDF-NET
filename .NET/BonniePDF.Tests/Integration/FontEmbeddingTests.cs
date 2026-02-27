@@ -157,7 +157,7 @@ public class FontEmbeddingTests : IntegrationTestBase
     {
         // Arrange
         string outputPath = GetTestFilePath("text_wrapping.pdf");
-        string longText = string.Join(" ", Enumerable.Repeat(
+        string longText = string.Join(' ', Enumerable.Repeat(
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
             "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
             20));

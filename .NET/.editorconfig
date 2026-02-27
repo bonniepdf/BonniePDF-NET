@@ -1,0 +1,5 @@
+root = true
+
+[*.{cs,vb}]
+# Set all performance-related warnings to Error (includes CA18xx)
+dotnet_analyzer_diagnostic.category-Performance.severity = error

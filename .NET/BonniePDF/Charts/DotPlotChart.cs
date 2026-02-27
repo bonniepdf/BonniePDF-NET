@@ -34,7 +34,7 @@ public class DotPlotChart : CartesianChartBase
     /// Draws the dot plot chart elements for a single series (circular data points).
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
-        List<(float x, float y)> coordinates,
+        IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
         // Get series-specific styling or use defaults
@@ -56,10 +56,10 @@ public class DotPlotChart : CartesianChartBase
     /// <summary>
     /// Draws the data point circles for a series.
     /// </summary>
-    private void DrawDataPoints(ICanvas canvas, List<(float x, float y)> coordinates, Color color, float radius)
+    private static void DrawDataPoints(ICanvas canvas, IList<Point> coordinates, Color color, float radius)
     {
-        foreach ((float x, float y) in coordinates)
-            canvas.FillCircle(x, y, radius, color);
+        foreach (Point p in coordinates)
+            canvas.FillCircle(p.X, p.Y, radius, color);
     }
 
     /// <summary>
@@ -67,21 +67,4 @@ public class DotPlotChart : CartesianChartBase
     /// Returns the chart's DotColor property for backward compatibility.
     /// </summary>
     protected override Color GetDefaultSeriesColor() => DotColor;
-
-    #region Backward Compatibility - Obsolete Methods
-
-    /// <summary>
-    /// Draws the dot plot chart elements (circular data points).
-    /// OBSOLETE: Use DrawSeriesElements instead for multi-series support.
-    /// </summary>
-    [System.Obsolete("Use DrawSeriesElements instead for multi-series support")]
-    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
-        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
-    {
-        // For backward compatibility, treat as single series
-        var series = data.Series.Count > 0 ? data.Series[0] : new ChartSeries { Color = DotColor };
-        DrawSeriesElements(canvas, data, series, coordinates, chartAreaWidth, chartAreaHeight, baselineY, topY);
-    }
-
-    #endregion
 }

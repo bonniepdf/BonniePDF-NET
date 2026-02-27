@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Rendering.Images;
@@ -12,7 +9,7 @@ namespace BonniePDF.Tests;
 public class ImageWriterTests
 {
     // Mock implementation of IPdfWriter for testing
-    private class MockPdfWriter : IPdfWriter
+    private sealed class MockPdfWriter : IPdfWriter
     {
         public List<(int id, Dictionary<string, string> dict, byte[] data)> WrittenObjects { get; } = new();
         private int _nextId = 2; // Start from 2 to avoid conflicts with test-provided IDs

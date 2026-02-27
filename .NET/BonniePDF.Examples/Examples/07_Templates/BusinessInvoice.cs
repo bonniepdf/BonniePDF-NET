@@ -543,7 +543,7 @@ public class InvoiceExample
         stack.AddChild(row);
     }
 
-    private static IElement CreatePaymentDetails()
+    private static Table CreatePaymentDetails()
     {
         Table paymentTable = new(1f, 1f, 1f)
         {

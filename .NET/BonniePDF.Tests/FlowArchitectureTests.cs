@@ -81,7 +81,7 @@ public class FlowArchitectureTests
     public void TextBlock_LongTextOverflows()
     {
         // Create a text block with many lines that will overflow a small page
-        string lines = string.Join("\n", Enumerable.Range(1, 100).Select(i => $"Line {i} of test content"));
+        string lines = string.Join('\n', Enumerable.Range(1, 100).Select(i => $"Line {i} of test content"));
         TextBlock textBlock = new() { Text = lines, FontSize = 12 };
 
         // Create a small context (200pt height, 50pt margins = 100pt content area)
@@ -96,7 +96,7 @@ public class FlowArchitectureTests
     public void TextBlock_ContinuesAfterOverflow()
     {
         // Create enough lines to definitely overflow (100 lines on a 100pt content area)
-        string lines = string.Join("\n", Enumerable.Range(1, 100).Select(i => $"Line {i} of test content"));
+        string lines = string.Join('\n', Enumerable.Range(1, 100).Select(i => $"Line {i} of test content"));
         TextBlock textBlock = new() { Text = lines, FontSize = 12 };
 
         // Use a small page (200pt height, 50pt margins = 100pt content area)
@@ -465,7 +465,7 @@ public class FlowArchitectureTests
         VerticalStack stack = new();
 
         // Fill most of the page with text
-        string longText = string.Join("\n", Enumerable.Range(1, 40).Select(i => $"Line {i}"));
+        string longText = string.Join('\n', Enumerable.Range(1, 40).Select(i => $"Line {i}"));
         stack.AddChild(new TextBlock { Text = longText, FontSize = 12 });
 
         // Add a large circle that won't fit in the remaining space
@@ -544,12 +544,12 @@ public class FlowArchitectureTests
     {
         // Use narrow width (100pt) to force word wrapping and create many lines
         // Each word ~40pt wide at FontSize 12, so ~2 words per line
-        string keepText = string.Join(" ", Enumerable.Range(1, 30).Select(i => $"WordKeep{i}"));
+        string keepText = string.Join(' ', Enumerable.Range(1, 30).Select(i => $"WordKeep{i}"));
         TextBlock keepTogether = new() { Text = keepText, BreakAllowed = false, FontSize = 12 };
 
         VerticalStack stack = new();
         // Add filler that takes some space
-        string fillerText = string.Join(" ", Enumerable.Range(1, 6).Select(i => $"Filler{i}"));
+        string fillerText = string.Join(' ', Enumerable.Range(1, 6).Select(i => $"Filler{i}"));
         stack.AddChild(new TextBlock { Text = fillerText, FontSize = 12 });
         stack.AddChild(keepTogether);
 
@@ -567,7 +567,7 @@ public class FlowArchitectureTests
     public void BreakAllowedFalse_ElementTooLargeForPage_RendersAnyway()
     {
         // Element that can't fit on any single page — must render anyway to avoid infinite loop
-        string hugeText = string.Join("\n", Enumerable.Range(1, 200).Select(i => $"Line {i}"));
+        string hugeText = string.Join('\n', Enumerable.Range(1, 200).Select(i => $"Line {i}"));
         VerticalStack stack = new() { BreakAllowed = false };
         stack.AddChild(new TextBlock { Text = hugeText });
 
@@ -584,14 +584,14 @@ public class FlowArchitectureTests
     public void Pipeline_RespectsBreakAllowedFalse_AtRootLevel()
     {
         // A root element with BreakAllowed=false that doesn't fit in remaining space
-        string text = string.Join("\n", Enumerable.Range(1, 10).Select(i => $"Line {i}"));
+        string text = string.Join('\n', Enumerable.Range(1, 10).Select(i => $"Line {i}"));
         TextBlock block = new() { Text = text, BreakAllowed = false };
 
         using Document doc = new();
         // Add filler first
         doc.Add(new TextBlock
         {
-            Text = string.Join("\n", Enumerable.Range(1, 40).Select(i => $"Filler {i}"))
+            Text = string.Join('\n', Enumerable.Range(1, 40).Select(i => $"Filler {i}"))
         });
         doc.Add(block);
 
@@ -739,7 +739,7 @@ public class FlowArchitectureTests
     {
         HorizontalStack stack = new();
         // Use narrow width + long text to force word wrapping, creating tall children
-        string text = string.Join(" ", Enumerable.Range(1, 20).Select(i => $"Word{i}"));
+        string text = string.Join(' ', Enumerable.Range(1, 20).Select(i => $"Word{i}"));
         stack.AddChild(new TextBlock { Text = text, FontSize = 12 });
         stack.AddChild(new TextBlock { Text = text, FontSize = 12 });
 
@@ -793,7 +793,7 @@ public class FlowArchitectureTests
     {
         VerticalStack vStack = new();
         // Fill most of the page
-        string filler = string.Join("\n", Enumerable.Range(1, 40).Select(i => $"Line {i}"));
+        string filler = string.Join('\n', Enumerable.Range(1, 40).Select(i => $"Line {i}"));
         vStack.AddChild(new TextBlock { Text = filler });
 
         // Add a horizontal stack that won't fit
@@ -834,7 +834,7 @@ public class FlowArchitectureTests
     {
         // Use narrow width to create many wrapped lines. Each word ~50pt at FontSize 12.
         // At width=60pt, each word gets its own line → 10 lines.
-        string text = string.Join(" ", Enumerable.Range(1, 10).Select(i => $"LongWord{i}"));
+        string text = string.Join(' ', Enumerable.Range(1, 10).Select(i => $"LongWord{i}"));
         TextBlock textBlock = new()
         {
             Text = text,
@@ -859,7 +859,7 @@ public class FlowArchitectureTests
     public void TextBlock_OrphanControl_RendersIfEnoughLinesFit()
     {
         // 8 lines of text at narrow width, MinLinesBeforeBreak = 2
-        string text = string.Join(" ", Enumerable.Range(1, 8).Select(i => $"LongWord{i}"));
+        string text = string.Join(' ', Enumerable.Range(1, 8).Select(i => $"LongWord{i}"));
         TextBlock textBlock = new()
         {
             Text = text,
@@ -883,7 +883,7 @@ public class FlowArchitectureTests
     public void TextBlock_OrphanControl_DisabledWhenSetTo1()
     {
         // 10 lines at narrow width, only 1 fits, but MinLinesBeforeBreak = 1 (disabled)
-        string text = string.Join(" ", Enumerable.Range(1, 10).Select(i => $"LongWord{i}"));
+        string text = string.Join(' ', Enumerable.Range(1, 10).Select(i => $"LongWord{i}"));
         TextBlock textBlock = new()
         {
             Text = text,
@@ -907,7 +907,7 @@ public class FlowArchitectureTests
     public void TextBlock_WidowControl_AdjustsBreakPoint()
     {
         // 5 lines at narrow width. Space for 4 → 1 widow. MinLinesAfterBreak=2 → render 3 instead
-        string text = string.Join(" ", Enumerable.Range(1, 5).Select(i => $"LongWord{i}"));
+        string text = string.Join(' ', Enumerable.Range(1, 5).Select(i => $"LongWord{i}"));
         TextBlock textBlock = new()
         {
             Text = text,
@@ -933,7 +933,7 @@ public class FlowArchitectureTests
     public void TextBlock_WithOrphanWidowControl_ProducesValidPdf()
     {
         // Use space-separated words to create many wrapped lines at default width
-        string longText = string.Join(" ", Enumerable.Range(1, 500).Select(i =>
+        string longText = string.Join(' ', Enumerable.Range(1, 500).Select(i =>
             $"Word{i}"));
 
         TextBlock textBlock = new()

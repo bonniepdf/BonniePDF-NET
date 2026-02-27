@@ -125,7 +125,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        string fill = ColorToHex(color);
+        string fill = color.ToHexString();
         _sb.AppendLine($"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" fill=\"{fill}\"/>");
     }
 
@@ -137,7 +137,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        string stroke = ColorToHex(color);
+        string stroke = color.ToHexString();
         _sb.AppendLine(
             $"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" fill=\"none\" stroke=\"{stroke}\" stroke-width=\"{strokeWidth}\"/>");
     }
@@ -149,7 +149,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        string fill = ColorToHex(color);
+        string fill = color.ToHexString();
         _sb.AppendLine($"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" rx=\"{radius}\" ry=\"{radius}\" fill=\"{fill}\"/>");
     }
 
@@ -161,7 +161,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        string stroke = ColorToHex(color);
+        string stroke = color.ToHexString();
         _sb.AppendLine(
             $"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" rx=\"{radius}\" ry=\"{radius}\" fill=\"none\" stroke=\"{stroke}\" stroke-width=\"{strokeWidth}\"/>");
     }
@@ -176,7 +176,7 @@ public class SvgCanvas : ICanvas
         float sy1 = y1 + _yOffset;
         float sx2 = x2 + _xOffset;
         float sy2 = y2 + _yOffset;
-        string stroke = ColorToHex(color);
+        string stroke = color.ToHexString();
         _sb.AppendLine(
             $"<line x1=\"{sx1}\" y1=\"{sy1}\" x2=\"{sx2}\" y2=\"{sy2}\" stroke=\"{stroke}\" stroke-width=\"{lineWidth}\"/>");
     }
@@ -189,7 +189,7 @@ public class SvgCanvas : ICanvas
     {
         float scx = cx + _xOffset;
         float scy = cy + _yOffset;
-        string fill = ColorToHex(color);
+        string fill = color.ToHexString();
         _sb.AppendLine($"<circle cx=\"{scx}\" cy=\"{scy}\" r=\"{radius}\" fill=\"{fill}\"/>");
     }
 
@@ -197,22 +197,22 @@ public class SvgCanvas : ICanvas
     /// Fills a closed path defined by a series of points.
     /// No coordinate transformation needed for SVG.
     /// </summary>
-    public void FillPath(List<(float x, float y)> points, Color color)
+    public void FillPath(List<Point> points, Color color)
     {
         if (points == null || points.Count < 3) return;
 
-        string fill = ColorToHex(color);
+        string fill = color.ToHexString();
         StringBuilder pathData = new();
 
         // Move to the first point
-        (float firstX, float firstY) = points[0];
-        pathData.Append($"M {firstX + _xOffset} {firstY + _yOffset}");
+        var first = points[0];
+        pathData.Append($"M {first.X + _xOffset} {first.Y + _yOffset}");
 
         // Draw lines to subsequent points
         for (int i = 1; i < points.Count; i++)
         {
-            (float x, float y) = points[i];
-            pathData.Append($" L {x + _xOffset} {y + _yOffset}");
+            Point p = points[i];
+            pathData.Append($" L {p.X + _xOffset} {p.Y + _yOffset}");
         }
 
         // Close the path
@@ -230,7 +230,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        string fill = ColorToHex(color);
+        string fill = color.ToHexString();
         string anchor = GetTextAnchor(align);
         string escapedText = EscapeXml(text);
 
@@ -267,7 +267,7 @@ public class SvgCanvas : ICanvas
 
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        string fill = ColorToHex(color);
+        string fill = color.ToHexString();
         string escapedText = EscapeXml(text);
         float baselineY = sy + fontSize * 0.8f;
 
@@ -344,17 +344,9 @@ public class SvgCanvas : ICanvas
     }
 
     /// <summary>
-    /// Converts a Color to a hex string for SVG.
-    /// </summary>
-    private string ColorToHex(Color color)
-    {
-        return color.ToHexString();
-    }
-
-    /// <summary>
     /// Maps TextAlignment to SVG text-anchor attribute.
     /// </summary>
-    private string GetTextAnchor(TextAlignment align)
+    private static string GetTextAnchor(TextAlignment align)
     {
         return align switch
         {
@@ -370,7 +362,7 @@ public class SvgCanvas : ICanvas
     /// <summary>
     /// Escapes special XML characters in text.
     /// </summary>
-    private string EscapeXml(string text)
+    private static string EscapeXml(string text)
     {
         if (string.IsNullOrEmpty(text)) return "";
         return text

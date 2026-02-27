@@ -33,13 +33,13 @@ public abstract class ChartBase
     /// When null, no background is drawn, allowing the chart to blend with document content.
     /// Set to Color.White for standalone chart images.
     /// </summary>
-    public Color? BackgroundColor { get; set; } = null;
+    public Color? BackgroundColor { get; set; }
 
     /// <summary>
     /// When true, the chart will stretch to fill the container width.
     /// The Width property will be set automatically by the ChartElement.
     /// </summary>
-    public bool StretchToFit { get; set; } = false;
+    public bool StretchToFit { get; set; }
 
     /// <summary>
     /// Draws the chart to the specified canvas.

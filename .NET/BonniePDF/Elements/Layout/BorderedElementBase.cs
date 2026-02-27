@@ -93,7 +93,7 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
     /// <summary>
     /// Draws a single line with the specified width and color.
     /// </summary>
-    protected void DrawLine(RenderContext ctx, float x1, float y1, float x2, float y2, float width, Color color)
+    protected static void DrawLine(RenderContext ctx, float x1, float y1, float x2, float y2, float width, Color color)
     {
         PdfOperators.SetStrokeColor(ctx.CurrentStream, color);
         PdfOperators.SetLineWidth(ctx.CurrentStream, width);

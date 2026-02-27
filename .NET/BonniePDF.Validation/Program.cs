@@ -8,7 +8,7 @@ namespace BonniePDF.Validation;
 /// <summary>
 /// BonniePDF PDF/A Validation Tool - Entry Point
 /// </summary>
-internal class Program
+internal sealed class Program
 {
     private static async Task Main(string[] args)
     {
@@ -46,7 +46,7 @@ internal class Program
         }
         
         // Display header
-        ui.DisplayHeader();
+        UI.ConsoleUserInterface.DisplayHeader();
         
         // Check if directory exists, if not prompt user
         if (string.IsNullOrEmpty(pdfDirectory))
@@ -54,14 +54,14 @@ internal class Program
             pdfDirectory = directoryProvider.GetDirectory();
             if (string.IsNullOrEmpty(pdfDirectory) || !System.IO.Directory.Exists(pdfDirectory))
             {
-                ui.DisplayMessage("Default PDF directory not found.");
-                ui.DisplayMessage("Enter the path to the directory containing PDFs to validate:");
-                pdfDirectory = ui.ReadLine();
+                UI.ConsoleUserInterface.DisplayMessage("Default PDF directory not found.");
+                UI.ConsoleUserInterface.DisplayMessage("Enter the path to the directory containing PDFs to validate:");
+                pdfDirectory = UI.ConsoleUserInterface.ReadLine();
                 
                 if (string.IsNullOrEmpty(pdfDirectory) || !System.IO.Directory.Exists(pdfDirectory))
                 {
-                    ui.DisplayError("Invalid directory. Exiting.");
-                    ui.WaitForExit();
+                    UI.ConsoleUserInterface.DisplayError("Invalid directory. Exiting.");
+                    UI.ConsoleUserInterface.WaitForExit();
                     return;
                 }
                 
@@ -104,8 +104,8 @@ internal class Program
             string htmlReportPath = System.IO.Path.Combine(pdfDirectory, "validation-report.html");
             if (File.Exists(htmlReportPath))
             {
-                ui.DisplayMessage("");
-                ui.DisplayMessage("Opening validation report in browser...");
+                UI.ConsoleUserInterface.DisplayMessage("");
+                UI.ConsoleUserInterface.DisplayMessage("Opening validation report in browser...");
                 
                 try
                 {
@@ -118,13 +118,13 @@ internal class Program
                 }
                 catch (Exception ex)
                 {
-                    ui.DisplayError($"Failed to open report: {ex.Message}");
-                    ui.DisplayMessage($"Report location: {htmlReportPath}");
+                    UI.ConsoleUserInterface.DisplayError($"Failed to open report: {ex.Message}");
+                    UI.ConsoleUserInterface.DisplayMessage($"Report location: {htmlReportPath}");
                 }
             }
         }
         
         // Wait for exit
-        ui.WaitForExit();
+        UI.ConsoleUserInterface.WaitForExit();
     }
 }

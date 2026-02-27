@@ -1,8 +1,11 @@
+using System.Runtime.InteropServices;
+
 namespace BonniePDF.Core;
 
 /// <summary>
 /// Represents border colors for the four sides of an element
 /// </summary>
+[StructLayout(LayoutKind.Sequential)]
 public struct BorderColors
 {
     public Color? Left { get; set; }

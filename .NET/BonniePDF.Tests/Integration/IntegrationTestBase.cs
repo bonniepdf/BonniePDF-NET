@@ -37,7 +37,7 @@ public abstract class IntegrationTestBase : IDisposable
     /// <summary>
     /// Validates that a PDF file is structurally valid
     /// </summary>
-    protected void AssertValidPdf(string filePath)
+    protected static void AssertValidPdf(string filePath)
     {
         Assert.True(File.Exists(filePath), $"PDF file should exist at {filePath}");
 
@@ -62,7 +62,7 @@ public abstract class IntegrationTestBase : IDisposable
     /// <summary>
     /// Validates that a PDF file has the expected minimum size
     /// </summary>
-    protected void AssertMinimumFileSize(string filePath, long minSizeBytes)
+    protected static void AssertMinimumFileSize(string filePath, long minSizeBytes)
     {
         FileInfo fileInfo = new FileInfo(filePath);
         Assert.True(fileInfo.Length >= minSizeBytes,
@@ -75,7 +75,7 @@ public abstract class IntegrationTestBase : IDisposable
     /// Text may not be found if it's inside compressed streams.
     /// Use sparingly and only for uncompressed metadata/structure.
     /// </summary>
-    protected void AssertPdfContains(string filePath, params string[] expectedContent)
+    protected static void AssertPdfContains(string filePath, params string[] expectedContent)
     {
         byte[] fileBytes = File.ReadAllBytes(filePath);
         string content = System.Text.Encoding.ASCII.GetString(fileBytes);
@@ -103,7 +103,7 @@ public abstract class IntegrationTestBase : IDisposable
     /// <summary>
     /// Validates that a PDF is encrypted
     /// </summary>
-    protected void AssertPdfIsEncrypted(string filePath)
+    protected static void AssertPdfIsEncrypted(string filePath)
     {
         string content = File.ReadAllText(filePath);
         Assert.Contains("/Encrypt", content);
@@ -112,7 +112,7 @@ public abstract class IntegrationTestBase : IDisposable
     /// <summary>
     /// Validates that a PDF has multiple pages
     /// </summary>
-    protected void AssertPdfHasPages(string filePath, int expectedMinPages)
+    protected static void AssertPdfHasPages(string filePath, int expectedMinPages)
     {
         byte[] fileBytes = File.ReadAllBytes(filePath);
         string content = System.Text.Encoding.Latin1.GetString(fileBytes);
@@ -144,7 +144,7 @@ public abstract class IntegrationTestBase : IDisposable
     /// <summary>
     /// Validates that a PDF contains font information
     /// </summary>
-    protected void AssertPdfHasFonts(string filePath)
+    protected static void AssertPdfHasFonts(string filePath)
     {
         string content = File.ReadAllText(filePath);
         Assert.Contains("/Font", content);
@@ -153,7 +153,7 @@ public abstract class IntegrationTestBase : IDisposable
     /// <summary>
     /// Validates that a PDF contains image XObjects
     /// </summary>
-    protected void AssertPdfHasImages(string filePath, int minImageCount = 1)
+    protected static void AssertPdfHasImages(string filePath, int minImageCount = 1)
     {
         string content = File.ReadAllText(filePath);
         int imageCount = CountOccurrences(content, "/Subtype /Image");
@@ -165,7 +165,7 @@ public abstract class IntegrationTestBase : IDisposable
     /// <summary>
     /// Creates test chart data
     /// </summary>
-    protected ChartData CreateTestChartData(int points = 5)
+    protected static ChartData CreateTestChartData(int points = 5)
     {
         ChartData data = new();
         for (int i = 0; i < points; i++)
@@ -182,7 +182,7 @@ public abstract class IntegrationTestBase : IDisposable
     /// <summary>
     /// Loads the test image from resources
     /// </summary>
-    protected byte[] LoadTestImage()
+    protected static byte[] LoadTestImage()
     {
         string imagePath = Path.Combine(AppContext.BaseDirectory, "image.png");
         if (!File.Exists(imagePath))
@@ -195,7 +195,7 @@ public abstract class IntegrationTestBase : IDisposable
     /// <summary>
     /// Counts occurrences of a substring in a string
     /// </summary>
-    private int CountOccurrences(string text, string pattern)
+    private static int CountOccurrences(string text, string pattern)
     {
         int count = 0;
         int index = 0;

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using BonniePDF.Examples.Examples;
 using BonniePDF.Examples.Examples._01_Basics;
 using BonniePDF.Examples.Examples._02_Layout;
 using BonniePDF.Examples.Examples._03_Typography;
@@ -14,7 +13,7 @@ using BonniePDF.Examples.Examples._07_Templates;
 
 namespace BonniePDF.Examples;
 
-internal class Program
+internal sealed class Program
 {
     private static void Main(string[] args)
     {
@@ -214,21 +213,21 @@ internal class Program
     }
 
     // Helper classes for organizing examples
-    private record PdfExample(
+    private sealed record PdfExample(
         string Description,
         string FileName,
         Action<string> Generate,
         string[]? AdditionalInfo = null
     );
 
-    private record ConditionalPdfExample(
+    private sealed record ConditionalPdfExample(
         string Description,
         string FileName,
         Func<string, object?> Generate,
         string SkipMessage
     );
 
-    private record AsyncPdfExample(
+    private sealed record AsyncPdfExample(
         string Description,
         string FileName,
         Func<string, Task> GenerateAsync

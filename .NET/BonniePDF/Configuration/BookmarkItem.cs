@@ -21,5 +21,5 @@ public class BookmarkItem
     /// <summary>
     /// Child bookmarks (nested outline items).
     /// </summary>
-    public List<BookmarkItem> Children { get; } = new();
+    public IList<BookmarkItem> Children { get; } = new List<BookmarkItem>();
 }

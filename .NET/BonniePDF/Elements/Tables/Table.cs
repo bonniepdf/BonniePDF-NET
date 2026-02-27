@@ -39,7 +39,7 @@ public class Table : BorderedElementBase, IStatefulElement
     /// <summary>
     /// Whether to show footers on each page (only last page if false)
     /// </summary>
-    public bool ShowFootersOnAllPages { get; set; } = false;
+    public bool ShowFootersOnAllPages { get; set; }
 
     /// <summary>
     /// Default background color for header rows
@@ -314,7 +314,7 @@ public class Table : BorderedElementBase, IStatefulElement
     private void RenderRow(RenderContext ctx, TableRow row, float[] widths, bool isFirstPage)
     {
         // For footers, only show on last page if ShowFootersOnAllPages is false
-        if (row.IsFooter && !ShowFootersOnAllPages && !isLastPage(ctx)) return;
+        if (row.IsFooter && !ShowFootersOnAllPages && !IsLastPage(ctx)) return;
 
         float rowHeight = MeasureRowHeight(row, widths);
 
@@ -439,7 +439,7 @@ public class Table : BorderedElementBase, IStatefulElement
         return maxHeight;
     }
 
-    private bool isLastPage(RenderContext ctx)
+    private static bool IsLastPage(RenderContext ctx)
     {
         // Use the RenderContext.IsLastPage property which is set by the render pipeline
         // and TemplateRenderer when processing each page

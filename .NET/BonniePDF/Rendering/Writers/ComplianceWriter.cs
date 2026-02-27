@@ -68,7 +68,7 @@ public class ComplianceWriter
         using MemoryStream ms = new();
         using (ZLibStream zlib = new(ms, CompressionLevel.Optimal))
         {
-            await zlib.WriteAsync(iccData, 0, iccData.Length, cancellationToken).ConfigureAwait(false);
+            await zlib.WriteAsync(iccData, cancellationToken).ConfigureAwait(false);
         }
         byte[] compressed = ms.ToArray();
 

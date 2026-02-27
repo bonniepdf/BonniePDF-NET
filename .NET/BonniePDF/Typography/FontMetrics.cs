@@ -69,18 +69,17 @@ public static class FontMetrics
     private static float GetTtfWidth(string text, string filepath, float fontSize)
     {
         // 1. Load into cache if missing
-        if (!TtfCache.ContainsKey(filepath))
+        if (!TtfCache.TryGetValue(filepath, out int[] widths))
             try
             {
-                TtfCache[filepath] = SimpleTtfReader.GetWidths(filepath);
+                widths = SimpleTtfReader.GetWidths(filepath);
+                TtfCache[filepath] = widths;
             }
             catch
             {
                 // Fallback if file not found or corrupted
                 return text.Length * (fontSize * 0.5f);
             }
-
-        int[] widths = TtfCache[filepath];
         float totalWidth = 0;
 
         foreach (char c in text)
@@ -165,23 +164,23 @@ public static class FontMetrics
                     tables[tag] = offset;
                 }
 
-                if (!tables.ContainsKey("head") || !tables.ContainsKey("hmtx") ||
-                    !tables.ContainsKey("cmap") || !tables.ContainsKey("hhea"))
+                if (!tables.TryGetValue("head", out uint headOffset) || !tables.TryGetValue("hmtx", out uint hmtxOffset) ||
+                    !tables.TryGetValue("cmap", out uint cmapOffset) || !tables.TryGetValue("hhea", out uint hheaOffset))
                     throw new Exception("Invalid TTF: Missing critical tables.");
 
                 // 3. READ HEAD TABLE (To get UnitsPerEm)
-                reader.Seek(tables["head"]);
+                reader.Seek(headOffset);
                 reader.Skip(18);
                 int unitsPerEm = reader.ReadUInt16();
 
                 // 4. READ HHEA TABLE (To get NumberOfHMetrics)
-                reader.Seek(tables["hhea"]);
+                reader.Seek(hheaOffset);
                 reader.Skip(34);
                 int numberOfHMetrics = reader.ReadUInt16();
 
                 // 5. READ CMAP (Character to Glyph Index Mapping)
-                reader.Seek(tables["cmap"]);
-                int glyphMapOffset = ReadCmapTable(reader, tables["cmap"]);
+                reader.Seek(cmapOffset);
+                int glyphMapOffset = ReadCmapTable(reader, cmapOffset);
 
                 // 6. READ HMTX (Glyph Index to Width)
                 // We now iterate our target chars (32..126), look up their GlyphIndex, and retrieve width
@@ -190,18 +189,18 @@ public static class FontMetrics
                     int charIndex = c - 32;
                     int glyphIndex = GetGlyphIndex(reader, glyphMapOffset, c);
 
-                    int rawWidth = 0;
+                    int rawWidth;
                     if (glyphIndex < numberOfHMetrics)
                     {
                         // The hmtx table is an array of LongHorMetric records (AdvanceWidth + LSB)
                         // Each record is 4 bytes (2 bytes width, 2 bytes lsb)
-                        reader.Seek(tables["hmtx"] + glyphIndex * 4);
+                        reader.Seek(hmtxOffset + glyphIndex * 4);
                         rawWidth = reader.ReadUInt16();
                     }
                     else
                     {
                         // If glyphIndex > numberOfHMetrics, it uses the width of the last metric
-                        reader.Seek(tables["hmtx"] + (numberOfHMetrics - 1) * 4);
+                        reader.Seek(hmtxOffset + (numberOfHMetrics - 1) * 4);
                         rawWidth = reader.ReadUInt16();
                     }
 

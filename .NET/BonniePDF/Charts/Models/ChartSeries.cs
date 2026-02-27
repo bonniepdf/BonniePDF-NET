@@ -24,7 +24,7 @@ public class ChartSeries
     /// Data points for this series.
     /// Each data point contains a label, value, and optional format string.
     /// </summary>
-    public List<ChartDataPoint> DataPoints { get; set; } = new();
+    public IList<ChartDataPoint> DataPoints { get; set; } = new List<ChartDataPoint>();
 
     /// <summary>
     /// Series-specific styling options.

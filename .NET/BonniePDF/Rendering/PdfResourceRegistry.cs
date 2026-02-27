@@ -90,19 +90,20 @@ public class PdfResourceRegistry
             }
         }
 
-        if (!FontNameMap.ContainsKey(fontIdentifier))
+        if (!FontNameMap.TryGetValue(fontIdentifier, out string value))
         {
             _fontCounter++;
-            FontNameMap[fontIdentifier] = $"/F{_fontCounter}";
+            value = $"/F{_fontCounter}";
+            FontNameMap[fontIdentifier] = value;
         }
 
-        return FontNameMap[fontIdentifier];
+        return value;
     }
 
     /// <summary>
     /// Checks if a font is an embedded TrueType/OpenType font.
     /// </summary>
-    public bool IsEmbeddedFont(string fontIdentifier)
+    public static bool IsEmbeddedFont(string fontIdentifier)
     {
         return fontIdentifier.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) ||
                fontIdentifier.EndsWith(".otf", StringComparison.OrdinalIgnoreCase);
@@ -118,7 +119,7 @@ public class PdfResourceRegistry
 
     private string RegisterEmbeddedFont(string filePath)
     {
-        if (!EmbeddedFonts.ContainsKey(filePath))
+        if (!EmbeddedFonts.TryGetValue(filePath, out EmbeddedFontInfo existingFont))
         {
             TtfFont font = new(filePath);
             GlyphUsageTracker tracker = new(font);
@@ -220,20 +221,20 @@ public class PdfResourceRegistry
         byte[] dataToHash = info.OriginalData != null && info.OriginalData.Length > 0 ? info.OriginalData : info.Data;
         string key = "img_" + ComputeHash(dataToHash);
 
-        if (!ImageIdMap.ContainsKey(key))
+        if (!ImageIdMap.TryGetValue(key, out int existingImageId))
         {
             int imageId = GetNewImageId();
             ImageIdMap[key] = imageId;
             LoadedImages[key] = info;
+            return imageId;
         }
 
-        return ImageIdMap[key];
+        return existingImageId;
     }
 
     private static string ComputeHash(byte[] data)
     {
-        using SHA256 sha = SHA256.Create();
-        byte[] hash = sha.ComputeHash(data);
+        byte[] hash = SHA256.HashData(data);
         return Convert.ToHexString(hash).Substring(0, 16);
     }
 
@@ -242,8 +243,13 @@ public class PdfResourceRegistry
     /// </summary>
     public string GetImageResourceName(int imageId)
     {
-        if (!ImageResourceNames.ContainsKey(imageId)) ImageResourceNames[imageId] = $"/I{imageId}";
-        return ImageResourceNames[imageId];
+        if (!ImageResourceNames.TryGetValue(imageId, out string existingResourceName))
+        {
+            string resourceName = $"/I{imageId}";
+            ImageResourceNames[imageId] = resourceName;
+            return resourceName;
+        }
+        return existingResourceName;
     }
 
     /// <summary>
@@ -285,9 +291,10 @@ public class PdfResourceRegistry
 
     private int ResolveFontObjectId(string fontIdentifier)
     {
-        if (FontAliasMap.TryGetValue(fontIdentifier, out string ttfPath))
-            return FontIdMap[ttfPath];
-        return FontIdMap[fontIdentifier];
+        if (FontAliasMap.TryGetValue(fontIdentifier, out string ttfPath) &&
+            FontIdMap.TryGetValue(ttfPath, out int ttfFontId))
+            return ttfFontId;
+        return FontIdMap.TryGetValue(fontIdentifier, out int fontId) ? fontId : 0;
     }
 
     /// <summary>
@@ -308,11 +315,13 @@ public class PdfResourceRegistry
 
             if (IsEmbeddedFont(fontIdentifier))
             {
-                EmbeddedFontInfo fontInfo = EmbeddedFonts[fontIdentifier];
-                int type0Id = writer.GetNewId();
-                fontInfo.Type0ObjectId = type0Id;
-                FontIdMap[fontIdentifier] = type0Id;
-                fontWriter.WriteEmbeddedTtfFont(type0Id, fontInfo);
+                if (EmbeddedFonts.TryGetValue(fontIdentifier, out EmbeddedFontInfo fontInfo))
+                {
+                    int type0Id = writer.GetNewId();
+                    fontInfo.Type0ObjectId = type0Id;
+                    FontIdMap[fontIdentifier] = type0Id;
+                    fontWriter.WriteEmbeddedTtfFont(type0Id, fontInfo);
+                }
             }
             else
             {
@@ -385,10 +394,10 @@ public class PdfResourceRegistry
             if (FontAliasMap.ContainsKey(fontIdentifier))
                 continue;
 
-            int objectId = FontIdMap[fontIdentifier];
-            fontRefs.Add($"{resourceName} {objectId} 0 R");
+            if (FontIdMap.TryGetValue(fontIdentifier, out int objectId))
+                fontRefs.Add($"{resourceName} {objectId} 0 R");
         }
-        string fontResources = "<< /Font << " + string.Join(" ", fontRefs) + " >> >>";
+        string fontResources = "<< /Font << " + string.Join(' ', fontRefs) + " >> >>";
 
         List<string> xobjRefs = new();
         if (ImageIdMap.Count > 0)
@@ -413,7 +422,7 @@ public class PdfResourceRegistry
                     xobjRefs.Add($"{info.ResourceName} {objectId} 0 R");
             }
 
-        string imageResources = xobjRefs.Count > 0 ? "<< /XObject << " + string.Join(" ", xobjRefs) + " >> >>" : "";
+        string imageResources = xobjRefs.Count > 0 ? "<< /XObject << " + string.Join(' ', xobjRefs) + " >> >>" : "";
         
         return CombineResources(fontResources, imageResources);
     }
@@ -436,11 +445,13 @@ public class PdfResourceRegistry
 
             if (IsEmbeddedFont(fontIdentifier))
             {
-                EmbeddedFontInfo fontInfo = EmbeddedFonts[fontIdentifier];
-                int type0Id = writer.GetNewId();
-                fontInfo.Type0ObjectId = type0Id;
-                FontIdMap[fontIdentifier] = type0Id;
-                await fontWriter.WriteEmbeddedTtfFontAsync(type0Id, fontInfo, true, cancellationToken).ConfigureAwait(false);
+                if (EmbeddedFonts.TryGetValue(fontIdentifier, out EmbeddedFontInfo fontInfo))
+                {
+                    int type0Id = writer.GetNewId();
+                    fontInfo.Type0ObjectId = type0Id;
+                    FontIdMap[fontIdentifier] = type0Id;
+                    await fontWriter.WriteEmbeddedTtfFontAsync(type0Id, fontInfo, true, cancellationToken).ConfigureAwait(false);
+                }
             }
             else
             {
@@ -513,10 +524,10 @@ public class PdfResourceRegistry
             if (FontAliasMap.ContainsKey(fontIdentifier))
                 continue;
 
-            int objectId = FontIdMap[fontIdentifier];
-            fontRefs.Add($"{resourceName} {objectId} 0 R");
+            if (FontIdMap.TryGetValue(fontIdentifier, out int objectId))
+                fontRefs.Add($"{resourceName} {objectId} 0 R");
         }
-        string fontResources = "<< /Font << " + string.Join(" ", fontRefs) + " >> >>";
+        string fontResources = "<< /Font << " + string.Join(' ', fontRefs) + " >> >>";
 
         List<string> xobjRefs = new();
         if (ImageIdMap.Count > 0)
@@ -541,7 +552,7 @@ public class PdfResourceRegistry
                     xobjRefs.Add($"{info.ResourceName} {objectId} 0 R");
             }
 
-        string imageResources = xobjRefs.Count > 0 ? "<< /XObject << " + string.Join(" ", xobjRefs) + " >> >>" : "";
+        string imageResources = xobjRefs.Count > 0 ? "<< /XObject << " + string.Join(' ', xobjRefs) + " >> >>" : "";
         
         return CombineResources(fontResources, imageResources);
     }
@@ -561,6 +572,6 @@ public class PdfResourceRegistry
         if (fontBase.EndsWith(" >>"))
             fontBase = fontBase.Substring(0, fontBase.Length - 3);
 
-        return fontBase + " " + imageContent + " >>";
+        return fontBase + ' ' + imageContent + " >>";
     }
 }

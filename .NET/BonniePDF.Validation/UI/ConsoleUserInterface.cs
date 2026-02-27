@@ -10,7 +10,7 @@ public class ConsoleUserInterface
     /// <summary>
     /// Displays the header
     /// </summary>
-    public void DisplayHeader()
+    public static void DisplayHeader()
     {
         Console.WriteLine("╔══════════════════════════════════════════════════════════════╗");
         Console.WriteLine("║           BonniePDF - PDF/A Validation Tool                  ║");
@@ -21,7 +21,7 @@ public class ConsoleUserInterface
     /// <summary>
     /// Displays a message
     /// </summary>
-    public void DisplayMessage(string message)
+    public static void DisplayMessage(string message)
     {
         Console.WriteLine(message);
     }
@@ -29,7 +29,7 @@ public class ConsoleUserInterface
     /// <summary>
     /// Displays an error message
     /// </summary>
-    public void DisplayError(string error)
+    public static void DisplayError(string error)
     {
         Console.WriteLine($"✗ Error: {error}");
     }
@@ -37,7 +37,7 @@ public class ConsoleUserInterface
     /// <summary>
     /// Displays validation progress
     /// </summary>
-    public void DisplayProgress(int current, int total, string fileName)
+    public static void DisplayProgress(int current, int total, string fileName)
     {
         Console.WriteLine($"[{current}/{total}] Validating: {fileName}");
     }
@@ -45,7 +45,7 @@ public class ConsoleUserInterface
     /// <summary>
     /// Displays the validation summary
     /// </summary>
-    public void DisplaySummary(ValidationSummary summary)
+    public static void DisplaySummary(ValidationSummary summary)
     {
         Console.WriteLine("╔══════════════════════════════════════════════════════════════╗");
         Console.WriteLine("║                      Validation Summary                       ║");
@@ -64,7 +64,7 @@ public class ConsoleUserInterface
     /// <summary>
     /// Displays a validation result
     /// </summary>
-    public void DisplayResult(ValidationResult result)
+    public static void DisplayResult(ValidationResult result)
     {
         if (result.IsSuccess)
         {
@@ -95,7 +95,7 @@ public class ConsoleUserInterface
     /// <summary>
     /// Reads a line of input from the user
     /// </summary>
-    public string? ReadLine()
+    public static string? ReadLine()
     {
         return Console.ReadLine();
     }
@@ -103,7 +103,7 @@ public class ConsoleUserInterface
     /// <summary>
     /// Waits for user input before exiting
     /// </summary>
-    public void WaitForExit()
+    public static void WaitForExit()
     {
         try
         {

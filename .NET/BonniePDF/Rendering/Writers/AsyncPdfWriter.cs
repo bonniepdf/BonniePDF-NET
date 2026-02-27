@@ -117,7 +117,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
             await _writer.WriteLineAsync(">>").ConfigureAwait(false);
             await _writer.WriteLineAsync("stream").ConfigureAwait(false);
             await _writer.FlushAsync(cancellationToken).ConfigureAwait(false);
-            await _stream.WriteAsync(contentBytes, 0, contentBytes.Length, cancellationToken).ConfigureAwait(false);
+            await _stream.WriteAsync(contentBytes, cancellationToken).ConfigureAwait(false);
             await _writer.WriteAsync("\nendstream\n").ConfigureAwait(false);
         }
         else
@@ -160,7 +160,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
                 // 4. Compress into the MemoryStream
                 using (ZLibStream zlib = new(outputMs, CompressionLevel.Optimal, true))
                 {
-                    await zlib.WriteAsync(rawBytes, 0, rawBytes.Length, cancellationToken).ConfigureAwait(false);
+                    await zlib.WriteAsync(rawBytes, cancellationToken).ConfigureAwait(false);
                 }
                 // ZLibStream is disposed here, forcing a flush to outputMs.
 
@@ -263,7 +263,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
             trailerParts.Add($"/ID {Encryptor.GetIdArray()}");
         }
 
-        string trailerDict = $"<< {string.Join(" ", trailerParts)} >>\n";
+        string trailerDict = $"<< {string.Join(' ', trailerParts)} >>\n";
         await _writer.WriteAsync(trailerDict).ConfigureAwait(false);
         await _writer.WriteAsync("startxref\n").ConfigureAwait(false);
         await _writer.WriteAsync($"{xrefPos}\n").ConfigureAwait(false);
@@ -348,7 +348,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
         // Add OutputIntents if provided (PDF/A)
         if (options?.OutputIntentIds is { Count: > 0 })
         {
-            string refs = string.Join(" ", options.OutputIntentIds.ConvertAll(oid => $"{oid} 0 R"));
+            string refs = string.Join(' ', options.OutputIntentIds.ConvertAll(oid => $"{oid} 0 R"));
             dict["/OutputIntents"] = $"[ {refs} ]";
         }
 
@@ -377,7 +377,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
         await _writer.WriteAsync(">>\nstream\n").ConfigureAwait(false);
         await _writer.FlushAsync(cancellationToken).ConfigureAwait(false);
 
-        await _stream.WriteAsync(streamContent, 0, streamContent.Length, cancellationToken).ConfigureAwait(false);
+        await _stream.WriteAsync(streamContent, cancellationToken).ConfigureAwait(false);
 
         await _writer.WriteAsync("\nendstream\n").ConfigureAwait(false);
         await _writer.WriteAsync("endobj\n").ConfigureAwait(false);
@@ -398,7 +398,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
         using MemoryStream memoryStream = new();
         using (ZLibStream zlib = new(memoryStream, CompressionLevel.Optimal, leaveOpen: true))
         {
-            await zlib.WriteAsync(streamContent, 0, length, cancellationToken).ConfigureAwait(false);
+            await zlib.WriteAsync(streamContent.AsMemory(0, length), cancellationToken).ConfigureAwait(false);
         }
 
         byte[] compressedBytes = memoryStream.ToArray();
@@ -456,7 +456,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter, IAsyncDisposable
 
         // Write binary data directly to the underlying stream
         // We explicitly write 'lengthToWrite' bytes, ignoring the rest of the buffer
-        await _stream.WriteAsync(contentToWrite, 0, lengthToWrite, cancellationToken).ConfigureAwait(false);
+        await _stream.WriteAsync(contentToWrite.AsMemory(0, lengthToWrite), cancellationToken).ConfigureAwait(false);
 
         // Continue with ASCII writer
         await _writer.WriteAsync("\nendstream\n").ConfigureAwait(false);

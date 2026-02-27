@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using BonniePDF.Charts.Models;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
@@ -52,7 +53,7 @@ public class PieChart : ChartBase
     /// Custom colors to use for the pie slices.
     /// If null, uses the default color palette.
     /// </summary>
-    public List<string>? Colors { get; set; } = null;
+    public List<string>? Colors { get; set; }
 
     /// <summary>
     /// Whether to render as a donut chart with a center hole.
@@ -81,7 +82,7 @@ public class PieChart : ChartBase
     /// When null (default), uses the LabelFormat from the first data point.
     /// Set to a custom format string (e.g. "C0", "N0", "'$'#,##0") to override.
     /// </summary>
-    public string? TotalValueFormat { get; set; } = null;
+    public string? TotalValueFormat { get; set; }
 
     /// <summary>
     /// Whether to show the legend.
@@ -170,7 +171,7 @@ public class PieChart : ChartBase
     /// <summary>
     /// Calculates the start and end angles for each pie slice.
     /// </summary>
-    private List<(float startAngle, float endAngle)> CalculateSliceAngles(List<ChartDataPoint> dataPoints,
+    private static List<(float startAngle, float endAngle)> CalculateSliceAngles(IList<ChartDataPoint> dataPoints,
         decimal total)
     {
         List<(float startAngle, float endAngle)> angles = new();
@@ -207,7 +208,7 @@ public class PieChart : ChartBase
     /// <summary>
     /// Draws the pie slices.
     /// </summary>
-    private void DrawPieSlices(ICanvas canvas, List<ChartDataPoint> dataPoints,
+    private static void DrawPieSlices(ICanvas canvas, IList<ChartDataPoint> dataPoints,
         List<(float startAngle, float endAngle)> angles, List<Color> colors, PieLayout layout)
     {
         for (int i = 0; i < dataPoints.Count; i++)
@@ -216,7 +217,7 @@ public class PieChart : ChartBase
             Color color = colors[i];
 
             // Calculate the path for the pie slice
-            List<(float x, float y)> path = CreatePieSlicePath(startAngle, endAngle, layout);
+            List<Point> path = CreatePieSlicePath(startAngle, endAngle, layout);
 
             // Fill the slice
             canvas.FillPath(path, color);
@@ -226,12 +227,12 @@ public class PieChart : ChartBase
     /// <summary>
     /// Creates a path for a pie slice.
     /// </summary>
-    private List<(float x, float y)> CreatePieSlicePath(float startAngle, float endAngle, PieLayout layout)
+    private static List<Point> CreatePieSlicePath(float startAngle, float endAngle, PieLayout layout)
     {
-        List<(float x, float y)> path = new();
+        List<Point> path = new();
 
         // Start at the center
-        path.Add((layout.CenterX, layout.CenterY));
+        path.Add(new Point(layout.CenterX, layout.CenterY));
 
         // Add arc points
         int segments = Math.Max((int)Math.Ceiling((endAngle - startAngle) / 5), 1);
@@ -241,7 +242,7 @@ public class PieChart : ChartBase
             float radians = (float)(angle * Math.PI / 180);
             float x = layout.CenterX + (float)(layout.Radius * Math.Cos(radians));
             float y = layout.CenterY + (float)(layout.Radius * Math.Sin(radians));
-            path.Add((x, y));
+            path.Add(new Point(x, y));
         }
 
         return path;
@@ -250,7 +251,7 @@ public class PieChart : ChartBase
     /// <summary>
     /// Draws the donut hole with the total value.
     /// </summary>
-    private void DrawDonutHole(ICanvas canvas, decimal total, List<ChartDataPoint> dataPoints, PieLayout layout)
+    private void DrawDonutHole(ICanvas canvas, decimal total, IList<ChartDataPoint> dataPoints, PieLayout layout)
     {
         // Draw white circle for donut hole
         canvas.FillCircle(layout.CenterX, layout.CenterY, layout.DonutHoleRadius, Color.White);
@@ -272,7 +273,7 @@ public class PieChart : ChartBase
     /// <summary>
     /// Draws the legend on the right side.
     /// </summary>
-    private void DrawLegend(ICanvas canvas, List<ChartDataPoint> dataPoints, List<Color> colors, PieLayout layout)
+    private static void DrawLegend(ICanvas canvas, IList<ChartDataPoint> dataPoints, List<Color> colors, PieLayout layout)
     {
         for (int i = 0; i < dataPoints.Count; i++)
         {
@@ -293,11 +294,35 @@ public class PieChart : ChartBase
     /// <summary>
     /// Holds all computed layout positions for a pie chart render pass.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     private readonly record struct PieLayout(
         float CenterX,
         float CenterY,
         float Radius,
         float DonutHoleRadius,
         float LegendX,
-        float LegendStartY);
+        float LegendStartY)
+    {
+        public bool Equals(PieLayout other)
+        {
+            return Math.Abs(CenterX - other.CenterX) < 0.0001f &&
+                   Math.Abs(CenterY - other.CenterY) < 0.0001f &&
+                   Math.Abs(Radius - other.Radius) < 0.0001f &&
+                   Math.Abs(DonutHoleRadius - other.DonutHoleRadius) < 0.0001f &&
+                   Math.Abs(LegendX - other.LegendX) < 0.0001f &&
+                   Math.Abs(LegendStartY - other.LegendStartY) < 0.0001f;
+        }
+
+        public override int GetHashCode()
+        {
+            var hash = new HashCode();
+            hash.Add(CenterX);
+            hash.Add(CenterY);
+            hash.Add(Radius);
+            hash.Add(DonutHoleRadius);
+            hash.Add(LegendX);
+            hash.Add(LegendStartY);
+            return hash.ToHashCode();
+        }
+    }
 }

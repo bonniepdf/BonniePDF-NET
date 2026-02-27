@@ -9,6 +9,12 @@ namespace BonniePDF.Validation.Services;
 /// </summary>
 public class HtmlReportGenerator : IReportGenerator
 {
+    private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+    {
+        WriteIndented = false,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     /// <summary>
     /// Initializes a new instance of the HtmlReportGenerator
     /// </summary>
@@ -71,7 +77,7 @@ public class HtmlReportGenerator : IReportGenerator
         await System.IO.File.WriteAllTextAsync(outputPath, html.ToString());
     }
 
-    private string GetCssStyles()
+    private static string GetCssStyles()
     {
         return @"
     <style>
@@ -567,7 +573,7 @@ public class HtmlReportGenerator : IReportGenerator
     </style>";
     }
 
-    private string GetHeaderSection(string validationProfile, string sourceDirectory)
+    private static string GetHeaderSection(string validationProfile, string sourceDirectory)
     {
         return $@"
         <header class=""report-header"">
@@ -594,7 +600,7 @@ public class HtmlReportGenerator : IReportGenerator
         </header>";
     }
 
-    private string GetSummarySection(ValidationSummary summary)
+    private static string GetSummarySection(ValidationSummary summary)
     {
         return $@"
         <section class=""summary-section"">
@@ -630,7 +636,7 @@ public class HtmlReportGenerator : IReportGenerator
         </section>";
     }
 
-    private string GetControlsSection()
+    private static string GetControlsSection()
     {
         return @"
         <section class=""controls-section"">
@@ -651,7 +657,7 @@ public class HtmlReportGenerator : IReportGenerator
         </section>";
     }
 
-    private string GetResultsSection(List<ValidationResult> results)
+    private static string GetResultsSection(List<ValidationResult> results)
     {
         var sb = new StringBuilder();
         sb.AppendLine(@"        <section class=""results-section"">");
@@ -668,7 +674,7 @@ public class HtmlReportGenerator : IReportGenerator
         return sb.ToString();
     }
 
-    private string GetResultCard(ValidationResult result)
+    private static string GetResultCard(ValidationResult result)
     {
         string statusClass = result.IsSuccess
             ? (result.IsCompliant ? "passed" : "failed")
@@ -741,7 +747,7 @@ public class HtmlReportGenerator : IReportGenerator
         return sb.ToString();
     }
 
-    private string GetFooterSection(ValidationSummary summary, string validationProfile)
+    private static string GetFooterSection(ValidationSummary summary, string validationProfile)
     {
         return $@"
         <footer class=""report-footer"">
@@ -752,7 +758,7 @@ public class HtmlReportGenerator : IReportGenerator
         </footer>";
     }
 
-    private string GetJavaScriptData(
+    private static string GetJavaScriptData(
         List<ValidationResult> results,
         ValidationSummary summary,
         string validationProfile,
@@ -782,16 +788,12 @@ public class HtmlReportGenerator : IReportGenerator
             })
         };
 
-        var json = JsonSerializer.Serialize(data, new JsonSerializerOptions
-        {
-            WriteIndented = false,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+        var json = JsonSerializer.Serialize(data, _jsonOptions);
 
         return $"const validationData = {json};";
     }
 
-    private string GetJavaScriptLogic()
+    private static string GetJavaScriptLogic()
     {
         return @"
         // Initialize on page load

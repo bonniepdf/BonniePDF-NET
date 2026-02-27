@@ -193,14 +193,14 @@ public class BookPageExample
         return outputPath;
     }
 
-    private static IElement CreateParagraph(string text)
+    private static TextBlock CreateParagraph(string text)
     {
         return new TextBlock
         {
             Text = text,
             FontName = StandardFonts.TimesRoman,
             FontSize = 11,
-            TextColor = Color.Slate800
+            TextColor = Color.Slate800,
         };
     }
 }

@@ -44,7 +44,7 @@ public class LollipopChart : CartesianChartBase
     /// Draws the lollipop chart elements for a single series (stems and heads).
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
-        List<(float x, float y)> coordinates,
+        IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
         // Get series-specific styling or use defaults
@@ -70,20 +70,20 @@ public class LollipopChart : CartesianChartBase
     /// <summary>
     /// Draws the lollipop stems (vertical lines from baseline to data point) for a series.
     /// </summary>
-    private void DrawLollipopStems(ICanvas canvas, List<(float x, float y)> coordinates, 
+    private static void DrawLollipopStems(ICanvas canvas, IList<Point> coordinates, 
         float baselineY, Color color, float stemWidth)
     {
-        foreach ((float x, float y) in coordinates)
-            canvas.DrawLine(x, baselineY, x, y, color, stemWidth);
+        foreach (Point p in coordinates)
+            canvas.DrawLine(p.X, baselineY, p.X, p.Y, color, stemWidth);
     }
 
     /// <summary>
     /// Draws the lollipop heads (circles at data points) for a series.
     /// </summary>
-    private void DrawLollipopHeads(ICanvas canvas, List<(float x, float y)> coordinates, Color color, float radius)
+    private static void DrawLollipopHeads(ICanvas canvas, IList<Point> coordinates, Color color, float radius)
     {
-        foreach ((float x, float y) in coordinates)
-            canvas.FillCircle(x, y, radius, color);
+        foreach (Point p in coordinates)
+            canvas.FillCircle(p.X, p.Y, radius, color);
     }
 
     /// <summary>
@@ -91,21 +91,4 @@ public class LollipopChart : CartesianChartBase
     /// Returns the chart's LollipopColor property for backward compatibility.
     /// </summary>
     protected override Color GetDefaultSeriesColor() => LollipopColor;
-
-    #region Backward Compatibility - Obsolete Methods
-
-    /// <summary>
-    /// Draws the lollipop chart elements (stems and heads).
-    /// OBSOLETE: Use DrawSeriesElements instead for multi-series support.
-    /// </summary>
-    [System.Obsolete("Use DrawSeriesElements instead for multi-series support")]
-    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
-        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
-    {
-        // For backward compatibility, treat as single series
-        var series = data.Series.Count > 0 ? data.Series[0] : new ChartSeries { Color = LollipopColor };
-        DrawSeriesElements(canvas, data, series, coordinates, chartAreaWidth, chartAreaHeight, baselineY, topY);
-    }
-
-    #endregion
 }

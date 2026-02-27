@@ -258,7 +258,7 @@ public class PdfWriter : IPdfWriter, IDisposable
             trailerParts.Add($"/ID [<{hexId}> <{hexId}>]");
         }
 
-        string trailerDict = $"<< {string.Join(" ", trailerParts)} >>\n";
+        string trailerDict = $"<< {string.Join(' ', trailerParts)} >>\n";
         _writer.Write(trailerDict);
         _writer.Write("startxref\n");
         _writer.Write($"{xrefPos}\n");
@@ -339,7 +339,7 @@ public class PdfWriter : IPdfWriter, IDisposable
         // Add OutputIntents if provided (PDF/A)
         if (options?.OutputIntentIds is { Count: > 0 })
         {
-            string refs = string.Join(" ", options.OutputIntentIds.ConvertAll(oid => $"{oid} 0 R"));
+            string refs = string.Join(' ', options.OutputIntentIds.ConvertAll(oid => $"{oid} 0 R"));
             dict["/OutputIntents"] = $"[ {refs} ]";
         }
 

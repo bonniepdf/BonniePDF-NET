@@ -112,7 +112,7 @@ public class RenderContext
 
     public string RegisterFont(string fontIdentifier) => Resources.RegisterFont(fontIdentifier);
 
-    public bool IsEmbeddedFont(string fontIdentifier) => Resources.IsEmbeddedFont(fontIdentifier);
+    public static bool IsEmbeddedFont(string fontIdentifier) => PdfResourceRegistry.IsEmbeddedFont(fontIdentifier);
 
     public EmbeddedFontInfo GetEmbeddedFont(string filePath) => Resources.GetEmbeddedFont(filePath);
 

@@ -103,7 +103,7 @@ public class EncryptionSettings
             UserPassword = UserPassword,
             OwnerPassword = OwnerPassword,
             Permissions = Permissions,
-            EncryptMetadata = EncryptMetadata
+            EncryptMetadata = EncryptMetadata,
         };
     }
 }

@@ -233,7 +233,7 @@ public class TtfSubsetterTests
         var mapping = subsetter.OldToNewGidMap;
 
         // New GIDs should be sequential starting from 0 (.notdef)
-        var newGids = mapping.Values.OrderBy(g => g).ToList();
+        var newGids = mapping.Values.Order().ToList();
         for (int i = 0; i < newGids.Count; i++)
         {
             Assert.Equal(i, newGids[i]);

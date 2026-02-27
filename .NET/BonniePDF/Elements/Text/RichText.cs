@@ -277,7 +277,7 @@ public class RichText : ElementBase, IStatefulElement
             }
 
             // Add leading space (if not at start of line)
-            string text = currentWidth > 0 && word.HasLeadingSpace ? " " + word.Text : word.Text;
+            string text = currentWidth > 0 && word.HasLeadingSpace ? ' ' + word.Text : word.Text;
             float textWidth = currentWidth > 0 && word.HasLeadingSpace ? spaceWidth + wordWidth : wordWidth;
 
             // Try to merge with last run if same style
@@ -341,7 +341,7 @@ public class RichText : ElementBase, IStatefulElement
                 string part = parts[i];
                 if (string.IsNullOrEmpty(part)) continue;
 
-                bool hasLeadingSpace = i > 0 || (words.Count > 0 && text.StartsWith(" "));
+                bool hasLeadingSpace = i > 0 || (words.Count > 0 && text.StartsWith(' '));
 
                 float partWidth = FontMetrics.GetStringWidth(
                     part, resolved.EffectiveFontName, resolved.EffectiveFontSize);
@@ -461,7 +461,7 @@ public class RichText : ElementBase, IStatefulElement
     /// <summary>
     /// Draws a justified run by splitting at spaces and adding extra spacing.
     /// </summary>
-    private float DrawJustifiedRun(RenderContext ctx, StyledRun run,
+    private static float DrawJustifiedRun(RenderContext ctx, StyledRun run,
         float startX, float y, float lineHeight, float extraWordSpacing)
     {
         TextStyle style = run.Style;
@@ -501,7 +501,7 @@ public class RichText : ElementBase, IStatefulElement
     /// <summary>
     /// Draws underline and/or strikethrough decorations for a styled run.
     /// </summary>
-    private void DrawRunDecorations(RenderContext ctx, TextStyle style,
+    private static void DrawRunDecorations(RenderContext ctx, TextStyle style,
         float x, float y, float width, float fontSize)
     {
         float thickness = Math.Max(0.5f, fontSize / 18f);
@@ -527,7 +527,7 @@ public class RichText : ElementBase, IStatefulElement
         return spanStyle.MergeWith(DefaultStyle);
     }
 
-    private float MeasureRunWidth(StyledRun run, float extraWordSpacing)
+    private static float MeasureRunWidth(StyledRun run, float extraWordSpacing)
     {
         float baseWidth = FontMetrics.GetStringWidth(
             run.Text, run.Style.EffectiveFontName, run.Style.EffectiveFontSize);

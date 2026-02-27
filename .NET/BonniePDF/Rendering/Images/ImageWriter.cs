@@ -153,7 +153,7 @@ public class ImageWriter
     /// <summary>
     /// Compresses data using zlib/Deflate (Legacy Sync Version)
     /// </summary>
-    private byte[] CompressData(byte[] data)
+    private static byte[] CompressData(byte[] data)
     {
         using MemoryStream output = new();
 
@@ -181,7 +181,7 @@ public class ImageWriter
     /// Returns the buffer and the actual length used.
     /// Caller MUST return the buffer to ArrayPool&lt;byte&gt;.Shared
     /// </summary>
-    private (byte[] Buffer, int Length) CompressDataToPool(byte[] data)
+    private static (byte[] Buffer, int Length) CompressDataToPool(byte[] data)
     {
         // Guess size: Input + overhead. Zlib usually compresses, but can expand slightly if random.
         // We allow some headroom to avoid MemoryStream expansion issues on fixed buffers.
@@ -213,7 +213,7 @@ public class ImageWriter
     /// <summary>
     /// Calculates Adler-32 checksum for zlib
     /// </summary>
-    private uint CalculateAdler32(byte[] data)
+    private static uint CalculateAdler32(byte[] data)
     {
         const uint MOD_ADLER = 65521;
         uint a = 1, b = 0;
@@ -230,7 +230,7 @@ public class ImageWriter
     /// <summary>
     /// Gets the PDF color space string for an image
     /// </summary>
-    private string GetColorSpaceString(ImageColorSpace colorSpace, byte[] palette)
+    private static string GetColorSpaceString(ImageColorSpace colorSpace, byte[] palette)
     {
         return colorSpace switch
         {
@@ -379,7 +379,7 @@ public class ImageWriter
     /// <summary>
     /// Flattens alpha channel by compositing against white background
     /// </summary>
-    private byte[] FlattenAlpha(byte[] data, byte[] alphaData, int components, int bitsPerComponent)
+    private static byte[] FlattenAlpha(byte[] data, byte[] alphaData, int components, int bitsPerComponent)
     {
         if (bitsPerComponent != 8)
             throw new NotSupportedException($"Flattening alpha for {bitsPerComponent}-bit images is not supported yet.");

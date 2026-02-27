@@ -58,7 +58,7 @@ public abstract class TextElementBase : ElementBase
 
         foreach (string word in words)
         {
-            string testLine = string.IsNullOrEmpty(currentLine) ? word : currentLine + " " + word;
+            string testLine = string.IsNullOrEmpty(currentLine) ? word : currentLine + ' ' + word;
 
             // Calculate exact width of the test line (handling tokens)
             float testWidth = MeasureTextWidth(testLine);

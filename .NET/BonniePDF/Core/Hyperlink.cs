@@ -178,7 +178,7 @@ public class Hyperlink : IElement
 
         foreach (string word in words)
         {
-            string testLine = string.IsNullOrEmpty(currentLine) ? word : currentLine + " " + word;
+            string testLine = string.IsNullOrEmpty(currentLine) ? word : currentLine + ' ' + word;
 
             float testWidth = FontMetrics.GetStringWidth(testLine, FontName, FontSize);
 

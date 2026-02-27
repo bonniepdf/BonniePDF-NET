@@ -8,6 +8,12 @@ namespace BonniePDF.Validation.Services;
 /// </summary>
 public class JsonReportGenerator : IReportGenerator
 {
+    private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     /// <summary>
     /// Initializes a new instance of the JsonReportGenerator
     /// </summary>
@@ -26,13 +32,7 @@ public class JsonReportGenerator : IReportGenerator
     {
         var report = ValidationReport.FromResults(results, validationProfile, sourceDirectory);
 
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
-        string json = JsonSerializer.Serialize(report, options);
+        string json = JsonSerializer.Serialize(report, _jsonOptions);
         await System.IO.File.WriteAllTextAsync(outputPath, json);
     }
 }

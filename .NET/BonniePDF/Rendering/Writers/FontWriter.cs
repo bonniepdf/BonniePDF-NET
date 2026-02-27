@@ -277,11 +277,11 @@ public class FontWriter
     /// Generates the /W (width) array for the CIDFont.
     /// Format: [ gid [w1 w2 w3...] gid [w1 w2...] ... ]
     /// </summary>
-    private string GenerateWidthArray(TtfFont font, GlyphUsageTracker tracker)
+    private static string GenerateWidthArray(TtfFont font, GlyphUsageTracker tracker)
     {
         float scale = 1000f / font.UnitsPerEm;
         StringBuilder sb = new("[ ");
-        List<ushort> glyphs = tracker.UsedGlyphIds.OrderBy(g => g).ToList();
+        List<ushort> glyphs = tracker.UsedGlyphIds.Order().ToList();
 
         int i = 0;
         while (i < glyphs.Count)
@@ -293,7 +293,7 @@ public class FontWriter
             while (j < glyphs.Count && glyphs[j] == startGid + (j - i))
             {
                 int scaledWidth = (int)(font.GetGlyphWidth(glyphs[j]) * scale);
-                sb.Append(scaledWidth).Append(" ");
+                sb.Append(scaledWidth).Append(' ');
                 j++;
             }
 
@@ -301,7 +301,7 @@ public class FontWriter
             i = j; // Jump to the next non-consecutive GID
         }
 
-        sb.Append("]");
+        sb.Append(']');
         return sb.ToString();
     }
 

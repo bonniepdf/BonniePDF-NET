@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using BonniePDF.Validation.Configuration;
 using BonniePDF.Validation.Models;
 
@@ -7,9 +8,30 @@ namespace BonniePDF.Validation.Services;
 /// <summary>
 /// HTTP client implementation for VeraPDF API
 /// </summary>
-public class VeraPdfApiClient
+public partial class VeraPdfApiClient
 {
     private readonly Configuration.VeraPdfSettings _settings;
+    
+    [GeneratedRegex(@"<compliance>(.*?)</compliance>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture)]
+    private static partial Regex ComplianceRegex();
+    
+    [GeneratedRegex(@"<passed>(.*?)</passed>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture)]
+    private static partial Regex PassedRegex();
+    
+    [GeneratedRegex(@"<rule[^>]*status=""failed""[^>]*>(.*?)</rule>", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture)]
+    private static partial Regex FailedRuleRegex();
+    
+    [GeneratedRegex(@"<message>(.*?)</message>", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture)]
+    private static partial Regex MessageRegex();
+    
+    [GeneratedRegex(@"<location>(.*?)</location>", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture)]
+    private static partial Regex LocationRegex();
+    
+    [GeneratedRegex(@"clause=""([^""]+)""", RegexOptions.ExplicitCapture)]
+    private static partial Regex ClauseRegex();
+    
+    [GeneratedRegex(@"test=""([^""]+)""", RegexOptions.ExplicitCapture)]
+    private static partial Regex TestRegex();
 
     /// <summary>
     /// Initializes a new instance of the VeraPdfApiClient
@@ -93,7 +115,7 @@ public class VeraPdfApiClient
             string responseContent = await response.Content.ReadAsStringAsync();
             
             // Check if response is XML or JSON
-            if (responseContent.TrimStart().StartsWith("<"))
+            if (responseContent.TrimStart().StartsWith('<'))
             {
                 return ParseXmlResponse(responseContent, fileName, pdfBytes.LongLength, stopwatch.Elapsed);
             }
@@ -116,7 +138,7 @@ public class VeraPdfApiClient
         }
     }
 
-    private HttpClient CreateHttpClient(TimeSpan timeout)
+    private static HttpClient CreateHttpClient(TimeSpan timeout)
     {
         var client = new HttpClient
         {
@@ -125,7 +147,7 @@ public class VeraPdfApiClient
         return client;
     }
 
-    private string GetProfileId(ValidationProfile profile)
+    private static string GetProfileId(ValidationProfile profile)
     {
         return profile switch
         {
@@ -139,7 +161,7 @@ public class VeraPdfApiClient
         };
     }
 
-    private ValidationResult ParseJsonResponse(
+    private static ValidationResult ParseJsonResponse(
         string jsonResponse,
         string fileName,
         long fileSize,
@@ -262,7 +284,7 @@ public class VeraPdfApiClient
         }
     }
 
-    private ValidationResult ParseXmlResponse(
+    private static ValidationResult ParseXmlResponse(
         string xmlResponse,
         string fileName,
         long fileSize,
@@ -272,11 +294,7 @@ public class VeraPdfApiClient
         {
             bool isCompliant = false;
             
-            var complianceMatch = System.Text.RegularExpressions.Regex.Match(
-                xmlResponse, 
-                @"<compliance>(.*?)</compliance>", 
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase
-            );
+            var complianceMatch = ComplianceRegex().Match(xmlResponse);
             
             if (complianceMatch.Success)
             {
@@ -286,11 +304,7 @@ public class VeraPdfApiClient
             }
             else
             {
-                var passedMatch = System.Text.RegularExpressions.Regex.Match(
-                    xmlResponse, 
-                    @"<passed>(.*?)</passed>", 
-                    System.Text.RegularExpressions.RegexOptions.IgnoreCase
-                );
+                var passedMatch = PassedRegex().Match(xmlResponse);
                 
                 if (passedMatch.Success)
                 {
@@ -304,37 +318,25 @@ public class VeraPdfApiClient
 
             if (!isCompliant)
             {
-                var ruleMatches = System.Text.RegularExpressions.Regex.Matches(
-                    xmlResponse,
-                    @"<rule[^>]*status=""failed""[^>]*>(.*?)</rule>",
-                    System.Text.RegularExpressions.RegexOptions.Singleline | System.Text.RegularExpressions.RegexOptions.IgnoreCase
-                );
+                var ruleMatches = FailedRuleRegex().Matches(xmlResponse);
 
                 var processedErrors = new HashSet<string>();
                 
-                foreach (System.Text.RegularExpressions.Match match in ruleMatches)
+                foreach (Match match in ruleMatches)
                 {
                     string ruleContent = match.Groups[1].Value;
                     string ruleTag = match.Value;
                     
-                    var messageMatch = System.Text.RegularExpressions.Regex.Match(
-                        ruleContent, 
-                        @"<message>(.*?)</message>", 
-                        System.Text.RegularExpressions.RegexOptions.Singleline | System.Text.RegularExpressions.RegexOptions.IgnoreCase
-                    );
+                    var messageMatch = MessageRegex().Match(ruleContent);
                     string message = messageMatch.Success ? messageMatch.Groups[1].Value.Trim() : "";
                     
-                    var locationMatch = System.Text.RegularExpressions.Regex.Match(
-                        ruleContent, 
-                        @"<location>(.*?)</location>", 
-                        System.Text.RegularExpressions.RegexOptions.Singleline | System.Text.RegularExpressions.RegexOptions.IgnoreCase
-                    );
+                    var locationMatch = LocationRegex().Match(ruleContent);
                     string location = locationMatch.Success ? locationMatch.Groups[1].Value.Trim() : "";
                     
-                    var clauseMatch = System.Text.RegularExpressions.Regex.Match(ruleTag, @"clause=""([^""]+)""");
+                    var clauseMatch = ClauseRegex().Match(ruleTag);
                     string clause = clauseMatch.Success ? clauseMatch.Groups[1].Value : "";
                     
-                    var testMatch = System.Text.RegularExpressions.Regex.Match(ruleTag, @"test=""([^""]+)""");
+                    var testMatch = TestRegex().Match(ruleTag);
                     string test = testMatch.Success ? testMatch.Groups[1].Value : "";
                     
                     string errorStr = "";

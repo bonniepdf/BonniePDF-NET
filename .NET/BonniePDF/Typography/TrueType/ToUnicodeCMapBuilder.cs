@@ -33,7 +33,7 @@ public class ToUnicodeCMapBuilder
     /// <summary>
     /// Adds multiple mappings from a codepoint-to-glyph dictionary
     /// </summary>
-    public void AddMappings(Dictionary<int, ushort> codepointToGlyph)
+    public void AddMappings(IDictionary<int, ushort> codepointToGlyph)
     {
         foreach ((int cp, ushort gid) in codepointToGlyph) AddMapping(gid, cp);
     }
@@ -110,7 +110,7 @@ public class ToUnicodeCMapBuilder
         return $"<{highSurrogate:X4}{lowSurrogate:X4}>";
     }
 
-    private string BuildEmptyCMap()
+    private static string BuildEmptyCMap()
     {
         StringBuilder sb = new();
 

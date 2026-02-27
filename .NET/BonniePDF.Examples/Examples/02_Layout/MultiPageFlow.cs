@@ -230,7 +230,7 @@ public static class FlowArchitectureExample
             for (int p = 0; p < 3; p++)
                 doc.Add(new TextBlock
                 {
-                    Text = paragraphText + " " + paragraphText,
+                    Text = paragraphText + ' ' + paragraphText,
                     FontName = StandardFonts.Helvetica,
                     FontSize = 11,
                     TextColor = Color.Slate600,

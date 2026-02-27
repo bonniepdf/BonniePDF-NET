@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using BonniePDF.Charts.Models;
 using BonniePDF.Core;
@@ -109,22 +108,6 @@ public abstract class CartesianChartBase : ChartBase
     }
 
     /// <summary>
-    /// Draws the chart-specific data elements (bars, lines, area, dots, etc.).
-    /// Derived classes must implement this to provide their specific drawing logic.
-    /// This is called after grid lines and axis labels, but before axis lines are drawn on top.
-    /// </summary>
-    /// <param name="canvas">The canvas to draw to</param>
-    /// <param name="data">The chart data to render</param>
-    /// <param name="coordinates">Pre-calculated coordinates for all data points</param>
-    /// <param name="chartAreaWidth">Width of the chart drawing area</param>
-    /// <param name="chartAreaHeight">Height of the chart drawing area</param>
-    /// <param name="baselineY">Y coordinate of the x-axis (bottom of chart area)</param>
-    /// <param name="topY">Y coordinate of the top of the chart area</param>
-    [Obsolete("Use DrawSeriesElements instead for multi-series support")]
-    protected abstract void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
-        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY);
-
-    /// <summary>
     /// Whether to show a legend for multiple series (default: true).
     /// </summary>
     public bool ShowLegend { get; set; } = true;
@@ -138,7 +121,7 @@ public abstract class CartesianChartBase : ChartBase
     {
         foreach (ChartSeries series in data.Series)
         {
-            List<(float x, float y)> coordinates = CalculateSeriesCoordinates(
+            IList<Point> coordinates = CalculateSeriesCoordinates(
                 series, data, chartAreaWidth, chartAreaHeight, baselineY);
 
             DrawSeriesElements(canvas, data, series, coordinates,
@@ -149,24 +132,26 @@ public abstract class CartesianChartBase : ChartBase
     /// <summary>
     /// Calculates coordinates for a specific series based on chart dimensions.
     /// </summary>
-    protected List<(float x, float y)> CalculateSeriesCoordinates(
+    protected static IList<Point> CalculateSeriesCoordinates(
         ChartSeries series, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY)
     {
         int dataPointCount = series.DataPoints.Count;
-        List<(float x, float y)> coordinates = new();
+        List<Point> coordinates = new();
 
         float totalSpace = chartAreaWidth / dataPointCount;
         float spacing = totalSpace;
 
         for (int i = 0; i < dataPointCount; i++)
         {
+
             float x = LeftPadding + i * spacing + spacing / 2;
 
             decimal normalizedValue = series.DataPoints[i].Value / data.YAxis.MaxValue;
             float y = baselineY - (float)(normalizedValue * (decimal)chartAreaHeight);
 
-            coordinates.Add((x, y));
+            var point = new Point(x, y);
+            coordinates.Add(point);
         }
 
         return coordinates;
@@ -185,7 +170,7 @@ public abstract class CartesianChartBase : ChartBase
     /// <param name="baselineY">Y coordinate of the x-axis (bottom of chart area)</param>
     /// <param name="topY">Y coordinate of the top of the chart area</param>
     protected abstract void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
-        List<(float x, float y)> coordinates,
+        IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY);
 
     /// <summary>
@@ -200,7 +185,7 @@ public abstract class CartesianChartBase : ChartBase
 
         foreach (ChartSeries series in data.Series)
         {
-            List<(float x, float y)> coordinates = CalculateSeriesCoordinates(
+            IList<Point> coordinates = CalculateSeriesCoordinates(
                 series, data, chartAreaWidth, chartAreaHeight, baselineY);
 
             Color labelColor = series.Color;
@@ -208,11 +193,11 @@ public abstract class CartesianChartBase : ChartBase
 
             for (int i = 0; i < series.DataPoints.Count; i++)
             {
-                (float x, float y) = coordinates[i];
+                var point = coordinates[i];
                 string text = series.DataPoints[i].FormattedValue;
 
                 // Draw text above the data point
-                canvas.DrawText(x, y - verticalOffset - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
+                canvas.DrawText(point.X, point.Y - verticalOffset - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
                     TextAlignment.Center);
             }
         }
@@ -364,11 +349,11 @@ public abstract class CartesianChartBase : ChartBase
     /// <summary>
     /// Calculates coordinates for all data points based on chart dimensions.
     /// </summary>
-    protected static List<(float x, float y)> CalculateCoordinates(ChartData data, float chartAreaWidth,
+    protected static IList<Point> CalculateCoordinates(ChartData data, float chartAreaWidth,
         float chartAreaHeight, float baselineY)
     {
         int dataPointCount = data.DataPoints.Count;
-        List<(float x, float y)> coordinates = new();
+        List<Point> coordinates = new();
 
         // Calculate horizontal spacing
         float totalSpace = chartAreaWidth / dataPointCount;
@@ -383,7 +368,7 @@ public abstract class CartesianChartBase : ChartBase
             decimal normalizedValue = data.DataPoints[i].Value / data.YAxis.MaxValue;
             float y = baselineY - (float)(normalizedValue * (decimal)chartAreaHeight);
 
-            coordinates.Add((x, y));
+            coordinates.Add(new Point(x, y));
         }
 
         return coordinates;

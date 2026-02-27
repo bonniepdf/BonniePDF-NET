@@ -43,7 +43,7 @@ public class AreaChart : CartesianChartBase
     /// Draws the area chart elements for a single series (area fill and connecting line).
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
-        List<(float x, float y)> coordinates,
+        IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
         // Get series-specific styling or use defaults
@@ -66,7 +66,7 @@ public class AreaChart : CartesianChartBase
     /// Draws the area fill using a series of thin vertical rectangles.
     /// This approximates the area under the line connecting data points.
     /// </summary>
-    private void DrawAreaFill(ICanvas canvas, List<(float x, float y)> coordinates, float baselineY, Color color, float opacity)
+    private static void DrawAreaFill(ICanvas canvas, IList<Point> coordinates, float baselineY, Color color, float opacity)
     {
         if (coordinates.Count < 2) return;
 
@@ -77,8 +77,8 @@ public class AreaChart : CartesianChartBase
         const float stepSize = 2f;
 
         // Find the x range
-        float minX = coordinates[0].x;
-        float maxX = coordinates[coordinates.Count - 1].x;
+        float minX = coordinates[0].X;
+        float maxX = coordinates[coordinates.Count - 1].Y;
 
         // Draw vertical rectangles from baseline to the line at each step
         for (float x = minX; x < maxX; x += stepSize)
@@ -104,41 +104,40 @@ public class AreaChart : CartesianChartBase
     /// <summary>
     /// Interpolates the y value for a given x position on the line connecting data points.
     /// </summary>
-    private float InterpolateY(List<(float x, float y)> coordinates, float x)
+    private static float InterpolateY(IList<Point> coordinates, float x)
     {
         // Find the two data points that x lies between
         for (int i = 0; i < coordinates.Count - 1; i++)
         {
-            (float x1, float y1) = coordinates[i];
-            (float x2, float y2) = coordinates[i + 1];
+            var p1 = coordinates[i];
+            var p2 = coordinates[i + 1];
 
-            if (x >= x1 && x <= x2)
+            if (x >= p1.X && x <= p2.X)
             {
                 // Linear interpolation
-                float t = (x - x1) / (x2 - x1);
-                return y1 + t * (y2 - y1);
+                float t = (x - p1.X) / (p2.X - p1.X);
+                return p1.Y + t * (p2.Y - p1.Y);
             }
         }
 
         // If x is outside the range, return the closest point's y
-        if (x < coordinates[0].x)
-            return coordinates[0].y;
-        return coordinates[coordinates.Count - 1].y;
+        if (x < coordinates[0].X)
+            return coordinates[0].Y;
+        return coordinates[coordinates.Count - 1].Y;
     }
 
     /// <summary>
     /// Draws the connecting line on top of the area fill for a series.
     /// </summary>
-    private void DrawConnectingLine(ICanvas canvas, List<(float x, float y)> coordinates, Color color, float lineWidth)
+    private static void DrawConnectingLine(ICanvas canvas, IList<Point> coordinates, Color color, float lineWidth)
     {
         if (coordinates.Count < 2) return;
 
         for (int i = 0; i < coordinates.Count - 1; i++)
         {
-            (float x1, float y1) = coordinates[i];
-            (float x2, float y2) = coordinates[i + 1];
-
-            canvas.DrawLine(x1, y1, x2, y2, color, lineWidth);
+            var p1 = coordinates[i];
+            var p2 = coordinates[i + 1];
+            canvas.DrawLine(p1.X, p1.Y, p2.X, p2.Y, color, lineWidth);
         }
     }
 
@@ -147,21 +146,4 @@ public class AreaChart : CartesianChartBase
     /// Returns the chart's AreaColor property for backward compatibility.
     /// </summary>
     protected override Color GetDefaultSeriesColor() => AreaColor;
-
-    #region Backward Compatibility - Obsolete Methods
-
-    /// <summary>
-    /// Draws the area chart elements (area fill and connecting line).
-    /// OBSOLETE: Use DrawSeriesElements instead for multi-series support.
-    /// </summary>
-    [System.Obsolete("Use DrawSeriesElements instead for multi-series support")]
-    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
-        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
-    {
-        // For backward compatibility, treat as single series
-        var series = data.Series.Count > 0 ? data.Series[0] : new ChartSeries { Color = AreaColor };
-        DrawSeriesElements(canvas, data, series, coordinates, chartAreaWidth, chartAreaHeight, baselineY, topY);
-    }
-
-    #endregion
 }

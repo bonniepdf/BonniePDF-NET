@@ -29,7 +29,7 @@ public class BarChart : CartesianChartBase
     /// Draws the bar chart elements for a single series (vertical bars).
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
-        List<(float x, float y)> coordinates,
+        IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
         // Calculate bar width dynamically
@@ -49,15 +49,13 @@ public class BarChart : CartesianChartBase
     /// <summary>
     /// Draws the bars for each data point.
     /// </summary>
-    private void DrawBars(ICanvas canvas, List<(float x, float y)> coordinates, float barWidth, float baselineY, Color color)
+    private static void DrawBars(ICanvas canvas, IList<Point> coordinates, float barWidth, float baselineY, Color color)
     {
-        for (int i = 0; i < coordinates.Count; i++)
+        foreach (Point p in coordinates)
         {
-            (float x, float y) = coordinates[i];
-            float barHeight = baselineY - y;
-            float barX = x - barWidth / 2; // Center the bar on the data point
-
-            canvas.FillRect(barX, y, barWidth, barHeight, color);
+            float barHeight = baselineY - p.Y;
+            float barX = p.X - barWidth / 2; // Center the bar on the data point
+            canvas.FillRect(barX, p.Y, barWidth, barHeight, color);
         }
     }
 
@@ -66,21 +64,4 @@ public class BarChart : CartesianChartBase
     /// Returns the chart's BarColor property for backward compatibility.
     /// </summary>
     protected override Color GetDefaultSeriesColor() => BarColor;
-
-    #region Backward Compatibility - Obsolete Methods
-
-    /// <summary>
-    /// Draws the bar chart elements (vertical bars).
-    /// OBSOLETE: Use DrawSeriesElements instead for multi-series support.
-    /// </summary>
-    [Obsolete("Use DrawSeriesElements instead for multi-series support")]
-    protected override void DrawChartElements(ICanvas canvas, ChartData data, List<(float x, float y)> coordinates,
-        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
-    {
-        // For backward compatibility, treat as single series
-        var series = data.Series.Count > 0 ? data.Series[0] : new ChartSeries { Color = BarColor };
-        DrawSeriesElements(canvas, data, series, coordinates, chartAreaWidth, chartAreaHeight, baselineY, topY);
-    }
-
-    #endregion
 }

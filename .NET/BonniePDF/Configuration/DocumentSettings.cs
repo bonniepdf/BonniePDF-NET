@@ -93,32 +93,32 @@ public class DocumentSettings
     /// <summary>
     /// Whether to hide the toolbar in the PDF viewer (default: false)
     /// </summary>
-    public bool HideToolbar { get; set; } = false;
+    public bool HideToolbar { get; set; }
 
     /// <summary>
     /// Whether to hide the menubar in the PDF viewer (default: false)
     /// </summary>
-    public bool HideMenubar { get; set; } = false;
+    public bool HideMenubar { get; set; }
 
     /// <summary>
     /// Whether to hide the window UI in the PDF viewer (default: false)
     /// </summary>
-    public bool HideWindowUI { get; set; } = false;
+    public bool HideWindowUI { get; set; }
 
     /// <summary>
     /// Whether to fit the document window to the first page (default: false)
     /// </summary>
-    public bool FitWindow { get; set; } = false;
+    public bool FitWindow { get; set; }
 
     /// <summary>
     /// Whether to center the document window on screen (default: false)
     /// </summary>
-    public bool CenterWindow { get; set; } = false;
+    public bool CenterWindow { get; set; }
 
     /// <summary>
     /// Whether to display the document title in the title bar instead of filename (default: false)
     /// </summary>
-    public bool DisplayDocTitle { get; set; } = false;
+    public bool DisplayDocTitle { get; set; }
 
     /// <summary>
     /// Gets or sets the PDF version for the output document (default: PDF 1.4).
@@ -129,7 +129,7 @@ public class DocumentSettings
     /// Gets or sets whether PDF/A-1b archival mode is enabled.
     /// Requires Version == Pdf17. Cannot be used with encryption.
     /// </summary>
-    public bool PdfAEnabled { get; set; } = false;
+    public bool PdfAEnabled { get; set; }
 
     /// <summary>
     /// Gets or sets the bookmark items for the document outline tree.
