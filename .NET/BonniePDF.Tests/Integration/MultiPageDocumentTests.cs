@@ -1,4 +1,3 @@
-using System.IO;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;

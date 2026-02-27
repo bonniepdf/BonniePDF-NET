@@ -1,13 +1,9 @@
-using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
