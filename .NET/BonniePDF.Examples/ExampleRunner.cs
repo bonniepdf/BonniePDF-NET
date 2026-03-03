@@ -80,4 +80,24 @@ public static class ExampleRunner
             throw new ArgumentException($"Example with ID '{exampleId}' was not found in the registry.");
         }
     }
+
+    /// <summary>
+    /// Executes the specified example and returns the PDF as a byte array.
+    /// </summary>
+    public static byte[] GenerateExampleToBytes(string exampleId)
+    {
+        var tempFile = System.IO.Path.GetTempFileName() + ".pdf";
+        try
+        {
+            GenerateExample(exampleId, tempFile);
+            return System.IO.File.ReadAllBytes(tempFile);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(tempFile))
+            {
+                try { System.IO.File.Delete(tempFile); } catch { }
+            }
+        }
+    }
 }
