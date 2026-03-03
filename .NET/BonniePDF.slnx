@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="BonniePDF.Benchmarks/BonniePDF.Benchmarks.csproj" />
+  <Project Path="BonniePDF.Demo/BonniePDF.Demo.csproj" />
   <Project Path="BonniePDF.Examples/BonniePDF.Examples.csproj" />
   <Project Path="BonniePDF.Tests/BonniePDF.Tests.csproj" />
   <Project Path="BonniePDF.Validation/BonniePDF.Validation.csproj" />
