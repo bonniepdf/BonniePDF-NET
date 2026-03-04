@@ -110,7 +110,7 @@ Found 26 PDF file(s) to validate
 ...
 
 ╔══════════════════════════════════════════════════════════════╗
-║                      Validation Summary                       ║
+║                      Validation Summary                      ║
 ╚══════════════════════════════════════════════════════════════╝
 
 Total PDFs validated: 26

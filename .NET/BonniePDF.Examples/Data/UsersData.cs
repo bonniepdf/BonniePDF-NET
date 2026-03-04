@@ -3,7 +3,7 @@ using BonniePDF.Examples.Data.Models;
 
 namespace BonniePDF.Examples.Data;
 
-public static class Users
+public static class UsersData
 {
     public static IList<User> GetMockUsers()
     {
