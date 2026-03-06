@@ -25,4 +25,11 @@ public class ExampleInfo
 
     [JsonIgnore]
     public Action<string>? GenerateAction { get; set; }
+
+    /// <summary>
+    /// User (open) password for encrypted PDFs. Serialised to JSON so the
+    /// client can pass it to the pdfium engine when rendering thumbnails.
+    /// Null for non-encrypted documents.
+    /// </summary>
+    public string? Password { get; set; }
 }
