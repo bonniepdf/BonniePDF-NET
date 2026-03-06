@@ -84,14 +84,15 @@ public static class ExampleRunner
         foreach (var category in Categories)
         {
             var match = category.Examples.Find(e => string.Equals(e.Id, exampleId, StringComparison.OrdinalIgnoreCase));
-            if (match != null)
+            if (match == null)
             {
-                target = match;
-                break;
+                continue;
             }
+            target = match;
+            break;
         }
 
-        if (target != null && target.GenerateAction != null)
+        if (target is { GenerateAction: not null })
         {
             target.GenerateAction(outputPath);
         }
