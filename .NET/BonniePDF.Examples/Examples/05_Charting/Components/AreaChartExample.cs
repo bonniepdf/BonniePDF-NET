@@ -48,7 +48,7 @@ public class AreaChartExample : ExampleBase
 
         document.Add(new TextBlock
         {
-            Text = "Generated using the new ICanvas architecture",
+            Text = "Area Chart Demonstration",
             FontSize = 14,
             TextColor = Color.Slate600,
             Alignment = TextAlignment.Center
@@ -84,7 +84,8 @@ public class AreaChartExample : ExampleBase
                 Prefix = "£",
                 MaxValue = 15000,
                 StepCount = 5,
-                Legend = "Sales"
+                Legend = "Sales",
+                VerticalLegend = true
             },
             XAxis = new AxisOptions
             {

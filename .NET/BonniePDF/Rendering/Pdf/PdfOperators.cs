@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using BonniePDF.Core;
 
@@ -38,6 +39,18 @@ internal static class PdfOperators
     /// </summary>
     internal static void Scale(StringBuilder s, float sx, float sy)
         => s.AppendLine($"{PdfSyntax.FormatDecimal(sx)} 0 0 {PdfSyntax.FormatDecimal(sy)} 0 0 cm");
+
+    /// <summary>
+    /// <c>cm</c> — Concatenate a rotation matrix. <paramref name="angleDegrees"/> is in degrees (counter-clockwise).
+    /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=211"/>
+    /// </summary>
+    internal static void Rotate(StringBuilder s, float angleDegrees)
+    {
+        float radians = angleDegrees * (float)(Math.PI / 180.0);
+        float cos = (float)Math.Cos(radians);
+        float sin = (float)Math.Sin(radians);
+        s.AppendLine($"{PdfSyntax.FormatDecimal(cos)} {PdfSyntax.FormatDecimal(sin)} {PdfSyntax.FormatDecimal(-sin)} {PdfSyntax.FormatDecimal(cos)} 0 0 cm");
+    }
 
     /// <summary>
     /// <c>cm</c> — Concatenate a full 6-element transformation matrix <c>[a b c d e f]</c>.

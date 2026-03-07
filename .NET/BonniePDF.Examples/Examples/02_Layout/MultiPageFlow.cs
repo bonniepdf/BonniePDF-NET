@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
@@ -53,7 +54,7 @@ public class MultiPageFlowExample : ExampleBase
 
         doc.Add(new TextBlock
         {
-            Text = "Annual Report 2024",
+            Text = $"Annual Report {DateTime.Now.Year}",
             FontName = StandardFonts.Helvetica,
             FontSize = 14,
             TextColor = Color.Slate500,

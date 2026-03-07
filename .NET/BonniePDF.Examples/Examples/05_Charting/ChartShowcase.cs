@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
@@ -286,7 +287,7 @@ public class ChartingExample : ExampleBase
 
         document.Add(new TextBlock
         {
-            Text = "Comparing 2023 and 2024 revenue with multiple series",
+            Text = $"Comparing {DateTime.Now.Year - 1} and {DateTime.Now.Year} revenue with multiple series",
             FontSize = 14,
             TextColor = Color.Slate600,
             Alignment = TextAlignment.Center
@@ -300,7 +301,7 @@ public class ChartingExample : ExampleBase
             {
                 new ChartSeries
                 {
-                    Name = "2023",
+                    Name = $"{DateTime.Now.Year - 1}",
                     Color = Color.FromHex(ChartColors.Indigo),
                     DataPoints = new List<ChartDataPoint>
                     {
@@ -320,7 +321,7 @@ public class ChartingExample : ExampleBase
                 },
                 new ChartSeries
                 {
-                    Name = "2024",
+                    Name = $"{DateTime.Now.Year}",
                     Color = Color.FromHex(ChartColors.Violet),
                     DataPoints = new List<ChartDataPoint>
                     {
@@ -537,7 +538,7 @@ public class ChartingExample : ExampleBase
         // Add a title
         document.Add(new TextBlock
         {
-            Text = "Pie Chart: Monthly Sales 2024",
+            Text = $"Pie Chart: Monthly Sales {DateTime.Now.Year}",
             FontSize = 24,
             TextColor = Color.Slate800,
             Alignment = TextAlignment.Center
@@ -554,7 +555,7 @@ public class ChartingExample : ExampleBase
         // Create chart data with all 12 months
         ChartData chartData = new()
         {
-            Title = "Monthly Sales 2024",
+            Title = $"Monthly Sales {DateTime.Now.Year}",
             Series = [new ChartSeries { DataPoints = ExampleChartData.PieChartSales }]
         };
 

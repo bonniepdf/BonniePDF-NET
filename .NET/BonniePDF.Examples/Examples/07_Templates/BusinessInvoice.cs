@@ -41,7 +41,7 @@ public class InvoiceExample : ExampleBase
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
 
-        doc.Metadata.Title = "Invoice INV-2024-001";
+        doc.Metadata.Title = $"Invoice INV-{DateTime.Now.Year}-001";
         doc.Metadata.Author = "Studio Eleven";
 
         VerticalStack mainStack = new();
@@ -221,7 +221,7 @@ public class InvoiceExample : ExampleBase
             TextColor = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        AddDetailRow(detailsStack, "Invoice #", "2024-001");
+        AddDetailRow(detailsStack, "Invoice #", $"{DateTime.Now.Year}-001");
         AddDetailRow(detailsStack, "Invoice date", DateTime.Now.ToString("MM/dd/yyyy"));
         AddDetailRow(detailsStack, "Terms", "Net 14");
         AddDetailRow(detailsStack, "Due date", DateTime.Now.AddDays(14).ToString("MM/dd/yyyy"));

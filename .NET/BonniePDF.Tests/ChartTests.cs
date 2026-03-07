@@ -34,6 +34,11 @@ public class ChartTests
             Operations.Add($"DrawText({x},{y},'{text}',{fontSize},{fontFamily},{alignment})");
         }
 
+        public void DrawTextRotated(float x, float y, string text, Color color, float fontSize, string fontFamily, float angleDegrees)
+        {
+            Operations.Add($"DrawTextRotated({x},{y},'{text}',{fontSize},{fontFamily},{angleDegrees})");
+        }
+
         public void DrawTextJustified(float x, float y, string text, Color color, float fontSize, string fontFamily,
             float availableWidth)
         {
@@ -435,5 +440,43 @@ public class ChartTests
         var chart = new BarChart { StretchToFit = true };
 
         Assert.True(chart.StretchToFit);
+    }
+
+    [Fact]
+    public void YAxisLegend_VerticalOrientation_DrawsRotatedLegend()
+    {
+        var chart = new BarChart();
+        var canvas = new MockCanvas();
+        var data = CreateSampleData();
+        data.YAxis.Legend = "Sales";
+        data.YAxis.VerticalLegend = true;
+
+        chart.Draw(canvas, data);
+
+        // Should draw the text rotated 90 degrees
+        Assert.Contains(canvas.Operations, op => op.Contains("DrawTextRotated") && op.Contains("'Sales'") && op.Contains("90"));
+    }
+
+    [Fact]
+    public void YAxisLegend_HorizontalOrientation_DrawsHorizontalLegend()
+    {
+        var chart = new BarChart();
+        var canvas = new MockCanvas();
+        var data = CreateSampleData();
+        data.YAxis.Legend = "Sales";
+        data.YAxis.VerticalLegend = false;
+
+        chart.Draw(canvas, data);
+
+        // Should draw the entire "Sales" text horizontally
+        Assert.Contains(canvas.Operations, op => op.Contains("DrawText") && op.Contains("'Sales'"));
+    }
+
+    [Fact]
+    public void AxisOptions_VerticalLegend_DefaultValue_IsFalse()
+    {
+        var axisOptions = new AxisOptions();
+
+        Assert.False(axisOptions.VerticalLegend, "VerticalLegend should default to false");
     }
 }

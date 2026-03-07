@@ -320,6 +320,7 @@ public class RichText : ElementBase, IStatefulElement
     private List<StyledWord> BuildStyledWords()
     {
         List<StyledWord> words = new();
+        bool prevSpanEndedWithSpace = false;
 
         foreach (TextSpan span in _spans)
         {
@@ -329,7 +330,10 @@ public class RichText : ElementBase, IStatefulElement
             if (string.IsNullOrEmpty(text))
             {
                 if (span.IsLineBreak)
+                {
                     words.Add(new StyledWord { Style = resolved, IsLineBreak = true });
+                    prevSpanEndedWithSpace = false;
+                }
                 continue;
             }
 
@@ -341,7 +345,13 @@ public class RichText : ElementBase, IStatefulElement
                 string part = parts[i];
                 if (string.IsNullOrEmpty(part)) continue;
 
-                bool hasLeadingSpace = i > 0 || (words.Count > 0 && text.StartsWith(' '));
+                // A word has a leading space if:
+                // 1. It's not the first token in its span (i > 0 means there was a space between parts)
+                // 2. It IS the first token in its span (i == 0), and either:
+                //    a. The span itself starts with a space (e.g. " mixed with"), or
+                //    b. The previous span ended with a space (e.g. "contains " → "bold")
+                bool hasLeadingSpace = i > 0 ||
+                    (words.Count > 0 && (text.StartsWith(' ') || prevSpanEndedWithSpace));
 
                 float partWidth = FontMetrics.GetStringWidth(
                     part, resolved.EffectiveFontName, resolved.EffectiveFontSize);
@@ -361,7 +371,14 @@ public class RichText : ElementBase, IStatefulElement
 
             // Handle trailing line break from the span
             if (span.IsLineBreak)
+            {
                 words.Add(new StyledWord { Style = resolved, IsLineBreak = true });
+                prevSpanEndedWithSpace = false;
+            }
+            else
+            {
+                prevSpanEndedWithSpace = text.EndsWith(' ');
+            }
         }
 
         return words;

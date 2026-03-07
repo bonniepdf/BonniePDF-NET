@@ -173,7 +173,7 @@ public class MoviesTableExample : ExampleBase
         // Footer
         TextBlock footer = new()
         {
-            Text = "(c) 2024 Classic Cinema Archive. All rights reserved. | Films listed for educational purposes.",
+            Text = $"© {DateTime.Now.Year} Classic Cinema Archive. All rights reserved. | Films listed for educational purposes.",
             FontName = StandardFonts.HelveticaOblique,
             FontSize = 8,
             TextColor = Color.Slate400

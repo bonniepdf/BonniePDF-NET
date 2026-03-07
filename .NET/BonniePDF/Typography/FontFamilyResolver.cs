@@ -120,20 +120,30 @@ public static class FontFamilyResolver
     }
 
     /// <summary>
-    /// Checks whether a font name is already a fully-qualified standard font name
-    /// (e.g. "Helvetica-Bold", "Times-Italic").
+    /// Checks whether a font name is already a fully-qualified standard font variant name
+    /// (e.g. "Helvetica-Bold", "Times-Italic") that should be passed through as-is.
+    /// Base family names ("Helvetica", "Times-Roman", "Courier") are intentionally excluded
+    /// so that Weight and Italic parameters are still applied when resolving them.
     /// </summary>
     private static bool IsStandardFontName(string name)
     {
         return name switch
         {
-            Typography.StandardFonts.Helvetica or Typography.StandardFonts.HelveticaBold
-                or Typography.StandardFonts.HelveticaOblique or Typography.StandardFonts.HelveticaBoldOblique
-                or Typography.StandardFonts.TimesRoman or Typography.StandardFonts.TimesBold
-                or Typography.StandardFonts.TimesItalic or Typography.StandardFonts.TimesBoldItalic
-                or Typography.StandardFonts.Courier or Typography.StandardFonts.CourierBold
-                or Typography.StandardFonts.CourierOblique or Typography.StandardFonts.CourierBoldOblique
-                or Typography.StandardFonts.Symbol or Typography.StandardFonts.ZapfDingbats => true,
+            // Helvetica variants — base "Helvetica" excluded so Bold/Italic can still be applied
+            Typography.StandardFonts.HelveticaBold
+                or Typography.StandardFonts.HelveticaOblique
+                or Typography.StandardFonts.HelveticaBoldOblique
+            // Times variants — base "Times-Roman" excluded so Bold/Italic can still be applied
+                or Typography.StandardFonts.TimesBold
+                or Typography.StandardFonts.TimesItalic
+                or Typography.StandardFonts.TimesBoldItalic
+            // Courier variants — base "Courier" excluded so Bold/Italic can still be applied
+                or Typography.StandardFonts.CourierBold
+                or Typography.StandardFonts.CourierOblique
+                or Typography.StandardFonts.CourierBoldOblique
+            // Special fonts with no variants
+                or Typography.StandardFonts.Symbol
+                or Typography.StandardFonts.ZapfDingbats => true,
             _ => false
         };
     }

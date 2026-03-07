@@ -39,4 +39,10 @@ public class AxisOptions
     /// Whether to show grid lines for this axis
     /// </summary>
     public bool ShowGridLines { get; set; } = true;
+
+    /// <summary>
+    /// Whether to render the legend vertically (rotated 90 degrees) instead of horizontally.
+    /// This is particularly useful for Y-axis labels where vertical orientation saves horizontal space.
+    /// </summary>
+    public bool VerticalLegend { get; set; }
 }

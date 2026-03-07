@@ -10,7 +10,7 @@ namespace BonniePDF.Charts.Models;
 public class ChartSeries
 {
     /// <summary>
-    /// Series name/label (e.g., "2024 Sales", "Product A", "Q1 Revenue")
+    /// Series name/label (e.g., "Year Sales", "Product A", "Q1 Revenue")
     /// Used in legends and tooltips.
     /// </summary>
     public string Name { get; set; } = string.Empty;

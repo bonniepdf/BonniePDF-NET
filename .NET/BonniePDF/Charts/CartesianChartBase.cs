@@ -69,7 +69,7 @@ public abstract class CartesianChartBase : ChartBase
 
         // 3. Draw Y-axis legend (behind data)
         if (!string.IsNullOrEmpty(data.YAxis.Legend))
-            DrawYAxisLegend(canvas, data.YAxis.Legend, chartAreaHeight, topY);
+            DrawYAxisLegend(canvas, data.YAxis, chartAreaHeight, topY);
 
         // 4. Draw chart-specific data elements (bars, lines, area, etc.) - now supports multiple series
         DrawAllSeries(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
@@ -283,17 +283,26 @@ public abstract class CartesianChartBase : ChartBase
     }
 
     /// <summary>
-    /// Draws the Y-axis legend (rotated text would be ideal, but we'll use horizontal for now).
+    /// Draws the Y-axis legend. Can be rendered horizontally or vertically based on VerticalLegend option.
+    /// Vertical rendering rotates the text 90 degrees counter-clockwise, which is useful for saving horizontal space.
     /// </summary>
-    protected void DrawYAxisLegend(ICanvas canvas, string legend, float chartAreaHeight, float topY)
+    protected void DrawYAxisLegend(ICanvas canvas, AxisOptions yAxis, float chartAreaHeight, float topY)
     {
-        // Position the legend to the left of the Y-axis labels
-        float x = 10;
-        float y = topY + chartAreaHeight / 2;
-
-        // Note: PDF doesn't easily support rotated text without transforms
-        // For now, we'll draw it horizontally at a slight offset
-        canvas.DrawText(x, y, legend, AxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
+        if (yAxis.VerticalLegend)
+        {
+            // Vertical rendering: rotate text 90 degrees counter-clockwise
+            // Position with minimal left margin
+            float x = 15; // Minimal left margin for vertical legend
+            float y = topY + chartAreaHeight / 2;
+            canvas.DrawTextRotated(x, y, yAxis.Legend, AxisColor, LegendFontSize, FontFamily, 90);
+        }
+        else
+        {
+            // Horizontal rendering (original behavior)
+            float x = 10;
+            float y = topY + chartAreaHeight / 2;
+            canvas.DrawText(x, y, yAxis.Legend, AxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
+        }
     }
 
     /// <summary>

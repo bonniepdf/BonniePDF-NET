@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
@@ -42,7 +43,7 @@ public class PieChartExample : ExampleBase
         // Add a title
         document.Add(new TextBlock
         {
-            Text = "Monthly Sales Report 2024",
+            Text = $"Monthly Sales Report {DateTime.Now.Year}",
             FontSize = 24,
             TextColor = Color.Slate800,
             Alignment = TextAlignment.Center
@@ -59,7 +60,7 @@ public class PieChartExample : ExampleBase
         // Create chart data with all 12 months (matching the SVG data)
         ChartData chartData = new()
         {
-            Title = "Monthly Sales 2024",
+            Title = $"Monthly Sales {DateTime.Now.Year}",
             Series = [new ChartSeries { DataPoints = ExampleChartData.PieChartSales }]
         };
 

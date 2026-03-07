@@ -244,6 +244,22 @@ public class SvgCanvas : ICanvas
     }
 
     /// <summary>
+    /// Draws rotated text at the specified location.
+    /// Uses SVG transform attribute to rotate text.
+    /// </summary>
+    public void DrawTextRotated(float x, float y, string text, Color color, float fontSize, string fontFamily, float angleDegrees)
+    {
+        float sx = x + _xOffset;
+        float sy = y + _yOffset;
+        string fill = color.ToHexString();
+        string escapedText = EscapeXml(text);
+        float baselineY = sy + fontSize * 0.8f;
+
+        _sb.AppendLine(
+            $"<text x=\"{sx}\" y=\"{baselineY}\" font-family=\"{fontFamily}\" font-size=\"{fontSize}\" fill=\"{fill}\" text-anchor=\"start\" transform=\"rotate({angleDegrees}, {sx}, {baselineY})\">{escapedText}</text>");
+    }
+
+    /// <summary>
     /// Draws justified text by distributing extra space across word gaps.
     /// Uses SVG word-spacing attribute.
     /// </summary>

@@ -30,13 +30,13 @@ public class WebApiInvoiceExample : ExampleBase
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
 
-        doc.Metadata.Title = "Invoice INV-2024-001";
+        doc.Metadata.Title = $"Invoice INV-{DateTime.Now.Year}-001";
         doc.Metadata.Author = "MyCompany";
 
         // Header
         doc.Add(new TextBlock
         {
-            Text = "INVOICE #INV-2024-001",
+            Text = $"INVOICE #INV-{DateTime.Now.Year}-001",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 20,
             TextColor = Color.Slate800,

@@ -231,7 +231,7 @@ public class EmbeddedFontExample : ExampleBase
         // Footer
         doc.Add(new TextBlock
         {
-            Text = "\u00A9 2024 BonniePDF \u2022 TrueType Font Embedding",
+            Text = $"\u00A9 {DateTime.Now.Year} BonniePDF \u2022 TrueType Font Embedding",
             FontName = arialPath,
             FontSize = 10,
             TextColor = Color.Slate400

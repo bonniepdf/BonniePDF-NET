@@ -146,13 +146,40 @@ public class PdfResourceRegistry
     private static string ResolveStandardFontToTtf(string fontIdentifier)
     {
         string lower = fontIdentifier.ToLowerInvariant();
+        bool isBold = lower.Contains("bold");
+        bool isItalic = lower.Contains("oblique") || lower.Contains("italic");
+
         string[] candidates;
         if (lower.Contains("courier") || lower.Contains("mono"))
-            candidates = new[] { "cour.ttf", "consola.ttf" };
+        {
+            candidates = (isBold, isItalic) switch
+            {
+                (true, true) => new[] { "courbi.ttf", "consolaz.ttf" },
+                (true, false) => new[] { "courbd.ttf", "consolab.ttf" },
+                (false, true) => new[] { "couri.ttf", "consolai.ttf" },
+                _ => new[] { "cour.ttf", "consola.ttf" }
+            };
+        }
         else if (lower.Contains("times"))
-            candidates = new[] { "times.ttf", "timesnewroman.ttf" };
-        else 
-            candidates = new[] { "arial.ttf", "segoeui.ttf", "calibri.ttf" };
+        {
+            candidates = (isBold, isItalic) switch
+            {
+                (true, true) => new[] { "timesbi.ttf" },
+                (true, false) => new[] { "timesbd.ttf" },
+                (false, true) => new[] { "timesi.ttf" },
+                _ => new[] { "times.ttf", "timesnewroman.ttf" }
+            };
+        }
+        else
+        {
+            candidates = (isBold, isItalic) switch
+            {
+                (true, true) => new[] { "arialbi.ttf", "segoeuiz.ttf", "calibriz.ttf" },
+                (true, false) => new[] { "arialbd.ttf", "segoeuib.ttf", "calibrib.ttf" },
+                (false, true) => new[] { "ariali.ttf", "segoeuii.ttf", "calibrii.ttf" },
+                _ => new[] { "arial.ttf", "segoeui.ttf", "calibri.ttf" }
+            };
+        }
 
         string fontsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts));
         foreach (string candidate in candidates)

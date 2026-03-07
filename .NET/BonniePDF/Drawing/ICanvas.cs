@@ -80,6 +80,18 @@ public interface ICanvas
     void DrawText(float x, float y, string text, Color color, float fontSize, string fontFamily, TextAlignment align);
 
     /// <summary>
+    /// Draws rotated text at the specified location.
+    /// </summary>
+    /// <param name="x">Left position</param>
+    /// <param name="y">Top position of the bounding box</param>
+    /// <param name="text">The text to draw</param>
+    /// <param name="color">Text color</param>
+    /// <param name="fontSize">Font size in points</param>
+    /// <param name="fontFamily">Font family name</param>
+    /// <param name="angleDegrees">Rotation angle in degrees (counter-clockwise)</param>
+    void DrawTextRotated(float x, float y, string text, Color color, float fontSize, string fontFamily, float angleDegrees);
+
+    /// <summary>
     /// Draws justified text by distributing extra space across word gaps to fill the available width.
     /// </summary>
     /// <param name="x">Left position</param>

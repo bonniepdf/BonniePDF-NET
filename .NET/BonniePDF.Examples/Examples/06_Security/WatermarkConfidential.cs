@@ -1,3 +1,4 @@
+using System;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Tables;
@@ -47,7 +48,7 @@ public class WatermarkConfidentialExample : ExampleBase
 
         doc.Add(new TextBlock
         {
-            Text = "Financial Performance Report Q4 2025",
+            Text = $"Financial Performance Report Q4 {DateTime.Now.Year}",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 22,
             TextColor = Color.Slate800,
@@ -60,8 +61,8 @@ public class WatermarkConfidentialExample : ExampleBase
         // Header row
         table.AddRow(
             CreateHeaderCell("Metric"),
-            CreateHeaderCell("Q3 2025"),
-            CreateHeaderCell("Q4 2025")
+            CreateHeaderCell($"Q3 {DateTime.Now.Year}"),
+            CreateHeaderCell($"Q4 {DateTime.Now.Year}")
         );
 
         // Data rows

@@ -237,6 +237,40 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>
+    /// Draws rotated text at the specified location.
+    /// Uses transformation matrix to rotate text around the specified point.
+    /// </summary>
+    public void DrawTextRotated(float x, float y, string text, Color color, float fontSize, string fontFamily, float angleDegrees)
+    {
+        // PDF text y is the baseline.
+        float pdfY = Height - (y + _yOffset + fontSize);
+        float pdfX = x + _xOffset;
+
+        // Save state and apply rotation
+        PdfOperators.SaveState(_stream);
+        PdfOperators.Translate(_stream, pdfX, pdfY);
+        PdfOperators.Rotate(_stream, angleDegrees);
+
+        // Now draw text at origin (0,0) since we've already translated
+        PdfOperators.BeginText(_stream);
+
+        string fontResourceName = _fontResolver(fontFamily);
+        _glyphTracker(fontFamily, text);
+        PdfOperators.SetFont(_stream, fontResourceName, fontSize);
+        PdfOperators.SetFillColor(_stream, color);
+        PdfOperators.SetTextPosition(_stream, 0, 0);
+
+        TtfFont embeddedFont = _embeddedFontResolver(fontFamily);
+        if (embeddedFont != null)
+            PdfOperators.ShowText(_stream, PdfSyntax.ToGlyphIdHexString(text, embeddedFont));
+        else
+            PdfOperators.ShowText(_stream, $"({PdfSyntax.Escape(text)})");
+
+        PdfOperators.EndText(_stream);
+        PdfOperators.RestoreState(_stream);
+    }
+
+    /// <summary>
     /// Draws justified text by distributing extra space across word gaps using the PDF Tw operator.
     /// </summary>
     public void DrawTextJustified(float x, float y, string text, Color color, float fontSize, string fontFamily,

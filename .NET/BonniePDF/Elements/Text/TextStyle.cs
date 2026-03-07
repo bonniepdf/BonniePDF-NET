@@ -88,8 +88,11 @@ public class TextStyle
 
     /// <summary>
     /// Returns the effective font name, resolving family+weight+italic or defaulting to Helvetica.
+    /// When FontFamily is null, uses Helvetica as the base family so that Weight/Italic are still applied
+    /// (e.g. Bold with no family → "Helvetica-Bold", not plain "Helvetica").
     /// </summary>
-    public string EffectiveFontName => ResolvedFontName ?? StandardFonts.Helvetica;
+    public string EffectiveFontName =>
+        FontFamilyResolver.Resolve(FontFamily ?? "Helvetica", Weight, Italic);
 
     // --- Fluent API ---
 
