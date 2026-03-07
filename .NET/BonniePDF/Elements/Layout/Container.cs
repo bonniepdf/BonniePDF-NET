@@ -1,14 +1,26 @@
 using BonniePDF.Core;
+using BonniePDF.Fluent;
 using BonniePDF.Rendering;
 
 namespace BonniePDF.Elements.Layout;
 
 /// <summary>
-/// A container element that supports padding, background color, and borders
+/// A container element that supports padding, background color, and borders.
+/// Implements IContentContainer to participate in fluent API chains.
 /// </summary>
-public class Container : BorderedElementBase
+public class Container : BorderedElementBase, IContentContainer
 {
     public IElement Child { get; set; }
+
+    /// <summary>
+    /// Explicit interface implementation for IContentContainer.
+    /// Enables fluent API chaining through this container.
+    /// </summary>
+    IElement? IContentContainer.Child
+    {
+        get => Child;
+        set => Child = value!;
+    }
     public Thickness Padding { get; set; }
 
     /// <summary>

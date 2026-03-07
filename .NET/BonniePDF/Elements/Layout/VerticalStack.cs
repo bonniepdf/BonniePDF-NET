@@ -17,6 +17,11 @@ public class VerticalStack : ElementBase, IStatefulElement
     private int _lastChildRendered = -1;
 
     /// <summary>
+    /// Spacing between children in points. Default is 0.
+    /// </summary>
+    public float Spacing { get; set; }
+
+    /// <summary>
     /// The children elements in this stack (exposed for collection initializer syntax)
     /// </summary>
     public IList<IElement> Children => _children;
@@ -92,6 +97,10 @@ public class VerticalStack : ElementBase, IStatefulElement
                 // Child completed - mark it as rendered
                 _lastChildRendered = i;
 
+                // Apply spacing after completed child (except after last child)
+                if (Spacing > 0 && i < _children.Count - 1)
+                    ctx.CurrentY += Spacing;
+
                 // Check if there are more children and if the next one would start past MaxY
                 // This handles the case where children individually fit but collectively overflow
                 if (i < _children.Count - 1 && ctx.CurrentY >= ctx.MaxY)
@@ -138,6 +147,10 @@ public class VerticalStack : ElementBase, IStatefulElement
 
                 // Mark this child as rendered
                 _lastChildRendered = i;
+
+                // Apply spacing after rendered child (except after last child)
+                if (Spacing > 0 && i < _children.Count - 1)
+                    ctx.CurrentY += Spacing;
             }
         }
 
@@ -181,7 +194,10 @@ public class VerticalStack : ElementBase, IStatefulElement
         // Note: In a pagination scenario, measuring the total height of a stack
         // is tricky because it might span multiple pages.
         // For this simple engine, we sum it up, but the Render method decides placement.
-        return _children.Sum(c => c.MeasureHeight(contentWidth));
+        float totalHeight = _children.Sum(c => c.MeasureHeight(contentWidth));
+        if (_children.Count > 1 && Spacing > 0)
+            totalHeight += (_children.Count - 1) * Spacing;
+        return totalHeight;
     }
 
     protected override void RenderContent(RenderContext ctx, float contentWidth)
@@ -216,6 +232,10 @@ public class VerticalStack : ElementBase, IStatefulElement
             // Only advance Y if the child didn't already do it
             // (some elements like nested VerticalStacks and Tables advance Y themselves)
             if (ctx.CurrentY == yBefore) ctx.CurrentY += childHeight;
+
+            // Apply spacing between children
+            if (Spacing > 0 && child != _children[^1])
+                ctx.CurrentY += Spacing;
         }
 
         // Restore original X
