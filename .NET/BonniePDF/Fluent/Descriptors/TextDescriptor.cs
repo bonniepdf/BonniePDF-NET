@@ -23,6 +23,14 @@ public sealed class TextDescriptor
     }
 
     /// <summary>
+    /// Adds a text span with a predefined style.
+    /// </summary>
+    public void Span(string text, TextStyle style)
+    {
+        RichText.Span(text, style);
+    }
+
+    /// <summary>
     /// Adds a text span followed by a line break.
     /// </summary>
     /// <returns>A <see cref="TextSpanDescriptor"/> for configuring the span's style.</returns>

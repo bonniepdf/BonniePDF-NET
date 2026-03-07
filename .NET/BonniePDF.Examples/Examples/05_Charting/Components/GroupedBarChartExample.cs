@@ -6,6 +6,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._05_Charting.Components;
 
@@ -13,9 +14,15 @@ namespace BonniePDF.Examples.Examples._05_Charting.Components;
 /// Example demonstrating the GroupedBarChart implementation.
 /// This shows how a GroupedBarChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
-public class GroupedBarChartExample
+public class GroupedBarChartExample : ExampleBase
 {
-    public static string Generate(string outputPath = "grouped_bar_chart_example.pdf")
+    public override string Id => "grouped-bar-chart";
+    public override string Title => "Grouped Bar Chart";
+    public override string Description => "Demonstrates the GroupedBarChart implementation with quarterly revenue data by product line, showing multiple bars per category with value labels.";
+    public override string FileName => "grouped_bar_chart_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Charting;
+
+    public override string Generate(string outputPath)
     {
         // Create a new PDF document
         using Document document = new(new DocumentSettings

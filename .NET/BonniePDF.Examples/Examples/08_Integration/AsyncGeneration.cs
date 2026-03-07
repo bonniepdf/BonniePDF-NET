@@ -6,18 +6,25 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._08_Integration;
 
 /// <summary>
 /// Demonstrates async/await PDF generation for non-blocking I/O
 /// </summary>
-public class AsyncExample
+public class AsyncExample : ExampleBase
 {
+    public override string Id => "AsyncGeneration";
+    public override string Title => "Async Generation";
+    public override string Description => "Generating PDFs asynchronously.";
+    public override string FileName => "async_document.pdf";
+    public override ExampleCategory Category => ExampleCategory.Integration;
+    
     /// <summary>
     /// Generates a PDF asynchronously to a file
     /// </summary>
-    public static async Task<string> GenerateAsync(string outputPath = "async_document.pdf")
+    public override async Task<string> GenerateAsync(string outputPath)
     {
         Document doc = new();
 

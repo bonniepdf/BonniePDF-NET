@@ -1,4 +1,5 @@
 using System;
+using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Media;
@@ -99,6 +100,15 @@ public static class ContainerElementExtensions
     public static Line Line(this IContentContainer c, float thickness = 1f)
     {
         var line = new Line { Thickness = thickness };
+        return c.Element(line);
+    }
+
+    /// <summary>
+    /// Adds a horizontal line with color.
+    /// </summary>
+    public static Line Line(this IContentContainer c, float thickness, Color color)
+    {
+        var line = new Line { Thickness = thickness, Color = color };
         return c.Element(line);
     }
 

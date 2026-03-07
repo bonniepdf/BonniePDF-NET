@@ -3,6 +3,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._03_Typography;
 
@@ -11,9 +12,15 @@ namespace BonniePDF.Examples.Examples._03_Typography;
 /// Shows bold, italic, colored, underlined, and multi-size text all within a single
 /// paragraph that word-wraps correctly across span boundaries.
 /// </summary>
-public class RichTextExample
+public class RichTextExample : ExampleBase
 {
-    public static string Generate(string outputPath = "rich_text.pdf")
+    public override string Id => "RichTextStyles";
+    public override string Title => "Rich Text Styles";
+    public override string Description => "Mixed formatting within paragraphs.";
+    public override string FileName => "rich_text.pdf";
+    public override ExampleCategory Category => ExampleCategory.Typography;
+    
+    public override string Generate(string outputPath)
     {
         Document doc = new(new DocumentSettings
         {

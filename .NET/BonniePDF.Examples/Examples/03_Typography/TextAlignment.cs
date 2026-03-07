@@ -4,6 +4,7 @@ using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._03_Typography;
 
@@ -11,9 +12,15 @@ namespace BonniePDF.Examples.Examples._03_Typography;
 /// Demonstrates justified text alignment where word spacing is distributed
 /// evenly to fill the available width, similar to newspaper/book typesetting.
 /// </summary>
-public class JustifiedTextExample
+public class JustifiedTextExample : ExampleBase
 {
-    public static string Generate(string outputPath = "justified_text.pdf")
+    public override string Id => "TextAlignment";
+    public override string Title => "Text Alignment";
+    public override string Description => "Left, center, right, and justified text alignment.";
+    public override string FileName => "justified_text.pdf";
+    public override ExampleCategory Category => ExampleCategory.Typography;
+    
+    public override string Generate(string outputPath)
     {
         Document doc = new(new DocumentSettings
         {

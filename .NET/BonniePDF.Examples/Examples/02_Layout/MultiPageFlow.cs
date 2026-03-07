@@ -5,253 +5,26 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._02_Layout;
 
 /// <summary>
-/// Demonstrates the Unified Flow & Pagination architecture.
-/// Shows TextBlock overflow, VerticalStack overflow, and header/footer templates.
+/// Generates a comprehensive document demonstrating the flow architecture with:
+/// - A long table with repeating headers on each page
+/// - Followed by a long text section that flows across pages
 /// </summary>
-public static class FlowArchitectureExample
+public class MultiPageFlowExample : ExampleBase
 {
-    /// <summary>
-    /// Generates a document with a long TextBlock that flows across multiple pages.
-    /// </summary>
-    public static string GenerateTextBlockOverflow(string outputPath = "textblock_overflow.pdf")
-    {
-        using Document doc = new();
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
-        doc.Settings.FooterTemplate = pageNumber => new TextBlock
-        {
-            Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 10,
-            TextColor = Color.Slate500,
-            Alignment = TextAlignment.Right
-        };
-
-        doc.Metadata.Title = "TextBlock Overflow Demo";
-        doc.Metadata.Author = "BonniePDF";
-        doc.Metadata.Subject = "Demonstrates text flowing across page boundaries";
-
-        // Add a title
-        doc.Add(new TextBlock
-        {
-            Text = "Long Text Document",
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 24,
-            TextColor = Color.Slate800,
-            Margin = new Thickness(0, 0, 0, 20)
-        });
-
-        // Generate a long text that will overflow
-        string[] paragraphs = new[]
-        {
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-            "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.",
-            "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.",
-            "Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?",
-            "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-        };
-
-        // Repeat paragraphs to create enough content for multiple pages
-        string longText = string.Join("\n\n", Enumerable.Range(1, 20).Select(i =>
-            $"Section {i}\n\n{paragraphs[i % paragraphs.Length]}\n\n{paragraphs[(i + 1) % paragraphs.Length]}"));
-
-        doc.Add(new TextBlock
-        {
-            Text = longText,
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate700
-        });
-
-        doc.Save(outputPath);
-        return outputPath;
-    }
-
-    /// <summary>
-    /// Generates a document with a VerticalStack containing many items that flows across pages.
-    /// </summary>
-    public static string GenerateVerticalStackOverflow(string outputPath = "verticalstack_overflow.pdf")
-    {
-        using Document doc = new();
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
-
-        doc.Metadata.Title = "VerticalStack Overflow Demo";
-        doc.Metadata.Author = "BonniePDF";
-        doc.Metadata.Subject = "Demonstrates VerticalStack flowing across page boundaries";
-
-        // Add a title
-        doc.Add(new TextBlock
-        {
-            Text = "Item Catalog",
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 24,
-            TextColor = Color.Slate800,
-            Margin = new Thickness(0, 0, 0, 10)
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = "A collection of items demonstrating automatic pagination",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate500,
-            Margin = new Thickness(0, 0, 0, 20)
-        });
-
-        // Create a vertical stack with many items
-        VerticalStack stack = new() { Margin = new Thickness(0) };
-
-        for (int i = 1; i <= 75; i++)
-        {
-            // Each item is a small card-like element
-            VerticalStack itemStack = new()
-            {
-                Margin = new Thickness(0, 0, 0, 15)
-            };
-
-            itemStack.AddChild(new TextBlock
-            {
-                Text = $"Item #{i:D3}",
-                FontName = StandardFonts.HelveticaBold,
-                FontSize = 12,
-                TextColor = Color.Blue600,
-                Margin = new Thickness(0, 0, 0, 5)
-            });
-
-            itemStack.AddChild(new TextBlock
-            {
-                Text =
-                    $"This is the description for item {i}. It contains some details about what this item represents and why it's important.",
-                FontName = StandardFonts.Helvetica,
-                FontSize = 10,
-                TextColor = Color.Slate600
-            });
-
-            stack.AddChild(itemStack);
-        }
-
-        doc.Add(stack);
-
-        doc.Save(outputPath);
-        return outputPath;
-    }
-
-    /// <summary>
-    /// Generates a document with header and footer templates on each page.
-    /// Note: Header/Footer template rendering requires pipeline integration.
-    /// This example shows the settings configuration.
-    /// </summary>
-    public static string GenerateWithHeadersAndFooters(string outputPath = "headers_footers.pdf")
-    {
-        // Create document with custom settings
-        DocumentSettings settings = new()
-        {
-            PageSize = PdfSize.A4,
-            Margin = 60,
-            DefaultZoom = ZoomLevel.FitPage,
-
-            // Header template - shows document title
-            HeaderTemplate = pageNumber => new TextBlock
-            {
-                Text = $"BonniePDF Documentation - Page {pageNumber}",
-                FontName = StandardFonts.HelveticaBold,
-                FontSize = 10,
-                TextColor = Color.Slate600,
-                Alignment = TextAlignment.Center
-            },
-
-            // Footer template - shows page number
-            FooterTemplate = pageNumber => new TextBlock
-            {
-                Text = $"Page {pageNumber} - Confidential",
-                FontName = StandardFonts.Helvetica,
-                FontSize = 10,
-                TextColor = Color.Slate500,
-                Alignment = TextAlignment.Center
-            }
-        };
-
-        using Document doc = new(settings);
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
-
-        doc.Metadata.Title = "Headers and Footers Demo";
-        doc.Metadata.Author = "BonniePDF";
-
-        // Add content that will span multiple pages
-        doc.Add(new TextBlock
-        {
-            Text = "Chapter 1: Introduction",
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 20,
-            TextColor = Color.Slate800,
-            Margin = new Thickness(0, 0, 0, 15)
-        });
-
-        // Generate content for several pages
-        for (int section = 1; section <= 8; section++)
-        {
-            doc.Add(new TextBlock
-            {
-                Text = $"1.{section} Section Title",
-                FontName = StandardFonts.HelveticaBold,
-                FontSize = 14,
-                TextColor = Color.Slate700,
-                Margin = new Thickness(0, 15, 0, 10)
-            });
-
-            string paragraphText = section switch
-            {
-                1 =>
-                    "This document demonstrates the header and footer template system in BonniePDF. Headers and footers are automatically rendered on each page after all content has been laid out.",
-                2 =>
-                    "The header template function receives the page number and returns an IElement that is rendered at the top of each page. This allows for dynamic content like section titles or logos.",
-                3 =>
-                    "Similarly, the footer template function creates elements for the bottom of each page. Common uses include page numbers, copyright notices, and document dates.",
-                4 =>
-                    "Templates can contain any valid IElement, including HorizontalStack for multi-column layouts, TextBlocks for simple text, or even Images for logos and branding.",
-                5 =>
-                    "The page number passed to templates is 1-based, making it easy to display 'Page 1 of N' style pagination. The total page count is available after rendering completes.",
-                6 =>
-                    "Templates are rendered after all page content is finalized, ensuring accurate page counts and proper positioning regardless of how content flows across pages.",
-                7 =>
-                    "You can conditionally render headers or footers by returning null from the template function. For example, you might omit the header on the first page.",
-                8 =>
-                    "This flexible system supports professional document layouts while maintaining the simplicity that makes BonniePDF easy to use.",
-                _ => "Additional content section."
-            };
-
-            // Add multiple paragraphs per section
-            for (int p = 0; p < 3; p++)
-                doc.Add(new TextBlock
-                {
-                    Text = paragraphText + ' ' + paragraphText,
-                    FontName = StandardFonts.Helvetica,
-                    FontSize = 11,
-                    TextColor = Color.Slate600,
-                    Margin = new Thickness(0, 0, 0, 12)
-                });
-        }
-
-        doc.Save(outputPath);
-        return outputPath;
-    }
-
-    /// <summary>
-    /// Generates a comprehensive document demonstrating the flow architecture with:
-    /// - A long table with repeating headers on each page
-    /// - Followed by a long text section that flows across pages
-    /// This showcases how different element types can paginate together in a single document.
-    /// </summary>
-    public static string GenerateComprehensiveFlowDemo(string outputPath = "comprehensive_flow_demo.pdf")
+    public override string Id => "MultiPageFlow";
+    public override string Title => "Multi-Page Flow";
+    public override string Description => "Shows how elements seamlessly flow across multiple pages.";
+    public override string FileName => "flow_demo.pdf";
+    public override ExampleCategory Category => ExampleCategory.Layout;
+    
+    public override string Generate(string outputPath)
     {
         // IMPORTANT: Set orientation in DocumentSettings BEFORE creating the Document
-        // The first page is created in the constructor, so orientation must be set beforehand
         DocumentSettings settings = new()
         {
             PageSize = PdfSize.A4,

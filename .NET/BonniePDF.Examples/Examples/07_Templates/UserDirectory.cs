@@ -5,6 +5,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
+using BonniePDF.Examples.Core;
 using BonniePDF.Examples.Data;
 using BonniePDF.Examples.Data.Models;
 using BonniePDF.Extensions;
@@ -15,9 +16,15 @@ namespace BonniePDF.Examples.Examples._07_Templates;
 /// <summary>
 /// Generates a 2-page PDF showing a list of mock users
 /// </summary>
-public class UsersTableExample
+public class UsersTableExample : ExampleBase
 {
-    public static string Generate(string outputPath = "users_list.pdf")
+    public override string Id => "user-directory";
+    public override string Title => "User Directory";
+    public override string Description => "Generates a 2-page PDF showing a list of mock users with ID, name, email, department, role, location, and status in a formatted table.";
+    public override string FileName => "users_list.pdf";
+    public override ExampleCategory Category => ExampleCategory.Templates;
+
+    public override string Generate(string outputPath)
     {
         Document doc = new(new DocumentSettings
         {

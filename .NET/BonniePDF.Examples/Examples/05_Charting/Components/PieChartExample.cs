@@ -6,6 +6,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Examples.Data;
 using BonniePDF.Extensions;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._05_Charting.Components;
 
@@ -14,9 +15,15 @@ namespace BonniePDF.Examples.Examples._05_Charting.Components;
 /// This shows how a PieChart can be rendered to PDF using the ICanvas interface.
 /// Uses the same data and colors from the sales-piechart.svg file.
 /// </summary>
-public class PieChartExample
+public class PieChartExample : ExampleBase
 {
-    public static string Generate(string outputPath = "pie_chart_example.pdf")
+    public override string Id => "pie-chart";
+    public override string Title => "Pie Chart";
+    public override string Description => "Demonstrates the PieChart component with monthly sales data, showing a donut-style pie chart with customizable colors and legend.";
+    public override string FileName => "pie_chart_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Charting;
+
+    public override string Generate(string outputPath)
     {
         // Create a new PDF document
         using Document document = new(new DocumentSettings

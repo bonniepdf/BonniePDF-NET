@@ -6,6 +6,7 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Examples.Core;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Examples._07_Templates;
@@ -13,8 +14,13 @@ namespace BonniePDF.Examples.Examples._07_Templates;
 /// <summary>
 /// Generates a modern QuickBooks-style invoice that fits on a single page
 /// </summary>
-public class InvoiceExample
+public class InvoiceExample : ExampleBase
 {
+    public override string Id => "business-invoice";
+    public override string Title => "Business Invoice";
+    public override string Description => "Generates a modern QuickBooks-style invoice with company branding, line items table, payment details, and professional styling.";
+    public override string FileName => "invoice.pdf";
+    public override ExampleCategory Category => ExampleCategory.Templates;
     // Brand accent color - a professional green similar to QuickBooks
     private static readonly Color AccentGreen = Color.FromHex("#0B9444");
     private static readonly Color AccentGreenLight = Color.FromHex("#E8F5EC");
@@ -24,7 +30,7 @@ public class InvoiceExample
     private static readonly Color TextMedium = Color.FromHex("#555555");
     private static readonly Color TextLight = Color.FromHex("#888888");
 
-    public static string Generate(string outputPath = "invoice.pdf")
+    public override string Generate(string outputPath)
     {
         Document doc = new(new DocumentSettings
         {

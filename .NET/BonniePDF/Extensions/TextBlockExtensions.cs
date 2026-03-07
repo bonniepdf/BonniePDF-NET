@@ -65,9 +65,10 @@ public static class TextBlockExtensions
     /// <summary>
     /// Sets the font for the text block
     /// </summary>
-    public static TextBlock Font(this TextBlock b, string fontName)
+    public static TextBlock Font(this TextBlock b, string fontName, float? fontSize = null)
     {
         b.FontName = fontName;
+        b.FontSize = fontSize ?? b.FontSize;
         return b;
     }
 

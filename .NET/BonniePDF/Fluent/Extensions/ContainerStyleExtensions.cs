@@ -178,6 +178,29 @@ public static class ContainerStyleExtensions
         return c.Element(container);
     }
 
+    // --- Margin ---
+
+    /// <summary>Sets uniform margin on all sides.</summary>
+    public static IContentContainer Margin(this IContentContainer c, float value)
+    {
+        var container = new Container { Margin = new Core.Thickness(value) };
+        return c.Element(container);
+    }
+
+    /// <summary>Sets horizontal and vertical margin.</summary>
+    public static IContentContainer Margin(this IContentContainer c, float horizontal, float vertical)
+    {
+        var container = new Container { Margin = new Core.Thickness(horizontal, vertical) };
+        return c.Element(container);
+    }
+
+    /// <summary>Sets margin for each side individually.</summary>
+    public static IContentContainer Margin(this IContentContainer c, float left, float top, float right, float bottom)
+    {
+        var container = new Container { Margin = new Core.Thickness(left, top, right, bottom) };
+        return c.Element(container);
+    }
+
     // --- Alignment ---
 
     /// <summary>Centers the content horizontally.</summary>

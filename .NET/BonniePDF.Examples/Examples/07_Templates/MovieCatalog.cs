@@ -6,6 +6,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
+using BonniePDF.Examples.Core;
 using BonniePDF.Examples.Data;
 using BonniePDF.Examples.Data.Models;
 using BonniePDF.Extensions;
@@ -16,9 +17,15 @@ namespace BonniePDF.Examples.Examples._07_Templates;
 /// <summary>
 /// Generates a PDF showing a list of movies with ratings
 /// </summary>
-public class MoviesTableExample
+public class MoviesTableExample : ExampleBase
 {
-    public static string Generate(string outputPath = "movies_list.pdf")
+    public override string Id => "movie-catalog";
+    public override string Title => "Movie Catalog";
+    public override string Description => "Generates a PDF showing a list of classic movies with ratings, director, genre, and duration in a formatted table.";
+    public override string FileName => "movies_list.pdf";
+    public override ExampleCategory Category => ExampleCategory.Templates;
+
+    public override string Generate(string outputPath)
     {
         Document doc = new(new DocumentSettings
         {

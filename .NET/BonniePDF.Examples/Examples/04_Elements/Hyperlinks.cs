@@ -2,15 +2,22 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._04_Elements;
 
 /// <summary>
 /// Demonstrates hyperlink support in PDF documents
 /// </summary>
-public class HyperlinkExample
+public class HyperlinkExample : ExampleBase
 {
-    public static string Generate(string outputPath = "hyperlink_example.pdf")
+    public override string Id => "Hyperlinks";
+    public override string Title => "Hyperlinks";
+    public override string Description => "Internal and external clickable links.";
+    public override string FileName => "hyperlink_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Elements;
+    
+    public override string Generate(string outputPath)
     {
         // Create a document with metadata
         Document doc = new();

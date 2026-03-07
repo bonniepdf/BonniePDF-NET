@@ -3,15 +3,22 @@ using System.IO;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._03_Typography;
 
 /// <summary>
 /// Demonstrates supplementary Unicode plane support — emoji and symbols beyond U+FFFF
 /// </summary>
-public class EmojiExample
+public class EmojiExample : ExampleBase
 {
-    public static string Generate(string outputPath = "emoji_example.pdf")
+    public override string Id => "EmojisAndUnicode";
+    public override string Title => "Emojis & Unicode";
+    public override string Description => "Rendering international text and emojis.";
+    public override string FileName => "emoji_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Typography;
+    
+    public override string Generate(string outputPath)
     {
         // Segoe UI Emoji is the standard Windows emoji font
         string emojiFont = @"C:\Windows\Fonts\seguiemj.ttf";

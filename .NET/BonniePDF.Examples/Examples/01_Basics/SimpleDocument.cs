@@ -5,15 +5,22 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._01_Basics;
 
 /// <summary>
 /// Demonstrates the new high-level Document API for creating PDFs
 /// </summary>
-public class SimpleDocumentExample
+public class SimpleDocumentExample : ExampleBase
 {
-    public static string Generate(string outputPath = "simple_document.pdf")
+    public override string Id => "SimpleDocument";
+    public override string Title => "Simple Document";
+    public override string Description => "A basic text-only PDF generation example.";
+    public override string FileName => "simple_document.pdf";
+    public override ExampleCategory Category => ExampleCategory.Basics;
+    
+    public override string Generate(string outputPath)
     {
         // Use Arial as the embedded font (available on Windows)
         string fontPath = @"C:\Windows\Fonts\Arial.ttf";

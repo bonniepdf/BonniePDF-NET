@@ -5,6 +5,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._05_Charting.Components;
 
@@ -12,9 +13,15 @@ namespace BonniePDF.Examples.Examples._05_Charting.Components;
 /// Example demonstrating the LollipopChart implementation.
 /// This shows how a LollipopChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
-public class LollipopChartExample
+public class LollipopChartExample : ExampleBase
 {
-    public static string Generate(string outputPath = "lollipop_chart_example.pdf")
+    public override string Id => "lollipop-chart";
+    public override string Title => "Lollipop Chart";
+    public override string Description => "Demonstrates the LollipopChart implementation with quarterly performance metrics, showing data points as lollipops with customizable stem width and head radius.";
+    public override string FileName => "lollipop_chart_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Charting;
+
+    public override string Generate(string outputPath)
     {
         // Create a new PDF document
         using Document document = new(new DocumentSettings

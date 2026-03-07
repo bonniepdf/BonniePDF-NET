@@ -5,12 +5,19 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._01_Basics;
 
-public class AllPagesExample
+public class AllPagesExample : ExampleBase
 {
-    public static string GenerateAllPageSizes(string outputPath = "all_page_sizes.pdf")
+    public override string Id => "PageSettings";
+    public override string Title => "Page Settings";
+    public override string Description => "Demonstrates orientation, sizes, and backgrounds.";
+    public override string FileName => "all_page_sizes.pdf";
+    public override ExampleCategory Category => ExampleCategory.Basics;
+    
+    public override string Generate(string outputPath)
     {
         Document doc = new(new DocumentSettings
         {

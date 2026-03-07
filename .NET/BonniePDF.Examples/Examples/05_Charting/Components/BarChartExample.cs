@@ -5,6 +5,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._05_Charting.Components;
 
@@ -12,9 +13,15 @@ namespace BonniePDF.Examples.Examples._05_Charting.Components;
 /// Example demonstrating the new refactored chart architecture.
 /// This shows how a BarChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
-public class BarChartExample
+public class BarChartExample : ExampleBase
 {
-    public static string Generate(string outputPath = "bar_char_example.pdf")
+    public override string Id => "bar-chart";
+    public override string Title => "Bar Chart";
+    public override string Description => "Demonstrates the BarChart implementation with monthly sales report data, showing vertical bars with customizable colors and spacing.";
+    public override string FileName => "bar_chart_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Charting;
+
+    public override string Generate(string outputPath)
     {
         // Create a new PDF document
         using Document document = new(new DocumentSettings

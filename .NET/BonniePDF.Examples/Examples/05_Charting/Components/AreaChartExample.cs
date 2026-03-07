@@ -5,6 +5,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._05_Charting.Components;
 
@@ -12,9 +13,15 @@ namespace BonniePDF.Examples.Examples._05_Charting.Components;
 /// Example demonstrating the AreaChart implementation.
 /// This shows how an AreaChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
-public class AreaChartExample
+public class AreaChartExample : ExampleBase
 {
-    public static string Generate(string outputPath = "area_chart_example.pdf")
+    public override string Id => "area-chart";
+    public override string Title => "Area Chart";
+    public override string Description => "Demonstrates the AreaChart implementation with monthly sales performance data, showing filled areas under the line with customizable opacity.";
+    public override string FileName => "area_chart_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Charting;
+
+    public override string Generate(string outputPath)
     {
         // Create a new PDF document
         using Document document = new(new DocumentSettings

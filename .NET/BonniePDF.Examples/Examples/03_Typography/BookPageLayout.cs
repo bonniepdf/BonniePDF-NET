@@ -5,15 +5,22 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._03_Typography;
 
 /// <summary>
 /// Generates a formatted textual page that reads like a page from a book
 /// </summary>
-public class BookPageExample
+public class BookPageExample : ExampleBase
 {
-    public static string Generate(string outputPath = "book_page.pdf")
+    public override string Id => "BookPageLayout";
+    public override string Title => "Book Page Layout";
+    public override string Description => "Advanced typography layout mimicking a book.";
+    public override string FileName => "book_page.pdf";
+    public override ExampleCategory Category => ExampleCategory.Typography;
+    
+    public override string Generate(string outputPath)
     {
         Document doc = new(new DocumentSettings
         {

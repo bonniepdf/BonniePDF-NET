@@ -5,6 +5,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
+using BonniePDF.Examples.Core;
 using BonniePDF.Examples.Data;
 using BonniePDF.Examples.Examples._05_Charting.Components;
 using BonniePDF.Extensions;
@@ -15,9 +16,15 @@ namespace BonniePDF.Examples.Examples._05_Charting;
 /// <summary>
 /// A comprehensive example that generates a multipage PDF containing all chart types.
 /// </summary>
-public class ChartingExample
+public class ChartingExample : ExampleBase
 {
-    public static string Generate(string outputPath = "charting_example.pdf")
+    public override string Id => "charting-showcase";
+    public override string Title => "Charting Showcase";
+    public override string Description => "A comprehensive multi-page PDF showcasing all chart types including bar, grouped bar, line, area, lollipop, dot plot, and pie charts with various configurations.";
+    public override string FileName => "charting_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Charting;
+
+    public override string Generate(string outputPath)
     {
         // Create a new PDF document
         using Document document = new(new DocumentSettings

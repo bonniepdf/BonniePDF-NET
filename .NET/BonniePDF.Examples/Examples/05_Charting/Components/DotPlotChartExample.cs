@@ -5,6 +5,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._05_Charting.Components;
 
@@ -12,9 +13,15 @@ namespace BonniePDF.Examples.Examples._05_Charting.Components;
 /// Example demonstrating the DotPlotChart implementation.
 /// This shows how a DotPlotChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
-public class DotPlotChartExample
+public class DotPlotChartExample : ExampleBase
 {
-    public static string Generate(string outputPath = "dot_plot_chart_example.pdf")
+    public override string Id => "dot-plot-chart";
+    public override string Title => "Dot Plot Chart";
+    public override string Description => "Demonstrates the DotPlotChart implementation with product performance data, showing dots at data points with customizable radius and colors.";
+    public override string FileName => "dot_plot_chart_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Charting;
+
+    public override string Generate(string outputPath)
     {
         // Create a new PDF document
         using Document document = new(new DocumentSettings

@@ -5,6 +5,7 @@ using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._04_Elements;
 
@@ -13,9 +14,15 @@ namespace BonniePDF.Examples.Examples._04_Elements;
 /// Rounded corners are a universal UI element in modern document design,
 /// built from four arcs and four lines using Bezier curve approximations.
 /// </summary>
-public class RoundedRectangleExample
+public class RoundedRectangleExample : ExampleBase
 {
-    public static string Generate(string outputPath = "rounded_rectangles.pdf")
+    public override string Id => "ShapesAndBorders";
+    public override string Title => "Shapes & Borders";
+    public override string Description => "Drawing basic shapes and styling borders.";
+    public override string FileName => "rounded_rectangles.pdf";
+    public override ExampleCategory Category => ExampleCategory.Elements;
+    
+    public override string Generate(string outputPath)
     {
         Document doc = new(new DocumentSettings
         {

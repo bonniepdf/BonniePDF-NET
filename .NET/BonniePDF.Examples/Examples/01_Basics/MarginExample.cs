@@ -4,15 +4,22 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._01_Basics;
 
 /// <summary>
 /// Demonstrates the margin feature for controlling spacing around elements
 /// </summary>
-public class MarginExample
+public class MarginExample : ExampleBase
 {
-    public static string Generate(string outputPath = "margin_example.pdf")
+    public override string Id => "MarginsAndUnits";
+    public override string Title => "Margins & Units";
+    public override string Description => "Shows how to configure page margins and use different units.";
+    public override string FileName => "margin_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Basics;
+    
+    public override string Generate(string outputPath)
     {
         Document doc = new();
 

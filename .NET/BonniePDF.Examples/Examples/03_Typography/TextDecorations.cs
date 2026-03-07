@@ -5,6 +5,7 @@ using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._03_Typography;
 
@@ -13,9 +14,15 @@ namespace BonniePDF.Examples.Examples._03_Typography;
 /// Decorations can be applied individually or combined, and work
 /// with all text alignments including justified text.
 /// </summary>
-public class TextDecorationExample
+public class TextDecorationExample : ExampleBase
 {
-    public static string Generate(string outputPath = "text_decorations.pdf")
+    public override string Id => "TextDecorations";
+    public override string Title => "Text Decorations";
+    public override string Description => "Underlines, strikethroughs, and text backgrounds.";
+    public override string FileName => "text_decorations.pdf";
+    public override ExampleCategory Category => ExampleCategory.Typography;
+    
+    public override string Generate(string outputPath)
     {
         Document doc = new(new DocumentSettings
         {

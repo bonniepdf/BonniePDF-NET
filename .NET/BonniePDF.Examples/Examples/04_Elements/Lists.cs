@@ -4,15 +4,22 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Lists;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._04_Elements;
 
 /// <summary>
 /// Demonstrates the List elements (Ordered and Unordered)
 /// </summary>
-public class ListExample
+public class ListExample : ExampleBase
 {
-    public static string Generate(string outputPath = "list_example.pdf")
+    public override string Id => "Lists";
+    public override string Title => "Lists";
+    public override string Description => "Ordered and unordered bullet point lists.";
+    public override string FileName => "list_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Elements;
+    
+    public override string Generate(string outputPath)
     {
         Document doc = new();
 

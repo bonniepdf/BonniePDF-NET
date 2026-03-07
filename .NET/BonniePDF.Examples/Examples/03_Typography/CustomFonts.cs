@@ -4,15 +4,22 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._03_Typography;
 
 /// <summary>
 /// Demonstrates TrueType font embedding with full Unicode support
 /// </summary>
-public class EmbeddedFontExample
+public class EmbeddedFontExample : ExampleBase
 {
-    public static string Generate(string outputPath = "embedded_font.pdf")
+    public override string Id => "CustomFonts";
+    public override string Title => "Custom Fonts";
+    public override string Description => "Embedding and using custom TTF fonts.";
+    public override string FileName => "embedded_font.pdf";
+    public override ExampleCategory Category => ExampleCategory.Typography;
+    
+    public override string Generate(string outputPath)
     {
         // Use Arial as the embedded font (available on Windows)
         string arialPath = @"C:\Windows\Fonts\arial.ttf";

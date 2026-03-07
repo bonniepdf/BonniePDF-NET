@@ -6,6 +6,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Examples.Data;
 using BonniePDF.Extensions;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._05_Charting.Components;
 
@@ -13,9 +14,15 @@ namespace BonniePDF.Examples.Examples._05_Charting.Components;
 /// Example demonstrating the LineChart implementation.
 /// This shows how a LineChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
-public class LineChartExample
+public class LineChartExample : ExampleBase
 {
-    public static string Generate(string outputPath = "line_chart_example.pdf")
+    public override string Id => "line-chart";
+    public override string Title => "Line Chart";
+    public override string Description => "Demonstrates the LineChart implementation with monthly revenue trends, showing connected data points with customizable line width and markers.";
+    public override string FileName => "line_chart_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Charting;
+
+    public override string Generate(string outputPath)
     {
         // Create a new PDF document
         using Document document = new(new DocumentSettings

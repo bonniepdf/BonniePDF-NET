@@ -8,15 +8,22 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._04_Elements;
 
 /// <summary>
 /// Demonstrates Image support (JPEG and PNG) in BonniePDF
 /// </summary>
-public class ImageExample
+public class ImageExample : ExampleBase
 {
-    public static string Generate(string outputPath = "image_example.pdf")
+    public override string Id => "Images";
+    public override string Title => "Images";
+    public override string Description => "Embedding and sizing raster and SVG images.";
+    public override string FileName => "image_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Elements;
+    
+    public override string Generate(string outputPath)
     {
         // Setup paths
         string jpgPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "owl.jpg");

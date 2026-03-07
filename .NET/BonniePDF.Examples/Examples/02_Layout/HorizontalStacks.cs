@@ -3,15 +3,22 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._02_Layout;
 
 /// <summary>
 /// Demonstrates the HorizontalStack element for horizontal layouts
 /// </summary>
-public class HorizontalStackExample
+public class HorizontalStackExample : ExampleBase
 {
-    public static string Generate(string outputPath = "horizontal_stack_example.pdf")
+    public override string Id => "HorizontalStacks";
+    public override string Title => "Horizontal Stacks";
+    public override string Description => "Demonstrates flex-like horizontal layout blocks.";
+    public override string FileName => "horizontal_stack_example.pdf";
+    public override ExampleCategory Category => ExampleCategory.Layout;
+    
+    public override string Generate(string outputPath)
     {
         Document doc = new();
 
