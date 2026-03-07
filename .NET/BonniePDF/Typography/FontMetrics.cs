@@ -14,6 +14,22 @@ public static class FontMetrics
     // Cache for parsed TTF widths: "C:/Fonts/arial.ttf" -> int[95]
     private static readonly Dictionary<string, int[]> TtfCache = [];
 
+    // Alias map: logical font name (e.g. "Helvetica-Bold") → physical TTF path (e.g. "C:/Windows/Fonts/arialbd.ttf")
+    // Populated by PdfResourceRegistry when PDF/A mode resolves a standard font to an embedded TTF file.
+    // This ensures measurement uses actual TTF metrics to match rendering exactly.
+    private static readonly Dictionary<string, string> FontPathAliases = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Registers a logical font name alias pointing to a specific TTF file path.
+    /// Should be called by PdfResourceRegistry when PDF/A mode maps a standard font to an embedded TTF.
+    /// Ensures <see cref="GetStringWidth"/> measures using actual TTF glyph metrics rather than
+    /// the approximate standard-font width tables, so layout matches rendering.
+    /// </summary>
+    public static void RegisterFontAlias(string logicalName, string ttfPath)
+    {
+        FontPathAliases[logicalName] = ttfPath;
+    }
+
     // -----------------------------------------------------------------------
     // RAW METRICS: Widths for ASCII 32 (' ') to 126 ('~') in 1/1000th of EM
     // -----------------------------------------------------------------------
@@ -55,11 +71,17 @@ public static class FontMetrics
     {
         if (string.IsNullOrEmpty(text)) return 0;
 
-        // A. IS IT A CUSTOM TTF FILE?
+        // A. IS IT A CUSTOM TTF FILE (direct path)?
         if (fontIdentifier.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase))
             return GetTtfWidth(text, fontIdentifier, fontSize);
 
-        // B. IS IT A STANDARD FONT?
+        // B. IS IT A REGISTERED ALIAS TO A TTF FILE?
+        // When PDF/A mode embeds a real TTF for a logical name (e.g. "Helvetica-Bold" → arialbd.ttf),
+        // measure using the actual TTF metrics so layout matches rendering.
+        if (FontPathAliases.TryGetValue(fontIdentifier, out string ttfPath))
+            return GetTtfWidth(text, ttfPath, fontSize);
+
+        // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
         return GetStandardFontWidth(text, fontIdentifier, fontSize);
     }
 

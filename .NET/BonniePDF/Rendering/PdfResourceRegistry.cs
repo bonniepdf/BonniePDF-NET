@@ -87,6 +87,9 @@ public class PdfResourceRegistry
                 string resourceName = RegisterEmbeddedFont(ttfPath);
                 FontNameMap[fontIdentifier] = resourceName;
                 FontAliasMap[fontIdentifier] = ttfPath;
+                // Keep FontMetrics in sync so measurement uses actual TTF metrics,
+                // not the approximate standard-font width tables.
+                FontMetrics.RegisterFontAlias(fontIdentifier, ttfPath);
                 return resourceName;
             }
         }
