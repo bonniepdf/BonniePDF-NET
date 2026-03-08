@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BonniePDF.Core;
 using BonniePDF.Rendering;
 using BonniePDF.Typography;
@@ -102,6 +103,12 @@ public class RichText : ElementBase, IStatefulElement
 
     // --- Rendering ---
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <param name="width"></param>
+    /// <returns></returns>
     public RenderStatus RenderStateful(RenderContext ctx, float width)
     {
         // Apply top margin only on first render
@@ -180,12 +187,19 @@ public class RichText : ElementBase, IStatefulElement
         return RenderStatus.Overflow;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void ResetState()
     {
         _lastLineRendered = -1;
         InvalidateCache();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     protected override float GetPreferredContentWidth()
     {
         // Measure the total width of all spans without wrapping
@@ -203,12 +217,14 @@ public class RichText : ElementBase, IStatefulElement
     protected override float MeasureContentHeight(float contentWidth)
     {
         List<RichTextLine> lines = GetOrComputeLines(contentWidth);
-        float totalHeight = 0;
-        foreach (RichTextLine line in lines)
-            totalHeight += line.Height;
-        return totalHeight;
+        return lines.Sum(line => line.Height);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <param name="contentWidth"></param>
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
         List<RichTextLine> lines = GetOrComputeLines(contentWidth);
