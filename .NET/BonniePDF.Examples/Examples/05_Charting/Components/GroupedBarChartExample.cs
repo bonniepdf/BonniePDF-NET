@@ -18,7 +18,7 @@ public class GroupedBarChartExample : ExampleBase
 {
     public override string Id => "grouped-bar-chart";
     public override string Title => "Grouped Bar Chart";
-    public override string Description => "Demonstrates the GroupedBarChart implementation with quarterly revenue data by product line, showing multiple bars per category with value labels.";
+    public override string Description => "GroupedBarChart implementation with quarterly revenue data by product line, showing multiple bars per category with value labels.";
     public override string FileName => "grouped_bar_chart_example.pdf";
     public override ExampleCategory Category => ExampleCategory.Charting;
 

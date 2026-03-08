@@ -17,7 +17,7 @@ public class AreaChartExample : ExampleBase
 {
     public override string Id => "area-chart";
     public override string Title => "Area Chart";
-    public override string Description => "Demonstrates the AreaChart implementation with monthly sales performance data, showing filled areas under the line with customizable opacity.";
+    public override string Description => "AreaChart implementation with monthly sales performance data, showing filled areas under the line with customizable opacity.";
     public override string FileName => "area_chart_example.pdf";
     public override ExampleCategory Category => ExampleCategory.Charting;
 

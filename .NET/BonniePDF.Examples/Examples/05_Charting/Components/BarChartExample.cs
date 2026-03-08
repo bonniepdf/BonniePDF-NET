@@ -17,7 +17,7 @@ public class BarChartExample : ExampleBase
 {
     public override string Id => "bar-chart";
     public override string Title => "Bar Chart";
-    public override string Description => "Demonstrates the BarChart implementation with monthly sales report data, showing vertical bars with customizable colors and spacing.";
+    public override string Description => "BarChart implementation with monthly sales report data, showing vertical bars with customizable colors and spacing.";
     public override string FileName => "bar_chart_example.pdf";
     public override ExampleCategory Category => ExampleCategory.Charting;
 

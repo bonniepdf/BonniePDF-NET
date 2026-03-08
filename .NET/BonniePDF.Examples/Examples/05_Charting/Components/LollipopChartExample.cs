@@ -17,7 +17,7 @@ public class LollipopChartExample : ExampleBase
 {
     public override string Id => "lollipop-chart";
     public override string Title => "Lollipop Chart";
-    public override string Description => "Demonstrates the LollipopChart implementation with quarterly performance metrics, showing data points as lollipops with customizable stem width and head radius.";
+    public override string Description => "LollipopChart implementation with quarterly performance metrics, showing data points as lollipops with customizable stem width and head radius.";
     public override string FileName => "lollipop_chart_example.pdf";
     public override ExampleCategory Category => ExampleCategory.Charting;
 

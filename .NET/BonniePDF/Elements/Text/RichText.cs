@@ -292,22 +292,26 @@ public class RichText : ElementBase, IStatefulElement
                 totalNeeded = wordWidth;
             }
 
-            // Add leading space (if not at start of line)
-            string text = currentWidth > 0 && word.HasLeadingSpace ? ' ' + word.Text : word.Text;
-            float textWidth = currentWidth > 0 && word.HasLeadingSpace ? spaceWidth + wordWidth : wordWidth;
-
-            // Try to merge with last run if same style
-            if (currentLine.Runs.Count > 0 &&
-                StylesEqual(currentLine.Runs[^1].Style, word.Style))
+            // Add leading space with its own style (may differ from the word's style at span
+            // boundaries).  For example the space before a highlighted span should carry the
+            // *preceding* span's style (no background), not the highlighted span's style.
+            if (currentWidth > 0 && word.HasLeadingSpace)
             {
-                currentLine.Runs[^1].Text += text;
+                TextStyle spaceStyle = word.LeadingSpaceStyle ?? word.Style;
+                if (currentLine.Runs.Count > 0 && StylesEqual(currentLine.Runs[^1].Style, spaceStyle))
+                    currentLine.Runs[^1].Text += " ";
+                else
+                    currentLine.Runs.Add(new StyledRun { Text = " ", Style = spaceStyle });
+                currentWidth += word.LeadingSpaceWidth;
             }
+
+            // Add the word text with its own style
+            if (currentLine.Runs.Count > 0 && StylesEqual(currentLine.Runs[^1].Style, word.Style))
+                currentLine.Runs[^1].Text += word.Text;
             else
-            {
-                currentLine.Runs.Add(new StyledRun { Text = text, Style = word.Style });
-            }
+                currentLine.Runs.Add(new StyledRun { Text = word.Text, Style = word.Style });
 
-            currentWidth += textWidth;
+            currentWidth += word.Width;
         }
 
         // Add the final line
@@ -337,6 +341,7 @@ public class RichText : ElementBase, IStatefulElement
     {
         List<StyledWord> words = new();
         bool prevSpanEndedWithSpace = false;
+        TextStyle prevResolvedStyle = null;
 
         foreach (TextSpan span in _spans)
         {
@@ -369,10 +374,26 @@ public class RichText : ElementBase, IStatefulElement
                 bool hasLeadingSpace = i > 0 ||
                     (words.Count > 0 && (text.StartsWith(' ') || prevSpanEndedWithSpace));
 
+                // Determine which style *owns* the leading space:
+                // - Inter-span space: the space came from the previous span's trailing space.
+                //   It should use the previous span's style (e.g. no highlight background),
+                //   NOT the current word's style.  This prevents the highlight background of
+                //   "highlight important text" bleeding into the space before it.
+                // - Intra-span space (i > 0) or span-leading space (text.StartsWith(' ')):
+                //   the space belongs to this span's style.
+                bool isInterSpanSpace = hasLeadingSpace
+                    && i == 0
+                    && prevSpanEndedWithSpace
+                    && !text.StartsWith(' ');
+
+                TextStyle spaceStyle = isInterSpanSpace && prevResolvedStyle != null
+                    ? prevResolvedStyle
+                    : resolved;
+
                 float partWidth = FontMetrics.GetStringWidth(
                     part, resolved.EffectiveFontName, resolved.EffectiveFontSize);
                 float spaceWidth = hasLeadingSpace
-                    ? FontMetrics.GetStringWidth(" ", resolved.EffectiveFontName, resolved.EffectiveFontSize)
+                    ? FontMetrics.GetStringWidth(" ", spaceStyle.EffectiveFontName, spaceStyle.EffectiveFontSize)
                     : 0;
 
                 words.Add(new StyledWord
@@ -381,7 +402,8 @@ public class RichText : ElementBase, IStatefulElement
                     Style = resolved,
                     Width = partWidth,
                     HasLeadingSpace = hasLeadingSpace,
-                    LeadingSpaceWidth = spaceWidth
+                    LeadingSpaceWidth = spaceWidth,
+                    LeadingSpaceStyle = hasLeadingSpace ? spaceStyle : null
                 });
             }
 
@@ -395,6 +417,8 @@ public class RichText : ElementBase, IStatefulElement
             {
                 prevSpanEndedWithSpace = text.EndsWith(' ');
             }
+
+            prevResolvedStyle = resolved;
         }
 
         return words;
@@ -639,5 +663,13 @@ internal class StyledWord
     public float Width { get; set; }
     public bool HasLeadingSpace { get; set; }
     public float LeadingSpaceWidth { get; set; }
+    /// <summary>
+    /// The style to use when rendering the leading space character.
+    /// For intra-span spaces (space between words within the same span) this equals Style.
+    /// For inter-span spaces (trailing space from the preceding span) this is the preceding
+    /// span's resolved style — so the space inherits that span's background/color, not the
+    /// following word's background/color.
+    /// </summary>
+    public TextStyle LeadingSpaceStyle { get; set; }
     public bool IsLineBreak { get; set; }
 }

@@ -17,7 +17,7 @@ public class DotPlotChartExample : ExampleBase
 {
     public override string Id => "dot-plot-chart";
     public override string Title => "Dot Plot Chart";
-    public override string Description => "Demonstrates the DotPlotChart implementation with product performance data, showing dots at data points with customizable radius and colors.";
+    public override string Description => "DotPlotChart implementation with product performance data, showing dots at data points with customizable radius and colors.";
     public override string FileName => "dot_plot_chart_example.pdf";
     public override ExampleCategory Category => ExampleCategory.Charting;
 

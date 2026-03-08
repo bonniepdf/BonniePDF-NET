@@ -20,7 +20,7 @@ public class PieChartExample : ExampleBase
 {
     public override string Id => "pie-chart";
     public override string Title => "Pie Chart";
-    public override string Description => "Demonstrates the PieChart component with monthly sales data, showing a donut-style pie chart with customizable colors and legend.";
+    public override string Description => "PieChart component with monthly sales data, showing a donut-style pie chart with customizable colors and legend.";
     public override string FileName => "pie_chart_example.pdf";
     public override ExampleCategory Category => ExampleCategory.Charting;
 

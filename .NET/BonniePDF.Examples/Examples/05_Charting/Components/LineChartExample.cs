@@ -18,7 +18,7 @@ public class LineChartExample : ExampleBase
 {
     public override string Id => "line-chart";
     public override string Title => "Line Chart";
-    public override string Description => "Demonstrates the LineChart implementation with monthly revenue trends, showing connected data points with customizable line width and markers.";
+    public override string Description => "LineChart implementation with monthly revenue trends, showing connected data points with customizable line width and markers.";
     public override string FileName => "line_chart_example.pdf";
     public override ExampleCategory Category => ExampleCategory.Charting;
 
