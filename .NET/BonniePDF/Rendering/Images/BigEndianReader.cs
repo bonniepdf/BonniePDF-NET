@@ -121,7 +121,7 @@ public sealed class BigEndianReader : IDisposable
     /// <returns>The floating-point value</returns>
     public float ReadFixed()
     {
-        uint value = ReadUInt32();
+        int value = ReadInt32();
         return value / 65536.0f;
     }
 

@@ -32,4 +32,9 @@ public class CatalogOptions
     /// Whether PDF/A mode is enabled (adds /MarkInfo to catalog).
     /// </summary>
     public bool PdfAEnabled { get; set; }
+
+    /// <summary>
+    /// The named destinations dictionary object ID (0 if none).
+    /// </summary>
+    public int DestsId { get; set; }
 }

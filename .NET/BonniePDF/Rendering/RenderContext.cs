@@ -16,6 +16,12 @@ namespace BonniePDF.Rendering;
 /// </summary>
 public class RenderContext
 {
+    /// <summary>
+    /// Initializes a new <see cref="RenderContext"/> for a single document.
+    /// </summary>
+    /// <param name="size">The page size (width and height in points).</param>
+    /// <param name="margin">The uniform page margin in points.</param>
+    /// <param name="isSvgMode">When <c>true</c>, the context emits SVG instead of PDF operators.</param>
     public RenderContext(PdfSize size, float margin, bool isSvgMode = false)
     {
         IsSvgMode = isSvgMode;
@@ -28,6 +34,10 @@ public class RenderContext
         UpdateCanvas();
     }
 
+    /// <summary>
+    /// Gets the shared PDF resource registry that tracks fonts, images, and other PDF resources
+    /// for the document being rendered.
+    /// </summary>
     public PdfResourceRegistry Resources { get; } = new();
 
     /// <summary>
@@ -46,6 +56,9 @@ public class RenderContext
     /// </summary>
     public bool IsLastPage { get; set; }
 
+    /// <summary>
+    /// Gets the list of page content streams, one <see cref="StringBuilder"/> per page.
+    /// </summary>
     public IList<StringBuilder> Pages { get; } = new List<StringBuilder>();
 
     /// <summary>
@@ -53,6 +66,12 @@ public class RenderContext
     /// Key: page index, Value: list of hyperlinks on that page
     /// </summary>
     public IDictionary<int, List<Hyperlink>> PageHyperlinks { get; } = new ConcurrentDictionary<int, List<Hyperlink>>();
+
+    /// <summary>
+    /// Stores the resolved page numbers for Table of Contents entries.
+    /// Key: TOC Identifier, Value: 1-based page number.
+    /// </summary>
+    public IDictionary<string, int> TocEntries { get; set; } = new Dictionary<string, int>();
 
     /// <summary>
     /// Gets the current drawing canvas.
@@ -64,13 +83,40 @@ public class RenderContext
     /// </summary>
     public bool IsSvgMode { get; }
 
+    /// <summary>
+    /// Gets the content stream for the page currently being rendered.
+    /// </summary>
     public StringBuilder CurrentStream => Pages[CurrentPageIndex];
+
+    /// <summary>
+    /// Gets the zero-based index of the page currently being rendered.
+    /// </summary>
     public int CurrentPageIndex { get; private set; }
 
+    /// <summary>
+    /// Gets or sets the current horizontal cursor position in points from the left edge.
+    /// </summary>
     public float CurrentX { get; set; }
+
+    /// <summary>
+    /// Gets or sets the current vertical cursor position in points from the top edge.
+    /// </summary>
     public float CurrentY { get; set; }
+
+    /// <summary>
+    /// Gets or sets the size of the current page in points.
+    /// </summary>
     public PdfSize PageSize { get; set; }
+
+    /// <summary>
+    /// Gets or sets the uniform page margin in points applied to all four sides.
+    /// </summary>
     public float Margin { get; set; }
+
+    /// <summary>
+    /// Gets the maximum Y coordinate before the bottom margin is reached.
+    /// Elements that exceed this value trigger a page break.
+    /// </summary>
     public float MaxY => PageSize.Height - Margin;
 
     /// <summary>
@@ -107,14 +153,34 @@ public class RenderContext
         return Resources.GetImageResourceName(id);
     }
 
+    /// <summary>
+    /// Resolves the embedded <see cref="TtfFont"/> for the given font identifier,
+    /// or <c>null</c> if the font is not embedded (i.e. it is a standard PDF font).
+    /// </summary>
     internal TtfFont ResolveEmbeddedFont(string fontIdentifier) => Resources.ResolveEmbeddedFont(fontIdentifier);
 
+    /// <summary>
+    /// Records the characters in <paramref name="text"/> as used by the specified font,
+    /// enabling accurate glyph subsetting when the PDF is written.
+    /// </summary>
     internal void TrackGlyphUsage(string fontIdentifier, string text) => Resources.TrackGlyphUsage(fontIdentifier, text);
 
+    /// <summary>
+    /// Registers a font by its identifier and returns the PDF resource name (e.g. <c>/F1</c>)
+    /// to use in content stream operators.
+    /// </summary>
     public string RegisterFont(string fontIdentifier) => Resources.RegisterFont(fontIdentifier);
 
+    /// <summary>
+    /// Returns <c>true</c> if the given font identifier refers to an embedded TrueType font
+    /// rather than one of the 14 standard PDF fonts.
+    /// </summary>
     public static bool IsEmbeddedFont(string fontIdentifier) => PdfResourceRegistry.IsEmbeddedFont(fontIdentifier);
 
+    /// <summary>
+    /// Returns the <see cref="EmbeddedFontInfo"/> for a font loaded from the given file path,
+    /// loading and caching it on first access.
+    /// </summary>
     public EmbeddedFontInfo GetEmbeddedFont(string filePath) => Resources.GetEmbeddedFont(filePath);
 
     /// <summary>
@@ -161,10 +227,20 @@ public class RenderContext
         UpdateCanvas();
     }
 
+    /// <summary>
+    /// Allocates and returns a new unique image object ID for use in the PDF cross-reference table.
+    /// </summary>
     public int GetNewImageId() => Resources.GetNewImageId();
 
+    /// <summary>
+    /// Registers an image with the resource registry and returns its assigned object ID.
+    /// Identical images are de-duplicated automatically.
+    /// </summary>
     public int RegisterImage(ImageInfo info) => Resources.RegisterImage(info);
 
+    /// <summary>
+    /// Returns the PDF resource name (e.g. <c>/Im1</c>) for a previously registered image.
+    /// </summary>
     public string GetImageResourceName(int imageId) => Resources.GetImageResourceName(imageId);
 
     /// <summary>
@@ -176,6 +252,10 @@ public class RenderContext
         PageHyperlinks[CurrentPageIndex].Add(hyperlink);
     }
 
+    /// <summary>
+    /// Registers a deferred Form XObject for a watermark or overlay pattern and returns
+    /// its PDF resource name. The XObject content is generated at the end of the document.
+    /// </summary>
     public string RegisterDeferredXObject(string fontFamily, float fontSize, Color color) => Resources.RegisterDeferredXObject(fontFamily, fontSize, color);
 }
 
@@ -184,9 +264,18 @@ public class RenderContext
 /// </summary>
 public class DeferredXObjectInfo
 {
+    /// <summary>Gets or sets the PDF resource name (e.g. <c>/XO1</c>) assigned to this XObject.</summary>
     public required string ResourceName { get; set; }
+
+    /// <summary>Gets or sets the font identifier used within this XObject's content stream.</summary>
     public required string FontIdentifier { get; set; }
+
+    /// <summary>Gets or sets the PDF font resource name (e.g. <c>/F1</c>) for text drawing operations.</summary>
     public required string FontResourceName { get; set; }
+
+    /// <summary>Gets or sets the font size in points used to render text within this XObject.</summary>
     public float FontSize { get; set; }
+
+    /// <summary>Gets or sets the fill color applied to text within this XObject.</summary>
     public required Color Color { get; set; }
 }

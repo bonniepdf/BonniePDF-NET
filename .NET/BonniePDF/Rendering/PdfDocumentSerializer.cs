@@ -5,6 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements;
+using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Writers;
 
 namespace BonniePDF.Rendering;
@@ -47,27 +50,71 @@ public class PdfDocumentSerializer
 
         // 2. Initialize Shared Context
         PdfSize orientedPageSize = _document.Settings.GetOrientedPageSize();
+
+        IDictionary<string, int> resolvedTocEntries = null;
+
+        if (RequiresTwoPassLayout())
+        {
+            RenderContext dryRunCtx = new(orientedPageSize, _document.Settings.Margin)
+            {
+                PdfAEnabled = _document.Settings.PdfAEnabled
+            };
+
+            foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
+
+            resolvedTocEntries = dryRunCtx.TocEntries;
+
+            if (_document.Settings.Bookmarks.Count == 0 && resolvedTocEntries.Count > 0)
+            {
+                foreach (var kvp in resolvedTocEntries)
+                {
+                    _document.Settings.Bookmarks.Add(new BookmarkItem { Title = kvp.Key, PageIndex = kvp.Value - 1 });
+                }
+            }
+        }
+
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin)
         {
-            PdfAEnabled = _document.Settings.PdfAEnabled
+            PdfAEnabled = _document.Settings.PdfAEnabled,
+            TocEntries = resolvedTocEntries
         };
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = [];
 
+        if (RequiresTwoPassLayout())
+        {
+            int expectedTotalPages = resolvedTocEntries.Count > 0 ? resolvedTocEntries.Values.Max() + 1 : 0;
+            // Pre-allocate page IDs with a generous padding
+            for (int i = 0; i < Math.Max(expectedTotalPages + 50, 100); i++)
+            {
+                pageIds.Add(writer.GetNewId());
+            }
+        }
+
+        int pageIndex = 0;
         // We use the new Streaming pipeline
         foreach (PageRenderOutput pageOutput in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, ctx))
         {
-            int pageId = writer.GetNewId();
+            int pageId;
+            if (pageIndex < pageIds.Count)
+            {
+                pageId = pageIds[pageIndex];
+            }
+            else
+            {
+                pageId = writer.GetNewId();
+                pageIds.Add(pageId);
+            }
+            pageIndex++;
             int contentId = writer.GetNewId();
-            pageIds.Add(pageId);
 
             // A. Write Content Stream IMMEDIATELY (Flush memory)
-            writer.WriteCompressedObject(contentId, new Dictionary<string, string>(), pageOutput.ContentStream);
+            writer.WriteCompressedObject(contentId, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), pageOutput.ContentStream);
 
             // B. Write Page Object IMMEDIATELY
             // NOTICE: We removed "/Resources" from here! It will go on the Parent.
-            Dictionary<string, string> pageDict = new()
+            Dictionary<string, string> pageDict = new(StringComparer.OrdinalIgnoreCase)
             {
                 ["/Type"] = "/Page",
                 ["/Parent"] = $"{pagesId} 0 R", // Refers to the parent we write later
@@ -82,7 +129,7 @@ public class PdfDocumentSerializer
                 foreach (Hyperlink link in pageOutput.Hyperlinks)
                 {
                     int annotId = writer.GetNewId();
-                    writer.WriteLinkAnnotation(annotId, link);
+                    writer.WriteLinkAnnotation(annotId, link, pageIds);
                     annotIds.Add(annotId);
                 }
 
@@ -91,6 +138,10 @@ public class PdfDocumentSerializer
 
             writer.WriteObject(pageId, pageDict);
         }
+
+        // Trim any pre-allocated page IDs that were never written
+        if (pageIds.Count > pageIndex)
+            pageIds.RemoveRange(pageIndex, pageIds.Count - pageIndex);
 
         // 4. Post-Processing (Write Resources)
         string globalResources = ctx.Resources.WriteResources(writer, pageIds.Count);
@@ -102,20 +153,21 @@ public class PdfDocumentSerializer
             // PDF/A-1B forbids CA/ca < 1.0 — use full opacity and blend the color instead
             float opacity = _document.Settings.PdfAEnabled ? 1.0f : _document.Settings.Watermark.Opacity;
             writer.WriteObject(gsId, new Dictionary<string, string>
+(StringComparer.OrdinalIgnoreCase)
             {
                 ["/Type"] = "/ExtGState",
                 ["/ca"] = opacity.ToString("F4"),
                 ["/CA"] = opacity.ToString("F4")
             });
             string extGStateRes = $"<< /ExtGState << /GS_WM {gsId} 0 R >> >>";
-            
+
             // Inline CombineResources equivalent
             string MergeDicts(string d1, string d2)
             {
                 if (string.IsNullOrEmpty(d2)) return d1;
-                string t2 = d2.StartsWith("<< ") ? d2.Substring(3) : d2;
-                t2 = t2.EndsWith(" >>") ? t2.Substring(0, t2.Length - 3) : t2;
-                string t1 = d1.EndsWith(" >>") ? d1.Substring(0, d1.Length - 3) : d1;
+                string t2 = d2.StartsWith("<< ", StringComparison.OrdinalIgnoreCase) ? d2.Substring(3) : d2;
+                t2 = t2.EndsWith(" >>", StringComparison.OrdinalIgnoreCase) ? t2.Substring(0, t2.Length - 3) : t2;
+                string t1 = d1.EndsWith(" >>", StringComparison.OrdinalIgnoreCase) ? d1.Substring(0, d1.Length - 3) : d1;
                 return t1 + ' ' + t2 + " >>";
             }
 
@@ -125,11 +177,12 @@ public class PdfDocumentSerializer
         // 5. Write Parent Pages Object
         string kids = string.Join(' ', pageIds.Select(id => $"{id} 0 R"));
         writer.WriteObject(pagesId, new Dictionary<string, string>
+(StringComparer.OrdinalIgnoreCase)
         {
             ["/Type"] = "/Pages",
             ["/Kids"] = $"[ {kids} ]",
             ["/Count"] = pageIds.Count.ToString(),
-            ["/Resources"] = globalResources 
+            ["/Resources"] = globalResources
         });
 
         // 6. Write Metadata & Close
@@ -201,25 +254,69 @@ public class PdfDocumentSerializer
 
         // 2. Initialize Shared Context
         PdfSize orientedPageSize = _document.Settings.GetOrientedPageSize();
+
+        IDictionary<string, int> resolvedTocEntries = null;
+
+        if (RequiresTwoPassLayout())
+        {
+            RenderContext dryRunCtx = new(orientedPageSize, _document.Settings.Margin)
+            {
+                PdfAEnabled = _document.Settings.PdfAEnabled
+            };
+
+            foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
+
+            resolvedTocEntries = dryRunCtx.TocEntries;
+
+            if (_document.Settings.Bookmarks.Count == 0 && resolvedTocEntries.Count > 0)
+            {
+                foreach (var kvp in resolvedTocEntries)
+                {
+                    _document.Settings.Bookmarks.Add(new BookmarkItem { Title = kvp.Key, PageIndex = kvp.Value - 1 });
+                }
+            }
+        }
+
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin);
         ctx.PdfAEnabled = _document.Settings.PdfAEnabled;
+        ctx.TocEntries = resolvedTocEntries;
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = new();
 
+        if (RequiresTwoPassLayout())
+        {
+            int expectedTotalPages = resolvedTocEntries.Count > 0 ? resolvedTocEntries.Values.Max() + 1 : 0;
+            // Pre-allocate page IDs with a generous padding
+            for (int i = 0; i < Math.Max(expectedTotalPages + 50, 100); i++)
+            {
+                pageIds.Add(writer.GetNewId());
+            }
+        }
+
+        int pageIndex = 0;
         // We use the new Streaming pipeline
         foreach (PageRenderOutput pageOutput in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, ctx))
         {
-            int pageId = writer.GetNewId();
+            int pageId;
+            if (pageIndex < pageIds.Count)
+            {
+                pageId = pageIds[pageIndex];
+            }
+            else
+            {
+                pageId = writer.GetNewId();
+                pageIds.Add(pageId);
+            }
+            pageIndex++;
             int contentId = writer.GetNewId();
-            pageIds.Add(pageId);
 
             // A. Write Content Stream IMMEDIATELY (Flush memory)
-            await writer.WriteCompressedObjectAsync(contentId, new Dictionary<string, string>(),
+            await writer.WriteCompressedObjectAsync(contentId, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
                 pageOutput.ContentStream, cancellationToken).ConfigureAwait(false);
 
             // B. Write Page Object IMMEDIATELY
-            Dictionary<string, string> pageDict = new()
+            Dictionary<string, string> pageDict = new(StringComparer.OrdinalIgnoreCase)
             {
                 ["/Type"] = "/Page",
                 ["/Parent"] = $"{pagesId} 0 R", // Refers to the parent we write later
@@ -234,7 +331,7 @@ public class PdfDocumentSerializer
                 foreach (Hyperlink link in pageOutput.Hyperlinks)
                 {
                     int annotId = writer.GetNewId();
-                    await writer.WriteLinkAnnotationAsync(annotId, link, cancellationToken).ConfigureAwait(false);
+                    await writer.WriteLinkAnnotationAsync(annotId, link, pageIds, cancellationToken).ConfigureAwait(false);
                     annotIds.Add(annotId);
                 }
 
@@ -243,6 +340,10 @@ public class PdfDocumentSerializer
 
             await writer.WriteObjectAsync(pageId, pageDict, null, cancellationToken).ConfigureAwait(false);
         }
+
+        // Trim any pre-allocated page IDs that were never written
+        if (pageIds.Count > pageIndex)
+            pageIds.RemoveRange(pageIndex, pageIds.Count - pageIndex);
 
         // 4. Post-Processing (Write Resources)
         string globalResources = await ctx.Resources.WriteResourcesAsync(writer, pageIds.Count, cancellationToken).ConfigureAwait(false);
@@ -253,6 +354,7 @@ public class PdfDocumentSerializer
             int gsId = writer.GetNewId();
             float opacity = _document.Settings.PdfAEnabled ? 1.0f : _document.Settings.Watermark.Opacity;
             await writer.WriteObjectAsync(gsId, new Dictionary<string, string>
+(StringComparer.OrdinalIgnoreCase)
             {
                 ["/Type"] = "/ExtGState",
                 ["/ca"] = opacity.ToString("F4"),
@@ -260,12 +362,12 @@ public class PdfDocumentSerializer
             }, null, cancellationToken).ConfigureAwait(false);
             string extGStateRes = $"<< /ExtGState << /GS_WM {gsId} 0 R >> >>";
 
-            string MergeDicts(string d1, string d2)
+            static string MergeDicts(string d1, string d2)
             {
                 if (string.IsNullOrEmpty(d2)) return d1;
-                string t2 = d2.StartsWith("<< ") ? d2.Substring(3) : d2;
-                t2 = t2.EndsWith(" >>") ? t2.Substring(0, t2.Length - 3) : t2;
-                string t1 = d1.EndsWith(" >>") ? d1.Substring(0, d1.Length - 3) : d1;
+                string t2 = d2.StartsWith("<< ", StringComparison.OrdinalIgnoreCase) ? d2.Substring(3) : d2;
+                t2 = t2.EndsWith(" >>", StringComparison.OrdinalIgnoreCase) ? t2.Substring(0, t2.Length - 3) : t2;
+                string t1 = d1.EndsWith(" >>", StringComparison.OrdinalIgnoreCase) ? d1.Substring(0, d1.Length - 3) : d1;
                 return t1 + ' ' + t2 + " >>";
             }
 
@@ -275,11 +377,12 @@ public class PdfDocumentSerializer
         // 5. Write Parent Pages Object
         string kids = string.Join(' ', pageIds.Select(id => $"{id} 0 R"));
         await writer.WriteObjectAsync(pagesId, new Dictionary<string, string>
+(StringComparer.OrdinalIgnoreCase)
         {
             ["/Type"] = "/Pages",
             ["/Kids"] = $"[ {kids} ]",
             ["/Count"] = pageIds.Count.ToString(),
-            ["/Resources"] = globalResources 
+            ["/Resources"] = globalResources
         }, null, cancellationToken).ConfigureAwait(false);
 
         // 6. Write Metadata & Close
@@ -331,6 +434,10 @@ public class PdfDocumentSerializer
         await writer.CloseAsync(catalogId, documentInfoId, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Returns <c>true</c> if any non-default viewer preferences are configured on the document settings
+    /// (e.g. HideToolbar, FitWindow), indicating that a ViewerPreferences dictionary should be written.
+    /// </summary>
     private static bool HasViewerPreferences(DocumentSettings settings)
     {
         return settings.HideToolbar ||
@@ -339,5 +446,28 @@ public class PdfDocumentSerializer
                settings.FitWindow ||
                settings.CenterWindow ||
                settings.DisplayDocTitle;
+    }
+
+    /// <summary>
+    /// Returns <c>true</c> if the document contains a <see cref="VisualToc"/> element,
+    /// which requires a two-pass layout to resolve heading page numbers before rendering.
+    /// </summary>
+    private bool RequiresTwoPassLayout()
+    {
+        return _document.Pages.Any(page => page.Elements.Any(ContainsVisualToc));
+    }
+
+    /// <summary>
+    /// Recursively checks whether an element tree contains a <see cref="VisualToc"/> element.
+    /// Descends into layout containers such as <see cref="VerticalStack"/>, <see cref="HorizontalStack"/>,
+    /// and <see cref="Container"/>.
+    /// </summary>
+    private static bool ContainsVisualToc(IElement element)
+    {
+        if (element is VisualToc) return true;
+        if (element is VerticalStack vs) return vs.Children.Any(ContainsVisualToc);
+        if (element is HorizontalStack hs) return hs.Children.Any(ContainsVisualToc);
+        if (element is Container c && c.Child != null) return ContainsVisualToc(c.Child);
+        return false;
     }
 }

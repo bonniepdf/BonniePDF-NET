@@ -64,7 +64,11 @@ public class ValidationOrchestrator
         // Get all PDF files, excluding encrypted ones (encryption is forbidden by PDF/A)
         string[] allPdfFiles = System.IO.Directory.GetFiles(pdfDirectory, "*.pdf", System.IO.SearchOption.TopDirectoryOnly);
         string[] pdfFiles = allPdfFiles
-            .Where(f => !System.IO.Path.GetFileName(f).StartsWith("encrypted_", StringComparison.OrdinalIgnoreCase))
+            .Where(f => {
+                string name = System.IO.Path.GetFileName(f);
+                return !name.StartsWith("encrypted_", StringComparison.OrdinalIgnoreCase)
+                    && !name.StartsWith("encryption_", StringComparison.OrdinalIgnoreCase);
+            })
             .ToArray();
 
         int skipped = allPdfFiles.Length - pdfFiles.Length;
@@ -131,6 +135,10 @@ public class ValidationOrchestrator
         return result;
     }
 
+    /// <summary>
+    /// Generates validation reports for all results using each registered <see cref="IReportGenerator"/>.
+    /// Report files are saved to the same directory as the validated PDFs.
+    /// </summary>
     private async Task GenerateReportsAsync(List<ValidationResult> results, string sourceDirectory)
     {
         string profileId = GetProfileId(_settings.DefaultProfile);
@@ -152,6 +160,10 @@ public class ValidationOrchestrator
         }
     }
 
+    /// <summary>
+    /// Converts a <see cref="ValidationProfile"/> enum value to the short string identifier
+    /// expected by the VeraPDF API (e.g. <c>"1b"</c>, <c>"2a"</c>).
+    /// </summary>
     private static string GetProfileId(ValidationProfile profile)
     {
         return profile switch
@@ -166,6 +178,10 @@ public class ValidationOrchestrator
         };
     }
 
+    /// <summary>
+    /// Infers the file extension for a report file based on the generator's type name
+    /// (e.g. a type containing "Json" yields <c>".json"</c>).
+    /// </summary>
     private static string GetReportExtension(IReportGenerator generator)
     {
         // Simple heuristic to determine file extension

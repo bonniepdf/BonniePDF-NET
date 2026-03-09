@@ -25,6 +25,7 @@ namespace BonniePDF.Rendering.Writers;
 /// </summary>
 public class AsyncPdfWriter : IAsyncPdfWriter
 {
+    private static readonly Encoding Iso88591 = Encoding.GetEncoding("ISO-8859-1");
     private readonly FileStream _fs;
     private readonly bool _leaveOpen;
 
@@ -45,7 +46,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         _fs = new FileStream(filename, FileMode.Create);
         _stream = _fs;
         _leaveOpen = false;
-        _writer = new StreamWriter(_stream, Encoding.ASCII, leaveOpen: true) { NewLine = "\n" };
+        _writer = new StreamWriter(_stream, Iso88591, leaveOpen: true) { NewLine = "\n" };
         _writer.WriteLine(version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
         _writer.WriteLine("%\u00E2\u00E3\u00CF\u00D3");
     }
@@ -67,7 +68,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         _fs = null;
         _stream = stream;
         _leaveOpen = leaveOpen;
-        _writer = new StreamWriter(_stream, Encoding.ASCII, leaveOpen: true) { NewLine = "\n" };
+        _writer = new StreamWriter(_stream, Iso88591, leaveOpen: true) { NewLine = "\n" };
         _writer.WriteLine(version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
         _writer.WriteLine("%\u00E2\u00E3\u00CF\u00D3");
     }
@@ -187,7 +188,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="hyperlink">The hyperlink to create an annotation for</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>The object ID of the annotation</returns>
-    public async Task<int> WriteLinkAnnotationAsync(int id, Hyperlink hyperlink,
+    public async Task<int> WriteLinkAnnotationAsync(int id, Hyperlink hyperlink, IList<int> pageIds = null,
         CancellationToken cancellationToken = default)
     {
         Dictionary<string, string> dict = new()
@@ -195,9 +196,18 @@ public class AsyncPdfWriter : IAsyncPdfWriter
             ["/Type"] = "/Annot",
             ["/Subtype"] = "/Link",
             ["/Rect"] = hyperlink.GetRectangleString(),
-            ["/F"] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
-            ["/A"] = $"<< /S /URI /URI ({PdfSyntax.Escape(hyperlink.Uri)}) >>"
+            ["/F"] = "4" // Print flag (PDF/A-1B requires annotations to be printable)
         };
+
+        if (hyperlink.TargetPageIndex.HasValue && pageIds != null)
+        {
+            int pageIdx = Math.Max(0, Math.Min(hyperlink.TargetPageIndex.Value, pageIds.Count - 1));
+            dict["/A"] = $"<< /S /GoTo /D [{pageIds[pageIdx]} 0 R /Fit] >>";
+        }
+        else
+        {
+            dict["/A"] = $"<< /S /URI /URI ({PdfSyntax.Escape(hyperlink.Uri ?? "")}) >>";
+        }
 
         await WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
         return id;
@@ -241,8 +251,9 @@ public class AsyncPdfWriter : IAsyncPdfWriter
             if (_offsets.TryGetValue(i, out long offset))
                 await _writer.WriteAsync($"{offset:D10} 00000 n \n").ConfigureAwait(false);
             else
-                // Should not happen if logic is correct, but safe fallback
-                throw new Exception($"Object ID {i} was reserved but never written to the PDF.");
+                // Write a free entry for IDs that were reserved but not written
+                // (e.g. pre-allocated page IDs that weren't needed). Valid per PDF spec.
+                await _writer.WriteAsync("0000000000 00000 f \n").ConfigureAwait(false);
 
         await _writer.WriteAsync("trailer\n").ConfigureAwait(false);
         // Build trailer dictionary
@@ -259,6 +270,12 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         {
             trailerParts.Add($"/Encrypt {_encryptId} 0 R");
             trailerParts.Add($"/ID {Encryptor.GetIdArray()}");
+        }
+        else
+        {
+            byte[] idBytes = Guid.NewGuid().ToByteArray();
+            string hexId = BitConverter.ToString(idBytes).Replace("-", "");
+            trailerParts.Add($"/ID [<{hexId}> <{hexId}>]");
         }
 
         string trailerDict = $"<< {string.Join(' ', trailerParts)} >>\n";
@@ -313,7 +330,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="pagesId">The pages object ID</param>
     /// <param name="firstPageId">The first page object ID (for OpenAction)</param>
     /// <param name="settings">The document settings</param>
-    /// <param name="options"></param>
+    /// <param name="options">Optional catalog references such as outlines, XMP metadata, and PDF/A output intents.</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     public async Task WriteCatalogAsync(int id, int pagesId, int firstPageId, DocumentSettings settings,
         CatalogOptions options, CancellationToken cancellationToken = default)
@@ -353,6 +370,10 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         // Add MarkInfo for PDF/A
         if (options?.PdfAEnabled == true)
             dict["/MarkInfo"] = "<< /Marked true >>";
+
+        // Add Dests if provided
+        if (options?.DestsId > 0)
+            dict["/Dests"] = $"{options.DestsId} 0 R";
 
         await WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
     }
@@ -461,6 +482,10 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         await _writer.WriteAsync("endobj\n").ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Asynchronously flushes and disposes the stream writer and, unless <c>leaveOpen</c> was set,
+    /// the underlying stream and file handle.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         // Always flush the writer to ensure all buffered data is written

@@ -13,12 +13,24 @@ namespace BonniePDF.Examples.Examples._01_Basics;
 /// </summary>
 public class MarginExampleFluent : ExampleBase
 {
+    /// <inheritdoc/>
     public override string Id => "MarginsFluent";
+    /// <inheritdoc/>
     public override string Title => "Margins (Fluent API)";
+    /// <inheritdoc/>
     public override string Description => "Demonstrates margin support using the Fluent API.";
+    /// <inheritdoc/>
     public override string FileName => "margin_example_fluent.pdf";
+    /// <inheritdoc/>
     public override ExampleCategory Category => ExampleCategory.Basics;
-    
+
+    /// <summary>
+    /// Generates the margins example PDF and saves it to <paramref name="outputPath"/>.
+    /// The document illustrates top/bottom/left/right margin control on text, containers,
+    /// images, tables, and stacked layouts using the Fluent API.
+    /// </summary>
+    /// <param name="outputPath">The full file path where the PDF will be written.</param>
+    /// <returns>The path of the generated PDF file.</returns>
     public override string Generate(string outputPath)
     {
         Pdf.Create(doc =>
@@ -105,7 +117,7 @@ public class MarginExampleFluent : ExampleBase
                         .Margin(10, 0, 10, 0) // Left and right margin
                         .Table(table =>
                         {
-                            table.Columns(2);
+                            table.Columns(1, 1);
                             table.CellPadding(8);
                             table.Border(1, Color.Slate300);
                             table.HeaderBackground(Color.Slate200);

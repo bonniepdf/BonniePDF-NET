@@ -12,6 +12,34 @@ namespace BonniePDF.Rendering.Pdf;
 internal static class PdfSyntax
 {
     /// <summary>
+    /// Encodes a string for use in a PDF document information dictionary.
+    /// Returns a PDF literal string for Latin-1 compatible text, or a UTF-16 BE hex
+    /// string (with BOM) for text that contains characters outside the Latin-1 range.
+    /// </summary>
+    internal static string EncodeMetadataString(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return "()";
+
+        foreach (char c in input)
+        {
+            if (c > '\xFF')
+            {
+                // Encode as UTF-16 BE hex string with BOM (0xFEFF)
+                byte[] utf16be = Encoding.BigEndianUnicode.GetBytes(input);
+                StringBuilder sb = new(utf16be.Length * 2 + 8);
+                sb.Append("<FEFF");
+                foreach (byte b in utf16be)
+                    sb.Append(b.ToString("X2"));
+                sb.Append('>');
+                return sb.ToString();
+            }
+        }
+
+        return $"({Escape(input)})";
+    }
+
+    /// <summary>
     /// Escapes a string for use within PDF string literals (parentheses).
     /// Handles backslashes, parentheses, and control characters.
     /// </summary>

@@ -75,6 +75,9 @@ public class PdfWriter : IPdfWriter, IDisposable
         _writer.WriteLine("%\u00E2\u00E3\u00CF\u00D3");
     }
 
+    /// <summary>
+    /// Disposes the underlying stream writer and, unless <c>leaveOpen</c> was set, the stream and file handle.
+    /// </summary>
     public void Dispose()
     {
         _writer.Dispose();
@@ -176,16 +179,25 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="id">The object ID for the annotation</param>
     /// <param name="hyperlink">The hyperlink to create an annotation for</param>
     /// <returns>The object ID of the annotation</returns>
-    public int WriteLinkAnnotation(int id, Hyperlink hyperlink)
+    public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null)
     {
         Dictionary<string, string> dict = new()
         {
             ["/Type"] = "/Annot",
             ["/Subtype"] = "/Link",
             ["/Rect"] = hyperlink.GetRectangleString(),
-            ["/F"] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
-            ["/A"] = $"<< /S /URI /URI ({PdfSyntax.Escape(hyperlink.Uri)}) >>"
+            ["/F"] = "4" // Print flag (PDF/A-1B requires annotations to be printable)
         };
+
+        if (hyperlink.TargetPageIndex.HasValue && pageIds != null)
+        {
+            int pageIdx = Math.Max(0, Math.Min(hyperlink.TargetPageIndex.Value, pageIds.Count - 1));
+            dict["/A"] = $"<< /S /GoTo /D [{pageIds[pageIdx]} 0 R /Fit] >>";
+        }
+        else
+        {
+            dict["/A"] = $"<< /S /URI /URI ({PdfSyntax.Escape(hyperlink.Uri ?? "")}) >>";
+        }
 
         WriteObject(id, dict);
         return id;
@@ -227,8 +239,9 @@ public class PdfWriter : IPdfWriter, IDisposable
             if (_offsets.TryGetValue(i, out long offset))
                 _writer.Write($"{offset:D10} 00000 n \n");
             else
-                // Should not happen if logic is correct, but safe fallback
-                throw new Exception($"Object ID {i} was reserved but never written to the PDF.");
+                // Write a free entry for IDs that were reserved but not written
+                // (e.g. pre-allocated page IDs that weren't needed). Valid per PDF spec.
+                _writer.Write("0000000000 00000 f \n");
 
         _writer.Write("trailer\n");
         // Build trailer dictionary
@@ -309,7 +322,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="pagesId">The pages object ID</param>
     /// <param name="firstPageId">The first page object ID (for OpenAction)</param>
     /// <param name="settings">The document settings</param>
-    /// <param name="options"></param>
+    /// <param name="options">Optional catalog references such as outlines, XMP metadata, and PDF/A output intents.</param>
     public void WriteCatalog(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions options)
     {
         Dictionary<string, string> dict = new()
@@ -347,6 +360,10 @@ public class PdfWriter : IPdfWriter, IDisposable
         // Add MarkInfo for PDF/A
         if (options?.PdfAEnabled == true)
             dict["/MarkInfo"] = "<< /Marked true >>";
+
+        // Add Dests if provided
+        if (options?.DestsId > 0)
+            dict["/Dests"] = $"{options.DestsId} 0 R";
 
         WriteObject(id, dict);
     }

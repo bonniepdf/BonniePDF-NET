@@ -20,22 +20,34 @@ public class Hyperlink : IElement
     /// </summary>
     /// <param name="uri">The URI (URL) that this hyperlink points to</param>
     /// <param name="text">The link text to display</param>
-    public Hyperlink(string uri, string text)
+    public Hyperlink(string uri, string text) : this(text)
     {
         if (string.IsNullOrEmpty(uri))
             throw new ArgumentException("URI cannot be null or empty", nameof(uri));
 
+        Uri = uri;
+    }
+
+    /// <summary>
+    /// Creates a new internal hyperlink (bookmark) with the specified display text
+    /// </summary>
+    /// <param name="text">The link text to display</param>
+    public Hyperlink(string text)
+    {
         if (string.IsNullOrEmpty(text))
             throw new ArgumentException("TextBlock cannot be null or empty", nameof(text));
-
-        Uri = uri;
         Text = text;
     }
 
     /// <summary>
-    /// Gets the URI (URL) that this hyperlink points to
+    /// Gets or sets the URI (URL) that this hyperlink points to
     /// </summary>
-    public string Uri { get; }
+    public string Uri { get; set; }
+
+    /// <summary>
+    /// Gets or sets the target 0-based page index (for internal links)
+    /// </summary>
+    public int? TargetPageIndex { get; set; }
 
     /// <summary>
     /// Gets the link text to display
@@ -62,13 +74,30 @@ public class Hyperlink : IElement
     /// </summary>
     public Thickness Margin { get; set; } = new(0);
 
+    /// <summary>Line height derived from <see cref="FontSize"/> with a standard 1.2× leading factor.</summary>
     private float LineHeight => FontSize * 1.2f;
 
     // Internal properties set during rendering
+    /// <summary>Gets the X position of the rendered annotation rectangle in PDF coordinates (bottom-left origin).</summary>
     internal float RenderX { get; private set; }
+    /// <summary>Gets the Y position of the rendered annotation rectangle in PDF coordinates (bottom-left origin).</summary>
     internal float RenderY { get; private set; }
+    /// <summary>Gets the width of the rendered annotation rectangle in points.</summary>
     internal float RenderWidth { get; private set; }
+    /// <summary>Gets the height of the rendered annotation rectangle in points.</summary>
     internal float RenderHeight { get; private set; }
+
+    /// <summary>
+    /// Sets the rendered bounding rectangle in PDF coordinates (bottom-left origin).
+    /// Called during rendering so that the annotation can be written after layout is complete.
+    /// </summary>
+    internal void SetRenderBounds(float x, float y, float width, float height)
+    {
+        RenderX = x;
+        RenderY = y;
+        RenderWidth = width;
+        RenderHeight = height;
+    }
 
     /// <summary>
     /// Gets the preferred width of this element, if any.
@@ -159,15 +188,22 @@ public class Hyperlink : IElement
     {
         // PDF coordinates: (0,0) is bottom-left
         // RenderX, RenderY are already in PDF coordinates (bottom-left based)
-        return $"[{RenderX} {RenderY} {RenderX + RenderWidth} {RenderY + RenderHeight}]";
+        return $"[{PdfSyntax.FormatDecimal(RenderX)} {PdfSyntax.FormatDecimal(RenderY)} {PdfSyntax.FormatDecimal(RenderX + RenderWidth)} {PdfSyntax.FormatDecimal(RenderY + RenderHeight)}]";
     }
 
+    /// <summary>
+    /// Returns the number of wrapped lines required to render <see cref="Text"/> within the given width.
+    /// </summary>
     private int ComputeLineCount(float maxWidth)
     {
         if (string.IsNullOrEmpty(Text)) return 0;
         return ComputeLines(maxWidth).Count;
     }
 
+    /// <summary>
+    /// Wraps <see cref="Text"/> into a list of lines that each fit within <paramref name="maxWidth"/>.
+    /// Uses a greedy word-wrap algorithm measured with <see cref="FontMetrics"/>.
+    /// </summary>
     private List<string> ComputeLines(float maxWidth)
     {
         List<string> lines = [];
@@ -197,6 +233,11 @@ public class Hyperlink : IElement
         return lines;
     }
 
+    /// <summary>
+    /// Encodes <paramref name="text"/> as a PDF hex string of Glyph IDs for the current font,
+    /// and records glyph usage for subsetting. Falls back to a plain escaped PDF string if the
+    /// font is not embedded (i.e. a standard PDF font).
+    /// </summary>
     private string EncodeTextAsGlyphIds(RenderContext ctx, string text)
     {
         TtfFont font = ctx.ResolveEmbeddedFont(FontName);

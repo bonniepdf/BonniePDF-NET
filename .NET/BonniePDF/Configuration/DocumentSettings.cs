@@ -142,6 +142,11 @@ public class DocumentSettings
     public bool HasBookmarks => Bookmarks != null && Bookmarks.Count > 0;
 
     /// <summary>
+    /// Internal destinations mapping a name to a 0-based page index.
+    /// </summary>
+    public IDictionary<string, int> NamedDestinations { get; set; } = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
     /// Gets or sets the watermark settings for the document.
     /// When null, no watermark is rendered.
     /// </summary>

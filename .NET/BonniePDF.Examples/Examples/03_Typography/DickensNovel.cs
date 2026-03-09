@@ -28,13 +28,25 @@ public partial class DickensNovelExample : ExampleBase
     [GeneratedRegex(@"^CHAPTER\s+[IVXLC]+\.$")]
     private static partial Regex ChapterLineRegex();
 
+    /// <inheritdoc/>
     public override string Id          => "DickensNovel";
+    /// <inheritdoc/>
     public override string Title       => "Dickens: A Tale of Two Cities";
+    /// <inheritdoc/>
     public override string Description => "Formats the complete Project Gutenberg novel as a book-quality PDF.";
+    /// <inheritdoc/>
     public override string FileName    => "dickens_a_tale_of_two_cities.pdf";
+    /// <inheritdoc/>
     public override ExampleCategory Category => ExampleCategory.Typography;
+    /// <inheritdoc/>
     public override int? Order         => 10;
 
+    /// <summary>
+    /// Loads the novel source text, parses it into sections, and renders the full multi-page PDF.
+    /// Requires the Project Gutenberg plain-text file to be present at <see cref="LocalFilePath"/>.
+    /// </summary>
+    /// <param name="outputPath">The full file path where the generated PDF will be saved.</param>
+    /// <returns>The path of the generated PDF file.</returns>
     public override string Generate(string outputPath)
     {
         string raw = LoadText();
@@ -90,6 +102,38 @@ public partial class DickensNovelExample : ExampleBase
 
         // ── Title Page ───────────────────────────────────────────────────────
         AddTitlePage(doc);
+        doc.AddPage();
+
+        // ── Table of Contents ────────────────────────────────────────────────
+        doc.Add(new TextBlock
+        {
+            Text = "Table of Contents",
+            FontName = StandardFonts.TimesBold,
+            FontSize = 24,
+            TextColor = Color.Slate900,
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 40, 0, 40)
+        });
+
+        List<string> tocIdentifiers = new();
+        foreach (var section in sections)
+        {
+            if (section.Type == SectionType.BookTitle || section.Type == SectionType.Chapter)
+            {
+                tocIdentifiers.Add(section.Text);
+            }
+        }
+
+        doc.Add(new VisualToc
+        {
+            HeadingIdentifiers = tocIdentifiers,
+            FontName = StandardFonts.TimesRoman,
+            FontSize = 11,
+            TextColor = Color.Slate800,
+            Margin = new Thickness(0, 0, 0, 40)
+        });
+
+        doc.AddPage();
 
         // ── Body Content ─────────────────────────────────────────────────────
         foreach (NovelSection section in sections)
@@ -97,11 +141,11 @@ public partial class DickensNovelExample : ExampleBase
             switch (section.Type)
             {
                 case SectionType.BookTitle:
-                    AddBookHeading(doc, section.Text);
+                    AddBookHeading(doc, section.Text, section.Text);
                     break;
 
                 case SectionType.Chapter:
-                    AddChapterHeading(doc, section.Number, section.Title);
+                    AddChapterHeading(doc, section.Number, section.Title, section.Text);
                     break;
 
                 case SectionType.Paragraph:
@@ -116,6 +160,10 @@ public partial class DickensNovelExample : ExampleBase
 
     // ── Rendering helpers ────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Renders the decorative title page with the book title, subtitle, author, and edition note.
+    /// Relies on large top margins to visually centre the block without explicit page positioning.
+    /// </summary>
     private static void AddTitlePage(Document doc)
     {
         // Large top margin to vertically centre the block on the page.
@@ -184,7 +232,7 @@ public partial class DickensNovelExample : ExampleBase
     /// A generous top margin keeps it visually separated from preceding text so it
     /// sits near the top of whatever page it lands on.
     /// </summary>
-    private static void AddBookHeading(Document doc, string title)
+    private static void AddBookHeading(Document doc, string title, string tocId)
     {
         doc.Add(new TextBlock
         {
@@ -196,8 +244,9 @@ public partial class DickensNovelExample : ExampleBase
             Margin    = new Thickness(0, 56, 0, 14)
         });
 
-        doc.Add(new TextBlock
+        doc.Add(new Heading
         {
+            TocIdentifier = tocId,
             Text      = title.ToUpperInvariant(),
             FontName  = StandardFonts.TimesBold,
             FontSize  = 14,
@@ -222,7 +271,7 @@ public partial class DickensNovelExample : ExampleBase
     /// The top margin provides enough breathing room to visually open a new chapter
     /// without requiring explicit page breaks.
     /// </summary>
-    private static void AddChapterHeading(Document doc, string number, string title)
+    private static void AddChapterHeading(Document doc, string number, string title, string tocId)
     {
         doc.Add(new TextBlock
         {
@@ -234,8 +283,9 @@ public partial class DickensNovelExample : ExampleBase
             Margin    = new Thickness(0, 32, 0, 6)
         });
 
-        doc.Add(new TextBlock
+        doc.Add(new Heading
         {
+            TocIdentifier = tocId,
             Text      = title,
             FontName  = StandardFonts.TimesBold,
             FontSize  = 17,
@@ -267,6 +317,12 @@ public partial class DickensNovelExample : ExampleBase
 
     // ── Text loading ─────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Reads the novel source text from <see cref="LocalFilePath"/> using UTF-8 encoding.
+    /// Throws <see cref="FileNotFoundException"/> if the file is not present, with instructions
+    /// on where to download the Project Gutenberg edition.
+    /// </summary>
+    /// <returns>The raw text content of the novel.</returns>
     private static string LoadText()
     {
         if (File.Exists(LocalFilePath))
@@ -394,8 +450,12 @@ public partial class DickensNovelExample : ExampleBase
 
 // ── Supporting types ──────────────────────────────────────────────────────────
 
+/// <summary>Discriminates between the three kinds of content parsed from the Project Gutenberg source.</summary>
 internal enum SectionType { BookTitle, Chapter, Paragraph }
 
+/// <summary>
+/// Represents a single parsed section of the novel — a book division, chapter heading, or body paragraph.
+/// </summary>
 internal sealed class NovelSection
 {
     /// <summary>Creates a BookTitle or Paragraph section.</summary>
@@ -414,6 +474,7 @@ internal sealed class NovelSection
         Text   = $"{number} — {title}";
     }
 
+    /// <summary>Gets the type of this section (BookTitle, Chapter, or Paragraph).</summary>
     public SectionType Type   { get; }
 
     /// <summary>Full text (BookTitle / Paragraph) or "CHAPTER X. — Title" (Chapter).</summary>

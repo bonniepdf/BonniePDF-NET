@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BonniePDF", "BonniePDF.csproj", "{2D0A7D3F-8B4E-6E32-03FC-78BCB3A1B5B5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2D0A7D3F-8B4E-6E32-03FC-78BCB3A1B5B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D0A7D3F-8B4E-6E32-03FC-78BCB3A1B5B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D0A7D3F-8B4E-6E32-03FC-78BCB3A1B5B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D0A7D3F-8B4E-6E32-03FC-78BCB3A1B5B5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5993F3FF-CBC3-45A7-9269-AA8F2544ABF2}
+	EndGlobalSection
+EndGlobal

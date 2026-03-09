@@ -17,12 +17,20 @@ public class MetadataWriter
     private readonly IPdfWriter _writer;
     private readonly IAsyncPdfWriter _asyncWriter;
 
+    /// <summary>
+    /// Initializes a <see cref="MetadataWriter"/> for synchronous PDF writing.
+    /// </summary>
+    /// <param name="writer">The synchronous PDF writer to write metadata objects to.</param>
     public MetadataWriter(IPdfWriter writer)
     {
         _writer = writer ?? throw new ArgumentNullException(nameof(writer));
         _asyncWriter = null;
     }
 
+    /// <summary>
+    /// Initializes a <see cref="MetadataWriter"/> for asynchronous PDF writing.
+    /// </summary>
+    /// <param name="asyncWriter">The asynchronous PDF writer to write metadata objects to.</param>
     public MetadataWriter(IAsyncPdfWriter asyncWriter)
     {
         _asyncWriter = asyncWriter ?? throw new ArgumentNullException(nameof(asyncWriter));
@@ -37,22 +45,22 @@ public class MetadataWriter
         Dictionary<string, string> dict = new();
 
         if (!string.IsNullOrEmpty(metadata.Title))
-            dict["/Title"] = $"({PdfSyntax.Escape(metadata.Title)})";
+            dict["/Title"] = PdfSyntax.EncodeMetadataString(metadata.Title);
 
         if (!string.IsNullOrEmpty(metadata.Author))
-            dict["/Author"] = $"({PdfSyntax.Escape(metadata.Author)})";
+            dict["/Author"] = PdfSyntax.EncodeMetadataString(metadata.Author);
 
         if (!string.IsNullOrEmpty(metadata.Subject))
-            dict["/Subject"] = $"({PdfSyntax.Escape(metadata.Subject)})";
+            dict["/Subject"] = PdfSyntax.EncodeMetadataString(metadata.Subject);
 
         if (!string.IsNullOrEmpty(metadata.Keywords))
-            dict["/Keywords"] = $"({PdfSyntax.Escape(metadata.Keywords)})";
+            dict["/Keywords"] = PdfSyntax.EncodeMetadataString(metadata.Keywords);
 
         if (!string.IsNullOrEmpty(metadata.Creator))
-            dict["/Creator"] = $"({PdfSyntax.Escape(metadata.Creator)})";
+            dict["/Creator"] = PdfSyntax.EncodeMetadataString(metadata.Creator);
 
         if (!string.IsNullOrEmpty(metadata.Producer))
-            dict["/Producer"] = $"({PdfSyntax.Escape(metadata.Producer)})";
+            dict["/Producer"] = PdfSyntax.EncodeMetadataString(metadata.Producer);
 
         if (metadata.CreationDate.HasValue)
             dict["/CreationDate"] = $"({PdfSyntax.FormatDate(metadata.CreationDate.Value)})";
@@ -64,7 +72,7 @@ public class MetadataWriter
             dict["/Trapped"] = metadata.Trapped.Value ? "/True" : "/False";
 
         foreach (KeyValuePair<string, string> kvp in metadata.CustomProperties)
-            dict[$"/{PdfSyntax.Escape(kvp.Key)}"] = $"({PdfSyntax.Escape(kvp.Value)})";
+            dict[$"/{PdfSyntax.Escape(kvp.Key)}"] = PdfSyntax.EncodeMetadataString(kvp.Value);
 
         _writer.WriteObject(id, dict);
         return id;
@@ -78,22 +86,22 @@ public class MetadataWriter
         Dictionary<string, string> dict = new();
 
         if (!string.IsNullOrEmpty(metadata.Title))
-            dict["/Title"] = $"({PdfSyntax.Escape(metadata.Title)})";
+            dict["/Title"] = PdfSyntax.EncodeMetadataString(metadata.Title);
 
         if (!string.IsNullOrEmpty(metadata.Author))
-            dict["/Author"] = $"({PdfSyntax.Escape(metadata.Author)})";
+            dict["/Author"] = PdfSyntax.EncodeMetadataString(metadata.Author);
 
         if (!string.IsNullOrEmpty(metadata.Subject))
-            dict["/Subject"] = $"({PdfSyntax.Escape(metadata.Subject)})";
+            dict["/Subject"] = PdfSyntax.EncodeMetadataString(metadata.Subject);
 
         if (!string.IsNullOrEmpty(metadata.Keywords))
-            dict["/Keywords"] = $"({PdfSyntax.Escape(metadata.Keywords)})";
+            dict["/Keywords"] = PdfSyntax.EncodeMetadataString(metadata.Keywords);
 
         if (!string.IsNullOrEmpty(metadata.Creator))
-            dict["/Creator"] = $"({PdfSyntax.Escape(metadata.Creator)})";
+            dict["/Creator"] = PdfSyntax.EncodeMetadataString(metadata.Creator);
 
         if (!string.IsNullOrEmpty(metadata.Producer))
-            dict["/Producer"] = $"({PdfSyntax.Escape(metadata.Producer)})";
+            dict["/Producer"] = PdfSyntax.EncodeMetadataString(metadata.Producer);
 
         if (metadata.CreationDate.HasValue)
             dict["/CreationDate"] = $"({PdfSyntax.FormatDate(metadata.CreationDate.Value)})";
@@ -105,7 +113,7 @@ public class MetadataWriter
             dict["/Trapped"] = metadata.Trapped.Value ? "/True" : "/False";
 
         foreach (KeyValuePair<string, string> kvp in metadata.CustomProperties)
-            dict[$"/{PdfSyntax.Escape(kvp.Key)}"] = $"({PdfSyntax.Escape(kvp.Value)})";
+            dict[$"/{PdfSyntax.Escape(kvp.Key)}"] = PdfSyntax.EncodeMetadataString(kvp.Value);
 
         await _asyncWriter.WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
         return id;
