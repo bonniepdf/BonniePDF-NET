@@ -110,5 +110,12 @@ public class Container : BorderedElementBase, IContentContainer
         }
 
         ctx.CurrentY += Padding.Bottom;
+
+        // Ensure we advance by the full container height if it was explicitly set or larger
+        float expectedBottom = yBeforePadding + containerHeight;
+        if (ctx.CurrentY < expectedBottom)
+        {
+            ctx.CurrentY = expectedBottom;
+        }
     }
 }

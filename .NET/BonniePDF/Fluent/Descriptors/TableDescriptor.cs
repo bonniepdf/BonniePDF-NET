@@ -16,7 +16,7 @@ public sealed class TableDescriptor
     private float[] _columnWeights = [1f];
     private readonly List<Action<TableRowDescriptor>> _headerActions = [];
     private readonly List<Action<TableRowDescriptor>> _footerActions = [];
-    private readonly List<ContentSlot> _cellSlots = [];
+    private readonly List<object> _bodyItems = [];
 
     // Table styling
     private Color? _headerBackgroundColor;
@@ -81,15 +81,33 @@ public sealed class TableDescriptor
     }
 
     /// <summary>
+    /// Adds a full row to the table with a specific background color.
+    /// </summary>
+    public void Row(Color background, Action<TableRowDescriptor> handler)
+    {
+        _bodyItems.Add(new RowDefinition(background, handler));
+    }
+
+    /// <summary>
+    /// Adds a full row to the table.
+    /// </summary>
+    public void Row(Action<TableRowDescriptor> handler)
+    {
+        _bodyItems.Add(handler);
+    }
+
+    /// <summary>
     /// Returns a container for the next cell.
     /// Cells fill rows automatically based on the column count.
     /// </summary>
     public IContentContainer Cell()
     {
         var slot = new ContentSlot();
-        _cellSlots.Add(slot);
+        _bodyItems.Add(slot);
         return slot;
     }
+
+    private record RowDefinition(Color Background, Action<TableRowDescriptor> Handler);
 
     /// <summary>
     /// Builds the Table element from the descriptor configuration.
@@ -122,21 +140,55 @@ public sealed class TableDescriptor
             table.AddFooter(rowDesc.Build());
         }
 
-        // Build data rows from cell slots
+        // Build data rows from cell slots and explicit rows
         int colCount = _columnWeights.Length;
-        for (int i = 0; i < _cellSlots.Count; i += colCount)
+        List<ContentSlot> currentSlots = new();
+
+        void FlushCells()
         {
-            int cellsInRow = Math.Min(colCount, _cellSlots.Count - i);
-            var cells = new IElement[cellsInRow];
+            if (currentSlots.Count == 0) return;
 
-            for (int j = 0; j < cellsInRow; j++)
+            for (int i = 0; i < currentSlots.Count; i += colCount)
             {
-                IElement? child = _cellSlots[i + j].Child;
-                cells[j] = child ?? new TextBlock { Text = "" };
-            }
+                int cellsInRow = Math.Min(colCount, currentSlots.Count - i);
+                var cells = new IElement[cellsInRow];
 
-            table.AddRow(cells);
+                for (int j = 0; j < cellsInRow; j++)
+                {
+                    IElement? child = currentSlots[i + j].Child;
+                    cells[j] = child ?? new TextBlock { Text = "" };
+                }
+
+                table.AddRow(cells);
+            }
+            currentSlots.Clear();
         }
+
+        foreach (var item in _bodyItems)
+        {
+            if (item is ContentSlot slot)
+            {
+                currentSlots.Add(slot);
+            }
+            else if (item is RowDefinition rowDef)
+            {
+                FlushCells();
+                var rowDesc = new TableRowDescriptor();
+                rowDef.Handler(rowDesc);
+                var row = rowDesc.Build();
+                row.WithBackground(rowDef.Background);
+                table.AddRow(row);
+            }
+            else if (item is Action<TableRowDescriptor> rowAction)
+            {
+                FlushCells();
+                var rowDesc = new TableRowDescriptor();
+                rowAction(rowDesc);
+                table.AddRow(rowDesc.Build());
+            }
+        }
+
+        FlushCells();
 
         return table;
     }

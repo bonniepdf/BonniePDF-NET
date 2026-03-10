@@ -10,70 +10,91 @@ namespace BonniePDF.Fluent.Extensions;
 /// </summary>
 public static class ContainerStyleExtensions
 {
+    private static Container GetOrCreateContainer(IContentContainer c)
+    {
+        if (c is Container existingContainer && existingContainer.Child == null)
+        {
+            return existingContainer;
+        }
+
+        var newContainer = new Container();
+        c.Element(newContainer);
+        return newContainer;
+    }
+
     // --- Padding ---
 
     /// <summary>Sets uniform padding on all sides.</summary>
     public static IContentContainer Padding(this IContentContainer c, float value)
     {
-        var container = new Container { Padding = new Thickness(value) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Padding = new Thickness(value);
+        return container;
     }
 
     /// <summary>Sets horizontal and vertical padding.</summary>
     public static IContentContainer Padding(this IContentContainer c, float horizontal, float vertical)
     {
-        var container = new Container { Padding = new Thickness(horizontal, vertical) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Padding = new Thickness(horizontal, vertical);
+        return container;
     }
 
     /// <summary>Sets padding for each side individually.</summary>
     public static IContentContainer Padding(this IContentContainer c, float left, float top, float right,
         float bottom)
     {
-        var container = new Container { Padding = new Thickness(left, top, right, bottom) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Padding = new Thickness(left, top, right, bottom);
+        return container;
     }
 
     /// <summary>Sets top padding.</summary>
     public static IContentContainer PaddingTop(this IContentContainer c, float value)
     {
-        var container = new Container { Padding = new Thickness(0, value, 0, 0) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Padding = new Thickness(0, value, 0, 0);
+        return container;
     }
 
     /// <summary>Sets bottom padding.</summary>
     public static IContentContainer PaddingBottom(this IContentContainer c, float value)
     {
-        var container = new Container { Padding = new Thickness(0, 0, 0, value) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Padding = new Thickness(0, 0, 0, value);
+        return container;
     }
 
     /// <summary>Sets left padding.</summary>
     public static IContentContainer PaddingLeft(this IContentContainer c, float value)
     {
-        var container = new Container { Padding = new Thickness(value, 0, 0, 0) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Padding = new Thickness(value, 0, 0, 0);
+        return container;
     }
 
     /// <summary>Sets right padding.</summary>
     public static IContentContainer PaddingRight(this IContentContainer c, float value)
     {
-        var container = new Container { Padding = new Thickness(0, 0, value, 0) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Padding = new Thickness(0, 0, value, 0);
+        return container;
     }
 
     /// <summary>Sets horizontal padding (left and right).</summary>
     public static IContentContainer PaddingHorizontal(this IContentContainer c, float value)
     {
-        var container = new Container { Padding = new Thickness(value, 0, value, 0) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Padding = new Thickness(value, 0, value, 0);
+        return container;
     }
 
     /// <summary>Sets vertical padding (top and bottom).</summary>
     public static IContentContainer PaddingVertical(this IContentContainer c, float value)
     {
-        var container = new Container { Padding = new Thickness(0, value, 0, value) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Padding = new Thickness(0, value, 0, value);
+        return container;
     }
 
     // --- Background ---
@@ -81,8 +102,9 @@ public static class ContainerStyleExtensions
     /// <summary>Sets the background color.</summary>
     public static IContentContainer Background(this IContentContainer c, Color color)
     {
-        var container = new Container { BackgroundColor = color };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.BackgroundColor = color;
+        return container;
     }
 
     // --- Border ---
@@ -90,67 +112,55 @@ public static class ContainerStyleExtensions
     /// <summary>Sets a uniform border on all sides.</summary>
     public static IContentContainer Border(this IContentContainer c, float width)
     {
-        var container = new Container
-        {
-            Border = new Core.Border(width),
-            BorderColors = new BorderColors(Color.Black)
-        };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Border = new Core.Border(width);
+        container.BorderColors = new BorderColors(Color.Black);
+        return container;
     }
 
     /// <summary>Sets a uniform border with a specific color.</summary>
     public static IContentContainer Border(this IContentContainer c, float width, Color color)
     {
-        var container = new Container
-        {
-            Border = new Core.Border(width),
-            BorderColors = new BorderColors(color)
-        };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Border = new Core.Border(width);
+        container.BorderColors = new BorderColors(color);
+        return container;
     }
 
     /// <summary>Sets a bottom border.</summary>
     public static IContentContainer BorderBottom(this IContentContainer c, float width, Color? color = null)
     {
-        var container = new Container
-        {
-            Border = Core.Border.BottomOnly(width),
-            BorderColors = new BorderColors(color ?? Color.Black)
-        };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Border = Core.Border.BottomOnly(width);
+        container.BorderColors = new BorderColors(color ?? Color.Black);
+        return container;
     }
 
     /// <summary>Sets a top border.</summary>
     public static IContentContainer BorderTop(this IContentContainer c, float width, Color? color = null)
     {
-        var container = new Container
-        {
-            Border = Core.Border.TopOnly(width),
-            BorderColors = new BorderColors(color ?? Color.Black)
-        };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Border = Core.Border.TopOnly(width);
+        container.BorderColors = new BorderColors(color ?? Color.Black);
+        return container;
     }
 
     /// <summary>Sets a left border.</summary>
     public static IContentContainer BorderLeft(this IContentContainer c, float width, Color? color = null)
     {
-        var container = new Container
-        {
-            Border = Core.Border.LeftOnly(width),
-            BorderColors = new BorderColors(color ?? Color.Black)
-        };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Border = Core.Border.LeftOnly(width);
+        container.BorderColors = new BorderColors(color ?? Color.Black);
+        return container;
     }
 
     /// <summary>Sets a right border.</summary>
     public static IContentContainer BorderRight(this IContentContainer c, float width, Color? color = null)
     {
-        var container = new Container
-        {
-            Border = Core.Border.RightOnly(width),
-            BorderColors = new BorderColors(color ?? Color.Black)
-        };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Border = Core.Border.RightOnly(width);
+        container.BorderColors = new BorderColors(color ?? Color.Black);
+        return container;
     }
 
     // --- Size Constraints ---
@@ -158,15 +168,17 @@ public static class ContainerStyleExtensions
     /// <summary>Sets a fixed width.</summary>
     public static IContentContainer Width(this IContentContainer c, float value)
     {
-        var container = new Container { Width = value };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Width = value;
+        return container;
     }
 
     /// <summary>Sets a fixed height.</summary>
     public static IContentContainer Height(this IContentContainer c, float value)
     {
-        var container = new Container { Height = value };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Height = value;
+        return container;
     }
 
     // --- Corner Radius ---
@@ -174,8 +186,9 @@ public static class ContainerStyleExtensions
     /// <summary>Sets the corner radius for rounded corners.</summary>
     public static IContentContainer CornerRadius(this IContentContainer c, float radius)
     {
-        var container = new Container { CornerRadius = radius };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.CornerRadius = radius;
+        return container;
     }
 
     // --- Margin ---
@@ -183,22 +196,25 @@ public static class ContainerStyleExtensions
     /// <summary>Sets uniform margin on all sides.</summary>
     public static IContentContainer Margin(this IContentContainer c, float value)
     {
-        var container = new Container { Margin = new Core.Thickness(value) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Margin = new Core.Thickness(value);
+        return container;
     }
 
     /// <summary>Sets horizontal and vertical margin.</summary>
     public static IContentContainer Margin(this IContentContainer c, float horizontal, float vertical)
     {
-        var container = new Container { Margin = new Core.Thickness(horizontal, vertical) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Margin = new Core.Thickness(horizontal, vertical);
+        return container;
     }
 
     /// <summary>Sets margin for each side individually.</summary>
     public static IContentContainer Margin(this IContentContainer c, float left, float top, float right, float bottom)
     {
-        var container = new Container { Margin = new Core.Thickness(left, top, right, bottom) };
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        container.Margin = new Core.Thickness(left, top, right, bottom);
+        return container;
     }
 
     // --- Alignment ---
@@ -206,23 +222,21 @@ public static class ContainerStyleExtensions
     /// <summary>Centers the content horizontally.</summary>
     public static IContentContainer AlignCenter(this IContentContainer c)
     {
-        // Alignment is achieved via a container with centered text blocks
-        // For now, we pass through — alignment is handled at the text level
-        var container = new Container();
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        return container;
     }
 
     /// <summary>Aligns content to the right.</summary>
     public static IContentContainer AlignRight(this IContentContainer c)
     {
-        var container = new Container();
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        return container;
     }
 
     /// <summary>Aligns content to the left (default).</summary>
     public static IContentContainer AlignLeft(this IContentContainer c)
     {
-        var container = new Container();
-        return c.Element(container);
+        var container = GetOrCreateContainer(c);
+        return container;
     }
 }

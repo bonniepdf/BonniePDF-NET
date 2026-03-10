@@ -39,6 +39,17 @@ public static class ContainerElementExtensions
         c.Element<RichText>(descriptor.RichText);
     }
 
+    // --- Empty ---
+
+    /// <summary>
+    /// Adds an empty block to the container, which terminates the chain.
+    /// Useful for colored spacer blocks or drawing backgrounds without content.
+    /// </summary>
+    public static void Empty(this IContentContainer c)
+    {
+        c.Element(new Elements.Layout.Container());
+    }
+
     // --- Layout ---
 
     /// <summary>
@@ -58,6 +69,16 @@ public static class ContainerElementExtensions
     {
         var descriptor = new RowDescriptor();
         handler(descriptor);
+
+        // If the container has an explicit height, transfer it to the stack
+        // so that vertical alignment (AlignItems) works correctly within that height.
+        if (c is Container container && container.Height.HasValue)
+        {
+            descriptor.Stack.Height = container.Height.Value 
+                - container.Padding.Top - container.Padding.Bottom 
+                - container.Border.VerticalWidth;
+        }
+
         c.Element<HorizontalStack>(descriptor.Stack);
     }
 

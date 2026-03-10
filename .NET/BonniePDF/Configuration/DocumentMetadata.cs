@@ -83,7 +83,7 @@ public class DocumentMetadata
     /// A collection of custom metadata key-value pairs to embed in the document's
     /// Information Dictionary alongside the standard entries.
     /// </summary>
-    public IDictionary<string, string> CustomProperties { get; set; } = new Dictionary<string, string>();
+    public IDictionary<string, string> CustomProperties { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Sets the Keywords property from a collection of individual tags,

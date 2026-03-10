@@ -82,11 +82,12 @@ public class Document : IDisposable
     /// </summary>
     public void Add(IElement element)
     {
-        if (element == null)
-            throw new ArgumentNullException(nameof(element));
+        ArgumentNullException.ThrowIfNull(element);
 
         if (_pages.Count == 0)
+        {
             AddPage();
+        }
 
         _pages[_pages.Count - 1].Add(element);
     }

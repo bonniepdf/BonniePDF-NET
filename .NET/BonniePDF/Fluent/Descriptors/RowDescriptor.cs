@@ -1,3 +1,4 @@
+using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 
 namespace BonniePDF.Fluent.Descriptors;
@@ -15,6 +16,11 @@ public sealed class RowDescriptor
     /// Sets the horizontal spacing between items in points.
     /// </summary>
     public void Spacing(float value) => Stack.Spacing = value;
+
+    /// <summary>
+    /// Sets the vertical alignment of items within the row.
+    /// </summary>
+    public void AlignItems(HorizontalAlignment alignment) => Stack.Alignment = alignment;
 
     /// <summary>
     /// Adds an item that takes proportional space (like CSS flex-grow).

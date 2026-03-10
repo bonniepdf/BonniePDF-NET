@@ -226,7 +226,7 @@ public class RoundedRectangleExample : ExampleBase
         {
             BackgroundColor = Color.FromHex("#fee2e2"),
             Border = new Border(1),
-            BorderColors = new BorderColors(Color.Red),
+            BorderColors = new BorderColors(Color.FromHex("#991b1b")),
             CornerRadius = 8,
             Padding = new Thickness(16, 12, 16, 12),
             Margin = new Thickness(0, 0, 0, 8),
@@ -254,7 +254,7 @@ public class RoundedRectangleExample : ExampleBase
                 FontName = StandardFonts.Helvetica,
                 FontSize = 12,
                 TextColor = Color.Blue800
-            }
+            },
         });
 
         doc.Save(outputPath);

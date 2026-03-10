@@ -117,7 +117,7 @@ public class MarginExampleFluent : ExampleBase
                         .Margin(10, 0, 10, 0) // Left and right margin
                         .Table(table =>
                         {
-                            table.Columns(1, 1);
+                            table.Columns(1f, 2f);
                             table.CellPadding(8);
                             table.Border(1, Color.Slate300);
                             table.HeaderBackground(Color.Slate200);
@@ -158,8 +158,6 @@ public class MarginExampleFluent : ExampleBase
                         .Margin(20, 10, 20, 10) // 20pt horizontal, 10pt vertical
                         .Column(stack =>
                         {
-                            stack.Spacing(5);
-
                             stack.Item()
                                 .Background(Color.Green100)
                                 .Padding(10)
@@ -169,6 +167,7 @@ public class MarginExampleFluent : ExampleBase
                                 .TextColor(Color.Green800);
 
                             stack.Item()
+                                .Margin(0, 5, 0, 0) // 5pt top margin
                                 .Background(Color.Purple100)
                                 .Padding(10)
                                 .Text("Item 2 in stack (with top margin)")
@@ -177,6 +176,7 @@ public class MarginExampleFluent : ExampleBase
                                 .TextColor(Color.Purple800);
 
                             stack.Item()
+                                .Margin(0, 5, 0, 0) // 5pt top margin
                                 .Background(Color.Red100)
                                 .Padding(10)
                                 .Text("Item 3 in stack (with top margin)")
