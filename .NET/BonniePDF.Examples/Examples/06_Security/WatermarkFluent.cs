@@ -1,9 +1,10 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
-using BonniePDF.Elements.Text;
+using BonniePDF.Fluent;
+using BonniePDF.Fluent.Extensions;
 using BonniePDF.Extensions;
-using BonniePDF.Examples.Core;
 using BonniePDF.Typography;
+using BonniePDF.Examples.Core;
 
 namespace BonniePDF.Examples.Examples._06_Security;
 
@@ -22,54 +23,56 @@ public class WatermarkFluentExample : ExampleBase
 
     public override string Generate(string outputPath)
     {
-        Document doc = new(new DocumentSettings
+        Pdf.Create(doc =>
         {
-            PageSize = PdfSize.A4,
-            Margin = 60
-        });
+            doc.WithMetadata(metadata =>
+            {
+                metadata.Title = "Watermark Fluent API";
+                metadata.Author = "BonniePDF";
+            });
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+            doc.WithSettings(settings =>
+            {
+                settings.PageSize = PdfSize.A4;
+                settings.Margin = 60;
+                settings.Version = PdfVersion.Pdf17;
+                settings.PdfAEnabled = true;
 
-        doc.Metadata.Title = "Watermark Fluent API";
-        doc.Metadata.Author = "BonniePDF";
+                // Fluent API: simple one-liner
+                settings.WithWatermark("SAMPLE", opacity: 0.12f, rotationDegrees: -40);
+            });
 
-        // Fluent API: simple one-liner
-        doc.Settings.WithWatermark("SAMPLE", opacity: 0.12f, rotationDegrees: -40);
+            doc.WithDefaultTextStyle(style => style.WithFamily(StandardFonts.Helvetica).WithSize(12));
 
-        doc.Add(new TextBlock
-        {
-            Text = "Fluent Watermark API",
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 24,
-            TextColor = Color.Slate800,
-            Margin = new Thickness(0, 0, 0, 16)
-        });
+            doc.Page(page =>
+            {
+                page.Content().Column(column =>
+                {
+                    column.Item()
+                        .Text("Fluent Watermark API")
+                        .Bold()
+                        .FontSize(24)
+                        .TextColor(Color.Slate800)
+                        .Margin(0, 0, 0, 16);
 
-        doc.Add(new TextBlock
-        {
-            Text = "This document demonstrates the fluent API for adding watermarks. " +
-                   "A single call to Settings.WithWatermark(\"SAMPLE\", opacity: 0.12f, " +
-                   "rotationDegrees: -40) configures the watermark with custom opacity and rotation.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate600,
-            Alignment = TextAlignment.Justify,
-            Margin = new Thickness(0, 0, 0, 16)
-        });
+                    column.Item()
+                        .Text("This document demonstrates the fluent API for adding watermarks. " +
+                              "A single call to Settings.WithWatermark(\"SAMPLE\", opacity: 0.12f, " +
+                              "rotationDegrees: -40) configures the watermark with custom opacity and rotation.")
+                        .TextColor(Color.Slate600)
+                        .AlignJustify()
+                        .Margin(0, 0, 0, 16);
 
-        doc.Add(new TextBlock
-        {
-            Text = "The watermark appears behind all content on every page, using PDF " +
-                   "ExtGState for transparency and the cm operator for rotation. The text " +
-                   "is centered on each page and automatically sized to fit diagonally.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate600,
-            Alignment = TextAlignment.Justify
-        });
+                    column.Item()
+                        .Text("The watermark appears behind all content on every page, using PDF " +
+                              "ExtGState for transparency and the cm operator for rotation. The text " +
+                              "is centered on each page and automatically sized to fit diagonally.")
+                        .TextColor(Color.Slate600)
+                        .AlignJustify();
+                });
+            });
+        }).Save(outputPath);
 
-        doc.Save(outputPath);
         return outputPath;
     }
 }

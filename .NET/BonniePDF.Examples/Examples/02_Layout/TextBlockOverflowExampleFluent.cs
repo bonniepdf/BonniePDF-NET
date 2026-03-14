@@ -57,16 +57,17 @@ public class TextBlockOverflowExampleFluent : ExampleBase
             {
                 settings.Version = PdfVersion.Pdf17;
                 settings.PdfAEnabled = true;
-                
+
                 settings.Footer((pageNumber, footer) =>
                 {
                     footer.Text($"Page {pageNumber} of {TextElementBase.TotalPagesToken}")
-                          .Font(StandardFonts.Helvetica)
                           .FontSize(10)
                           .TextColor(Color.Slate500)
                           .AlignRight();
                 });
             });
+
+            doc.WithDefaultTextStyle(style => style.WithFamily(StandardFonts.Helvetica).WithSize(11));
 
             doc.Page(page =>
             {
@@ -75,7 +76,7 @@ public class TextBlockOverflowExampleFluent : ExampleBase
                     // Title
                     column.Item()
                         .Text("Long Text Document")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(24)
                         .TextColor(Color.Slate800)
                         .Margin(0, 0, 0, 20);
@@ -89,8 +90,6 @@ public class TextBlockOverflowExampleFluent : ExampleBase
 
                     column.Item()
                         .Text(longText)
-                        .Font(StandardFonts.Helvetica)
-                        .FontSize(11)
                         .TextColor(Color.Slate700);
                 });
             });

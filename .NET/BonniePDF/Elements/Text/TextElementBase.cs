@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using BonniePDF.Core;
 using BonniePDF.Typography;
 
@@ -12,14 +13,104 @@ namespace BonniePDF.Elements.Text;
 public abstract class TextElementBase : ElementBase
 {
     /// <summary>
+    /// Ambient default text style that is applied to new text elements during construction.
+    /// Set by PdfBuilder/PageDescriptor during fluent API document building.
+    /// Uses AsyncLocal for thread safety.
+    /// </summary>
+    internal static readonly AsyncLocal<TextStyle?> AmbientDefaultStyle = new();
+
+    /// <summary>
     /// Token for injecting total pages count
     /// </summary>
     public const string TotalPagesToken = "{{TotalPages}}";
 
+    private string? _fontFamily;
+    private FontWeight _weight = FontWeight.Normal;
+    private bool _isItalic;
+    private string _fontName = StandardFonts.Helvetica;
+
+    protected TextElementBase()
+    {
+        var defaultStyle = AmbientDefaultStyle.Value;
+        if (defaultStyle != null) ApplyDefaultStyle(defaultStyle);
+    }
+
+    private void ApplyDefaultStyle(TextStyle style)
+    {
+        if (style.FontFamily != null)
+            FontFamily = style.FontFamily;
+        if (style.Weight != FontWeight.Normal)
+            Weight = style.Weight;
+        if (style.Italic)
+            IsItalic = true;
+        if (style.FontSize.HasValue)
+            FontSize = style.FontSize.Value;
+        if (style.Color.HasValue)
+            TextColor = style.Color.Value;
+        if (style.Decoration != TextDecoration.None)
+            TextDecoration = style.Decoration;
+    }
+
     /// <summary>
-    /// Font name for text rendering
+    /// Font family name (e.g. "Helvetica", "Times", "Arial") for weight/italic resolution.
+    /// When set, FontName is automatically resolved via FontFamilyResolver using
+    /// the current Weight and IsItalic values.
     /// </summary>
-    public string FontName { get; set; } = StandardFonts.Helvetica;
+    public string? FontFamily
+    {
+        get => _fontFamily;
+        set
+        {
+            _fontFamily = value;
+            if (value != null) ResolveFontName();
+        }
+    }
+
+    /// <summary>
+    /// Font weight (100-900). Normal = 400, Bold = 700.
+    /// When FontFamily is set, triggers automatic resolution.
+    /// When FontFamily is not set, uses the current FontName as the base family for resolution.
+    /// </summary>
+    public FontWeight Weight
+    {
+        get => _weight;
+        set
+        {
+            _weight = value;
+            ResolveFontName();
+        }
+    }
+
+    /// <summary>
+    /// Whether the text should be rendered in italic/oblique style.
+    /// When FontFamily is set, triggers automatic resolution.
+    /// When FontFamily is not set, uses the current FontName as the base family for resolution.
+    /// </summary>
+    public bool IsItalic
+    {
+        get => _isItalic;
+        set
+        {
+            _isItalic = value;
+            ResolveFontName();
+        }
+    }
+
+    /// <summary>
+    /// The resolved PDF font name used for rendering.
+    /// Can be set directly (e.g. "Helvetica-Bold") for backward compatibility,
+    /// or resolved automatically from FontFamily + Weight + IsItalic.
+    /// Setting this directly clears FontFamily.
+    /// </summary>
+    public string FontName
+    {
+        get => _fontName;
+        set
+        {
+            _fontName = value;
+            _fontFamily = null; // Direct font name bypasses family resolution
+        }
+    }
 
     /// <summary>
     /// Font size for text rendering
@@ -35,6 +126,17 @@ public abstract class TextElementBase : ElementBase
     /// Text decoration (underline, strikethrough, or both)
     /// </summary>
     public TextDecoration TextDecoration { get; set; } = TextDecoration.None;
+
+    /// <summary>
+    /// Resolves FontName from FontFamily + Weight + IsItalic via FontFamilyResolver.
+    /// Falls back to the current FontName as the base family when FontFamily is not set,
+    /// enabling .Bold() and .Italic() to work without an explicit .Font() call.
+    /// </summary>
+    private void ResolveFontName()
+    {
+        string family = _fontFamily ?? _fontName;
+        _fontName = FontFamilyResolver.Resolve(family, _weight, _isItalic);
+    }
 
     /// <summary>
     /// Line height calculated from font size (1.2x font size)

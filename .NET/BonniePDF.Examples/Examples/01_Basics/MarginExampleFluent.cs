@@ -48,14 +48,17 @@ public class MarginExampleFluent : ExampleBase
                 settings.PdfAEnabled = true;
             });
 
+            // Document-wide default: all text inherits Helvetica 11pt
+            doc.WithDefaultTextStyle(style => style.WithFamily(StandardFonts.Helvetica).WithSize(11));
+
             doc.Page(page =>
             {
                 page.Content().Column(column =>
                 {
-                    // Title with bottom margin
+                    // Title — only override size and weight (font family inherited from default)
                     column.Item()
                         .Text("Margin Example (Fluent API)")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(24)
                         .TextColor(Color.Slate800)
                         .Margin(0, 0, 0, 20); // Bottom margin of 20pt
@@ -63,7 +66,6 @@ public class MarginExampleFluent : ExampleBase
                     // Paragraph with margin on all sides
                     column.Item()
                         .Text("This paragraph has a 10pt margin on all sides. Margins create space around elements, helping to visually separate content and improve readability.")
-                        .Font(StandardFonts.Helvetica)
                         .FontSize(12)
                         .TextColor(Color.Slate600)
                         .Margin(10); // 10pt margin on all sides
@@ -75,22 +77,18 @@ public class MarginExampleFluent : ExampleBase
                         .Background(Color.Blue100)
                         .Border(1, Color.Blue500)
                         .Text("This container has a 10pt top and bottom margin, plus 15pt padding inside. Notice how the margin creates space outside the border, while padding creates space inside.")
-                        .Font(StandardFonts.Helvetica)
-                        .FontSize(11)
                         .TextColor(Color.Blue900);
 
                     // Section header with top margin
                     column.Item()
                         .Text("Image with Margin")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(16)
                         .TextColor(Color.Slate700)
                         .Margin(0, 20, 0, 10); // 20pt top, 10pt bottom
 
                     column.Item()
                         .Text("Images can also have margins. The image below has a 20pt margin on all sides:")
-                        .Font(StandardFonts.Helvetica)
-                        .FontSize(11)
                         .TextColor(Color.Slate600)
                         .Margin(0, 0, 0, 10);
 
@@ -100,7 +98,6 @@ public class MarginExampleFluent : ExampleBase
                         .Background(Color.Amber400)
                         .Padding(10, 25, 10, 25)
                         .Text("Image Placeholder (100x60)")
-                        .Font(StandardFonts.Helvetica)
                         .FontSize(10)
                         .TextColor(Color.Amber900)
                         .AlignCenter();
@@ -108,7 +105,7 @@ public class MarginExampleFluent : ExampleBase
                     // Table with margin
                     column.Item()
                         .Text("Table with Margin")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(16)
                         .TextColor(Color.Slate700)
                         .Margin(0, 20, 0, 10);
@@ -125,31 +122,31 @@ public class MarginExampleFluent : ExampleBase
 
                             table.Header(row =>
                             {
-                                row.Cell().Text("Property").Font(StandardFonts.HelveticaBold).FontSize(11);
-                                row.Cell().Text("Description").Font(StandardFonts.HelveticaBold).FontSize(11);
+                                row.Cell().Text("Property").Bold();
+                                row.Cell().Text("Description").Bold();
                             });
 
                             // Row 1
-                            table.Cell().Text("Margin.Top").Font(StandardFonts.Helvetica).FontSize(10);
-                            table.Cell().Text("Space above the element").Font(StandardFonts.Helvetica).FontSize(10);
+                            table.Cell().Text("Margin.Top").FontSize(10);
+                            table.Cell().Text("Space above the element").FontSize(10);
 
                             // Row 2
-                            table.Cell().Text("Margin.Bottom").Font(StandardFonts.Helvetica).FontSize(10);
-                            table.Cell().Text("Space below the element").Font(StandardFonts.Helvetica).FontSize(10);
+                            table.Cell().Text("Margin.Bottom").FontSize(10);
+                            table.Cell().Text("Space below the element").FontSize(10);
 
                             // Row 3
-                            table.Cell().Text("Margin.Left").Font(StandardFonts.Helvetica).FontSize(10);
-                            table.Cell().Text("Space to the left of the element").Font(StandardFonts.Helvetica).FontSize(10);
+                            table.Cell().Text("Margin.Left").FontSize(10);
+                            table.Cell().Text("Space to the left of the element").FontSize(10);
 
                             // Row 4
-                            table.Cell().Text("Margin.Right").Font(StandardFonts.Helvetica).FontSize(10);
-                            table.Cell().Text("Space to the right of the element").Font(StandardFonts.Helvetica).FontSize(10);
+                            table.Cell().Text("Margin.Right").FontSize(10);
+                            table.Cell().Text("Space to the right of the element").FontSize(10);
                         });
 
                     // VerticalStack with margin
                     column.Item()
                         .Text("VerticalStack with Margin")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(16)
                         .TextColor(Color.Slate700)
                         .Margin(0, 20, 0, 10);
@@ -162,7 +159,6 @@ public class MarginExampleFluent : ExampleBase
                                 .Background(Color.Green100)
                                 .Padding(10)
                                 .Text("Item 1 in stack")
-                                .Font(StandardFonts.Helvetica)
                                 .FontSize(10)
                                 .TextColor(Color.Green800);
 
@@ -171,7 +167,6 @@ public class MarginExampleFluent : ExampleBase
                                 .Background(Color.Purple100)
                                 .Padding(10)
                                 .Text("Item 2 in stack (with top margin)")
-                                .Font(StandardFonts.Helvetica)
                                 .FontSize(10)
                                 .TextColor(Color.Purple800);
 
@@ -180,15 +175,14 @@ public class MarginExampleFluent : ExampleBase
                                 .Background(Color.Red100)
                                 .Padding(10)
                                 .Text("Item 3 in stack (with top margin)")
-                                .Font(StandardFonts.Helvetica)
                                 .FontSize(10)
                                 .TextColor(Color.Red800);
                         });
 
-                    // Final note
+                    // Final note — Italic overrides the default weight
                     column.Item()
                         .Text("Note: Margins collapse with adjacent content, creating clean spacing throughout the document.")
-                        .Font(StandardFonts.HelveticaOblique)
+                        .Italic()
                         .FontSize(10)
                         .TextColor(Color.Slate500)
                         .Margin(0, 30, 0, 0);

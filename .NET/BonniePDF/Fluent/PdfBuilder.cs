@@ -20,14 +20,43 @@ public sealed class PdfBuilder
     private readonly List<PageDescriptor> _pageDescriptors = [];
     private Action<DocumentMetadata>? _metadataAction;
     private Action<DocumentSettings>? _settingsAction;
+    private TextStyle? _documentDefaultStyle;
 
     /// <summary>
-    /// Adds a page to the document.
+    /// Sets a document-wide default text style. All text elements will inherit these
+    /// defaults unless overridden by page-level <see cref="PageDescriptor.DefaultTextStyle"/>
+    /// or element-level fluent calls.
+    /// </summary>
+    public PdfBuilder WithDefaultTextStyle(Action<TextStyle> configure)
+    {
+        _documentDefaultStyle = new TextStyle();
+        configure(_documentDefaultStyle);
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a page to the document. If a default text style is configured
+    /// (via <see cref="WithDefaultTextStyle"/> or <see cref="PageDescriptor.DefaultTextStyle"/>),
+    /// it is applied to all text elements created within the handler.
     /// </summary>
     public void Page(Action<PageDescriptor> handler)
     {
         var descriptor = new PageDescriptor();
-        handler(descriptor);
+
+        // Set document-level default before running the handler,
+        // so text elements created inside inherit the style.
+        // PageDescriptor.DefaultTextStyle() can override this.
+        TextElementBase.AmbientDefaultStyle.Value = _documentDefaultStyle;
+
+        try
+        {
+            handler(descriptor);
+        }
+        finally
+        {
+            TextElementBase.AmbientDefaultStyle.Value = null;
+        }
+
         _pageDescriptors.Add(descriptor);
     }
 

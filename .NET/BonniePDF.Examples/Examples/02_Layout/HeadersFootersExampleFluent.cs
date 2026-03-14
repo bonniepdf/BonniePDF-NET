@@ -50,10 +50,12 @@ public class HeadersFootersExampleFluent : ExampleBase
                 settings.Version = PdfVersion.Pdf17;
                 settings.PdfAEnabled = true;
 
+                // Header/footer templates are rendered during save, outside the Page() scope,
+                // so they don't inherit the document default style — explicit font calls needed.
                 settings.Header((pageNumber, header) =>
                 {
                     header.Text($"BonniePDF Documentation - Page {pageNumber}")
-                          .Font(StandardFonts.HelveticaBold)
+                          .Bold()
                           .FontSize(10)
                           .TextColor(Color.Slate600)
                           .AlignCenter();
@@ -62,12 +64,13 @@ public class HeadersFootersExampleFluent : ExampleBase
                 settings.Footer((pageNumber, footer) =>
                 {
                     footer.Text($"Page {pageNumber} - Confidential")
-                          .Font(StandardFonts.Helvetica)
                           .FontSize(10)
                           .TextColor(Color.Slate500)
                           .AlignCenter();
                 });
             });
+
+            doc.WithDefaultTextStyle(style => style.WithFamily(StandardFonts.Helvetica).WithSize(11));
 
             doc.Page(page =>
             {
@@ -75,7 +78,7 @@ public class HeadersFootersExampleFluent : ExampleBase
                 {
                     column.Item()
                         .Text("Chapter 1: Introduction")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(20)
                         .TextColor(Color.Slate800)
                         .Margin(0, 0, 0, 15);
@@ -85,7 +88,7 @@ public class HeadersFootersExampleFluent : ExampleBase
                     {
                         column.Item()
                             .Text($"1.{section} Section Title")
-                            .Font(StandardFonts.HelveticaBold)
+                            .Bold()
                             .FontSize(14)
                             .TextColor(Color.Slate700)
                             .Margin(0, 15, 0, 10);
@@ -115,8 +118,6 @@ public class HeadersFootersExampleFluent : ExampleBase
                         for (int p = 0; p < 3; p++)
                             column.Item()
                                 .Text(paragraphText + ' ' + paragraphText)
-                                .Font(StandardFonts.Helvetica)
-                                .FontSize(11)
                                 .TextColor(Color.Slate600)
                                 .Margin(0, 0, 0, 12);
                     }

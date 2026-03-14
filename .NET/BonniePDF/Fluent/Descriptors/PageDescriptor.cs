@@ -36,11 +36,16 @@ public sealed class PageDescriptor
 
     /// <summary>
     /// Configures the default text style for all text on this page.
+    /// Overrides any document-level default set via <see cref="PdfBuilder.WithDefaultTextStyle"/>.
+    /// Text elements created after this call will inherit these defaults.
     /// </summary>
     public void DefaultTextStyle(Action<TextStyle> configure)
     {
         DefaultStyle = new TextStyle();
         configure(DefaultStyle);
+
+        // Set the ambient so text elements created after this call inherit the page style
+        TextElementBase.AmbientDefaultStyle.Value = DefaultStyle;
     }
 
     /// <summary>

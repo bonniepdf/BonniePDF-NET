@@ -49,6 +49,8 @@ public class VerticalStackOverflowExampleFluent : ExampleBase
                 settings.PdfAEnabled = true;
             });
 
+            doc.WithDefaultTextStyle(style => style.WithFamily(StandardFonts.Helvetica));
+
             doc.Page(page =>
             {
                 page.Content().Column(column =>
@@ -56,14 +58,13 @@ public class VerticalStackOverflowExampleFluent : ExampleBase
                     // Title
                     column.Item()
                         .Text("Item Catalog")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(24)
                         .TextColor(Color.Slate800)
                         .Margin(0, 0, 0, 10);
 
                     column.Item()
                         .Text("A collection of items demonstrating automatic pagination")
-                        .Font(StandardFonts.Helvetica)
                         .FontSize(12)
                         .TextColor(Color.Slate500)
                         .Margin(0, 0, 0, 20);
@@ -79,14 +80,13 @@ public class VerticalStackOverflowExampleFluent : ExampleBase
                             {
                                 itemStack.Item()
                                     .Text($"Item #{capturedI:D3}")
-                                    .Font(StandardFonts.HelveticaBold)
+                                    .Bold()
                                     .FontSize(12)
                                     .TextColor(Color.Blue600)
                                     .Margin(0, 0, 0, 5);
 
                                 itemStack.Item()
                                     .Text($"This is the description for item {capturedI}. It contains some details about what this item represents and why it's important.")
-                                    .Font(StandardFonts.Helvetica)
                                     .FontSize(10)
                                     .TextColor(Color.Slate600);
                             });

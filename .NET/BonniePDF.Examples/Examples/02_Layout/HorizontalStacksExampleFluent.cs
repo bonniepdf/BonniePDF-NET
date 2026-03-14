@@ -47,6 +47,8 @@ public class HorizontalStackExampleFluent : ExampleBase
                 metadata.Author = "BonniePDF";
             });
 
+            doc.WithDefaultTextStyle(style => style.WithFamily(StandardFonts.Helvetica).WithSize(12));
+
             doc.Page(page =>
             {
                 page.Content().Column(column =>
@@ -54,7 +56,7 @@ public class HorizontalStackExampleFluent : ExampleBase
                     // Title
                     column.Item()
                         .Text("Horizontal Stack Examples")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(24)
                         .TextColor(Color.Slate800)
                         .Margin(0, 0, 0, 12);
@@ -62,7 +64,7 @@ public class HorizontalStackExampleFluent : ExampleBase
                     // Equal width distribution
                     column.Item()
                         .Text("Equal Width Distribution")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(14)
                         .TextColor(Color.Slate700)
                         .Margin(0, 0, 0, 8);
@@ -74,15 +76,15 @@ public class HorizontalStackExampleFluent : ExampleBase
                         .Row(row =>
                         {
                             row.Spacing(10);
-                            row.RelativeItem().Text("Item 1").Font(StandardFonts.Helvetica).FontSize(12).TextColor(Color.White);
-                            row.RelativeItem().Text("Item 2").Font(StandardFonts.Helvetica).FontSize(12).TextColor(Color.White);
-                            row.RelativeItem().Text("Item 3").Font(StandardFonts.Helvetica).FontSize(12).TextColor(Color.White);
+                            row.RelativeItem().Text("Item 1").TextColor(Color.White);
+                            row.RelativeItem().Text("Item 2").TextColor(Color.White);
+                            row.RelativeItem().Text("Item 3").TextColor(Color.White);
                         });
 
                     // Weighted width distribution
                     column.Item()
                         .Text("Weighted Width Distribution (1:2:3 ratio)")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(14)
                         .TextColor(Color.Slate700)
                         .Margin(0, 16, 0, 8);
@@ -93,15 +95,15 @@ public class HorizontalStackExampleFluent : ExampleBase
                         .Row(row =>
                         {
                             row.Spacing(10);
-                            row.RelativeItem(1f).Text("25%").Font(StandardFonts.Helvetica).FontSize(12).TextColor(Color.White);
-                            row.RelativeItem(2f).Text("50%").Font(StandardFonts.Helvetica).FontSize(12).TextColor(Color.White);
-                            row.RelativeItem(3f).Text("75%").Font(StandardFonts.Helvetica).FontSize(12).TextColor(Color.White);
+                            row.RelativeItem(1f).Text("25%").TextColor(Color.White);
+                            row.RelativeItem(2f).Text("50%").TextColor(Color.White);
+                            row.RelativeItem(3f).Text("75%").TextColor(Color.White);
                         });
 
                     // Center alignment
                     column.Item()
                         .Text("Center Vertical Alignment")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(14)
                         .TextColor(Color.Slate700)
                         .Margin(0, 16, 0, 8);
@@ -112,15 +114,15 @@ public class HorizontalStackExampleFluent : ExampleBase
                         {
                             row.Spacing(10);
                             row.AlignItems(HorizontalAlignment.Center);
-                            row.RelativeItem().Text("Small").Font(StandardFonts.Helvetica).FontSize(10);
-                            row.RelativeItem().Text("Medium\n(2 lines)").Font(StandardFonts.Helvetica).FontSize(12);
-                            row.RelativeItem().Text("Large\n(3 lines)\nof text").Font(StandardFonts.Helvetica).FontSize(14);
+                            row.RelativeItem().Text("Small").FontSize(10);
+                            row.RelativeItem().Text("Medium\n(2 lines)");
+                            row.RelativeItem().Text("Large\n(3 lines)\nof text").FontSize(14);
                         });
 
                     // Colored containers in horizontal stack
                     column.Item()
                         .Text("Colored Containers")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(14)
                         .TextColor(Color.Slate700)
                         .Margin(0, 16, 0, 8);
@@ -129,15 +131,15 @@ public class HorizontalStackExampleFluent : ExampleBase
                         .Row(row =>
                         {
                             row.Spacing(5);
-                            row.RelativeItem().Padding(15).Background(Color.Red).Text("Red").Font(StandardFonts.HelveticaBold).FontSize(14).TextColor(Color.White);
-                            row.RelativeItem().Padding(15).Background(Color.Green600).Text("Green").Font(StandardFonts.HelveticaBold).FontSize(14).TextColor(Color.White);
-                            row.RelativeItem().Padding(15).Background(Color.Blue).Text("Blue").Font(StandardFonts.HelveticaBold).FontSize(14).TextColor(Color.White);
+                            row.RelativeItem().Padding(15).Background(Color.Red).Text("Red").Bold().FontSize(14).TextColor(Color.White);
+                            row.RelativeItem().Padding(15).Background(Color.Green600).Text("Green").Bold().FontSize(14).TextColor(Color.White);
+                            row.RelativeItem().Padding(15).Background(Color.Blue).Text("Blue").Bold().FontSize(14).TextColor(Color.White);
                         });
 
                     // Practical Examples
                     column.Item()
                         .Text("Practical Examples")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(24)
                         .TextColor(Color.Slate800)
                         .Margin(0, 0, 0, 12);
@@ -145,7 +147,7 @@ public class HorizontalStackExampleFluent : ExampleBase
                     // Key-value pairs
                     column.Item()
                         .Text("Key-Value Pairs")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(14)
                         .TextColor(Color.Slate700)
                         .Margin(0, 0, 0, 8);
@@ -154,8 +156,8 @@ public class HorizontalStackExampleFluent : ExampleBase
                         .Row(row =>
                         {
                             row.Spacing(10);
-                            row.RelativeItem(1f).Text("Name:").Font(StandardFonts.HelveticaBold).FontSize(12).TextColor(Color.Slate600);
-                            row.RelativeItem(3f).Text("John Doe").Font(StandardFonts.Helvetica).FontSize(12).TextColor(Color.Slate800);
+                            row.RelativeItem(1f).Text("Name:").Bold().TextColor(Color.Slate600);
+                            row.RelativeItem(3f).Text("John Doe").TextColor(Color.Slate800);
                         });
 
                     column.Item()
@@ -163,14 +165,14 @@ public class HorizontalStackExampleFluent : ExampleBase
                         .Row(row =>
                         {
                             row.Spacing(10);
-                            row.RelativeItem(1f).Text("Email:").Font(StandardFonts.HelveticaBold).FontSize(12).TextColor(Color.Slate600);
-                            row.RelativeItem(3f).Text("john.doe@example.com").Font(StandardFonts.Helvetica).FontSize(12).TextColor(Color.Slate800);
+                            row.RelativeItem(1f).Text("Email:").Bold().TextColor(Color.Slate600);
+                            row.RelativeItem(3f).Text("john.doe@example.com").TextColor(Color.Slate800);
                         });
 
                     // Progress bar style
                     column.Item()
                         .Text("Progress Bar Style")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(14)
                         .TextColor(Color.Slate700)
                         .Margin(0, 16, 0, 8);
@@ -180,14 +182,14 @@ public class HorizontalStackExampleFluent : ExampleBase
                         {
                             row.Spacing(0);
                             row.RelativeItem(75f).Padding(10, 5, 10, 5).Background(Color.Green600).Height(24)
-                                .Text("75%").Font(StandardFonts.HelveticaBold).FontSize(12).TextColor(Color.White);
+                                .Text("75%").Bold().TextColor(Color.White);
                             row.RelativeItem(25f).Padding(10, 5, 10, 5).Background(Color.Slate300).Height(24).Empty();
                         });
 
                     // Badge style
                     column.Item()
                         .Text("Badge Style Layout")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(14)
                         .TextColor(Color.Slate700)
                         .Margin(0, 16, 0, 8);
@@ -198,9 +200,9 @@ public class HorizontalStackExampleFluent : ExampleBase
                         .Row(row =>
                         {
                             row.Spacing(10);
-                            row.AutoItem().Text("Status:").Font(StandardFonts.Helvetica).FontSize(12).TextColor(Color.Slate600);
-                            row.AutoItem().Padding(8, 4, 8, 4).Background(Color.Green600).Text("Active").Font(StandardFonts.HelveticaBold).FontSize(11).TextColor(Color.White);
-                            row.AutoItem().Padding(8, 4, 8, 4).Background(Color.Blue).Text("Verified").Font(StandardFonts.HelveticaBold).FontSize(11).TextColor(Color.White);
+                            row.AutoItem().Text("Status:").TextColor(Color.Slate600);
+                            row.AutoItem().Padding(8, 4, 8, 4).Background(Color.Green600).Text("Active").Bold().FontSize(11).TextColor(Color.White);
+                            row.AutoItem().Padding(8, 4, 8, 4).Background(Color.Blue).Text("Verified").Bold().FontSize(11).TextColor(Color.White);
                         });
                 });
             });

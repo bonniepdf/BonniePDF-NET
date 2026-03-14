@@ -8,6 +8,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
+using BonniePDF.Fluent;
 using BonniePDF.Rendering.Writers;
 
 namespace BonniePDF.Rendering;
@@ -468,6 +469,8 @@ public class PdfDocumentSerializer
         if (element is VerticalStack vs) return vs.Children.Any(ContainsVisualToc);
         if (element is HorizontalStack hs) return hs.Children.Any(ContainsVisualToc);
         if (element is Container c && c.Child != null) return ContainsVisualToc(c.Child);
+        // IContentContainer covers fluent API slots (ContentSlot) that wrap a single child element
+        if (element is IContentContainer cc && cc.Child != null) return ContainsVisualToc(cc.Child);
         return false;
     }
 }

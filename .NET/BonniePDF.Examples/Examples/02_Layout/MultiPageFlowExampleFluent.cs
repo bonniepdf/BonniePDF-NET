@@ -78,6 +78,8 @@ public class MultiPageFlowExampleFluent : ExampleBase
                 settings.PdfAEnabled = true;
             });
 
+            doc.WithDefaultTextStyle(style => style.WithFamily(StandardFonts.Helvetica).WithSize(11));
+
             doc.Page(page =>
             {
                 page.Content().Column(column =>
@@ -85,7 +87,7 @@ public class MultiPageFlowExampleFluent : ExampleBase
                     // === SECTION 1: Document Title ===
                     column.Item()
                         .Text("Employee Directory & Company Overview")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(28)
                         .TextColor(Color.Slate800)
                         .AlignCenter()
@@ -93,7 +95,6 @@ public class MultiPageFlowExampleFluent : ExampleBase
 
                     column.Item()
                         .Text($"Annual Report {DateTime.Now.Year}")
-                        .Font(StandardFonts.Helvetica)
                         .FontSize(14)
                         .TextColor(Color.Slate500)
                         .AlignCenter()
@@ -102,19 +103,15 @@ public class MultiPageFlowExampleFluent : ExampleBase
                     // === SECTION 2: Large Table with Employee Data ===
                     column.Item()
                         .Text("Part 1: Complete Employee Directory")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(18)
                         .TextColor(Color.Slate700)
                         .Margin(0, 0, 0, 15);
 
                     column.Item()
                         .Text("The following table lists all employees across all departments. Headers repeat on each page for easy reference.")
-                        .Font(StandardFonts.Helvetica)
-                        .FontSize(11)
                         .TextColor(Color.Slate600)
                         .Margin(0, 0, 0, 15);
-
-                    // Sample data arrays (defined as static readonly fields above)
 
                     column.Item()
                         .Table(table =>
@@ -128,11 +125,11 @@ public class MultiPageFlowExampleFluent : ExampleBase
 
                             table.Header(row =>
                             {
-                                row.Cell().Text("ID").Font(StandardFonts.HelveticaBold).FontSize(10);
-                                row.Cell().Text("Full Name").Font(StandardFonts.HelveticaBold).FontSize(10);
-                                row.Cell().Text("Department").Font(StandardFonts.HelveticaBold).FontSize(10);
-                                row.Cell().Text("Position").Font(StandardFonts.HelveticaBold).FontSize(10);
-                                row.Cell().Text("Start Date").Font(StandardFonts.HelveticaBold).FontSize(10);
+                                row.Cell().Text("ID").Bold().FontSize(10);
+                                row.Cell().Text("Full Name").Bold().FontSize(10);
+                                row.Cell().Text("Department").Bold().FontSize(10);
+                                row.Cell().Text("Position").Bold().FontSize(10);
+                                row.Cell().Text("Start Date").Bold().FontSize(10);
                             });
 
                             // Add 150 employee rows with alternating row background
@@ -149,11 +146,11 @@ public class MultiPageFlowExampleFluent : ExampleBase
 
                                 table.Row(rowBgColor, row =>
                                 {
-                                    row.Cell().Text(i.ToString("D4")).Font(StandardFonts.Helvetica).FontSize(9).TextColor(Color.Slate600);
-                                    row.Cell().Text($"{firstName} {lastName}").Font(StandardFonts.Helvetica).FontSize(9).TextColor(Color.Slate800);
-                                    row.Cell().Text(department).Font(StandardFonts.Helvetica).FontSize(9).TextColor(Color.Slate600);
-                                    row.Cell().Text(position).Font(StandardFonts.Helvetica).FontSize(9).TextColor(Color.Slate600);
-                                    row.Cell().Text($"{startMonth:D2}/{startYear}").Font(StandardFonts.Helvetica).FontSize(9).TextColor(Color.Slate500);
+                                    row.Cell().Text(i.ToString("D4")).FontSize(9).TextColor(Color.Slate600);
+                                    row.Cell().Text($"{firstName} {lastName}").FontSize(9).TextColor(Color.Slate800);
+                                    row.Cell().Text(department).FontSize(9).TextColor(Color.Slate600);
+                                    row.Cell().Text(position).FontSize(9).TextColor(Color.Slate600);
+                                    row.Cell().Text($"{startMonth:D2}/{startYear}").FontSize(9).TextColor(Color.Slate500);
                                 });
                             }
                         });
@@ -161,7 +158,7 @@ public class MultiPageFlowExampleFluent : ExampleBase
                     // === SECTION 3: Long Text Content After Table ===
                     column.Item()
                         .Text("Part 2: Company Overview & History")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(18)
                         .TextColor(Color.Slate700)
                         .Margin(0, 30, 0, 15);
@@ -194,15 +191,13 @@ public class MultiPageFlowExampleFluent : ExampleBase
                     {
                         column.Item()
                             .Text(title)
-                            .Font(StandardFonts.HelveticaBold)
+                            .Bold()
                             .FontSize(14)
                             .TextColor(Color.Slate700)
                             .Margin(0, 20, 0, 8);
 
                         column.Item()
                             .Text(content)
-                            .Font(StandardFonts.Helvetica)
-                            .FontSize(11)
                             .TextColor(Color.Slate600)
                             .Margin(0, 0, 0, 8);
 
@@ -213,8 +208,6 @@ public class MultiPageFlowExampleFluent : ExampleBase
                                   "remain relevant and effective in an ever-changing business environment. " +
                                   "The leadership team reviews progress quarterly and adjusts our approach as needed " +
                                   "to maintain alignment with our long-term objectives.")
-                            .Font(StandardFonts.Helvetica)
-                            .FontSize(11)
                             .TextColor(Color.Slate600)
                             .Margin(0, 0, 0, 12);
                     }
@@ -222,7 +215,7 @@ public class MultiPageFlowExampleFluent : ExampleBase
                     // === SECTION 4: Closing Remarks ===
                     column.Item()
                         .Text("Conclusion")
-                        .Font(StandardFonts.HelveticaBold)
+                        .Bold()
                         .FontSize(18)
                         .TextColor(Color.Slate700)
                         .Margin(0, 30, 0, 15);
@@ -234,14 +227,12 @@ public class MultiPageFlowExampleFluent : ExampleBase
                               "The text sections that follow flow naturally across page boundaries, maintaining readability " +
                               "and professional formatting throughout. This unified approach to content flow enables the " +
                               "creation of complex, multipage documents with consistent quality and appearance.")
-                        .Font(StandardFonts.Helvetica)
-                        .FontSize(11)
                         .TextColor(Color.Slate600)
                         .Margin(0, 0, 0, 20);
 
                     column.Item()
                         .Text("Generated with BonniePDF - Flow Architecture Demo")
-                        .Font(StandardFonts.HelveticaOblique)
+                        .Italic()
                         .FontSize(10)
                         .TextColor(Color.Slate400)
                         .AlignCenter()
