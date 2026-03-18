@@ -1,8 +1,39 @@
 <Solution>
   <Project Path="BonniePDF.Benchmarks/BonniePDF.Benchmarks.csproj" />
   <Project Path="BonniePDF.Demo/BonniePDF.Demo.csproj" />
-  <Project Path="BonniePDF.Examples/BonniePDF.Examples.csproj" />
   <Project Path="BonniePDF.Tests/BonniePDF.Tests.csproj" />
   <Project Path="BonniePDF.Validation/BonniePDF.Validation.csproj" />
   <Project Path="BonniePDF/BonniePDF.csproj" />
+
+  <Folder Name="/Examples/">
+    <Project Path="Examples/BonniePDF.Examples.Basics.MarginExample/BonniePDF.Examples.Basics.MarginExample.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Basics.PageSettings/BonniePDF.Examples.Basics.PageSettings.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Basics.SimpleDocument/BonniePDF.Examples.Basics.SimpleDocument.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Layout.HeadersFooters/BonniePDF.Examples.Layout.HeadersFooters.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Layout.HorizontalStacks/BonniePDF.Examples.Layout.HorizontalStacks.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Layout.MultiPageFlow/BonniePDF.Examples.Layout.MultiPageFlow.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Layout.TextBlockOverflow/BonniePDF.Examples.Layout.TextBlockOverflow.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Layout.VerticalStackOverflow/BonniePDF.Examples.Layout.VerticalStackOverflow.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Typography.BookPageLayout/BonniePDF.Examples.Typography.BookPageLayout.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Typography.CustomFonts/BonniePDF.Examples.Typography.CustomFonts.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Typography.DickensNovel/BonniePDF.Examples.Typography.DickensNovel.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Typography.EmojisAndUnicode/BonniePDF.Examples.Typography.EmojisAndUnicode.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Typography.RichTextStyles/BonniePDF.Examples.Typography.RichTextStyles.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Typography.TextAlignment/BonniePDF.Examples.Typography.TextAlignment.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Typography.TextDecorations/BonniePDF.Examples.Typography.TextDecorations.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Elements.Hyperlinks/BonniePDF.Examples.Elements.Hyperlinks.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Elements.Images/BonniePDF.Examples.Elements.Images.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Elements.Lists/BonniePDF.Examples.Elements.Lists.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Elements.QRCodes/BonniePDF.Examples.Elements.QRCodes.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Elements.ShapesAndBorders/BonniePDF.Examples.Elements.ShapesAndBorders.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Charting.ChartShowcase/BonniePDF.Examples.Charting.ChartShowcase.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Security.Encryption/BonniePDF.Examples.Security.Encryption.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Security.Watermarking/BonniePDF.Examples.Security.Watermarking.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.BusinessInvoice/BonniePDF.Examples.Templates.BusinessInvoice.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.MovieCatalog/BonniePDF.Examples.Templates.MovieCatalog.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.UserDirectory/BonniePDF.Examples.Templates.UserDirectory.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Integration.AsyncGeneration/BonniePDF.Examples.Integration.AsyncGeneration.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Integration.WebApi/BonniePDF.Examples.Integration.WebApi.csproj" />
+  </Folder>
 </Solution>
+
