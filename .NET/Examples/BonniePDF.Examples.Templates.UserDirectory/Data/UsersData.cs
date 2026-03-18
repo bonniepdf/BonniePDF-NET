@@ -1,7 +1,6 @@
-using System.Collections.Generic;
-using BonniePDF.Examples.Data.Models;
+using BonniePDF.Examples.Templates.UserDirectory.Data.Models;
 
-namespace BonniePDF.Examples.Data;
+namespace BonniePDF.Examples.Templates.UserDirectory.Data;
 
 public static class UsersData
 {

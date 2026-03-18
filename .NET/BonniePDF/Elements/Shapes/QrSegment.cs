@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace BonniePDF.Elements.Shapes.QrEncoding;
+namespace BonniePDF.Elements.Shapes;
 
 /// <summary>
 /// A segment of character/binary/control data in a QR Code symbol.

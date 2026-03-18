@@ -1,5 +1,4 @@
-using System;
-using System.IO;
+namespace BonniePDF.Examples.Typography.TextAlignment;
 
 class Program
 {
@@ -10,9 +9,9 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Text Alignment...");
-                    BonniePDF.Examples.Examples._03_Typography.JustifiedTextExample.Generate(Path.Combine(outputDir, "justified_text.pdf"));
+        JustifiedTextExample.Generate(Path.Combine(outputDir, "justified_text.pdf"));
         Console.WriteLine("Generating Text Alignment (Fluent API)...");
-                    BonniePDF.Examples.Examples._03_Typography.TextAlignmentFluentExample.Generate(Path.Combine(outputDir, "justified_text_fluent.pdf"));
+        TextAlignmentFluentExample.Generate(Path.Combine(outputDir, "justified_text_fluent.pdf"));
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

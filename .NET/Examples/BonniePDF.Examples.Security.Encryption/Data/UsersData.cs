@@ -1,7 +1,6 @@
-using System.Collections.Generic;
-using BonniePDF.Examples.Data.Models;
+using BonniePDF.Examples.Security.Encryption.Data.Models;
 
-namespace BonniePDF.Examples.Data;
+namespace BonniePDF.Examples.Security.Encryption.Data;
 
 public static class UsersData
 {

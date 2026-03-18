@@ -1,5 +1,4 @@
-using System;
-using System.IO;
+namespace BonniePDF.Examples.Basics.SimpleDocument;
 
 class Program
 {
@@ -10,9 +9,9 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Simple Document...");
-                    BonniePDF.Examples.Examples._01_Basics.SimpleDocumentExample.Generate(Path.Combine(outputDir, "simple_document.pdf"));
+        SimpleDocumentExample.Generate(Path.Combine(outputDir, "simple_document.pdf"));
         Console.WriteLine("Generating Simple Document (Fluent API)...");
-                    BonniePDF.Examples.Examples._01_Basics.SimpleDocumentFluentExample.Generate(Path.Combine(outputDir, "simple_document_fluent.pdf"));
+        SimpleDocumentFluentExample.Generate(Path.Combine(outputDir, "simple_document_fluent.pdf"));
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

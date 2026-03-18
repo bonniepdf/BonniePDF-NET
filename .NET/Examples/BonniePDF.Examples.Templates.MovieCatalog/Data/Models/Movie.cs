@@ -1,4 +1,4 @@
-namespace BonniePDF.Examples.Data.Models;
+namespace BonniePDF.Examples.Templates.MovieCatalog.Data.Models;
 
 public class Movie
 {

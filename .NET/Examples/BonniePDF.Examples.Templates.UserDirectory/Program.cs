@@ -1,5 +1,4 @@
-using System;
-using System.IO;
+namespace BonniePDF.Examples.Templates.UserDirectory;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating User Directory...");
-                    BonniePDF.Examples.Examples._07_Templates.UsersTableExample.Generate(Path.Combine(outputDir, "users_list.pdf"));
+        UsersTableExample.Generate(Path.Combine(outputDir, "users_list.pdf"));
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

@@ -1,5 +1,4 @@
-using System;
-using System.IO;
+namespace BonniePDF.Examples.Templates.BusinessInvoice;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Business Invoice...");
-                    BonniePDF.Examples.Examples._07_Templates.InvoiceExample.Generate(Path.Combine(outputDir, "invoice.pdf"));
+        InvoiceExample.Generate(Path.Combine(outputDir, "invoice.pdf"));
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

@@ -1,5 +1,4 @@
-using System;
-using System.IO;
+namespace BonniePDF.Examples.Elements.QRCodes;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating QR Codes (Fluent API)...");
-                    BonniePDF.Examples.Examples._04_Elements.QRCodesFluentExample.Generate(Path.Combine(outputDir, "qrcodes_fluent.pdf"));
+        QRCodesFluentExample.Generate(Path.Combine(outputDir, "qrcodes_fluent.pdf"));
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

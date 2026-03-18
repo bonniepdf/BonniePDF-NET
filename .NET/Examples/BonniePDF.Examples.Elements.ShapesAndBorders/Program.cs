@@ -1,5 +1,4 @@
-using System;
-using System.IO;
+namespace BonniePDF.Examples.Elements.ShapesAndBorders;
 
 class Program
 {
@@ -10,9 +9,9 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Shapes & Borders...");
-                    BonniePDF.Examples.Examples._04_Elements.RoundedRectangleExample.Generate(Path.Combine(outputDir, "rounded_rectangles.pdf"));
+        RoundedRectangleExample.Generate(Path.Combine(outputDir, "rounded_rectangles.pdf"));
         Console.WriteLine("Generating Shapes & Borders (Fluent API)...");
-                    BonniePDF.Examples.Examples._04_Elements.RoundedRectangleFluentExample.Generate(Path.Combine(outputDir, "rounded_rectangles_fluent.pdf"));
+        RoundedRectangleFluentExample.Generate(Path.Combine(outputDir, "rounded_rectangles_fluent.pdf"));
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

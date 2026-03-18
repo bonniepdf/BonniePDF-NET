@@ -1,5 +1,4 @@
-using System;
-using System.IO;
+namespace BonniePDF.Examples.Basics.PageSettings;
 
 class Program
 {
@@ -10,9 +9,9 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Page Settings...");
-                    BonniePDF.Examples.Examples._01_Basics.AllPagesExample.Generate(Path.Combine(outputDir, "all_page_sizes.pdf"));
+        AllPagesExample.Generate(Path.Combine(outputDir, "all_page_sizes.pdf"));
         Console.WriteLine("Generating Page Settings (Fluent API)...");
-                    BonniePDF.Examples.Examples._01_Basics.AllPagesFluentExample.Generate(Path.Combine(outputDir, "all_page_sizes_fluent.pdf"));
+        AllPagesFluentExample.Generate(Path.Combine(outputDir, "all_page_sizes_fluent.pdf"));
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

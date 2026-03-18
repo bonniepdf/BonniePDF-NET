@@ -1,9 +1,7 @@
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using BonniePDF.Charts.Models;
 
-namespace BonniePDF.Examples.Data;
+namespace BonniePDF.Examples.Charting.ChartShowcase.Data;
 
 public static class ExampleChartData
 {

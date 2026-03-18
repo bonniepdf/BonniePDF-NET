@@ -1,5 +1,4 @@
-using System;
-using System.IO;
+namespace BonniePDF.Examples.Templates.MovieCatalog;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Movie Catalog...");
-                    BonniePDF.Examples.Examples._07_Templates.MoviesTableExample.Generate(Path.Combine(outputDir, "movies_list.pdf"));
+        MoviesTableExample.Generate(Path.Combine(outputDir, "movies_list.pdf"));
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

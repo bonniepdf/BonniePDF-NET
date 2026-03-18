@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace BonniePDF.Elements.Shapes.QrEncoding;
+namespace BonniePDF.Elements.Shapes;
 
 /// <summary>
 /// A QR Code symbol compliant with ISO/IEC 18004 (QR Code Model 2).

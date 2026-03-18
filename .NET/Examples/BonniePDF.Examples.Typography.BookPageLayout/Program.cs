@@ -1,5 +1,4 @@
-using System;
-using System.IO;
+namespace BonniePDF.Examples.Typography.BookPageLayout;
 
 class Program
 {
@@ -10,9 +9,9 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Book Page Layout...");
-                    BonniePDF.Examples.Examples._03_Typography.BookPageExample.Generate(Path.Combine(outputDir, "book_page.pdf"));
+        BookPageExample.Generate(Path.Combine(outputDir, "book_page.pdf"));
         Console.WriteLine("Generating Book Page Layout (Fluent API)...");
-                    BonniePDF.Examples.Examples._03_Typography.BookPageLayoutFluentExample.Generate(Path.Combine(outputDir, "book_page_fluent.pdf"));
+        BookPageLayoutFluentExample.Generate(Path.Combine(outputDir, "book_page_fluent.pdf"));
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

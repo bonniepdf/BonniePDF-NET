@@ -1,4 +1,4 @@
-namespace BonniePDF.Examples.Data.Models;
+namespace BonniePDF.Examples.Security.Encryption.Data.Models;
 
 public class User
 {

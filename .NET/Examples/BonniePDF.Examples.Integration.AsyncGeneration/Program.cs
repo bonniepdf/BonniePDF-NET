@@ -1,5 +1,4 @@
-using System;
-using System.IO;
+namespace BonniePDF.Examples.Integration.AsyncGeneration;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Async Generation...");
-                    BonniePDF.Examples.Examples._08_Integration.AsyncExample.GenerateAsync(Path.Combine(outputDir, "async_document.pdf")).GetAwaiter().GetResult();
+        AsyncExample.GenerateAsync(Path.Combine(outputDir, "async_document.pdf")).GetAwaiter().GetResult();
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

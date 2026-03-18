@@ -1,5 +1,5 @@
 using BonniePDF.Core;
-using BonniePDF.Elements.Shapes.QrEncoding;
+
 using BonniePDF.Rendering;
 
 namespace BonniePDF.Elements.Shapes;
