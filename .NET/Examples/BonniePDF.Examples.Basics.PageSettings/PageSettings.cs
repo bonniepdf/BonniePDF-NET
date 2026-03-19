@@ -9,7 +9,6 @@ namespace BonniePDF.Examples.Basics.PageSettings;
 
 public static class AllPagesExample
 {
-    
     public static string Generate(string outputPath)
     {
         Document doc = new(new DocumentSettings

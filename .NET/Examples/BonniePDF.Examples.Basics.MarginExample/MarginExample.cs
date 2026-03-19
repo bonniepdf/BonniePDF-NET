@@ -12,7 +12,6 @@ namespace BonniePDF.Examples.Basics.MarginExample;
 /// </summary>
 public static class MarginExample
 {
-    
     public static string Generate(string outputPath)
     {
         Document doc = new();

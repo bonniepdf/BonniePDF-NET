@@ -12,12 +12,6 @@ namespace BonniePDF.Demo;
 /// </summary>
 public static class MarginExampleFluent
 {
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-
     /// <summary>
     /// Generates the margins example PDF and saves it to <paramref name="outputPath"/>.
     /// The document illustrates top/bottom/left/right margin control on text, containers,

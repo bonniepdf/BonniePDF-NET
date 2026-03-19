@@ -15,7 +15,6 @@ namespace BonniePDF.Examples.Basics.PageSettings;
 /// </summary>
 public static class AllPagesFluentExample
 {
-
     /// <summary>Both orientations rendered for each standard page size.</summary>
     private static readonly PageOrientation[] Orientations =
         [PageOrientation.Portrait, PageOrientation.Landscape];
