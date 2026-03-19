@@ -43,13 +43,25 @@ public abstract class CartesianChartBase : ChartBase
     public float LabelFontSize { get; set; } = 9;
 
     /// <summary>
+    /// Whether to show a legend for multiple series (default: true).
+    /// </summary>
+    public bool ShowLegend { get; set; } = true;
+
+    /// <summary>
+    /// Controls whether the chart renders with vertical or horizontal orientation.
+    /// In horizontal mode, categories run along the Y-axis (left) and values along the X-axis (bottom).
+    /// Setting this on any chart type enables horizontal rendering without needing a separate class.
+    /// </summary>
+    public ChartOrientation Orientation { get; set; } = ChartOrientation.Vertical;
+
+    /// <summary>
     /// Draws the chart content using a Template Method pattern.
     /// This ensures consistent drawing order across all Cartesian chart types:
     /// 1. Grid lines (behind everything)
-    /// 2. Y-axis labels and legend (behind data)
-    /// 3. Chart-specific data elements (bars, lines, etc.) - now supports multiple series
+    /// 2. Value-axis labels (behind data)
+    /// 3. Chart-specific data elements (bars, lines, etc.)
     /// 4. Value labels (on top of data)
-    /// 5. X-axis labels and legend
+    /// 5. Category-axis labels
     /// 6. Axis lines (on top of everything to prevent overlap)
     /// 7. Legend (for multi-series charts)
     /// </summary>
@@ -57,33 +69,32 @@ public abstract class CartesianChartBase : ChartBase
     {
         if (data.Series.Count == 0) return;
 
-        // Calculate dynamic layout based on chart dimensions
         (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) = CalculateLayout();
 
         // 1. Draw grid lines first (behind everything)
         if (data.YAxis.ShowGridLines)
             DrawGridLines(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
 
-        // 2. Draw Y-axis labels (behind data)
+        // 2. Draw value-axis labels (behind data)
         DrawYAxisLabels(canvas, data, chartAreaHeight, baselineY, topY);
 
-        // 3. Draw Y-axis legend (behind data)
+        // 3. Draw value-axis legend
         if (!string.IsNullOrEmpty(data.YAxis.Legend))
-            DrawYAxisLegend(canvas, data.YAxis, chartAreaHeight, topY);
+            DrawYAxisLegend(canvas, data.YAxis, chartAreaWidth, chartAreaHeight, topY, baselineY);
 
-        // 4. Draw chart-specific data elements (bars, lines, area, etc.) - now supports multiple series
+        // 4. Draw chart-specific data elements
         DrawAllSeries(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
 
         // 5. Draw value labels on top of data
         if (ShowValueLabels)
             DrawValueLabels(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
 
-        // 6. Draw X-axis labels (data point labels)
-        DrawXAxisLabels(canvas, data, chartAreaWidth, baselineY);
+        // 6. Draw category-axis labels
+        DrawXAxisLabels(canvas, data, chartAreaWidth, chartAreaHeight, baselineY);
 
-        // 7. Draw X-axis legend
+        // 7. Draw category-axis legend
         if (!string.IsNullOrEmpty(data.XAxis.Legend))
-            DrawXAxisLegend(canvas, data.XAxis.Legend, chartAreaWidth, baselineY);
+            DrawXAxisLegend(canvas, data.XAxis.Legend, chartAreaWidth, chartAreaHeight, baselineY);
 
         // 8. Draw axis lines LAST (on top of everything to prevent overlap)
         DrawAxisLines(canvas, chartAreaWidth, baselineY, topY);
@@ -94,13 +105,7 @@ public abstract class CartesianChartBase : ChartBase
     }
 
     /// <summary>
-    /// Whether to show a legend for multiple series (default: true).
-    /// </summary>
-    public bool ShowLegend { get; set; } = true;
-
-    /// <summary>
     /// Draws all series in the chart.
-    /// This method iterates through each series and calls DrawSeriesElements for each one.
     /// </summary>
     protected virtual void DrawAllSeries(ICanvas canvas, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
@@ -116,28 +121,43 @@ public abstract class CartesianChartBase : ChartBase
     }
 
     /// <summary>
-    /// Calculates coordinates for a specific series based on chart dimensions.
+    /// Calculates screen-space coordinates for a series.
+    /// In vertical mode: category index → X position, normalised value → Y position.
+    /// In horizontal mode: category index → Y position, normalised value → X position.
+    /// Derived charts receive pre-computed Point coordinates and draw relative to them,
+    /// so most derived chart drawing logic works correctly in both orientations.
     /// </summary>
-    protected static IList<Point> CalculateSeriesCoordinates(
+    protected IList<Point> CalculateSeriesCoordinates(
         ChartSeries series, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY)
     {
         int dataPointCount = series.DataPoints.Count;
         List<Point> coordinates = new();
 
-        float totalSpace = chartAreaWidth / dataPointCount;
-        float spacing = totalSpace;
-
-        for (int i = 0; i < dataPointCount; i++)
+        if (Orientation == ChartOrientation.Horizontal)
         {
+            float topY = baselineY - chartAreaHeight;
+            float totalSpace = chartAreaHeight / dataPointCount;
 
-            float x = LeftPadding + i * spacing + spacing / 2;
+            for (int i = 0; i < dataPointCount; i++)
+            {
+                float y = topY + i * totalSpace + totalSpace / 2;
+                decimal normalizedValue = series.DataPoints[i].Value / data.YAxis.MaxValue;
+                float x = LeftPadding + (float)(normalizedValue * (decimal)chartAreaWidth);
+                coordinates.Add(new Point(x, y));
+            }
+        }
+        else
+        {
+            float totalSpace = chartAreaWidth / dataPointCount;
 
-            decimal normalizedValue = series.DataPoints[i].Value / data.YAxis.MaxValue;
-            float y = baselineY - (float)(normalizedValue * (decimal)chartAreaHeight);
-
-            var point = new Point(x, y);
-            coordinates.Add(point);
+            for (int i = 0; i < dataPointCount; i++)
+            {
+                float x = LeftPadding + i * totalSpace + totalSpace / 2;
+                decimal normalizedValue = series.DataPoints[i].Value / data.YAxis.MaxValue;
+                float y = baselineY - (float)(normalizedValue * (decimal)chartAreaHeight);
+                coordinates.Add(new Point(x, y));
+            }
         }
 
         return coordinates;
@@ -150,19 +170,18 @@ public abstract class CartesianChartBase : ChartBase
     /// <param name="canvas">The canvas to draw to</param>
     /// <param name="data">The chart data containing all series</param>
     /// <param name="series">The specific series to draw</param>
-    /// <param name="coordinates">Pre-calculated coordinates for this series' data points</param>
+    /// <param name="coordinates">Pre-calculated screen-space coordinates for this series' data points</param>
     /// <param name="chartAreaWidth">Width of the chart drawing area</param>
     /// <param name="chartAreaHeight">Height of the chart drawing area</param>
-    /// <param name="baselineY">Y coordinate of the x-axis (bottom of chart area)</param>
+    /// <param name="baselineY">Y coordinate of the bottom of the chart area</param>
     /// <param name="topY">Y coordinate of the top of the chart area</param>
     protected abstract void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
         IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY);
 
     /// <summary>
-    /// Draws value labels above data points for all series.
-    /// Default implementation uses GetLabelVerticalOffset() to customize appearance.
-    /// Derived classes can override completely if they need custom behavior.
+    /// Draws value labels next to data points for all series.
+    /// In vertical mode labels appear above each point; in horizontal mode to the right.
     /// </summary>
     protected virtual void DrawValueLabels(ICanvas canvas, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
@@ -175,24 +194,27 @@ public abstract class CartesianChartBase : ChartBase
                 series, data, chartAreaWidth, chartAreaHeight, baselineY);
 
             Color labelColor = series.Color;
-            float verticalOffset = GetLabelVerticalOffset(series);
+            float offset = GetLabelVerticalOffset(series);
 
             for (int i = 0; i < series.DataPoints.Count; i++)
             {
                 var point = coordinates[i];
                 string text = series.DataPoints[i].FormattedValue;
 
-                // Draw text above the data point
-                canvas.DrawText(point.X, point.Y - verticalOffset - LabelFontSize, text, labelColor, LabelFontSize, FontFamily,
-                    TextAlignment.Center);
+                if (Orientation == ChartOrientation.Horizontal)
+                    canvas.DrawText(point.X + offset, point.Y - LabelFontSize / 2, text,
+                        labelColor, LabelFontSize, FontFamily, TextAlignment.Left);
+                else
+                    canvas.DrawText(point.X, point.Y - offset - LabelFontSize, text,
+                        labelColor, LabelFontSize, FontFamily, TextAlignment.Center);
             }
         }
     }
 
     /// <summary>
-    /// Gets the vertical offset (in points) to apply when positioning value labels above data points.
-    /// This accounts for any visual elements (like markers or bars) that need space above the data point.
-    /// Default implementation returns 7. Derived classes can override for custom behavior.
+    /// Gets the offset (in points) to apply when positioning value labels near data points.
+    /// In vertical mode this is the gap above the data point; in horizontal mode to the right.
+    /// Default implementation returns 7. Derived classes can override for custom behaviour.
     /// </summary>
     protected virtual float GetLabelVerticalOffset(ChartSeries series) => 7;
 
@@ -211,50 +233,64 @@ public abstract class CartesianChartBase : ChartBase
             ChartSeries series = data.Series[i];
             float x = legendStartX + i * legendItemWidth;
 
-            // Draw color box
             canvas.FillRect(x, legendY, colorBoxSize, colorBoxSize, series.Color);
 
-            // Draw series name
             canvas.DrawText(x + colorBoxSize + 5, legendY + colorBoxSize / 2 - LegendFontSize / 2,
                 series.Name, AxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
         }
     }
 
     /// <summary>
-    /// Draws horizontal grid lines across the chart area.
+    /// Draws grid lines across the chart area.
+    /// In vertical mode: horizontal lines at value intervals.
+    /// In horizontal mode: vertical lines at value intervals.
     /// </summary>
-    protected static void DrawGridLines(ICanvas canvas, ChartData data, float chartAreaWidth, float chartAreaHeight,
+    protected void DrawGridLines(ICanvas canvas, ChartData data, float chartAreaWidth, float chartAreaHeight,
         float baselineY, float topY)
     {
         int stepCount = data.YAxis.StepCount;
         if (stepCount <= 0) stepCount = 5;
 
-        float stepHeight = chartAreaHeight / stepCount;
-
-        for (int i = 1; i <= stepCount; i++)
+        if (Orientation == ChartOrientation.Horizontal)
         {
-            float y = baselineY - i * stepHeight;
-            float x1 = LeftPadding;
-            float x2 = LeftPadding + chartAreaWidth;
-
-            canvas.DrawLine(x1, y, x2, y, GridLineColor, GridLineWidth);
+            float stepWidth = chartAreaWidth / stepCount;
+            for (int i = 1; i <= stepCount; i++)
+            {
+                float x = LeftPadding + i * stepWidth;
+                canvas.DrawLine(x, topY, x, baselineY, GridLineColor, GridLineWidth);
+            }
+        }
+        else
+        {
+            float stepHeight = chartAreaHeight / stepCount;
+            for (int i = 1; i <= stepCount; i++)
+            {
+                float y = baselineY - i * stepHeight;
+                float x1 = LeftPadding;
+                float x2 = LeftPadding + chartAreaWidth;
+                canvas.DrawLine(x1, y, x2, y, GridLineColor, GridLineWidth);
+            }
         }
     }
 
     /// <summary>
     /// Draws the X and Y axis lines.
+    /// These are in the same physical positions for both orientations:
+    /// the left vertical line and the bottom horizontal line.
     /// </summary>
     protected static void DrawAxisLines(ICanvas canvas, float chartAreaWidth, float baselineY, float topY)
     {
-        // Y-axis (vertical line on the left)
+        // Left vertical line
         canvas.DrawLine(LeftPadding, topY, LeftPadding, baselineY, AxisColor, AxisLineWidth);
 
-        // X-axis (horizontal line at the bottom)
+        // Bottom horizontal line
         canvas.DrawLine(LeftPadding, baselineY, LeftPadding + chartAreaWidth, baselineY, AxisColor, AxisLineWidth);
     }
 
     /// <summary>
-    /// Draws Y-axis value labels.
+    /// Draws value-axis labels.
+    /// In vertical mode: numbers on the left side at each step.
+    /// In horizontal mode: numbers along the bottom at each step.
     /// </summary>
     protected void DrawYAxisLabels(ICanvas canvas, ChartData data, float chartAreaHeight, float baselineY, float topY)
     {
@@ -266,39 +302,57 @@ public abstract class CartesianChartBase : ChartBase
         decimal range = maxValue - minValue;
         decimal stepValue = range / stepCount;
 
-        float stepHeight = chartAreaHeight / stepCount;
-
-        for (int i = 0; i <= stepCount; i++)
+        if (Orientation == ChartOrientation.Horizontal)
         {
-            float y = baselineY - i * stepHeight;
-            decimal value = minValue + i * stepValue;
+            float chartAreaWidth = Width - LeftPadding - RightPadding;
+            float stepWidth = chartAreaWidth / stepCount;
 
-            // Format the value with prefix/suffix
-            string label = $"{data.YAxis.Prefix}{value:N0}{data.YAxis.Suffix}";
+            for (int i = 0; i <= stepCount; i++)
+            {
+                float x = LeftPadding + i * stepWidth;
+                decimal value = minValue + i * stepValue;
+                string label = $"{data.YAxis.Prefix}{value:N0}{data.YAxis.Suffix}";
+                canvas.DrawText(x, baselineY + 8, label, AxisColor, AxisLabelFontSize, FontFamily,
+                    TextAlignment.Center);
+            }
+        }
+        else
+        {
+            float stepHeight = chartAreaHeight / stepCount;
 
-            // Draw label to the left of the Y-axis
-            canvas.DrawText(LeftPadding - 8, y - AxisLabelFontSize / 2, label, AxisColor, AxisLabelFontSize, FontFamily,
-                TextAlignment.Right);
+            for (int i = 0; i <= stepCount; i++)
+            {
+                float y = baselineY - i * stepHeight;
+                decimal value = minValue + i * stepValue;
+                string label = $"{data.YAxis.Prefix}{value:N0}{data.YAxis.Suffix}";
+                canvas.DrawText(LeftPadding - 8, y - AxisLabelFontSize / 2, label, AxisColor, AxisLabelFontSize,
+                    FontFamily, TextAlignment.Right);
+            }
         }
     }
 
     /// <summary>
-    /// Draws the Y-axis legend. Can be rendered horizontally or vertically based on VerticalLegend option.
-    /// Vertical rendering rotates the text 90 degrees counter-clockwise, which is useful for saving horizontal space.
+    /// Draws the value-axis legend.
+    /// In vertical mode: on the left side (horizontal or rotated text).
+    /// In horizontal mode: centred below the chart as the bottom-axis legend.
     /// </summary>
-    protected void DrawYAxisLegend(ICanvas canvas, AxisOptions yAxis, float chartAreaHeight, float topY)
+    protected void DrawYAxisLegend(ICanvas canvas, AxisOptions yAxis,
+        float chartAreaWidth, float chartAreaHeight, float topY, float baselineY)
     {
-        if (yAxis.VerticalLegend)
+        if (Orientation == ChartOrientation.Horizontal)
         {
-            // Vertical rendering: rotate text 90 degrees counter-clockwise
-            // Position with minimal left margin
-            float x = 15; // Minimal left margin for vertical legend
+            float x = LeftPadding + chartAreaWidth / 2;
+            float y = Height - 15;
+            canvas.DrawText(x, y, yAxis.Legend, AxisColor, LegendFontSize, FontFamily, TextAlignment.Center);
+        }
+        else if (yAxis.VerticalLegend)
+        {
+            float x = 15;
             float y = topY + chartAreaHeight / 2;
             canvas.DrawTextRotated(x, y, yAxis.Legend, AxisColor, LegendFontSize, FontFamily, 90);
         }
         else
         {
-            // Horizontal rendering (original behavior)
             float x = 10;
             float y = topY + chartAreaHeight / 2;
             canvas.DrawText(x, y, yAxis.Legend, AxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
@@ -306,38 +360,64 @@ public abstract class CartesianChartBase : ChartBase
     }
 
     /// <summary>
-    /// Draws the X-axis legend centered below the axis labels.
+    /// Draws the category-axis legend.
+    /// In vertical mode: centred below the x-axis labels.
+    /// In horizontal mode: rotated on the left side.
     /// </summary>
-    protected void DrawXAxisLegend(ICanvas canvas, string legend, float chartAreaWidth, float baselineY)
+    protected void DrawXAxisLegend(ICanvas canvas, string legend,
+        float chartAreaWidth, float chartAreaHeight, float baselineY)
     {
-        float x = LeftPadding + chartAreaWidth / 2;
-        float y = baselineY + 50;
-
-        canvas.DrawText(x, y, legend, AxisColor, LegendFontSize, FontFamily, TextAlignment.Center);
+        if (Orientation == ChartOrientation.Horizontal)
+        {
+            float x = 15;
+            float y = TitleAreaHeight + chartAreaHeight / 2;
+            canvas.DrawTextRotated(x, y, legend, AxisColor, LegendFontSize, FontFamily, 90);
+        }
+        else
+        {
+            float x = LeftPadding + chartAreaWidth / 2;
+            float y = baselineY + 50;
+            canvas.DrawText(x, y, legend, AxisColor, LegendFontSize, FontFamily, TextAlignment.Center);
+        }
     }
 
     /// <summary>
-    /// Draws X-axis labels (data point labels below each point).
-    /// Uses labels from the first series for all series.
+    /// Draws category-axis labels (data point labels).
+    /// In vertical mode: below each point along the X-axis.
+    /// In horizontal mode: to the left of each point along the Y-axis.
     /// </summary>
-    protected virtual void DrawXAxisLabels(ICanvas canvas, ChartData data, float chartAreaWidth, float baselineY)
+    protected virtual void DrawXAxisLabels(ICanvas canvas, ChartData data,
+        float chartAreaWidth, float chartAreaHeight, float baselineY)
     {
         if (data.Series.Count == 0) return;
 
-        // Use the first series' labels for the X-axis
         ChartSeries firstSeries = data.Series[0];
         int dataPointCount = firstSeries.DataPoints.Count;
 
-        float labelY = baselineY + 15;
-        float totalSpace = chartAreaWidth / dataPointCount;
-        float spacing = totalSpace;
-
-        for (int i = 0; i < dataPointCount; i++)
+        if (Orientation == ChartOrientation.Horizontal)
         {
-            float x = LeftPadding + i * spacing + spacing / 2;
-            string label = firstSeries.DataPoints[i].Label;
+            float topY = baselineY - chartAreaHeight;
+            float totalSpace = chartAreaHeight / dataPointCount;
 
-            canvas.DrawText(x, labelY, label, AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Center);
+            for (int i = 0; i < dataPointCount; i++)
+            {
+                float y = topY + i * totalSpace + totalSpace / 2;
+                string label = firstSeries.DataPoints[i].Label;
+                canvas.DrawText(LeftPadding - 8, y - AxisLabelFontSize / 2, label,
+                    AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Right);
+            }
+        }
+        else
+        {
+            float labelY = baselineY + 15;
+            float totalSpace = chartAreaWidth / dataPointCount;
+
+            for (int i = 0; i < dataPointCount; i++)
+            {
+                float x = LeftPadding + i * totalSpace + totalSpace / 2;
+                string label = firstSeries.DataPoints[i].Label;
+                canvas.DrawText(x, labelY, label, AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Center);
+            }
         }
     }
 

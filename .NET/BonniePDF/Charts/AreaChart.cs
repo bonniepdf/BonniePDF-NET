@@ -41,19 +41,16 @@ public class AreaChart : CartesianChartBase
 
     /// <summary>
     /// Draws the area chart elements for a single series (area fill and connecting line).
+    /// In horizontal mode the area fill extends leftward from the line to the value-axis baseline.
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
         IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
-        // Get series-specific styling or use defaults
         float fillOpacity = series.Style?.FillOpacity > 0 ? series.Style.FillOpacity : DefaultFillOpacity;
         float lineWidth = series.Style?.LineWidth > 0 ? series.Style.LineWidth : DefaultLineWidth;
 
-        // Draw the area fill (behind the line)
         DrawAreaFill(canvas, coordinates, baselineY, series.Color, fillOpacity);
-
-        // Draw the line on top
         DrawConnectingLine(canvas, coordinates, series.Color, lineWidth);
     }
 
@@ -63,42 +60,78 @@ public class AreaChart : CartesianChartBase
     protected override float GetLabelVerticalOffset(ChartSeries series) => 7;
 
     /// <summary>
-    /// Draws the area fill using a series of thin vertical rectangles.
-    /// This approximates the area under the line connecting data points.
+    /// Draws the area fill using thin rectangles spanning from the axis baseline to the line.
+    /// In vertical mode: thin vertical rectangles from baselineY up to the line.
+    /// In horizontal mode: thin horizontal rectangles from LeftPadding right to the line.
     /// </summary>
-    private static void DrawAreaFill(ICanvas canvas, IList<Point> coordinates, float baselineY, Color color, float opacity)
+    private void DrawAreaFill(ICanvas canvas, IList<Point> coordinates, float baselineY, Color color, float opacity)
     {
         if (coordinates.Count < 2) return;
 
-        // Create a semi-transparent color for the fill
         Color fillColor = color.WithAlpha(opacity);
-
-        // Use a small step size for smooth area fill
         const float stepSize = 2f;
 
-        // Find the x range
-        float minX = coordinates[0].X;
-        float maxX = coordinates[coordinates.Count - 1].Y;
-
-        // Draw vertical rectangles from baseline to the line at each step
-        for (float x = minX; x < maxX; x += stepSize)
+        if (Orientation == ChartOrientation.Horizontal)
         {
-            // Interpolate to find the y value on the line at this x position
-            float y = InterpolateY(coordinates, x);
+            float minY = coordinates[0].Y;
+            float maxY = coordinates[coordinates.Count - 1].Y;
 
-            // Draw a thin rectangle from baseline to the line
-            float rectHeight = baselineY - y;
-            canvas.FillRect(x, y, stepSize, rectHeight, fillColor);
+            for (float y = minY; y < maxY; y += stepSize)
+            {
+                float x = InterpolateX(coordinates, y);
+                float rectWidth = x - LeftPadding;
+                canvas.FillRect(LeftPadding, y, rectWidth, stepSize, fillColor);
+            }
+
+            float lastY = maxY - (maxY - minY) % stepSize;
+            if (lastY < maxY)
+            {
+                float x = InterpolateX(coordinates, maxY);
+                canvas.FillRect(LeftPadding, lastY, x - LeftPadding, maxY - lastY, fillColor);
+            }
+        }
+        else
+        {
+            float minX = coordinates[0].X;
+            float maxX = coordinates[coordinates.Count - 1].Y; // note: existing behaviour preserved
+
+            for (float x = minX; x < maxX; x += stepSize)
+            {
+                float y = InterpolateY(coordinates, x);
+                float rectHeight = baselineY - y;
+                canvas.FillRect(x, y, stepSize, rectHeight, fillColor);
+            }
+
+            float lastX = maxX - (maxX - minX) % stepSize;
+            if (lastX < maxX)
+            {
+                float y = InterpolateY(coordinates, maxX);
+                float rectHeight = baselineY - y;
+                canvas.FillRect(lastX, y, maxX - lastX, rectHeight, fillColor);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Interpolates the X value on the line connecting data points for a given Y position.
+    /// Used in horizontal mode to find how far right the line is at a given vertical position.
+    /// </summary>
+    private static float InterpolateX(IList<Point> coordinates, float y)
+    {
+        for (int i = 0; i < coordinates.Count - 1; i++)
+        {
+            var p1 = coordinates[i];
+            var p2 = coordinates[i + 1];
+
+            if (y >= p1.Y && y <= p2.Y)
+            {
+                float t = (p2.Y - p1.Y) == 0 ? 0 : (y - p1.Y) / (p2.Y - p1.Y);
+                return p1.X + t * (p2.X - p1.X);
+            }
         }
 
-        // Fill any remaining gap at the end
-        float lastX = maxX - (maxX - minX) % stepSize;
-        if (lastX < maxX)
-        {
-            float y = InterpolateY(coordinates, maxX);
-            float rectHeight = baselineY - y;
-            canvas.FillRect(lastX, y, maxX - lastX, rectHeight, fillColor);
-        }
+        if (y < coordinates[0].Y) return coordinates[0].X;
+        return coordinates[coordinates.Count - 1].X;
     }
 
     /// <summary>

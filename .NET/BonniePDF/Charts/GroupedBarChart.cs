@@ -25,63 +25,98 @@ public class GroupedBarChart : CartesianChartBase
 
     /// <summary>
     /// Draws the grouped bar chart elements for a single series.
+    /// In vertical mode draws grouped vertical bars; in horizontal mode draws grouped horizontal bars.
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
         IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
-        // Calculate bar dimensions
         int seriesCount = data.Series.Count;
         int categoryCount = series.DataPoints.Count;
-
-        float totalGroupSpace = chartAreaWidth / categoryCount;
-        float groupPadding = totalGroupSpace * GroupGapRatio;
-        float barGroupWidth = totalGroupSpace - groupPadding;
-        float barWidth = (barGroupWidth / seriesCount) * BarWidthRatio;
-
-        // Find this series' index
         int seriesIndex = data.Series.IndexOf(series);
 
-        // Draw bars
-        for (int i = 0; i < coordinates.Count; i++)
+        if (Orientation == ChartOrientation.Horizontal)
         {
-            var p = coordinates[i];
-            float barHeight = baselineY - p.Y;
+            float totalGroupSpace = chartAreaHeight / categoryCount;
+            float groupPadding = totalGroupSpace * GroupGapRatio;
+            float barGroupHeight = totalGroupSpace - groupPadding;
+            float barHeight = (barGroupHeight / seriesCount) * BarWidthRatio;
+            float topAreaY = baselineY - chartAreaHeight;
 
-            // Calculate bar position within group
-            float groupStartX = LeftPadding + i * totalGroupSpace + groupPadding / 2;
-            float barX = groupStartX + seriesIndex * (barGroupWidth / seriesCount) +
-                         (barGroupWidth / seriesCount - barWidth) / 2;
+            for (int i = 0; i < coordinates.Count; i++)
+            {
+                var p = coordinates[i];
+                float barWidth = p.X - LeftPadding;
 
-            canvas.FillRect(barX, p.Y, barWidth, barHeight, series.Color);
+                float groupStartY = topAreaY + i * totalGroupSpace + groupPadding / 2;
+                float barY = groupStartY + seriesIndex * (barGroupHeight / seriesCount)
+                             + (barGroupHeight / seriesCount - barHeight) / 2;
+
+                canvas.FillRect(LeftPadding, barY, barWidth, barHeight, series.Color);
+            }
+        }
+        else
+        {
+            float totalGroupSpace = chartAreaWidth / categoryCount;
+            float groupPadding = totalGroupSpace * GroupGapRatio;
+            float barGroupWidth = totalGroupSpace - groupPadding;
+            float barWidth = (barGroupWidth / seriesCount) * BarWidthRatio;
+
+            for (int i = 0; i < coordinates.Count; i++)
+            {
+                var p = coordinates[i];
+                float barHeight = baselineY - p.Y;
+
+                float groupStartX = LeftPadding + i * totalGroupSpace + groupPadding / 2;
+                float barX = groupStartX + seriesIndex * (barGroupWidth / seriesCount)
+                             + (barGroupWidth / seriesCount - barWidth) / 2;
+
+                canvas.FillRect(barX, p.Y, barWidth, barHeight, series.Color);
+            }
         }
     }
 
     /// <summary>
-    /// Gets the vertical offset for value labels (simple spacing above bars).
+    /// Gets the offset for value labels (simple spacing above/beside bars).
     /// </summary>
     protected override float GetLabelVerticalOffset(ChartSeries series) => 7;
 
     /// <summary>
-    /// Draws X-axis labels using first series' category labels.
+    /// Draws category-axis labels using the first series' labels.
+    /// In vertical mode: below each group. In horizontal mode: to the left of each group.
     /// </summary>
-    protected override void DrawXAxisLabels(ICanvas canvas, ChartData data, float chartAreaWidth, float baselineY)
+    protected override void DrawXAxisLabels(ICanvas canvas, ChartData data,
+        float chartAreaWidth, float chartAreaHeight, float baselineY)
     {
         if (data.Series.Count == 0) return;
 
-        // Use the first series' labels for the X-axis
         ChartSeries firstSeries = data.Series[0];
         int dataPointCount = firstSeries.DataPoints.Count;
 
-        float labelY = baselineY + 15;
-        float totalGroupSpace = chartAreaWidth / dataPointCount;
-
-        for (int i = 0; i < dataPointCount; i++)
+        if (Orientation == ChartOrientation.Horizontal)
         {
-            float x = LeftPadding + i * totalGroupSpace + totalGroupSpace / 2;
-            string label = firstSeries.DataPoints[i].Label;
+            float topY = baselineY - chartAreaHeight;
+            float totalGroupSpace = chartAreaHeight / dataPointCount;
 
-            canvas.DrawText(x, labelY, label, AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Center);
+            for (int i = 0; i < dataPointCount; i++)
+            {
+                float y = topY + i * totalGroupSpace + totalGroupSpace / 2;
+                string label = firstSeries.DataPoints[i].Label;
+                canvas.DrawText(LeftPadding - 8, y - AxisLabelFontSize / 2, label,
+                    AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Right);
+            }
+        }
+        else
+        {
+            float labelY = baselineY + 15;
+            float totalGroupSpace = chartAreaWidth / dataPointCount;
+
+            for (int i = 0; i < dataPointCount; i++)
+            {
+                float x = LeftPadding + i * totalGroupSpace + totalGroupSpace / 2;
+                string label = firstSeries.DataPoints[i].Label;
+                canvas.DrawText(x, labelY, label, AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Center);
+            }
         }
     }
 }

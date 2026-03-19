@@ -26,6 +26,12 @@ class Program
         LollipopChartExample.Generate(Path.Combine(outputDir, "lollipop_chart_example.pdf"));
         Console.WriteLine("Generating Pie Chart...");
         PieChartExample.Generate(Path.Combine(outputDir, "pie_chart_example.pdf"));
+        Console.WriteLine("Generating Horizontal Bar Chart...");
+        HorizontalBarChartExample.Generate(Path.Combine(outputDir, "horizontal_bar_chart_example.pdf"));
+        Console.WriteLine("Generating Horizontal Lollipop Chart...");
+        HorizontalLollipopChartExample.Generate(Path.Combine(outputDir, "horizontal_lollipop_chart_example.pdf"));
+        Console.WriteLine("Generating Horizontal Grouped Bar Chart...");
+        HorizontalGroupedBarChartExample.Generate(Path.Combine(outputDir, "horizontal_grouped_bar_chart_example.pdf"));
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

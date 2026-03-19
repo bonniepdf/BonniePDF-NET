@@ -42,24 +42,21 @@ public class LollipopChart : CartesianChartBase
 
     /// <summary>
     /// Draws the lollipop chart elements for a single series (stems and heads).
+    /// In vertical mode stems are vertical lines; in horizontal mode they are horizontal lines.
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
         IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
-        // Get series-specific styling or use defaults
         float stemWidth = series.Style?.StemWidth > 0 ? series.Style.StemWidth : DefaultStemWidth;
         float headRadius = series.Style?.MarkerRadius > 0 ? series.Style.MarkerRadius : DefaultHeadRadius;
 
-        // Draw lollipop stems (vertical lines)
         DrawLollipopStems(canvas, coordinates, baselineY, series.Color, stemWidth);
-
-        // Draw lollipop heads (circles)
         DrawLollipopHeads(canvas, coordinates, series.Color, headRadius);
     }
 
     /// <summary>
-    /// Gets the vertical offset for value labels (accounts for lollipop head radius).
+    /// Gets the offset for value labels (accounts for lollipop head radius).
     /// </summary>
     protected override float GetLabelVerticalOffset(ChartSeries series)
     {
@@ -68,13 +65,20 @@ public class LollipopChart : CartesianChartBase
     }
 
     /// <summary>
-    /// Draws the lollipop stems (vertical lines from baseline to data point) for a series.
+    /// Draws lollipop stems from the axis baseline to each data point.
+    /// In vertical mode: vertical lines from baselineY up to p.Y.
+    /// In horizontal mode: horizontal lines from LeftPadding right to p.X.
     /// </summary>
-    private static void DrawLollipopStems(ICanvas canvas, IList<Point> coordinates, 
+    private void DrawLollipopStems(ICanvas canvas, IList<Point> coordinates,
         float baselineY, Color color, float stemWidth)
     {
         foreach (Point p in coordinates)
-            canvas.DrawLine(p.X, baselineY, p.X, p.Y, color, stemWidth);
+        {
+            if (Orientation == ChartOrientation.Horizontal)
+                canvas.DrawLine(LeftPadding, p.Y, p.X, p.Y, color, stemWidth);
+            else
+                canvas.DrawLine(p.X, baselineY, p.X, p.Y, color, stemWidth);
+        }
     }
 
     /// <summary>
