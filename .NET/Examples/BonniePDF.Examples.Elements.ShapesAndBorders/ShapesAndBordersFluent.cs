@@ -200,7 +200,8 @@ public static class RoundedRectangleFluentExample
                     }
 
                     // ── Section 6: Practical Examples ─────────────────────────
-                    col.Item().Margin(0, 16, 0, 0).Line(1, Color.Slate300);
+                    col.Item().Spacer(16);
+                    col.Item().Line(1, Color.Slate300);
                     SectionHeader(col, "Practical Examples");
 
                     // Success

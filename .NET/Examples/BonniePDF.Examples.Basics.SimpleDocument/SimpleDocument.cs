@@ -67,9 +67,10 @@ public static class SimpleDocumentExample
             Text = "This PDF was created using the new high-level Document API.",
             FontName = File.Exists(fontPath) ? fontPath : StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = Color.Slate600,
-            Margin = new Thickness(0, 0, 0, 8)
+            TextColor = Color.Slate600
         });
+
+        doc.Add(new Spacer(16));
 
         doc.Add(new TextBlock
         {

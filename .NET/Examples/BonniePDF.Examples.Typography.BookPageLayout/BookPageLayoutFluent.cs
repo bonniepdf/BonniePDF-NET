@@ -64,8 +64,9 @@ public static class BookPageLayoutFluentExample
                         .Font(StandardFonts.Courier)
                         .FontSize(8)
                         .TextColor(Color.Slate400)
-                        .AlignCenter()
-                        .Margin(0, 0, 0, 6);
+                        .AlignCenter();
+
+                    column.Item().Spacer(20);
 
                     // ── Body paragraphs ──────────────────────────────────────────
 
@@ -128,13 +129,14 @@ public static class BookPageLayoutFluentExample
                         "\"I know what you're thinking,\" Halloway said softly. \"You're thinking about Alzheimer's. About PTSD. About the millions of people whose internal cathedrals are crumbling, whose memories have become labyrinths with no exit. You're wondering why this isn't headline news. Why pharmaceutical companies aren't beating down my door.\" He looked around the room, making eye contact with each student in turn. \"The answer, unfortunately, is the same reason I've been forced to hold this lecture in a rented classroom at nine o'clock at night. Some discoveries are too dangerous. Some architectures, once revealed, cannot be unseen.\"");
 
                     // ── Page footer ──────────────────────────────────────────────
+                    column.Item().Spacer(16);
+
                     column.Item()
                         .Text("--------------------------------------------------------------------")
                         .Font(StandardFonts.Courier)
                         .FontSize(8)
                         .TextColor(Color.Slate400)
-                        .AlignCenter()
-                        .Margin(0, 8, 0, 0);
+                        .AlignCenter();
 
                     column.Item()
                         .Text("42")

@@ -66,8 +66,9 @@ public static class SimpleDocumentFluentExample
 
                     col.Item()
                         .Text("This PDF was created using the BonniePDF Fluent API.")
-                        .TextColor(Color.Slate600)
-                        .Margin(0, 0, 0, 8);
+                        .TextColor(Color.Slate600);
+
+                    col.Item().Spacer(16);
 
                     col.Item()
                         .Text("Key Features:")

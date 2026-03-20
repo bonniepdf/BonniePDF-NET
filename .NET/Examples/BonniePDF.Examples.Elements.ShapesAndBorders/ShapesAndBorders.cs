@@ -176,7 +176,8 @@ public static class RoundedRectangleExample
         }
 
         // --- Section 6: Practical Examples ---
-        doc.Add(new Line { Color = Color.Slate300, Thickness = 1, Margin = new Thickness(0, 16, 0, 0) });
+        doc.Add(new Spacer(16));
+        doc.Add(new Line { Color = Color.Slate300, Thickness = 1 });
         doc.Add(CreateSectionHeader("Practical Examples"));
 
         // Success banner

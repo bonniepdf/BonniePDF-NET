@@ -230,7 +230,8 @@ public static class RichTextStylesFluentExample
                     );
 
                     // ── 11. Practical: legal disclaimer ──────────────────────────
-                    column.Item().Margin(0, 12, 0, 0).Line(1, Color.Slate300);
+                    column.Item().Spacer(12);
+                    column.Item().Line(1, Color.Slate300);
                     SectionHeader(column, "Practical Example: Legal Disclaimer");
 
                     column.Item().Element(

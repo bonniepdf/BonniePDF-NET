@@ -181,7 +181,9 @@ public static class BookPageExample
         // Main Layout
         VerticalStack mainStack = new();
         mainStack.AddChild(headerStack);
+        mainStack.AddChild(new Spacer(20));
         mainStack.AddChild(contentStack);
+        mainStack.AddChild(new Spacer(16));
         mainStack.AddChild(footerStack);
 
         // Add to document

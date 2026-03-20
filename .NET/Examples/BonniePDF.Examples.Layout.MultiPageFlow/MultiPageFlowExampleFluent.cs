@@ -149,12 +149,14 @@ public static class MultiPageFlowExampleFluent
                         });
 
                     // === SECTION 3: Long Text Content After Table ===
+                    column.Item().Spacer(30);
+
                     column.Item()
                         .Text("Part 2: Company Overview & History")
                         .Bold()
                         .FontSize(18)
                         .TextColor(Color.Slate700)
-                        .Margin(0, 30, 0, 15);
+                        .Margin(0, 0, 0, 15);
 
                     (string, string)[] sections = new[]
                     {
@@ -206,12 +208,14 @@ public static class MultiPageFlowExampleFluent
                     }
 
                     // === SECTION 4: Closing Remarks ===
+                    column.Item().Spacer(30);
+
                     column.Item()
                         .Text("Conclusion")
                         .Bold()
                         .FontSize(18)
                         .TextColor(Color.Slate700)
-                        .Margin(0, 30, 0, 15);
+                        .Margin(0, 0, 0, 15);
 
                     column.Item()
                         .Text("This document demonstrates the powerful pagination capabilities of BonniePDF. " +

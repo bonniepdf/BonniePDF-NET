@@ -1,5 +1,6 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
@@ -158,13 +159,15 @@ public static class MultiPageFlowExample
         doc.Add(table);
 
         // === SECTION 3: Long Text Content After Table ===
+        doc.Add(new Spacer(30));
+
         doc.Add(new TextBlock
         {
             Text = "Part 2: Company Overview & History",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
             TextColor = Color.Slate700,
-            Margin = new Thickness(0, 30, 0, 15)
+            Margin = new Thickness(0, 0, 0, 15)
         });
 
         // Generate extensive text content that will flow across multiple pages
@@ -230,13 +233,15 @@ public static class MultiPageFlowExample
         }
 
         // === SECTION 4: Closing Remarks ===
+        doc.Add(new Spacer(30));
+
         doc.Add(new TextBlock
         {
             Text = "Conclusion",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
             TextColor = Color.Slate700,
-            Margin = new Thickness(0, 30, 0, 15)
+            Margin = new Thickness(0, 0, 0, 15)
         });
 
         doc.Add(new TextBlock
