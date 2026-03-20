@@ -14,7 +14,7 @@ namespace BonniePDF.Examples.Typography.CustomFonts;
 public static class EmbeddedFontExample
 {
     
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
         // Use Arial as the embedded font (available on Windows)
         string arialPath = @"C:\Windows\Fonts\arial.ttf";
@@ -231,8 +231,7 @@ public static class EmbeddedFontExample
             FontSize = 10,
             TextColor = Color.Slate400
         });
-
-        doc.Save(outputPath);
-        return outputPath;
+        return doc;
     }
 }
+

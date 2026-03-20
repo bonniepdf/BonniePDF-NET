@@ -1,17 +1,23 @@
 namespace BonniePDF.Examples.Layout.HeadersFooters;
 
-class Program
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Headers & Footers...");
-        HeadersFootersExample.Generate(Path.Combine(outputDir, "headers_footers.pdf"));
+        using (var doc = HeadersFootersExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "headers_footers.pdf"));
+        }
         Console.WriteLine("Generating Headers & Footers (Fluent API)...");
-        HeadersFootersExampleFluent.Generate(Path.Combine(outputDir, "headers_footers_fluent.pdf"));
+        using (var doc = HeadersFootersExampleFluent.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "headers_footers_fluent.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

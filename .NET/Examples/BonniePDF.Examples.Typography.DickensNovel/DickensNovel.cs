@@ -41,7 +41,7 @@ public static partial class DickensNovelExample
     /// </summary>
     /// <param name="outputPath">The full file path where the generated PDF will be saved.</param>
     /// <returns>The path of the generated PDF file.</returns>
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
         string raw = LoadText();
         List<NovelSection> sections = ParseNovel(raw);
@@ -89,7 +89,7 @@ public static partial class DickensNovelExample
             }
         };
 
-        using Document doc = new(settings);
+        Document doc = new(settings);
         doc.Metadata.Title   = "A Tale of Two Cities";
         doc.Metadata.Author  = "Charles Dickens";
         doc.Metadata.Subject = "Project Gutenberg eBook #98 — A public domain classic.";
@@ -147,9 +147,7 @@ public static partial class DickensNovelExample
                     break;
             }
         }
-
-        doc.Save(outputPath);
-        return outputPath;
+        return doc;
     }
 
     // ── Rendering helpers ────────────────────────────────────────────────────
@@ -480,3 +478,4 @@ internal sealed class NovelSection
     /// <summary>e.g. "The Period"  (Chapter sections only)</summary>
     public string Title  { get; }
 }
+

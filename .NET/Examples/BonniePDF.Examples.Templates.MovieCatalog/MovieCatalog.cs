@@ -19,7 +19,7 @@ namespace BonniePDF.Examples.Templates.MovieCatalog;
 public static class MoviesTableExample
 {
 
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
         Document doc = new(new DocumentSettings
         {
@@ -184,8 +184,7 @@ public static class MoviesTableExample
         doc.Add(mainStack);
 
         // Save PDF
-        doc.Save(outputPath);
-
-        return outputPath;
+        return doc;
     }
 }
+

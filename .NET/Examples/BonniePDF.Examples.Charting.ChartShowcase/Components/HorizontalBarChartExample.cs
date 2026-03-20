@@ -18,9 +18,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 [System.ComponentModel.Description("BarChart with Orientation = ChartOrientation.Horizontal — regional sales ranking where long category labels sit naturally on the left axis.")]
 public static class HorizontalBarChartExample
 {
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
-        using Document document = new(new DocumentSettings
+        Document document = new(new DocumentSettings
         {
             Orientation = PageOrientation.Landscape
         });
@@ -91,14 +91,15 @@ public static class HorizontalBarChartExample
         };
 
         document.Add(new ChartElement(barChart, chartData));
-        document.Save(outputPath);
+        
 
-        string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");
-        File.WriteAllText(svgChartPath, barChart.ToSvg(chartData));
+        //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");
+        //File.WriteAllText(svgChartPath, barChart.ToSvg(chartData));
 
-        string svgPagePath = outputPath.Replace(".pdf", "_page.svg");
-        File.WriteAllText(svgPagePath, document.Pages[0].ToSvg());
-
-        return outputPath;
+        //string svgPagePath = outputPath.Replace(".pdf", "_page.svg");
+        //File.WriteAllText(svgPagePath, document.Pages[0].ToSvg());
+        return document;
     }
 }
+
+

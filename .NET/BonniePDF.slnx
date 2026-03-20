@@ -6,7 +6,7 @@
   <Project Path="BonniePDF/BonniePDF.csproj" />
 
   <Folder Name="/Examples/">
-    <Project Path="Examples/BonniePDF.Examples.Basics.MarginExample/BonniePDF.Examples.Basics.MarginExample.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Basics.MarginExample/BonniePDF.Examples.Basics.Margins.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Basics.PageSettings/BonniePDF.Examples.Basics.PageSettings.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Basics.SimpleDocument/BonniePDF.Examples.Basics.SimpleDocument.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Layout.HeadersFooters/BonniePDF.Examples.Layout.HeadersFooters.csproj" />

@@ -1,17 +1,23 @@
 namespace BonniePDF.Examples.Layout.MultiPageFlow;
 
-class Program
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Multi-Page Flow...");
-        MultiPageFlowExample.Generate(Path.Combine(outputDir, "flow_demo.pdf"));
+        using (var doc = MultiPageFlowExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "flow_demo.pdf"));
+        }
         Console.WriteLine("Generating Multi-Page Flow (Fluent API)...");
-        MultiPageFlowExampleFluent.Generate(Path.Combine(outputDir, "flow_demo_fluent.pdf"));
+        using (var doc = MultiPageFlowExampleFluent.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "flow_demo_fluent.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

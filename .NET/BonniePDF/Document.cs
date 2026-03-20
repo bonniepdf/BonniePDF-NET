@@ -251,6 +251,23 @@ public class Document : IDisposable
         await SaveInternalAsync(stream, leaveOpen, cancellationToken).ConfigureAwait(false);
     }
 
+    public byte[] ToByteArray()
+    {
+        MemoryStream ms = new();
+        this.Save(ms, leaveOpen: false);
+        return ms.ToArray();
+    }
+
+    public async Task<byte[]> ToByteArrayAsync()
+    {
+        MemoryStream ms = new();
+        await using (ms.ConfigureAwait(false))
+        {
+            await this.SaveAsync(ms, leaveOpen: false).ConfigureAwait(false);
+            return ms.ToArray();
+        }
+    }
+
     /// <summary>
     /// Internal implementation of Save that generates the PDF to a file
     /// </summary>

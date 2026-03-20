@@ -1,17 +1,23 @@
 namespace BonniePDF.Examples.Elements.Images;
 
-class Program
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Images...");
-        ImageExample.Generate(Path.Combine(outputDir, "image_example.pdf"));
+        using (var doc = ImagesExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "image_example.pdf"));
+        }
         Console.WriteLine("Generating Images (Fluent API)...");
-        ImageFluentExample.Generate(Path.Combine(outputDir, "image_example_fluent.pdf"));
+        using (var doc = ImagesExampleFluent.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "image_example_fluent.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

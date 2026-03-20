@@ -19,10 +19,10 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 public static class LineChartExample
 {
 
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
         // Create a new PDF document
-        using Document document = new(new DocumentSettings
+        Document document = new(new DocumentSettings
         {
             Orientation = PageOrientation.Landscape
         });
@@ -88,18 +88,10 @@ public static class LineChartExample
         document.Add(new ChartElement(lineChart, chartData));
 
         // Save the document
-        document.Save(outputPath);
+        
 
-        // Export Chart to SVG
-        string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");
-        string svgChart = lineChart.ToSvg(chartData);
-        File.WriteAllText(svgChartPath, svgChart);
-
-        // Export Page to SVG
-        string svgPagePath = outputPath.Replace(".pdf", "_page.svg");
-        string svgPage = document.Pages[0].ToSvg();
-        File.WriteAllText(svgPagePath, svgPage);
-
-        return outputPath;
+        return document;
     }
 }
+
+

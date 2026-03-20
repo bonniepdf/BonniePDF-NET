@@ -62,3 +62,4 @@ public static class ExampleChartData
         new ChartDataPoint { Label = MonthLabels[11], Value = 9876, LabelFormat = "'£'#,##0" }
     };
 }
+

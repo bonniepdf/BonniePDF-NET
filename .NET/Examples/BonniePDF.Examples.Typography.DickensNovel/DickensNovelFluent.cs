@@ -49,7 +49,7 @@ public static partial class DickensNovelFluentExample
     /// <summary>
     /// Loads and parses the novel, then renders it as a multi-page PDF using Pdf.Create().
     /// </summary>
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
         string raw = LoadText();
         List<NovelSection> sections = ParseNovel(raw);
@@ -62,7 +62,7 @@ public static partial class DickensNovelFluentExample
                 tocIdentifiers.Add(section.Text);
         }
 
-        Pdf.Create(doc =>
+        return Pdf.Create(doc =>
         {
             doc.WithMetadata(metadata =>
             {
@@ -222,9 +222,8 @@ public static partial class DickensNovelFluentExample
                 });
             });
 
-        }).Save(outputPath);
+        }).Build();
 
-        return outputPath;
     }
 
     // ── Rendering helpers ─────────────────────────────────────────────────────
@@ -404,3 +403,4 @@ public static partial class DickensNovelFluentExample
         return sections;
     }
 }
+

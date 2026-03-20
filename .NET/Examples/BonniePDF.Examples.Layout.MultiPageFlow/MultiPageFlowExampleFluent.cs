@@ -16,12 +16,6 @@ namespace BonniePDF.Examples.Layout.MultiPageFlow;
 [System.ComponentModel.Description("Shows how elements seamlessly flow across multiple pages using the Fluent API.")]
 public static class MultiPageFlowExampleFluent
 {
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-
     private static readonly string[] FirstNames =
     {
         "James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda", "David", "Elizabeth",
@@ -53,9 +47,9 @@ public static class MultiPageFlowExampleFluent
     /// </summary>
     /// <param name="outputPath">The full file path where the PDF will be written.</param>
     /// <returns>The path of the generated PDF file.</returns>
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
-        Pdf.Create(doc =>
+        return Pdf.Create(doc =>
         {
             doc.WithMetadata(metadata =>
             {
@@ -239,8 +233,8 @@ public static class MultiPageFlowExampleFluent
                         .Margin(0, 20, 0, 0);
                 });
             });
-        }).Save(outputPath);
+        }).Build();
 
-        return outputPath;
     }
 }
+

@@ -23,3 +23,4 @@ public static class ChartColors
         Orange, Yellow, Lime, Green, Teal, Cyan
     ];
 }
+

@@ -15,9 +15,9 @@ namespace BonniePDF.Examples.Typography.TextAlignment;
 public static class TextAlignmentFluentExample
 {
 
-    public static string Generate(string outputPath)
+    public static global::BonniePDF.Document Generate()
     {
-        Pdf.Create(doc =>
+        return Pdf.Create(doc =>
         {
             doc.WithMetadata(metadata =>
             {
@@ -135,8 +135,9 @@ public static class TextAlignmentFluentExample
                     }
                 });
             });
-        }).Save(outputPath);
+        }).Build();
 
-        return outputPath;
     }
 }
+
+

@@ -17,7 +17,7 @@ namespace BonniePDF.Examples.Security.Watermarking;
 public static class WatermarkConfidentialExample
 {
 
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
         Document doc = new(new DocumentSettings
         {
@@ -78,9 +78,7 @@ public static class WatermarkConfidentialExample
             TextColor = Color.Slate500,
             Margin = new Thickness(0, 20, 0, 0)
         });
-
-        doc.Save(outputPath);
-        return outputPath;
+        return doc;
     }
 
     private static TableCell CreateHeaderCell(string text)
@@ -116,3 +114,4 @@ public static class WatermarkConfidentialExample
         };
     }
 }
+

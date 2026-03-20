@@ -17,7 +17,7 @@ public class WatermarkExample
     /// <summary>
     /// Generates a multipage document with a "DRAFT" watermark on every page.
     /// </summary>
-    public static string GenerateDraft(string outputPath = "watermark_draft.pdf")
+    public static global::BonniePDF.Document GenerateDraft(string outputPath = "watermark_draft.pdf")
     {
         Document doc = new(new DocumentSettings
         {
@@ -99,15 +99,13 @@ public class WatermarkExample
             TextColor = Color.Slate700,
             Alignment = TextAlignment.Justify
         });
-
-        doc.Save(outputPath);
-        return outputPath;
+        return doc;
     }
 
     /// <summary>
     /// Generates a document with a "CONFIDENTIAL" watermark using custom styling.
     /// </summary>
-    public static string GenerateConfidential(string outputPath = "watermark_confidential.pdf")
+    public static global::BonniePDF.Document GenerateConfidential(string outputPath = "watermark_confidential.pdf")
     {
         Document doc = new(new DocumentSettings
         {
@@ -168,15 +166,13 @@ public class WatermarkExample
             TextColor = Color.Slate500,
             Margin = new Thickness(0, 20, 0, 0)
         });
-
-        doc.Save(outputPath);
-        return outputPath;
+        return doc;
     }
 
     /// <summary>
     /// Demonstrates the fluent API for adding watermarks.
     /// </summary>
-    public static string GenerateFluent(string outputPath = "watermark_fluent.pdf")
+    public static global::BonniePDF.Document GenerateFluent(string outputPath = "watermark_fluent.pdf")
     {
         Document doc = new(new DocumentSettings
         {
@@ -224,9 +220,7 @@ public class WatermarkExample
             TextColor = Color.Slate600,
             Alignment = TextAlignment.Justify
         });
-
-        doc.Save(outputPath);
-        return outputPath;
+        return doc;
     }
 
     private static TableCell CreateHeaderCell(string text)
@@ -262,3 +256,5 @@ public class WatermarkExample
         };
     }
 }
+
+

@@ -1,18 +1,23 @@
 namespace BonniePDF.Examples.Elements.Lists;
-
-class Program
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Lists...");
-        ListExample.Generate(Path.Combine(outputDir, "list_example.pdf"));
+        using (var doc = ListsExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "list_example.pdf"));
+        }
         
         Console.WriteLine("Generating Lists (Fluent API)...");
-        ListFluentExample.Generate(Path.Combine(outputDir, "list_example_fluent.pdf"));
+        using (var doc = ListsExampleFluent.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "list_example_fluent.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

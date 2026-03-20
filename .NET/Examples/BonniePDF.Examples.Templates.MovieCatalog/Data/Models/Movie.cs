@@ -9,3 +9,4 @@ public class Movie
     public float Rating { get; set; }
     public string Duration { get; set; }
 }
+

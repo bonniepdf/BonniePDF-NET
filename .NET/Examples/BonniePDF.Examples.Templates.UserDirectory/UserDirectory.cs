@@ -19,7 +19,7 @@ namespace BonniePDF.Examples.Templates.UserDirectory;
 public static class UsersTableExample
 {
 
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
         Document doc = new(new DocumentSettings
         {
@@ -147,8 +147,7 @@ public static class UsersTableExample
         doc.Add(mainStack);
 
         // Save PDF
-        doc.Save(outputPath);
-
-        return outputPath;
+        return doc;
     }
 }
+

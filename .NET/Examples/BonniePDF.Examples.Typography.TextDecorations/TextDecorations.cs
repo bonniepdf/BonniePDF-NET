@@ -19,7 +19,7 @@ namespace BonniePDF.Examples.Typography.TextDecorations;
 public static class TextDecorationExample
 {
     
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
         Document doc = new(new DocumentSettings
         {
@@ -203,9 +203,7 @@ public static class TextDecorationExample
         });
 
         doc.Add(priceList);
-
-        doc.Save(outputPath);
-        return outputPath;
+        return doc;
     }
 
     private static TextBlock CreateSectionHeader(string title)
@@ -220,3 +218,4 @@ public static class TextDecorationExample
         };
     }
 }
+

@@ -5,7 +5,7 @@ using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 
-namespace BonniePDF.Examples.Basics.MarginExample;
+namespace BonniePDF.Examples.Basics.Margins;
 
 /// <summary>
 /// Demonstrates the margin feature for controlling spacing around elements
@@ -15,7 +15,7 @@ namespace BonniePDF.Examples.Basics.MarginExample;
 [System.ComponentModel.Description("Shows how to configure page margins and use different units.")]
 public static class MarginExample
 {
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
         Document doc = new();
 
@@ -216,9 +216,7 @@ public static class MarginExample
             TextColor = Color.Slate500,
             Margin = new Thickness(0, 30, 0, 0)
         });
-
-        doc.Save(outputPath);
-
-        return outputPath;
+        return doc;
     }
 }
+

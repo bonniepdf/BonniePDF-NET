@@ -17,9 +17,9 @@ namespace BonniePDF.Examples.Typography.TextDecorations;
 public static class TextDecorationsFluentExample
 {
 
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
-        Pdf.Create(doc =>
+        return Pdf.Create(doc =>
         {
             doc.WithMetadata(metadata =>
             {
@@ -164,9 +164,8 @@ public static class TextDecorationsFluentExample
                         .TextColor(Color.Green600);
                 });
             });
-        }).Save(outputPath);
+        }).Build();
 
-        return outputPath;
     }
 
     private static readonly int[] DecorationSizes = { 8, 12, 18, 24, 36 };
@@ -182,3 +181,4 @@ public static class TextDecorationsFluentExample
             .Margin(0, 12, 0, 6);
     }
 }
+

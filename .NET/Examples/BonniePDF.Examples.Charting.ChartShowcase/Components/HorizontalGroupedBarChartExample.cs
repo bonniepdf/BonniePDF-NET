@@ -18,9 +18,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 [System.ComponentModel.Description("GroupedBarChart with Orientation = ChartOrientation.Horizontal — quarterly sales for three product lines shown as horizontal grouped bars.")]
 public static class HorizontalGroupedBarChartExample
 {
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
-        using Document document = new(new DocumentSettings
+        Document document = new(new DocumentSettings
         {
             Orientation = PageOrientation.Landscape
         });
@@ -116,14 +116,15 @@ public static class HorizontalGroupedBarChartExample
         };
 
         document.Add(new GroupedBarChartElement(groupedBarChart, chartData));
-        document.Save(outputPath);
+        
 
-        string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");
-        File.WriteAllText(svgChartPath, groupedBarChart.ToSvg(chartData));
+        //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");
+        //File.WriteAllText(svgChartPath, groupedBarChart.ToSvg(chartData));
 
-        string svgPagePath = outputPath.Replace(".pdf", "_page.svg");
-        File.WriteAllText(svgPagePath, document.Pages[0].ToSvg());
-
-        return outputPath;
+        //string svgPagePath = outputPath.Replace(".pdf", "_page.svg");
+        //File.WriteAllText(svgPagePath, document.Pages[0].ToSvg());
+        return document;
     }
 }
+
+

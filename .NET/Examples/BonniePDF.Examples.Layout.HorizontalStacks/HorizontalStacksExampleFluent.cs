@@ -13,24 +13,16 @@ namespace BonniePDF.Examples.Layout.HorizontalStacks;
 [System.ComponentModel.DisplayName("Horizontal Stacks (Fluent API)")]
 [System.ComponentModel.Category("Layout")]
 [System.ComponentModel.Description("Demonstrates flex-like horizontal layout blocks using the Fluent API.")]
-public static class HorizontalStackExampleFluent
+public static class HorizontalStacksExampleFluent
 {
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-
     /// <summary>
-    /// Generates the horizontal stacks example PDF and saves it to <paramref name="outputPath"/>
-    /// using the Fluent API. The document illustrates equal-width, weighted, and badge-style
-    /// row layouts.
+    /// Generates the horizontal stacks example PDF using the Fluent API.
+    /// The document illustrates equal-width, weighted, and badge-style row layouts.
     /// </summary>
-    /// <param name="outputPath">The full file path where the PDF will be written.</param>
     /// <returns>The path of the generated PDF file.</returns>
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
-        Pdf.Create(doc =>
+        return Pdf.Create(doc =>
         {
             doc.WithSettings(settings =>
             {
@@ -203,8 +195,8 @@ public static class HorizontalStackExampleFluent
                         });
                 });
             });
-        }).Save(outputPath);
+        }).Build();
 
-        return outputPath;
     }
 }
+

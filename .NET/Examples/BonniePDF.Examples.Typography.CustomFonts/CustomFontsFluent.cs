@@ -29,7 +29,7 @@ public static class CustomFontsFluentExample
         "\u2713 Check mark (U+2713)"
     };
 
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
         // Prefer Arial; fall back to Segoe UI on systems where Arial is absent
         string arialPath = @"C:\Windows\Fonts\arial.ttf";
@@ -45,7 +45,7 @@ public static class CustomFontsFluentExample
             return null;
         }
 
-        Pdf.Create(doc =>
+        return Pdf.Create(doc =>
         {
             doc.WithMetadata(metadata =>
             {
@@ -164,8 +164,8 @@ public static class CustomFontsFluentExample
                         .TextColor(Color.Slate400);
                 });
             });
-        }).Save(outputPath);
+        }).Build();
 
-        return outputPath;
     }
 }
+

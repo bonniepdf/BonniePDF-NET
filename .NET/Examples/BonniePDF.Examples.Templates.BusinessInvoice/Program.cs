@@ -9,7 +9,10 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Business Invoice...");
-        InvoiceExample.Generate(Path.Combine(outputDir, "invoice.pdf"));
+        using (var doc = Invoice.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "invoice.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

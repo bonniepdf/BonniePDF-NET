@@ -18,9 +18,9 @@ namespace BonniePDF.Examples.Security.Watermarking;
 public static class WatermarkFluentExample
 {
 
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
-        Pdf.Create(doc =>
+        return Pdf.Create(doc =>
         {
             doc.WithMetadata(metadata =>
             {
@@ -68,8 +68,8 @@ public static class WatermarkFluentExample
                         .AlignJustify();
                 });
             });
-        }).Save(outputPath);
+        }).Build();
 
-        return outputPath;
     }
 }
+

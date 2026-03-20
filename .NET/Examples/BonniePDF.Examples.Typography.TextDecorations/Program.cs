@@ -1,6 +1,6 @@
 namespace BonniePDF.Examples.Typography.TextDecorations;
 
-class Program
+sealed class Program
 {
     static void Main()
     {
@@ -9,9 +9,15 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Text Decorations...");
-        TextDecorationExample.Generate(Path.Combine(outputDir, "text_decorations.pdf"));
+        using (var doc = TextDecorationExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "text_decorations.pdf"));
+        }
         Console.WriteLine("Generating Text Decorations (Fluent API)...");
-        TextDecorationsFluentExample.Generate(Path.Combine(outputDir, "text_decorations_fluent.pdf"));
+        using (var doc = TextDecorationsFluentExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "text_decorations_fluent.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

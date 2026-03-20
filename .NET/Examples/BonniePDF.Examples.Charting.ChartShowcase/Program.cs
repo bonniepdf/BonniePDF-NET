@@ -1,37 +1,69 @@
 using BonniePDF.Examples.Charting.ChartShowcase.Components;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase;
-
-class Program
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Charting Showcase...");
-        ChartingExample.Generate(Path.Combine(outputDir, "charting_example.pdf"));
+        using (var doc = ChartShowcaseExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "charting_example.pdf"));
+        }
         Console.WriteLine("Generating Area Chart...");
-        AreaChartExample.Generate(Path.Combine(outputDir, "area_chart_example.pdf"));
+        using (var doc = AreaChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "area_chart_example.pdf"));
+        }
         Console.WriteLine("Generating Bar Chart...");
-        BarChartExample.Generate(Path.Combine(outputDir, "bar_chart_example.pdf"));
+        using (var doc = BarChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "bar_chart_example.pdf"));
+        }
         Console.WriteLine("Generating Dot Plot Chart...");
-        DotPlotChartExample.Generate(Path.Combine(outputDir, "dot_plot_chart_example.pdf"));
+        using (var doc = DotPlotChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "dot_plot_chart_example.pdf"));
+        }
         Console.WriteLine("Generating Grouped Bar Chart...");
-        GroupedBarChartExample.Generate(Path.Combine(outputDir, "grouped_bar_chart_example.pdf"));
+        using (var doc = GroupedBarChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "grouped_bar_chart_example.pdf"));
+        }
         Console.WriteLine("Generating Line Chart...");
-        LineChartExample.Generate(Path.Combine(outputDir, "line_chart_example.pdf"));
+        using (var doc = LineChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "line_chart_example.pdf"));
+        }
         Console.WriteLine("Generating Lollipop Chart...");
-        LollipopChartExample.Generate(Path.Combine(outputDir, "lollipop_chart_example.pdf"));
+        using (var doc = LollipopChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "lollipop_chart_example.pdf"));
+        }
         Console.WriteLine("Generating Pie Chart...");
-        PieChartExample.Generate(Path.Combine(outputDir, "pie_chart_example.pdf"));
+        using (var doc = PieChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "pie_chart_example.pdf"));
+        }
         Console.WriteLine("Generating Horizontal Bar Chart...");
-        HorizontalBarChartExample.Generate(Path.Combine(outputDir, "horizontal_bar_chart_example.pdf"));
+        using (var doc = HorizontalBarChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "horizontal_bar_chart_example.pdf"));
+        }
         Console.WriteLine("Generating Horizontal Lollipop Chart...");
-        HorizontalLollipopChartExample.Generate(Path.Combine(outputDir, "horizontal_lollipop_chart_example.pdf"));
+        using (var doc = HorizontalLollipopChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "horizontal_lollipop_chart_example.pdf"));
+        }
         Console.WriteLine("Generating Horizontal Grouped Bar Chart...");
-        HorizontalGroupedBarChartExample.Generate(Path.Combine(outputDir, "horizontal_grouped_bar_chart_example.pdf"));
+        using (var doc = HorizontalGroupedBarChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "horizontal_grouped_bar_chart_example.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

@@ -10,3 +10,4 @@ public class User
     public string Location { get; set; }
     public string Status { get; set; }
 }
+

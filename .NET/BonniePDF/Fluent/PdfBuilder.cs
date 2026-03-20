@@ -83,7 +83,7 @@ public sealed class PdfBuilder
     /// </summary>
     public void Save(string path)
     {
-        using var doc = BuildDocument();
+        using var doc = Build();
         doc.Save(path);
     }
 
@@ -92,7 +92,7 @@ public sealed class PdfBuilder
     /// </summary>
     public void Save(Stream stream, bool leaveOpen = false)
     {
-        using var doc = BuildDocument();
+        using var doc = Build();
         doc.Save(stream, leaveOpen);
     }
 
@@ -101,7 +101,7 @@ public sealed class PdfBuilder
     /// </summary>
     public async Task SaveAsync(string path, CancellationToken cancellationToken = default)
     {
-        using var doc = BuildDocument();
+        using var doc = Build();
         await doc.SaveAsync(path, cancellationToken);
     }
 
@@ -111,7 +111,7 @@ public sealed class PdfBuilder
     public async Task SaveAsync(Stream stream, bool leaveOpen = false,
         CancellationToken cancellationToken = default)
     {
-        using var doc = BuildDocument();
+        using var doc = Build();
         await doc.SaveAsync(stream, leaveOpen, cancellationToken);
     }
 
@@ -120,7 +120,7 @@ public sealed class PdfBuilder
     /// </summary>
     public byte[] GenerateBytes()
     {
-        using var doc = BuildDocument();
+        using var doc = Build();
         using var ms = new MemoryStream();
         doc.Save(ms, leaveOpen: true);
         return ms.ToArray();
@@ -129,7 +129,7 @@ public sealed class PdfBuilder
     /// <summary>
     /// Builds the Document from all configured page descriptors.
     /// </summary>
-    internal Document BuildDocument()
+    public Document Build()
     {
         if (_pageDescriptors.Count == 0)
             throw new InvalidOperationException("At least one page must be defined. Call .Page() in the document builder.");

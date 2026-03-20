@@ -5,7 +5,7 @@ using BonniePDF.Fluent;
 using BonniePDF.Fluent.Extensions;
 using BonniePDF.Typography;
 
-namespace BonniePDF.Demo;
+namespace BonniePDF.Examples.Basics.Margins;
 
 /// <summary>
 /// Demonstrates the margin feature using the Fluent API for controlling spacing around elements
@@ -22,9 +22,9 @@ public static class MarginExampleFluent
     /// </summary>
     /// <param name="outputPath">The full file path where the PDF will be written.</param>
     /// <returns>The path of the generated PDF file.</returns>
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
-        Pdf.Create(doc =>
+        return Pdf.Create(doc =>
         {
             doc.WithMetadata(metadata =>
             {
@@ -179,8 +179,8 @@ public static class MarginExampleFluent
                         .Margin(0, 30, 0, 0);
                 });
             });
-        }).Save(outputPath);
+        }).Build();
 
-        return outputPath;
     }
 }
+

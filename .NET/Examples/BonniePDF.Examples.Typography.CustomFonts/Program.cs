@@ -1,6 +1,6 @@
 namespace BonniePDF.Examples.Typography.CustomFonts;
 
-class Program
+sealed class Program
 {
     static void Main()
     {
@@ -9,9 +9,15 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Custom Fonts...");
-        EmbeddedFontExample.Generate(Path.Combine(outputDir, "embedded_font.pdf"));
+        using (var doc = EmbeddedFontExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "embedded_font.pdf"));
+        }
         Console.WriteLine("Generating Custom Fonts (Fluent API)...");
-        CustomFontsFluentExample.Generate(Path.Combine(outputDir, "embedded_font_fluent.pdf"));
+        using (var doc = CustomFontsFluentExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "embedded_font_fluent.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

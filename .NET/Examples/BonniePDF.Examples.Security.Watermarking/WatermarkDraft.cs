@@ -17,7 +17,7 @@ namespace BonniePDF.Examples.Security.Watermarking;
 public static class WatermarkDraftExample
 {
 
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
         Document doc = new(new DocumentSettings
         {
@@ -99,8 +99,7 @@ public static class WatermarkDraftExample
             TextColor = Color.Slate700,
             Alignment = TextAlignment.Justify
         });
-
-        doc.Save(outputPath);
-        return outputPath;
+        return doc;
     }
 }
+

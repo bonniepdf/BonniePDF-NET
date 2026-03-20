@@ -16,12 +16,6 @@ namespace BonniePDF.Examples.Layout.TextBlockOverflow;
 [System.ComponentModel.Description("TextBlock overflow flow architecture using the Fluent API.")]
 public static class TextBlockOverflowExampleFluent
 {
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-
     private static readonly string[] handler = new[]
                     {
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
@@ -38,9 +32,9 @@ public static class TextBlockOverflowExampleFluent
     /// </summary>
     /// <param name="outputPath">The full file path where the PDF will be written.</param>
     /// <returns>The path of the generated PDF file.</returns>
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
-        Pdf.Create(doc =>
+        return Pdf.Create(doc =>
         {
             doc.WithMetadata(metadata =>
             {
@@ -89,8 +83,8 @@ public static class TextBlockOverflowExampleFluent
                         .TextColor(Color.Slate700);
                 });
             });
-        }).Save(outputPath);
+        }).Build();
 
-        return outputPath;
     }
 }
+

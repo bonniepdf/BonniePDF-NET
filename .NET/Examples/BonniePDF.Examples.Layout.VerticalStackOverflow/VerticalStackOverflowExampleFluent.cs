@@ -16,22 +16,15 @@ namespace BonniePDF.Examples.Layout.VerticalStackOverflow;
 [System.ComponentModel.Description("VerticalStack overflow flow architecture using the Fluent API.")]
 public static class VerticalStackOverflowExampleFluent
 {
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-
     /// <summary>
-    /// Generates the VerticalStack overflow example PDF and saves it to <paramref name="outputPath"/>
-    /// using the Fluent API. The document illustrates 75 card-style items flowing across page
+    /// Generates the VerticalStack overflow example PDF and saves it using the Fluent API.
+    /// The document illustrates 75 card-style items flowing across page
     /// boundaries via automatic pagination.
     /// </summary>
-    /// <param name="outputPath">The full file path where the PDF will be written.</param>
     /// <returns>The path of the generated PDF file.</returns>
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
-        Pdf.Create(doc =>
+        return Pdf.Create(doc =>
         {
             doc.WithMetadata(metadata =>
             {
@@ -90,8 +83,8 @@ public static class VerticalStackOverflowExampleFluent
                     }
                 });
             });
-        }).Save(outputPath);
+        }).Build();
 
-        return outputPath;
     }
 }
+

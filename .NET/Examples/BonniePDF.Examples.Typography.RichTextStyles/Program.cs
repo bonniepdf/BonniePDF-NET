@@ -1,6 +1,7 @@
+using BonniePDF.Demo;
 namespace BonniePDF.Examples.Typography.RichTextStyles;
 
-class Program
+sealed class Program
 {
     static void Main()
     {
@@ -9,9 +10,15 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Rich Text Styles...");
-        RichTextExample.Generate(Path.Combine(outputDir, "rich_text.pdf"));
+        using (var doc = RichTextExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "rich_text.pdf"));
+        }
         Console.WriteLine("Generating Rich Text Styles (Fluent API)...");
-        RichTextStylesFluentExample.Generate(Path.Combine(outputDir, "rich_text_fluent.pdf"));
+        using (var doc = RichTextExampleFluent.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "rich_text_fluent.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

@@ -17,9 +17,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 [System.ComponentModel.Description("LollipopChart with Orientation = ChartOrientation.Horizontal — product revenue ranking with a lightweight stem-and-head style that reads cleanly left-to-right.")]
 public static class HorizontalLollipopChartExample
 {
-    public static string Generate(string outputPath)
+    public static Document Generate()
     {
-        using Document document = new(new DocumentSettings
+        Document document = new(new DocumentSettings
         {
             Orientation = PageOrientation.Landscape
         });
@@ -93,14 +93,15 @@ public static class HorizontalLollipopChartExample
         };
 
         document.Add(new ChartElement(lollipopChart, chartData));
-        document.Save(outputPath);
+        
 
-        string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");
-        File.WriteAllText(svgChartPath, lollipopChart.ToSvg(chartData));
+        //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");
+        //File.WriteAllText(svgChartPath, lollipopChart.ToSvg(chartData));
 
-        string svgPagePath = outputPath.Replace(".pdf", "_page.svg");
-        File.WriteAllText(svgPagePath, document.Pages[0].ToSvg());
-
-        return outputPath;
+        //string svgPagePath = outputPath.Replace(".pdf", "_page.svg");
+        //File.WriteAllText(svgPagePath, document.Pages[0].ToSvg());
+        return document;
     }
 }
+
+

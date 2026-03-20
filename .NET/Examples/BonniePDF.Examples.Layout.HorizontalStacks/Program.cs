@@ -1,17 +1,23 @@
 namespace BonniePDF.Examples.Layout.HorizontalStacks;
 
-class Program
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Horizontal Stacks...");
-        HorizontalStackExample.Generate(Path.Combine(outputDir, "horizontal_stack_example.pdf"));
+        using (var doc = HorizontalStacksExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "horizontal_stack_example.pdf"));
+        }
         Console.WriteLine("Generating Horizontal Stacks (Fluent API)...");
-        HorizontalStackExampleFluent.Generate(Path.Combine(outputDir, "horizontal_stack_example_fluent.pdf"));
+        using (var doc = HorizontalStacksExampleFluent.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "horizontal_stack_example_fluent.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

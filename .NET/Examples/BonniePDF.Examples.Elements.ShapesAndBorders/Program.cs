@@ -1,17 +1,23 @@
 namespace BonniePDF.Examples.Elements.ShapesAndBorders;
 
-class Program
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Shapes & Borders...");
-        RoundedRectangleExample.Generate(Path.Combine(outputDir, "rounded_rectangles.pdf"));
+        using (var doc = ShapesAndBordersExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "rounded_rectangles.pdf"));
+        }
         Console.WriteLine("Generating Shapes & Borders (Fluent API)...");
-        RoundedRectangleFluentExample.Generate(Path.Combine(outputDir, "rounded_rectangles_fluent.pdf"));
+        using (var doc = ShapesAndBordersExampleFluent.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "rounded_rectangles_fluent.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

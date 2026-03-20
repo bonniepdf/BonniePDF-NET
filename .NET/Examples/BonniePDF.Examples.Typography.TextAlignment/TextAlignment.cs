@@ -14,7 +14,7 @@ namespace BonniePDF.Demo;
 public static class JustifiedTextExample
 {
     
-    public static string Generate(string outputPath)
+    public static global::BonniePDF.Document Generate()
     {
         Document doc = new(new DocumentSettings
         {
@@ -134,9 +134,7 @@ public static class JustifiedTextExample
                 Margin = new Thickness(0, 0, 0, 8)
             });
         }
-
-        doc.Save(outputPath);
-        return outputPath;
+        return doc;
     }
 
     private static TextBlock CreateSectionHeader(string title)
@@ -151,3 +149,5 @@ public static class JustifiedTextExample
         };
     }
 }
+
+

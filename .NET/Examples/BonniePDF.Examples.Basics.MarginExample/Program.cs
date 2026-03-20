@@ -1,17 +1,22 @@
-namespace BonniePDF.Examples.Basics.MarginExample;
-
-class Program
+namespace BonniePDF.Examples.Basics.Margins;
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Margins & Units...");
-        MarginExample.Generate(Path.Combine(outputDir, "margin_example.pdf"));
+        using (var doc = MarginExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "margin_example.pdf"));
+        }
         Console.WriteLine("Generating Margins (Fluent API)...");
-        MarginExampleFluent.Generate(Path.Combine(outputDir, "margin_example_fluent.pdf"));
+        using (var doc = MarginExampleFluent.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "margin_example_fluent.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

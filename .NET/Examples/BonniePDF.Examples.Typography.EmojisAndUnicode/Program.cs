@@ -1,6 +1,8 @@
+using BonniePDF.Demo;
+
 namespace BonniePDF.Examples.Typography.EmojisAndUnicode;
 
-class Program
+sealed class Program
 {
     static void Main()
     {
@@ -9,9 +11,15 @@ class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Emojis & Unicode...");
-        EmojiExample.Generate(Path.Combine(outputDir, "emoji_example.pdf"));
+        using (var doc = EmojiExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "emoji_example.pdf"));
+        }
         Console.WriteLine("Generating Emojis & Unicode (Fluent API)...");
-        EmojisAndUnicodeFluentExample.Generate(Path.Combine(outputDir, "emoji_example_fluent.pdf"));
+        using (var doc = EmojiExampleFluent.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "emoji_example_fluent.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
