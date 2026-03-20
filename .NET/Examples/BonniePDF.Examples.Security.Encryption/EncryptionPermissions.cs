@@ -11,6 +11,9 @@ namespace BonniePDF.Examples.Security.Encryption;
 /// Users can open with user password but have limited actions.
 /// Owner password unlocks all permissions.
 /// </summary>
+[System.ComponentModel.DisplayName("Encryption - Permission Restrictions")]
+[System.ComponentModel.Category("Security")]
+[System.ComponentModel.Description("Generates a PDF with restricted permissions. Users can open with user password but have limited actions. Owner password unlocks all permissions.")]
 public static class EncryptionPermissionsExample
 {
 

@@ -13,6 +13,9 @@ namespace BonniePDF.Examples.Elements.QRCodes;
 /// Demonstrates generating standard and customized QR Codes 
 /// using the Fluent API.
 /// </summary>
+[System.ComponentModel.DisplayName("QR Codes (Fluent API)")]
+[System.ComponentModel.Category("Elements")]
+[System.ComponentModel.Description("Generating ISO/IEC 18004 compliant QR Codes with customized colors, quiet zones, and error correction levels using the Fluent API.")]
 public static class QRCodesFluentExample
 {
 

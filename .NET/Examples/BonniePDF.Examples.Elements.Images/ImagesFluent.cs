@@ -17,6 +17,9 @@ namespace BonniePDF.Examples.Elements.Images;
 /// before .Image(), so the image becomes the child of the styled container.
 /// The PNG generation helpers are copied from the traditional example unchanged.
 /// </summary>
+[System.ComponentModel.DisplayName("Images (Fluent API)")]
+[System.ComponentModel.Category("Elements")]
+[System.ComponentModel.Description("Embedding and sizing raster images using the Fluent API.")]
 public static class ImageFluentExample
 {
 
@@ -226,13 +229,13 @@ public static class ImageFluentExample
         writer.Write(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
 
         WriteChunk(writer, "IHDR", BitConverter.IsLittleEndian
-            ? new byte[] { 0, 0, 0, (byte)width, 0, 0, 0, (byte)height, 8, 2, 0, 0, 0 }
-            : new byte[]
-            {
+            ? [0, 0, 0, (byte)width, 0, 0, 0, (byte)height, 8, 2, 0, 0, 0]
+            :
+            [
                 (byte)(width  >> 24), (byte)(width  >> 16), (byte)(width  >> 8), (byte)width,
                 (byte)(height >> 24), (byte)(height >> 16), (byte)(height >> 8), (byte)height,
                 8, 2, 0, 0, 0
-            });
+            ]);
 
         MemoryStream rawData = new();
         for (int y = 0; y < height; y++)
@@ -248,6 +251,11 @@ public static class ImageFluentExample
 
         WriteChunk(writer, "IDAT", CompressZlib(rawData.ToArray()));
         WriteChunk(writer, "IEND", Array.Empty<byte>());
+
+        var dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+
         File.WriteAllBytes(path, ms.ToArray());
     }
 
@@ -282,6 +290,11 @@ public static class ImageFluentExample
 
         WriteChunk(writer, "IDAT", CompressZlib(rawData.ToArray()));
         WriteChunk(writer, "IEND", Array.Empty<byte>());
+
+        var dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+
         File.WriteAllBytes(path, ms.ToArray());
     }
 

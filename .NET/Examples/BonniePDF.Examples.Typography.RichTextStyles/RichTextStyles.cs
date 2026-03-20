@@ -12,6 +12,9 @@ namespace BonniePDF.Demo;
 /// Shows bold, italic, colored, underlined, and multi-size text all within a single
 /// paragraph that word-wraps correctly across span boundaries.
 /// </summary>
+[System.ComponentModel.DisplayName("Rich Text Styles")]
+[System.ComponentModel.Category("Typography")]
+[System.ComponentModel.Description("Mixed formatting within paragraphs.")]
 public static class RichTextExample
 {
     

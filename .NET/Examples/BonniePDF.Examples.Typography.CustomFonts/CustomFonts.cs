@@ -8,6 +8,9 @@ namespace BonniePDF.Examples.Typography.CustomFonts;
 /// <summary>
 /// Demonstrates TrueType font embedding with full Unicode support
 /// </summary>
+[System.ComponentModel.DisplayName("Custom Fonts")]
+[System.ComponentModel.Category("Typography")]
+[System.ComponentModel.Description("Embedding and using custom TTF fonts.")]
 public static class EmbeddedFontExample
 {
     

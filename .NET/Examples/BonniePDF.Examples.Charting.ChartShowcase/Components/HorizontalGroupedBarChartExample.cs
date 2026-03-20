@@ -13,6 +13,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// Horizontal orientation works particularly well for grouped data when category names
 /// are long, since the left-side axis gives generous space for labels.
 /// </summary>
+[System.ComponentModel.DisplayName("Horizontal Grouped Bar Chart")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("GroupedBarChart with Orientation = ChartOrientation.Horizontal — quarterly sales for three product lines shown as horizontal grouped bars.")]
 public static class HorizontalGroupedBarChartExample
 {
     public static string Generate(string outputPath)

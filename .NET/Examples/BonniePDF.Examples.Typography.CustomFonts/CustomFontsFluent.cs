@@ -12,6 +12,9 @@ namespace BonniePDF.Examples.Typography.CustomFonts;
 /// Sets the embedded font as the document-wide default so every text element
 /// inherits it without an explicit .Font() call.
 /// </summary>
+[System.ComponentModel.DisplayName("Custom Fonts (Fluent API)")]
+[System.ComponentModel.Category("Typography")]
+[System.ComponentModel.Description("Embedding and using custom TTF fonts using the Fluent API.")]
 public static class CustomFontsFluentExample
 {
 

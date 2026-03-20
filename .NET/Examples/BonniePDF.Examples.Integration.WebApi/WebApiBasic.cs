@@ -10,6 +10,9 @@ namespace BonniePDF.Examples.Integration.WebApi;
 /// Demonstrates how to use BonniePDF in ASP.NET Core Web APIs.
 /// This shows the real-world scenario of generating PDFs in-memory and returning them to clients.
 /// </summary>
+[System.ComponentModel.DisplayName("Web API - Basic")]
+[System.ComponentModel.Category("Integration")]
+[System.ComponentModel.Description("Demonstrates basic Web API integration with in-memory PDF generation, returning byte arrays directly to clients without temporary files.")]
 public static class WebApiBasicExample
 {
 

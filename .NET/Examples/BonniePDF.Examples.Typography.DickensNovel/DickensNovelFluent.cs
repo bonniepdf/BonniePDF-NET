@@ -9,6 +9,7 @@ using BonniePDF.Fluent.Descriptors;
 using BonniePDF.Fluent.Extensions;
 using BonniePDF.Typography;
 
+
 namespace BonniePDF.Examples.Typography.DickensNovel;
 
 /// <summary>
@@ -27,6 +28,9 @@ namespace BonniePDF.Examples.Typography.DickensNovel;
 /// Source file expected at C:\GITHUB\pg98.txt.
 /// Download from https://www.gutenberg.org/cache/epub/98/pg98.txt if not present.
 /// </summary>
+[System.ComponentModel.DisplayName("Dickens: A Tale of Two Cities (Fluent API)")]
+[System.ComponentModel.Category("Typography")]
+[System.ComponentModel.Description("Formats the complete Project Gutenberg novel as a book-quality PDF using the Fluent API.")]
 public static partial class DickensNovelFluentExample
 {
     private const string LocalFilePath = @"C:\GITHUB\pg98.txt";

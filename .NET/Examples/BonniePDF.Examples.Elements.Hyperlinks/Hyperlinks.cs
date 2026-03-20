@@ -8,6 +8,9 @@ namespace BonniePDF.Examples.Elements.Hyperlinks;
 /// <summary>
 /// Demonstrates hyperlink support in PDF documents
 /// </summary>
+[System.ComponentModel.DisplayName("Hyperlinks")]
+[System.ComponentModel.Category("Elements")]
+[System.ComponentModel.Description("Internal and external clickable links.")]
 public static class HyperlinkExample
 {
     

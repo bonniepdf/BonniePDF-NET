@@ -12,6 +12,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// Example demonstrating the new refactored chart architecture.
 /// This shows how a BarChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
+[System.ComponentModel.DisplayName("Bar Chart")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("BarChart implementation with monthly sales report data, showing vertical bars with customizable colors and spacing.")]
 public static class BarChartExample
 {
 

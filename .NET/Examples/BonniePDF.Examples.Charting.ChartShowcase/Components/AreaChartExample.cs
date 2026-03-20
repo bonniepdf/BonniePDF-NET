@@ -12,6 +12,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// Example demonstrating the AreaChart implementation.
 /// This shows how an AreaChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
+[System.ComponentModel.DisplayName("Area Chart")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("AreaChart implementation with monthly sales performance data, showing filled areas under the line with customizable opacity.")]
 public static class AreaChartExample
 {
 

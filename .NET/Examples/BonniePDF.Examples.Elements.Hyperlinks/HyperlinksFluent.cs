@@ -12,6 +12,9 @@ namespace BonniePDF.Examples.Elements.Hyperlinks;
 /// Hyperlink elements are added via the Element() escape hatch because there is no dedicated
 /// fluent terminal method for them — all other styling uses chained extension methods.
 /// </summary>
+[System.ComponentModel.DisplayName("Hyperlinks (Fluent API)")]
+[System.ComponentModel.Category("Elements")]
+[System.ComponentModel.Description("Internal and external clickable links using the Fluent API.")]
 public static class HyperlinkFluentExample
 {
 

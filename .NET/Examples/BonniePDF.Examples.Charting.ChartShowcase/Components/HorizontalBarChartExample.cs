@@ -13,6 +13,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// or when ranking data reads more naturally left-to-right.
 /// The only change from a standard BarChart is Orientation = ChartOrientation.Horizontal.
 /// </summary>
+[System.ComponentModel.DisplayName("Horizontal Bar Chart")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("BarChart with Orientation = ChartOrientation.Horizontal — regional sales ranking where long category labels sit naturally on the left axis.")]
 public static class HorizontalBarChartExample
 {
     public static string Generate(string outputPath)

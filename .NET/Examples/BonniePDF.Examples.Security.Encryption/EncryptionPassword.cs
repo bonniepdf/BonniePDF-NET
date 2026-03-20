@@ -9,6 +9,9 @@ namespace BonniePDF.Examples.Security.Encryption;
 /// Example demonstrating PDF encryption with password protection (128-bit RC4 encryption).
 /// The document requires a password to open.
 /// </summary>
+[System.ComponentModel.DisplayName("Encryption - Password Protected")]
+[System.ComponentModel.Category("Security")]
+[System.ComponentModel.Description("Generates a password-protected PDF (128-bit RC4 encryption) that requires a password to open.")]
 public static class EncryptionPasswordExample
 {
 

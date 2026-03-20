@@ -10,6 +10,9 @@ namespace BonniePDF.Examples.Layout.HorizontalStacks;
 /// <summary>
 /// Demonstrates the HorizontalStack element for horizontal layouts using the Fluent API.
 /// </summary>
+[System.ComponentModel.DisplayName("Horizontal Stacks (Fluent API)")]
+[System.ComponentModel.Category("Layout")]
+[System.ComponentModel.Description("Demonstrates flex-like horizontal layout blocks using the Fluent API.")]
 public static class HorizontalStackExampleFluent
 {
     /// <inheritdoc/>

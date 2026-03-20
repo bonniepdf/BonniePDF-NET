@@ -12,6 +12,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// Example demonstrating the DotPlotChart implementation.
 /// This shows how a DotPlotChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
+[System.ComponentModel.DisplayName("Dot Plot Chart")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("DotPlotChart implementation with product performance data, showing dots at data points with customizable radius and colors.")]
 public static class DotPlotChartExample
 {
 

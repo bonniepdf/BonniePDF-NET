@@ -14,6 +14,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase;
 /// <summary>
 /// A comprehensive example that generates a multipage PDF containing all chart types.
 /// </summary>
+[System.ComponentModel.DisplayName("Charting Showcase")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("A comprehensive multi-page PDF showcasing all chart types including bar, grouped bar, line, area, lollipop, dot plot, and pie charts with various configurations.")]
 public static class ChartingExample
 {
 

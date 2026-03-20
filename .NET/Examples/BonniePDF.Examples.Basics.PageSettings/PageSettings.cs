@@ -7,6 +7,9 @@ using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Basics.PageSettings;
 
+[System.ComponentModel.DisplayName("Page Settings")]
+[System.ComponentModel.Category("Basics")]
+[System.ComponentModel.Description("Demonstrates orientation, sizes, and backgrounds.")]
 public static class AllPagesExample
 {
     public static string Generate(string outputPath)

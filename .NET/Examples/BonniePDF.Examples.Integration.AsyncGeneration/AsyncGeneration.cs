@@ -9,6 +9,9 @@ namespace BonniePDF.Examples.Integration.AsyncGeneration;
 /// <summary>
 /// Demonstrates async/await PDF generation for non-blocking I/O
 /// </summary>
+[System.ComponentModel.DisplayName("Async Generation")]
+[System.ComponentModel.Category("Integration")]
+[System.ComponentModel.Description("Generating PDFs asynchronously.")]
 public static class AsyncExample
 {
     

@@ -8,6 +8,9 @@ namespace BonniePDF.Examples.Layout.HeadersFooters;
 /// <summary>
 /// Generates a document with header and footer templates on each page.
 /// </summary>
+[System.ComponentModel.DisplayName("Headers & Footers")]
+[System.ComponentModel.Category("Layout")]
+[System.ComponentModel.Description("Page template headers and footers.")]
 public static class HeadersFootersExample
 {
     

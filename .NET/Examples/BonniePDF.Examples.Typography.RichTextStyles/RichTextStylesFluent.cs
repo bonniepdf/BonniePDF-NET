@@ -16,6 +16,9 @@ namespace BonniePDF.Examples.Typography.RichTextStyles;
 /// Note: Justified alignment on rich text is not exposed through TextDescriptor.
 /// Those sections use the escape-hatch column.Item().Element(new RichText { ... }) pattern.
 /// </summary>
+[System.ComponentModel.DisplayName("Rich Text Styles (Fluent API)")]
+[System.ComponentModel.Category("Typography")]
+[System.ComponentModel.Description("Mixed formatting within paragraphs using the Fluent API.")]
 public static class RichTextStylesFluentExample
 {
 

@@ -7,6 +7,9 @@ namespace BonniePDF.Demo;
 /// <summary>
 /// Demonstrates supplementary Unicode plane support — emoji and symbols beyond U+FFFF
 /// </summary>
+[System.ComponentModel.DisplayName("Emojis & Unicode")]
+[System.ComponentModel.Category("Typography")]
+[System.ComponentModel.Description("Rendering international text and emojis.")]
 public static class EmojiExample
 {
     

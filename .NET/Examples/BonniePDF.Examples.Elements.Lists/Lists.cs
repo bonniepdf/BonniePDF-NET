@@ -10,6 +10,9 @@ namespace BonniePDF.Examples.Elements.Lists;
 /// <summary>
 /// Demonstrates the List elements (Ordered and Unordered)
 /// </summary>
+[System.ComponentModel.DisplayName("Lists")]
+[System.ComponentModel.Category("Elements")]
+[System.ComponentModel.Description("Ordered and unordered bullet point lists.")]
 public static class ListExample
 {
     

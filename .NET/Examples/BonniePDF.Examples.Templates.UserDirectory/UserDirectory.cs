@@ -13,6 +13,9 @@ namespace BonniePDF.Examples.Templates.UserDirectory;
 /// <summary>
 /// Generates a 2-page PDF showing a list of mock users
 /// </summary>
+[System.ComponentModel.DisplayName("User Directory")]
+[System.ComponentModel.Category("Templates")]
+[System.ComponentModel.Description("Generates a 2-page PDF showing a list of mock users with ID, name, email, department, role, location, and status in a formatted table.")]
 public static class UsersTableExample
 {
 

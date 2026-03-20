@@ -11,6 +11,9 @@ namespace BonniePDF.Examples.Layout.MultiPageFlow;
 /// Generates a comprehensive document demonstrating the flow architecture using the Fluent API:
 /// a long table with repeating headers on each page, followed by a long text section.
 /// </summary>
+[System.ComponentModel.DisplayName("Multi-Page Flow (Fluent API)")]
+[System.ComponentModel.Category("Layout")]
+[System.ComponentModel.Description("Shows how elements seamlessly flow across multiple pages using the Fluent API.")]
 public static class MultiPageFlowExampleFluent
 {
     /// <inheritdoc/>

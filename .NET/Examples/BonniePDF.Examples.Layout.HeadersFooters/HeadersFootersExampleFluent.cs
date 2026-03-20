@@ -10,6 +10,9 @@ namespace BonniePDF.Examples.Layout.HeadersFooters;
 /// <summary>
 /// Generates a document with header and footer templates on each page using the Fluent API.
 /// </summary>
+[System.ComponentModel.DisplayName("Headers & Footers (Fluent API)")]
+[System.ComponentModel.Category("Layout")]
+[System.ComponentModel.Description("Page template headers and footers using the Fluent API.")]
 public static class HeadersFootersExampleFluent
 {
     /// <inheritdoc/>

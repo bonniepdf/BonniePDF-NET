@@ -13,6 +13,9 @@ namespace BonniePDF.Examples.Basics.PageSettings;
 /// producing a "spec card" page for each via repeated <c>doc.Page()</c> calls inside a loop.
 /// The footer template is registered once via <c>settings.Footer()</c> and applies to all pages.
 /// </summary>
+[System.ComponentModel.DisplayName("Page Settings (Fluent API)")]
+[System.ComponentModel.Category("Basics")]
+[System.ComponentModel.Description("Demonstrates orientation, sizes, and backgrounds using the Fluent API.")]
 public static class AllPagesFluentExample
 {
     /// <summary>Both orientations rendered for each standard page size.</summary>

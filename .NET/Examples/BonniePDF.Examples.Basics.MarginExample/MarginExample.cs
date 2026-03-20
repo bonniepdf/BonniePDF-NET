@@ -10,6 +10,9 @@ namespace BonniePDF.Examples.Basics.MarginExample;
 /// <summary>
 /// Demonstrates the margin feature for controlling spacing around elements
 /// </summary>
+[System.ComponentModel.DisplayName("Margins & Units")]
+[System.ComponentModel.Category("Basics")]
+[System.ComponentModel.Description("Shows how to configure page margins and use different units.")]
 public static class MarginExample
 {
     public static string Generate(string outputPath)

@@ -11,6 +11,9 @@ namespace BonniePDF.Demo;
 /// <summary>
 /// Generates a modern QuickBooks-style invoice that fits on a single page
 /// </summary>
+[System.ComponentModel.DisplayName("Business Invoice")]
+[System.ComponentModel.Category("Templates")]
+[System.ComponentModel.Description("Generates a modern QuickBooks-style invoice with company branding, line items table, payment details, and professional styling.")]
 public static class InvoiceExample
 {
     // Brand accent color - a professional green similar to QuickBooks

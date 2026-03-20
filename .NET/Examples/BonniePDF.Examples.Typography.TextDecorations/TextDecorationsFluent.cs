@@ -11,6 +11,9 @@ namespace BonniePDF.Examples.Typography.TextDecorations;
 /// Demonstrates text decorations (underline and strikethrough) using the Fluent API.
 /// All sections use chained extension methods — no property-initialiser syntax.
 /// </summary>
+[System.ComponentModel.DisplayName("Text Decorations (Fluent API)")]
+[System.ComponentModel.Category("Typography")]
+[System.ComponentModel.Description("Underlines, strikethroughs, and text backgrounds using the Fluent API.")]
 public static class TextDecorationsFluentExample
 {
 

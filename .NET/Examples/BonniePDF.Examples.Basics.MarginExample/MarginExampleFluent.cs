@@ -10,6 +10,9 @@ namespace BonniePDF.Demo;
 /// <summary>
 /// Demonstrates the margin feature using the Fluent API for controlling spacing around elements
 /// </summary>
+[System.ComponentModel.DisplayName("Margins (Fluent API)")]
+[System.ComponentModel.Category("Basics")]
+[System.ComponentModel.Description("Demonstrates margin support using the Fluent API.")]
 public static class MarginExampleFluent
 {
     /// <summary>

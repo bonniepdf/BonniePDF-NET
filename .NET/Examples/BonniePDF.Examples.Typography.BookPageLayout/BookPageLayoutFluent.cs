@@ -14,6 +14,9 @@ namespace BonniePDF.Examples.Typography.BookPageLayout;
 /// with chained Column/Row descriptors and inline style calls.
 /// The document default is set to Times Roman 11pt so body paragraphs need no font calls.
 /// </summary>
+[System.ComponentModel.DisplayName("Book Page Layout (Fluent API)")]
+[System.ComponentModel.Category("Typography")]
+[System.ComponentModel.Description("Advanced typography layout mimicking a book using the Fluent API.")]
 public static class BookPageLayoutFluentExample
 {
 

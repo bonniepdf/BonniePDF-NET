@@ -10,6 +10,9 @@ namespace BonniePDF.Examples.Basics.SimpleDocument;
 /// <summary>
 /// Demonstrates the new high-level Document API for creating PDFs
 /// </summary>
+[System.ComponentModel.DisplayName("Simple Document")]
+[System.ComponentModel.Category("Basics")]
+[System.ComponentModel.Description("A basic text-only PDF generation example.")]
 public static class SimpleDocumentExample
 {
     

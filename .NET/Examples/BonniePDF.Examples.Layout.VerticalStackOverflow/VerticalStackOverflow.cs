@@ -9,6 +9,9 @@ namespace BonniePDF.Examples.Layout.VerticalStackOverflow;
 /// <summary>
 /// Generates a document with a VerticalStack containing many items that flows across pages.
 /// </summary>
+[System.ComponentModel.DisplayName("VerticalStack Overflow")]
+[System.ComponentModel.Category("Layout")]
+[System.ComponentModel.Description("VerticalStack overflow flow architecture.")]
 public static class VerticalStackOverflowExample
 {
     

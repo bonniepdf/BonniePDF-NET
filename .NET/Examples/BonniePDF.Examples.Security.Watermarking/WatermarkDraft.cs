@@ -11,6 +11,9 @@ namespace BonniePDF.Examples.Security.Watermarking;
 /// Watermarks use PDF ExtGState for opacity and the cm operator for rotation,
 /// appearing as semi-transparent diagonal text behind all page elements.
 /// </summary>
+[System.ComponentModel.DisplayName("Watermark - Draft")]
+[System.ComponentModel.Category("Security")]
+[System.ComponentModel.Description("Generates a multipage document with a 'DRAFT' watermark on every page, demonstrating document status marking.")]
 public static class WatermarkDraftExample
 {
 

@@ -10,6 +10,9 @@ namespace BonniePDF.Examples.Integration.WebApi;
 /// Demonstrates invoice generation for Web APIs.
 /// This shows a realistic scenario of generating invoices with dynamic data.
 /// </summary>
+[System.ComponentModel.DisplayName("Web API - Invoice")]
+[System.ComponentModel.Category("Integration")]
+[System.ComponentModel.Description("Demonstrates invoice generation for Web APIs with customer information, line items table, and dynamic data.")]
 public static class WebApiInvoiceExample
 {
 

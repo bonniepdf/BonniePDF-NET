@@ -8,6 +8,9 @@ namespace BonniePDF.Examples.Layout.TextBlockOverflow;
 /// <summary>
 /// Generates a document with a long TextBlock that flows across multiple pages.
 /// </summary>
+[System.ComponentModel.DisplayName("TextBlock Overflow")]
+[System.ComponentModel.Category("Layout")]
+[System.ComponentModel.Description("TextBlock overflow flow architecture.")]
 public static class TextBlockOverflowExample
 {
     

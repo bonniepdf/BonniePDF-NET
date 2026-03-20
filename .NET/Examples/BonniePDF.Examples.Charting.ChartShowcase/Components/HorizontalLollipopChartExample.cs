@@ -12,6 +12,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// Demonstrates a horizontal lollipop chart — an elegant alternative to horizontal bars
 /// for ranking data where you want to reduce visual weight.
 /// </summary>
+[System.ComponentModel.DisplayName("Horizontal Lollipop Chart")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("LollipopChart with Orientation = ChartOrientation.Horizontal — product revenue ranking with a lightweight stem-and-head style that reads cleanly left-to-right.")]
 public static class HorizontalLollipopChartExample
 {
     public static string Generate(string outputPath)

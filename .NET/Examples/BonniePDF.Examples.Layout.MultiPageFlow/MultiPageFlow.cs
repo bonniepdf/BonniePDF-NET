@@ -12,6 +12,9 @@ namespace BonniePDF.Examples.Layout.MultiPageFlow;
 /// - A long table with repeating headers on each page
 /// - Followed by a long text section that flows across pages
 /// </summary>
+[System.ComponentModel.DisplayName("Multi-Page Flow")]
+[System.ComponentModel.Category("Layout")]
+[System.ComponentModel.Description("Shows how elements seamlessly flow across multiple pages.")]
 public static class MultiPageFlowExample
 {
     

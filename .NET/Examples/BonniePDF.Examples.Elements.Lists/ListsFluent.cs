@@ -15,6 +15,9 @@ namespace BonniePDF.Examples.Elements.Lists;
 /// since there are no dedicated fluent terminal methods for them.
 /// The document spans four pages, each added via a separate doc.Page() call.
 /// </summary>
+[System.ComponentModel.DisplayName("Lists (Fluent API)")]
+[System.ComponentModel.Category("Elements")]
+[System.ComponentModel.Description("Ordered and unordered bullet point lists using the Fluent API.")]
 public static class ListFluentExample
 {
 

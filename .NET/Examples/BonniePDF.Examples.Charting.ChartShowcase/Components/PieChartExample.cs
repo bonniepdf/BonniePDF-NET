@@ -15,6 +15,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// This shows how a PieChart can be rendered to PDF using the ICanvas interface.
 /// Uses the same data and colors from the sales-piechart.svg file.
 /// </summary>
+[System.ComponentModel.DisplayName("Pie Chart")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("PieChart component with monthly sales data, showing a donut-style pie chart with customizable colors and legend.")]
 public static class PieChartExample
 {
 

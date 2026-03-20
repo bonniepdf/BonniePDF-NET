@@ -13,6 +13,9 @@ namespace BonniePDF.Examples.Typography.TextDecorations;
 /// Decorations can be applied individually or combined, and work
 /// with all text alignments including justified text.
 /// </summary>
+[System.ComponentModel.DisplayName("Text Decorations")]
+[System.ComponentModel.Category("Typography")]
+[System.ComponentModel.Description("Underlines, strikethroughs, and text backgrounds.")]
 public static class TextDecorationExample
 {
     

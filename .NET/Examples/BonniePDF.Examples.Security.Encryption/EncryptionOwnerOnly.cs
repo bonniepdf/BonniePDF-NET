@@ -9,6 +9,9 @@ namespace BonniePDF.Examples.Security.Encryption;
 /// Example demonstrating PDF encryption that opens without a password but has restricted actions.
 /// Only the owner password can unlock full permissions.
 /// </summary>
+[System.ComponentModel.DisplayName("Encryption - Owner Password Only")]
+[System.ComponentModel.Category("Security")]
+[System.ComponentModel.Description("Generates a PDF that opens without a password but has restricted actions. Only the owner password can unlock full permissions.")]
 public static class EncryptionOwnerOnlyExample
 {
 

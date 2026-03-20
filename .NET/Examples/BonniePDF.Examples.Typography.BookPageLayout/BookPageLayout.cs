@@ -10,6 +10,9 @@ namespace BonniePDF.Demo;
 /// <summary>
 /// Generates a formatted textual page that reads like a page from a book
 /// </summary>
+[System.ComponentModel.DisplayName("Book Page Layout")]
+[System.ComponentModel.Category("Typography")]
+[System.ComponentModel.Description("Advanced typography layout mimicking a book.")]
 public static class BookPageExample
 {
     

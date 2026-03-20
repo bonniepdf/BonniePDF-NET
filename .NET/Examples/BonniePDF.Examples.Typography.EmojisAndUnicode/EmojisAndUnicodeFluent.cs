@@ -12,6 +12,9 @@ namespace BonniePDF.Examples.Typography.EmojisAndUnicode;
 /// using the Fluent API. Section headers inherit the text-font default;
 /// emoji rows override with the emoji font per-item.
 /// </summary>
+[System.ComponentModel.DisplayName("Emojis & Unicode (Fluent API)")]
+[System.ComponentModel.Category("Typography")]
+[System.ComponentModel.Description("Rendering international text and emojis using the Fluent API.")]
 public static class EmojisAndUnicodeFluentExample
 {
 

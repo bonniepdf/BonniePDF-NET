@@ -13,6 +13,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// Example demonstrating the GroupedBarChart implementation.
 /// This shows how a GroupedBarChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
+[System.ComponentModel.DisplayName("Grouped Bar Chart")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("GroupedBarChart implementation with quarterly revenue data by product line, showing multiple bars per category with value labels.")]
 public static class GroupedBarChartExample
 {
 

@@ -13,6 +13,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// Example demonstrating the LineChart implementation.
 /// This shows how a LineChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
+[System.ComponentModel.DisplayName("Line Chart")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("LineChart implementation with monthly revenue trends, showing connected data points with customizable line width and markers.")]
 public static class LineChartExample
 {
 

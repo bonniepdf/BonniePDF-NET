@@ -12,6 +12,9 @@ namespace BonniePDF.Examples.Security.Watermarking;
 /// Watermarks use PDF ExtGState for opacity and the cm operator for rotation,
 /// appearing as semi-transparent diagonal text behind all page elements.
 /// </summary>
+[System.ComponentModel.DisplayName("Watermark - Fluent API")]
+[System.ComponentModel.Category("Security")]
+[System.ComponentModel.Description("Demonstrates the fluent API for adding watermarks with a simple one-liner configuration.")]
 public static class WatermarkFluentExample
 {
 

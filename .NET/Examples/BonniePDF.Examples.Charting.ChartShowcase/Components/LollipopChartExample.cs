@@ -12,6 +12,9 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// Example demonstrating the LollipopChart implementation.
 /// This shows how a LollipopChart can be rendered to PDF using the ICanvas interface.
 /// </summary>
+[System.ComponentModel.DisplayName("Lollipop Chart")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("LollipopChart implementation with quarterly performance metrics, showing data points as lollipops with customizable stem width and head radius.")]
 public static class LollipopChartExample
 {
 

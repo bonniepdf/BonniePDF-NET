@@ -12,6 +12,9 @@ namespace BonniePDF.Examples.Elements.Images;
 /// <summary>
 /// Demonstrates Image support (JPEG and PNG) in BonniePDF
 /// </summary>
+[System.ComponentModel.DisplayName("Images")]
+[System.ComponentModel.Category("Elements")]
+[System.ComponentModel.Description("Embedding and sizing raster and SVG images.")]
 public static class ImageExample
 {
     
@@ -300,6 +303,10 @@ public static class ImageExample
         // IEND chunk
         WriteChunk(writer, "IEND", Array.Empty<byte>());
 
+        var dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+
         File.WriteAllBytes(path, ms.ToArray());
     }
 
@@ -376,6 +383,10 @@ public static class ImageExample
 
         // IEND chunk
         WriteChunk(writer, "IEND", Array.Empty<byte>());
+
+        var dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
 
         File.WriteAllBytes(path, ms.ToArray());
     }

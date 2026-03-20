@@ -9,6 +9,9 @@ namespace BonniePDF.Examples.Integration.WebApi;
 /// Demonstrates report generation with streaming for Web APIs.
 /// This shows how to stream PDFs directly to HTTP responses without buffering in memory.
 /// </summary>
+[System.ComponentModel.DisplayName("Web API - Streaming")]
+[System.ComponentModel.Category("Integration")]
+[System.ComponentModel.Description("Demonstrates report generation with streaming, writing PDFs directly to response streams without buffering in memory for better scalability.")]
 public static class WebApiStreamingExample
 {
 

@@ -13,6 +13,9 @@ namespace BonniePDF.Examples.Elements.ShapesAndBorders;
 /// Rounded corners are a universal UI element in modern document design,
 /// built from four arcs and four lines using Bezier curve approximations.
 /// </summary>
+[System.ComponentModel.DisplayName("Shapes & Borders")]
+[System.ComponentModel.Category("Elements")]
+[System.ComponentModel.Description("Drawing basic shapes and styling borders.")]
 public static class RoundedRectangleExample
 {
     

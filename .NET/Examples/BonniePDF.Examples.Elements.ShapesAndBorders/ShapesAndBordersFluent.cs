@@ -15,6 +15,9 @@ namespace BonniePDF.Examples.Elements.ShapesAndBorders;
 /// The card layout uses doc.Page → col.Item().Row(row => { row.RelativeItem(1)... })
 /// with each card built inline.
 /// </summary>
+[System.ComponentModel.DisplayName("Shapes & Borders (Fluent API)")]
+[System.ComponentModel.Category("Elements")]
+[System.ComponentModel.Description("Drawing basic shapes and styling borders using the Fluent API.")]
 public static class RoundedRectangleFluentExample
 {
 
