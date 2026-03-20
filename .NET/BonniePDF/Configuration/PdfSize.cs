@@ -47,6 +47,8 @@ public struct PdfSize
     /// <param name="name">Optional name of the page size.</param>
     public PdfSize(float width, float height, string? name = null)
     {
+        if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width), "Page width must be positive.");
+        if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height), "Page height must be positive.");
         Width = width;
         Height = height;
         Name = name;

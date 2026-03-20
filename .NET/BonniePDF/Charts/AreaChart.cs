@@ -93,7 +93,7 @@ public class AreaChart : CartesianChartBase
         else
         {
             float minX = coordinates[0].X;
-            float maxX = coordinates[coordinates.Count - 1].Y; // note: existing behaviour preserved
+            float maxX = coordinates[coordinates.Count - 1].X;
 
             for (float x = minX; x < maxX; x += stepSize)
             {

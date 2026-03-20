@@ -50,6 +50,23 @@ public static class ContainerElementExtensions
         c.Element(new Elements.Layout.Container());
     }
 
+    /// <summary>
+    /// Adds an invisible spacer that reserves the specified vertical space in points.
+    /// </summary>
+    public static void Spacer(this IContentContainer c, float height)
+    {
+        c.Element(new Elements.Layout.Spacer(height));
+    }
+
+    /// <summary>
+    /// Forces a page break. The next element after this will start at the top of a new page.
+    /// Has no effect if the current position is already at the top of a page.
+    /// </summary>
+    public static void PageBreak(this IContentContainer c)
+    {
+        c.Element(new Elements.Layout.PageBreak());
+    }
+
     // --- Layout ---
 
     /// <summary>

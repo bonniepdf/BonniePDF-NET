@@ -269,7 +269,9 @@ public class SvgCanvas : ICanvas
         // Count spaces
         int spaceCount = 0;
         foreach (char c in text)
+        {
             if (c == ' ') spaceCount++;
+        }
 
         if (spaceCount == 0)
         {
@@ -312,7 +314,7 @@ public class SvgCanvas : ICanvas
         float sy = y + _yOffset;
 
         string mimeType = image.Format == ImageFormat.Png ? "image/png" : "image/jpeg";
-        string base64 = Convert.ToBase64String(image.OriginalData != null && image.OriginalData.Length > 0
+        string base64 = Convert.ToBase64String(image.OriginalData is { Length: > 0 }
             ? image.OriginalData
             : image.Data);
         string dataUri = $"data:{mimeType};base64,{base64}";
@@ -352,7 +354,7 @@ public class SvgCanvas : ICanvas
 
         // Close SVG document if we created the StringBuilder
         // If we didn't create it, we assume the caller manages the closing tag
-        if (_sb.ToString().StartsWith("<svg"))
+        if (_sb.ToString().StartsWith("<svg", StringComparison.OrdinalIgnoreCase))
             // Simple check, robust enough for our usage
             _sb.AppendLine("</svg>");
 
@@ -382,10 +384,10 @@ public class SvgCanvas : ICanvas
     {
         if (string.IsNullOrEmpty(text)) return "";
         return text
-            .Replace("&", "\u0026amp;")
-            .Replace("<", "\u0026lt;")
-            .Replace(">", "\u0026gt;")
-            .Replace("\"", "\u0026quot;")
-            .Replace("'", "\u0026apos;");
+            .Replace("&", "\u0026amp;", StringComparison.OrdinalIgnoreCase)
+            .Replace("<", "\u0026lt;", StringComparison.OrdinalIgnoreCase)
+            .Replace(">", "\u0026gt;", StringComparison.OrdinalIgnoreCase)
+            .Replace("\"", "\u0026quot;", StringComparison.OrdinalIgnoreCase)
+            .Replace("'", "\u0026apos;", StringComparison.OrdinalIgnoreCase);
     }
 }

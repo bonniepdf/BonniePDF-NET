@@ -82,6 +82,7 @@ public class Document : IDisposable
     /// </summary>
     public void Add(IElement element)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(element);
 
         if (_pages.Count == 0)

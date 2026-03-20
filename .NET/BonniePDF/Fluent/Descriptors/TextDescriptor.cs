@@ -55,7 +55,7 @@ public sealed class TextDescriptor
     public TextSpanDescriptor CurrentPageNumber()
     {
         var style = new TextStyle();
-        RichText.Span(TextElementBase.TotalPagesToken.Replace("Total", ""), style);
+        RichText.Span(TextElementBase.CurrentPageToken, style);
         return new TextSpanDescriptor(style);
     }
 

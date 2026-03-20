@@ -40,11 +40,11 @@ public class GroupedBarChartElement : ElementBase
         // If StretchToFit is enabled, set the chart width to match the container
         if (_chart.StretchToFit) _chart.Width = contentWidth;
 
-        // Create a PdfCanvas that wraps the current PDF content stream
-        PdfCanvas pdfCanvas = new(ctx.CurrentStream, ctx.PageSize.Height, ctx.CurrentX, ctx.CurrentY);
+        // Get a canvas via ctx to ensure fonts/images are properly registered
+        ICanvas canvas = ctx.GetCanvas(ctx.CurrentX, ctx.CurrentY);
 
         // Draw the chart using the ICanvas interface
-        _chart.Draw(pdfCanvas, _data);
+        _chart.Draw(canvas, _data);
 
         // Advance Y position by the chart height
         ctx.CurrentY += _chart.Height;

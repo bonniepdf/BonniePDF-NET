@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using BonniePDF.Rendering;
 
 namespace BonniePDF.Elements.Text;
@@ -37,6 +38,7 @@ public class TextBlock : TextElementBase, IStatefulElement
 
     }
 
+    [SetsRequiredMembers]
     public TextBlock(string text)
     {
         this.Text = text;
@@ -47,7 +49,7 @@ public class TextBlock : TextElementBase, IStatefulElement
     /// Text that doesn't fit on the current page will be continued on the next page.
     /// Respects MinLinesBeforeBreak (orphan) and MinLinesAfterBreak (widow) settings.
     /// </summary>
-    public RenderStatus RenderStateful(RenderContext ctx, float width)
+    public virtual RenderStatus RenderStateful(RenderContext ctx, float width)
     {
         // Apply top margin only on first render (not on continuation pages)
         if (_lastLineRendered < 0) ctx.CurrentY += Margin.Top;
@@ -149,7 +151,7 @@ public class TextBlock : TextElementBase, IStatefulElement
     /// <summary>
     /// Resets the internal state, preparing the element for a fresh render.
     /// </summary>
-    public void ResetState()
+    public virtual void ResetState()
     {
         _lastLineRendered = -1;
         _cachedLines = null;
@@ -195,6 +197,10 @@ public class TextBlock : TextElementBase, IStatefulElement
     private void DrawSingleLine(RenderContext ctx, string line, float contentWidth, float y, float baseX,
         bool isLastLine)
     {
+        // Substitute current page number inline — it is known at render time
+        if (line.Contains(CurrentPageToken))
+            line = line.Replace(CurrentPageToken, (ctx.CurrentPageIndex + 1).ToString());
+
         if (line.Contains(TotalPagesToken))
         {
             DrawLineWithTokens(ctx, line, contentWidth, y, baseX);

@@ -106,7 +106,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
 
         if (streamContent != null)
         {
-            byte[] contentBytes = Encoding.ASCII.GetBytes(streamContent);
+            byte[] contentBytes = Iso88591.GetBytes(streamContent);
 
             // Encrypt if encryptor is set
             if (Encryptor != null)
@@ -139,7 +139,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         CancellationToken cancellationToken = default)
     {
         // 1. Convert to bytes
-        byte[] rawBytes = Encoding.ASCII.GetBytes(content);
+        byte[] rawBytes = Iso88591.GetBytes(content);
 
         // 2. RENT a buffer.
         // We guess the compressed size. Usually it's smaller, but ZLib overhead on tiny strings

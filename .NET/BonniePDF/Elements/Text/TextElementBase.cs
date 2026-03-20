@@ -24,6 +24,11 @@ public abstract class TextElementBase : ElementBase
     /// </summary>
     public const string TotalPagesToken = "{{TotalPages}}";
 
+    /// <summary>
+    /// Token for injecting the current page number
+    /// </summary>
+    public const string CurrentPageToken = "{{CurrentPage}}";
+
     private string? _fontFamily;
     private FontWeight _weight = FontWeight.Normal;
     private bool _isItalic;
@@ -139,9 +144,15 @@ public abstract class TextElementBase : ElementBase
     }
 
     /// <summary>
-    /// Line height calculated from font size (1.2x font size)
+    /// Multiplier applied to font size to compute line height. Default is 1.2.
+    /// Set to a value like 1.5 for looser leading or 1.0 for tight leading.
     /// </summary>
-    protected float LineHeight => FontSize * 1.2f;
+    public float LineHeightMultiplier { get; set; } = 1.2f;
+
+    /// <summary>
+    /// Line height calculated from font size and LineHeightMultiplier
+    /// </summary>
+    protected float LineHeight => FontSize * LineHeightMultiplier;
 
     /// <summary>
     /// Computes wrapped lines for text that exceeds the maximum width.
@@ -194,8 +205,8 @@ public abstract class TextElementBase : ElementBase
     /// <returns>The width of the text in points</returns>
     protected float MeasureTextWidth(string text)
     {
-        // Replace token with estimated placeholder (2 digits) for measurement
-        string measuredText = text.Replace(TotalPagesToken, "00");
+        // Replace tokens with estimated placeholders (2 digits) for measurement
+        string measuredText = text.Replace(TotalPagesToken, "00").Replace(CurrentPageToken, "00");
         return FontMetrics.GetStringWidth(measuredText, FontName, FontSize);
     }
 }

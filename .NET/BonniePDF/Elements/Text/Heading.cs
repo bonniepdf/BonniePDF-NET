@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using BonniePDF.Rendering;
 
 namespace BonniePDF.Elements.Text;
@@ -29,6 +30,7 @@ public class Heading : TextBlock, IStatefulElement
     /// Initializes a new instance of <see cref="Heading"/> with the specified text.
     /// </summary>
     /// <param name="text">The heading text to display.</param>
+    [SetsRequiredMembers]
     public Heading(string text) : base(text)
     {
     }
@@ -40,7 +42,7 @@ public class Heading : TextBlock, IStatefulElement
     /// <param name="ctx">The current render context.</param>
     /// <param name="width">The available width for rendering.</param>
     /// <returns>The render status indicating whether the element is complete or overflowed.</returns>
-    public new RenderStatus RenderStateful(RenderContext ctx, float width)
+    public override RenderStatus RenderStateful(RenderContext ctx, float width)
     {
         if (!_tocRegistered)
         {
@@ -54,7 +56,7 @@ public class Heading : TextBlock, IStatefulElement
     /// Resets the render state so the heading can be re-rendered on subsequent layout passes
     /// (e.g. during two-pass TOC resolution).
     /// </summary>
-    public new void ResetState()
+    public override void ResetState()
     {
         _tocRegistered = false;
         base.ResetState();
