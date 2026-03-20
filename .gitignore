@@ -296,9 +296,12 @@ FodyWeavers.xsd
 .claude/
 *.claude*
 
-# Test Coverage 
+# Test Coverage
 CoverageReport
 coverage.cobertura.xml
 
 plans/
 BenchmarkReports/
+
+# Demo web UI build output
+wwwroot/
