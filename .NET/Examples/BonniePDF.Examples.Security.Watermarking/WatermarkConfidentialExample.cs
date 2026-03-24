@@ -8,8 +8,6 @@ namespace BonniePDF.Examples.Security.Watermarking;
 
 /// <summary>
 /// Demonstrates a "CONFIDENTIAL" watermark with custom styling.
-/// Watermarks use PDF ExtGState for opacity and the cm operator for rotation,
-/// appearing as semi-transparent diagonal text behind all page elements.
 /// </summary>
 [System.ComponentModel.DisplayName("Watermark - Confidential")]
 [System.ComponentModel.Category("Security")]

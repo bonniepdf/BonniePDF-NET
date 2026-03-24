@@ -1,17 +1,17 @@
 namespace BonniePDF.Examples.Templates.UserDirectory;
 
-sealed class Program
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating User Directory...");
-        using (var doc = UsersTableExample.Generate())
+        using (var doc = UserDirectoryExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "users_list.pdf"));
+            doc.Save(Path.Combine(outputDir, "user_directory.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

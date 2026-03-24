@@ -31,20 +31,13 @@ namespace BonniePDF.Examples.Typography.DickensNovel;
 [System.ComponentModel.DisplayName("Dickens: A Tale of Two Cities (Fluent API)")]
 [System.ComponentModel.Category("Typography")]
 [System.ComponentModel.Description("Formats the complete Project Gutenberg novel as a book-quality PDF using the Fluent API.")]
-public static partial class DickensNovelFluentExample
+public static partial class DickensNovelExampleFluent
 {
     private const string LocalFilePath = @"C:\GITHUB\pg98.txt";
 
     /// <summary>Matches chapter number lines: "CHAPTER I." … "CHAPTER XXIV."</summary>
     [GeneratedRegex(@"^CHAPTER\s+[IVXLC]+\.$")]
     private static partial Regex ChapterLineRegex();
-
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
 
     /// <summary>
     /// Loads and parses the novel, then renders it as a multi-page PDF using Pdf.Create().

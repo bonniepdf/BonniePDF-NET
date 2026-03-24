@@ -11,9 +11,8 @@ namespace BonniePDF.Examples.Typography.CustomFonts;
 [System.ComponentModel.DisplayName("Custom Fonts")]
 [System.ComponentModel.Category("Typography")]
 [System.ComponentModel.Description("Embedding and using custom TTF fonts.")]
-public static class EmbeddedFontExample
+public static class CustomFontExample
 {
-    
     public static Document Generate()
     {
         // Use Arial as the embedded font (available on Windows)

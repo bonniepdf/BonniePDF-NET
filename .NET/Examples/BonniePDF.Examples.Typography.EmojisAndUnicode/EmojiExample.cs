@@ -2,7 +2,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 
-namespace BonniePDF.Demo;
+namespace BonniePDF.Examples.Typography.EmojisAndUnicode;
 
 /// <summary>
 /// Demonstrates supplementary Unicode plane support — emoji and symbols beyond U+FFFF
@@ -12,7 +12,6 @@ namespace BonniePDF.Demo;
 [System.ComponentModel.Description("Rendering international text and emojis.")]
 public static class EmojiExample
 {
-    
     public static Document Generate()
     {
         // Segoe UI Emoji is the standard Windows emoji font

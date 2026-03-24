@@ -1,9 +1,8 @@
-using BonniePDF.Demo;
 namespace BonniePDF.Examples.Typography.DickensNovel;
 
-class Program
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
@@ -15,7 +14,7 @@ class Program
             doc.Save(Path.Combine(outputDir, "dickens_a_tale_of_two_cities.pdf"));
         }
         Console.WriteLine("Generating Dickens: A Tale of Two Cities (Fluent API)...");
-        using (var doc = DickensNovelFluentExample.Generate())
+        using (var doc = DickensNovelExampleFluent.Generate())
         {
             doc.Save(Path.Combine(outputDir, "dickens_a_tale_of_two_cities_fluent.pdf"));
         }

@@ -38,7 +38,7 @@ public class ImageWriterTests
             throw new NotImplementedException();
         }
 
-        public int WriteLinkAnnotation(int id, Hyperlink hyperlink)
+        public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null)
         {
             throw new NotImplementedException();
         }

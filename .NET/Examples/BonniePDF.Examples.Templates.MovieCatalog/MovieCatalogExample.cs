@@ -16,7 +16,7 @@ namespace BonniePDF.Examples.Templates.MovieCatalog;
 [System.ComponentModel.DisplayName("Movie Catalog")]
 [System.ComponentModel.Category("Templates")]
 [System.ComponentModel.Description("Generates a PDF showing a list of classic movies with ratings, director, genre, and duration in a formatted table.")]
-public static class MoviesTableExample
+public static class MovieCatalogExample
 {
 
     public static Document Generate()

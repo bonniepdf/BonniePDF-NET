@@ -1,15 +1,15 @@
 namespace BonniePDF.Examples.Templates.BusinessInvoice;
 
-class Program
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Business Invoice...");
-        using (var doc = Invoice.Generate())
+        using (var doc = BusinessInvoiceExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "invoice.pdf"));
         }

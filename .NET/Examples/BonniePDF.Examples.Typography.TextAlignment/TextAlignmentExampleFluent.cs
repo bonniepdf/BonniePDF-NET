@@ -12,10 +12,9 @@ namespace BonniePDF.Examples.Typography.TextAlignment;
 /// Shows left, center, right, and justified alignment with both
 /// Times Roman body text and a book-style justified paragraph section.
 /// </summary>
-public static class TextAlignmentFluentExample
+public static class TextAlignmentExampleFluent
 {
-
-    public static global::BonniePDF.Document Generate()
+    public static Document Generate()
     {
         return Pdf.Create(doc =>
         {

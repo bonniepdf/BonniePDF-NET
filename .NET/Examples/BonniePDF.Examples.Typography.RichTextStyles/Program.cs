@@ -1,9 +1,8 @@
-using BonniePDF.Demo;
 namespace BonniePDF.Examples.Typography.RichTextStyles;
 
-sealed class Program
+internal sealed class Program
 {
-    static void Main()
+    private static void Main()
     {
         Console.WriteLine("Generating Examples...");
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");

@@ -18,7 +18,6 @@ namespace BonniePDF.Examples.Typography.TextDecorations;
 [System.ComponentModel.Description("Underlines, strikethroughs, and text backgrounds.")]
 public static class TextDecorationExample
 {
-    
     public static Document Generate()
     {
         Document doc = new(new DocumentSettings

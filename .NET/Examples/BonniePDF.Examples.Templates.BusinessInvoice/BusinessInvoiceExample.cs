@@ -14,7 +14,7 @@ namespace BonniePDF.Examples.Templates.BusinessInvoice;
 [System.ComponentModel.DisplayName("Business Invoice")]
 [System.ComponentModel.Category("Templates")]
 [System.ComponentModel.Description("Generates a modern QuickBooks-style invoice with company branding, line items table, payment details, and professional styling.")]
-public static class Invoice
+public static class BusinessInvoiceExample
 {
     // Brand accent color - a professional green similar to QuickBooks
     private static readonly Color AccentGreen = Color.FromHex("#0B9444");

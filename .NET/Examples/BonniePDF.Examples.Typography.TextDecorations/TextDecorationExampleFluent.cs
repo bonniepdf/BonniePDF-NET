@@ -14,9 +14,8 @@ namespace BonniePDF.Examples.Typography.TextDecorations;
 [System.ComponentModel.DisplayName("Text Decorations (Fluent API)")]
 [System.ComponentModel.Category("Typography")]
 [System.ComponentModel.Description("Underlines, strikethroughs, and text backgrounds using the Fluent API.")]
-public static class TextDecorationsFluentExample
+public static class TextDecorationExampleFluent
 {
-
     public static Document Generate()
     {
         return Pdf.Create(doc =>

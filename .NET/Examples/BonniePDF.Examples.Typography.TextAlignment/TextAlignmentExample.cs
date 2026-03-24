@@ -5,16 +5,15 @@ using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Typography;
 
-namespace BonniePDF.Demo;
+namespace BonniePDF.Examples.Typography.TextAlignment;
 
 /// <summary>
 /// Demonstrates justified text alignment where word spacing is distributed
 /// evenly to fill the available width, similar to newspaper/book typesetting.
 /// </summary>
-public static class JustifiedTextExample
+public static class TextAlignmentExample
 {
-    
-    public static global::BonniePDF.Document Generate()
+    public static Document Generate()
     {
         Document doc = new(new DocumentSettings
         {

@@ -15,9 +15,8 @@ namespace BonniePDF.Examples.Typography.CustomFonts;
 [System.ComponentModel.DisplayName("Custom Fonts (Fluent API)")]
 [System.ComponentModel.Category("Typography")]
 [System.ComponentModel.Description("Embedding and using custom TTF fonts using the Fluent API.")]
-public static class CustomFontsFluentExample
+public static class CustomFontExampleFluent
 {
-
     private static readonly string[] UnicodeSymbols =
     {
         "\u2022 Bullet point (U+2022)",

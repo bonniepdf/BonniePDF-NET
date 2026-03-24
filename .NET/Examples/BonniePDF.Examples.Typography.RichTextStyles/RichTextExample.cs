@@ -5,7 +5,7 @@ using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 
-namespace BonniePDF.Demo;
+namespace BonniePDF.Examples.Typography.RichTextStyles;
 
 /// <summary>
 /// Demonstrates the RichText element with mixed styling within flowing paragraphs.
@@ -17,7 +17,6 @@ namespace BonniePDF.Demo;
 [System.ComponentModel.Description("Mixed formatting within paragraphs.")]
 public static class RichTextExample
 {
-    
     public static Document Generate()
     {
         Document doc = new(new DocumentSettings
