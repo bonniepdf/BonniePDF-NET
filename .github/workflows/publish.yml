@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (leave empty for auto)'
+        required: false
+        type: string
 
 jobs:
   publish:
@@ -20,6 +25,15 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
+        
+    - name: Update Version
+      run: |
+        chmod +x scripts/update-versions.sh
+        if [ -n "${{ github.event.inputs.version }}" ]; then
+          ./scripts/update-versions.sh --version "${{ github.event.inputs.version }}"
+        else
+          ./scripts/update-versions.sh
+        fi
         
     - name: Restore dependencies
       run: dotnet restore BonniePDF/BonniePDF.csproj

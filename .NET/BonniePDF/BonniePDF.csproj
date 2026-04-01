@@ -8,7 +8,7 @@
     <RootNamespace>BonniePDF</RootNamespace>
     <AssemblyName>BonniePDF</AssemblyName>
     <Description>BonniePDF is a high-performance, zero-dependency PDF generation engine for .NET. Engineered for speed and compliance, it features an intuitive Fluent API for building complex documents, reports, integrated charting, and native PDF/A support.</Description>
-    <Version>1.0.0</Version>
+    <Version>2026.04.1</Version>
     <Authors>BonniePDF</Authors>
     
     <RepositoryUrl></RepositoryUrl>
