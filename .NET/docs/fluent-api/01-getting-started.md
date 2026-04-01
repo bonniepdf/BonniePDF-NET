@@ -191,4 +191,5 @@ Pdf.Create(doc =>
 - [Images & Shapes](07-images-and-shapes.md) — embedding images, lines, and QR codes
 - [Headers & Footers](08-headers-and-footers.md) — page templates with dynamic page numbers
 - [Advanced Features](09-advanced-features.md) — watermarks, encryption, bookmarks, and multi-page flow
+- [Charting](11-charting.md) — creating data visualizations with bar, line, area, and pie charts
 - [API Reference](10-api-reference.md) — complete type and enum reference
