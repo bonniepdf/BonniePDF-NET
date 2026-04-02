@@ -68,7 +68,7 @@ Pdf.Create(doc =>
 
 ## Examples
 
-The `Examples/` directory contains working samples covering common use cases: invoices, reports, books, tables, and charts. Browse them online at [bonniepdf.dev/examples](https://bonniepdf.dev/examples).
+The `Examples/` directory contains working samples covering common use cases: invoices, reports, books, tables, and charts.  Browse them online at [bonniepdf.dev/examples](https://bonniepdf.dev/examples).
 
 ## License
 
