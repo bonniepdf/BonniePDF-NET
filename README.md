@@ -1,7 +1,6 @@
 # BonniePDF
 
-A high-performance PDF generation library for .NET 8+. Zero dependencies, no native libraries, no deployment friction.
-
+A highly performant PDF generation library for .NET 8+. Zero dependencies, no native libraries, no GDI+.
 ## Features
 
 **Document Creation**
