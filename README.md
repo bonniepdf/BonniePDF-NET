@@ -135,7 +135,7 @@ byte[] bytes = Pdf.Create(doc => { /* ... */ }).GenerateBytes();
 
 ## Examples
 
-The [`Examples/`](Examples/) directory contains working projects:
+The [`Examples/`]([Examples/](https://github.com/bonniepdf/BonniePDF/tree/master/.NET/Examples)) directory contains isolated example projects:
 
 | Example | What it demonstrates |
 |---|---|
