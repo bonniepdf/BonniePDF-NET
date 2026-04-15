@@ -1,6 +1,8 @@
 # BonniePDF
 
-A PDF generation library for .NET. Zero dependencies, no native binaries, no GDI+. Designed for performance and high-throughput scenarios with a straightforward API.
+A PDF generation library for .NET. 
+
+No dependencies whatsoever, no native binaries, no GDI+. Designed for performance and high-throughput scenarios with a straightforward API.
 
 [![NuGet](https://img.shields.io/nuget/v/BonniePDF)](https://www.nuget.org/packages/BonniePDF)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/BonniePDF)](https://www.nuget.org/packages/BonniePDF)
@@ -172,7 +174,9 @@ API guide by topic:
 
 BonniePDF uses a hybrid licence model:
 
-- **Community:** Free for individuals, open-source projects, non-profits, and companies with under $1M annual gross revenue. Full features, no restrictions on what you can build.
+- **Community:** Free for individuals, open-source projects, non-profits, and companies with under $50k annual gross revenue. Full features, no restrictions on what you can build.
+- **Professional:** For companies over $50k revenue with up to 5 developers. Perpetual for the version purchased.
+- **Enterprise:** Unlimited developers. Priority support.
 
 No licence keys, activation servers or runtime checks.
 
