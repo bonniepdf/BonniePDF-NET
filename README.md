@@ -184,4 +184,4 @@ Details at [bonniepdf.dev/license](https://www.bonniepdf.dev/license/).
 
 ## Contributing
 
-Bug reports and feature requests via [GitHub Issues](https://github.com/BonniePDF/BonniePDF/issues). Pull requests welcome — please open an issue first for anything non-trivial so we can discuss the approach.
+Bug reports and feature requests via [GitHub Issues](https://github.com/BonniePDF/BonniePDF/issues).  Pull requests are welcomed however please open an issue first for anything non-trivial so we can discuss the approach.
