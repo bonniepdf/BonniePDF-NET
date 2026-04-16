@@ -25,6 +25,9 @@ public class TtfFont
     private readonly Dictionary<string, (uint offset, uint length)> _tables = new();
     private int _numberOfHMetrics;
 
+    // Kern pairs: (leftGid, rightGid) -> adjustment in font units
+    private readonly Dictionary<(ushort left, ushort right), short> _kernPairs = new();
+
     // =====================================================
     // CONSTRUCTOR
     // =====================================================
@@ -130,6 +133,20 @@ public class TtfFont
     }
 
     /// <summary>
+    /// Gets the kerning adjustment in font units between two adjacent glyphs.
+    /// Returns 0 if no kerning pair exists or the font has no kern table.
+    /// </summary>
+    public short GetKerning(ushort leftGid, ushort rightGid)
+    {
+        return _kernPairs.TryGetValue((leftGid, rightGid), out short kern) ? kern : (short)0;
+    }
+
+    /// <summary>
+    /// Returns true if this font has any kern pairs defined.
+    /// </summary>
+    public bool HasKerning => _kernPairs.Count > 0;
+
+    /// <summary>
     /// Gets the raw font data for embedding
     /// </summary>
     public byte[] GetRawFontData()
@@ -199,6 +216,9 @@ public class TtfFont
 
         if (_tables.ContainsKey("post"))
             ParsePostTable(reader);
+
+        if (_tables.ContainsKey("kern"))
+            ParseKernTable(reader);
     }
 
     private void ParseHeadTable(BigEndianReader reader)
@@ -527,5 +547,42 @@ public class TtfFont
 
         reader.Skip(4); // version
         ItalicAngle = reader.ReadFixed();
+    }
+
+    private void ParseKernTable(BigEndianReader reader)
+    {
+        if (!_tables.TryGetValue("kern", out var info)) return;
+
+        reader.Seek(info.offset);
+        reader.ReadUInt16(); // version
+        int nTables = reader.ReadUInt16();
+
+        for (int t = 0; t < nTables; t++)
+        {
+            long tableStart = reader.Position;
+            reader.ReadUInt16(); // version
+            int length = reader.ReadUInt16();
+            int coverage = reader.ReadUInt16();
+            int format = coverage >> 8;
+            bool isHorizontal = (coverage & 0x01) != 0;
+
+            if (format != 0 || !isHorizontal)
+            {
+                // Skip unsupported formats
+                reader.Seek(tableStart + length);
+                continue;
+            }
+
+            int nPairs = reader.ReadUInt16();
+            reader.Skip(6); // searchRange, entrySelector, rangeShift
+
+            for (int i = 0; i < nPairs; i++)
+            {
+                ushort left = reader.ReadUInt16();
+                ushort right = reader.ReadUInt16();
+                short value = reader.ReadInt16();
+                _kernPairs[(left, right)] = value;
+            }
+        }
     }
 }

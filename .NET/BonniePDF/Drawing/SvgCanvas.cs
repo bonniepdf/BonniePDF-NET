@@ -5,6 +5,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Images;
 using BonniePDF.Typography;
+using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF.Drawing;
 
@@ -21,6 +22,7 @@ public class SvgCanvas : ICanvas
     private readonly float _xOffset;
     private readonly float _yOffset;
     private int _stateDepth;
+    private readonly Func<string, TtfFont> _fontResolver;
 
     /// <summary>
     /// Creates a new SvgCanvas for generating SVG markup.
@@ -32,8 +34,8 @@ public class SvgCanvas : ICanvas
     /// <param name="existingSb">Optional existing StringBuilder to write to</param>
     /// <param name="includeHeader">Whether to write the SVG header (default true if creating new SB, false if using existing)</param>
     public SvgCanvas(float width, float height, float xOffset = 0, float yOffset = 0, StringBuilder? existingSb = null,
-        bool? includeHeader = null)
-        : this(width, height, xOffset, yOffset, existingSb, includeHeader, 0, false)
+        bool? includeHeader = null, Func<string, TtfFont> fontResolver = null)
+        : this(width, height, xOffset, yOffset, existingSb, includeHeader, 0, false, fontResolver)
     {
     }
 
@@ -49,7 +51,7 @@ public class SvgCanvas : ICanvas
     /// <param name="pageNumber">Page number (0-based) for multipage mode</param>
     /// <param name="isMultiPageMode">Whether this canvas is part of a multipage document</param>
     public SvgCanvas(float width, float height, float xOffset, float yOffset, StringBuilder? existingSb,
-        bool? includeHeader, int pageNumber, bool isMultiPageMode)
+        bool? includeHeader, int pageNumber, bool isMultiPageMode, Func<string, TtfFont> fontResolver = null)
     {
         Width = width;
         Height = height;
@@ -57,6 +59,7 @@ public class SvgCanvas : ICanvas
         _yOffset = yOffset;
         PageNumber = pageNumber;
         IsMultiPageMode = isMultiPageMode;
+        _fontResolver = fontResolver;
 
         _sb = existingSb ?? new StringBuilder();
 
@@ -223,24 +226,69 @@ public class SvgCanvas : ICanvas
 
     /// <summary>
     /// Draws text at the specified location.
-    /// No coordinate transformation needed for SVG.
+    /// When an embedded TTF font is available via the font resolver, emits one &lt;tspan&gt;
+    /// per glyph with explicit x coordinates derived from actual advance widths and kern pairs,
+    /// producing layout that matches the PDF output precisely.
+    /// Falls back to a single &lt;text&gt; element (browser-rendered) for standard fonts.
     /// </summary>
     public void DrawText(float x, float y, string text, Color color, float fontSize, string fontFamily,
         TextAlignment align)
     {
+        if (string.IsNullOrEmpty(text)) return;
+
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         string fill = color.ToHexString();
-        string anchor = GetTextAnchor(align);
-        string escapedText = EscapeXml(text);
-
-        // SVG text y is baseline. Approximate baseline shift.
-        // Assuming top-alignment input (standard for ICanvas), shift down by ~0.8-1.0em for baseline
-        // Actually, ICanvas y is top. 
         float baselineY = sy + fontSize * 0.8f;
 
-        _sb.AppendLine(
-            $"<text x=\"{sx}\" y=\"{baselineY}\" font-family=\"{fontFamily}\" font-size=\"{fontSize}\" fill=\"{fill}\" text-anchor=\"{anchor}\">{escapedText}</text>");
+        TtfFont ttfFont = _fontResolver?.Invoke(fontFamily);
+
+        if (ttfFont != null)
+        {
+            float totalWidth = FontMetrics.GetKernedStringWidth(text, ttfFont, fontSize);
+            float cursorX = sx;
+            if (align == TextAlignment.Center)
+                cursorX -= totalWidth / 2f;
+            else if (align == TextAlignment.Right)
+                cursorX -= totalWidth;
+
+            float scale = fontSize / ttfFont.UnitsPerEm;
+
+            _sb.Append($"<text font-family=\"{fontFamily}\" font-size=\"{fontSize}\" fill=\"{fill}\" xml:space=\"preserve\">");
+
+            ushort prevGid = 0;
+            bool hasPrev = false;
+
+            foreach (Rune rune in text.EnumerateRunes())
+            {
+                if (Rune.IsControl(rune)) continue;
+
+                ushort gid = ttfFont.GetGlyphId(rune.Value);
+
+                if (hasPrev && ttfFont.HasKerning)
+                {
+                    short kern = ttfFont.GetKerning(prevGid, gid);
+                    cursorX += kern * scale;
+                }
+
+                string charStr = EscapeXml(rune.ToString());
+                _sb.Append($"<tspan x=\"{cursorX:F2}\" y=\"{baselineY:F2}\">{charStr}</tspan>");
+
+                cursorX += ttfFont.GetGlyphWidth(gid) * scale;
+                prevGid = gid;
+                hasPrev = true;
+            }
+
+            _sb.AppendLine("</text>");
+        }
+        else
+        {
+            // Fallback: no embedded TTF available — rely on browser/viewer rendering
+            string anchor = GetTextAnchor(align);
+            string escapedText = EscapeXml(text);
+            _sb.AppendLine(
+                $"<text x=\"{sx}\" y=\"{baselineY}\" font-family=\"{fontFamily}\" font-size=\"{fontSize}\" fill=\"{fill}\" text-anchor=\"{anchor}\">{escapedText}</text>");
+        }
     }
 
     /// <summary>
@@ -295,11 +343,15 @@ public class SvgCanvas : ICanvas
 
     /// <summary>
     /// Measures text size.
-    /// Uses FontMetrics for accurate width.
+    /// Uses per-glyph kerned metrics from the embedded TTF when available,
+    /// otherwise falls back to FontMetrics approximate widths.
     /// </summary>
     public Size MeasureText(string text, float fontSize, string fontFamily)
     {
-        float width = FontMetrics.GetStringWidth(text, fontFamily, fontSize);
+        TtfFont ttfFont = _fontResolver?.Invoke(fontFamily);
+        float width = ttfFont != null
+            ? FontMetrics.GetKernedStringWidth(text, ttfFont, fontSize)
+            : FontMetrics.GetStringWidth(text, fontFamily, fontSize);
         float height = fontSize * 1.2f;
         return new Size(width, height);
     }

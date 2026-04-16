@@ -131,7 +131,7 @@ public class RenderContext
     private void UpdateCanvas()
     {
         if (IsSvgMode)
-            Canvas = new SvgCanvas(PageSize.Width, PageSize.Height, 0, 0, CurrentStream, true);
+            Canvas = new SvgCanvas(PageSize.Width, PageSize.Height, 0, 0, CurrentStream, true, ResolveEmbeddedFont);
         else
             Canvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
                 ResolveEmbeddedFont, TrackGlyphUsage);
@@ -142,7 +142,7 @@ public class RenderContext
     /// </summary>
     public ICanvas GetCanvas(float x, float y)
     {
-        if (IsSvgMode) return new SvgCanvas(PageSize.Width, PageSize.Height, x, y, CurrentStream, false);
+        if (IsSvgMode) return new SvgCanvas(PageSize.Width, PageSize.Height, x, y, CurrentStream, false, ResolveEmbeddedFont);
 
         return new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource, ResolveEmbeddedFont, TrackGlyphUsage);
     }

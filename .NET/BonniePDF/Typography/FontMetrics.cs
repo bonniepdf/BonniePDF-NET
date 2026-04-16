@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using BonniePDF.Rendering.Images;
+using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF.Typography;
 
@@ -83,6 +85,42 @@ public static class FontMetrics
 
         // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
         return GetStandardFontWidth(text, fontIdentifier, fontSize);
+    }
+
+    /// <summary>
+    /// Measures the width of a string using actual per-glyph advances and kerning
+    /// from an embedded TrueType font. More accurate than <see cref="GetStringWidth"/> for
+    /// embedded fonts because it accounts for kern pairs.
+    /// Returns 0 if font is null or text is empty.
+    /// </summary>
+    public static float GetKernedStringWidth(string text, TtfFont font, float fontSize)
+    {
+        if (string.IsNullOrEmpty(text) || font == null) return 0;
+
+        float scale = fontSize / font.UnitsPerEm;
+        float width = 0;
+
+        ushort prevGid = 0;
+        bool hasPrev = false;
+
+        foreach (Rune rune in text.EnumerateRunes())
+        {
+            if (Rune.IsControl(rune)) continue;
+
+            ushort gid = font.GetGlyphId(rune.Value);
+
+            if (hasPrev && font.HasKerning)
+            {
+                short kern = font.GetKerning(prevGid, gid);
+                width += kern * scale;
+            }
+
+            width += font.GetGlyphWidth(gid) * scale;
+            prevGid = gid;
+            hasPrev = true;
+        }
+
+        return width;
     }
 
     // =====================================================

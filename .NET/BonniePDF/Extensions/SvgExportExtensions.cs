@@ -39,10 +39,12 @@ public static class SvgExportExtensions
 
     /// <summary>
     /// Renders the chart to an SVG string.
+    /// Note: Chart SVG export uses standard font fallback rendering without per-glyph kerning.
+    /// For accurate kerning with embedded fonts, render the chart via a Page using ToSvg(Page) instead.
     /// </summary>
     public static string ToSvg(this ChartBase chart, ChartData data)
     {
-        // Create canvas that writes to its own internal StringBuilder (will include header/footer)
+        // Charts use standard fonts internally, so no per-glyph font resolver is needed here.
         SvgCanvas canvas = new(chart.Width, chart.Height);
 
         // Draw the chart
