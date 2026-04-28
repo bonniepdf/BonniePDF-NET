@@ -305,3 +305,5 @@ BenchmarkReports/
 
 # Demo web UI build output
 wwwroot/
+
+dist/
