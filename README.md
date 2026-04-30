@@ -1,6 +1,6 @@
 # BonniePDF
 
-A dependency-free PDF library for .NET. No native binaries or GDI+. Designed for high-performance scenarios and high-throughput workloads with a simple, intuitive API.
+A dependency-free PDF creation library for .NET. No dependancies, native binaries or GDI+. Designed for high-performance scenarios and workloads with a simple, intuitive API.
 
 [![NuGet](https://img.shields.io/nuget/v/BonniePDF)](https://www.nuget.org/packages/BonniePDF)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/BonniePDF)](https://www.nuget.org/packages/BonniePDF)
