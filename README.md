@@ -1,4 +1,4 @@
-# BonniePDF
+# BonniePDF (Pre
 
 A dependency-free PDF creation library for .NET. No dependancies, native binaries or GDI+. Designed for high-performance scenarios and workloads with a simple, intuitive API.
 
@@ -173,14 +173,14 @@ API guide by topic:
 BonniePDF uses a hybrid licence model:
 
 - **Community:** Free for individuals, open-source projects, non-profits, and companies with under $50k annual gross revenue. Full features, no restrictions on what you can build.
-- **Professional:** For companies over $50k revenue with up to 5 developers. Perpetual for the version purchased.
-- **Enterprise:** Unlimited developers. Priority support.
+- **Professional:** For any form of commercial usage. Perpetual for the version purchased.
+- **Enterprise:** As per professional, but with unlimited developers. Priority support.
 
 No licence keys, activation servers or runtime checks.
 
-Details at [bonniepdf.dev/license](https://www.bonniepdf.dev/license/).
+Please see details at [bonniepdf.dev/license](https://www.bonniepdf.dev/license/).
 
 ## Contributing
 
 Bug reports and feature requests via [GitHub Issues](https://github.com/BonniePDF/BonniePDF/issues).  
-Pull requests are welcomed however please open an issue first for anything non-trivial so we can discuss the approach.
+Pull requests are welcomed however please open an issue first for anything non-trivial (and potentially discuss the approach).
