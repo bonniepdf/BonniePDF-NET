@@ -307,3 +307,4 @@ BenchmarkReports/
 wwwroot/
 
 dist/
+dist-examples/
