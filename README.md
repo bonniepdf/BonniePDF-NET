@@ -1,4 +1,4 @@
-# BonniePDF (Pre
+# BonniePDF
 
 A dependency-free PDF creation library for .NET. No dependancies, native binaries or GDI+. Designed for high-performance scenarios and workloads with a simple, intuitive API.
 
