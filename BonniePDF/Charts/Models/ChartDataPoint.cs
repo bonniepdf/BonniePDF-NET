@@ -5,7 +5,14 @@ namespace BonniePDF.Charts.Models;
 /// </summary>
 public class ChartDataPoint
 {
+    /// <summary>
+    /// Gets or sets the label for the data point.
+    /// </summary>
     public string Label { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the numeric value for the data point.
+    /// </summary>
     public decimal Value { get; set; }
 
     /// <summary>
@@ -17,5 +24,5 @@ public class ChartDataPoint
     /// <summary>
     /// Gets the formatted value string based on Value and LabelFormat.
     /// </summary>
-    public string FormattedValue => Value.ToString(LabelFormat);
+    public string FormattedValue => Value.ToString(LabelFormat, System.Globalization.CultureInfo.InvariantCulture);
 }

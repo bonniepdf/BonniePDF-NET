@@ -8,7 +8,7 @@
     <RootNamespace>BonniePDF</RootNamespace>
     <AssemblyName>BonniePDF</AssemblyName>
     <Description>BonniePDF is a high-performance, zero-dependency PDF generation engine for .NET. Engineered for speed and compliance, it features an intuitive Fluent API for building complex documents, reports, integrated charting, and native PDF/A support.</Description>
-    <Version>2026.04.1</Version>
+    <Version>2026.5.1</Version>
     <Authors>BonniePDF</Authors>
     
     <RepositoryUrl></RepositoryUrl>
@@ -18,6 +18,8 @@
     <PackageReadmeFile></PackageReadmeFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Suppress analyzer/doc warnings that are not relevant for a library consumed by the demo -->
+    <NoWarn>$(NoWarn);CS1591;CS1573;CS8632;MA0002;MA0004;MA0006;MA0009;MA0011;MA0015;MA0046;MA0048;MA0051;MA0074;MA0140</NoWarn>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>BonniePDF</Title>
     <PackageProjectUrl>https://bonniepdf.dev</PackageProjectUrl>

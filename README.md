@@ -137,18 +137,18 @@ byte[] bytes = Pdf.Create(doc => { /* ... */ }).GenerateBytes();
 
 The [`Examples/`]([Examples/](https://github.com/bonniepdf/BonniePDF/tree/master/.NET/Examples)) directory contains isolated example projects:
 
-| Example | What it demonstrates |
-|---|---|
-| SimpleDocument | Basic text and multi-page layout |
-| BusinessInvoice | Tables, styled containers, payment details |
-| ChartShowcase | All chart types with sample data |
-| MovieCatalog | Large table with alternating rows and repeating headers |
-| BookPageLayout | Typography, justified text, pull quotes |
-| RichTextStyles | Mixed formatting within paragraphs |
-| Encryption | Password protection and permission control |
-| Watermarking | Diagonal watermark text behind content |
-| AsyncGeneration | Async save and in-memory generation |
-| WebApi | ASP.NET Core integration patterns |
+| Example         | What it demonstrates                                    |
+| --------------- | ------------------------------------------------------- |
+| SimpleDocument  | Basic text and multi-page layout                        |
+| BusinessInvoice | Tables, styled containers, payment details              |
+| ChartShowcase   | All chart types with sample data                        |
+| MovieCatalog    | Large table with alternating rows and repeating headers |
+| BookPageLayout  | Typography, justified text, pull quotes                 |
+| RichTextStyles  | Mixed formatting within paragraphs                      |
+| Encryption      | Password protection and permission control              |
+| Watermarking    | Diagonal watermark text behind content                  |
+| AsyncGeneration | Async save and in-memory generation                     |
+| WebApi          | ASP.NET Core integration patterns                       |
 
 ## Documentation
 
@@ -170,7 +170,7 @@ API guide by topic:
 
 ## Licence
 
-BonniePDF uses a hybrid licence model:
+BonniePDF uses a hybrid licence model.
 
 - **Community:** Free for individuals, open-source projects, non-profits, and companies with under $50k annual gross revenue. Full features, no restrictions on what you can build.
 - **Professional:** For any form of commercial usage. Perpetual for the version purchased.
