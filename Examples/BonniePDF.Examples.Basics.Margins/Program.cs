@@ -8,14 +8,14 @@ internal sealed class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Margins & Units...");
-        using (var doc = MarginExample.Generate())
+        using (var doc = MarginsExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "margin_example.pdf"));
+            doc.Save(Path.Combine(outputDir, "margins.pdf"));
         }
         Console.WriteLine("Generating Margins (Fluent API)...");
-        using (var doc = MarginExampleFluent.Generate())
+        using (var doc = MarginsExampleFluent.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "margin_example_fluent.pdf"));
+            doc.Save(Path.Combine(outputDir, "margins_fluent.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

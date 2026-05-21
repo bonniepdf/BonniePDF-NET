@@ -13,7 +13,7 @@ namespace BonniePDF.Examples.Basics.Margins;
 [System.ComponentModel.DisplayName("Margins (Fluent API)")]
 [System.ComponentModel.Category("Basics")]
 [System.ComponentModel.Description("Demonstrates margin support using the Fluent API.")]
-public static class MarginExampleFluent
+public static class MarginsExampleFluent
 {
     /// <summary>
     /// Generates the margins example PDF and saves it to <paramref name="outputPath"/>.

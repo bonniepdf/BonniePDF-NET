@@ -13,7 +13,7 @@ namespace BonniePDF.Examples.Basics.Margins;
 [System.ComponentModel.DisplayName("Margins & Units")]
 [System.ComponentModel.Category("Basics")]
 [System.ComponentModel.Description("Shows how to configure page margins and use different units.")]
-public static class MarginExample
+public static class MarginsExample
 {
     public static Document Generate()
     {
