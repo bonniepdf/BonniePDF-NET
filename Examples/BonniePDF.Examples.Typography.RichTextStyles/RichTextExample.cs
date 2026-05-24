@@ -27,6 +27,7 @@ public static class RichTextExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate700);
 
         doc.Metadata.Title = "Rich Text";
         doc.Metadata.Author = "BonniePDF";

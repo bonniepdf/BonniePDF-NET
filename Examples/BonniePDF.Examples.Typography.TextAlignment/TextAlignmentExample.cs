@@ -23,6 +23,7 @@ public static class TextAlignmentExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11).WithColor(Color.Slate700);
 
         doc.Metadata.Title = "Justified Text Alignment";
         doc.Metadata.Author = "BonniePDF";
@@ -49,9 +50,6 @@ public static class TextAlignmentExample
         doc.Add(new TextBlock
         {
             Text = sampleText,
-            FontName = StandardFonts.TimesRoman,
-            FontSize = 11,
-            TextColor = Color.Slate700,
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -60,9 +58,6 @@ public static class TextAlignmentExample
         doc.Add(new TextBlock
         {
             Text = sampleText,
-            FontName = StandardFonts.TimesRoman,
-            FontSize = 11,
-            TextColor = Color.Slate700,
             Alignment = Elements.Text.TextAlignment.Center,
             Margin = new Thickness(0, 0, 0, 20)
         });
@@ -72,9 +67,6 @@ public static class TextAlignmentExample
         doc.Add(new TextBlock
         {
             Text = sampleText,
-            FontName = StandardFonts.TimesRoman,
-            FontSize = 11,
-            TextColor = Color.Slate700,
             Alignment = Elements.Text.TextAlignment.Right,
             Margin = new Thickness(0, 0, 0, 20)
         });
@@ -84,9 +76,6 @@ public static class TextAlignmentExample
         doc.Add(new TextBlock
         {
             Text = sampleText,
-            FontName = StandardFonts.TimesRoman,
-            FontSize = 11,
-            TextColor = Color.Slate700,
             Alignment = Elements.Text.TextAlignment.Justify,
             Margin = new Thickness(0, 0, 0, 20)
         });
@@ -96,9 +85,6 @@ public static class TextAlignmentExample
         doc.Add(new TextBlock
         {
             Text = sampleText,
-            FontName = StandardFonts.TimesRoman,
-            FontSize = 11,
-            TextColor = Color.Slate700,
             Margin = new Thickness(0, 0, 0, 20)
         }.AlignJustify());
 
@@ -126,8 +112,6 @@ public static class TextAlignmentExample
             doc.Add(new TextBlock
             {
                 Text = paragraph,
-                FontName = StandardFonts.TimesRoman,
-                FontSize = 11,
                 TextColor = Color.Slate800,
                 Alignment = Elements.Text.TextAlignment.Justify,
                 Margin = new Thickness(0, 0, 0, 8)

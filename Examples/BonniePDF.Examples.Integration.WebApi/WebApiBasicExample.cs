@@ -22,6 +22,7 @@ public static class WebApiBasicExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
 
         // Set metadata
         doc.Metadata.Title = "Web API PDF";
@@ -41,9 +42,7 @@ public static class WebApiBasicExample
         doc.Add(new TextBlock
         {
             Text = "This PDF was generated in-memory and returned directly to the client.",
-            FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = Color.Slate600,
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -56,41 +55,11 @@ public static class WebApiBasicExample
             TextColor = Color.Slate700,
             Margin = new Thickness(0, 0, 0, 6)
         });
-        features.AddChild(new TextBlock
-        {
-            Text = "• No temporary files on disk",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "• Better security (sensitive data never hits disk)",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "• Non-blocking async I/O",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "• Better scalability under load",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "• Cleaner code (no temp file cleanup)",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
+        features.AddChild(new TextBlock { Text = "• No temporary files on disk" });
+        features.AddChild(new TextBlock { Text = "• Better security (sensitive data never hits disk)" });
+        features.AddChild(new TextBlock { Text = "• Non-blocking async I/O" });
+        features.AddChild(new TextBlock { Text = "• Better scalability under load" });
+        features.AddChild(new TextBlock { Text = "• Cleaner code (no temp file cleanup)" });
 
         doc.Add(features);
         return doc;
@@ -106,6 +75,7 @@ public static class WebApiBasicExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
 
         // Set metadata
         doc.Metadata.Title = "Web API PDF";
@@ -125,9 +95,7 @@ public static class WebApiBasicExample
         doc.Add(new TextBlock
         {
             Text = "This PDF was generated in-memory and returned directly to the client.",
-            FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = Color.Slate600,
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -140,41 +108,11 @@ public static class WebApiBasicExample
             TextColor = Color.Slate700,
             Margin = new Thickness(0, 0, 0, 6)
         });
-        features.AddChild(new TextBlock
-        {
-            Text = "• No temporary files on disk",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "• Better security (sensitive data never hits disk)",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "• Non-blocking async I/O",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "• Better scalability under load",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "• Cleaner code (no temp file cleanup)",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
+        features.AddChild(new TextBlock { Text = "• No temporary files on disk" });
+        features.AddChild(new TextBlock { Text = "• Better security (sensitive data never hits disk)" });
+        features.AddChild(new TextBlock { Text = "• Non-blocking async I/O" });
+        features.AddChild(new TextBlock { Text = "• Better scalability under load" });
+        features.AddChild(new TextBlock { Text = "• Cleaner code (no temp file cleanup)" });
 
         doc.Add(features);
 

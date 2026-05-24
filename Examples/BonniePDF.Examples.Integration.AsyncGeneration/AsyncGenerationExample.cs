@@ -23,6 +23,7 @@ public static class AsyncGenerationExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
 
         // Set document metadata
         doc.Metadata.Title = "Async PDF Generation";
@@ -38,43 +39,18 @@ public static class AsyncGenerationExample
             TextColor = Color.Slate800
         });
 
+        // Uses DefaultTextStyle (Helvetica, 11, Slate600)
         doc.Add(new TextBlock
         {
             Text = "This PDF was generated asynchronously using async/await.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate600
+            FontSize = 12
         });
 
         VerticalStack features = new();
-        features.AddChild(new TextBlock
-        {
-            Text = "✓ Non-blocking I/O - perfect for web applications",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "✓ Better thread pool utilization",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "✓ Supports cancellation tokens",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "✓ Scalable for high-throughput scenarios",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
+        features.AddChild(new TextBlock { Text = "✓ Non-blocking I/O - perfect for web applications" });
+        features.AddChild(new TextBlock { Text = "✓ Better thread pool utilization" });
+        features.AddChild(new TextBlock { Text = "✓ Supports cancellation tokens" });
+        features.AddChild(new TextBlock { Text = "✓ Scalable for high-throughput scenarios" });
 
         doc.Add(features);
 

@@ -30,6 +30,7 @@ public static class MovieCatalogExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Color.Slate700);
 
         doc.Metadata.Title = "Classic MoviesData Collection";
         doc.Metadata.Author = "Classic Cinema Archive";

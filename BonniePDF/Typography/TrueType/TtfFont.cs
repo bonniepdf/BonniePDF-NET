@@ -43,6 +43,22 @@ public class TtfFont
         Parse();
     }
 
+    /// <summary>
+    /// Initializes a TtfFont from raw bytes (used when loading from embedded resources).
+    /// </summary>
+    private TtfFont(byte[] bytes)
+    {
+        FilePath = string.Empty;
+        _rawData = bytes;
+        Parse();
+    }
+
+    /// <summary>Loads a TrueType font from raw bytes.</summary>
+    public static TtfFont LoadFromBytes(byte[] bytes)
+    {
+        return new TtfFont(bytes);
+    }
+
     // =====================================================
     // PUBLIC PROPERTIES (from parsed tables)
     // =====================================================

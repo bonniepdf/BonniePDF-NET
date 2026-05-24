@@ -50,7 +50,8 @@ public static class SimpleDocumentExample
             PageMode = PageMode.UseNone,
             DisplayDocTitle = false,
             Version = PdfVersion.Pdf17,
-            PdfAEnabled = true
+            PdfAEnabled = true,
+            DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate600)
         };
 
         // Add content to the first page
@@ -63,12 +64,10 @@ public static class SimpleDocumentExample
             Margin = new Thickness(0, 0, 0, 12)
         });
 
+        // Body text uses DefaultTextStyle (family=Helvetica, size=12, color=Slate600)
         doc.Add(new TextBlock
         {
-            Text = "This PDF was created using the new high-level Document API.",
-            FontName = File.Exists(fontPath) ? fontPath : StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate600
+            Text = "This PDF was created using the new high-level Document API."
         });
 
         doc.Add(new Spacer(16));
@@ -83,30 +82,11 @@ public static class SimpleDocumentExample
         });
 
         VerticalStack features = new();
-        features.AddChild(new TextBlock
-        {
-            Text = "- Simple, intuitive API", FontName = File.Exists(fontPath) ? fontPath : StandardFonts.Helvetica, FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "- Built-in metadata support", FontName = File.Exists(fontPath) ? fontPath : StandardFonts.Helvetica, FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "- Configurable zoom levels", FontName = File.Exists(fontPath) ? fontPath : StandardFonts.Helvetica, FontSize = 11,
-            TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "- Viewer preferences", FontName = File.Exists(fontPath) ? fontPath : StandardFonts.Helvetica, FontSize = 11, TextColor = Color.Slate600
-        });
-        features.AddChild(new TextBlock
-        {
-            Text = "- Automatic page management", FontName = File.Exists(fontPath) ? fontPath : StandardFonts.Helvetica, FontSize = 11,
-            TextColor = Color.Slate600
-        });
+        features.AddChild(new TextBlock { Text = "- Simple, intuitive API", FontSize = 11 });
+        features.AddChild(new TextBlock { Text = "- Built-in metadata support", FontSize = 11 });
+        features.AddChild(new TextBlock { Text = "- Configurable zoom levels", FontSize = 11 });
+        features.AddChild(new TextBlock { Text = "- Viewer preferences", FontSize = 11 });
+        features.AddChild(new TextBlock { Text = "- Automatic page management", FontSize = 11 });
 
         doc.Add(features);
 
@@ -122,12 +102,10 @@ public static class SimpleDocumentExample
             Margin = new Thickness(0, 0, 0, 12)
         });
 
+        // Body text inherits DefaultTextStyle
         doc.Add(new TextBlock
         {
-            Text = "This demonstrates multipage support with automatic page management.",
-            FontName = File.Exists(fontPath) ? fontPath : StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate600
+            Text = "This demonstrates multipage support with automatic page management."
         });
 
         // Add a custom size page (Square)
@@ -147,9 +125,6 @@ public static class SimpleDocumentExample
         doc.Add(new TextBlock
         {
             Text = $"{customSize.Width}pt x {customSize.Height}pt",
-            FontName = File.Exists(fontPath) ? fontPath : StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate600,
             Alignment = TextAlignment.Center
         });
 

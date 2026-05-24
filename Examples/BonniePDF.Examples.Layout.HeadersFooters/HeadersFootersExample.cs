@@ -46,6 +46,7 @@ public static class HeadersFootersExample
         Document doc = new(settings);
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
 
         doc.Metadata.Title = "Headers and Footers Demo";
         doc.Metadata.Author = "BonniePDF";
@@ -93,14 +94,11 @@ public static class HeadersFootersExample
                 _ => "Additional content section."
             };
 
-            // Add multiple paragraphs per section
+            // Add multiple paragraphs per section (uses DefaultTextStyle: Helvetica, 11, Slate600)
             for (int p = 0; p < 3; p++)
                 doc.Add(new TextBlock
                 {
                     Text = paragraphText + ' ' + paragraphText,
-                    FontName = StandardFonts.Helvetica,
-                    FontSize = 11,
-                    TextColor = Color.Slate600,
                     Margin = new Thickness(0, 0, 0, 12)
                 });
         }

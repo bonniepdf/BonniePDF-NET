@@ -59,6 +59,7 @@ public static class ChartShowcaseExample
 
         document.Settings.Version = PdfVersion.Pdf17;
         document.Settings.PdfAEnabled = true;
+        document.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate700);
 
         // Set document metadata
         document.Metadata.Title = "Charting Examples";

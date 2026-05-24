@@ -198,11 +198,13 @@ public class PdfDocumentSerializer
             writer.WriteViewerPreferences(catalogOptions.ViewerPrefsId, _document.Settings);
         }
 
+        bool effectivePdfA = _document.Settings.PdfAEnabled && !ctx.Resources.HasNonEmbeddedStandardFont();
+
         // Write XMP Metadata for PDF 1.7
         if (_document.Settings.Version == PdfVersion.Pdf17)
         {
             catalogOptions.XmpMetadataId = writer.GetNewId();
-            metadataWriter.WriteXmpMetadata(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings.PdfAEnabled);
+            metadataWriter.WriteXmpMetadata(catalogOptions.XmpMetadataId, _document.Metadata, effectivePdfA);
         }
 
         // Write Bookmarks for PDF 1.7
@@ -214,7 +216,7 @@ public class PdfDocumentSerializer
         }
 
         // Write PDF/A Output Intents
-        if (_document.Settings.PdfAEnabled && _document.Settings.Version == PdfVersion.Pdf17)
+        if (effectivePdfA && _document.Settings.Version == PdfVersion.Pdf17)
         {
             ComplianceWriter complianceWriter = new(writer);
             catalogOptions.PdfAEnabled = true;
@@ -398,11 +400,13 @@ public class PdfDocumentSerializer
             await writer.WriteViewerPreferencesAsync(catalogOptions.ViewerPrefsId, _document.Settings, cancellationToken).ConfigureAwait(false);
         }
 
+        bool effectivePdfA = _document.Settings.PdfAEnabled && !ctx.Resources.HasNonEmbeddedStandardFont();
+
         // Write XMP Metadata for PDF 1.7
         if (_document.Settings.Version == PdfVersion.Pdf17)
         {
             catalogOptions.XmpMetadataId = writer.GetNewId();
-            await metadataWriter.WriteXmpMetadataAsync(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings.PdfAEnabled, cancellationToken).ConfigureAwait(false);
+            await metadataWriter.WriteXmpMetadataAsync(catalogOptions.XmpMetadataId, _document.Metadata, effectivePdfA, cancellationToken).ConfigureAwait(false);
         }
 
         // Write Bookmarks for PDF 1.7
@@ -414,7 +418,7 @@ public class PdfDocumentSerializer
         }
 
         // Write PDF/A Output Intents
-        if (_document.Settings.PdfAEnabled && _document.Settings.Version == PdfVersion.Pdf17)
+        if (effectivePdfA && _document.Settings.Version == PdfVersion.Pdf17)
         {
             ComplianceWriter complianceWriter = new(writer);
             catalogOptions.PdfAEnabled = true;

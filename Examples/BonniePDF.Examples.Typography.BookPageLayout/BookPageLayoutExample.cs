@@ -25,6 +25,7 @@ public static class BookPageLayoutExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11).WithColor(Color.Slate800);
 
         doc.Metadata.Title = "The Architecture of Memory";
         doc.Metadata.Author = "Professor Halloway";
@@ -197,13 +198,7 @@ public static class BookPageLayoutExample
 
     private static TextBlock CreateParagraph(string text)
     {
-        return new TextBlock
-        {
-            Text = text,
-            FontName = StandardFonts.TimesRoman,
-            FontSize = 11,
-            TextColor = Color.Slate800,
-        };
+        return new TextBlock { Text = text };
     }
 }
 

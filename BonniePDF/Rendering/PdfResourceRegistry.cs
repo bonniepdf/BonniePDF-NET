@@ -72,15 +72,60 @@ public class PdfResourceRegistry
     /// </summary>
     public IDictionary<string, DeferredXObjectInfo> DeferredXObjects { get; } = new ConcurrentDictionary<string, DeferredXObjectInfo>();
 
+    private static readonly HashSet<string> StandardFontNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Helvetica", "Helvetica-Bold", "Helvetica-Oblique", "Helvetica-BoldOblique",
+        "Times-Roman", "Times-Bold", "Times-Italic", "Times-BoldItalic",
+        "Courier", "Courier-Bold", "Courier-Oblique", "Courier-BoldOblique",
+        "Symbol", "ZapfDingbats",
+    };
+
+    /// <summary>
+    /// Returns true if any standard (non-embedded) font has been registered without a corresponding
+    /// embedded font entry — indicating that the PDF/A claim cannot be safely made.
+    /// </summary>
+    public bool HasNonEmbeddedStandardFont()
+    {
+        foreach (var name in FontNameMap.Keys)
+        {
+            if (!StandardFontNames.Contains(name)) continue;
+            // Check if this standard font was resolved to an embedded (virtual or file) font
+            if (EmbeddedFonts.ContainsKey(name)) continue;
+            if (EmbeddedFonts.ContainsKey($"virtual:{name}")) continue;
+            if (FontAliasMap.ContainsKey(name)) continue;
+            return true;
+        }
+        return false;
+    }
+
     /// <summary>
     /// Registers a font and returns its resource name (e.g., /F1).
     /// </summary>
     public string RegisterFont(string fontIdentifier)
     {
+        // (A) Direct TTF/OTF file path
         if (IsEmbeddedFont(fontIdentifier)) return RegisterEmbeddedFont(fontIdentifier);
+
+        // (B) Already registered as a virtual (bytes-based) font
+        string virtualKey = $"virtual:{fontIdentifier}";
+        if (EmbeddedFonts.ContainsKey(virtualKey))
+            return EmbeddedFonts[virtualKey].ResourceName;
 
         if (PdfAEnabled)
         {
+            // (C1) Try FontManager bytes (bundled Liberation fonts)
+            byte[] bytes = FontManager.GetBytesForStandardFont(fontIdentifier);
+            if (bytes != null)
+            {
+                string resourceName = RegisterEmbeddedFontFromBytes(bytes, virtualKey);
+                FontNameMap[fontIdentifier] = resourceName;
+                // Register for accurate measurement
+                if (EmbeddedFonts.TryGetValue(virtualKey, out EmbeddedFontInfo info) && info.Font != null)
+                    FontMetrics.RegisterFontInstance(fontIdentifier, info.Font);
+                return resourceName;
+            }
+
+            // (C2) File-based TTF resolution (existing logic)
             string ttfPath = ResolveStandardFontToTtf(fontIdentifier);
             if (ttfPath != null)
             {
@@ -94,6 +139,7 @@ public class PdfResourceRegistry
             }
         }
 
+        // (D) Standard type-1 font
         if (!FontNameMap.TryGetValue(fontIdentifier, out string value))
         {
             _fontCounter++;
@@ -104,13 +150,45 @@ public class PdfResourceRegistry
         return value;
     }
 
+    private string RegisterEmbeddedFontFromBytes(byte[] bytes, string key)
+    {
+        if (!EmbeddedFonts.ContainsKey(key))
+        {
+            TtfFont font = null;
+            GlyphUsageTracker tracker = null;
+            try
+            {
+                font = TtfFont.LoadFromBytes(bytes);
+                tracker = new GlyphUsageTracker(font);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[BonniePDF] Could not load font from bytes for key \"{key}\": {ex.Message}");
+            }
+            _fontCounter++;
+            string resourceName = $"/F{_fontCounter}";
+            string subsetPrefix = GenerateSubsetPrefix();
+            var info = new EmbeddedFontInfo
+            {
+                Font = font,
+                Tracker = tracker,
+                SubsetPrefix = subsetPrefix,
+                ResourceName = resourceName,
+            };
+            EmbeddedFonts[key] = info;
+            FontNameMap[key] = resourceName;
+        }
+        return EmbeddedFonts[key].ResourceName;
+    }
+
     /// <summary>
-    /// Checks if a font is an embedded TrueType/OpenType font.
+    /// Checks if a font is an embedded TrueType/OpenType font (file path or virtual bytes-based).
     /// </summary>
     public static bool IsEmbeddedFont(string fontIdentifier)
     {
         return fontIdentifier.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) ||
-               fontIdentifier.EndsWith(".otf", StringComparison.OrdinalIgnoreCase);
+               fontIdentifier.EndsWith(".otf", StringComparison.OrdinalIgnoreCase) ||
+               fontIdentifier.StartsWith("virtual:", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -211,6 +289,11 @@ public class PdfResourceRegistry
             return fontInfo?.Font;
         }
 
+        // Check virtual (bytes-based) font
+        string virtualKey = $"virtual:{fontIdentifier}";
+        if (EmbeddedFonts.TryGetValue(virtualKey, out EmbeddedFontInfo virtualFontInfo))
+            return virtualFontInfo?.Font;
+
         if (FontAliasMap.TryGetValue(fontIdentifier, out string ttfPath))
         {
             EmbeddedFontInfo fontInfo = GetEmbeddedFont(ttfPath);
@@ -226,6 +309,14 @@ public class PdfResourceRegistry
         {
             EmbeddedFontInfo fontInfo = GetEmbeddedFont(fontIdentifier);
             fontInfo?.Tracker.MarkUsed(text);
+            return;
+        }
+
+        // Check virtual (bytes-based) font
+        string virtualKey = $"virtual:{fontIdentifier}";
+        if (EmbeddedFonts.TryGetValue(virtualKey, out EmbeddedFontInfo virtualFontInfo))
+        {
+            virtualFontInfo?.Tracker.MarkUsed(text);
             return;
         }
 
@@ -340,8 +431,13 @@ public class PdfResourceRegistry
         foreach (KeyValuePair<string, string> fontEntry in FontNameMap)
         {
             string fontIdentifier = fontEntry.Key;
-            
+
+            // Skip file-path aliases (already written under the TTF path key)
             if (FontAliasMap.ContainsKey(fontIdentifier))
+                continue;
+
+            // Skip logical names that were mapped to a virtual (bytes-based) font — written under "virtual:" key
+            if (EmbeddedFonts.ContainsKey($"virtual:{fontIdentifier}"))
                 continue;
 
             if (IsEmbeddedFont(fontIdentifier))
@@ -422,11 +518,25 @@ public class PdfResourceRegistry
             string fontIdentifier = fontEntry.Key;
             string resourceName = fontEntry.Value;
 
+            // Skip file-path aliases (written under the TTF path key)
             if (FontAliasMap.ContainsKey(fontIdentifier))
                 continue;
 
-            if (FontIdMap.TryGetValue(fontIdentifier, out int objectId))
+            // Skip logical names that were mapped to a virtual (bytes-based) font — handled under "virtual:" key
+            if (EmbeddedFonts.ContainsKey($"virtual:{fontIdentifier}"))
+                continue;
+
+            // For virtual: keys, resolve the object ID via the virtual key itself
+            int objectId = 0;
+            if (fontIdentifier.StartsWith("virtual:", StringComparison.OrdinalIgnoreCase))
+            {
+                if (FontIdMap.TryGetValue(fontIdentifier, out objectId))
+                    fontRefs.Add($"{resourceName} {objectId} 0 R");
+            }
+            else if (FontIdMap.TryGetValue(fontIdentifier, out objectId))
+            {
                 fontRefs.Add($"{resourceName} {objectId} 0 R");
+            }
         }
         string fontResources = "<< /Font << " + string.Join(' ', fontRefs) + " >> >>";
 
@@ -454,7 +564,7 @@ public class PdfResourceRegistry
             }
 
         string imageResources = xobjRefs.Count > 0 ? "<< /XObject << " + string.Join(' ', xobjRefs) + " >> >>" : "";
-        
+
         return CombineResources(fontResources, imageResources);
     }
 
@@ -471,7 +581,12 @@ public class PdfResourceRegistry
         {
             string fontIdentifier = fontEntry.Key;
 
+            // Skip file-path aliases (already written under the TTF path key)
             if (FontAliasMap.ContainsKey(fontIdentifier))
+                continue;
+
+            // Skip logical names that were mapped to a virtual (bytes-based) font — written under "virtual:" key
+            if (EmbeddedFonts.ContainsKey($"virtual:{fontIdentifier}"))
                 continue;
 
             if (IsEmbeddedFont(fontIdentifier))
@@ -552,11 +667,25 @@ public class PdfResourceRegistry
             string fontIdentifier = fontEntry.Key;
             string resourceName = fontEntry.Value;
 
+            // Skip file-path aliases
             if (FontAliasMap.ContainsKey(fontIdentifier))
                 continue;
 
-            if (FontIdMap.TryGetValue(fontIdentifier, out int objectId))
+            // Skip logical names that were mapped to a virtual (bytes-based) font
+            if (EmbeddedFonts.ContainsKey($"virtual:{fontIdentifier}"))
+                continue;
+
+            // For virtual: keys, resolve the object ID via the virtual key itself
+            int objectId = 0;
+            if (fontIdentifier.StartsWith("virtual:", StringComparison.OrdinalIgnoreCase))
+            {
+                if (FontIdMap.TryGetValue(fontIdentifier, out objectId))
+                    fontRefs.Add($"{resourceName} {objectId} 0 R");
+            }
+            else if (FontIdMap.TryGetValue(fontIdentifier, out objectId))
+            {
                 fontRefs.Add($"{resourceName} {objectId} 0 R");
+            }
         }
         string fontResources = "<< /Font << " + string.Join(' ', fontRefs) + " >> >>";
 
@@ -584,7 +713,7 @@ public class PdfResourceRegistry
             }
 
         string imageResources = xobjRefs.Count > 0 ? "<< /XObject << " + string.Join(' ', xobjRefs) + " >> >>" : "";
-        
+
         return CombineResources(fontResources, imageResources);
     }
 

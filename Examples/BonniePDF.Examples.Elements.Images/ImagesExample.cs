@@ -31,6 +31,7 @@ public static class ImagesExample
         Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(new Color(128, 128, 128));
         doc.Metadata.Title = "Image Support Demo";
         doc.Metadata.Author = "BonniePDF";
 
@@ -45,9 +46,7 @@ public static class ImagesExample
 
         doc.Add(new TextBlock
         {
-            Text = "This section demonstrates JPEG image embedding capabilities.",
-            FontSize = 12,
-            TextColor = new Color(128, 128, 128)
+            Text = "This section demonstrates JPEG image embedding capabilities."
         });
 
         if (File.Exists(jpgPath))
@@ -64,8 +63,7 @@ public static class ImagesExample
             doc.Add(new TextBlock
             {
                 Text = "Image scaled to fit within 300x200 bounds while maintaining aspect ratio.",
-                FontSize = 10,
-                TextColor = new Color(128, 128, 128)
+                FontSize = 10
             });
 
             doc.Add(new Image
@@ -88,8 +86,7 @@ public static class ImagesExample
             doc.Add(new TextBlock
             {
                 Text = "Image scaled to fill 300x200 bounds, maintaining aspect ratio (may crop).",
-                FontSize = 10,
-                TextColor = new Color(128, 128, 128)
+                FontSize = 10
             });
 
             doc.Add(new Image
@@ -112,8 +109,7 @@ public static class ImagesExample
             doc.Add(new TextBlock
             {
                 Text = "Image stretched to fill 300x200 bounds, ignoring aspect ratio.",
-                FontSize = 10,
-                TextColor = new Color(128, 128, 128)
+                FontSize = 10
             });
 
             doc.Add(new Image
@@ -166,9 +162,7 @@ public static class ImagesExample
 
         doc.Add(new TextBlock
         {
-            Text = "This section demonstrates PNG image embedding with transparency support.",
-            FontSize = 12,
-            TextColor = new Color(128, 128, 128)
+            Text = "This section demonstrates PNG image embedding with transparency support."
         });
 
         // Example 1: Basic PNG
@@ -222,8 +216,7 @@ public static class ImagesExample
         doc.Add(new TextBlock
         {
             Text = "PNG images can have alpha transparency (soft mask in PDF).",
-            FontSize = 10,
-            TextColor = new Color(128, 128, 128)
+            FontSize = 10
         });
 
         doc.Add(new Container

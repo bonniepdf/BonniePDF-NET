@@ -21,6 +21,18 @@ public static class FontMetrics
     // This ensures measurement uses actual TTF metrics to match rendering exactly.
     private static readonly Dictionary<string, string> FontPathAliases = new(StringComparer.OrdinalIgnoreCase);
 
+    // Instance alias map: logical font name → TtfFont instance (loaded from bytes, no file path)
+    private static readonly Dictionary<string, TtfFont> FontInstanceAliases = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Registers a TtfFont instance for accurate width measurement when font was loaded from bytes.
+    /// Should be called by PdfResourceRegistry when FontManager provides bytes for a standard font.
+    /// </summary>
+    public static void RegisterFontInstance(string logicalName, TtfFont font)
+    {
+        FontInstanceAliases[logicalName] = font;
+    }
+
     /// <summary>
     /// Registers a logical font name alias pointing to a specific TTF file path.
     /// Should be called by PdfResourceRegistry when PDF/A mode maps a standard font to an embedded TTF.
@@ -77,7 +89,11 @@ public static class FontMetrics
         if (fontIdentifier.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase))
             return GetTtfWidth(text, fontIdentifier, fontSize);
 
-        // B. IS IT A REGISTERED ALIAS TO A TTF FILE?
+        // B1. IS IT A BYTES-LOADED FONT INSTANCE (from FontManager)?
+        if (FontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont instanceFont))
+            return GetKernedStringWidth(text, instanceFont, fontSize);
+
+        // B2. IS IT A REGISTERED ALIAS TO A TTF FILE?
         // When PDF/A mode embeds a real TTF for a logical name (e.g. "Helvetica-Bold" → arialbd.ttf),
         // measure using the actual TTF metrics so layout matches rendering.
         if (FontPathAliases.TryGetValue(fontIdentifier, out string ttfPath))

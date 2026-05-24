@@ -34,6 +34,15 @@ public abstract class TextElementBase : ElementBase
     private bool _isItalic;
     private string _fontName = StandardFonts.Helvetica;
 
+    // Explicit-set tracking for this feature DefaultTextStyle cascade
+    private bool _fontExplicit;
+    private float _fontSize = 12f;
+    private bool _fontSizeExplicit;
+    private Color _textColor = Color.Black;
+    private bool _textColorExplicit;
+    private float _lineHeightMultiplier = 1.2f;
+    private bool _lineHeightExplicit;
+
     protected TextElementBase()
     {
         var defaultStyle = AmbientDefaultStyle.Value;
@@ -67,7 +76,7 @@ public abstract class TextElementBase : ElementBase
         set
         {
             _fontFamily = value;
-            if (value != null) ResolveFontName();
+            if (value != null) { _fontExplicit = true; ResolveFontName(); }
         }
     }
 
@@ -82,6 +91,7 @@ public abstract class TextElementBase : ElementBase
         set
         {
             _weight = value;
+            _fontExplicit = true;
             ResolveFontName();
         }
     }
@@ -97,6 +107,7 @@ public abstract class TextElementBase : ElementBase
         set
         {
             _isItalic = value;
+            _fontExplicit = true;
             ResolveFontName();
         }
     }
@@ -114,18 +125,27 @@ public abstract class TextElementBase : ElementBase
         {
             _fontName = value;
             _fontFamily = null; // Direct font name bypasses family resolution
+            _fontExplicit = true;
         }
     }
 
     /// <summary>
     /// Font size for text rendering
     /// </summary>
-    public float FontSize { get; set; } = 12;
+    public float FontSize
+    {
+        get => _fontSize;
+        set { _fontSize = value; _fontSizeExplicit = true; }
+    }
 
     /// <summary>
     /// TextBlock color for rendering
     /// </summary>
-    public Color TextColor { get; set; } = Color.Black;
+    public Color TextColor
+    {
+        get => _textColor;
+        set { _textColor = value; _textColorExplicit = true; }
+    }
 
     /// <summary>
     /// Text decoration (underline, strikethrough, or both)
@@ -147,12 +167,43 @@ public abstract class TextElementBase : ElementBase
     /// Multiplier applied to font size to compute line height. Default is 1.2.
     /// Set to a value like 1.5 for looser leading or 1.0 for tight leading.
     /// </summary>
-    public float LineHeightMultiplier { get; set; } = 1.2f;
+    public float LineHeightMultiplier
+    {
+        get => _lineHeightMultiplier;
+        set { _lineHeightMultiplier = value; _lineHeightExplicit = true; }
+    }
 
     /// <summary>
     /// Line height calculated from font size and LineHeightMultiplier
     /// </summary>
     protected float LineHeight => FontSize * LineHeightMultiplier;
+
+    /// <summary>
+    /// Applies style properties from <paramref name="style"/> only for properties
+    /// that have not been explicitly set by user code. Called by the document
+    /// tree-walk before rendering when DefaultTextStyle is configured.
+    /// </summary>
+    public void ApplyDefaultStyleIfNotSet(TextStyle style)
+    {
+        if (style == null) return;
+
+        if (!_fontExplicit)
+        {
+            if (style.FontFamily != null)
+            {
+                _fontFamily = style.FontFamily;
+                if (style.Weight != FontWeight.Normal) _weight = style.Weight;
+                if (style.Italic) _isItalic = true;
+                ResolveFontName();
+            }
+        }
+        if (!_fontSizeExplicit && style.FontSize.HasValue)
+            _fontSize = style.FontSize.Value;
+        if (!_textColorExplicit && style.Color.HasValue)
+            _textColor = style.Color.Value;
+        if (!_lineHeightExplicit && style.LineHeightMultiplier.HasValue)
+            _lineHeightMultiplier = style.LineHeightMultiplier.Value;
+    }
 
     /// <summary>
     /// Computes wrapped lines for text that exceeds the maximum width.

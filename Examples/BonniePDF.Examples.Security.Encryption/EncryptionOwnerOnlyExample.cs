@@ -25,6 +25,7 @@ public static class EncryptionOwnerOnlyExample
         );
 
         Document doc = new(settings);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
 
         doc.Add(new TextBlock
         {

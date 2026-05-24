@@ -76,6 +76,10 @@ public class Table : BorderedElementBase, IStatefulElement
     /// </summary>
     public IList<TableRow> Rows => _rows;
 
+    /// <summary>Returns all rows (headers + data rows + footers) for tree-walking.</summary>
+    public IReadOnlyList<TableRow> GetAllRows() =>
+        _headers.Concat(_rows).Concat(_footers).ToList().AsReadOnly();
+
     /// <summary>
     /// Adds a header row to the table
     /// </summary>

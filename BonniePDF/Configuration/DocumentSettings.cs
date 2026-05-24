@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BonniePDF.Core;
 using BonniePDF.Elements;
+using BonniePDF.Elements.Text;
 using BonniePDF.Security.Models;
 
 namespace BonniePDF.Configuration;
@@ -145,6 +146,19 @@ public class DocumentSettings
     /// Internal destinations mapping a name to a 0-based page index.
     /// </summary>
     public IDictionary<string, int> NamedDestinations { get; set; } = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Default text style applied to all text elements that have not had their style
+    /// properties explicitly set. Use this to define a document-wide font/size/color
+    /// baseline and avoid repeating style assignments on every element.
+    ///
+    /// <example>
+    /// <code>
+    /// settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
+    /// </code>
+    /// </example>
+    /// </summary>
+    public TextStyle DefaultTextStyle { get; set; }
 
     /// <summary>
     /// Gets or sets the watermark settings for the document.

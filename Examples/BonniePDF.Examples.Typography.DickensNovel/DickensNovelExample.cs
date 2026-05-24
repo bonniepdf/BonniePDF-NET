@@ -54,6 +54,7 @@ public static partial class DickensNovelExample
             Version     = PdfVersion.Pdf17,
             PdfAEnabled = true,
             DisplayDocTitle = true,
+            DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11).WithColor(Color.Slate900),
 
             // Running header: book title left, author right — static across all pages.
             // (The template is called per page after layout, so a closure over fixed strings works.)
@@ -299,9 +300,6 @@ public static partial class DickensNovelExample
         doc.Add(new TextBlock
         {
             Text      = text,
-            FontName  = StandardFonts.TimesRoman,
-            FontSize  = 11,
-            TextColor = Color.Slate900,
             Alignment = TextAlignment.Justify,
             Margin    = new Thickness(0, 0, 0, 7)
         });

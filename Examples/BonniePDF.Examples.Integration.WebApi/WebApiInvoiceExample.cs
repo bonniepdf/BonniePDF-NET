@@ -23,6 +23,7 @@ public static class WebApiInvoiceExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate600);
 
         doc.Metadata.Title = $"Invoice INV-{DateTime.Now.Year}-001";
         doc.Metadata.Author = "MyCompany";
@@ -38,22 +39,8 @@ public static class WebApiInvoiceExample
         });
 
         // Customer info
-        doc.Add(new TextBlock
-        {
-            Text = "Customer: John Doe",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate600
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = $"Date: {DateTime.Now:yyyy-MM-dd}",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate600,
-            Margin = new Thickness(0, 0, 0, 16)
-        });
+        doc.Add(new TextBlock { Text = "Customer: John Doe" });
+        doc.Add(new TextBlock { Text = $"Date: {DateTime.Now:yyyy-MM-dd}", Margin = new Thickness(0, 0, 0, 16) });
 
         // Sample table
         Table table = new(3, 1, 2, 1); // column weights
@@ -64,22 +51,22 @@ public static class WebApiInvoiceExample
             new TextBlock { Text = "Total", FontName = StandardFonts.HelveticaBold, FontSize = 10 }
         );
         table.AddRow(
-            new TextBlock { Text = "Web Development Services", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "1", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$5,000.00", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$5,000.00", FontName = StandardFonts.Helvetica, FontSize = 10 }
+            new TextBlock { Text = "Web Development Services", FontSize = 10 },
+            new TextBlock { Text = "1", FontSize = 10 },
+            new TextBlock { Text = "$5,000.00", FontSize = 10 },
+            new TextBlock { Text = "$5,000.00", FontSize = 10 }
         );
         table.AddRow(
-            new TextBlock { Text = "Hosting Setup", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "1", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$500.00", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$500.00", FontName = StandardFonts.Helvetica, FontSize = 10 }
+            new TextBlock { Text = "Hosting Setup", FontSize = 10 },
+            new TextBlock { Text = "1", FontSize = 10 },
+            new TextBlock { Text = "$500.00", FontSize = 10 },
+            new TextBlock { Text = "$500.00", FontSize = 10 }
         );
         table.AddRow(
-            new TextBlock { Text = "Domain Registration", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "1", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$50.00", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$50.00", FontName = StandardFonts.Helvetica, FontSize = 10 }
+            new TextBlock { Text = "Domain Registration", FontSize = 10 },
+            new TextBlock { Text = "1", FontSize = 10 },
+            new TextBlock { Text = "$50.00", FontSize = 10 },
+            new TextBlock { Text = "$50.00", FontSize = 10 }
         );
 
         doc.Add(table);
@@ -95,6 +82,7 @@ public static class WebApiInvoiceExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate600);
 
         doc.Metadata.Title = $"Invoice {invoiceNumber}";
         doc.Metadata.Author = "MyCompany";
@@ -110,22 +98,8 @@ public static class WebApiInvoiceExample
         });
 
         // Customer info
-        doc.Add(new TextBlock
-        {
-            Text = $"Customer: {customerName}",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate600
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = $"Date: {DateTime.Now:yyyy-MM-dd}",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate600,
-            Margin = new Thickness(0, 0, 0, 16)
-        });
+        doc.Add(new TextBlock { Text = $"Customer: {customerName}" });
+        doc.Add(new TextBlock { Text = $"Date: {DateTime.Now:yyyy-MM-dd}", Margin = new Thickness(0, 0, 0, 16) });
 
         // Sample table
         Table table = new(3, 1, 2, 1); // column weights
@@ -136,22 +110,22 @@ public static class WebApiInvoiceExample
             new TextBlock { Text = "Total", FontName = StandardFonts.HelveticaBold, FontSize = 10 }
         );
         table.AddRow(
-            new TextBlock { Text = "Web Development Services", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "1", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$5,000.00", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$5,000.00", FontName = StandardFonts.Helvetica, FontSize = 10 }
+            new TextBlock { Text = "Web Development Services", FontSize = 10 },
+            new TextBlock { Text = "1", FontSize = 10 },
+            new TextBlock { Text = "$5,000.00", FontSize = 10 },
+            new TextBlock { Text = "$5,000.00", FontSize = 10 }
         );
         table.AddRow(
-            new TextBlock { Text = "Hosting Setup", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "1", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$500.00", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$500.00", FontName = StandardFonts.Helvetica, FontSize = 10 }
+            new TextBlock { Text = "Hosting Setup", FontSize = 10 },
+            new TextBlock { Text = "1", FontSize = 10 },
+            new TextBlock { Text = "$500.00", FontSize = 10 },
+            new TextBlock { Text = "$500.00", FontSize = 10 }
         );
         table.AddRow(
-            new TextBlock { Text = "Domain Registration", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "1", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$50.00", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "$50.00", FontName = StandardFonts.Helvetica, FontSize = 10 }
+            new TextBlock { Text = "Domain Registration", FontSize = 10 },
+            new TextBlock { Text = "1", FontSize = 10 },
+            new TextBlock { Text = "$50.00", FontSize = 10 },
+            new TextBlock { Text = "$50.00", FontSize = 10 }
         );
 
         doc.Add(table);
