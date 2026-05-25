@@ -132,6 +132,29 @@ public class DocumentSettings
     public bool PdfAEnabled { get; set; }
 
     /// <summary>
+    /// Gets or sets the accessibility / tagged-PDF conformance mode.
+    /// Default <see cref="AccessibilityMode.None"/> — the writer
+    /// produces an untagged PDF and ignores all tagging machinery.
+    /// Set to <see cref="AccessibilityMode.PdfUa1"/> to opt the
+    /// document into PDF/UA-1 emission (structure tree, MCIDs, XMP
+    /// conformance claim, <c>/Lang</c>, <c>/MarkInfo</c>).
+    ///
+    /// Orthogonal to <see cref="PdfAEnabled"/>: a document can be
+    /// PDF/A, PDF/UA, both, or neither. See
+    /// <c>the specification</c>.
+    /// </summary>
+    public AccessibilityMode Accessibility { get; set; } = AccessibilityMode.None;
+
+    /// <summary>
+    /// Document natural language as a BCP-47 tag (e.g. <c>"en-GB"</c>,
+    /// <c>"de-DE"</c>, <c>"fr"</c>). Written to the catalog as
+    /// <c>/Lang</c> when set; required for PDF/UA-1 conformance, where
+    /// it tells assistive tech the language of unmarked content.
+    /// Default <c>null</c> (no language declared).
+    /// </summary>
+    public string Language { get; set; }
+
+    /// <summary>
     /// Gets or sets the bookmark items for the document outline tree.
     /// </summary>
     public IList<BookmarkItem> Bookmarks { get; set; } = new List<BookmarkItem>();
