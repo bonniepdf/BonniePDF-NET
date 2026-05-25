@@ -226,6 +226,8 @@ public class PdfDocumentSerializer
 
         CatalogOptions catalogOptions = new();
 
+        // PDF/UA-1 mandates /DisplayDocTitle true (Matterhorn Protocol §7-1).
+        if (taggingContext != null) _document.Settings.DisplayDocTitle = true;
         if (HasViewerPreferences(_document.Settings))
         {
             catalogOptions.ViewerPrefsId = writer.GetNewId();
@@ -466,6 +468,8 @@ public class PdfDocumentSerializer
 
         CatalogOptions catalogOptions = new();
 
+        // PDF/UA-1 mandates /DisplayDocTitle true (Matterhorn Protocol §7-1).
+        if (taggingContext != null) _document.Settings.DisplayDocTitle = true;
         if (HasViewerPreferences(_document.Settings))
         {
             catalogOptions.ViewerPrefsId = writer.GetNewId();
