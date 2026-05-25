@@ -378,6 +378,7 @@ public class PdfCanvas : ICanvas
         int mcid = _tagging.AllocateMcid();
         _tagging.Tree.AddMcid(mcid);
         PdfOperators.BeginMarkedContentTagged(_stream, role, mcid);
+        _tagging.PushOpenRole(role);
         _openMarkedContent++;
     }
 
@@ -387,6 +388,7 @@ public class PdfCanvas : ICanvas
         if (_tagging == null) return;
         if (_openMarkedContent <= 0) return; // tolerate unbalanced End() rather than emit a stray EMC
         PdfOperators.EndMarkedContent(_stream);
+        _tagging.PopOpenRole();
         _openMarkedContent--;
     }
 

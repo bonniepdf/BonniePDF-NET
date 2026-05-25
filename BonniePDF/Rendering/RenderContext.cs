@@ -205,6 +205,21 @@ public class RenderContext
     /// </summary>
     public void NewPage()
     {
+        // this feature page-break-aware tagging: marked-content scopes (BDC/EMC)
+        // cannot cross a page boundary per PDF spec, but structure
+        // elements can. Snapshot any marked-content currently open,
+        // emit EMC on the outgoing page so the marks are balanced,
+        // then on the new page reopen the same roles with fresh MCIDs.
+        // All MCIDs (old page + new page) attach to the same structure
+        // elements because the StructureTreeBuilder stack is untouched.
+        string[] reopenRoles = null;
+        if (Tagging != null && Tagging.OpenMarkedContentCount > 0)
+        {
+            reopenRoles = Tagging.SnapshotOpenRolesBottomUp();
+            for (int i = reopenRoles.Length - 1; i >= 0; i--)
+                Canvas.EndMarkedContent();
+        }
+
         Pages.Add(new StringBuilder());
         CurrentPageIndex++;
         CurrentX = Margin;
@@ -212,6 +227,13 @@ public class RenderContext
         // MCIDs restart at 0 per PDF page (ISO 32000-1 §14.7.4).
         Tagging?.ResetPage();
         UpdateCanvas();
+
+        if (reopenRoles != null)
+        {
+            for (int i = 0; i < reopenRoles.Length; i++)
+                Canvas.BeginMarkedContent(reopenRoles[i]);
+        }
+
         OnPageCreated?.Invoke(CurrentPageIndex);
     }
 
