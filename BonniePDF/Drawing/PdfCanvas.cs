@@ -376,7 +376,7 @@ public class PdfCanvas : ICanvas
     {
         if (_tagging == null) return;
         int mcid = _tagging.AllocateMcid();
-        _tagging.Tree.AddMcid(mcid);
+        _tagging.Tree.AddMcid(mcid, _tagging.CurrentPageIndex);
         PdfOperators.BeginMarkedContentTagged(_stream, role, mcid);
         _tagging.PushOpenRole(role);
         _openMarkedContent++;

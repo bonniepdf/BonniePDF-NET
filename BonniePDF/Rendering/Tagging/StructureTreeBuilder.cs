@@ -67,13 +67,25 @@ public sealed class StructureTreeBuilder
 
     /// <summary>
     /// Attach a marked-content identifier (MCID) to the current
-    /// structure element. Called by the canvas when marked-content is
-    /// emitted in the content stream.
+    /// structure element, paired with the zero-based page index on
+    /// which the MCID was emitted. Called by the canvas when
+    /// marked-content is written into the content stream.
+    ///
+    /// The page-aware overload is what the canvas uses in real
+    /// rendering; the page-less overload (defaulting to page 0) is
+    /// kept for unit tests of the structure-tree model in isolation.
     /// </summary>
-    public void AddMcid(int mcid)
+    public void AddMcid(int mcid, int pageIndex)
     {
         Current.McIds.Add(mcid);
+        Current.McIdPages.Add(pageIndex);
     }
+
+    /// <summary>
+    /// Convenience overload that records the MCID on page 0. Used by
+    /// model-level tests that don't simulate a full render pipeline.
+    /// </summary>
+    public void AddMcid(int mcid) => AddMcid(mcid, pageIndex: 0);
 
     /// <summary>Set <c>/Alt</c> on the current element.</summary>
     public void SetAlt(string text) => Current.Alt = text;

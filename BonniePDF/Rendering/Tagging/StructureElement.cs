@@ -47,6 +47,17 @@ public sealed class StructureElement
     public IList<int> McIds { get; }
 
     /// <summary>
+    /// Zero-based page index for each entry in <see cref="McIds"/>,
+    /// parallel to that list (<c>McIdPages[i]</c> is the page on which
+    /// <c>McIds[i]</c> was emitted). The structure-tree writer uses
+    /// this to emit <c>/Pg</c> on the StructElem (when all MCIDs share
+    /// a page) or <c>/MCR</c> dicts with explicit <c>/Pg</c> per entry
+    /// (when MCIDs span multiple pages — which happens whenever a
+    /// tagged element overflows past a page break).
+    /// </summary>
+    public IList<int> McIdPages { get; } = new List<int>();
+
+    /// <summary>
     /// <c>/Alt</c> alternate text — read by assistive tech in place of
     /// the visible content. Required by PDF/UA on <see cref="SemanticRole.Figure"/>
     /// elements that aren't <see cref="SemanticRole.Artifact"/>.

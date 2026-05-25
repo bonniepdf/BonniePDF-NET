@@ -30,14 +30,34 @@ public sealed class TaggingContext
     public StructureTreeBuilder Tree { get; }
 
     /// <summary>
+    /// Zero-based index of the page currently being rendered. Set by
+    /// <see cref="RenderContext"/> in <c>NewPage</c> and at construction.
+    /// The canvas reads this when allocating MCIDs so each MCID can be
+    /// later paired with its page for /Pg / ParentTree emission.
+    /// </summary>
+    public int CurrentPageIndex { get; set; }
+
+    /// <summary>
     /// Allocate the next MCID for the current page. MCIDs restart at 0
     /// on every new page per ISO 32000-1 §14.7.4.
     /// </summary>
     public int AllocateMcid() => _nextMcidOnPage++;
 
     /// <summary>
-    /// Reset the per-page MCID counter to 0. Called by
-    /// <c>RenderContext</c> on every <c>NewPage</c>.
+    /// Reset the per-page MCID counter to 0 and update the current
+    /// page index. Called by <c>RenderContext</c> on every
+    /// <c>NewPage</c>.
+    /// </summary>
+    public void ResetPage(int pageIndex)
+    {
+        _nextMcidOnPage = 0;
+        CurrentPageIndex = pageIndex;
+    }
+
+    /// <summary>
+    /// Back-compat overload — resets the MCID counter without changing
+    /// the current page index. Used by tests that don't care about
+    /// per-MCID page tracking.
     /// </summary>
     public void ResetPage() => _nextMcidOnPage = 0;
 

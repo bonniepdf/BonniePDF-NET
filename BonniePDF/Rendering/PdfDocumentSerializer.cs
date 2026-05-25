@@ -130,6 +130,13 @@ public class PdfDocumentSerializer
                 ["/Contents"] = $"{contentId} 0 R"
             };
 
+            // Tagged PDF: each page gets /StructParents equal to its
+            // page index. The /ParentTree (emitted at the end by
+            // StructureTreeWriter) uses the same key, so the reverse
+            // lookup MCID→StructElem works.
+            if (taggingContext != null)
+                pageDict["/StructParents"] = (pageIndex - 1).ToString();
+
             // Write link annotations if present
             if (pageOutput.Hyperlinks.Count > 0)
             {
@@ -240,7 +247,7 @@ public class PdfDocumentSerializer
         if (taggingContext != null)
         {
             StructureTreeWriter structureTreeWriter = new(writer);
-            catalogOptions.StructTreeRootId = structureTreeWriter.Write(taggingContext.Tree);
+            catalogOptions.StructTreeRootId = structureTreeWriter.Write(taggingContext.Tree, pageIds);
             catalogOptions.Tagged = true;
             catalogOptions.Language = _document.Settings.Language;
         }
@@ -350,6 +357,10 @@ public class PdfDocumentSerializer
                 ["/Contents"] = $"{contentId} 0 R"
             };
 
+            // Tagged PDF: /StructParents keyed by 0-based page index.
+            if (taggingContext != null)
+                pageDict["/StructParents"] = (pageIndex - 1).ToString();
+
             // Write link annotations if present
             if (pageOutput.Hyperlinks.Count > 0)
             {
@@ -456,7 +467,7 @@ public class PdfDocumentSerializer
         if (taggingContext != null)
         {
             StructureTreeWriter structureTreeWriter = new(writer);
-            catalogOptions.StructTreeRootId = await structureTreeWriter.WriteAsync(taggingContext.Tree, cancellationToken)
+            catalogOptions.StructTreeRootId = await structureTreeWriter.WriteAsync(taggingContext.Tree, pageIds, cancellationToken)
                 .ConfigureAwait(false);
             catalogOptions.Tagged = true;
             catalogOptions.Language = _document.Settings.Language;

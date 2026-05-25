@@ -225,7 +225,9 @@ public class RenderContext
         CurrentX = Margin;
         CurrentY = Margin;
         // MCIDs restart at 0 per PDF page (ISO 32000-1 §14.7.4).
-        Tagging?.ResetPage();
+        // Pass the new page index so any subsequent MCID can be paired
+        // with its page for /Pg + /ParentTree emission later.
+        Tagging?.ResetPage(CurrentPageIndex);
         UpdateCanvas();
 
         if (reopenRoles != null)
