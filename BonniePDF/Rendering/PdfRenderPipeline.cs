@@ -7,6 +7,7 @@ using BonniePDF.Drawing;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Rendering.Pdf;
+using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
@@ -127,6 +128,46 @@ public static class PdfRenderPipeline
     /// graphics state leaks between elements.
     /// </summary>
     private static void RenderElementWithOverflow(IElement element, RenderContext ctx, float contentWidth)
+    {
+        // when tagging is on and the element declares a structure
+        // role, push the role onto the in-memory tree and wrap the
+        // element's render in a /role MCID BDC ... EMC pair so the
+        // canvas's draw calls attach as marked content. Pop after.
+        //
+        // No-op when tagging is off (Tagging == null) or the element
+        // isn't an IRoleProvider — pre-G-1 elements behave exactly as
+        // they did.
+        //
+        // Known limitation deferred to a later stage-0 task: elements
+        // that overflow across pages emit BDC on one page and EMC on
+        // the next, which is technically invalid marked content per the
+        // PDF spec. The renderer-side fix is to close + reopen the
+        // marked-content pair around each NewPage() call. Tests below
+        // use small content that fits on one page.
+        TaggingContext tagging = ctx.Tagging;
+        bool tagThis = tagging != null && element is IRoleProvider;
+        if (tagThis)
+        {
+            var role = ((IRoleProvider)element).SemanticRole;
+            tagging.Tree.Begin(role);
+            ctx.Canvas.BeginMarkedContent(role.ToPdfTag());
+        }
+
+        try
+        {
+            RenderElementWithOverflowCore(element, ctx, contentWidth);
+        }
+        finally
+        {
+            if (tagThis)
+            {
+                ctx.Canvas.EndMarkedContent();
+                tagging.Tree.End();
+            }
+        }
+    }
+
+    private static void RenderElementWithOverflowCore(IElement element, RenderContext ctx, float contentWidth)
     {
         if (element is IStatefulElement statefulElement)
         {

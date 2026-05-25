@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Elements.Text;
 
@@ -9,13 +10,32 @@ namespace BonniePDF.Elements.Text;
 /// in the <see cref="RenderContext.TocEntries"/> dictionary so that a <see cref="VisualToc"/>
 /// can display the correct page reference.
 /// </summary>
-public class Heading : TextBlock, IStatefulElement
+public class Heading : TextBlock, IStatefulElement, IRoleProvider
 {
     /// <summary>
     /// Gets or sets the unique identifier used to look up this heading in the TOC entries dictionary.
     /// Must match the identifier passed to <see cref="VisualToc.HeadingIdentifiers"/>.
     /// </summary>
     public required string TocIdentifier { get; set; }
+
+    /// <summary>
+    /// Heading level (1–6). Maps to PDF/UA structure roles <c>H1</c>…<c>H6</c>
+    /// when the document opts into tagging via
+    /// <c>DocumentSettings.Accessibility</c>. Default <c>1</c>.
+    /// Values outside 1–6 are clamped.
+    /// </summary>
+    public int Level { get; set; } = 1;
+
+    /// <inheritdoc />
+    public override SemanticRole SemanticRole => Level switch
+    {
+        <= 1 => Rendering.Tagging.SemanticRole.H1,
+        2 => Rendering.Tagging.SemanticRole.H2,
+        3 => Rendering.Tagging.SemanticRole.H3,
+        4 => Rendering.Tagging.SemanticRole.H4,
+        5 => Rendering.Tagging.SemanticRole.H5,
+        _ => Rendering.Tagging.SemanticRole.H6,
+    };
 
     private bool _tocRegistered;
 
