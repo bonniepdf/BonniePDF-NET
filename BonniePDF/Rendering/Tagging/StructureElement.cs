@@ -84,6 +84,15 @@ public sealed class StructureElement
     public string Title { get; set; }
 
     /// <summary>
+    /// <c>/A</c> — raw structure-element attributes dictionary as PDF
+    /// syntax (e.g. <c>"&lt;&lt; /O /Table /ColSpan 2 &gt;&gt;"</c>).
+    /// Used for table cell column/row spans, list label characteristics,
+    /// and other attribute-owner-namespaced metadata per ISO 32000-1
+    /// §14.7.5. Emitted verbatim by the structure-tree writer.
+    /// </summary>
+    public string Attributes { get; set; }
+
+    /// <summary>
     /// Visit this element and (recursively) all of its descendants in
     /// document order.
     /// </summary>

@@ -100,6 +100,15 @@ public sealed class StructureTreeBuilder
     public void SetTitle(string title) => Current.Title = title;
 
     /// <summary>
+    /// Set the raw <c>/A</c> (attributes dictionary) PDF syntax on the
+    /// current element. Used by tagged tables to emit <c>/ColSpan</c>
+    /// / <c>/RowSpan</c> on cells, and by lists to declare bullet
+    /// characteristics. The caller is responsible for valid PDF
+    /// syntax.
+    /// </summary>
+    public void SetAttributes(string pdfAttributes) => Current.Attributes = pdfAttributes;
+
+    /// <summary>
     /// Traverse the entire tree from the root depth-first, invoking
     /// <paramref name="visitor"/> on each node.
     /// </summary>

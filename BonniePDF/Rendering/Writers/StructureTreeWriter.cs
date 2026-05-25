@@ -193,6 +193,12 @@ public sealed class StructureTreeWriter
         if (!string.IsNullOrEmpty(element.Title))
             dict["/T"] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(element.Title)})";
 
+        // /A — attributes dictionary (raw PDF syntax provided by caller).
+        // Tables use this for /ColSpan; future stages may use it for
+        // /RowSpan and list characteristics.
+        if (!string.IsNullOrEmpty(element.Attributes))
+            dict["/A"] = element.Attributes;
+
         return dict;
     }
 
