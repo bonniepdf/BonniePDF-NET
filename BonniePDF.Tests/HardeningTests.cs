@@ -193,21 +193,13 @@ public class HardeningTests
         Assert.Equal(1, SubstringCounter.Count(pdf, "/S /H1"));
     }
 
-    // ── 8. Header/footer templates (known stage-2 gap) ──────────────
+    // ── 8. Header/footer templates (this feature fixed) ─────────────────────
 
     [Fact]
     public void Fixture08_HeaderFooterTemplates_KnownToProduceUntaggedContent()
     {
-        // KNOWN STAGE-2 GAP: header/footer templates draw text via the
-        // canvas without /Artifact tagging, so VeraPDF will flag the
-        // content as "untagged but not /Artifact" under profile ua1.
-        // this feature fixes this by auto-wrapping HeaderTemplate/FooterTemplate
-        // emission in /Artifact begin/end.
-        //
-        // This test documents the current behaviour: the structure tree
-        // is correct for body content; the header/footer content is
-        // simply drawn outside it. PDF generates valid bytes; only the
-        // PDF/UA rule about untagged content trips on it.
+        // this feature fixed this: header/footer template content is now tagged as
+        // /Artifact so screen readers skip it.
         string pdf = Encoding.ASCII.GetString(GenerateTagged(doc =>
         {
             doc.Settings.HeaderTemplate = pageNum => new TextBlock
@@ -227,10 +219,9 @@ public class HardeningTests
         Assert.Contains("/S /H1", pdf);
         // Document structure exists.
         Assert.Contains("/S /Document", pdf);
-        // Header/footer text appears in the page stream but unclaimed.
-        // (Once this feature lands, swap the Header/footer text for /Artifact
-        // begin/end wrapping and uncomment the per-page balance
-        // assertion below.)
+        // this feature fixed this: header/footer template content is now tagged as
+        // /Artifact so screen readers skip it.
+        Assert.Contains("/Artifact BMC", pdf);
     }
 
     // ── 9. Nested layout: VerticalStack containing Tables ───────────

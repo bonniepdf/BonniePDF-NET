@@ -258,4 +258,7 @@ internal static class PdfOperators
     /// <c>EMC</c> — end the most recent marked-content sequence.
     /// </summary>
     internal static void EndMarkedContent(StringBuilder s) => s.AppendLine("EMC");
+
+    /// <summary>Emit <c>/Artifact BMC</c> (no MCID, not in struct tree).</summary>
+    internal static void BeginArtifact(StringBuilder s) => s.AppendLine("/Artifact BMC");
 }

@@ -38,7 +38,7 @@ public class ImageWriterTests
             throw new NotImplementedException();
         }
 
-        public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null)
+        public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null)
         {
             throw new NotImplementedException();
         }

@@ -397,6 +397,12 @@ public class SvgCanvas : ICanvas
         // See BeginMarkedContent — no-op for SVG output.
     }
 
+    /// <inheritdoc />
+    public void BeginArtifact() { } // no-op for SVG output
+
+    /// <inheritdoc />
+    public void EndArtifact() { } // no-op for SVG output
+
     /// <summary>
     /// Closes the page group in multipage mode.
     /// Should be called before GetSvg() or when switching pages.

@@ -100,6 +100,13 @@ public class PdfDocumentSerializer
             }
         }
 
+        // annotation bindings for /StructParent + /OBJR wiring.
+        // Keys start well above the page count so the /ParentTree number
+        // tree has no collision between page keys (0..N-1) and annotation keys.
+        const int AnnotStructParentBase = 10_000;
+        var annotBindings = new List<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>();
+        int globalAnnotIndex = 0;
+
         int pageIndex = 0;
         // We use the new Streaming pipeline
         foreach (PageRenderOutput pageOutput in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, ctx))
@@ -135,7 +142,10 @@ public class PdfDocumentSerializer
             // StructureTreeWriter) uses the same key, so the reverse
             // lookup MCID→StructElem works.
             if (taggingContext != null)
+            {
                 pageDict["/StructParents"] = (pageIndex - 1).ToString();
+                pageDict["/Tabs"] = "/S"; // follow structure order for tab navigation
+            }
 
             // Write link annotations if present
             if (pageOutput.Hyperlinks.Count > 0)
@@ -144,8 +154,18 @@ public class PdfDocumentSerializer
                 foreach (Hyperlink link in pageOutput.Hyperlinks)
                 {
                     int annotId = writer.GetNewId();
-                    writer.WriteLinkAnnotation(annotId, link, pageIds);
+                    int? structParentKey = null;
+                    if (taggingContext != null)
+                    {
+                        structParentKey = AnnotStructParentBase + globalAnnotIndex++;
+                    }
+                    writer.WriteLinkAnnotation(annotId, link, pageIds, structParentKey);
                     annotIds.Add(annotId);
+                    if (taggingContext != null && link.LinkedStructElement != null && structParentKey.HasValue)
+                    {
+                        link.LinkedStructElement.ObjrAnnotations.Add((annotId, pageId));
+                        annotBindings.Add((link.LinkedStructElement, annotId, pageId, structParentKey.Value));
+                    }
                 }
 
                 pageDict["/Annots"] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
@@ -243,11 +263,11 @@ public class PdfDocumentSerializer
         // render pass via taggingContext (this feature wire MCIDs and
         // semantic roles through the canvas). For this feature the tree is still
         // a Document-only skeleton; this feature adds the renderer-driven
-        // population.
+        // population. this feature threads annotation bindings for /OBJR.
         if (taggingContext != null)
         {
             StructureTreeWriter structureTreeWriter = new(writer);
-            catalogOptions.StructTreeRootId = structureTreeWriter.Write(taggingContext.Tree, pageIds);
+            catalogOptions.StructTreeRootId = structureTreeWriter.Write(taggingContext.Tree, pageIds, annotBindings);
             catalogOptions.Tagged = true;
             catalogOptions.Language = _document.Settings.Language;
         }
@@ -327,6 +347,11 @@ public class PdfDocumentSerializer
             }
         }
 
+        // annotation bindings for /StructParent + /OBJR wiring.
+        const int AnnotStructParentBase = 10_000;
+        var annotBindings = new List<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>();
+        int globalAnnotIndex = 0;
+
         int pageIndex = 0;
         // We use the new Streaming pipeline
         foreach (PageRenderOutput pageOutput in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, ctx))
@@ -359,7 +384,10 @@ public class PdfDocumentSerializer
 
             // Tagged PDF: /StructParents keyed by 0-based page index.
             if (taggingContext != null)
+            {
                 pageDict["/StructParents"] = (pageIndex - 1).ToString();
+                pageDict["/Tabs"] = "/S"; // follow structure order for tab navigation
+            }
 
             // Write link annotations if present
             if (pageOutput.Hyperlinks.Count > 0)
@@ -368,8 +396,18 @@ public class PdfDocumentSerializer
                 foreach (Hyperlink link in pageOutput.Hyperlinks)
                 {
                     int annotId = writer.GetNewId();
-                    await writer.WriteLinkAnnotationAsync(annotId, link, pageIds, cancellationToken).ConfigureAwait(false);
+                    int? structParentKey = null;
+                    if (taggingContext != null)
+                    {
+                        structParentKey = AnnotStructParentBase + globalAnnotIndex++;
+                    }
+                    await writer.WriteLinkAnnotationAsync(annotId, link, pageIds, structParentKey, cancellationToken).ConfigureAwait(false);
                     annotIds.Add(annotId);
+                    if (taggingContext != null && link.LinkedStructElement != null && structParentKey.HasValue)
+                    {
+                        link.LinkedStructElement.ObjrAnnotations.Add((annotId, pageId));
+                        annotBindings.Add((link.LinkedStructElement, annotId, pageId, structParentKey.Value));
+                    }
                 }
 
                 pageDict["/Annots"] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
@@ -463,11 +501,12 @@ public class PdfDocumentSerializer
 
         // Write PDF/UA structure tree (async). See sync path for the
         // rationale. taggingContext carries the same builder that the
-        // canvas populated during render.
+        // canvas populated during render. this feature threads annotation bindings
+        // for /OBJR wiring.
         if (taggingContext != null)
         {
             StructureTreeWriter structureTreeWriter = new(writer);
-            catalogOptions.StructTreeRootId = await structureTreeWriter.WriteAsync(taggingContext.Tree, pageIds, cancellationToken)
+            catalogOptions.StructTreeRootId = await structureTreeWriter.WriteAsync(taggingContext.Tree, pageIds, annotBindings, cancellationToken)
                 .ConfigureAwait(false);
             catalogOptions.Tagged = true;
             catalogOptions.Language = _document.Settings.Language;

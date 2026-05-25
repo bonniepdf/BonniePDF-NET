@@ -58,6 +58,14 @@ public sealed class StructureElement
     public IList<int> McIdPages { get; } = new List<int>();
 
     /// <summary>
+    /// Annotation object-reference bindings for this element. Each entry
+    /// is an (annotObjectId, pageObjectId) pair that the structure-tree
+    /// writer emits as an <c>/OBJR</c> child in this element's <c>/K</c>
+    /// array and registers in the <c>/ParentTree</c>.
+    /// </summary>
+    public IList<(int annotId, int pageObjectId)> ObjrAnnotations { get; } = new System.Collections.Generic.List<(int, int)>();
+
+    /// <summary>
     /// <c>/Alt</c> alternate text — read by assistive tech in place of
     /// the visible content. Required by PDF/UA on <see cref="SemanticRole.Figure"/>
     /// elements that aren't <see cref="SemanticRole.Artifact"/>.

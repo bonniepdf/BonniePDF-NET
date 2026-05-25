@@ -392,6 +392,14 @@ public class PdfCanvas : ICanvas
         _openMarkedContent--;
     }
 
+    /// <inheritdoc />
+    public void BeginArtifact()
+        => PdfOperators.BeginArtifact(_stream);
+
+    /// <inheritdoc />
+    public void EndArtifact()
+        => PdfOperators.EndMarkedContent(_stream);
+
     /// <summary>
     /// Measures text size to allow for precise alignment calculations in charts.
     /// Uses FontMetrics to get accurate text width.

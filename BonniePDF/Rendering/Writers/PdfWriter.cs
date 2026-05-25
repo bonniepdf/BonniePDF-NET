@@ -179,7 +179,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="id">The object ID for the annotation</param>
     /// <param name="hyperlink">The hyperlink to create an annotation for</param>
     /// <returns>The object ID of the annotation</returns>
-    public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null)
+    public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null)
     {
         Dictionary<string, string> dict = new()
         {
@@ -195,6 +195,11 @@ public class PdfWriter : IPdfWriter, IDisposable
             // viewers that don't surface annotation alt-text.
             ["/Contents"] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
         };
+
+        // /StructParent wires this annotation into the parent tree
+        // for reverse MCID→StructElem lookup by accessible viewers.
+        if (structParentKey.HasValue)
+            dict["/StructParent"] = structParentKey.Value.ToString();
 
         if (hyperlink.TargetPageIndex.HasValue && pageIds != null)
         {

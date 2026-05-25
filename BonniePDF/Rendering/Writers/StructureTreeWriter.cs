@@ -63,7 +63,15 @@ public sealed class StructureTreeWriter
     /// Page object IDs in document order (index = page index). Empty
     /// or null when no page-aware output is needed (test fixtures).
     /// </param>
-    public int Write(StructureTreeBuilder builder, IList<int> pageIds = null)
+    /// <param name="annotBindings">
+    /// Annotation /StructParent bindings collected during serialization
+    ///. Each entry wires a link annotation into the parent tree
+    /// and emits an /OBJR child on the owning Link struct element.
+    /// </param>
+    public int Write(
+        StructureTreeBuilder builder,
+        IList<int> pageIds = null,
+        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)> annotBindings = null)
     {
         int structTreeRootId = _writer.GetNewId();
         int parentTreeId = (pageIds != null && pageIds.Count > 0) ? _writer.GetNewId() : 0;
@@ -76,10 +84,10 @@ public sealed class StructureTreeWriter
         WriteSubtree(builder.Root, structTreeRootId, elementIds, pageIds, parentTreeNums);
 
         if (parentTreeId > 0)
-            _writer.WriteObject(parentTreeId, BuildParentTreeDict(parentTreeNums, elementIds));
+            _writer.WriteObject(parentTreeId, BuildParentTreeDict(parentTreeNums, elementIds, annotBindings));
 
         _writer.WriteObject(structTreeRootId,
-            BuildStructTreeRootDict(builder.Root, elementIds, parentTreeId, parentTreeNums));
+            BuildStructTreeRootDict(builder.Root, elementIds, parentTreeId, parentTreeNums, annotBindings));
 
         return structTreeRootId;
     }
@@ -108,7 +116,11 @@ public sealed class StructureTreeWriter
     // ── Async ─────────────────────────────────────────────────────────
 
     /// <summary>Async counterpart to <see cref="Write"/>.</summary>
-    public async Task<int> WriteAsync(StructureTreeBuilder builder, IList<int> pageIds = null, CancellationToken cancellationToken = default)
+    public async Task<int> WriteAsync(
+        StructureTreeBuilder builder,
+        IList<int> pageIds = null,
+        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)> annotBindings = null,
+        CancellationToken cancellationToken = default)
     {
         int structTreeRootId = _asyncWriter.GetNewId();
         int parentTreeId = (pageIds != null && pageIds.Count > 0) ? _asyncWriter.GetNewId() : 0;
@@ -124,13 +136,13 @@ public sealed class StructureTreeWriter
         if (parentTreeId > 0)
         {
             await _asyncWriter
-                .WriteObjectAsync(parentTreeId, BuildParentTreeDict(parentTreeNums, elementIds), null, cancellationToken)
+                .WriteObjectAsync(parentTreeId, BuildParentTreeDict(parentTreeNums, elementIds, annotBindings), null, cancellationToken)
                 .ConfigureAwait(false);
         }
 
         await _asyncWriter
             .WriteObjectAsync(structTreeRootId,
-                BuildStructTreeRootDict(builder.Root, elementIds, parentTreeId, parentTreeNums), null, cancellationToken)
+                BuildStructTreeRootDict(builder.Root, elementIds, parentTreeId, parentTreeNums, annotBindings), null, cancellationToken)
             .ConfigureAwait(false);
 
         return structTreeRootId;
@@ -206,7 +218,8 @@ public sealed class StructureTreeWriter
         StructureElement documentRoot,
         IDictionary<StructureElement, int> elementIds,
         int parentTreeId,
-        IList<List<(int mcid, StructureElement elem)>> parentTreeNums)
+        IList<List<(int mcid, StructureElement elem)>> parentTreeNums,
+        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)> annotBindings = null)
     {
         var dict = new Dictionary<string, string>
         {
@@ -217,9 +230,16 @@ public sealed class StructureTreeWriter
         if (parentTreeId > 0)
         {
             dict["/ParentTree"] = $"{parentTreeId} 0 R";
-            // /ParentTreeNextKey = max page key used + 1. We always emit
-            // a slot per page so this is just the page count.
-            dict["/ParentTreeNextKey"] = parentTreeNums.Count.ToString(CultureInfo.InvariantCulture);
+            // /ParentTreeNextKey = max key used + 1.
+            // For pages it's the page count; if there are annotation
+            // bindings with higher keys (this feature uses 10_000+), use those.
+            int nextKey = parentTreeNums?.Count ?? 0;
+            if (annotBindings != null && annotBindings.Count > 0)
+            {
+                int maxAnnotKey = annotBindings.Max(b => b.structParentKey);
+                nextKey = Math.Max(nextKey, maxAnnotKey + 1);
+            }
+            dict["/ParentTreeNextKey"] = nextKey.ToString(CultureInfo.InvariantCulture);
         }
 
         return dict;
@@ -227,7 +247,8 @@ public sealed class StructureTreeWriter
 
     private static Dictionary<string, string> BuildParentTreeDict(
         IList<List<(int mcid, StructureElement elem)>> parentTreeNums,
-        IDictionary<StructureElement, int> elementIds)
+        IDictionary<StructureElement, int> elementIds,
+        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)> annotBindings = null)
     {
         // PDF number-tree form: /Nums [ key1 value1 key2 value2 … ].
         // Value for each page key is an array indexed by MCID, where
@@ -257,6 +278,20 @@ public sealed class StructureTreeWriter
             parts.Add("[ " + string.Join(" ", slots) + " ]");
         }
 
+        // Annotation struct parent entries: each link annotation gets
+        // its own key mapping directly to its containing Link struct element.
+        if (annotBindings != null)
+        {
+            foreach (var (structElem, _, _, structParentKey) in annotBindings)
+            {
+                if (elementIds.TryGetValue(structElem, out int elemId))
+                {
+                    parts.Add(structParentKey.ToString(CultureInfo.InvariantCulture));
+                    parts.Add($"{elemId} 0 R");
+                }
+            }
+        }
+
         return new Dictionary<string, string>
         {
             ["/Nums"] = "[ " + string.Join(" ", parts) + " ]",
@@ -274,13 +309,13 @@ public sealed class StructureTreeWriter
     {
         singlePageObjectId = null;
 
-        if (element.Children.Count == 0 && element.McIds.Count == 0)
+        if (element.Children.Count == 0 && element.McIds.Count == 0 && element.ObjrAnnotations.Count == 0)
         {
             kids = null;
             return;
         }
 
-        var parts = new List<string>(element.Children.Count + element.McIds.Count);
+        var parts = new List<string>(element.Children.Count + element.McIds.Count + element.ObjrAnnotations.Count);
 
         foreach (var child in element.Children)
             parts.Add($"{elementIds[child]} 0 R");
@@ -326,6 +361,10 @@ public sealed class StructureTreeWriter
                     parts.Add(mcid.ToString(CultureInfo.InvariantCulture));
             }
         }
+
+        // /OBJR children for annotation-backed elements.
+        foreach (var (annotId, pageObjId) in element.ObjrAnnotations)
+            parts.Add($"<< /Type /OBJR /Pg {pageObjId} 0 R /Obj {annotId} 0 R >>");
 
         kids = "[ " + string.Join(" ", parts) + " ]";
     }

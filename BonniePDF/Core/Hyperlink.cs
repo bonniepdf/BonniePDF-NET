@@ -81,6 +81,12 @@ public class Hyperlink : IElement, IRoleProvider
     /// <summary>Line height derived from <see cref="FontSize"/> with a standard 1.2× leading factor.</summary>
     private float LineHeight => FontSize * 1.2f;
 
+    /// <summary>
+    /// The structure element created for this link by the tagging pipeline.
+    /// Set during render; used by the serializer to wire /StructParent and /OBJR.
+    /// </summary>
+    internal Rendering.Tagging.StructureElement LinkedStructElement { get; set; }
+
     // Internal properties set during rendering
     /// <summary>Gets the X position of the rendered annotation rectangle in PDF coordinates (bottom-left origin).</summary>
     internal float RenderX { get; private set; }

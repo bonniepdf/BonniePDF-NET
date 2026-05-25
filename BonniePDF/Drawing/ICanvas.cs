@@ -150,4 +150,19 @@ public interface ICanvas
     /// on SVG and when tagging is disabled.
     /// </summary>
     void EndMarkedContent();
+
+    /// <summary>
+    /// Begin an artifact (decorative/navigational) marked-content region.
+    /// Emits <c>/Artifact BMC</c> on PDF. Unlike
+    /// <see cref="BeginMarkedContent"/>, artifact regions are not
+    /// registered in the structure tree and do not allocate an MCID.
+    /// No-op when the document is not tagged or when using SVG output.
+    /// </summary>
+    void BeginArtifact();
+
+    /// <summary>
+    /// End the artifact region opened by <see cref="BeginArtifact"/>.
+    /// Emits <c>EMC</c> on PDF; no-op on SVG.
+    /// </summary>
+    void EndArtifact();
 }

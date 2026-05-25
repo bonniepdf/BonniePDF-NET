@@ -189,7 +189,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>The object ID of the annotation</returns>
     public async Task<int> WriteLinkAnnotationAsync(int id, Hyperlink hyperlink, IList<int> pageIds = null,
-        CancellationToken cancellationToken = default)
+        int? structParentKey = null, CancellationToken cancellationToken = default)
     {
         Dictionary<string, string> dict = new()
         {
@@ -201,6 +201,10 @@ public class AsyncPdfWriter : IAsyncPdfWriter
             // link text. See the sync variant for the rationale.
             ["/Contents"] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
         };
+
+        // /StructParent wires this annotation into the parent tree.
+        if (structParentKey.HasValue)
+            dict["/StructParent"] = structParentKey.Value.ToString();
 
         if (hyperlink.TargetPageIndex.HasValue && pageIds != null)
         {

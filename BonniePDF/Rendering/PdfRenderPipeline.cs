@@ -127,7 +127,7 @@ public static class PdfRenderPipeline
     /// Each element's rendering is wrapped in SaveState/RestoreState to prevent
     /// graphics state leaks between elements.
     /// </summary>
-    private static void RenderElementWithOverflow(IElement element, RenderContext ctx, float contentWidth)
+    internal static void RenderElementWithOverflow(IElement element, RenderContext ctx, float contentWidth)
     {
         // when tagging is on and the element declares a structure
         // role, push the role onto the in-memory tree and wrap the
@@ -149,7 +149,7 @@ public static class PdfRenderPipeline
         if (tagThis)
         {
             var role = ((IRoleProvider)element).SemanticRole;
-            tagging.Tree.Begin(role);
+            var elem = tagging.Tree.Begin(role);
 
             // Surface alt-text on the structure element when the element
             // provides it. PDF/UA requires /Alt on Figure structure
@@ -160,6 +160,11 @@ public static class PdfRenderPipeline
             {
                 tagging.Tree.SetAlt(altProvider.AltText);
             }
+
+            // wire the struct element back to the hyperlink so the
+            // serializer can write /StructParent + /OBJR in the annot dict.
+            if (element is Core.Hyperlink hyperlink)
+                hyperlink.LinkedStructElement = elem;
 
             ctx.Canvas.BeginMarkedContent(role.ToPdfTag());
         }
@@ -423,6 +428,13 @@ public static class PdfRenderPipeline
         PdfOperators.EndText(wmOps);
         PdfOperators.RestoreState(wmOps);
 
+        // wrap watermark in /Artifact BMC ... EMC so screen readers skip it.
+        if (ctx.Tagging != null)
+        {
+            wmOps.Insert(0, "/Artifact BMC\n");
+            wmOps.AppendLine("EMC");
+        }
+
         // Prepend to page stream (painter's model: first drawn = behind)
         ctx.Pages[pageIndex].Insert(0, wmOps);
     }
@@ -463,7 +475,9 @@ public static class PdfRenderPipeline
                     // Position at top of page (0)
                     ctx.CurrentX = startX;
                     ctx.CurrentY = 0;
+                    if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
                     headerElement.Render(ctx, contentWidth);
+                    if (ctx.Tagging != null) ctx.Canvas.EndArtifact();
                 }
             }
 
@@ -476,7 +490,9 @@ public static class PdfRenderPipeline
                     // Position at start of bottom margin
                     ctx.CurrentX = startX;
                     ctx.CurrentY = ctx.PageSize.Height - ctx.Margin;
+                    if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
                     footerElement.Render(ctx, contentWidth);
+                    if (ctx.Tagging != null) ctx.Canvas.EndArtifact();
                 }
             }
         }
