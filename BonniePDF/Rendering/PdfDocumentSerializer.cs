@@ -8,6 +8,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
+using BonniePDF.Rendering.Tagging;
 using BonniePDF.Fluent;
 using BonniePDF.Rendering.Writers;
 
@@ -225,6 +226,21 @@ public class PdfDocumentSerializer
             catalogOptions.OutputIntentIds = new List<int> { outputIntentId };
         }
 
+        // Write PDF/UA structure tree. The in-memory tree currently only
+        // contains the implicit Document root — actual semantic tagging
+        // arrives once the renderer populates the tree. What lands
+        // here in this feature is the catalog wiring: a valid empty StructTreeRoot
+        // referencing a Document StructElem, plus /MarkInfo and /Lang.
+        if (_document.Settings.Accessibility != AccessibilityMode.None
+            && _document.Settings.Version == PdfVersion.Pdf17)
+        {
+            StructureTreeBuilder structureTree = new();
+            StructureTreeWriter structureTreeWriter = new(writer);
+            catalogOptions.StructTreeRootId = structureTreeWriter.Write(structureTree);
+            catalogOptions.Tagged = true;
+            catalogOptions.Language = _document.Settings.Language;
+        }
+
         // Write Catalog
         writer.WriteCatalog(catalogId, pagesId, pageIds[0], _document.Settings, catalogOptions);
 
@@ -423,6 +439,20 @@ public class PdfDocumentSerializer
             int outputIntentId = writer.GetNewId();
             await complianceWriter.WriteOutputIntentAsync(outputIntentId, iccProfileId, cancellationToken).ConfigureAwait(false);
             catalogOptions.OutputIntentIds = new List<int> { outputIntentId };
+        }
+
+        // Write PDF/UA structure tree. See sync path for the rationale —
+        // this feature lands the catalog wiring; renderer-driven population is
+        // this feature.
+        if (_document.Settings.Accessibility != AccessibilityMode.None
+            && _document.Settings.Version == PdfVersion.Pdf17)
+        {
+            StructureTreeBuilder structureTree = new();
+            StructureTreeWriter structureTreeWriter = new(writer);
+            catalogOptions.StructTreeRootId = await structureTreeWriter.WriteAsync(structureTree, cancellationToken)
+                .ConfigureAwait(false);
+            catalogOptions.Tagged = true;
+            catalogOptions.Language = _document.Settings.Language;
         }
 
         // Write Catalog

@@ -357,9 +357,20 @@ public class PdfWriter : IPdfWriter, IDisposable
             dict["/OutputIntents"] = $"[ {refs} ]";
         }
 
-        // Add MarkInfo for PDF/A
-        if (options?.PdfAEnabled == true)
+        // Add MarkInfo when either PDF/A or tagging is on. Both standards
+        // require /MarkInfo /Marked true; they're orthogonal flags so emitting
+        // it once when either is set covers both cases.
+        if (options?.PdfAEnabled == true || options?.Tagged == true)
             dict["/MarkInfo"] = "<< /Marked true >>";
+
+        // Add StructTreeRoot when tagging is on.
+        if (options?.StructTreeRootId > 0)
+            dict["/StructTreeRoot"] = $"{options.StructTreeRootId} 0 R";
+
+        // Add /Lang when the document declares a natural language. Required
+        // by PDF/UA-1; useful generally for assistive tech.
+        if (!string.IsNullOrEmpty(options?.Language))
+            dict["/Lang"] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(options.Language)})";
 
         // Add Dests if provided
         if (options?.DestsId > 0)
