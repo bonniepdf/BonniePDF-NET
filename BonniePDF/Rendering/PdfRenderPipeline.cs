@@ -150,6 +150,17 @@ public static class PdfRenderPipeline
         {
             var role = ((IRoleProvider)element).SemanticRole;
             tagging.Tree.Begin(role);
+
+            // Surface alt-text on the structure element when the element
+            // provides it. PDF/UA requires /Alt on Figure structure
+            // elements; an Image with no AltText degrades to /Artifact
+            // (see Image.SemanticRole) so this branch only fires for the
+            // "Figure with alt-text" case.
+            if (element is IAltTextProvider altProvider && !string.IsNullOrEmpty(altProvider.AltText))
+            {
+                tagging.Tree.SetAlt(altProvider.AltText);
+            }
+
             ctx.Canvas.BeginMarkedContent(role.ToPdfTag());
         }
 

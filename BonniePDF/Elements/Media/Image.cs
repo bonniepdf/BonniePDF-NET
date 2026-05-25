@@ -1,13 +1,14 @@
 using System;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Images;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Elements.Media;
 
 /// <summary>
 /// An image element that displays JPEG or PNG images in the PDF
 /// </summary>
-public class Image : ElementBase
+public class Image : ElementBase, IRoleProvider, IAltTextProvider
 {
     private ImageInfo _cachedInfo;
 
@@ -28,6 +29,29 @@ public class Image : ElementBase
 
     /// <summary>Whether to maintain aspect ratio (ignored for Fill mode)</summary>
     public bool MaintainAspectRatio { get; set; } = true;
+
+    /// <summary>
+    /// Alternate text description for accessibility. When the document
+    /// opts into <c>AccessibilityMode.PdfUa1</c>, this populates the
+    /// <c>/Alt</c> entry on the structure element wrapping the image.
+    /// Required by PDF/UA for non-decorative figures.
+    /// </summary>
+    public string AltText { get; set; } = string.Empty;
+
+    /// <summary>
+    /// When <c>true</c>, the image is purely decorative and should be
+    /// tagged as <c>/Artifact</c> with no alt-text warning. Set this
+    /// explicitly for decorative borders, dividers, and background
+    /// imagery so authors can distinguish "no alt by mistake" from
+    /// "no alt is correct".
+    /// </summary>
+    public bool IsDecorative { get; set; }
+
+    /// <inheritdoc />
+    public SemanticRole SemanticRole =>
+        IsDecorative || string.IsNullOrEmpty(AltText)
+            ? Rendering.Tagging.SemanticRole.Artifact
+            : Rendering.Tagging.SemanticRole.Figure;
 
     protected override float GetPreferredContentWidth()
     {
