@@ -68,7 +68,7 @@ public class XmpMetadataTests
             Keywords = "pdf, test, xmp"
         };
 
-        string xml = XmpMetadataWriter.GenerateXmpXml(metadata, false);
+        string xml = XmpMetadataWriter.GenerateXmpXml(metadata);
 
         Assert.Contains("<?xpacket begin=", xml);
         Assert.Contains("<?xpacket end=", xml);
@@ -82,11 +82,58 @@ public class XmpMetadataTests
     public void XmpMetadataWriter_PdfA_IncludesConformance()
     {
         var metadata = new DocumentMetadata { Title = "Test" };
-        string xml = XmpMetadataWriter.GenerateXmpXml(metadata, true);
+        string xml = XmpMetadataWriter.GenerateXmpXml(metadata, new[] { XmpConformanceBlock.PdfA1B() });
 
         Assert.Contains("pdfaid:part", xml);
         Assert.Contains("1", xml);
         Assert.Contains("pdfaid:conformance", xml);
         Assert.Contains("B", xml);
+    }
+
+    // ── PDF/UA conformance and additive composition ──────────
+
+    [Fact]
+    public void XmpMetadataWriter_PdfUa1_IncludesPdfuaidPart()
+    {
+        var metadata = new DocumentMetadata { Title = "Accessibility test" };
+        string xml = XmpMetadataWriter.GenerateXmpXml(metadata, new[] { XmpConformanceBlock.PdfUa1() });
+
+        Assert.Contains("xmlns:pdfuaid=\"http://www.aiim.org/pdfua/ns/id/\"", xml);
+        Assert.Contains("<pdfuaid:part", xml);
+        Assert.Contains(">1<", xml);
+    }
+
+    [Fact]
+    public void XmpMetadataWriter_NoConformance_OmitsPdfuaidAndPdfaid()
+    {
+        var metadata = new DocumentMetadata { Title = "Plain document" };
+        string xml = XmpMetadataWriter.GenerateXmpXml(metadata);
+
+        Assert.DoesNotContain("pdfuaid", xml);
+        Assert.DoesNotContain("pdfaid", xml);
+    }
+
+    [Fact]
+    public void XmpMetadataWriter_PdfA_PlusPdfUa1_ComposesBothNamespaces()
+    {
+        // The additive-hook contract: two registered blocks emit into the
+        // same XMP packet without collision. This is the future-proofing
+        // smoke test promised by the this feature this feature design — when ZUGFeRD lands
+        // it'll be a third entry in this same array.
+        var metadata = new DocumentMetadata { Title = "Both" };
+        string xml = XmpMetadataWriter.GenerateXmpXml(metadata, new[]
+        {
+            XmpConformanceBlock.PdfA1B(),
+            XmpConformanceBlock.PdfUa1(),
+        });
+
+        Assert.Contains("pdfaid:part", xml);
+        Assert.Contains("pdfaid:conformance", xml);
+        Assert.Contains("pdfuaid:part", xml);
+        // The output is well-formed XML — namespaces don't collide and
+        // we're not double-declaring xmlns attributes.
+        var doc = new System.Xml.XmlDocument();
+        doc.LoadXml(xml);
+        Assert.NotNull(doc.DocumentElement);
     }
 }

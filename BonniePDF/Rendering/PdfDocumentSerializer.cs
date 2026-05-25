@@ -203,7 +203,7 @@ public class PdfDocumentSerializer
         if (_document.Settings.Version == PdfVersion.Pdf17)
         {
             catalogOptions.XmpMetadataId = writer.GetNewId();
-            metadataWriter.WriteXmpMetadata(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings.PdfAEnabled);
+            metadataWriter.WriteXmpMetadata(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings);
         }
 
         // Write Bookmarks for PDF 1.7
@@ -418,7 +418,7 @@ public class PdfDocumentSerializer
         if (_document.Settings.Version == PdfVersion.Pdf17)
         {
             catalogOptions.XmpMetadataId = writer.GetNewId();
-            await metadataWriter.WriteXmpMetadataAsync(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings.PdfAEnabled, cancellationToken).ConfigureAwait(false);
+            await metadataWriter.WriteXmpMetadataAsync(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings, cancellationToken).ConfigureAwait(false);
         }
 
         // Write Bookmarks for PDF 1.7

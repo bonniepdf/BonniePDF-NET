@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using BonniePDF.Configuration;
@@ -18,7 +19,6 @@ internal static class XmpMetadataWriter
         public const string Dc = "http://purl.org/dc/elements/1.1/";
         public const string Xmp = "http://ns.adobe.com/xap/1.0/";
         public const string Pdf = "http://ns.adobe.com/pdf/1.3/";
-        public const string Pdfaid = "http://www.aiim.org/pdfa/ns/id/";
         public const string Xml = "http://www.w3.org/XML/1998/namespace";
         public const string AdobeMeta = "adobe:ns:meta/";
     }
@@ -29,7 +29,6 @@ internal static class XmpMetadataWriter
         public const string Dc = "dc";
         public const string Xmp = "xmp";
         public const string Pdf = "pdf";
-        public const string Pdfaid = "pdfaid";
         public const string Xml = "xml";
         public const string AdobeX = "x";
     }
@@ -57,10 +56,6 @@ internal static class XmpMetadataWriter
         public const string CreateDate = "CreateDate";
         public const string ModifyDate = "ModifyDate";
         public const string Producer = "Producer";
-
-        // PDF/A
-        public const string PdfaidPart = "part";
-        public const string PdfaidConformance = "conformance";
     }
 
     private static class XmpPacket
@@ -75,9 +70,14 @@ internal static class XmpMetadataWriter
     private const string DefaultLanguage = "x-default";
 
     /// <summary>
-    /// Generates the XMP XML string from document metadata.
+    /// Generates the XMP XML string from document metadata, including
+    /// any conformance-namespace blocks the caller wants to claim
+    /// (PDF/A, PDF/UA, ZUGFeRD/Factur-X, …). Blocks compose — pass any
+    /// combination.
     /// </summary>
-    public static string GenerateXmpXml(DocumentMetadata metadata, bool pdfA = false)
+    public static string GenerateXmpXml(
+        DocumentMetadata metadata,
+        IReadOnlyList<XmpConformanceBlock> conformanceBlocks = null)
     {
         var settings = new XmlWriterSettings
         {
@@ -97,7 +97,8 @@ internal static class XmpMetadataWriter
             xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Description, XmpNamespaces.Rdf);
             xw.WriteAttributeString(XmlPrefixes.Rdf, "about", XmpNamespaces.Rdf, string.Empty);
 
-            WriteMetadataElements(xw, metadata, pdfA);
+            WriteMetadataElements(xw, metadata);
+            WriteConformanceBlocks(xw, conformanceBlocks);
 
             xw.WriteEndElement(); // rdf:Description
             xw.WriteEndElement(); // rdf:RDF
@@ -109,7 +110,26 @@ internal static class XmpMetadataWriter
         return sw.ToString();
     }
 
-    private static void WriteMetadataElements(XmlWriter xw, DocumentMetadata metadata, bool pdfA)
+    /// <summary>
+    /// Emit each <see cref="XmpConformanceBlock"/> inside the open
+    /// <c>rdf:Description</c>. Blocks share the same RDF description
+    /// per the additive-hook design — namespaces are scoped via
+    /// per-element <c>xmlns:prefix</c> declarations that XmlWriter
+    /// emits automatically.
+    /// </summary>
+    private static void WriteConformanceBlocks(XmlWriter xw, IReadOnlyList<XmpConformanceBlock> blocks)
+    {
+        if (blocks == null) return;
+        foreach (var block in blocks)
+        {
+            foreach (var element in block.Elements)
+            {
+                xw.WriteElementString(block.Prefix, element.Key, block.NamespaceUri, element.Value);
+            }
+        }
+    }
+
+    private static void WriteMetadataElements(XmlWriter xw, DocumentMetadata metadata)
     {
         if (!string.IsNullOrEmpty(metadata.Title))
         {
@@ -173,11 +193,9 @@ internal static class XmpMetadataWriter
         if (!string.IsNullOrEmpty(metadata.Producer))
             xw.WriteElementString(XmlPrefixes.Pdf, XmlElements.Producer, XmpNamespaces.Pdf, metadata.Producer);
 
-        if (pdfA)
-        {
-            xw.WriteElementString(XmlPrefixes.Pdfaid, XmlElements.PdfaidPart, XmpNamespaces.Pdfaid, "1");
-            xw.WriteElementString(XmlPrefixes.Pdfaid, XmlElements.PdfaidConformance, XmpNamespaces.Pdfaid, "B");
-        }
+        // Conformance blocks (PDF/A, PDF/UA, ZUGFeRD, …) are emitted by
+        // WriteConformanceBlocks above — see this feature this feature design note for
+        // the additive-hook rationale.
     }
 
     /// <summary>

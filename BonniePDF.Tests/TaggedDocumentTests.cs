@@ -39,6 +39,8 @@ public class TaggedDocumentTests
         // The Document StructElem must appear as the StructTreeRoot's child.
         Assert.Contains("/Type /StructElem", pdf);
         Assert.Contains("/S /Document", pdf);
+        // XMP carries the PDF/UA-1 conformance claim.
+        Assert.Contains("pdfuaid:part", pdf);
     }
 
     [Fact]
