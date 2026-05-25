@@ -186,7 +186,14 @@ public class PdfWriter : IPdfWriter, IDisposable
             ["/Type"] = "/Annot",
             ["/Subtype"] = "/Link",
             ["/Rect"] = hyperlink.GetRectangleString(),
-            ["/F"] = "4" // Print flag (PDF/A-1B requires annotations to be printable)
+            ["/F"] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
+            // this feature / PDF/UA rule 7-18: /Contents on the annotation must
+            // carry an alt-text that mirrors the visible link text. Used
+            // by screen readers when the structure tree omits or can't
+            // resolve the link's text. Emitted unconditionally — even
+            // untagged docs benefit, and the field is a no-op for
+            // viewers that don't surface annotation alt-text.
+            ["/Contents"] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
         };
 
         if (hyperlink.TargetPageIndex.HasValue && pageIds != null)

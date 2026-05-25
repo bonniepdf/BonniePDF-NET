@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BonniePDF.Elements;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Pdf;
+using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
@@ -13,8 +14,11 @@ namespace BonniePDF.Core;
 /// Hyperlinks are clickable areas that navigate to a URI.
 /// This element implements IElement so it can be added like other elements.
 /// </summary>
-public class Hyperlink : IElement
+public class Hyperlink : IElement, IRoleProvider
 {
+    /// <inheritdoc />
+    public SemanticRole SemanticRole => Rendering.Tagging.SemanticRole.Link;
+
     /// <summary>
     /// Creates a new hyperlink with the specified URI and display text
     /// </summary>
