@@ -75,10 +75,16 @@ public class PdfDocumentSerializer
             }
         }
 
+        // PDF/UA tagging context — created once, shared between the
+        // render pipeline (canvas attaches MCIDs to the builder) and the
+        // structure-tree writer at the end (emits the populated tree).
+        TaggingContext taggingContext = CreateTaggingContext();
+
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin)
         {
             PdfAEnabled = _document.Settings.PdfAEnabled,
-            TocEntries = resolvedTocEntries
+            TocEntries = resolvedTocEntries,
+            Tagging = taggingContext,
         };
 
         // 3. Stream Processing (Low Memory)
@@ -226,17 +232,15 @@ public class PdfDocumentSerializer
             catalogOptions.OutputIntentIds = new List<int> { outputIntentId };
         }
 
-        // Write PDF/UA structure tree. The in-memory tree currently only
-        // contains the implicit Document root — actual semantic tagging
-        // arrives once the renderer populates the tree. What lands
-        // here in this feature is the catalog wiring: a valid empty StructTreeRoot
-        // referencing a Document StructElem, plus /MarkInfo and /Lang.
-        if (_document.Settings.Accessibility != AccessibilityMode.None
-            && _document.Settings.Version == PdfVersion.Pdf17)
+        // Write PDF/UA structure tree. The tree was populated during the
+        // render pass via taggingContext (this feature wire MCIDs and
+        // semantic roles through the canvas). For this feature the tree is still
+        // a Document-only skeleton; this feature adds the renderer-driven
+        // population.
+        if (taggingContext != null)
         {
-            StructureTreeBuilder structureTree = new();
             StructureTreeWriter structureTreeWriter = new(writer);
-            catalogOptions.StructTreeRootId = structureTreeWriter.Write(structureTree);
+            catalogOptions.StructTreeRootId = structureTreeWriter.Write(taggingContext.Tree);
             catalogOptions.Tagged = true;
             catalogOptions.Language = _document.Settings.Language;
         }
@@ -294,9 +298,14 @@ public class PdfDocumentSerializer
             }
         }
 
+        // PDF/UA tagging context — shared between the render pipeline and
+        // the async structure-tree writer below.
+        TaggingContext taggingContext = CreateTaggingContext();
+
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin);
         ctx.PdfAEnabled = _document.Settings.PdfAEnabled;
         ctx.TocEntries = resolvedTocEntries;
+        ctx.Tagging = taggingContext;
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = new();
@@ -441,15 +450,13 @@ public class PdfDocumentSerializer
             catalogOptions.OutputIntentIds = new List<int> { outputIntentId };
         }
 
-        // Write PDF/UA structure tree. See sync path for the rationale —
-        // this feature lands the catalog wiring; renderer-driven population is
-        // this feature.
-        if (_document.Settings.Accessibility != AccessibilityMode.None
-            && _document.Settings.Version == PdfVersion.Pdf17)
+        // Write PDF/UA structure tree (async). See sync path for the
+        // rationale. taggingContext carries the same builder that the
+        // canvas populated during render.
+        if (taggingContext != null)
         {
-            StructureTreeBuilder structureTree = new();
             StructureTreeWriter structureTreeWriter = new(writer);
-            catalogOptions.StructTreeRootId = await structureTreeWriter.WriteAsync(structureTree, cancellationToken)
+            catalogOptions.StructTreeRootId = await structureTreeWriter.WriteAsync(taggingContext.Tree, cancellationToken)
                 .ConfigureAwait(false);
             catalogOptions.Tagged = true;
             catalogOptions.Language = _document.Settings.Language;
@@ -477,6 +484,21 @@ public class PdfDocumentSerializer
                settings.FitWindow ||
                settings.CenterWindow ||
                settings.DisplayDocTitle;
+    }
+
+    /// <summary>
+    /// Returns a <see cref="TaggingContext"/> if the document opted into
+    /// PDF/UA tagging (Accessibility != None and a PDF version that
+    /// supports structure trees); otherwise <c>null</c>. The returned
+    /// context is shared between the render pipeline (canvas writes
+    /// MCIDs to the builder) and the structure-tree writer (emits the
+    /// populated tree into the PDF object graph).
+    /// </summary>
+    private TaggingContext CreateTaggingContext()
+    {
+        if (_document.Settings.Accessibility == AccessibilityMode.None) return null;
+        if (_document.Settings.Version != PdfVersion.Pdf17) return null;
+        return new TaggingContext(new StructureTreeBuilder());
     }
 
     /// <summary>

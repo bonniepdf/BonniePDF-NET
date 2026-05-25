@@ -242,4 +242,20 @@ internal static class PdfOperators
     /// </summary>
     internal static void PaintXObject(StringBuilder s, string name)
         => s.AppendLine($"{name} Do");
+
+    // ── Marked content (PDF Ref 14.6 — tagged PDF / PDF/UA) ──────────────
+
+    /// <summary>
+    /// <c>/&lt;role&gt; &lt;&lt; /MCID n &gt;&gt; BDC</c> — begin a
+    /// marked-content sequence with a PDF structure role and an MCID.
+    /// The content emitted up to the matching <see cref="EndMarkedContent"/>
+    /// is associated with the structure element holding this MCID.
+    /// </summary>
+    internal static void BeginMarkedContentTagged(StringBuilder s, string role, int mcid)
+        => s.AppendLine($"/{role} << /MCID {mcid} >> BDC");
+
+    /// <summary>
+    /// <c>EMC</c> — end the most recent marked-content sequence.
+    /// </summary>
+    internal static void EndMarkedContent(StringBuilder s) => s.AppendLine("EMC");
 }

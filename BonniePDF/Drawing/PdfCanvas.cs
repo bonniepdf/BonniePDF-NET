@@ -5,6 +5,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Pdf;
+using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
@@ -25,6 +26,8 @@ public class PdfCanvas : ICanvas
     private readonly float _xOffset;
     private readonly float _yOffset;
     private int _stateDepth;
+    private TaggingContext _tagging;
+    private int _openMarkedContent;
 
     /// <summary>
     /// Creates a new PdfCanvas for writing to the specified PDF content stream.
@@ -348,7 +351,7 @@ public class PdfCanvas : ICanvas
         // Calculate PDF coordinates (Bottom-Left origin)
         // PDF Y is bottom-left. x,y is top-left.
         float pdfX = x + _xOffset;
-        // Map Top-Left (y) to Bottom-Left (pdfY). 
+        // Map Top-Left (y) to Bottom-Left (pdfY).
         // Note: For Form XObjects, we assume the content is drawn relative to its own origin (0,0).
         // By translating to (pdfX, pdfY), (0,0) of the form aligns with this point.
         float pdfY = Height - (y + _yOffset);
@@ -357,6 +360,34 @@ public class PdfCanvas : ICanvas
         PdfOperators.Translate(_stream, pdfX, pdfY);
         PdfOperators.PaintXObject(_stream, resourceName);
         PdfOperators.RestoreState(_stream);
+    }
+
+    /// <summary>
+    /// Sets the tagging context that governs marked-content emission.
+    /// When non-null, <see cref="BeginMarkedContent"/> /
+    /// <see cref="EndMarkedContent"/> emit PDF marked-content operators
+    /// and register MCIDs with the structure tree; when null, both are
+    /// no-ops and the canvas behaves exactly as it did pre-G-1.
+    /// </summary>
+    public void SetTaggingContext(TaggingContext tagging) => _tagging = tagging;
+
+    /// <inheritdoc />
+    public void BeginMarkedContent(string role)
+    {
+        if (_tagging == null) return;
+        int mcid = _tagging.AllocateMcid();
+        _tagging.Tree.AddMcid(mcid);
+        PdfOperators.BeginMarkedContentTagged(_stream, role, mcid);
+        _openMarkedContent++;
+    }
+
+    /// <inheritdoc />
+    public void EndMarkedContent()
+    {
+        if (_tagging == null) return;
+        if (_openMarkedContent <= 0) return; // tolerate unbalanced End() rather than emit a stray EMC
+        PdfOperators.EndMarkedContent(_stream);
+        _openMarkedContent--;
     }
 
     /// <summary>

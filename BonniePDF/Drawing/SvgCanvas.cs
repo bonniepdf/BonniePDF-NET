@@ -384,6 +384,19 @@ public class SvgCanvas : ICanvas
         // We could render a placeholder here if needed, but for now we ignore it.
     }
 
+    /// <inheritdoc />
+    public void BeginMarkedContent(string role)
+    {
+        // SVG output doesn't carry PDF structure tags. Tagging is a no-op
+        // on this canvas; tagged-PDF emission is PdfCanvas-only.
+    }
+
+    /// <inheritdoc />
+    public void EndMarkedContent()
+    {
+        // See BeginMarkedContent — no-op for SVG output.
+    }
+
     /// <summary>
     /// Closes the page group in multipage mode.
     /// Should be called before GetSvg() or when switching pages.

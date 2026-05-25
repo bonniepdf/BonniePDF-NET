@@ -6,6 +6,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Rendering.Images;
+using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
@@ -79,6 +80,14 @@ public class RenderContext
     public ICanvas Canvas { get; private set; }
 
     /// <summary>
+    /// PDF/UA tagging context. Non-null when the document opted into
+    /// <c>AccessibilityMode.PdfUa1</c>; null otherwise. Held on the
+    /// context so each per-page <see cref="PdfCanvas"/> gets it via
+    /// <see cref="UpdateCanvas"/>.
+    /// </summary>
+    public TaggingContext Tagging { get; set; }
+
+    /// <summary>
     /// Gets whether the context is in SVG rendering mode.
     /// </summary>
     public bool IsSvgMode { get; }
@@ -131,10 +140,16 @@ public class RenderContext
     private void UpdateCanvas()
     {
         if (IsSvgMode)
+        {
             Canvas = new SvgCanvas(PageSize.Width, PageSize.Height, 0, 0, CurrentStream, true, ResolveEmbeddedFont);
+        }
         else
-            Canvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
+        {
+            var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
                 ResolveEmbeddedFont, TrackGlyphUsage);
+            if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
+            Canvas = pdfCanvas;
+        }
     }
 
     /// <summary>
@@ -144,7 +159,9 @@ public class RenderContext
     {
         if (IsSvgMode) return new SvgCanvas(PageSize.Width, PageSize.Height, x, y, CurrentStream, false, ResolveEmbeddedFont);
 
-        return new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource, ResolveEmbeddedFont, TrackGlyphUsage);
+        var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource, ResolveEmbeddedFont, TrackGlyphUsage);
+        if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
+        return pdfCanvas;
     }
 
     private string ResolveImageResource(ImageInfo info)
@@ -192,6 +209,8 @@ public class RenderContext
         CurrentPageIndex++;
         CurrentX = Margin;
         CurrentY = Margin;
+        // MCIDs restart at 0 per PDF page (ISO 32000-1 §14.7.4).
+        Tagging?.ResetPage();
         UpdateCanvas();
         OnPageCreated?.Invoke(CurrentPageIndex);
     }
