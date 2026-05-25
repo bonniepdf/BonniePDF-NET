@@ -33,12 +33,16 @@ jobs:
         run: dotnet build --no-restore
 
       - name: Generate PDF/UA-1 examples
-        run: dotnet run --project Examples/BonniePDF.Examples.Basics.SimpleDocument --no-build
+        run: |
+          dotnet run --project Examples/BonniePDF.Examples.Basics.SimpleDocument --no-build
+          dotnet run --project Examples/BonniePDF.Examples.Templates.BusinessInvoice --no-build
 
       - name: Collect tagged PDFs
         run: |
           mkdir -p ${{ github.workspace }}/generated-pdfs
           find . -name "simple_document_tagged.pdf" \
+            -exec cp {} ${{ github.workspace }}/generated-pdfs/ \;
+          find . -name "invoice.pdf" \
             -exec cp {} ${{ github.workspace }}/generated-pdfs/ \;
 
       - name: Validate with VeraPDF (PDF/UA-1)
@@ -48,7 +52,8 @@ jobs:
             ghcr.io/verapdf/cli:latest \
             --flavour ua1 \
             --format text \
-            /data/simple_document_tagged.pdf
+            /data/simple_document_tagged.pdf \
+            /data/invoice.pdf
 
       - name: Upload generated PDFs
         uses: actions/upload-artifact@v4
