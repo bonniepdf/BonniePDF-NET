@@ -196,14 +196,17 @@ public sealed class StructureTreeWriter
         if (kids != null) dict["/K"] = kids;
         if (singlePageObjectId.HasValue) dict["/Pg"] = $"{singlePageObjectId.Value} 0 R";
 
+        // PDF text strings: use EncodeMetadataString so non-Latin-1 chars
+        // (em-dash, smart quotes, CJK, etc.) become a UTF-16BE hex literal
+        // <FEFF…> rather than getting byte-truncated by the Latin-1 writer.
         if (!string.IsNullOrEmpty(element.Alt))
-            dict["/Alt"] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(element.Alt)})";
+            dict["/Alt"] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.Alt);
         if (!string.IsNullOrEmpty(element.ActualText))
-            dict["/ActualText"] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(element.ActualText)})";
+            dict["/ActualText"] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.ActualText);
         if (!string.IsNullOrEmpty(element.Lang))
-            dict["/Lang"] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(element.Lang)})";
+            dict["/Lang"] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.Lang);
         if (!string.IsNullOrEmpty(element.Title))
-            dict["/T"] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(element.Title)})";
+            dict["/T"] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.Title);
 
         // /A — attributes dictionary (raw PDF syntax provided by caller).
         // Tables use this for /ColSpan; future stages may use it for

@@ -254,25 +254,45 @@ public class HardeningTests
         Assert.Contains("/S /TD", pdf);
     }
 
-    // ── 10. Alt-text with special characters that need escaping ─────
+    // ── 10. Alt-text encoding (Latin-1 escapes + Unicode hex) ───────
 
     [Fact]
-    public void Fixture10_AltTextWithSpecialChars_PdfEscaped()
+    public void Fixture10a_AltTextWithLatin1SpecialChars_PdfEscaped()
     {
+        // Backslashes and parens are PDF string-literal metacharacters
+        // and must be backslash-escaped; the structure-tree writer
+        // routes through EncodeMetadataString → PdfSyntax.Escape.
         string pdf = Encoding.ASCII.GetString(GenerateTagged(doc =>
         {
             doc.Add(new QRCode
             {
                 Data = "https://example.com",
                 Size = 60,
-                AltText = "Chart for fiscal year (2026) — \\ revenue \"projection\"",
+                AltText = "Chart for FY (2026) \\ revenue \"projection\"",
             });
         }));
 
-        // /Alt string-literal must escape backslashes and parens. The
-        // structure-tree writer routes through PdfSyntax.Escape, which
-        // does this. Other chars (em-dash, quotes) pass through.
-        Assert.Contains("/Alt (Chart for fiscal year \\(2026\\) — \\\\ revenue \"projection\")", pdf);
+        Assert.Contains("/Alt (Chart for FY \\(2026\\) \\\\ revenue \"projection\")", pdf);
+    }
+
+    [Fact]
+    public void Fixture10b_AltTextWithNonLatin1Chars_Utf16BeHexEncoded()
+    {
+        // Em-dash (U+2014) doesn't fit in a single-byte PDF string
+        // literal and would otherwise be byte-truncated. Per the spec,
+        // such strings become a <FEFF…> UTF-16BE hex literal.
+        string pdf = Encoding.ASCII.GetString(GenerateTagged(doc =>
+        {
+            doc.Add(new QRCode
+            {
+                Data = "https://example.com",
+                Size = 60,
+                AltText = "Year 2026 — projection",
+            });
+        }));
+
+        Assert.Matches(@"/Alt <FEFF[0-9A-F]+>", pdf);
+        Assert.Matches(@"/Alt <FEFF[0-9A-F]*2014[0-9A-F]*>", pdf);
     }
 
     // ── Helpers ─────────────────────────────────────────────────────
