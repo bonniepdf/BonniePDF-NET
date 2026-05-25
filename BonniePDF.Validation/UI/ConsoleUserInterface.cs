@@ -13,7 +13,7 @@ public class ConsoleUserInterface
     public static void DisplayHeader()
     {
         Console.WriteLine("╔══════════════════════════════════════════════════════════════╗");
-        Console.WriteLine("║           BonniePDF - PDF/A Validation Tool                  ║");
+        Console.WriteLine("║              BonniePDF Validation Tool                       ║");
         Console.WriteLine("╚══════════════════════════════════════════════════════════════╝");
         Console.WriteLine();
     }

@@ -46,7 +46,7 @@ public class ValidationOrchestrator
         }
 
         UI.ConsoleUserInterface.DisplayMessage($"Validating PDFs in: {pdfDirectory}");
-        UI.ConsoleUserInterface.DisplayMessage($"Validation Profile: PDF/A-{GetProfileId(_settings.DefaultProfile).ToUpper()}");
+        UI.ConsoleUserInterface.DisplayMessage($"Validation Profile: {_settings.DefaultProfile.GetDisplayName()}");
         UI.ConsoleUserInterface.DisplayMessage("");
 
         // Check if VeraPDF API is accessible
@@ -61,7 +61,8 @@ public class ValidationOrchestrator
         UI.ConsoleUserInterface.DisplayMessage("✓ VeraPDF API is accessible");
         UI.ConsoleUserInterface.DisplayMessage("");
 
-        // Get all PDF files, excluding encrypted ones (encryption is forbidden by PDF/A)
+        // Get all PDF files, excluding encrypted ones (PDF/A forbids encryption;
+        // PDF/UA inherits the limitation in practice because validators reject it).
         string[] allPdfFiles = System.IO.Directory.GetFiles(pdfDirectory, "*.pdf", System.IO.SearchOption.TopDirectoryOnly);
         string[] pdfFiles = allPdfFiles
             .Where(f => {
@@ -82,7 +83,7 @@ public class ValidationOrchestrator
 
         UI.ConsoleUserInterface.DisplayMessage($"Found {pdfFiles.Length} PDF file(s) to validate");
         if (skipped > 0)
-            UI.ConsoleUserInterface.DisplayMessage($"Skipped {skipped} encrypted PDF(s) (encryption is incompatible with PDF/A)");
+            UI.ConsoleUserInterface.DisplayMessage($"Skipped {skipped} encrypted PDF(s) (encryption is incompatible with PDF/A and PDF/UA validation)");
         UI.ConsoleUserInterface.DisplayMessage("");
 
         // Validate each PDF
@@ -141,16 +142,16 @@ public class ValidationOrchestrator
     /// </summary>
     private async Task GenerateReportsAsync(List<ValidationResult> results, string sourceDirectory)
     {
-        string profileId = GetProfileId(_settings.DefaultProfile);
-        
+        string profileDisplayName = _settings.DefaultProfile.GetDisplayName();
+
         foreach (var generator in _reportGenerators)
         {
             try
             {
                 string extension = GetReportExtension(generator);
                 string outputPath = System.IO.Path.Combine(sourceDirectory, $"validation-report{extension}");
-                
-                await generator.GenerateAsync(results, profileId, sourceDirectory, outputPath);
+
+                await generator.GenerateAsync(results, profileDisplayName, sourceDirectory, outputPath);
                 UI.ConsoleUserInterface.DisplayMessage($"Report saved to: {outputPath}");
             }
             catch (Exception ex)
@@ -158,24 +159,6 @@ public class ValidationOrchestrator
                 UI.ConsoleUserInterface.DisplayError($"Failed to generate report: {ex.Message}");
             }
         }
-    }
-
-    /// <summary>
-    /// Converts a <see cref="ValidationProfile"/> enum value to the short string identifier
-    /// expected by the VeraPDF API (e.g. <c>"1b"</c>, <c>"2a"</c>).
-    /// </summary>
-    private static string GetProfileId(ValidationProfile profile)
-    {
-        return profile switch
-        {
-            ValidationProfile.PDF_A_1b => "1b",
-            ValidationProfile.PDF_A_2b => "2b",
-            ValidationProfile.PDF_A_3b => "3b",
-            ValidationProfile.PDF_A_1a => "1a",
-            ValidationProfile.PDF_A_2a => "2a",
-            ValidationProfile.PDF_A_3a => "3a",
-            _ => "1b"
-        };
     }
 
     /// <summary>
