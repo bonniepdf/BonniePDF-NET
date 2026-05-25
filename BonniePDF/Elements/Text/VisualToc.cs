@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using BonniePDF.Core;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Elements.Text;
@@ -11,8 +12,11 @@ namespace BonniePDF.Elements.Text;
 /// Supports multi-page overflow via <see cref="IStatefulElement"/> so that very long
 /// tables of contents flow naturally across page boundaries.
 /// </summary>
-public class VisualToc : ElementBase, IStatefulElement
+public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
 {
+    /// <inheritdoc />
+    public SemanticRole SemanticRole => Rendering.Tagging.SemanticRole.TOC;
+
     /// <summary>
     /// Gets or sets the ordered list of TOC identifiers to render.
     /// Each identifier must match the <see cref="Heading.TocIdentifier"/> of a rendered heading.
@@ -67,7 +71,7 @@ public class VisualToc : ElementBase, IStatefulElement
 
         for (int i = 0; i < HeadingIdentifiers.Count; i++)
         {
-            DrawTocEntry(ctx, HeadingIdentifiers[i], contentWidth, y);
+            DrawTaggedTocEntry(ctx, HeadingIdentifiers[i], contentWidth, y);
             y += lineHeight;
         }
 
@@ -121,7 +125,7 @@ public class VisualToc : ElementBase, IStatefulElement
         int endIndex = startIndex + itemsThatFit;
         for (int i = startIndex; i < endIndex; i++)
         {
-            DrawTocEntry(ctx, HeadingIdentifiers[i], contentWidth, localY);
+            DrawTaggedTocEntry(ctx, HeadingIdentifiers[i], contentWidth, localY);
             localY += lineHeight;
         }
 
@@ -135,6 +139,37 @@ public class VisualToc : ElementBase, IStatefulElement
         }
 
         return RenderStatus.Overflow;
+    }
+
+    /// <summary>
+    /// wraps <see cref="DrawTocEntry"/> in a <c>/TOCI</c> struct
+    /// element + marked-content scope so each entry is its own
+    /// addressable item in the PDF/UA structure tree. The outer
+    /// <c>/TOC</c> wrap comes from the pipeline's IRoleProvider hook
+    /// using <see cref="SemanticRole"/>. No-op when tagging is off.
+    /// </summary>
+    private void DrawTaggedTocEntry(RenderContext ctx, string identifier, float contentWidth, float y)
+    {
+        var tagging = ctx.Tagging;
+        bool tagThisEntry = tagging != null;
+        if (tagThisEntry)
+        {
+            tagging.Tree.Begin(Rendering.Tagging.SemanticRole.TOCI);
+            ctx.Canvas.BeginMarkedContent("TOCI");
+        }
+
+        try
+        {
+            DrawTocEntry(ctx, identifier, contentWidth, y);
+        }
+        finally
+        {
+            if (tagThisEntry)
+            {
+                ctx.Canvas.EndMarkedContent();
+                tagging.Tree.End();
+            }
+        }
     }
 
     /// <summary>
