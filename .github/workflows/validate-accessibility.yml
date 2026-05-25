@@ -1,0 +1,59 @@
+name: PDF/UA Accessibility Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: a11y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-accessibility:
+    name: Generate & validate PDF/UA-1
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .NET
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Generate PDF/UA-1 examples
+        run: dotnet run --project Examples/BonniePDF.Examples.Basics.SimpleDocument --no-build
+
+      - name: Collect tagged PDFs
+        run: |
+          mkdir -p ${{ github.workspace }}/generated-pdfs
+          find . -name "simple_document_tagged.pdf" \
+            -exec cp {} ${{ github.workspace }}/generated-pdfs/ \;
+
+      - name: Validate with VeraPDF (PDF/UA-1)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/generated-pdfs:/data" \
+            ghcr.io/verapdf/cli:latest \
+            --flavour ua1 \
+            --format text \
+            /data/simple_document_tagged.pdf
+
+      - name: Upload generated PDFs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: generated-pdfs
+          path: ${{ github.workspace }}/generated-pdfs/
+          retention-days: 14
