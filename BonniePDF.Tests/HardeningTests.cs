@@ -60,8 +60,13 @@ public class HardeningTests
     // ── 2. PDF/A + PDF/UA combined ──────────────────────────────────
 
     [Fact]
-    public void Fixture02_PdfAPlusPdfUa_BothConformanceClaimsInXmp()
+    public void Fixture02_PdfAClaimSuppressed_WhenStandardFontsAreUsed()
     {
+        // PDF/A-1b §6.3.4 forbids non-embedded fonts. When the caller
+        // asks for PDF/A but uses any of the standard 14 (Helvetica
+        // here), the serializer drops the PDF/A claim rather than
+        // emitting an invalid one. PDF/UA-1 still ships because it has
+        // no font-embedding requirement.
         string pdf = Encoding.ASCII.GetString(Generate(doc =>
         {
             doc.Settings.Version = PdfVersion.Pdf17;
@@ -71,12 +76,11 @@ public class HardeningTests
             doc.Add(new Heading("Combined") { TocIdentifier = "c", Level = 1, FontSize = 18 });
         }));
 
-        // XMP packet declares both conformance levels via the additive
-        // hook from this feature.
-        Assert.Contains("pdfaid:part", pdf);
+        // PDF/A claim and OutputIntent are suppressed (honest about what we ship).
+        Assert.DoesNotContain("pdfaid:part", pdf);
+        Assert.DoesNotContain("/OutputIntents", pdf);
+        // PDF/UA-1 plumbing is unaffected.
         Assert.Contains("pdfuaid:part", pdf);
-        // Catalog has both PDF/A output intent ref AND struct-tree wiring.
-        Assert.Contains("/OutputIntents", pdf);
         Assert.Contains("/StructTreeRoot", pdf);
         Assert.Contains("/MarkInfo << /Marked true >>", pdf);
     }

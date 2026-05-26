@@ -181,6 +181,24 @@ public class PdfDocumentSerializer
         // 4. Post-Processing (Write Resources)
         string globalResources = ctx.Resources.WriteResources(writer, pageIds.Count);
 
+        // ── Honest PDF/A claim ──────────────────────────────────
+        // Settings.PdfAEnabled is opt-in, but PDF/A-1b §6.3.4 forbids
+        // non-embedded fonts. When the caller asked for PDF/A but the
+        // document references any of the standard 14 (which we don't
+        // embed), we silently drop the claim: no pdfaid block in XMP,
+        // no OutputIntent. The document is still a valid PDF — it just
+        // doesn't lie about being PDF/A-1b. To actually deliver PDF/A
+        // the caller must register a real TTF.
+        //
+        // Implemented by demoting Settings.PdfAEnabled to the effective
+        // value (rather than threading a separate flag through the
+        // remaining writes); mirrors the DisplayDocTitle = true
+        // mutation we do for PDF/UA-1.
+        if (_document.Settings.PdfAEnabled && ctx.Resources.HasNonEmbeddedStandardFont())
+        {
+            _document.Settings.PdfAEnabled = false;
+        }
+
         // Write ExtGState for watermark opacity if configured
         if (_document.Settings.Watermark != null)
         {
@@ -424,6 +442,13 @@ public class PdfDocumentSerializer
 
         // 4. Post-Processing (Write Resources)
         string globalResources = await ctx.Resources.WriteResourcesAsync(writer, pageIds.Count, cancellationToken).ConfigureAwait(false);
+
+        // drop the PDF/A claim if any standard-14 font slipped
+        // through unembedded — see the sync path for the rationale.
+        if (_document.Settings.PdfAEnabled && ctx.Resources.HasNonEmbeddedStandardFont())
+        {
+            _document.Settings.PdfAEnabled = false;
+        }
 
         // Write ExtGState for watermark opacity if configured
         if (_document.Settings.Watermark != null)

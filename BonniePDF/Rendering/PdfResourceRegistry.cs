@@ -121,6 +121,29 @@ public class PdfResourceRegistry
         return EmbeddedFonts.TryGetValue(filePath, out EmbeddedFontInfo info) ? info : null;
     }
 
+    /// <summary>
+    /// Reports whether this document will end up emitting any
+    /// non-embedded standard-14 Type1 font reference (Helvetica,
+    /// Times-*, Courier-*, Symbol, ZapfDingbats). Such references are
+    /// <b>forbidden by PDF/A-1b §6.3.4</b>, so when this returns
+    /// <c>true</c> the serializer suppresses the PDF/A conformance
+    /// claim rather than emitting an invalid one.
+    ///
+    /// Mirrors what <see cref="WriteResources"/> does: anything that
+    /// won't be aliased to a TTF and isn't already an embedded-font
+    /// path will be written via <c>WriteType1Font</c> (non-embedded).
+    /// </summary>
+    public bool HasNonEmbeddedStandardFont()
+    {
+        foreach (string fontIdentifier in FontNameMap.Keys)
+        {
+            if (FontAliasMap.ContainsKey(fontIdentifier)) continue;
+            if (IsEmbeddedFont(fontIdentifier)) continue;
+            return true;
+        }
+        return false;
+    }
+
     private string RegisterEmbeddedFont(string filePath)
     {
         if (!EmbeddedFonts.TryGetValue(filePath, out EmbeddedFontInfo existingFont))
