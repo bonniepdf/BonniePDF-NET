@@ -299,6 +299,52 @@ public class HardeningTests
         Assert.Matches(@"/Alt <FEFF[0-9A-F]*2014[0-9A-F]*>", pdf);
     }
 
+    // ── 11. this feature Stage 2 — real PDF/A when fonts are registered ────────
+
+    [Fact]
+    public void Fixture11a_FontManager_HasBundledFonts_AfterStaticInit()
+    {
+        // The static constructor automatically registers Liberation fonts from
+        // embedded assembly resources. This test verifies that the registry is
+        // populated before any user code runs.
+        Assert.True(FontManager.HasBundledFonts());
+        Assert.NotNull(FontManager.GetBytesForStandardFont("Helvetica"));
+        Assert.NotNull(FontManager.GetBytesForStandardFont("Times-Roman"));
+        Assert.NotNull(FontManager.GetBytesForStandardFont("Courier"));
+        Assert.Null(FontManager.GetBytesForStandardFont("Symbol")); // not in map
+    }
+
+    [Fact]
+    public void Fixture11b_RegisterFontFromStream_CanLookUpByStandardFontName()
+    {
+        // Verify the stream-based API works independently of auto-registration.
+        // We use the Liberation Sans bytes from the embedded resources.
+        byte[]? bytes = FontManager.GetBytesForStandardFont("Helvetica");
+        Assert.NotNull(bytes);
+
+        // Re-register under a custom family name to test the API path.
+        using var ms = new MemoryStream(bytes);
+        FontManager.RegisterFont(ms, "TestCustom", "Regular");
+        Assert.NotNull(FontManager.GetBytesForFamily("TestCustom", "Regular"));
+    }
+
+    [Fact]
+    public void Fixture11c_PdfaidXmpBlockEmitted_WhenBundledFontsPresent()
+    {
+        // With Liberation Sans auto-registered, pdfAEnabled = true should produce
+        // a genuine PDF/A-1b document (pdfaid:part and /OutputIntents present).
+        // This is the Stage 2 deliverable: no longer lying about PDF/A.
+        string pdf = Encoding.ASCII.GetString(Generate(doc =>
+        {
+            doc.Settings.Version = PdfVersion.Pdf17;
+            doc.Settings.PdfAEnabled = true;
+            doc.Add(new TextBlock { Text = "Hello PDF/A", FontSize = 12 });
+        }));
+
+        Assert.Contains("pdfaid:part", pdf);
+        Assert.Contains("/OutputIntents", pdf);
+    }
+
     // ── Helpers ─────────────────────────────────────────────────────
 
     private static byte[] GenerateTagged(System.Action<Document> populate)
