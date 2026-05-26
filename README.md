@@ -170,11 +170,10 @@ API guide by topic:
 
 ## Licence
 
-BonniePDF uses a hybrid licence model.
+BonniePDF uses a hybrid licence model:
 
-- **Community:** Free for individuals, open-source projects, non-profits, and companies with under $50k annual gross revenue. Full features, no restrictions on what you can build.
-- **Professional:** For any form of commercial usage. Perpetual for the version purchased.
-- **Enterprise:** As per professional, but with unlimited developers. Priority support.
+- **Community:** Free for individuals, open-source projects, non-profits, and companies with under $1m annual gross revenue. Full features, no restrictions on what you can build.
+- **Commercial:** For any form of commercial usage. Perpetual for the version purchased.
 
 No licence keys, activation servers or runtime checks.
 
