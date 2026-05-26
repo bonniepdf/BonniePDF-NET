@@ -1,13 +1,14 @@
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Elements.Tables;
 
 /// <summary>
 /// A table cell with support for custom styling, background color, and padding overrides
 /// </summary>
-public class TableCell : BorderedElementBase
+public class TableCell : BorderedElementBase, IRoleProvider
 {
     /// <summary>
     /// The content element to display in this cell
@@ -28,6 +29,21 @@ public class TableCell : BorderedElementBase
     /// Number of columns this cell spans (default: 1)
     /// </summary>
     public int ColumnSpan { get; set; } = 1;
+
+    /// <summary>
+    /// Whether this cell is a header cell (renders as <c>/TH</c> in
+    /// PDF/UA tagged output instead of <c>/TD</c>). Set automatically
+    /// by <see cref="Table.AddHeader"/> on each cell in a header row,
+    /// and at render time from the owning row's <c>IsHeader</c> flag
+    /// for cells added directly to a row. May also be set explicitly
+    /// for individual cells that act as headers (e.g. row headers in
+    /// the first column of a data row).
+    /// </summary>
+    public bool IsHeader { get; set; }
+
+    /// <inheritdoc />
+    public SemanticRole SemanticRole =>
+        IsHeader ? Rendering.Tagging.SemanticRole.TH : Rendering.Tagging.SemanticRole.TD;
 
     protected override float MeasureContentHeight(float contentWidth)
     {

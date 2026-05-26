@@ -36,9 +36,12 @@ public static class BusinessInvoiceExample
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(TextMedium);
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-US";
 
         doc.Metadata.Title = $"Invoice INV-{DateTime.Now.Year}-001";
         doc.Metadata.Author = "Studio Eleven";
+        doc.Metadata.Subject = "Invoice for design and development services.";
 
         VerticalStack mainStack = new();
 
@@ -77,11 +80,13 @@ public static class BusinessInvoiceExample
         companyStack.AddChild(new TextBlock { Text = "Phone  (555) 123-4567" });
         companyStack.AddChild(new TextBlock { Text = "Email  hello@studioeleven.co" });
 
-        // Right: Invoice title
+        // Right: Invoice title — Heading (H1) instead of plain TextBlock so it
+        // carries the semantic role for screen readers (PDF/UA-1 Matterhorn §14-1).
+        // Visually identical to the prior styled TextBlock.
         VerticalStack titleStack = new();
-        titleStack.AddChild(new TextBlock
+        titleStack.AddChild(new Heading("Invoice")
         {
-            Text = "Invoice",
+            Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 28,
             TextColor = AccentGreen,

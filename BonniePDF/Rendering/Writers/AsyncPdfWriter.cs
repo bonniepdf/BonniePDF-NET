@@ -189,15 +189,22 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>The object ID of the annotation</returns>
     public async Task<int> WriteLinkAnnotationAsync(int id, Hyperlink hyperlink, IList<int> pageIds = null,
-        CancellationToken cancellationToken = default)
+        int? structParentKey = null, CancellationToken cancellationToken = default)
     {
         Dictionary<string, string> dict = new()
         {
             ["/Type"] = "/Annot",
             ["/Subtype"] = "/Link",
             ["/Rect"] = hyperlink.GetRectangleString(),
-            ["/F"] = "4" // Print flag (PDF/A-1B requires annotations to be printable)
+            ["/F"] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
+            // this feature / PDF/UA rule 7-18: /Contents mirrors the visible
+            // link text. See the sync variant for the rationale.
+            ["/Contents"] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
         };
+
+        // /StructParent wires this annotation into the parent tree.
+        if (structParentKey.HasValue)
+            dict["/StructParent"] = structParentKey.Value.ToString();
 
         if (hyperlink.TargetPageIndex.HasValue && pageIds != null)
         {
@@ -367,9 +374,20 @@ public class AsyncPdfWriter : IAsyncPdfWriter
             dict["/OutputIntents"] = $"[ {refs} ]";
         }
 
-        // Add MarkInfo for PDF/A
-        if (options?.PdfAEnabled == true)
+        // Add MarkInfo when either PDF/A or tagging is on. Both standards
+        // require /MarkInfo /Marked true; they're orthogonal flags so emitting
+        // it once when either is set covers both cases.
+        if (options?.PdfAEnabled == true || options?.Tagged == true)
             dict["/MarkInfo"] = "<< /Marked true >>";
+
+        // Add StructTreeRoot when tagging is on.
+        if (options?.StructTreeRootId > 0)
+            dict["/StructTreeRoot"] = $"{options.StructTreeRootId} 0 R";
+
+        // Add /Lang when the document declares a natural language. Required
+        // by PDF/UA-1; useful generally for assistive tech.
+        if (!string.IsNullOrEmpty(options?.Language))
+            dict["/Lang"] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(options.Language)})";
 
         // Add Dests if provided
         if (options?.DestsId > 0)

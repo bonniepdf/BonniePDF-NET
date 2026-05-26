@@ -4,14 +4,18 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Elements.Tables;
 
 /// <summary>
 /// A table element with support for column weights, cell padding, borders, headers, and footers
 /// </summary>
-public class Table : BorderedElementBase, IStatefulElement
+public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 {
+    /// <inheritdoc />
+    public SemanticRole SemanticRole => Rendering.Tagging.SemanticRole.Table;
+
     private readonly float[] _columnWeights;
     private readonly List<TableRow> _footers = new();
     private readonly List<TableRow> _headers = new();
@@ -94,6 +98,7 @@ public class Table : BorderedElementBase, IStatefulElement
     /// </summary>
     public void AddHeader(params TableCell[] cells)
     {
+        foreach (var c in cells) c.IsHeader = true;
         TableRow row = TableRow.From(cells).AsHeader();
         _headers.Add(row);
     }
@@ -104,6 +109,9 @@ public class Table : BorderedElementBase, IStatefulElement
     public void AddHeader(TableRow row)
     {
         row.IsHeader = true;
+        // Propagate to cells so each cell's PDF/UA role resolves to TH
+        // when the structure tree is built.
+        foreach (var c in row.Cells) c.IsHeader = true;
         _headers.Add(row);
     }
 
@@ -236,29 +244,82 @@ public class Table : BorderedElementBase, IStatefulElement
     /// <summary>
     /// Renders a row without internal pagination checks.
     /// Used by RenderStateful() where pagination is handled externally.
+    ///
+    /// this feature tagging: pushes /TR around the row and /TH or /TD around
+    /// each cell when the document has opted into PDF/UA. ColumnSpan
+    /// surfaces as /Attributes /ColSpan on the cell's StructElem.
+    /// No-op when tagging is off; see RenderRow for the non-stateful
+    /// twin that lives alongside this method for the
+    /// non-pipeline render path.
     /// </summary>
     private void RenderRowDirect(RenderContext ctx, TableRow row, float[] widths)
     {
         float rowHeight = MeasureRowHeight(row, widths);
 
-        float startX = ctx.CurrentX;
-        float currentX = startX;
-
-        for (int i = 0; i < row.Cells.Length; i++)
+        var tagging = ctx.Tagging;
+        bool tagThisRow = tagging != null;
+        if (tagThisRow)
         {
-            TableCell cell = row.Cells[i];
-            float colWidth = widths[i];
-
-            if (cell.ColumnSpan > 1)
-                for (int j = 1; j < cell.ColumnSpan && i + j < widths.Length; j++)
-                    colWidth += widths[i + j];
-
-            RenderCell(ctx, cell, row, currentX, colWidth, rowHeight);
-            currentX += widths[i];
+            tagging.Tree.Begin(SemanticRole.TR);
+            ctx.Canvas.BeginMarkedContent("TR");
         }
 
-        ctx.CurrentX = startX;
-        ctx.CurrentY += rowHeight;
+        try
+        {
+            float startX = ctx.CurrentX;
+            float currentX = startX;
+
+            for (int i = 0; i < row.Cells.Length; i++)
+            {
+                TableCell cell = row.Cells[i];
+
+                // Defensive: cells added via fromElements don't know their
+                // row's header-ness. Propagate at render time so the role
+                // resolves to TH instead of TD.
+                if (row.IsHeader && !cell.IsHeader) cell.IsHeader = true;
+
+                float colWidth = widths[i];
+                if (cell.ColumnSpan > 1)
+                    for (int j = 1; j < cell.ColumnSpan && i + j < widths.Length; j++)
+                        colWidth += widths[i + j];
+
+                SemanticRole cellRole = cell.SemanticRole;
+                bool tagThisCell = tagThisRow;
+                if (tagThisCell)
+                {
+                    tagging.Tree.Begin(cellRole);
+                    if (cell.ColumnSpan > 1)
+                        tagging.Tree.SetAttributes($"<< /O /Table /ColSpan {cell.ColumnSpan} >>");
+                    ctx.Canvas.BeginMarkedContent(cellRole.ToPdfTag());
+                }
+
+                try
+                {
+                    RenderCell(ctx, cell, row, currentX, colWidth, rowHeight);
+                }
+                finally
+                {
+                    if (tagThisCell)
+                    {
+                        ctx.Canvas.EndMarkedContent();
+                        tagging.Tree.End();
+                    }
+                }
+
+                currentX += widths[i];
+            }
+
+            ctx.CurrentX = startX;
+            ctx.CurrentY += rowHeight;
+        }
+        finally
+        {
+            if (tagThisRow)
+            {
+                ctx.Canvas.EndMarkedContent();
+                tagging.Tree.End();
+            }
+        }
     }
 
     protected override float MeasureContentHeight(float contentWidth)
@@ -325,28 +386,80 @@ public class Table : BorderedElementBase, IStatefulElement
         // Pagination check
         if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin) ctx.NewPage();
 
-        float startX = ctx.CurrentX;
-        float currentX = startX;
-
-        for (int i = 0; i < row.Cells.Length; i++)
+        // this feature tagging: push a /TR struct around the row and a /TH or
+        // /TD around each cell so the structure tree mirrors the visible
+        // table. ColumnSpan surfaces as /Attributes /ColSpan on the
+        // cell's StructElem. Header-ness is inherited from the row
+        // when the cell doesn't already declare it. Renders unchanged
+        // (and adds nothing to the content stream) when tagging is off.
+        var tagging = ctx.Tagging;
+        bool tagThisRow = tagging != null;
+        if (tagThisRow)
         {
-            TableCell cell = row.Cells[i];
-            float colWidth = widths[i];
-
-            // Apply column span
-            if (cell.ColumnSpan > 1)
-                for (int j = 1; j < cell.ColumnSpan && i + j < widths.Length; j++)
-                    colWidth += widths[i + j];
-
-            // Render cell with proper background
-            RenderCell(ctx, cell, row, currentX, colWidth, rowHeight);
-
-            currentX += widths[i]; // Move by original column width (not spanned width)
+            tagging.Tree.Begin(SemanticRole.TR);
+            ctx.Canvas.BeginMarkedContent("TR");
         }
 
-        // Move down by row height
-        ctx.CurrentX = startX;
-        ctx.CurrentY += rowHeight;
+        try
+        {
+            float startX = ctx.CurrentX;
+            float currentX = startX;
+
+            for (int i = 0; i < row.Cells.Length; i++)
+            {
+                TableCell cell = row.Cells[i];
+
+                // Defensive: cells added via TableRow.From() don't know
+                // their row's header-ness. Propagate at render time so
+                // the structure role resolves to TH instead of TD.
+                if (row.IsHeader && !cell.IsHeader) cell.IsHeader = true;
+
+                float colWidth = widths[i];
+
+                // Apply column span
+                if (cell.ColumnSpan > 1)
+                    for (int j = 1; j < cell.ColumnSpan && i + j < widths.Length; j++)
+                        colWidth += widths[i + j];
+
+                SemanticRole cellRole = cell.SemanticRole;
+                bool tagThisCell = tagThisRow;
+                if (tagThisCell)
+                {
+                    tagging.Tree.Begin(cellRole);
+                    if (cell.ColumnSpan > 1)
+                        tagging.Tree.SetAttributes($"<< /O /Table /ColSpan {cell.ColumnSpan} >>");
+                    ctx.Canvas.BeginMarkedContent(cellRole.ToPdfTag());
+                }
+
+                try
+                {
+                    // Render cell with proper background
+                    RenderCell(ctx, cell, row, currentX, colWidth, rowHeight);
+                }
+                finally
+                {
+                    if (tagThisCell)
+                    {
+                        ctx.Canvas.EndMarkedContent();
+                        tagging.Tree.End();
+                    }
+                }
+
+                currentX += widths[i]; // Move by original column width (not spanned width)
+            }
+
+            // Move down by row height
+            ctx.CurrentX = startX;
+            ctx.CurrentY += rowHeight;
+        }
+        finally
+        {
+            if (tagThisRow)
+            {
+                ctx.Canvas.EndMarkedContent();
+                tagging.Tree.End();
+            }
+        }
     }
 
     private void RenderCell(RenderContext ctx, TableCell cell, TableRow row, float x, float width, float rowHeight)

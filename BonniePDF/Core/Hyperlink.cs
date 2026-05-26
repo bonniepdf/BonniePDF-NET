@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BonniePDF.Elements;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Pdf;
+using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
@@ -13,8 +14,11 @@ namespace BonniePDF.Core;
 /// Hyperlinks are clickable areas that navigate to a URI.
 /// This element implements IElement so it can be added like other elements.
 /// </summary>
-public class Hyperlink : IElement
+public class Hyperlink : IElement, IRoleProvider
 {
+    /// <inheritdoc />
+    public SemanticRole SemanticRole => Rendering.Tagging.SemanticRole.Link;
+
     /// <summary>
     /// Creates a new hyperlink with the specified URI and display text
     /// </summary>
@@ -76,6 +80,12 @@ public class Hyperlink : IElement
 
     /// <summary>Line height derived from <see cref="FontSize"/> with a standard 1.2× leading factor.</summary>
     private float LineHeight => FontSize * 1.2f;
+
+    /// <summary>
+    /// The structure element created for this link by the tagging pipeline.
+    /// Set during render; used by the serializer to wire /StructParent and /OBJR.
+    /// </summary>
+    internal Rendering.Tagging.StructureElement LinkedStructElement { get; set; }
 
     // Internal properties set during rendering
     /// <summary>Gets the X position of the rendered annotation rectangle in PDF coordinates (bottom-left origin).</summary>

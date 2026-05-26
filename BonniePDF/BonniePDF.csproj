@@ -51,4 +51,21 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Bundled Liberation fonts (OFL license, metric-compatible with Helvetica/Times/Courier).
+         Embedded as assembly resources so PDF/A-1b works without file-system font paths. -->
+    <EmbeddedResource Include="Typography\Fonts\LiberationSans-Regular.ttf" />
+    <EmbeddedResource Include="Typography\Fonts\LiberationSans-Bold.ttf" />
+    <EmbeddedResource Include="Typography\Fonts\LiberationSans-Italic.ttf" />
+    <EmbeddedResource Include="Typography\Fonts\LiberationSans-BoldItalic.ttf" />
+    <EmbeddedResource Include="Typography\Fonts\LiberationSerif-Regular.ttf" />
+    <EmbeddedResource Include="Typography\Fonts\LiberationSerif-Bold.ttf" />
+    <EmbeddedResource Include="Typography\Fonts\LiberationSerif-Italic.ttf" />
+    <EmbeddedResource Include="Typography\Fonts\LiberationSerif-BoldItalic.ttf" />
+    <EmbeddedResource Include="Typography\Fonts\LiberationMono-Regular.ttf" />
+    <EmbeddedResource Include="Typography\Fonts\LiberationMono-Bold.ttf" />
+    <EmbeddedResource Include="Typography\Fonts\LiberationMono-Italic.ttf" />
+    <EmbeddedResource Include="Typography\Fonts\LiberationMono-BoldItalic.ttf" />
+  </ItemGroup>
+
 </Project>

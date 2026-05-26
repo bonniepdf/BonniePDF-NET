@@ -44,19 +44,21 @@ public class TtfFont
     }
 
     /// <summary>
-    /// Initializes a TtfFont from raw bytes (used when loading from embedded resources).
+    /// Creates a <see cref="TtfFont"/> from raw TTF bytes without requiring a file on disk.
+    /// Works in any environment (desktop, server, cloud, browser via Blazor).
     /// </summary>
-    private TtfFont(byte[] bytes)
-    {
-        FilePath = string.Empty;
-        _rawData = bytes;
-        Parse();
-    }
-
-    /// <summary>Loads a TrueType font from raw bytes.</summary>
     public static TtfFont LoadFromBytes(byte[] bytes)
     {
-        return new TtfFont(bytes);
+        ArgumentNullException.ThrowIfNull(bytes);
+        var font = new TtfFont(bytes);
+        return font;
+    }
+
+    private TtfFont(byte[] bytes)
+    {
+        FilePath = "<from bytes>";
+        _rawData = bytes;
+        Parse();
     }
 
     // =====================================================

@@ -18,6 +18,11 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "simple_document_fluent.pdf"));
         }
+        Console.WriteLine("Generating Simple Document (Tagged / PDF/UA-1)...");
+        using (var doc = SimpleDocumentTaggedExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "simple_document_tagged.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

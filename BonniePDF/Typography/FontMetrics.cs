@@ -21,17 +21,8 @@ public static class FontMetrics
     // This ensures measurement uses actual TTF metrics to match rendering exactly.
     private static readonly Dictionary<string, string> FontPathAliases = new(StringComparer.OrdinalIgnoreCase);
 
-    // Instance alias map: logical font name → TtfFont instance (loaded from bytes, no file path)
+    // Instance map: logical font name → already-parsed TtfFont (for bytes-based fonts with no file path).
     private static readonly Dictionary<string, TtfFont> FontInstanceAliases = new(StringComparer.OrdinalIgnoreCase);
-
-    /// <summary>
-    /// Registers a TtfFont instance for accurate width measurement when font was loaded from bytes.
-    /// Should be called by PdfResourceRegistry when FontManager provides bytes for a standard font.
-    /// </summary>
-    public static void RegisterFontInstance(string logicalName, TtfFont font)
-    {
-        FontInstanceAliases[logicalName] = font;
-    }
 
     /// <summary>
     /// Registers a logical font name alias pointing to a specific TTF file path.
@@ -42,6 +33,16 @@ public static class FontMetrics
     public static void RegisterFontAlias(string logicalName, string ttfPath)
     {
         FontPathAliases[logicalName] = ttfPath;
+    }
+
+    /// <summary>
+    /// Registers a logical font name alias pointing to an already-parsed <see cref="TtfFont"/>.
+    /// Used when the font was loaded from bytes (e.g., bundled Liberation Sans) rather than a
+    /// file path, so file-based caching is bypassed entirely.
+    /// </summary>
+    public static void RegisterFontInstance(string logicalName, TtfFont font)
+    {
+        FontInstanceAliases[logicalName] = font;
     }
 
     // -----------------------------------------------------------------------
@@ -96,8 +97,9 @@ public static class FontMetrics
         // B2. IS IT A REGISTERED ALIAS TO A TTF FILE?
         // When PDF/A mode embeds a real TTF for a logical name (e.g. "Helvetica-Bold" → arialbd.ttf),
         // measure using the actual TTF metrics so layout matches rendering.
-        if (FontPathAliases.TryGetValue(fontIdentifier, out string ttfPath))
-            return GetTtfWidth(text, ttfPath, fontSize);
+        // B1. IS IT A REGISTERED ALIAS TO A TtfFont INSTANCE (bytes-based)?
+        if (FontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont fontInstance))
+            return GetKernedStringWidth(text, fontInstance, fontSize);
 
         // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
         return GetStandardFontWidth(text, fontIdentifier, fontSize);

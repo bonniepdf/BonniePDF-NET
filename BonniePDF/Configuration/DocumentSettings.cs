@@ -128,9 +128,43 @@ public class DocumentSettings
 
     /// <summary>
     /// Gets or sets whether PDF/A-1b archival mode is enabled.
-    /// Requires Version == Pdf17. Cannot be used with encryption.
+    /// Requires <c>Version == Pdf17</c>. Cannot be used with encryption.
+    /// <para/>
+    /// <b>Honest-claim behaviour:</b> setting this to <c>true</c>
+    /// is a request, not a guarantee. The serializer suppresses the
+    /// <c>pdfaid:part</c> XMP block and <c>/OutputIntents</c> entry
+    /// whenever the document references any of the standard 14 fonts
+    /// (Helvetica, Times-*, Courier-*, Symbol, ZapfDingbats), because
+    /// PDF/A-1b §6.3.4 requires every font to be embedded and BonniePDF
+    /// does not bundle subset versions of those faces. To actually
+    /// produce a PDF/A-conformant file, register a real TTF via
+    /// <c>TtfFont.FromFile()</c> / <c>FontMetrics.RegisterFontAlias()</c>
+    /// and use that for every text element.
     /// </summary>
     public bool PdfAEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets the accessibility / tagged-PDF conformance mode.
+    /// Default <see cref="AccessibilityMode.None"/> — the writer
+    /// produces an untagged PDF and ignores all tagging machinery.
+    /// Set to <see cref="AccessibilityMode.PdfUa1"/> to opt the
+    /// document into PDF/UA-1 emission (structure tree, MCIDs, XMP
+    /// conformance claim, <c>/Lang</c>, <c>/MarkInfo</c>).
+    ///
+    /// Orthogonal to <see cref="PdfAEnabled"/>: a document can be
+    /// PDF/A, PDF/UA, both, or neither. See
+    /// <c>the specification</c>.
+    /// </summary>
+    public AccessibilityMode Accessibility { get; set; } = AccessibilityMode.None;
+
+    /// <summary>
+    /// Document natural language as a BCP-47 tag (e.g. <c>"en-GB"</c>,
+    /// <c>"de-DE"</c>, <c>"fr"</c>). Written to the catalog as
+    /// <c>/Lang</c> when set; required for PDF/UA-1 conformance, where
+    /// it tells assistive tech the language of unmarked content.
+    /// Default <c>null</c> (no language declared).
+    /// </summary>
+    public string Language { get; set; }
 
     /// <summary>
     /// Gets or sets the bookmark items for the document outline tree.

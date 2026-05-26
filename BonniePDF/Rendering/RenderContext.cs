@@ -6,6 +6,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Rendering.Images;
+using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
@@ -79,6 +80,14 @@ public class RenderContext
     public ICanvas Canvas { get; private set; }
 
     /// <summary>
+    /// PDF/UA tagging context. Non-null when the document opted into
+    /// <c>AccessibilityMode.PdfUa1</c>; null otherwise. Held on the
+    /// context so each per-page <see cref="PdfCanvas"/> gets it via
+    /// <see cref="UpdateCanvas"/>.
+    /// </summary>
+    public TaggingContext Tagging { get; set; }
+
+    /// <summary>
     /// Gets whether the context is in SVG rendering mode.
     /// </summary>
     public bool IsSvgMode { get; }
@@ -131,10 +140,16 @@ public class RenderContext
     private void UpdateCanvas()
     {
         if (IsSvgMode)
+        {
             Canvas = new SvgCanvas(PageSize.Width, PageSize.Height, 0, 0, CurrentStream, true, ResolveEmbeddedFont);
+        }
         else
-            Canvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
+        {
+            var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
                 ResolveEmbeddedFont, TrackGlyphUsage);
+            if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
+            Canvas = pdfCanvas;
+        }
     }
 
     /// <summary>
@@ -144,7 +159,9 @@ public class RenderContext
     {
         if (IsSvgMode) return new SvgCanvas(PageSize.Width, PageSize.Height, x, y, CurrentStream, false, ResolveEmbeddedFont);
 
-        return new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource, ResolveEmbeddedFont, TrackGlyphUsage);
+        var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource, ResolveEmbeddedFont, TrackGlyphUsage);
+        if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
+        return pdfCanvas;
     }
 
     private string ResolveImageResource(ImageInfo info)
@@ -188,11 +205,37 @@ public class RenderContext
     /// </summary>
     public void NewPage()
     {
+        // this feature page-break-aware tagging: marked-content scopes (BDC/EMC)
+        // cannot cross a page boundary per PDF spec, but structure
+        // elements can. Snapshot any marked-content currently open,
+        // emit EMC on the outgoing page so the marks are balanced,
+        // then on the new page reopen the same roles with fresh MCIDs.
+        // All MCIDs (old page + new page) attach to the same structure
+        // elements because the StructureTreeBuilder stack is untouched.
+        string[] reopenRoles = null;
+        if (Tagging != null && Tagging.OpenMarkedContentCount > 0)
+        {
+            reopenRoles = Tagging.SnapshotOpenRolesBottomUp();
+            for (int i = reopenRoles.Length - 1; i >= 0; i--)
+                Canvas.EndMarkedContent();
+        }
+
         Pages.Add(new StringBuilder());
         CurrentPageIndex++;
         CurrentX = Margin;
         CurrentY = Margin;
+        // MCIDs restart at 0 per PDF page (ISO 32000-1 §14.7.4).
+        // Pass the new page index so any subsequent MCID can be paired
+        // with its page for /Pg + /ParentTree emission later.
+        Tagging?.ResetPage(CurrentPageIndex);
         UpdateCanvas();
+
+        if (reopenRoles != null)
+        {
+            for (int i = 0; i < reopenRoles.Length; i++)
+                Canvas.BeginMarkedContent(reopenRoles[i]);
+        }
+
         OnPageCreated?.Invoke(CurrentPageIndex);
     }
 

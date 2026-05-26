@@ -43,7 +43,7 @@ public interface IPdfWriter
     /// <summary>
     /// Writes a link annotation object for a hyperlink
     /// </summary>
-    int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null);
+    int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null);
 
     /// <summary>
     /// Writes viewer preferences to the document catalog.

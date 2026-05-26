@@ -37,4 +37,25 @@ public class CatalogOptions
     /// The named destinations dictionary object ID (0 if none).
     /// </summary>
     public int DestsId { get; set; }
+
+    /// <summary>
+    /// The structure tree root object ID (0 if none). Set when the
+    /// document opts into PDF/UA tagging.
+    /// </summary>
+    public int StructTreeRootId { get; set; }
+
+    /// <summary>
+    /// Whether the document carries a structure tree and should claim
+    /// to be tagged in the catalog. When true the catalog emits
+    /// <c>/MarkInfo &lt;&lt; /Marked true &gt;&gt;</c> regardless of
+    /// <see cref="PdfAEnabled"/> (the two flags are orthogonal).
+    /// </summary>
+    public bool Tagged { get; set; }
+
+    /// <summary>
+    /// BCP-47 language tag for the document (e.g. <c>"en-GB"</c>).
+    /// When non-null/empty, emitted as <c>/Lang</c> on the catalog.
+    /// Required by PDF/UA-1.
+    /// </summary>
+    public string Language { get; set; }
 }

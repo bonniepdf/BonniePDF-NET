@@ -113,27 +113,27 @@ public class PdfResourceRegistry
 
         if (PdfAEnabled)
         {
-            // (C1) Try FontManager bytes (bundled Liberation fonts)
-            byte[] bytes = FontManager.GetBytesForStandardFont(fontIdentifier);
+            // 1. Try FontManager (bytes-based — works in all environments)
+            byte[]? bytes = FontManager.GetBytesForStandardFont(fontIdentifier);
             if (bytes != null)
             {
+                string virtualKey = $"virtual:{fontIdentifier}";
                 string resourceName = RegisterEmbeddedFontFromBytes(bytes, virtualKey);
                 FontNameMap[fontIdentifier] = resourceName;
-                // Register for accurate measurement
-                if (EmbeddedFonts.TryGetValue(virtualKey, out EmbeddedFontInfo info) && info.Font != null)
+                FontAliasMap[fontIdentifier] = virtualKey;
+                // Register the parsed font with FontMetrics for accurate measurement.
+                if (EmbeddedFonts.TryGetValue(virtualKey, out var info))
                     FontMetrics.RegisterFontInstance(fontIdentifier, info.Font);
                 return resourceName;
             }
 
-            // (C2) File-based TTF resolution (existing logic)
-            string ttfPath = ResolveStandardFontToTtf(fontIdentifier);
+            // 2. Legacy: file-path based resolution (system fonts)
+            string? ttfPath = ResolveStandardFontToTtf(fontIdentifier);
             if (ttfPath != null)
             {
                 string resourceName = RegisterEmbeddedFont(ttfPath);
                 FontNameMap[fontIdentifier] = resourceName;
                 FontAliasMap[fontIdentifier] = ttfPath;
-                // Keep FontMetrics in sync so measurement uses actual TTF metrics,
-                // not the approximate standard-font width tables.
                 FontMetrics.RegisterFontAlias(fontIdentifier, ttfPath);
                 return resourceName;
             }
@@ -182,7 +182,7 @@ public class PdfResourceRegistry
     }
 
     /// <summary>
-    /// Checks if a font is an embedded TrueType/OpenType font (file path or virtual bytes-based).
+    /// Checks if a font is an embedded TrueType/OpenType font (or a virtual bytes-based key).
     /// </summary>
     public static bool IsEmbeddedFont(string fontIdentifier)
     {
@@ -197,6 +197,54 @@ public class PdfResourceRegistry
     public EmbeddedFontInfo GetEmbeddedFont(string filePath)
     {
         return EmbeddedFonts.TryGetValue(filePath, out EmbeddedFontInfo info) ? info : null;
+    }
+
+    /// <summary>
+    /// Reports whether this document will end up emitting any
+    /// non-embedded standard-14 Type1 font reference (Helvetica,
+    /// Times-*, Courier-*, Symbol, ZapfDingbats). Such references are
+    /// <b>forbidden by PDF/A-1b §6.3.4</b>, so when this returns
+    /// <c>true</c> the serializer suppresses the PDF/A conformance
+    /// claim rather than emitting an invalid one.
+    ///
+    /// Mirrors what <see cref="WriteResources"/> does: anything that
+    /// won't be aliased to a TTF and isn't already an embedded-font
+    /// path will be written via <c>WriteType1Font</c> (non-embedded).
+    /// </summary>
+    public bool HasNonEmbeddedStandardFont()
+    {
+        foreach (string fontIdentifier in FontNameMap.Keys)
+        {
+            if (FontAliasMap.ContainsKey(fontIdentifier)) continue;
+            if (IsEmbeddedFont(fontIdentifier)) continue;
+            return true;
+        }
+        return false;
+    }
+
+    private string RegisterEmbeddedFontFromBytes(byte[] bytes, string key)
+    {
+        if (!EmbeddedFonts.ContainsKey(key))
+        {
+            TtfFont font = TtfFont.LoadFromBytes(bytes);
+            GlyphUsageTracker tracker = new(font);
+
+            _fontCounter++;
+            string resourceName = $"/F{_fontCounter}";
+            string subsetPrefix = GenerateSubsetPrefix();
+
+            EmbeddedFonts[key] = new EmbeddedFontInfo
+            {
+                Font = font,
+                Tracker = tracker,
+                SubsetPrefix = subsetPrefix,
+                ResourceName = resourceName
+            };
+
+            FontNameMap[key] = resourceName;
+        }
+
+        return FontNameMap[key];
     }
 
     private string RegisterEmbeddedFont(string filePath)
