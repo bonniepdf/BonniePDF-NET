@@ -66,7 +66,8 @@ public partial class VeraPdfApiClient
     }
 
     /// <summary>
-    /// Validates a PDF file against PDF/A standards
+    /// Validates a PDF file against the requested VeraPDF profile
+    /// (PDF/A-1a/1b/2a/2b/3a/3b or PDF/UA-1).
     /// </summary>
     /// <param name="pdfBytes">The PDF file bytes</param>
     /// <param name="fileName">The PDF file name</param>
@@ -75,7 +76,7 @@ public partial class VeraPdfApiClient
     public async Task<ValidationResult> ValidatePdfAsync(byte[] pdfBytes, string fileName, ValidationProfile profile)
     {
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        
+
         try
         {
             using var client = CreateHttpClient(_settings.Timeout);
@@ -87,13 +88,13 @@ public partial class VeraPdfApiClient
             content.Add(pdfContent, "file", fileName);
 
             // Convert profile to API format
-            string profileId = GetProfileId(profile);
+            string profileId = profile.GetProfileId();
             string validateUrl = $"{_settings.BaseUrl}/validate/{profileId}";
-            
+
             // Request JSON response
             client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Add("Accept", "application/json");
-            
+
             var response = await client.PostAsync(validateUrl, content);
             stopwatch.Stop();
 
@@ -112,11 +113,11 @@ public partial class VeraPdfApiClient
 
             // Parse the response
             string responseContent = await response.Content.ReadAsStringAsync();
-            
+
             // Check if response is XML or JSON
             if (responseContent.TrimStart().StartsWith('<'))
             {
-                return ParseXmlResponse(responseContent, fileName, pdfBytes.LongLength, stopwatch.Elapsed);
+                return ParseXmlResponse(responseContent, fileName, pdfBytes.LongLength, stopwatch.Elapsed, profile);
             }
             else
             {
@@ -146,20 +147,6 @@ public partial class VeraPdfApiClient
         return client;
     }
 
-    private static string GetProfileId(ValidationProfile profile)
-    {
-        return profile switch
-        {
-            ValidationProfile.PDF_A_1b => "1b",
-            ValidationProfile.PDF_A_2b => "2b",
-            ValidationProfile.PDF_A_3b => "3b",
-            ValidationProfile.PDF_A_1a => "1a",
-            ValidationProfile.PDF_A_2a => "2a",
-            ValidationProfile.PDF_A_3a => "3a",
-            _ => "1b"
-        };
-    }
-
     private static ValidationResult ParseJsonResponse(
         string jsonResponse,
         string fileName,
@@ -171,9 +158,9 @@ public partial class VeraPdfApiClient
         {
             using var jsonDoc = JsonDocument.Parse(jsonResponse);
             JsonElement root = jsonDoc.RootElement;
-            
+
             bool isCompliant = false;
-            string complianceLevel = $"PDF/A-{GetProfileId(profile).ToUpper()}";
+            string complianceLevel = profile.GetDisplayName();
             var errors = new List<string>();
             
             if (root.TryGetProperty("report", out JsonElement report) &&
@@ -287,14 +274,15 @@ public partial class VeraPdfApiClient
         string xmlResponse,
         string fileName,
         long fileSize,
-        TimeSpan validationDuration)
+        TimeSpan validationDuration,
+        ValidationProfile profile)
     {
         try
         {
             bool isCompliant = false;
-            
+
             var complianceMatch = ComplianceRegex().Match(xmlResponse);
-            
+
             if (complianceMatch.Success)
             {
                 string complianceValue = complianceMatch.Groups[1].Value.Trim();
@@ -304,15 +292,15 @@ public partial class VeraPdfApiClient
             else
             {
                 var passedMatch = PassedRegex().Match(xmlResponse);
-                
+
                 if (passedMatch.Success)
                 {
                     string passedValue = passedMatch.Groups[1].Value.Trim();
                     isCompliant = passedValue.Equals("true", StringComparison.OrdinalIgnoreCase);
                 }
             }
-            
-            string complianceLevel = "PDF/A-1B";
+
+            string complianceLevel = profile.GetDisplayName();
             var errors = new List<string>();
 
             if (!isCompliant)
@@ -365,7 +353,7 @@ public partial class VeraPdfApiClient
                 
                 if (errors.Count == 0)
                 {
-                    errors.Add("PDF does not comply with PDF/A-1B standard. Use a validation profile that matches the PDF version or check the detailed report for specific issues.");
+                    errors.Add($"PDF does not comply with the {complianceLevel} profile. Check the detailed report for specific issues.");
                 }
             }
 

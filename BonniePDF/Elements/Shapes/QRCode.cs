@@ -1,6 +1,7 @@
 using BonniePDF.Core;
 
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Elements.Shapes;
 
@@ -14,12 +15,35 @@ namespace BonniePDF.Elements.Shapes;
 /// https://www.nayuki.io/page/qr-code-generator-library
 /// Ported to C# for BonniePDF.
 /// </summary>
-public class QRCode : ElementBase
+public class QRCode : ElementBase, IRoleProvider, IAltTextProvider
 {
     /// <summary>
     /// The data/text to encode in the QR Code.
     /// </summary>
     public string Data { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Alternate text description for accessibility (e.g. "QR code to
+    /// https://example.com"). When the document opts into
+    /// <c>AccessibilityMode.PdfUa1</c>, this populates the <c>/Alt</c>
+    /// entry on the structure element wrapping the QR code. Required
+    /// by PDF/UA for non-decorative figures.
+    /// </summary>
+    public string AltText { get; set; } = string.Empty;
+
+    /// <summary>
+    /// When <c>true</c>, the QR code is purely decorative and is
+    /// tagged as <c>/Artifact</c> with no alt-text warning. Rare for
+    /// QR codes (they're almost always meaningful) — included for
+    /// symmetry with <c>Image.IsDecorative</c>.
+    /// </summary>
+    public bool IsDecorative { get; set; }
+
+    /// <inheritdoc />
+    public SemanticRole SemanticRole =>
+        IsDecorative || string.IsNullOrEmpty(AltText)
+            ? Rendering.Tagging.SemanticRole.Artifact
+            : Rendering.Tagging.SemanticRole.Figure;
 
     /// <summary>
     /// The display size of the QR Code (QR codes are always square).

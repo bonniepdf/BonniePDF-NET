@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
+using BonniePDF.Core;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Elements.Layout;
 
@@ -56,101 +58,128 @@ public class VerticalStack : ElementBase, IStatefulElement
         {
             IElement child = _children[i];
 
-            if (child is IStatefulElement statefulChild)
+            // Tag children that declare a semantic role. Uses the same
+            // try/finally pattern as PdfRenderPipeline so tagging is
+            // closed before Overflow/WrapRequired propagates upward.
+            var tagging = ctx.Tagging;
+            bool tagChild = tagging != null && child is IRoleProvider;
+            if (tagChild)
             {
-                // Check if this child disallows breaking across pages
-                if (child is ElementBase { BreakAllowed: false } eb)
-                {
-                    float childHeight = child.MeasureHeight(contentWidth);
-                    bool wouldOverflow = ctx.CurrentY + childHeight > ctx.MaxY;
-                    bool notAtTop = ctx.CurrentY > ctx.Margin;
-                    bool wouldFitOnFreshPage = childHeight <= ctx.MaxY - ctx.Margin;
+                var role = ((IRoleProvider)child).SemanticRole;
+                var elem = tagging!.Tree.Begin(role);
+                if (child is IAltTextProvider alt && !string.IsNullOrEmpty(alt.AltText))
+                    tagging.Tree.SetAlt(alt.AltText);
+                if (child is Hyperlink hl)
+                    hl.LinkedStructElement = elem;
+                ctx.Canvas.BeginMarkedContent(role.ToPdfTag());
+            }
 
-                    if (wouldOverflow && notAtTop && wouldFitOnFreshPage)
+            try
+            {
+                if (child is IStatefulElement statefulChild)
+                {
+                    // Check if this child disallows breaking across pages
+                    if (child is ElementBase { BreakAllowed: false } eb)
                     {
-                        // Element won't fit here but would fit on a fresh page - don't split it
+                        float childHeight = child.MeasureHeight(contentWidth);
+                        bool wouldOverflow = ctx.CurrentY + childHeight > ctx.MaxY;
+                        bool notAtTop = ctx.CurrentY > ctx.Margin;
+                        bool wouldFitOnFreshPage = childHeight <= ctx.MaxY - ctx.Margin;
+
+                        if (wouldOverflow && notAtTop && wouldFitOnFreshPage)
+                        {
+                            // Element won't fit here but would fit on a fresh page - don't split it
+                            ctx.CurrentX = originalX;
+                            return i == startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+                        }
+                        // If at top of page or too large for any page, fall through and render anyway
+                    }
+
+                    // Render stateful child with overflow support
+                    RenderStatus status = statefulChild.RenderStateful(ctx, contentWidth);
+
+                    if (status == RenderStatus.Overflow)
+                    {
+                        // Child rendered some content but has more - always Overflow since progress was made
+                        _lastChildRendered = i - 1;
+                        ctx.CurrentX = originalX;
+                        return RenderStatus.Overflow;
+                    }
+
+                    if (status == RenderStatus.WrapRequired)
+                    {
+                        // Child couldn't render anything - propagate WrapRequired if no prior progress
+                        _lastChildRendered = i - 1;
                         ctx.CurrentX = originalX;
                         return i == startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
                     }
-                    // If at top of page or too large for any page, fall through and render anyway
+
+                    // Child completed - mark it as rendered
+                    _lastChildRendered = i;
+
+                    // Apply spacing after completed child (except after last child)
+                    if (Spacing > 0 && i < _children.Count - 1)
+                        ctx.CurrentY += Spacing;
+
+                    // Check if there are more children and if the next one would start past MaxY
+                    // This handles the case where children individually fit but collectively overflow
+                    if (i < _children.Count - 1 && ctx.CurrentY >= ctx.MaxY)
+                    {
+                        ctx.CurrentX = originalX;
+                        return RenderStatus.Overflow;
+                    }
                 }
-
-                // Render stateful child with overflow support
-                RenderStatus status = statefulChild.RenderStateful(ctx, contentWidth);
-
-                if (status == RenderStatus.Overflow)
+                else
                 {
-                    // Child rendered some content but has more - always Overflow since progress was made
-                    _lastChildRendered = i - 1;
-                    ctx.CurrentX = originalX;
-                    return RenderStatus.Overflow;
-                }
+                    // Non-stateful child - check if it fits before rendering
+                    // IMPORTANT: Tables and nested VerticalStacks handle their own pagination,
+                    // so we should let them render even if they don't "fit"
+                    bool canPaginateInternally = child is Table || child is VerticalStack;
 
-                if (status == RenderStatus.WrapRequired)
-                {
-                    // Child couldn't render anything - propagate WrapRequired if no prior progress
-                    _lastChildRendered = i - 1;
-                    ctx.CurrentX = originalX;
-                    return i == startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
-                }
+                    if (!canPaginateInternally)
+                    {
+                        float childHeight = child.MeasureHeight(contentWidth);
 
-                // Child completed - mark it as rendered
-                _lastChildRendered = i;
+                        // Check if it fits on the current page
+                        bool wouldOverflow = ctx.CurrentY + childHeight > ctx.MaxY;
+                        bool notAtTop = ctx.CurrentY > ctx.Margin;
 
-                // Apply spacing after completed child (except after last child)
-                if (Spacing > 0 && i < _children.Count - 1)
-                    ctx.CurrentY += Spacing;
+                        if (wouldOverflow && notAtTop)
+                        {
+                            // This child doesn't fit - determine if we made any progress
+                            // _lastChildRendered stays at previous value - we haven't rendered child i yet
+                            ctx.CurrentX = originalX;
+                            // If this is the first child we attempted on this page, zero progress was made
+                            return i == startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+                        }
+                    }
 
-                // Check if there are more children and if the next one would start past MaxY
-                // This handles the case where children individually fit but collectively overflow
-                if (i < _children.Count - 1 && ctx.CurrentY >= ctx.MaxY)
-                {
-                    ctx.CurrentX = originalX;
-                    return RenderStatus.Overflow;
+                    // Save position before render
+                    float yBefore = ctx.CurrentY;
+                    child.Render(ctx, contentWidth);
+
+                    // Only advance Y if the child didn't already do it
+                    if (ctx.CurrentY == yBefore)
+                    {
+                        float childHeight = child.MeasureHeight(contentWidth);
+                        ctx.CurrentY += childHeight;
+                    }
+
+                    // Mark this child as rendered
+                    _lastChildRendered = i;
+
+                    // Apply spacing after rendered child (except after last child)
+                    if (Spacing > 0 && i < _children.Count - 1)
+                        ctx.CurrentY += Spacing;
                 }
             }
-            else
+            finally
             {
-                // Non-stateful child - check if it fits before rendering
-                // IMPORTANT: Tables and nested VerticalStacks handle their own pagination,
-                // so we should let them render even if they don't "fit"
-                bool canPaginateInternally = child is Table || child is VerticalStack;
-
-                if (!canPaginateInternally)
+                if (tagChild)
                 {
-                    float childHeight = child.MeasureHeight(contentWidth);
-
-                    // Check if it fits on the current page
-                    bool wouldOverflow = ctx.CurrentY + childHeight > ctx.MaxY;
-                    bool notAtTop = ctx.CurrentY > ctx.Margin;
-
-                    if (wouldOverflow && notAtTop)
-                    {
-                        // This child doesn't fit - determine if we made any progress
-                        // _lastChildRendered stays at previous value - we haven't rendered child i yet
-                        ctx.CurrentX = originalX;
-                        // If this is the first child we attempted on this page, zero progress was made
-                        return i == startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
-                    }
+                    ctx.Canvas.EndMarkedContent();
+                    ctx.Tagging!.Tree.End();
                 }
-
-                // Save position before render
-                float yBefore = ctx.CurrentY;
-                child.Render(ctx, contentWidth);
-
-                // Only advance Y if the child didn't already do it
-                if (ctx.CurrentY == yBefore)
-                {
-                    float childHeight = child.MeasureHeight(contentWidth);
-                    ctx.CurrentY += childHeight;
-                }
-
-                // Mark this child as rendered
-                _lastChildRendered = i;
-
-                // Apply spacing after rendered child (except after last child)
-                if (Spacing > 0 && i < _children.Count - 1)
-                    ctx.CurrentY += Spacing;
             }
         }
 
@@ -225,17 +254,42 @@ public class VerticalStack : ElementBase, IStatefulElement
             // Large elements (like tables) handle their own pagination
             if (wouldOverflow && notAtTop && elementFitsOnOnePage && !canPaginateInternally) ctx.NewPage();
 
-            // Save position before render
-            float yBefore = ctx.CurrentY;
-            child.Render(ctx, contentWidth);
+            // Tag children that declare a semantic role (same pattern as RenderStateful).
+            var tagging = ctx.Tagging;
+            bool tagChild = tagging != null && child is IRoleProvider;
+            if (tagChild)
+            {
+                var role = ((IRoleProvider)child).SemanticRole;
+                var elem = tagging!.Tree.Begin(role);
+                if (child is IAltTextProvider alt && !string.IsNullOrEmpty(alt.AltText))
+                    tagging.Tree.SetAlt(alt.AltText);
+                if (child is Hyperlink hl)
+                    hl.LinkedStructElement = elem;
+                ctx.Canvas.BeginMarkedContent(role.ToPdfTag());
+            }
 
-            // Only advance Y if the child didn't already do it
-            // (some elements like nested VerticalStacks and Tables advance Y themselves)
-            if (ctx.CurrentY == yBefore) ctx.CurrentY += childHeight;
+            try
+            {
+                // Save position before render
+                float yBefore = ctx.CurrentY;
+                child.Render(ctx, contentWidth);
 
-            // Apply spacing between children
-            if (Spacing > 0 && child != _children[^1])
-                ctx.CurrentY += Spacing;
+                // Only advance Y if the child didn't already do it
+                // (some elements like nested VerticalStacks and Tables advance Y themselves)
+                if (ctx.CurrentY == yBefore) ctx.CurrentY += childHeight;
+
+                // Apply spacing between children
+                if (Spacing > 0 && child != _children[^1])
+                    ctx.CurrentY += Spacing;
+            }
+            finally
+            {
+                if (tagChild)
+                {
+                    ctx.Canvas.EndMarkedContent();
+                    ctx.Tagging!.Tree.End();
+                }
+            }
         }
 
         // Restore original X

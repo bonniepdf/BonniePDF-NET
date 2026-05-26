@@ -1,7 +1,9 @@
 namespace BonniePDF.Validation.Models;
 
 /// <summary>
-/// PDF/A validation profile enumeration
+/// VeraPDF validation profile enumeration. Includes the PDF/A
+/// conformance levels (1a / 1b / 2a / 2b / 3a / 3b) and PDF/UA-1
+/// for accessibility validation.
 /// </summary>
 public enum ValidationProfile
 {
@@ -33,5 +35,11 @@ public enum ValidationProfile
     /// <summary>
     /// PDF/A-3a - Accessible level
     /// </summary>
-    PDF_A_3a
+    PDF_A_3a,
+
+    /// <summary>
+    /// PDF/UA-1 — accessibility / Universal Accessibility (ISO 14289-1).
+    /// Independent from PDF/A; a document can claim both.
+    /// </summary>
+    PDF_UA_1
 }

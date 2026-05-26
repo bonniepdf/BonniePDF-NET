@@ -127,4 +127,42 @@ public interface ICanvas
     /// <param name="x">Left position</param>
     /// <param name="y">Top position</param>
     void DrawFormXObject(string resourceName, float x, float y);
+
+    // --- 4. Marked content (PDF/UA tagging) ---
+
+    /// <summary>
+    /// Begin a marked-content sequence tagged with a PDF structure role
+    /// (e.g. <c>"H1"</c>, <c>"P"</c>, <c>"Figure"</c>). On PDF this
+    /// emits <c>/&lt;role&gt; &lt;&lt; /MCID n &gt;&gt; BDC</c>; on SVG
+    /// it is a no-op (SVG-out doesn't carry PDF structure). The MCID is
+    /// auto-allocated and attached to the currently-open structure
+    /// element via the tagging context.
+    ///
+    /// When the canvas has no tagging context (the document is not
+    /// opted into PDF/UA), this method is a no-op so renderer code can
+    /// call it unconditionally.
+    /// </summary>
+    void BeginMarkedContent(string role);
+
+    /// <summary>
+    /// End the most recent marked-content sequence opened by
+    /// <see cref="BeginMarkedContent"/>. Emits <c>EMC</c> on PDF; no-op
+    /// on SVG and when tagging is disabled.
+    /// </summary>
+    void EndMarkedContent();
+
+    /// <summary>
+    /// Begin an artifact (decorative/navigational) marked-content region.
+    /// Emits <c>/Artifact BMC</c> on PDF. Unlike
+    /// <see cref="BeginMarkedContent"/>, artifact regions are not
+    /// registered in the structure tree and do not allocate an MCID.
+    /// No-op when the document is not tagged or when using SVG output.
+    /// </summary>
+    void BeginArtifact();
+
+    /// <summary>
+    /// End the artifact region opened by <see cref="BeginArtifact"/>.
+    /// Emits <c>EMC</c> on PDF; no-op on SVG.
+    /// </summary>
+    void EndArtifact();
 }

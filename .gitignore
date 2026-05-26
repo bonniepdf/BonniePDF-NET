@@ -308,3 +308,5 @@ wwwroot/
 
 dist/
 dist-examples/
+# CI-generated PDFs
+generated-pdfs/

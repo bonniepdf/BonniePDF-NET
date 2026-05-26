@@ -122,14 +122,17 @@ public class MetadataWriter
     /// <summary>
     /// Writes XMP metadata to the PDF document.
     /// XMP (Extensible Metadata Platform) provides standardized metadata
-    /// that is required for PDF/A compliance and optional for PDF 1.7.
+    /// plus any conformance claims the document makes (PDF/A, PDF/UA, …).
+    /// The conformance blocks are derived from <paramref name="settings"/>
+    /// via the additive-hook design — see <c>XmpConformanceBlock</c>.
     /// </summary>
     /// <param name="id">The object ID for the XMP metadata dictionary.</param>
     /// <param name="metadata">The document metadata.</param>
-    /// <param name="pdfAEnabled">Indicates whether PDF/A compliance is enabled.</param>
-    public void WriteXmpMetadata(int id, DocumentMetadata metadata, bool pdfAEnabled)
+    /// <param name="settings">The document settings, read for PdfAEnabled and Accessibility.</param>
+    public void WriteXmpMetadata(int id, DocumentMetadata metadata, DocumentSettings settings)
     {
-        string xmpXml = XmpMetadataWriter.GenerateXmpXml(metadata, pdfAEnabled);
+        var blocks = BuildConformanceBlocks(settings);
+        string xmpXml = XmpMetadataWriter.GenerateXmpXml(metadata, blocks);
         byte[] xmpBytes = Encoding.UTF8.GetBytes(xmpXml);
 
         Dictionary<string, string> dict = new()
@@ -144,16 +147,11 @@ public class MetadataWriter
 
     /// <summary>
     /// Writes XMP metadata to the PDF document asynchronously.
-    /// XMP (Extensible Metadata Platform) provides standardized metadata
-    /// that is required for PDF/A compliance and optional for PDF 1.7.
     /// </summary>
-    /// <param name="id">The object ID for the XMP metadata dictionary.</param>
-    /// <param name="metadata">The document metadata.</param>
-    /// <param name="pdfAEnabled">Indicates whether PDF/A compliance is enabled.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    public async Task WriteXmpMetadataAsync(int id, DocumentMetadata metadata, bool pdfAEnabled, CancellationToken cancellationToken = default)
+    public async Task WriteXmpMetadataAsync(int id, DocumentMetadata metadata, DocumentSettings settings, CancellationToken cancellationToken = default)
     {
-        string xmpXml = XmpMetadataWriter.GenerateXmpXml(metadata, pdfAEnabled);
+        var blocks = BuildConformanceBlocks(settings);
+        string xmpXml = XmpMetadataWriter.GenerateXmpXml(metadata, blocks);
         byte[] xmpBytes = Encoding.UTF8.GetBytes(xmpXml);
 
         Dictionary<string, string> dict = new()
@@ -163,5 +161,19 @@ public class MetadataWriter
         };
 
         await _asyncWriter.WriteUnencryptedBinaryObjectAsync(id, dict, xmpBytes, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Build the list of conformance-namespace blocks the document
+    /// claims, based on <paramref name="settings"/>. Currently PDF/A
+    /// and PDF/UA-1; ZUGFeRD/Factur-X will register here too once
+    /// implemented.
+    /// </summary>
+    private static IReadOnlyList<XmpConformanceBlock> BuildConformanceBlocks(DocumentSettings settings)
+    {
+        var blocks = new List<XmpConformanceBlock>(2);
+        if (settings.PdfAEnabled) blocks.Add(XmpConformanceBlock.PdfA1B());
+        if (settings.Accessibility == AccessibilityMode.PdfUa1) blocks.Add(XmpConformanceBlock.PdfUa1());
+        return blocks;
     }
 }

@@ -179,15 +179,27 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="id">The object ID for the annotation</param>
     /// <param name="hyperlink">The hyperlink to create an annotation for</param>
     /// <returns>The object ID of the annotation</returns>
-    public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null)
+    public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null)
     {
         Dictionary<string, string> dict = new()
         {
             ["/Type"] = "/Annot",
             ["/Subtype"] = "/Link",
             ["/Rect"] = hyperlink.GetRectangleString(),
-            ["/F"] = "4" // Print flag (PDF/A-1B requires annotations to be printable)
+            ["/F"] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
+            // this feature / PDF/UA rule 7-18: /Contents on the annotation must
+            // carry an alt-text that mirrors the visible link text. Used
+            // by screen readers when the structure tree omits or can't
+            // resolve the link's text. Emitted unconditionally — even
+            // untagged docs benefit, and the field is a no-op for
+            // viewers that don't surface annotation alt-text.
+            ["/Contents"] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
         };
+
+        // /StructParent wires this annotation into the parent tree
+        // for reverse MCID→StructElem lookup by accessible viewers.
+        if (structParentKey.HasValue)
+            dict["/StructParent"] = structParentKey.Value.ToString();
 
         if (hyperlink.TargetPageIndex.HasValue && pageIds != null)
         {
@@ -357,9 +369,20 @@ public class PdfWriter : IPdfWriter, IDisposable
             dict["/OutputIntents"] = $"[ {refs} ]";
         }
 
-        // Add MarkInfo for PDF/A
-        if (options?.PdfAEnabled == true)
+        // Add MarkInfo when either PDF/A or tagging is on. Both standards
+        // require /MarkInfo /Marked true; they're orthogonal flags so emitting
+        // it once when either is set covers both cases.
+        if (options?.PdfAEnabled == true || options?.Tagged == true)
             dict["/MarkInfo"] = "<< /Marked true >>";
+
+        // Add StructTreeRoot when tagging is on.
+        if (options?.StructTreeRootId > 0)
+            dict["/StructTreeRoot"] = $"{options.StructTreeRootId} 0 R";
+
+        // Add /Lang when the document declares a natural language. Required
+        // by PDF/UA-1; useful generally for assistive tech.
+        if (!string.IsNullOrEmpty(options?.Language))
+            dict["/Lang"] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(options.Language)})";
 
         // Add Dests if provided
         if (options?.DestsId > 0)

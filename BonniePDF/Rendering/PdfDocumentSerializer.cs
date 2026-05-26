@@ -8,6 +8,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
+using BonniePDF.Rendering.Tagging;
 using BonniePDF.Fluent;
 using BonniePDF.Rendering.Writers;
 
@@ -74,10 +75,16 @@ public class PdfDocumentSerializer
             }
         }
 
+        // PDF/UA tagging context — created once, shared between the
+        // render pipeline (canvas attaches MCIDs to the builder) and the
+        // structure-tree writer at the end (emits the populated tree).
+        TaggingContext taggingContext = CreateTaggingContext();
+
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin)
         {
             PdfAEnabled = _document.Settings.PdfAEnabled,
-            TocEntries = resolvedTocEntries
+            TocEntries = resolvedTocEntries,
+            Tagging = taggingContext,
         };
 
         // 3. Stream Processing (Low Memory)
@@ -92,6 +99,13 @@ public class PdfDocumentSerializer
                 pageIds.Add(writer.GetNewId());
             }
         }
+
+        // annotation bindings for /StructParent + /OBJR wiring.
+        // Keys start well above the page count so the /ParentTree number
+        // tree has no collision between page keys (0..N-1) and annotation keys.
+        const int AnnotStructParentBase = 10_000;
+        var annotBindings = new List<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>();
+        int globalAnnotIndex = 0;
 
         int pageIndex = 0;
         // We use the new Streaming pipeline
@@ -123,6 +137,16 @@ public class PdfDocumentSerializer
                 ["/Contents"] = $"{contentId} 0 R"
             };
 
+            // Tagged PDF: each page gets /StructParents equal to its
+            // page index. The /ParentTree (emitted at the end by
+            // StructureTreeWriter) uses the same key, so the reverse
+            // lookup MCID→StructElem works.
+            if (taggingContext != null)
+            {
+                pageDict["/StructParents"] = (pageIndex - 1).ToString();
+                pageDict["/Tabs"] = "/S"; // follow structure order for tab navigation
+            }
+
             // Write link annotations if present
             if (pageOutput.Hyperlinks.Count > 0)
             {
@@ -130,8 +154,18 @@ public class PdfDocumentSerializer
                 foreach (Hyperlink link in pageOutput.Hyperlinks)
                 {
                     int annotId = writer.GetNewId();
-                    writer.WriteLinkAnnotation(annotId, link, pageIds);
+                    int? structParentKey = null;
+                    if (taggingContext != null)
+                    {
+                        structParentKey = AnnotStructParentBase + globalAnnotIndex++;
+                    }
+                    writer.WriteLinkAnnotation(annotId, link, pageIds, structParentKey);
                     annotIds.Add(annotId);
+                    if (taggingContext != null && link.LinkedStructElement != null && structParentKey.HasValue)
+                    {
+                        link.LinkedStructElement.ObjrAnnotations.Add((annotId, pageId));
+                        annotBindings.Add((link.LinkedStructElement, annotId, pageId, structParentKey.Value));
+                    }
                 }
 
                 pageDict["/Annots"] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
@@ -146,6 +180,24 @@ public class PdfDocumentSerializer
 
         // 4. Post-Processing (Write Resources)
         string globalResources = ctx.Resources.WriteResources(writer, pageIds.Count);
+
+        // ── Honest PDF/A claim ──────────────────────────────────
+        // Settings.PdfAEnabled is opt-in, but PDF/A-1b §6.3.4 forbids
+        // non-embedded fonts. When the caller asked for PDF/A but the
+        // document references any of the standard 14 (which we don't
+        // embed), we silently drop the claim: no pdfaid block in XMP,
+        // no OutputIntent. The document is still a valid PDF — it just
+        // doesn't lie about being PDF/A-1b. To actually deliver PDF/A
+        // the caller must register a real TTF.
+        //
+        // Implemented by demoting Settings.PdfAEnabled to the effective
+        // value (rather than threading a separate flag through the
+        // remaining writes); mirrors the DisplayDocTitle = true
+        // mutation we do for PDF/UA-1.
+        if (_document.Settings.PdfAEnabled && ctx.Resources.HasNonEmbeddedStandardFont())
+        {
+            _document.Settings.PdfAEnabled = false;
+        }
 
         // Write ExtGState for watermark opacity if configured
         if (_document.Settings.Watermark != null)
@@ -192,6 +244,8 @@ public class PdfDocumentSerializer
 
         CatalogOptions catalogOptions = new();
 
+        // PDF/UA-1 mandates /DisplayDocTitle true (Matterhorn Protocol §7-1).
+        if (taggingContext != null) _document.Settings.DisplayDocTitle = true;
         if (HasViewerPreferences(_document.Settings))
         {
             catalogOptions.ViewerPrefsId = writer.GetNewId();
@@ -202,7 +256,7 @@ public class PdfDocumentSerializer
         if (_document.Settings.Version == PdfVersion.Pdf17)
         {
             catalogOptions.XmpMetadataId = writer.GetNewId();
-            metadataWriter.WriteXmpMetadata(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings.PdfAEnabled);
+            metadataWriter.WriteXmpMetadata(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings);
         }
 
         // Write Bookmarks for PDF 1.7
@@ -223,6 +277,19 @@ public class PdfDocumentSerializer
             int outputIntentId = writer.GetNewId();
             complianceWriter.WriteOutputIntent(outputIntentId, iccProfileId);
             catalogOptions.OutputIntentIds = new List<int> { outputIntentId };
+        }
+
+        // Write PDF/UA structure tree. The tree was populated during the
+        // render pass via taggingContext (this feature wire MCIDs and
+        // semantic roles through the canvas). For this feature the tree is still
+        // a Document-only skeleton; this feature adds the renderer-driven
+        // population. this feature threads annotation bindings for /OBJR.
+        if (taggingContext != null)
+        {
+            StructureTreeWriter structureTreeWriter = new(writer);
+            catalogOptions.StructTreeRootId = structureTreeWriter.Write(taggingContext.Tree, pageIds, annotBindings);
+            catalogOptions.Tagged = true;
+            catalogOptions.Language = _document.Settings.Language;
         }
 
         // Write Catalog
@@ -278,9 +345,14 @@ public class PdfDocumentSerializer
             }
         }
 
+        // PDF/UA tagging context — shared between the render pipeline and
+        // the async structure-tree writer below.
+        TaggingContext taggingContext = CreateTaggingContext();
+
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin);
         ctx.PdfAEnabled = _document.Settings.PdfAEnabled;
         ctx.TocEntries = resolvedTocEntries;
+        ctx.Tagging = taggingContext;
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = new();
@@ -294,6 +366,11 @@ public class PdfDocumentSerializer
                 pageIds.Add(writer.GetNewId());
             }
         }
+
+        // annotation bindings for /StructParent + /OBJR wiring.
+        const int AnnotStructParentBase = 10_000;
+        var annotBindings = new List<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>();
+        int globalAnnotIndex = 0;
 
         int pageIndex = 0;
         // We use the new Streaming pipeline
@@ -325,6 +402,13 @@ public class PdfDocumentSerializer
                 ["/Contents"] = $"{contentId} 0 R"
             };
 
+            // Tagged PDF: /StructParents keyed by 0-based page index.
+            if (taggingContext != null)
+            {
+                pageDict["/StructParents"] = (pageIndex - 1).ToString();
+                pageDict["/Tabs"] = "/S"; // follow structure order for tab navigation
+            }
+
             // Write link annotations if present
             if (pageOutput.Hyperlinks.Count > 0)
             {
@@ -332,8 +416,18 @@ public class PdfDocumentSerializer
                 foreach (Hyperlink link in pageOutput.Hyperlinks)
                 {
                     int annotId = writer.GetNewId();
-                    await writer.WriteLinkAnnotationAsync(annotId, link, pageIds, cancellationToken).ConfigureAwait(false);
+                    int? structParentKey = null;
+                    if (taggingContext != null)
+                    {
+                        structParentKey = AnnotStructParentBase + globalAnnotIndex++;
+                    }
+                    await writer.WriteLinkAnnotationAsync(annotId, link, pageIds, structParentKey, cancellationToken).ConfigureAwait(false);
                     annotIds.Add(annotId);
+                    if (taggingContext != null && link.LinkedStructElement != null && structParentKey.HasValue)
+                    {
+                        link.LinkedStructElement.ObjrAnnotations.Add((annotId, pageId));
+                        annotBindings.Add((link.LinkedStructElement, annotId, pageId, structParentKey.Value));
+                    }
                 }
 
                 pageDict["/Annots"] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
@@ -348,6 +442,13 @@ public class PdfDocumentSerializer
 
         // 4. Post-Processing (Write Resources)
         string globalResources = await ctx.Resources.WriteResourcesAsync(writer, pageIds.Count, cancellationToken).ConfigureAwait(false);
+
+        // drop the PDF/A claim if any standard-14 font slipped
+        // through unembedded — see the sync path for the rationale.
+        if (_document.Settings.PdfAEnabled && ctx.Resources.HasNonEmbeddedStandardFont())
+        {
+            _document.Settings.PdfAEnabled = false;
+        }
 
         // Write ExtGState for watermark opacity if configured
         if (_document.Settings.Watermark != null)
@@ -392,6 +493,8 @@ public class PdfDocumentSerializer
 
         CatalogOptions catalogOptions = new();
 
+        // PDF/UA-1 mandates /DisplayDocTitle true (Matterhorn Protocol §7-1).
+        if (taggingContext != null) _document.Settings.DisplayDocTitle = true;
         if (HasViewerPreferences(_document.Settings))
         {
             catalogOptions.ViewerPrefsId = writer.GetNewId();
@@ -402,7 +505,7 @@ public class PdfDocumentSerializer
         if (_document.Settings.Version == PdfVersion.Pdf17)
         {
             catalogOptions.XmpMetadataId = writer.GetNewId();
-            await metadataWriter.WriteXmpMetadataAsync(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings.PdfAEnabled, cancellationToken).ConfigureAwait(false);
+            await metadataWriter.WriteXmpMetadataAsync(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings, cancellationToken).ConfigureAwait(false);
         }
 
         // Write Bookmarks for PDF 1.7
@@ -423,6 +526,19 @@ public class PdfDocumentSerializer
             int outputIntentId = writer.GetNewId();
             await complianceWriter.WriteOutputIntentAsync(outputIntentId, iccProfileId, cancellationToken).ConfigureAwait(false);
             catalogOptions.OutputIntentIds = new List<int> { outputIntentId };
+        }
+
+        // Write PDF/UA structure tree (async). See sync path for the
+        // rationale. taggingContext carries the same builder that the
+        // canvas populated during render. this feature threads annotation bindings
+        // for /OBJR wiring.
+        if (taggingContext != null)
+        {
+            StructureTreeWriter structureTreeWriter = new(writer);
+            catalogOptions.StructTreeRootId = await structureTreeWriter.WriteAsync(taggingContext.Tree, pageIds, annotBindings, cancellationToken)
+                .ConfigureAwait(false);
+            catalogOptions.Tagged = true;
+            catalogOptions.Language = _document.Settings.Language;
         }
 
         // Write Catalog
@@ -447,6 +563,21 @@ public class PdfDocumentSerializer
                settings.FitWindow ||
                settings.CenterWindow ||
                settings.DisplayDocTitle;
+    }
+
+    /// <summary>
+    /// Returns a <see cref="TaggingContext"/> if the document opted into
+    /// PDF/UA tagging (Accessibility != None and a PDF version that
+    /// supports structure trees); otherwise <c>null</c>. The returned
+    /// context is shared between the render pipeline (canvas writes
+    /// MCIDs to the builder) and the structure-tree writer (emits the
+    /// populated tree into the PDF object graph).
+    /// </summary>
+    private TaggingContext CreateTaggingContext()
+    {
+        if (_document.Settings.Accessibility == AccessibilityMode.None) return null;
+        if (_document.Settings.Version != PdfVersion.Pdf17) return null;
+        return new TaggingContext(new StructureTreeBuilder());
     }
 
     /// <summary>

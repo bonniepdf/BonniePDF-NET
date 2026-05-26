@@ -7,6 +7,7 @@ using BonniePDF.Drawing;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Rendering.Pdf;
+using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
@@ -126,7 +127,63 @@ public static class PdfRenderPipeline
     /// Each element's rendering is wrapped in SaveState/RestoreState to prevent
     /// graphics state leaks between elements.
     /// </summary>
-    private static void RenderElementWithOverflow(IElement element, RenderContext ctx, float contentWidth)
+    internal static void RenderElementWithOverflow(IElement element, RenderContext ctx, float contentWidth)
+    {
+        // when tagging is on and the element declares a structure
+        // role, push the role onto the in-memory tree and wrap the
+        // element's render in a /role MCID BDC ... EMC pair so the
+        // canvas's draw calls attach as marked content. Pop after.
+        //
+        // No-op when tagging is off (Tagging == null) or the element
+        // isn't an IRoleProvider — pre-G-1 elements behave exactly as
+        // they did.
+        //
+        // Known limitation deferred to a later stage-0 task: elements
+        // that overflow across pages emit BDC on one page and EMC on
+        // the next, which is technically invalid marked content per the
+        // PDF spec. The renderer-side fix is to close + reopen the
+        // marked-content pair around each NewPage() call. Tests below
+        // use small content that fits on one page.
+        TaggingContext tagging = ctx.Tagging;
+        bool tagThis = tagging != null && element is IRoleProvider;
+        if (tagThis)
+        {
+            var role = ((IRoleProvider)element).SemanticRole;
+            var elem = tagging.Tree.Begin(role);
+
+            // Surface alt-text on the structure element when the element
+            // provides it. PDF/UA requires /Alt on Figure structure
+            // elements; an Image with no AltText degrades to /Artifact
+            // (see Image.SemanticRole) so this branch only fires for the
+            // "Figure with alt-text" case.
+            if (element is IAltTextProvider altProvider && !string.IsNullOrEmpty(altProvider.AltText))
+            {
+                tagging.Tree.SetAlt(altProvider.AltText);
+            }
+
+            // wire the struct element back to the hyperlink so the
+            // serializer can write /StructParent + /OBJR in the annot dict.
+            if (element is Core.Hyperlink hyperlink)
+                hyperlink.LinkedStructElement = elem;
+
+            ctx.Canvas.BeginMarkedContent(role.ToPdfTag());
+        }
+
+        try
+        {
+            RenderElementWithOverflowCore(element, ctx, contentWidth);
+        }
+        finally
+        {
+            if (tagThis)
+            {
+                ctx.Canvas.EndMarkedContent();
+                tagging.Tree.End();
+            }
+        }
+    }
+
+    private static void RenderElementWithOverflowCore(IElement element, RenderContext ctx, float contentWidth)
     {
         if (element is IStatefulElement statefulElement)
         {
@@ -371,6 +428,13 @@ public static class PdfRenderPipeline
         PdfOperators.EndText(wmOps);
         PdfOperators.RestoreState(wmOps);
 
+        // wrap watermark in /Artifact BMC ... EMC so screen readers skip it.
+        if (ctx.Tagging != null)
+        {
+            wmOps.Insert(0, "/Artifact BMC\n");
+            wmOps.AppendLine("EMC");
+        }
+
         // Prepend to page stream (painter's model: first drawn = behind)
         ctx.Pages[pageIndex].Insert(0, wmOps);
     }
@@ -411,7 +475,9 @@ public static class PdfRenderPipeline
                     // Position at top of page (0)
                     ctx.CurrentX = startX;
                     ctx.CurrentY = 0;
+                    if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
                     headerElement.Render(ctx, contentWidth);
+                    if (ctx.Tagging != null) ctx.Canvas.EndArtifact();
                 }
             }
 
@@ -424,7 +490,9 @@ public static class PdfRenderPipeline
                     // Position at start of bottom margin
                     ctx.CurrentX = startX;
                     ctx.CurrentY = ctx.PageSize.Height - ctx.Margin;
+                    if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
                     footerElement.Render(ctx, contentWidth);
+                    if (ctx.Tagging != null) ctx.Canvas.EndArtifact();
                 }
             }
         }

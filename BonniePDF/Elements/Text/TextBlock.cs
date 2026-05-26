@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Elements.Text;
 
@@ -9,7 +10,7 @@ namespace BonniePDF.Elements.Text;
 /// A text block element that supports word wrapping, alignment, font customization,
 /// and automatic pagination across page boundaries.
 /// </summary>
-public class TextBlock : TextElementBase, IStatefulElement
+public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 {
     private float _cachedContentWidth = -1;
     private IList<string>? _cachedLines;
@@ -18,6 +19,14 @@ public class TextBlock : TextElementBase, IStatefulElement
     private int _lastLineRendered = -1;
     public required string Text { get; set; }
     public TextAlignment Alignment { get; set; } = TextAlignment.Left;
+
+    /// <summary>
+    /// PDF/UA structure role for this element. Defaults to
+    /// <see cref="Rendering.Tagging.SemanticRole.P"/> (a paragraph).
+    /// <see cref="Heading"/> overrides this to return one of
+    /// <c>H1</c>…<c>H6</c>.
+    /// </summary>
+    public virtual SemanticRole SemanticRole => Rendering.Tagging.SemanticRole.P;
 
     /// <summary>
     /// Minimum number of lines to render before a page break (orphan control).

@@ -43,6 +43,24 @@ public class TtfFont
         Parse();
     }
 
+    /// <summary>
+    /// Creates a <see cref="TtfFont"/> from raw TTF bytes without requiring a file on disk.
+    /// Works in any environment (desktop, server, cloud, browser via Blazor).
+    /// </summary>
+    public static TtfFont LoadFromBytes(byte[] bytes)
+    {
+        ArgumentNullException.ThrowIfNull(bytes);
+        var font = new TtfFont(bytes);
+        return font;
+    }
+
+    private TtfFont(byte[] bytes)
+    {
+        FilePath = "<from bytes>";
+        _rawData = bytes;
+        Parse();
+    }
+
     // =====================================================
     // PUBLIC PROPERTIES (from parsed tables)
     // =====================================================

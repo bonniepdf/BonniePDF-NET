@@ -1,16 +1,18 @@
 # BonniePDF Validation Tool
 
-A console application that validates generated PDFs against the PDF/A standard using a local VeraPDF API instance.
+A console application that validates generated PDFs against the
+PDF/A and PDF/UA standards using a local VeraPDF API instance.
 
 ## Features
 
 - **Batch Validation**: Validate all PDFs in a directory at once
 - **VeraPDF Integration**: Uses your local VeraPDF API running at `http://localhost:8080/`
-- **Detailed Error Reporting**: Shows specific PDF/A compliance failures with:
+- **PDF/A and PDF/UA profiles**: validate against archival (PDF/A) or accessibility (PDF/UA) conformance levels
+- **Detailed Error Reporting**: Shows specific conformance failures with:
   - ISO specification clause and test numbers
   - Clear descriptions of what failed
   - Exact locations in the PDF structure
-- **JSON Report Generation**: Creates a detailed `validation-report.json` file
+- **JSON + HTML Report Generation**: Creates `validation-report.json` and `validation-report.html` files
 - **Easy to Use**: Simple command-line interface with automatic directory detection
 
 ## Prerequisites
@@ -27,31 +29,49 @@ A console application that validates generated PDFs against the PDF/A standard u
 2. **API Endpoints**: The tool uses the VeraPDF REST API endpoints:
    - `/api/info` - Health check endpoint
    - `/api/validate/{profileId}` - Validation endpoint (default: `1b` for PDF/A-1B)
-   
-   Available validation profiles:
-   - `1a` - PDF/A-1A (full compliance, accessibility)
-   - `1b` - PDF/A-1B (basic compliance)
-   - `2b` - PDF/A-2B
-   - `3b` - PDF/A-3B
 
-2. **Generated PDFs**: Run the BonniePDF Examples project first to generate sample PDFs.
+   Available validation profiles:
+   - `1a` — PDF/A-1A (basic + accessibility)
+   - `1b` — PDF/A-1B (basic compliance, default)
+   - `2a` — PDF/A-2A
+   - `2b` — PDF/A-2B
+   - `3a` — PDF/A-3A
+   - `3b` — PDF/A-3B
+   - `ua1` — PDF/UA-1 (Universal Accessibility, ISO 14289-1)
+
+3. **Generated PDFs**: Run the BonniePDF Examples project first to generate sample PDFs.
 
 ## Usage
 
 ### Basic Usage
 
-The tool will automatically look for PDFs in the default examples output directory:
+The tool will automatically look for PDFs in the default examples output directory and validate them against PDF/A-1B (the default profile):
 
 ```bash
 dotnet run --project BonniePDF.Validation
 ```
 
+### Choose a profile
+
+Pass `--profile <id>` (or `-p <id>`) to validate against a different conformance level. Examples:
+
+```bash
+# Validate accessibility (PDF/UA-1)
+dotnet run --project BonniePDF.Validation -- --profile ua1
+
+# Validate PDF/A-3B (the level ZUGFeRD / Factur-X targets)
+dotnet run --project BonniePDF.Validation -- --profile 3b
+```
+
+Supported ids: `1a`, `1b`, `2a`, `2b`, `3a`, `3b`, `ua1`.
+
 ### Specify Custom Directory
 
-Provide a custom directory path as an argument:
+Provide a custom directory path as a positional argument (order-independent with `--profile`):
 
 ```bash
 dotnet run --project BonniePDF.Validation -- "C:\path\to\your\pdfs"
+dotnet run --project BonniePDF.Validation -- --profile ua1 "C:\path\to\your\pdfs"
 ```
 
 ### Build and Run
@@ -62,6 +82,9 @@ dotnet build BonniePDF.Validation/BonniePDF.Validation.csproj
 
 # Run the validator
 dotnet run --project BonniePDF.Validation
+
+# Show CLI help
+dotnet run --project BonniePDF.Validation -- --help
 ```
 
 ## Output
@@ -83,7 +106,7 @@ The tool provides:
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
-║           BonniePDF - PDF/A Validation Tool                  ║
+║              BonniePDF Validation Tool                       ║
 ╚══════════════════════════════════════════════════════════════╝
 
 Validating PDFs in: C:\path\to\GeneratedPdfs
@@ -127,11 +150,10 @@ Validation report saved to: C:\path\to\GeneratedPdfs\validation-report.json
 
 ### Changing the Validation Profile
 
-By default, the tool validates against PDF/A-1B. To change the validation profile, edit the `DefaultValidationProfile` constant in [`Program.cs`](Program.cs:14):
-
-```csharp
-private const string DefaultValidationProfile = "1b"; // Options: 1a, 1b, 2b, 3b
-```
+The CLI flag `--profile <id>` (see "Choose a profile" above) is the
+ergonomic path. To change the *default* profile when no flag is
+passed, edit the `ValidationSettings.DefaultProfile` initialiser in
+[`Configuration/ValidationSettings.cs`](Configuration/ValidationSettings.cs).
 
 ### Changing the VeraPDF API URL
 
