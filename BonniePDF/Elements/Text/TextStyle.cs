@@ -48,6 +48,12 @@ public class TextStyle
     public TextDecoration Decoration { get; set; } = TextDecoration.None;
 
     /// <summary>
+    /// Line-height multiplier applied to font size. Null = inherit (1.2 if not set anywhere).
+    /// Set to 1.5 for looser leading or 1.0 for tight leading.
+    /// </summary>
+    public float? LineHeightMultiplier { get; set; }
+
+    /// <summary>
     /// Resolves the actual PDF font name by combining FontFamily + Weight + Italic
     /// through the FontFamilyResolver.
     /// </summary>
@@ -72,7 +78,8 @@ public class TextStyle
             FontSize = FontSize ?? baseStyle.FontSize,
             Color = Color ?? baseStyle.Color,
             BackgroundColor = BackgroundColor ?? baseStyle.BackgroundColor,
-            Decoration = Decoration != TextDecoration.None ? Decoration : baseStyle.Decoration
+            Decoration = Decoration != TextDecoration.None ? Decoration : baseStyle.Decoration,
+            LineHeightMultiplier = LineHeightMultiplier ?? baseStyle.LineHeightMultiplier,
         };
     }
 
@@ -170,6 +177,13 @@ public class TextStyle
     public TextStyle Strikethrough()
     {
         Decoration |= TextDecoration.Strikethrough;
+        return this;
+    }
+
+    /// <summary>Sets the line-height multiplier</summary>
+    public TextStyle WithLineHeight(float multiplier)
+    {
+        LineHeightMultiplier = multiplier;
         return this;
     }
 }

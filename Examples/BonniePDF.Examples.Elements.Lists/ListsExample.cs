@@ -18,9 +18,10 @@ public static class ListsExample
     public static Document Generate()
     {
         Document doc = new();
-       
+
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate600);
 
         // Set document metadata
         doc.Metadata.Title = "List Examples";

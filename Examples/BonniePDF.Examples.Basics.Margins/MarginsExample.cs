@@ -21,6 +21,7 @@ public static class MarginsExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
 
         doc.Metadata.Title = "Margin Example";
         doc.Metadata.Author = "BonniePDF";
@@ -41,9 +42,7 @@ public static class MarginsExample
         {
             Text =
                 "This paragraph has a 10pt margin on all sides. Margins create space around elements, helping to visually separate content and improve readability.",
-            FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = Color.Slate600,
             Margin = new Thickness(10) // 10pt margin on all sides
         });
 
@@ -78,9 +77,6 @@ public static class MarginsExample
         doc.Add(new TextBlock
         {
             Text = "Images can also have margins. The image below has a 20pt margin on all sides:",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600,
             Margin = new Thickness(0, 0, 0, 10)
         });
 
@@ -126,25 +122,23 @@ public static class MarginsExample
         );
 
         table.AddRow(
-            new TextBlock { Text = "Margin.Top", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "Space above the element", FontName = StandardFonts.Helvetica, FontSize = 10 }
+            new TextBlock { Text = "Margin.Top", FontSize = 10 },
+            new TextBlock { Text = "Space above the element", FontSize = 10 }
         );
 
         table.AddRow(
-            new TextBlock { Text = "Margin.Bottom", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock { Text = "Space below the element", FontName = StandardFonts.Helvetica, FontSize = 10 }
+            new TextBlock { Text = "Margin.Bottom", FontSize = 10 },
+            new TextBlock { Text = "Space below the element", FontSize = 10 }
         );
 
         table.AddRow(
-            new TextBlock { Text = "Margin.Left", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock
-                { Text = "Space to the left of the element", FontName = StandardFonts.Helvetica, FontSize = 10 }
+            new TextBlock { Text = "Margin.Left", FontSize = 10 },
+            new TextBlock { Text = "Space to the left of the element", FontSize = 10 }
         );
 
         table.AddRow(
-            new TextBlock { Text = "Margin.Right", FontName = StandardFonts.Helvetica, FontSize = 10 },
-            new TextBlock
-                { Text = "Space to the right of the element", FontName = StandardFonts.Helvetica, FontSize = 10 }
+            new TextBlock { Text = "Margin.Right", FontSize = 10 },
+            new TextBlock { Text = "Space to the right of the element", FontSize = 10 }
         );
 
         doc.Add(table);
@@ -171,7 +165,6 @@ public static class MarginsExample
             Child = new TextBlock
             {
                 Text = "Item 1 in stack",
-                FontName = StandardFonts.Helvetica,
                 FontSize = 10,
                 TextColor = Color.Green800
             }
@@ -185,7 +178,6 @@ public static class MarginsExample
             Child = new TextBlock
             {
                 Text = "Item 2 in stack (with top margin)",
-                FontName = StandardFonts.Helvetica,
                 FontSize = 10,
                 TextColor = Color.Purple800
             }
@@ -199,7 +191,6 @@ public static class MarginsExample
             Child = new TextBlock
             {
                 Text = "Item 3 in stack (with top margin)",
-                FontName = StandardFonts.Helvetica,
                 FontSize = 10,
                 TextColor = Color.Red800
             }

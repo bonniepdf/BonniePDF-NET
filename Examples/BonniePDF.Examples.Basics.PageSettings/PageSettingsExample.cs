@@ -30,6 +30,7 @@ public static class PageSettingsExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
 
         doc.Metadata.Title = "Standard PDF Page Formats Gallery";
 

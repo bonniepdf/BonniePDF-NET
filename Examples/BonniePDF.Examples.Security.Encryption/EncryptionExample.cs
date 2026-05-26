@@ -21,6 +21,7 @@ public static class EncryptionExample
         settings.WithPassword("demo123");
 
         Document doc = new(settings);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
 
         doc.Add(new TextBlock
         {
@@ -66,6 +67,7 @@ public static class EncryptionExample
         );
 
         Document doc = new(settings);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
 
         doc.Add(new TextBlock
         {
@@ -113,6 +115,7 @@ public static class EncryptionExample
         );
 
         Document doc = new(settings);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
 
         doc.Add(new TextBlock
         {

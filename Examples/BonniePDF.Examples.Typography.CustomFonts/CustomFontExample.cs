@@ -35,6 +35,7 @@ public static class CustomFontExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(arialPath).WithSize(11).WithColor(Color.Slate600);
 
         // Set metadata
         doc.Metadata.Title = "Embedded Font Example";
@@ -71,62 +72,14 @@ public static class CustomFontExample
         });
 
         // Bullets and common symbols
-        doc.Add(new TextBlock
-        {
-            Text = "\u2022 Bullet point (U+2022)",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
+        doc.Add(new TextBlock { Text = "\u2022 Bullet point (U+2022)" });
+        doc.Add(new TextBlock { Text = "\u00A9 Copyright symbol (U+00A9)" });
+        doc.Add(new TextBlock { Text = "\u00AE Registered trademark (U+00AE)" });
+        doc.Add(new TextBlock { Text = "\u2122 Trademark (U+2122)" });
+        doc.Add(new TextBlock { Text = "\u2013 En-dash (U+2013) \u2014 Em-dash (U+2014)" });
+        doc.Add(new TextBlock { Text = "\u2190 \u2191 \u2192 \u2193 Arrows" });
 
-        doc.Add(new TextBlock
-        {
-            Text = "\u00A9 Copyright symbol (U+00A9)",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = "\u00AE Registered trademark (U+00AE)",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = "\u2122 Trademark (U+2122)",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = "\u2013 En-dash (U+2013) \u2014 Em-dash (U+2014)",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = "\u2190 \u2191 \u2192 \u2193 Arrows",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = "\u2713 Check mark (U+2713)",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600,
-            Margin = new Thickness(0, 0, 0, 12)
-        });
+        doc.Add(new TextBlock { Text = "\u2713 Check mark (U+2713)", Margin = new Thickness(0, 0, 0, 12) });
 
         // Currency symbols
         doc.Add(new TextBlock
@@ -138,14 +91,7 @@ public static class CustomFontExample
             Margin = new Thickness(0, 0, 0, 6)
         });
 
-        doc.Add(new TextBlock
-        {
-            Text = "\u20AC Euro \u00A3 Pound \u00A5 Yen \u20B9 Rupee",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600,
-            Margin = new Thickness(0, 0, 0, 12)
-        });
+        doc.Add(new TextBlock { Text = "\u20AC Euro \u00A3 Pound \u00A5 Yen \u20B9 Rupee", Margin = new Thickness(0, 0, 0, 12) });
 
         // Math symbols
         doc.Add(new TextBlock
@@ -157,22 +103,8 @@ public static class CustomFontExample
             Margin = new Thickness(0, 0, 0, 6)
         });
 
-        doc.Add(new TextBlock
-        {
-            Text = "\u00B1 Plus-minus \u00D7 Multiply \u00F7 Divide \u2260 Not equal",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = "\u2264 Less-equal \u2265 Greater-equal \u221E Infinity",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600,
-            Margin = new Thickness(0, 0, 0, 12)
-        });
+        doc.Add(new TextBlock { Text = "\u00B1 Plus-minus \u00D7 Multiply \u00F7 Divide \u2260 Not equal" });
+        doc.Add(new TextBlock { Text = "\u2264 Less-equal \u2265 Greater-equal \u221E Infinity", Margin = new Thickness(0, 0, 0, 12) });
 
         // Greek letters
         doc.Add(new TextBlock
@@ -184,14 +116,7 @@ public static class CustomFontExample
             Margin = new Thickness(0, 0, 0, 6)
         });
 
-        doc.Add(new TextBlock
-        {
-            Text = "\u03B1 Alpha \u03B2 Beta \u03B3 Gamma \u03B4 Delta \u03C0 Pi \u03A9 Omega",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600,
-            Margin = new Thickness(0, 0, 0, 16)
-        });
+        doc.Add(new TextBlock { Text = "\u03B1 Alpha \u03B2 Beta \u03B3 Gamma \u03B4 Delta \u03C0 Pi \u03A9 Omega", Margin = new Thickness(0, 0, 0, 16) });
 
         // Mixed fonts demonstration
         doc.Add(new TextBlock
@@ -216,9 +141,6 @@ public static class CustomFontExample
         doc.Add(new TextBlock
         {
             Text = "This line uses embedded Arial (TrueType, full Unicode)",
-            FontName = arialPath,
-            FontSize = 11,
-            TextColor = Color.Slate600,
             Margin = new Thickness(0, 0, 0, 16)
         });
 
@@ -226,7 +148,6 @@ public static class CustomFontExample
         doc.Add(new TextBlock
         {
             Text = $"\u00A9 {DateTime.Now.Year} BonniePDF \u2022 TrueType Font Embedding",
-            FontName = arialPath,
             FontSize = 10,
             TextColor = Color.Slate400
         });

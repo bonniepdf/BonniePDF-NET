@@ -25,6 +25,7 @@ public static class WatermarkConfidentialExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
 
         doc.Metadata.Title = "Confidential Report";
         doc.Metadata.Author = "BonniePDF";

@@ -28,6 +28,7 @@ public static class TextDecorationExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate700);
 
         doc.Metadata.Title = "Text Decorations";
         doc.Metadata.Author = "BonniePDF";
@@ -48,9 +49,6 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text = "This text has an underline decoration applied.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate700,
             TextDecoration = TextDecoration.Underline,
             Margin = new Thickness(0, 0, 0, 12)
         });
@@ -59,9 +57,6 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text = "This underline was applied using the fluent .Underline() extension method.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate700,
             Margin = new Thickness(0, 0, 0, 12)
         }.Underline());
 
@@ -71,9 +66,6 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text = "This text has a strikethrough decoration, useful for showing deleted or superseded content.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate700,
             TextDecoration = TextDecoration.Strikethrough,
             Margin = new Thickness(0, 0, 0, 12)
         });
@@ -81,9 +73,6 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text = "This strikethrough was applied using the fluent .Strikethrough() extension method.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate700,
             Margin = new Thickness(0, 0, 0, 12)
         }.Strikethrough());
 
@@ -93,9 +82,6 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text = "This text has both underline and strikethrough applied simultaneously.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate700,
             TextDecoration = TextDecoration.Underline | TextDecoration.Strikethrough,
             Margin = new Thickness(0, 0, 0, 12)
         });
@@ -104,9 +90,6 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text = "Combined decorations via fluent API: .Underline().Strikethrough() chains are additive.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate700,
             Margin = new Thickness(0, 0, 0, 12)
         }.Underline().Strikethrough());
 
@@ -117,9 +100,6 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text = "Left-aligned underlined text",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate700,
             TextDecoration = TextDecoration.Underline,
             Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 8)
@@ -128,9 +108,6 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text = "Center-aligned underlined text",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate700,
             TextDecoration = TextDecoration.Underline,
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 0, 0, 8)
@@ -139,9 +116,6 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text = "Right-aligned underlined text",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate700,
             TextDecoration = TextDecoration.Underline,
             Alignment = TextAlignment.Right,
             Margin = new Thickness(0, 0, 0, 8)
@@ -157,9 +131,7 @@ public static class TextDecorationExample
             doc.Add(new TextBlock
             {
                 Text = $"Underline at {size}pt",
-                FontName = StandardFonts.Helvetica,
                 FontSize = size,
-                TextColor = Color.Slate700,
                 TextDecoration = TextDecoration.Underline,
                 Margin = new Thickness(0, 0, 0, 6)
             });

@@ -30,6 +30,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Typography/Fonts/LiberationSans-Regular.ttf" />
+    <EmbeddedResource Include="Typography/Fonts/LiberationSans-Bold.ttf" />
+    <EmbeddedResource Include="Typography/Fonts/LiberationSans-Italic.ttf" />
+    <EmbeddedResource Include="Typography/Fonts/LiberationSans-BoldItalic.ttf" />
+    <EmbeddedResource Include="Typography/Fonts/LiberationSerif-Regular.ttf" />
+    <EmbeddedResource Include="Typography/Fonts/LiberationSerif-Bold.ttf" />
+    <EmbeddedResource Include="Typography/Fonts/LiberationSerif-Italic.ttf" />
+    <EmbeddedResource Include="Typography/Fonts/LiberationSerif-BoldItalic.ttf" />
+    <EmbeddedResource Include="Typography/Fonts/LiberationMono-Regular.ttf" />
+    <EmbeddedResource Include="Typography/Fonts/LiberationMono-Bold.ttf" />
+    <EmbeddedResource Include="Typography/Fonts/LiberationMono-Italic.ttf" />
+    <EmbeddedResource Include="Typography/Fonts/LiberationMono-BoldItalic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="BonniePDF.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

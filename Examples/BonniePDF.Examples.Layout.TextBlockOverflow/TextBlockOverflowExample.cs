@@ -19,6 +19,7 @@ public static class TextBlockOverflowExample
         Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
         doc.Settings.FooterTemplate = pageNumber => new TextBlock
         {
             Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
@@ -56,12 +57,10 @@ public static class TextBlockOverflowExample
         string longText = string.Join("\n\n", Enumerable.Range(1, 20).Select(i =>
             $"Section {i}\n\n{paragraphs[i % paragraphs.Length]}\n\n{paragraphs[(i + 1) % paragraphs.Length]}"));
 
+        // Uses DefaultTextStyle: Helvetica, 11, Slate700
         doc.Add(new TextBlock
         {
-            Text = longText,
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate700
+            Text = longText
         });
         return doc;
     }

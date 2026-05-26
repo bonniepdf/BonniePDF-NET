@@ -21,6 +21,7 @@ public static class WebApiStreamingExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Color.Slate600);
 
         doc.Metadata.Title = "Monthly Report";
         doc.Metadata.Author = "Report Generator";
@@ -37,8 +38,6 @@ public static class WebApiStreamingExample
         doc.Add(new TextBlock
         {
             Text = $"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 10,
             TextColor = Color.Slate500
         });
         return doc;
@@ -53,6 +52,7 @@ public static class WebApiStreamingExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Color.Slate600);
 
         doc.Metadata.Title = "Monthly Report";
         doc.Metadata.Author = "Report Generator";
@@ -69,8 +69,6 @@ public static class WebApiStreamingExample
         doc.Add(new TextBlock
         {
             Text = $"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 10,
             TextColor = Color.Slate500
         });
 

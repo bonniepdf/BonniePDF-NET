@@ -21,6 +21,7 @@ public static class HorizontalStacksExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate600);
 
         // Set document metadata
         doc.Metadata.Title = "Horizontal Stack Example";

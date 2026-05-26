@@ -29,6 +29,7 @@ public static class MultiPageFlowExample
         Document doc = new(settings);
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
 
         doc.Metadata.Title = "Flow Architecture Demo";
         doc.Metadata.Author = "BonniePDF";
@@ -48,7 +49,6 @@ public static class MultiPageFlowExample
         doc.Add(new TextBlock
         {
             Text = $"Annual Report {DateTime.Now.Year}",
-            FontName = StandardFonts.Helvetica,
             FontSize = 14,
             TextColor = Color.Slate500,
             Alignment = TextAlignment.Center,
@@ -69,9 +69,6 @@ public static class MultiPageFlowExample
         {
             Text =
                 "The following table lists all employees across all departments. Headers repeat on each page for easy reference.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600,
             Margin = new Thickness(0, 0, 0, 15)
         });
 
@@ -207,17 +204,14 @@ public static class MultiPageFlowExample
                 Margin = new Thickness(0, 20, 0, 8)
             });
 
-            // Add the main content paragraph
+            // Add the main content paragraph (uses DefaultTextStyle: Helvetica, 11, Slate600)
             doc.Add(new TextBlock
             {
                 Text = content,
-                FontName = StandardFonts.Helvetica,
-                FontSize = 11,
-                TextColor = Color.Slate600,
                 Margin = new Thickness(0, 0, 0, 8)
             });
 
-            // Add additional detail paragraph to ensure more content
+            // Add additional detail paragraph
             doc.Add(new TextBlock
             {
                 Text = $"This section highlights the importance of {title.ToLower()} in our organization. " +
@@ -226,9 +220,6 @@ public static class MultiPageFlowExample
                        "remain relevant and effective in an ever-changing business environment. " +
                        "The leadership team reviews progress quarterly and adjusts our approach as needed " +
                        "to maintain alignment with our long-term objectives.",
-                FontName = StandardFonts.Helvetica,
-                FontSize = 11,
-                TextColor = Color.Slate600,
                 Margin = new Thickness(0, 0, 0, 12)
             });
         }
@@ -253,9 +244,6 @@ public static class MultiPageFlowExample
                    "The text sections that follow flow naturally across page boundaries, maintaining readability " +
                    "and professional formatting throughout. This unified approach to content flow enables the " +
                    "creation of complex, multipage documents with consistent quality and appearance.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = Color.Slate600,
             Margin = new Thickness(0, 0, 0, 20)
         });
 

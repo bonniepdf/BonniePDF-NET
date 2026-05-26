@@ -35,6 +35,7 @@ public static class BusinessInvoiceExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(TextMedium);
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-US";
 
@@ -74,34 +75,10 @@ public static class BusinessInvoiceExample
             TextColor = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        companyStack.AddChild(new TextBlock
-        {
-            Text = "42 Design District",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
-        companyStack.AddChild(new TextBlock
-        {
-            Text = "Brooklyn, NY 11201",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
-        companyStack.AddChild(new TextBlock
-        {
-            Text = "Phone  (555) 123-4567",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
-        companyStack.AddChild(new TextBlock
-        {
-            Text = "Email  hello@studioeleven.co",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
+        companyStack.AddChild(new TextBlock { Text = "42 Design District" });
+        companyStack.AddChild(new TextBlock { Text = "Brooklyn, NY 11201" });
+        companyStack.AddChild(new TextBlock { Text = "Phone  (555) 123-4567" });
+        companyStack.AddChild(new TextBlock { Text = "Email  hello@studioeleven.co" });
 
         // Right: Invoice title — Heading (H1) instead of plain TextBlock so it
         // carries the semantic role for screen readers (PDF/UA-1 Matterhorn §14-1).
@@ -143,34 +120,10 @@ public static class BusinessInvoiceExample
             TextColor = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        billToStack.AddChild(new TextBlock
-        {
-            Text = "Meridian Labs",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
-        billToStack.AddChild(new TextBlock
-        {
-            Text = "Sarah Chen",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
-        billToStack.AddChild(new TextBlock
-        {
-            Text = "88 Innovation Way",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
-        billToStack.AddChild(new TextBlock
-        {
-            Text = "Austin, TX 78701",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
+        billToStack.AddChild(new TextBlock { Text = "Meridian Labs" });
+        billToStack.AddChild(new TextBlock { Text = "Sarah Chen" });
+        billToStack.AddChild(new TextBlock { Text = "88 Innovation Way" });
+        billToStack.AddChild(new TextBlock { Text = "Austin, TX 78701" });
 
         // Ship To column
         VerticalStack shipToStack = new();
@@ -182,34 +135,10 @@ public static class BusinessInvoiceExample
             TextColor = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        shipToStack.AddChild(new TextBlock
-        {
-            Text = "Meridian Labs",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
-        shipToStack.AddChild(new TextBlock
-        {
-            Text = "Sarah Chen",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
-        shipToStack.AddChild(new TextBlock
-        {
-            Text = "88 Innovation Way",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
-        shipToStack.AddChild(new TextBlock
-        {
-            Text = "Austin, TX 78701",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
+        shipToStack.AddChild(new TextBlock { Text = "Meridian Labs" });
+        shipToStack.AddChild(new TextBlock { Text = "Sarah Chen" });
+        shipToStack.AddChild(new TextBlock { Text = "88 Innovation Way" });
+        shipToStack.AddChild(new TextBlock { Text = "Austin, TX 78701" });
 
         // Details column
         VerticalStack detailsStack = new();
@@ -353,36 +282,10 @@ public static class BusinessInvoiceExample
             TextColor = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        messageStack.AddChild(new TextBlock
-        {
-            Text = "Hello!",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium,
-            
-        });
-        messageStack.AddChild(new TextBlock
-        {
-            Text = "Thank you for choosing Studio Eleven.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
-        messageStack.AddChild(new TextBlock
-        {
-            Text = "Please return this invoice with payment.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium
-        });
-        messageStack.AddChild(new TextBlock
-        {
-            Text = "Thanks!",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 9,
-            TextColor = TextMedium,
-            Margin = new Thickness(0, 4, 0, 0)
-        });
+        messageStack.AddChild(new TextBlock { Text = "Hello!" });
+        messageStack.AddChild(new TextBlock { Text = "Thank you for choosing Studio Eleven." });
+        messageStack.AddChild(new TextBlock { Text = "Please return this invoice with payment." });
+        messageStack.AddChild(new TextBlock { Text = "Thanks!", Margin = new Thickness(0, 4, 0, 0) });
 
         // Right: Totals
         VerticalStack totalsStack = new();
@@ -565,27 +468,9 @@ public static class BusinessInvoiceExample
             TextColor = AccentGreen,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        bankStack.AddChild(new TextBlock
-        {
-            Text = "Chase Bank",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 8,
-            TextColor = TextMedium
-        });
-        bankStack.AddChild(new TextBlock
-        {
-            Text = "Routing: 021000021",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 8,
-            TextColor = TextMedium
-        });
-        bankStack.AddChild(new TextBlock
-        {
-            Text = "Account: ****7842",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 8,
-            TextColor = TextMedium
-        });
+        bankStack.AddChild(new TextBlock { Text = "Chase Bank", FontSize = 8, TextColor = TextMedium });
+        bankStack.AddChild(new TextBlock { Text = "Routing: 021000021", FontSize = 8, TextColor = TextMedium });
+        bankStack.AddChild(new TextBlock { Text = "Account: ****7842", FontSize = 8, TextColor = TextMedium });
 
         // Other payment
         VerticalStack otherStack = new();
@@ -597,20 +482,8 @@ public static class BusinessInvoiceExample
             TextColor = AccentGreen,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        otherStack.AddChild(new TextBlock
-        {
-            Text = "PayPal: pay@studioeleven.co",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 8,
-            TextColor = TextMedium
-        });
-        otherStack.AddChild(new TextBlock
-        {
-            Text = "Wise: @studioeleven",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 8,
-            TextColor = TextMedium
-        });
+        otherStack.AddChild(new TextBlock { Text = "PayPal: pay@studioeleven.co", FontSize = 8, TextColor = TextMedium });
+        otherStack.AddChild(new TextBlock { Text = "Wise: @studioeleven", FontSize = 8, TextColor = TextMedium });
 
         // Reference
         VerticalStack refStack = new();
@@ -622,20 +495,8 @@ public static class BusinessInvoiceExample
             TextColor = AccentGreen,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        refStack.AddChild(new TextBlock
-        {
-            Text = "Please include invoice",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 8,
-            TextColor = TextMedium
-        });
-        refStack.AddChild(new TextBlock
-        {
-            Text = "number with payment",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 8,
-            TextColor = TextMedium
-        });
+        refStack.AddChild(new TextBlock { Text = "Please include invoice", FontSize = 8, TextColor = TextMedium });
+        refStack.AddChild(new TextBlock { Text = "number with payment", FontSize = 8, TextColor = TextMedium });
 
         paymentTable.AddRow(
             new Container { Child = bankStack },

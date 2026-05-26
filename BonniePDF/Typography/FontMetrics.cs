@@ -90,13 +90,16 @@ public static class FontMetrics
         if (fontIdentifier.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase))
             return GetTtfWidth(text, fontIdentifier, fontSize);
 
+        // B1. IS IT A BYTES-LOADED FONT INSTANCE (from FontManager)?
+        if (FontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont instanceFont))
+            return GetKernedStringWidth(text, instanceFont, fontSize);
+
+        // B2. IS IT A REGISTERED ALIAS TO A TTF FILE?
+        // When PDF/A mode embeds a real TTF for a logical name (e.g. "Helvetica-Bold" → arialbd.ttf),
+        // measure using the actual TTF metrics so layout matches rendering.
         // B1. IS IT A REGISTERED ALIAS TO A TtfFont INSTANCE (bytes-based)?
         if (FontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont fontInstance))
             return GetKernedStringWidth(text, fontInstance, fontSize);
-
-        // B2. IS IT A REGISTERED ALIAS TO A TTF FILE?
-        if (FontPathAliases.TryGetValue(fontIdentifier, out string ttfPath))
-            return GetTtfWidth(text, ttfPath, fontSize);
 
         // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
         return GetStandardFontWidth(text, fontIdentifier, fontSize);

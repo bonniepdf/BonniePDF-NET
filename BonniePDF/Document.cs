@@ -7,6 +7,8 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Tables;
+using BonniePDF.Elements.Text;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Writers;
 
@@ -274,6 +276,7 @@ public class Document : IDisposable
     private void SaveInternal(string path)
     {
         ValidateSettings();
+        ApplyDefaultStyleToTree();
         using PdfWriter writer = new(path, Settings.Version);
         var serializer = new PdfDocumentSerializer(this);
         serializer.Serialize(writer);
@@ -285,6 +288,7 @@ public class Document : IDisposable
     private void SaveInternal(Stream stream, bool leaveOpen)
     {
         ValidateSettings();
+        ApplyDefaultStyleToTree();
         using PdfWriter writer = new(stream, leaveOpen, Settings.Version);
         var serializer = new PdfDocumentSerializer(this);
         serializer.Serialize(writer);
@@ -297,6 +301,7 @@ public class Document : IDisposable
     private async Task SaveInternalAsync(string path, CancellationToken cancellationToken)
     {
         ValidateSettings();
+        ApplyDefaultStyleToTree();
         await using AsyncPdfWriter writer = new(path, Settings.Version);
         var serializer = new PdfDocumentSerializer(this);
         await serializer.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
@@ -308,9 +313,41 @@ public class Document : IDisposable
     private async Task SaveInternalAsync(Stream stream, bool leaveOpen, CancellationToken cancellationToken)
     {
         ValidateSettings();
+        ApplyDefaultStyleToTree();
         await using AsyncPdfWriter writer = new(stream, leaveOpen, Settings.Version);
         var serializer = new PdfDocumentSerializer(this);
         await serializer.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Walks the element tree and applies DefaultTextStyle to elements that haven't
+    /// had their style properties explicitly set by user code.
+    /// </summary>
+    private void ApplyDefaultStyleToTree()
+    {
+        TextStyle style = Settings.DefaultTextStyle;
+        if (style == null) return;
+        foreach (Page page in _pages)
+            foreach (IElement el in page.Elements)
+                ApplyStyleToElement(el, style);
+    }
+
+    private static void ApplyStyleToElement(IElement el, TextStyle style)
+    {
+        if (el is TextElementBase text)
+            text.ApplyDefaultStyleIfNotSet(style);
+
+        if (el is VerticalStack vs)
+            foreach (IElement child in vs.Children) ApplyStyleToElement(child, style);
+        else if (el is HorizontalStack hs)
+            foreach (IElement child in hs.Children) ApplyStyleToElement(child, style);
+        else if (el is Container c && c.Child != null)
+            ApplyStyleToElement(c.Child, style);
+        else if (el is Table t)
+            foreach (TableRow row in t.GetAllRows())
+                foreach (TableCell cell in row.Cells)
+                    if (cell.Content != null)
+                        ApplyStyleToElement(cell.Content, style);
     }
 
 

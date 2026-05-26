@@ -29,6 +29,7 @@ public static class ShapesAndBordersExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate700);
 
         doc.Metadata.Title = "Rounded Rectangles";
         doc.Metadata.Author = "BonniePDF";
@@ -56,7 +57,6 @@ public static class ShapesAndBordersExample
             Child = new TextBlock
             {
                 Text = "A container with 8pt corner radius and a light blue background.",
-                FontName = StandardFonts.Helvetica,
                 FontSize = 12,
                 TextColor = Color.Blue800
             }
@@ -72,7 +72,6 @@ public static class ShapesAndBordersExample
             Child = new TextBlock
             {
                 Text = "A container with a larger 16pt corner radius. The arcs become more pronounced as the radius increases.",
-                FontName = StandardFonts.Helvetica,
                 FontSize = 12,
                 TextColor = Color.Green800
             }
@@ -92,9 +91,7 @@ public static class ShapesAndBordersExample
             Child = new TextBlock
             {
                 Text = "A rounded border with no background fill. The stroke follows the curved path.",
-                FontName = StandardFonts.Helvetica,
-                FontSize = 12,
-                TextColor = Color.Slate700
+                FontSize = 12
             }
         });
 
@@ -110,7 +107,6 @@ public static class ShapesAndBordersExample
             Child = new TextBlock
             {
                 Text = "Rounded border combined with a background fill — great for alert boxes and callouts.",
-                FontName = StandardFonts.Helvetica,
                 FontSize = 12,
                 TextColor = Color.FromHex("#92400e")
             }
@@ -138,9 +134,7 @@ public static class ShapesAndBordersExample
         doc.Add(new TextBlock
         {
             Text = "This element uses the fluent .Rounded() extension to apply corner radius via method chaining.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = Color.Slate700
+            FontSize = 12
         }.Padding(16).Background(Color.FromHex("#ede9fe")).Rounded(12).Border(Color.FromHex("#8b5cf6"), 1));
 
         doc.Add(new Container { Margin = new Thickness(0, 12, 0, 0) });
@@ -148,7 +142,6 @@ public static class ShapesAndBordersExample
         doc.Add(new TextBlock
         {
             Text = "Chaining: .Padding(16).Background(...).Rounded(12).Border(...)",
-            FontName = StandardFonts.Helvetica,
             FontSize = 11,
             TextColor = Color.Slate500,
             Margin = new Thickness(0, 0, 0, 12)
@@ -171,9 +164,7 @@ public static class ShapesAndBordersExample
                 Child = new TextBlock
                 {
                     Text = r == 0 ? "CornerRadius = 0 (sharp corners, default)" : $"CornerRadius = {r}",
-                    FontName = StandardFonts.Helvetica,
-                    FontSize = 11,
-                    TextColor = Color.Slate700
+                    FontSize = 11
                 }
             });
         }

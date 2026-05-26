@@ -31,6 +31,7 @@ public static class EmojiExample
         Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(textFont).WithSize(11).WithColor(Color.Slate600);
 
         doc.Metadata.Title = "Emoji & Supplementary Unicode Demo";
         doc.Metadata.Author = "BonniePDF";
@@ -49,8 +50,6 @@ public static class EmojiExample
         doc.Add(new TextBlock
         {
             Text = "BonniePDF supports the full Unicode range including characters beyond U+FFFF.",
-            FontName = textFont,
-            FontSize = 11,
             TextColor = Color.Slate500,
             Margin = new Thickness(0, 0, 0, 24)
         });
@@ -77,7 +76,6 @@ public static class EmojiExample
         doc.Add(new TextBlock
         {
             Text = "Mixed Content",
-            FontName = textFont,
             FontSize = 14,
             TextColor = Color.Slate700,
             Margin = new Thickness(0, 16, 0, 4)
@@ -86,8 +84,6 @@ public static class EmojiExample
         doc.Add(new TextBlock
         {
             Text = "Emoji can be used inline with regular text using an emoji-capable font:",
-            FontName = textFont,
-            FontSize = 11,
             TextColor = Color.Slate600,
             Margin = new Thickness(0, 0, 0, 8)
         });
@@ -120,7 +116,6 @@ public static class EmojiExample
         doc.Add(new TextBlock
         {
             Text = title,
-            FontName = textFont,
             FontSize = 14,
             TextColor = Color.Slate700,
             Margin = new Thickness(0, 16, 0, 4)

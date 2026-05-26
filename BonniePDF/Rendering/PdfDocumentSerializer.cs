@@ -252,6 +252,8 @@ public class PdfDocumentSerializer
             writer.WriteViewerPreferences(catalogOptions.ViewerPrefsId, _document.Settings);
         }
 
+        bool effectivePdfA = _document.Settings.PdfAEnabled && !ctx.Resources.HasNonEmbeddedStandardFont();
+
         // Write XMP Metadata for PDF 1.7
         if (_document.Settings.Version == PdfVersion.Pdf17)
         {
@@ -268,7 +270,7 @@ public class PdfDocumentSerializer
         }
 
         // Write PDF/A Output Intents
-        if (_document.Settings.PdfAEnabled && _document.Settings.Version == PdfVersion.Pdf17)
+        if (effectivePdfA && _document.Settings.Version == PdfVersion.Pdf17)
         {
             ComplianceWriter complianceWriter = new(writer);
             catalogOptions.PdfAEnabled = true;
@@ -501,6 +503,8 @@ public class PdfDocumentSerializer
             await writer.WriteViewerPreferencesAsync(catalogOptions.ViewerPrefsId, _document.Settings, cancellationToken).ConfigureAwait(false);
         }
 
+        bool effectivePdfA = _document.Settings.PdfAEnabled && !ctx.Resources.HasNonEmbeddedStandardFont();
+
         // Write XMP Metadata for PDF 1.7
         if (_document.Settings.Version == PdfVersion.Pdf17)
         {
@@ -517,7 +521,7 @@ public class PdfDocumentSerializer
         }
 
         // Write PDF/A Output Intents
-        if (_document.Settings.PdfAEnabled && _document.Settings.Version == PdfVersion.Pdf17)
+        if (effectivePdfA && _document.Settings.Version == PdfVersion.Pdf17)
         {
             ComplianceWriter complianceWriter = new(writer);
             catalogOptions.PdfAEnabled = true;
