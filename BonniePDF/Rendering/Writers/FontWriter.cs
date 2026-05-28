@@ -89,12 +89,13 @@ public class FontWriter
 
         WriteFontFile2(fontFile2Id, fontData);
 
-        // 2. Write CIDSet (required for PDF/A-1b compliance)
+        // 2. Write CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap
+        //    domain (0..MaxOriginalGid) — see BuildCIDSetData.
         int cidSetId = 0;
-        if (enableSubsetting)
+        if (enableSubsetting && subsetter != null)
         {
             cidSetId = _writer.GetNewId();
-            WriteCIDSet(cidSetId, tracker.UsedGlyphIds);
+            WriteCIDSet(cidSetId, subsetter.MaxOriginalGid);
         }
 
         // 3. Write FontDescriptor
@@ -188,34 +189,34 @@ public class FontWriter
     /// in the embedded CIDFont file. Required for PDF/A-1b compliance (ISO 19005-1:2005, 6.3.5).
     /// Each bit corresponds to a CID; bit 7 of byte 0 = CID 0, bit 6 = CID 1, etc.
     /// </summary>
-    private void WriteCIDSet(int id, IReadOnlySet<ushort> usedGlyphIds)
+    private void WriteCIDSet(int id, int maxCid)
     {
-        byte[] cidSetData = BuildCIDSetData(usedGlyphIds);
+        byte[] cidSetData = BuildCIDSetData(maxCid);
         _writer.WriteCompressedBinaryObject(id, new Dictionary<string, string>(), cidSetData);
     }
 
     /// <summary>
-    /// Builds the CIDSet bit-field byte array from a set of used glyph IDs.
+    /// Builds the CIDSet bit-field for a CIDFontType2 subset.
+    ///
+    /// The CIDSet must mirror the CIDToGIDMap's domain (CIDs 0..maxCid). VeraPDF
+    /// (PDF/UA-1, clause 7.21.4.2) treats every in-range CID as "present" — an
+    /// unmapped CIDToGIDMap entry points at GID 0, which is &lt; numGlyphs — and
+    /// requires the CIDSet to mark all of them, so set every bit 0..maxCid.
+    /// Bit ordering: bit 7 of byte 0 = CID 0, bit 6 of byte 0 = CID 1, etc.
     /// </summary>
-    private static byte[] BuildCIDSetData(IReadOnlySet<ushort> usedGlyphIds)
+    private static byte[] BuildCIDSetData(int maxCid)
     {
-        // Find the maximum CID to determine the size of the bit-field
-        ushort maxCid = 0;
-        foreach (ushort gid in usedGlyphIds)
-            if (gid > maxCid) maxCid = gid;
+        if (maxCid < 0) return Array.Empty<byte>();
 
-        // Allocate enough bytes: each byte covers 8 CIDs
         int byteCount = (maxCid / 8) + 1;
         byte[] data = new byte[byteCount];
+        for (int i = 0; i < byteCount; i++) data[i] = 0xFF;
 
-        // Set bits for each used CID
-        // Bit ordering: bit 7 of byte 0 = CID 0, bit 6 of byte 0 = CID 1, etc.
-        foreach (ushort cid in usedGlyphIds)
-        {
-            int byteIndex = cid / 8;
-            int bitIndex = 7 - (cid % 8);
-            data[byteIndex] |= (byte)(1 << bitIndex);
-        }
+        // Zero the bits past maxCid in the final byte so the bitset length is
+        // exactly maxCid + 1.
+        int bitsInLastByte = (maxCid % 8) + 1;
+        if (bitsInLastByte < 8)
+            data[byteCount - 1] = (byte)((0xFF << (8 - bitsInLastByte)) & 0xFF);
 
         return data;
     }
@@ -361,12 +362,13 @@ public class FontWriter
 
         await WriteFontFile2Async(fontFile2Id, fontData, cancellationToken).ConfigureAwait(false);
 
-        // 2. Write CIDSet (required for PDF/A-1b compliance)
+        // 2. Write CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap
+        //    domain (0..MaxOriginalGid) — see BuildCIDSetData.
         int cidSetId = 0;
-        if (enableSubsetting)
+        if (enableSubsetting && subsetter != null)
         {
             cidSetId = _asyncWriter.GetNewId();
-            await WriteCIDSetAsync(cidSetId, tracker.UsedGlyphIds, cancellationToken).ConfigureAwait(false);
+            await WriteCIDSetAsync(cidSetId, subsetter.MaxOriginalGid, cancellationToken).ConfigureAwait(false);
         }
 
         // 3. Write FontDescriptor
@@ -466,9 +468,9 @@ public class FontWriter
     /// <summary>
     /// Writes the CIDSet stream asynchronously
     /// </summary>
-    private async Task WriteCIDSetAsync(int id, IReadOnlySet<ushort> usedGlyphIds, CancellationToken cancellationToken)
+    private async Task WriteCIDSetAsync(int id, int maxCid, CancellationToken cancellationToken)
     {
-        byte[] cidSetData = BuildCIDSetData(usedGlyphIds);
+        byte[] cidSetData = BuildCIDSetData(maxCid);
         await _asyncWriter.WriteCompressedBinaryObjectAsync(id, new Dictionary<string, string>(), cidSetData,
             cidSetData.Length, cancellationToken).ConfigureAwait(false);
     }

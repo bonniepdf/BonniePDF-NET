@@ -82,7 +82,7 @@ public class TtfSubsetter
         CopyTableIfPresent(newTables, "cvt ");
         CopyTableIfPresent(newTables, "fpgm");
         CopyTableIfPresent(newTables, "prep");
-        CopyTableIfPresent(newTables, "post");
+        BuildPostTableIfPresent(newTables);
         CopyTableIfPresent(newTables, "name");
         CopyTableIfPresent(newTables, "OS/2");
 
@@ -709,6 +709,32 @@ public class TtfSubsetter
         } while ((flags & MORE_COMPONENTS) != 0);
 
         return result;
+    }
+
+    /// <summary>
+    /// Emits a format 3.0 'post' table (32-byte header, no glyph-name array).
+    ///
+    /// A format 2.0 'post' table carries its own numberOfGlyphs field reflecting
+    /// the original glyph count, which no longer matches the subset's rewritten
+    /// 'maxp' numGlyphs — veraPDF flags that mismatch. Glyph names are not used
+    /// for embedded PDF fonts (text extraction relies on the ToUnicode CMap), so
+    /// downgrading to format 3.0 drops the names and resolves the discrepancy.
+    /// </summary>
+    private void BuildPostTableIfPresent(Dictionary<string, byte[]> newTables)
+    {
+        if (!_tables.TryGetValue("post", out (uint offset, uint length) info) || info.length < 32)
+            return;
+
+        byte[] data = new byte[32];
+        Array.Copy(_originalData, info.offset, data, 0, 32);
+
+        // version = 3.0 (0x00030000)
+        data[0] = 0x00;
+        data[1] = 0x03;
+        data[2] = 0x00;
+        data[3] = 0x00;
+
+        newTables["post"] = data;
     }
 
     private void CopyTableIfPresent(Dictionary<string, byte[]> newTables, string tag)
