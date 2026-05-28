@@ -52,7 +52,9 @@ public static class EmojiExampleFluent
             doc.WithSettings(settings =>
             {
                 settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                // PDF/A compliance is disabled — emoji fonts often contain COLR/CBDT tables
+                // that require relaxed validation and are incompatible with PDF/A-1b.
+                settings.PdfAEnabled = false;
             });
 
             // Regular text font as document default; emoji rows override per item

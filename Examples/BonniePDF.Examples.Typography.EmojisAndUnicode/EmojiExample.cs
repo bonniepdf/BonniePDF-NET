@@ -30,7 +30,9 @@ public static class EmojiExample
 
         Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        // PDF/A compliance is disabled — emoji fonts often contain COLR/CBDT tables
+        // that require relaxed validation and are incompatible with PDF/A-1b.
+        doc.Settings.PdfAEnabled = false;
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(textFont).WithSize(11).WithColor(Color.Slate600);
 
         doc.Metadata.Title = "Emoji & Supplementary Unicode Demo";
