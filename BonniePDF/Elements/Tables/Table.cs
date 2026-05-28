@@ -170,12 +170,37 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         // Apply top margin only on first render
         if (_lastRowRendered < 0 && _headersPending) ctx.CurrentY += Margin.Top;
 
+        TaggingContext tagging = ctx.Tagging;
+        // Guarantee a Table ancestor for the row-groups. The pipeline/stack opens
+        // the Table for the first fragment, but a continuation fragment after a
+        // page break re-enters with only the page/Document open — so open a Table
+        // here when one isn't already current (PDF/UA 7.2). Guard avoids
+        // double-wrapping the common (already-wrapped) case. A paginated table can
+        // yield one Table per page fragment, which is structurally valid.
+        bool ownTable = tagging != null && tagging.Tree.Current.Role != SemanticRole.Table;
+        if (ownTable) tagging.Tree.Begin(SemanticRole.Table);
+        try
+        {
+            return RenderStatefulRows(ctx, width, tagging);
+        }
+        finally
+        {
+            if (ownTable) tagging.Tree.End();
+        }
+    }
+
+    private RenderStatus RenderStatefulRows(RenderContext ctx, float width, TaggingContext tagging)
+    {
         float contentWidth = GetContentWidth(width);
         float[] widths = CalculateColumnWidths(contentWidth);
+        // PDF/UA 7.2: rows must sit inside a THead/TBody/TFoot row-group. Groups
+        // are opened lazily (only once a row actually renders, so no empty groups)
+        // and closed before every return so the structure tree stays balanced.
 
         // Render headers if pending (first page or continuation with RepeatHeadersOnNewPage)
         if (_headersPending)
         {
+            bool theadOpen = false;
             foreach (TableRow headerRow in _headers)
             {
                 float headerHeight = MeasureRowHeight(headerRow, widths);
@@ -183,12 +208,15 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 if (ctx.CurrentY + headerHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
                 {
                     // Header doesn't fit
+                    if (theadOpen && tagging != null) tagging.Tree.End();
                     return _lastRowRendered < 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
                 }
 
+                if (!theadOpen && tagging != null) { tagging.Tree.Begin(SemanticRole.THead); theadOpen = true; }
                 RenderRowDirect(ctx, headerRow, widths);
             }
 
+            if (theadOpen && tagging != null) tagging.Tree.End();
             _headersPending = false;
         }
 
@@ -197,15 +225,13 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
         if (startRow >= _rows.Count)
         {
-            // All data rows rendered - render footers
-            foreach (TableRow footerRow in _footers)
-                RenderRowDirect(ctx, footerRow, widths);
-
+            RenderFootersGrouped(ctx, widths, tagging);
             ctx.CurrentY += Margin.Bottom;
             return RenderStatus.Complete;
         }
 
         // Render data rows
+        bool tbodyOpen = false;
         for (int i = startRow; i < _rows.Count; i++)
         {
             TableRow row = _rows[i];
@@ -214,22 +240,32 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             // Pagination check
             if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
             {
+                if (tbodyOpen && tagging != null) tagging.Tree.End();
                 _lastRowRendered = i - 1;
                 _headersPending = RepeatHeadersOnNewPage && _headers.Count > 0;
                 return i == startRow ? RenderStatus.WrapRequired : RenderStatus.Overflow;
             }
 
+            if (!tbodyOpen && tagging != null) { tagging.Tree.Begin(SemanticRole.TBody); tbodyOpen = true; }
             RenderRowDirect(ctx, row, widths);
             _lastRowRendered = i;
         }
+        if (tbodyOpen && tagging != null) tagging.Tree.End();
 
-        // All data rows rendered - render footers
-        foreach (TableRow footerRow in _footers)
-            RenderRowDirect(ctx, footerRow, widths);
-
+        RenderFootersGrouped(ctx, widths, tagging);
         ctx.CurrentY += Margin.Bottom;
         _lastRowRendered = _rows.Count - 1;
         return RenderStatus.Complete;
+    }
+
+    /// <summary>Renders footer rows wrapped in a TFoot row-group (PDF/UA 7.2).</summary>
+    private void RenderFootersGrouped(RenderContext ctx, float[] widths, TaggingContext tagging)
+    {
+        if (_footers.Count == 0) return;
+        if (tagging != null) tagging.Tree.Begin(SemanticRole.TFoot);
+        foreach (TableRow footerRow in _footers)
+            RenderRowDirect(ctx, footerRow, widths);
+        if (tagging != null) tagging.Tree.End();
     }
 
     /// <summary>
@@ -261,7 +297,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         if (tagThisRow)
         {
             tagging.Tree.Begin(SemanticRole.TR);
-            ctx.Canvas.BeginMarkedContent("TR");
+            ctx.Canvas.BeginContainerContent("TR");
         }
 
         try
@@ -288,8 +324,12 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 if (tagThisCell)
                 {
                     tagging.Tree.Begin(cellRole);
-                    if (cell.ColumnSpan > 1)
-                        tagging.Tree.SetAttributes($"<< /O /Table /ColSpan {cell.ColumnSpan} >>");
+                    var cellAttrs = new List<string>();
+                    if (cell.ColumnSpan > 1) cellAttrs.Add($"/ColSpan {cell.ColumnSpan}");
+                    // PDF/UA 7.5: TH cells need a Scope. Header rows are column headers.
+                    if (cellRole == SemanticRole.TH) cellAttrs.Add("/Scope /Column");
+                    if (cellAttrs.Count > 0)
+                        tagging.Tree.SetAttributes($"<< /O /Table {string.Join(" ", cellAttrs)} >>");
                     ctx.Canvas.BeginMarkedContent(cellRole.ToPdfTag());
                 }
 
@@ -341,39 +381,91 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
+        TaggingContext tagging = ctx.Tagging;
+        // Nested tables (rendered inside a container/cell) don't pass through the
+        // pipeline's role wrapper, so they get no Table structure element. Open one
+        // here so the THead/TBody/TFoot groups have a Table parent (PDF/UA 7.2).
+        // Top-level tables use RenderStateful instead and are wrapped by the
+        // pipeline, so this path only ever runs for nested tables.
+        if (tagging != null) tagging.Tree.Begin(SemanticRole.Table);
+        try
+        {
+            RenderContentRows(ctx, contentWidth, tagging);
+        }
+        finally
+        {
+            if (tagging != null) tagging.Tree.End();
+        }
+    }
+
+    private void RenderContentRows(RenderContext ctx, float contentWidth, TaggingContext tagging)
+    {
         float[] widths = CalculateColumnWidths(contentWidth);
         bool isFirstPage = true;
 
-        // Render headers
-        foreach (TableRow row in _headers) RenderRow(ctx, row, widths, isFirstPage);
+        // Render headers — grouped under THead (PDF/UA 7.2).
+        if (_headers.Count > 0)
+        {
+            if (tagging != null) tagging.Tree.Begin(SemanticRole.THead);
+            try
+            {
+                foreach (TableRow row in _headers) RenderRow(ctx, row, widths, isFirstPage);
+            }
+            finally
+            {
+                if (tagging != null) tagging.Tree.End();
+            }
+        }
 
         // Track if we've added headers on a new page
         bool headersAddedOnNewPage = false;
 
-        // Render data rows
-        foreach (TableRow row in _rows)
+        // Render data rows — grouped under TBody.
+        if (_rows.Count > 0)
         {
-            float rowHeight = MeasureRowHeight(row, widths);
-
-            // Pagination check
-            if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
+            if (tagging != null) tagging.Tree.Begin(SemanticRole.TBody);
+            try
             {
-                ctx.NewPage();
-                isFirstPage = false;
-
-                // Repeat headers on new page if enabled
-                if (RepeatHeadersOnNewPage && _headers.Count > 0)
+                foreach (TableRow row in _rows)
                 {
-                    headersAddedOnNewPage = true;
-                    foreach (TableRow headerRow in _headers) RenderRow(ctx, headerRow, widths, false);
+                    float rowHeight = MeasureRowHeight(row, widths);
+
+                    // Pagination check
+                    if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
+                    {
+                        ctx.NewPage();
+                        isFirstPage = false;
+
+                        // Repeat headers on new page if enabled
+                        if (RepeatHeadersOnNewPage && _headers.Count > 0)
+                        {
+                            headersAddedOnNewPage = true;
+                            foreach (TableRow headerRow in _headers) RenderRow(ctx, headerRow, widths, false);
+                        }
+                    }
+
+                    RenderRow(ctx, row, widths, isFirstPage && !headersAddedOnNewPage);
                 }
             }
-
-            RenderRow(ctx, row, widths, isFirstPage && !headersAddedOnNewPage);
+            finally
+            {
+                if (tagging != null) tagging.Tree.End();
+            }
         }
 
-        // Render footers
-        foreach (TableRow row in _footers) RenderRow(ctx, row, widths, isFirstPage);
+        // Render footers — grouped under TFoot.
+        if (_footers.Count > 0)
+        {
+            if (tagging != null) tagging.Tree.Begin(SemanticRole.TFoot);
+            try
+            {
+                foreach (TableRow row in _footers) RenderRow(ctx, row, widths, isFirstPage);
+            }
+            finally
+            {
+                if (tagging != null) tagging.Tree.End();
+            }
+        }
     }
 
     private void RenderRow(RenderContext ctx, TableRow row, float[] widths, bool isFirstPage)
@@ -397,7 +489,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         if (tagThisRow)
         {
             tagging.Tree.Begin(SemanticRole.TR);
-            ctx.Canvas.BeginMarkedContent("TR");
+            ctx.Canvas.BeginContainerContent("TR");
         }
 
         try
@@ -426,8 +518,12 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 if (tagThisCell)
                 {
                     tagging.Tree.Begin(cellRole);
-                    if (cell.ColumnSpan > 1)
-                        tagging.Tree.SetAttributes($"<< /O /Table /ColSpan {cell.ColumnSpan} >>");
+                    var cellAttrs = new List<string>();
+                    if (cell.ColumnSpan > 1) cellAttrs.Add($"/ColSpan {cell.ColumnSpan}");
+                    // PDF/UA 7.5: TH cells need a Scope. Header rows are column headers.
+                    if (cellRole == SemanticRole.TH) cellAttrs.Add("/Scope /Column");
+                    if (cellAttrs.Count > 0)
+                        tagging.Tree.SetAttributes($"<< /O /Table {string.Join(" ", cellAttrs)} >>");
                     ctx.Canvas.BeginMarkedContent(cellRole.ToPdfTag());
                 }
 

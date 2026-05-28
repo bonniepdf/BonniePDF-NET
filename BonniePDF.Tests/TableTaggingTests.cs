@@ -98,11 +98,15 @@ public class TableTaggingTests
                 t.AddRow(new TextBlock { Text = "1" }, new TextBlock { Text = "2" }, new TextBlock { Text = "3" });
             });
 
-        Assert.Equal(3, SubstringCounter.Count(pdf, "/S /TH"));
+        // "/S /TH" also matches "/S /THead", so subtract the THead count.
+        Assert.Equal(3, SubstringCounter.Count(pdf, "/S /TH") - SubstringCounter.Count(pdf, "/S /THead"));
         Assert.Equal(3, SubstringCounter.Count(pdf, "/S /TD"));
         // Exactly one Table wrapping two rows.
         Assert.Equal(1, SubstringCounter.Count(pdf, "/S /Table"));
         Assert.Equal(2, SubstringCounter.Count(pdf, "/S /TR"));
+        // PDF/UA 7.2: rows are grouped under THead/TBody.
+        Assert.Equal(1, SubstringCounter.Count(pdf, "/S /THead"));
+        Assert.Equal(1, SubstringCounter.Count(pdf, "/S /TBody"));
     }
 
     [Fact]

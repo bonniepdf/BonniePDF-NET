@@ -392,6 +392,9 @@ public class SvgCanvas : ICanvas
     }
 
     /// <inheritdoc />
+    public void BeginContainerContent(string role) { } // no-op for SVG output
+
+    /// <inheritdoc />
     public void EndMarkedContent()
     {
         // See BeginMarkedContent — no-op for SVG output.

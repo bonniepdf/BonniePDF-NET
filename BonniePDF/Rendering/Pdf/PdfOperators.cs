@@ -259,6 +259,17 @@ internal static class PdfOperators
     /// </summary>
     internal static void EndMarkedContent(StringBuilder s) => s.AppendLine("EMC");
 
+    /// <summary>
+    /// <c>/&lt;role&gt; BMC</c> — begin a marked-content sequence with a
+    /// PDF structure role but <em>without</em> an MCID. Use for container
+    /// roles (Table, TR, THead, TBody, TFoot, Sect, …) whose content is
+    /// referenced by child structure elements rather than directly by an
+    /// MCID. Prevents "Nested MCID" warnings in veraPDF when an outer BDC
+    /// is already open.
+    /// </summary>
+    internal static void BeginMarkedContentBmc(StringBuilder s, string role)
+        => s.AppendLine($"/{role} BMC");
+
     /// <summary>Emit <c>/Artifact BMC</c> (no MCID, not in struct tree).</summary>
     internal static void BeginArtifact(StringBuilder s) => s.AppendLine("/Artifact BMC");
 }

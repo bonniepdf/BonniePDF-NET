@@ -141,8 +141,22 @@ public interface ICanvas
     /// When the canvas has no tagging context (the document is not
     /// opted into PDF/UA), this method is a no-op so renderer code can
     /// call it unconditionally.
+    ///
+    /// If an outer BDC is already open, the inner call emits BMC instead
+    /// to prevent "Nested MCID" warnings in veraPDF.
     /// </summary>
     void BeginMarkedContent(string role);
+
+    /// <summary>
+    /// Begin a grouping/container marked-content sequence without
+    /// allocating an MCID. Emits <c>/&lt;role&gt; BMC</c> on PDF. Use
+    /// for container roles (Table, TR, THead, TBody, TFoot, Sect, …)
+    /// whose content is referenced by child structure elements rather
+    /// than directly by an MCID.
+    ///
+    /// No-op when the document is not tagged or when using SVG output.
+    /// </summary>
+    void BeginContainerContent(string role);
 
     /// <summary>
     /// End the most recent marked-content sequence opened by

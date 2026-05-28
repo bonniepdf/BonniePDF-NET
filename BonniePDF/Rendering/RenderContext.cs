@@ -13,6 +13,20 @@ using BonniePDF.Typography.TrueType;
 namespace BonniePDF.Rendering;
 
 /// <summary>
+/// PDF tag names for roles that are container/grouping elements and must
+/// emit BMC (no MCID) instead of BDC in the content stream.
+/// Mirrors <see cref="BonniePDF.Rendering.Tagging.SemanticRoleExtensions.IsContainerRole"/>.
+/// </summary>
+file static class ContainerRoleTags
+{
+    internal static readonly HashSet<string> Tags = new(StringComparer.Ordinal)
+    {
+        "Table", "TR", "THead", "TBody", "TFoot",
+        "Document", "Sect", "Art", "Div", "TOC", "L", "LI",
+    };
+}
+
+/// <summary>
 /// Context for rendering PDF elements, managing pages, fonts, and positioning
 /// </summary>
 public class RenderContext
@@ -232,8 +246,13 @@ public class RenderContext
 
         if (reopenRoles != null)
         {
-            for (int i = 0; i < reopenRoles.Length; i++)
-                Canvas.BeginMarkedContent(reopenRoles[i]);
+            foreach (string role in reopenRoles)
+            {
+                if (ContainerRoleTags.Tags.Contains(role))
+                    Canvas.BeginContainerContent(role);
+                else
+                    Canvas.BeginMarkedContent(role);
+            }
         }
 
         OnPageCreated?.Invoke(CurrentPageIndex);

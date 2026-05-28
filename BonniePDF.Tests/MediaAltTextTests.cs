@@ -97,7 +97,13 @@ public class MediaAltTextTests
             doc.Add(new QRCode { Data = "https://example.com", Size = 60 });
         });
 
-        Assert.Contains("/S /Artifact", pdf);
+        // A decorative element is wrapped in /Artifact marked content and kept
+        // OUT of the structure tree. Emitting /S /Artifact (a StructElem) is
+        // invalid — Artifact is a marked-content type, not a structure type
+        // (VeraPDF 7.1-5). The /Artifact BMC operator lives in the (compressed)
+        // content stream, so we assert the structure-tree negatives here.
+        Assert.DoesNotContain("/S /Artifact", pdf);
+        Assert.DoesNotContain("/S /Figure", pdf);
         Assert.DoesNotContain("/Alt (", pdf);
     }
 

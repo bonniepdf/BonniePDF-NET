@@ -28,6 +28,12 @@ public class PdfCanvas : ICanvas
     private int _stateDepth;
     private TaggingContext _tagging;
     private int _openMarkedContent;
+    // Number of currently-open BDC sequences (sequences that allocated an MCID).
+    private int _openTaggedCount;
+    // Stack tracking whether each open marked-content sequence is a BDC (true) or BMC (false).
+    private readonly Stack<bool> _markedContentTagged = new();
+    // Per-BeginArtifact record of whether an /Artifact wrapper was actually emitted.
+    private readonly System.Collections.Generic.Stack<bool> _artifactEmitStack = new();
 
     /// <summary>
     /// Creates a new PdfCanvas for writing to the specified PDF content stream.
@@ -375,9 +381,30 @@ public class PdfCanvas : ICanvas
     public void BeginMarkedContent(string role)
     {
         if (_tagging == null) return;
-        int mcid = _tagging.AllocateMcid();
-        _tagging.Tree.AddMcid(mcid, _tagging.CurrentPageIndex);
-        PdfOperators.BeginMarkedContentTagged(_stream, role, mcid);
+        bool tagged = false;
+        if (_openTaggedCount == 0)
+        {
+            int mcid = _tagging.AllocateMcid();
+            _tagging.Tree.AddMcid(mcid, _tagging.CurrentPageIndex);
+            PdfOperators.BeginMarkedContentTagged(_stream, role, mcid);
+            _openTaggedCount++;
+            tagged = true;
+        }
+        else
+        {
+            PdfOperators.BeginMarkedContentBmc(_stream, role);
+        }
+        _markedContentTagged.Push(tagged);
+        _tagging.PushOpenRole(role);
+        _openMarkedContent++;
+    }
+
+    /// <inheritdoc />
+    public void BeginContainerContent(string role)
+    {
+        if (_tagging == null) return;
+        PdfOperators.BeginMarkedContentBmc(_stream, role);
+        _markedContentTagged.Push(false);
         _tagging.PushOpenRole(role);
         _openMarkedContent++;
     }
@@ -388,17 +415,31 @@ public class PdfCanvas : ICanvas
         if (_tagging == null) return;
         if (_openMarkedContent <= 0) return; // tolerate unbalanced End() rather than emit a stray EMC
         PdfOperators.EndMarkedContent(_stream);
+        if (_markedContentTagged.Count > 0 && _markedContentTagged.Pop())
+            _openTaggedCount--;
         _tagging.PopOpenRole();
         _openMarkedContent--;
     }
 
     /// <inheritdoc />
     public void BeginArtifact()
-        => PdfOperators.BeginArtifact(_stream);
+    {
+        // Emit an /Artifact wrapper only for tagged documents and only when not
+        // already inside a tagged marked-content sequence. Content drawn inside
+        // a structure element (e.g. a table cell's /TD) is already enclosed real
+        // content (satisfies PDF/UA 7.1), and nesting an artifact inside a tag
+        // is invalid. The emit decision is recorded so EndArtifact stays balanced.
+        bool emit = _tagging != null && _openMarkedContent == 0;
+        if (emit) PdfOperators.BeginArtifact(_stream);
+        _artifactEmitStack.Push(emit);
+    }
 
     /// <inheritdoc />
     public void EndArtifact()
-        => PdfOperators.EndMarkedContent(_stream);
+    {
+        bool emit = _artifactEmitStack.Count > 0 && _artifactEmitStack.Pop();
+        if (emit) PdfOperators.EndMarkedContent(_stream);
+    }
 
     /// <summary>
     /// Measures text size to allow for precise alignment calculations in charts.

@@ -134,4 +134,30 @@ public static class SemanticRoleExtensions
         // (e.g. PDF/UA-2 renames) have one place to land.
         return role.ToString();
     }
+
+    /// <summary>
+    /// Returns <c>true</c> for grouping/container roles whose content is
+    /// referenced by child structure elements rather than directly by an
+    /// MCID. Container roles emit <c>BMC</c> (no MCID) in the content
+    /// stream; leaf roles emit <c>BDC</c> with an MCID.
+    /// </summary>
+    public static bool IsContainerRole(this SemanticRole role)
+    {
+        return role switch
+        {
+            SemanticRole.Table => true,
+            SemanticRole.TR => true,
+            SemanticRole.THead => true,
+            SemanticRole.TBody => true,
+            SemanticRole.TFoot => true,
+            SemanticRole.Document => true,
+            SemanticRole.Sect => true,
+            SemanticRole.Art => true,
+            SemanticRole.Div => true,
+            SemanticRole.TOC => true,
+            SemanticRole.L => true,
+            SemanticRole.LI => true,
+            _ => false,
+        };
+    }
 }

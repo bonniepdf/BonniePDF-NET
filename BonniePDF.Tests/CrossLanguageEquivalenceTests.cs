@@ -33,7 +33,7 @@ public class CrossLanguageEquivalenceTests
         "Document", "Sect", "Art", "Div",
         "H", "H1", "H2", "H3", "H4", "H5", "H6", "P",
         "L", "LI", "Lbl", "LBody",
-        "Table", "TR", "TH", "TD",
+        "Table", "THead", "TBody", "TFoot", "TR", "TH", "TD",
         "Span", "Quote", "Code",
         "Figure", "Caption", "Form", "Formula",
         "Link", "Reference", "Note", "Annot",
@@ -54,6 +54,8 @@ public class CrossLanguageEquivalenceTests
             ["H1"] = 1,
             ["P"] = 1,
             ["Table"] = 1,
+            ["THead"] = 1,     // header row group (PDF/UA 7.2)
+            ["TBody"] = 1,     // body row group
             ["TR"] = 4,        // 1 header + 3 body rows
             ["TH"] = 4,        // 4 header cells
             ["TD"] = 12,       // 3 body rows × 4 cells
@@ -91,7 +93,7 @@ public class CrossLanguageEquivalenceTests
         IDictionary<string, int> fp = Fingerprint(pdf);
 
         Assert.Equal(
-            new SortedSet<string> { "Document", "Table", "TR", "TH", "TD" },
+            new SortedSet<string> { "Document", "Table", "THead", "TBody", "TR", "TH", "TD" },
             new SortedSet<string>(fp.Keys));
 
         // Body cells are deterministic: 80 rows × 3 columns = 240.

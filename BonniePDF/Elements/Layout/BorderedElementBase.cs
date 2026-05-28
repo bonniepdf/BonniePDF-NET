@@ -37,16 +37,26 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
     protected void DrawBackground(RenderContext ctx, float x, float y, float width, float height, Color color)
     {
         float pdfY = ctx.PageSize.Height - y - height;
-        if (CornerRadius > 0)
+        // Decorative fill — tag as an artifact so tagged (PDF/UA) output does not
+        // leave it as untagged content. No-op wrapper for non-tagged documents.
+        ctx.Canvas.BeginArtifact();
+        try
         {
-            PdfDrawing.FillRoundedRect(ctx.CurrentStream, x, pdfY, width, height, CornerRadius, color);
+            if (CornerRadius > 0)
+            {
+                PdfDrawing.FillRoundedRect(ctx.CurrentStream, x, pdfY, width, height, CornerRadius, color);
+            }
+            else
+            {
+                PdfOperators.SaveState(ctx.CurrentStream);
+                PdfOperators.SetFillColor(ctx.CurrentStream, color);
+                PdfOperators.RectangleFill(ctx.CurrentStream, x, pdfY, width, height);
+                PdfOperators.RestoreState(ctx.CurrentStream);
+            }
         }
-        else
+        finally
         {
-            PdfOperators.SaveState(ctx.CurrentStream);
-            PdfOperators.SetFillColor(ctx.CurrentStream, color);
-            PdfOperators.RectangleFill(ctx.CurrentStream, x, pdfY, width, height);
-            PdfOperators.RestoreState(ctx.CurrentStream);
+            ctx.Canvas.EndArtifact();
         }
     }
 
@@ -58,36 +68,47 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
     protected void DrawBorder(RenderContext ctx, float x, float y, float width, float height, Border border,
         BorderColors borderColors)
     {
+        if (!border.HasAnyBorder) return;
+
         float pdfY = ctx.PageSize.Height - y - height;
 
-        // Rounded borders: use a single rounded rect stroke (uniform border only)
-        if (CornerRadius > 0 && border.HasAnyBorder)
+        // Decorative strokes — tag as an artifact (no-op for non-tagged output).
+        ctx.Canvas.BeginArtifact();
+        try
         {
-            float strokeWidth = border.Top > 0 ? border.Top : border.Left > 0 ? border.Left : border.Bottom > 0 ? border.Bottom : border.Right;
-            Color strokeColor = borderColors.Top ?? borderColors.Left ?? borderColors.Bottom ?? borderColors.Right ?? Color.Black;
-            PdfDrawing.StrokeRoundedRect(ctx.CurrentStream, x, pdfY, width, height, CornerRadius, strokeColor, strokeWidth);
-            return;
+            // Rounded borders: use a single rounded rect stroke (uniform border only)
+            if (CornerRadius > 0)
+            {
+                float strokeWidth = border.Top > 0 ? border.Top : border.Left > 0 ? border.Left : border.Bottom > 0 ? border.Bottom : border.Right;
+                Color strokeColor = borderColors.Top ?? borderColors.Left ?? borderColors.Bottom ?? borderColors.Right ?? Color.Black;
+                PdfDrawing.StrokeRoundedRect(ctx.CurrentStream, x, pdfY, width, height, CornerRadius, strokeColor, strokeWidth);
+                return;
+            }
+
+            PdfOperators.SaveState(ctx.CurrentStream);
+
+            // Draw left border
+            if (border.Left > 0 && borderColors.Left.HasValue)
+                DrawLine(ctx, x, pdfY, x, pdfY + height, border.Left, borderColors.Left.Value);
+
+            // Draw right border
+            if (border.Right > 0 && borderColors.Right.HasValue)
+                DrawLine(ctx, x + width, pdfY, x + width, pdfY + height, border.Right, borderColors.Right.Value);
+
+            // Draw top border
+            if (border.Top > 0 && borderColors.Top.HasValue)
+                DrawLine(ctx, x, pdfY + height, x + width, pdfY + height, border.Top, borderColors.Top.Value);
+
+            // Draw bottom border
+            if (border.Bottom > 0 && borderColors.Bottom.HasValue)
+                DrawLine(ctx, x, pdfY, x + width, pdfY, border.Bottom, borderColors.Bottom.Value);
+
+            PdfOperators.RestoreState(ctx.CurrentStream);
         }
-
-        PdfOperators.SaveState(ctx.CurrentStream);
-
-        // Draw left border
-        if (border.Left > 0 && borderColors.Left.HasValue)
-            DrawLine(ctx, x, pdfY, x, pdfY + height, border.Left, borderColors.Left.Value);
-
-        // Draw right border
-        if (border.Right > 0 && borderColors.Right.HasValue)
-            DrawLine(ctx, x + width, pdfY, x + width, pdfY + height, border.Right, borderColors.Right.Value);
-
-        // Draw top border
-        if (border.Top > 0 && borderColors.Top.HasValue)
-            DrawLine(ctx, x, pdfY + height, x + width, pdfY + height, border.Top, borderColors.Top.Value);
-
-        // Draw bottom border
-        if (border.Bottom > 0 && borderColors.Bottom.HasValue)
-            DrawLine(ctx, x, pdfY, x + width, pdfY, border.Bottom, borderColors.Bottom.Value);
-
-        PdfOperators.RestoreState(ctx.CurrentStream);
+        finally
+        {
+            ctx.Canvas.EndArtifact();
+        }
     }
 
     /// <summary>

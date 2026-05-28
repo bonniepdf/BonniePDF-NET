@@ -62,16 +62,26 @@ public class VerticalStack : ElementBase, IStatefulElement
             // try/finally pattern as PdfRenderPipeline so tagging is
             // closed before Overflow/WrapRequired propagates upward.
             var tagging = ctx.Tagging;
-            bool tagChild = tagging != null && child is IRoleProvider;
-            if (tagChild)
+            SemanticRole? role = tagging != null && child is IRoleProvider rp ? rp.SemanticRole : (SemanticRole?)null;
+            // Artifact is a marked-content type, not a structure type — a
+            // decorative child is wrapped in /Artifact and kept out of the tree.
+            bool isArtifact = role == SemanticRole.Artifact;
+            bool tagChild = role != null && !isArtifact;
+            if (isArtifact)
             {
-                var role = ((IRoleProvider)child).SemanticRole;
-                var elem = tagging!.Tree.Begin(role);
+                ctx.Canvas.BeginArtifact();
+            }
+            else if (tagChild)
+            {
+                var elem = tagging!.Tree.Begin(role.Value);
                 if (child is IAltTextProvider alt && !string.IsNullOrEmpty(alt.AltText))
                     tagging.Tree.SetAlt(alt.AltText);
                 if (child is Hyperlink hl)
                     hl.LinkedStructElement = elem;
-                ctx.Canvas.BeginMarkedContent(role.ToPdfTag());
+                if (role.Value.IsContainerRole())
+                    ctx.Canvas.BeginContainerContent(role.Value.ToPdfTag());
+                else
+                    ctx.Canvas.BeginMarkedContent(role.Value.ToPdfTag());
             }
 
             try
@@ -175,7 +185,11 @@ public class VerticalStack : ElementBase, IStatefulElement
             }
             finally
             {
-                if (tagChild)
+                if (isArtifact)
+                {
+                    ctx.Canvas.EndArtifact();
+                }
+                else if (tagChild)
                 {
                     ctx.Canvas.EndMarkedContent();
                     ctx.Tagging!.Tree.End();
@@ -256,16 +270,26 @@ public class VerticalStack : ElementBase, IStatefulElement
 
             // Tag children that declare a semantic role (same pattern as RenderStateful).
             var tagging = ctx.Tagging;
-            bool tagChild = tagging != null && child is IRoleProvider;
-            if (tagChild)
+            SemanticRole? role = tagging != null && child is IRoleProvider rp ? rp.SemanticRole : (SemanticRole?)null;
+            // Artifact is a marked-content type, not a structure type — a
+            // decorative child is wrapped in /Artifact and kept out of the tree.
+            bool isArtifact = role == SemanticRole.Artifact;
+            bool tagChild = role != null && !isArtifact;
+            if (isArtifact)
             {
-                var role = ((IRoleProvider)child).SemanticRole;
-                var elem = tagging!.Tree.Begin(role);
+                ctx.Canvas.BeginArtifact();
+            }
+            else if (tagChild)
+            {
+                var elem = tagging!.Tree.Begin(role.Value);
                 if (child is IAltTextProvider alt && !string.IsNullOrEmpty(alt.AltText))
                     tagging.Tree.SetAlt(alt.AltText);
                 if (child is Hyperlink hl)
                     hl.LinkedStructElement = elem;
-                ctx.Canvas.BeginMarkedContent(role.ToPdfTag());
+                if (role.Value.IsContainerRole())
+                    ctx.Canvas.BeginContainerContent(role.Value.ToPdfTag());
+                else
+                    ctx.Canvas.BeginMarkedContent(role.Value.ToPdfTag());
             }
 
             try
@@ -284,7 +308,11 @@ public class VerticalStack : ElementBase, IStatefulElement
             }
             finally
             {
-                if (tagChild)
+                if (isArtifact)
+                {
+                    ctx.Canvas.EndArtifact();
+                }
+                else if (tagChild)
                 {
                     ctx.Canvas.EndMarkedContent();
                     ctx.Tagging!.Tree.End();

@@ -145,17 +145,24 @@ public static class PdfRenderPipeline
         // marked-content pair around each NewPage() call. Tests below
         // use small content that fits on one page.
         TaggingContext tagging = ctx.Tagging;
-        bool tagThis = tagging != null && element is IRoleProvider;
-        if (tagThis)
+        SemanticRole? role = tagging != null && element is IRoleProvider rp ? rp.SemanticRole : (SemanticRole?)null;
+        // Artifact is a marked-content type, NOT a structure type: a decorative
+        // element (e.g. an Image with no alt text) must be wrapped in /Artifact
+        // marked content and kept OUT of the structure tree. Emitting it as a
+        // StructElem with /S /Artifact is invalid (VeraPDF 7.1-5 / 7.1-1).
+        bool isArtifact = role == SemanticRole.Artifact;
+        bool tagThis = role != null && !isArtifact;
+
+        if (isArtifact)
         {
-            var role = ((IRoleProvider)element).SemanticRole;
-            var elem = tagging.Tree.Begin(role);
+            ctx.Canvas.BeginArtifact();
+        }
+        else if (tagThis)
+        {
+            var elem = tagging.Tree.Begin(role.Value);
 
             // Surface alt-text on the structure element when the element
-            // provides it. PDF/UA requires /Alt on Figure structure
-            // elements; an Image with no AltText degrades to /Artifact
-            // (see Image.SemanticRole) so this branch only fires for the
-            // "Figure with alt-text" case.
+            // provides it. PDF/UA requires /Alt on Figure structure elements.
             if (element is IAltTextProvider altProvider && !string.IsNullOrEmpty(altProvider.AltText))
             {
                 tagging.Tree.SetAlt(altProvider.AltText);
@@ -166,7 +173,10 @@ public static class PdfRenderPipeline
             if (element is Core.Hyperlink hyperlink)
                 hyperlink.LinkedStructElement = elem;
 
-            ctx.Canvas.BeginMarkedContent(role.ToPdfTag());
+            if (role.Value.IsContainerRole())
+                ctx.Canvas.BeginContainerContent(role.Value.ToPdfTag());
+            else
+                ctx.Canvas.BeginMarkedContent(role.Value.ToPdfTag());
         }
 
         try
@@ -175,7 +185,11 @@ public static class PdfRenderPipeline
         }
         finally
         {
-            if (tagThis)
+            if (isArtifact)
+            {
+                ctx.Canvas.EndArtifact();
+            }
+            else if (tagThis)
             {
                 ctx.Canvas.EndMarkedContent();
                 tagging.Tree.End();
