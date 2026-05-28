@@ -12,6 +12,7 @@ public class UnorderedList : ListElementBase
 {
     private readonly List<string> _items = [];
     private readonly List<UnorderedList> _nestedLists = [];
+    private Color? _bulletColor;
 
     /// <summary>
     /// Bullet style for the list (Disc, Circle, Square, Dash, Custom)
@@ -26,7 +27,11 @@ public class UnorderedList : ListElementBase
     /// <summary>
     /// Color for the bullet character
     /// </summary>
-    public Color BulletColor { get; set; } = Color.Black;
+    public Color BulletColor
+    {
+        get => _bulletColor ?? TextColor;
+        set => _bulletColor = value;
+    }
 
     /// <summary>
     /// The items in this list (exposed for collection initializer syntax)
@@ -52,6 +57,11 @@ public class UnorderedList : ListElementBase
         _nestedLists.Add(nestedList);
     }
 
+    public override IReadOnlyList<ListElementBase> GetNestedLists()
+    {
+        return _nestedLists;
+    }
+
     protected override float MeasureContentHeight(float contentWidth)
     {
         float itemWidth = contentWidth - Indent;
@@ -64,7 +74,7 @@ public class UnorderedList : ListElementBase
         return totalHeight;
     }
 
-    protected override void RenderContent(RenderContext ctx, float contentWidth)
+    protected override void RenderItems(RenderContext ctx, float contentWidth)
     {
         float itemWidth = contentWidth - Indent;
 
@@ -84,7 +94,7 @@ public class UnorderedList : ListElementBase
                 (x, y) =>
                 {
                     // Draw bullet
-                    ctx.Canvas.DrawText(x, y, BulletChar, TextColor, FontSize, FontName, TextAlignment.Left);
+                    ctx.Canvas.DrawText(x, y, BulletChar, BulletColor, FontSize, FontName, TextAlignment.Left);
                 },
                 bulletWidth
             );
@@ -115,7 +125,7 @@ public class UnorderedList : ListElementBase
             BulletStyle.Square => "■",
             BulletStyle.Dash => "-",
             BulletStyle.Custom => CustomBullet,
-            _ => "•"
+            _ => "•",
         };
     }
 }

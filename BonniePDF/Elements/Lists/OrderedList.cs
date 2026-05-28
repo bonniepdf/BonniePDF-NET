@@ -46,6 +46,11 @@ public class OrderedList : ListElementBase
         _nestedLists.Add(nestedList);
     }
 
+    public override IReadOnlyList<ListElementBase> GetNestedLists()
+    {
+        return _nestedLists;
+    }
+
     protected override float MeasureContentHeight(float contentWidth)
     {
         float itemWidth = contentWidth - Indent;
@@ -58,7 +63,7 @@ public class OrderedList : ListElementBase
         return totalHeight;
     }
 
-    protected override void RenderContent(RenderContext ctx, float contentWidth)
+    protected override void RenderItems(RenderContext ctx, float contentWidth)
     {
         float itemWidth = contentWidth - Indent;
 

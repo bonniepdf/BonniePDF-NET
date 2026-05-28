@@ -7,6 +7,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Lists;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering;
@@ -364,6 +365,9 @@ public class Document : IDisposable
             foreach (IElement child in hs.Children) ApplyStyleToElement(child, style);
         else if (el is Container c && c.Child != null)
             ApplyStyleToElement(c.Child, style);
+        else if (el is ListElementBase list)
+            foreach (ListElementBase child in list.GetNestedLists())
+                ApplyStyleToElement(child, style);
         else if (el is Table t)
             foreach (TableRow row in t.GetAllRows())
                 foreach (TableCell cell in row.Cells)

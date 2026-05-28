@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Elements.Lists;
 
@@ -21,6 +22,48 @@ public abstract class ListElementBase : TextElementBase
     /// Spacing between list items (in points)
     /// </summary>
     public float ItemSpacing { get; set; } = 5f;
+
+    /// <summary>
+    /// Child lists rendered as nested list content.
+    /// </summary>
+    public virtual IReadOnlyList<ListElementBase> GetNestedLists()
+    {
+        return [];
+    }
+
+    /// <summary>
+    /// Wraps the subclass item rendering in an <c>L</c> structure element when tagging is
+    /// active, so the outer container is present in the structure tree for both top-level
+    /// and nested lists. Delegates actual content to <see cref="RenderItems"/>.
+    /// </summary>
+    protected override void RenderContent(RenderContext ctx, float contentWidth)
+    {
+        TaggingContext? tagging = ctx.Tagging;
+        if (tagging is not null)
+        {
+            tagging.Tree.Begin(SemanticRole.L);
+            ctx.Canvas.BeginContainerContent("L");
+        }
+        try
+        {
+            RenderItems(ctx, contentWidth);
+        }
+        finally
+        {
+            if (tagging is not null)
+            {
+                ctx.Canvas.EndMarkedContent();
+                tagging.Tree.End();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Renders the list items. Implemented by <see cref="OrderedList"/> and
+    /// <see cref="UnorderedList"/>; called from <see cref="RenderContent"/> which
+    /// handles the outer <c>L</c> structure-element wrapper.
+    /// </summary>
+    protected abstract void RenderItems(RenderContext ctx, float contentWidth);
 
     /// <summary>
     /// Measures the height of list items, accounting for item spacing.
@@ -63,7 +106,12 @@ public abstract class ListElementBase : TextElementBase
     }
 
     /// <summary>
-    /// Renders a list item with proper pagination handling.
+    /// Renders one list item with tagged <c>LI &gt; Lbl + LBody</c> structure when tagging
+    /// is active, or the original untagged layout otherwise.
+    ///
+    /// Tagged path emits the marker only on the first wrapped line (inside <c>Lbl</c>);
+    /// continuation lines are text-only inside separate <c>LBody</c> marked-content sequences
+    /// that all share a single <c>LBody</c> StructElem.
     /// </summary>
     /// <param name="ctx">The render context</param>
     /// <param name="lines">The lines of text for this item</param>
@@ -77,23 +125,70 @@ public abstract class ListElementBase : TextElementBase
         Action<float, float> renderMarker,
         float markerWidth)
     {
-        foreach (string line in lines)
+        if (lines.Count == 0) return;
+
+        TaggingContext? tagging = ctx.Tagging;
+
+        // Open LI container around the whole item when tagging
+        if (tagging is not null)
         {
-            // Check if we need a new page
-            CheckPageBreak(ctx, ref localY, LineHeight);
-
-            // Render marker at the left edge
-            float markerX = ctx.CurrentX + Margin.Left;
-            renderMarker(markerX, localY);
-
-            // Render text after the marker
-            float textX = ctx.CurrentX + Margin.Left + markerWidth + 5;
-            ctx.Canvas.DrawText(textX, localY, line, TextColor, FontSize, FontName, TextAlignment.Left);
-
-            localY += LineHeight;
+            tagging.Tree.Begin(SemanticRole.LI);
+            ctx.Canvas.BeginContainerContent("LI");
         }
 
-        // Add spacing after the item
+        try
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                string line = lines[i];
+                CheckPageBreak(ctx, ref localY, LineHeight);
+
+                float markerX = ctx.CurrentX + Margin.Left;
+                float textX = ctx.CurrentX + Margin.Left + markerWidth + 5;
+
+                if (tagging is null)
+                {
+                    // Non-tagged: original behaviour — marker drawn on every wrapped line
+                    renderMarker(markerX, localY);
+                    ctx.Canvas.DrawText(textX, localY, line, TextColor, FontSize, FontName, TextAlignment.Left);
+                }
+                else
+                {
+                    if (i == 0)
+                    {
+                        // Lbl — list item label (drawn once, on the first line only)
+                        tagging.Tree.Begin(SemanticRole.Lbl);
+                        ctx.Canvas.BeginMarkedContent("Lbl");
+                        renderMarker(markerX, localY);
+                        ctx.Canvas.EndMarkedContent();
+                        tagging.Tree.End();
+
+                        // Open the LBody StructElem; individual marked-content sequences
+                        // below will each add their own MCID to this single StructElem.
+                        tagging.Tree.Begin(SemanticRole.LBody);
+                    }
+
+                    // Each wrapped line gets its own MCID, all recorded under LBody
+                    ctx.Canvas.BeginMarkedContent("LBody");
+                    ctx.Canvas.DrawText(textX, localY, line, TextColor, FontSize, FontName, TextAlignment.Left);
+                    ctx.Canvas.EndMarkedContent();
+                }
+
+                localY += LineHeight;
+            }
+
+            if (tagging is not null)
+                tagging.Tree.End(); // end LBody
+        }
+        finally
+        {
+            if (tagging is not null)
+            {
+                ctx.Canvas.EndMarkedContent(); // end LI BMC
+                tagging.Tree.End(); // end LI StructElem
+            }
+        }
+
         localY += ItemSpacing;
     }
 }
