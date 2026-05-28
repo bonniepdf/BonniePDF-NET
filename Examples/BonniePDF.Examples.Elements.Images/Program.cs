@@ -18,6 +18,11 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "image_example_fluent.pdf"));
         }
+        Console.WriteLine("Generating Images (Tagged / PDF/UA-1)...");
+        using (var doc = ImagesTaggedExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "images_tagged.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

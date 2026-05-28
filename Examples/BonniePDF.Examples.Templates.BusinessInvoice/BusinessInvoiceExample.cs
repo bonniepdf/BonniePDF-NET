@@ -34,7 +34,6 @@ public static class BusinessInvoiceExample
         });
 
         doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(TextMedium);
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-US";
