@@ -21,7 +21,24 @@ namespace BonniePDF;
 public class Document : IDisposable
 {
     private readonly List<Page> _pages = [];
+    private readonly DiagnosticsCollector _diagnostics = new();
     private bool _disposed;
+
+    /// <summary>
+    /// Recoverable issues collected during the most recent Save / SaveAsync /
+    /// ToByteArray call — typically font load failures or subset fallbacks.
+    /// Empty before generation. Call <see cref="PrintDiagnostics"/> to surface
+    /// them via the console, or inspect directly to feed into custom UI /
+    /// telemetry.
+    /// </summary>
+    public IReadOnlyList<Diagnostic> Diagnostics => _diagnostics.All;
+
+    /// <summary>
+    /// Convenience: writes each diagnostic to <see cref="Console.Error"/> /
+    /// <see cref="Console.Out"/> according to its severity. Library code never
+    /// calls this implicitly — callers opt in.
+    /// </summary>
+    public void PrintDiagnostics() => _diagnostics.Print();
 
     /// <summary>
     /// Creates a new instance of Document with default settings
@@ -275,10 +292,11 @@ public class Document : IDisposable
     /// </summary>
     private void SaveInternal(string path)
     {
+        _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
         using PdfWriter writer = new(path, Settings.Version);
-        var serializer = new PdfDocumentSerializer(this);
+        var serializer = new PdfDocumentSerializer(this, _diagnostics);
         serializer.Serialize(writer);
     }
 
@@ -287,10 +305,11 @@ public class Document : IDisposable
     /// </summary>
     private void SaveInternal(Stream stream, bool leaveOpen)
     {
+        _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
         using PdfWriter writer = new(stream, leaveOpen, Settings.Version);
-        var serializer = new PdfDocumentSerializer(this);
+        var serializer = new PdfDocumentSerializer(this, _diagnostics);
         serializer.Serialize(writer);
     }
 
@@ -300,10 +319,11 @@ public class Document : IDisposable
     /// </summary>
     private async Task SaveInternalAsync(string path, CancellationToken cancellationToken)
     {
+        _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
         await using AsyncPdfWriter writer = new(path, Settings.Version);
-        var serializer = new PdfDocumentSerializer(this);
+        var serializer = new PdfDocumentSerializer(this, _diagnostics);
         await serializer.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
     }
 
@@ -312,10 +332,11 @@ public class Document : IDisposable
     /// </summary>
     private async Task SaveInternalAsync(Stream stream, bool leaveOpen, CancellationToken cancellationToken)
     {
+        _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
         await using AsyncPdfWriter writer = new(stream, leaveOpen, Settings.Version);
-        var serializer = new PdfDocumentSerializer(this);
+        var serializer = new PdfDocumentSerializer(this, _diagnostics);
         await serializer.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
     }
 

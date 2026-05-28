@@ -32,6 +32,13 @@ public class PdfResourceRegistry
     /// </summary>
     public bool PdfAEnabled { get; set; }
 
+    /// <summary>
+    /// Collector that receives recoverable failures encountered while loading
+    /// or embedding resources. Wired by Document; defaults to a private
+    /// instance so non-Document callers still get a usable collector.
+    /// </summary>
+    public DiagnosticsCollector Diagnostics { get; set; } = new DiagnosticsCollector();
+
     internal Dictionary<string, string> FontAliasMap { get; } = new();
     
     /// <summary>
@@ -163,7 +170,7 @@ public class PdfResourceRegistry
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[BonniePDF] Could not load font from bytes for key \"{key}\": {ex.Message}");
+                Diagnostics.AddWarning(DiagnosticCategory.Font, $"Could not load font from bytes: {ex.Message}", key, ex);
             }
             _fontCounter++;
             string resourceName = $"/F{_fontCounter}";

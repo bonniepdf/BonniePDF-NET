@@ -21,14 +21,17 @@ namespace BonniePDF.Rendering;
 public class PdfDocumentSerializer
 {
     private readonly Document _document;
+    private readonly DiagnosticsCollector _diagnostics;
 
     /// <summary>
     /// Creates a new document serializer for a given document.
     /// </summary>
     /// <param name="document">The document to be serialized.</param>
-    public PdfDocumentSerializer(Document document)
+    /// <param name="diagnostics">Optional collector for recoverable failures; defaults to a private instance.</param>
+    public PdfDocumentSerializer(Document document, DiagnosticsCollector diagnostics = null)
     {
         _document = document ?? throw new ArgumentNullException(nameof(document));
+        _diagnostics = diagnostics ?? new DiagnosticsCollector();
     }
 
     /// <summary>
@@ -86,6 +89,7 @@ public class PdfDocumentSerializer
             TocEntries = resolvedTocEntries,
             Tagging = taggingContext,
         };
+        ctx.Resources.Diagnostics = _diagnostics;
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = [];
@@ -355,6 +359,7 @@ public class PdfDocumentSerializer
         ctx.PdfAEnabled = _document.Settings.PdfAEnabled;
         ctx.TocEntries = resolvedTocEntries;
         ctx.Tagging = taggingContext;
+        ctx.Resources.Diagnostics = _diagnostics;
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = new();
