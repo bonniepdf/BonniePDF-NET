@@ -1,0 +1,27 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.bonniepdf</groupId>
+  <artifactId>verapdf-gate</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Pin the validator version so the gate is reproducible. Bump deliberately. -->
+    <verapdf.version>1.30.1</verapdf.version>
+  </properties>
+
+  <dependencies>
+    <!-- The veraPDF greenfield validation engine (includes the bundled
+         PDF/A and PDF/UA validation profiles). Resolved from Maven Central. -->
+    <dependency>
+      <groupId>org.verapdf</groupId>
+      <artifactId>validation-model</artifactId>
+      <version>${verapdf.version}</version>
+    </dependency>
+  </dependencies>
+</project>

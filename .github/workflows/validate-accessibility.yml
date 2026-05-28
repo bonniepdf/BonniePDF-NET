@@ -1,22 +1,24 @@
-name: PDF/UA Accessibility Validation
+name: PDF/UA-1 Validation
+
+# Compliance gate: builds the library, generates the tagged example PDFs, and
+# validates every one against PDF/UA-1 with veraPDF. The job fails if any PDF
+# is non-compliant (tools/verapdf/validate.sh exits non-zero), so a regression
+# cannot reach master. See docs/ci/pdf-validation.md.
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: a11y-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate-accessibility:
-    name: Generate & validate PDF/UA-1
+  validate:
+    name: Generate & validate (UA-1)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .NET
 
     steps:
       - uses: actions/checkout@v4
@@ -26,39 +28,41 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Restore dependencies
-        run: dotnet restore
+      # JDK + Maven power the veraPDF gate (tools/verapdf).
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
 
-      - name: Build
-        run: dotnet build --no-restore
-
-      - name: Generate PDF/UA-1 examples
+      - name: Build the tagged-example projects
         run: |
-          dotnet run --project Examples/BonniePDF.Examples.Basics.SimpleDocument --no-build
-          dotnet run --project Examples/BonniePDF.Examples.Templates.BusinessInvoice --no-build
+          dotnet build Examples/BonniePDF.Examples.Basics.SimpleDocument -c Release
+          dotnet build Examples/BonniePDF.Examples.Templates.BusinessInvoice -c Release
+          dotnet build Examples/BonniePDF.Examples.Elements.Images -c Release
+
+      - name: Generate tagged example PDFs
+        run: |
+          dotnet run --project Examples/BonniePDF.Examples.Basics.SimpleDocument -c Release --no-build
+          dotnet run --project Examples/BonniePDF.Examples.Templates.BusinessInvoice -c Release --no-build
+          dotnet run --project Examples/BonniePDF.Examples.Elements.Images -c Release --no-build
 
       - name: Collect tagged PDFs
         run: |
-          mkdir -p ${{ github.workspace }}/generated-pdfs
-          find . -name "simple_document_tagged.pdf" \
-            -exec cp {} ${{ github.workspace }}/generated-pdfs/ \;
-          find . -name "invoice.pdf" \
-            -exec cp {} ${{ github.workspace }}/generated-pdfs/ \;
+          mkdir -p generated-pdfs
+          # The example programs write to <project>/bin/.../GeneratedPdfs/.
+          find Examples -path '*/GeneratedPdfs/simple_document_tagged.pdf' -exec cp {} generated-pdfs/ \;
+          find Examples -path '*/GeneratedPdfs/invoice.pdf' -exec cp {} generated-pdfs/ \;
+          find Examples -path '*/GeneratedPdfs/images_tagged.pdf' -exec cp {} generated-pdfs/ \;
+          ls -l generated-pdfs
 
-      - name: Validate with VeraPDF (PDF/UA-1)
-        run: |
-          docker run --rm \
-            -v "${{ github.workspace }}/generated-pdfs:/data" \
-            ghcr.io/verapdf/cli:latest \
-            --flavour ua1 \
-            --format text \
-            /data/simple_document_tagged.pdf \
-            /data/invoice.pdf
+      - name: Validate with veraPDF (PDF/UA-1)
+        run: tools/verapdf/validate.sh generated-pdfs ua1
 
       - name: Upload generated PDFs
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: generated-pdfs
-          path: ${{ github.workspace }}/generated-pdfs/
+          path: generated-pdfs/
           retention-days: 14

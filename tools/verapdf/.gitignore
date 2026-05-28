@@ -1,0 +1,4 @@
+# Resolved Maven dependencies and compiled validator — regenerated on demand.
+lib/
+*.class
+target/
