@@ -8,6 +8,8 @@ using Xunit;
 
 namespace BonniePDF.Tests;
 
+[Collection("Serial")]
+
 /// <summary>
 /// List structure tagging. A tagged <see cref="OrderedList"/> / <see cref="UnorderedList"/>
 /// must produce <c>/L &gt; /LI &gt; /Lbl + /LBody</c> in the structure tree

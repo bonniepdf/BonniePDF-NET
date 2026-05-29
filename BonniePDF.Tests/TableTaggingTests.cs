@@ -10,6 +10,8 @@ using Xunit;
 
 namespace BonniePDF.Tests;
 
+[Collection("Serial")]
+
 /// <summary>
 /// table structure tagging. Asserts that a tagged Table
 /// produces the <c>/Table > /TR > [/TH | /TD]</c> structure hierarchy
@@ -156,26 +158,33 @@ public class TableTaggingTests
         // Even with the nested wrap (Table > TR > TH/TD around cell
         // text), the per-page BDC/EMC counts must stay balanced after
         // the this feature page-break-aware fix.
-        string pdf = GenerateTaggedTable(
-            hookHeader: t => t.AddHeader(
-                new TableCell { Content = new TextBlock { Text = "A" } },
-                new TableCell { Content = new TextBlock { Text = "B" } },
-                new TableCell { Content = new TextBlock { Text = "C" } }),
-            populate: t =>
-            {
-                for (int i = 0; i < 50; i++)
-                    t.AddRow(new TextBlock { Text = $"row {i}, a" },
-                             new TextBlock { Text = $"row {i}, b" },
-                             new TextBlock { Text = $"row {i}, c" });
-            });
-
-        string[] streams = PdfPageStreamSplitter.Split(pdf);
-        Assert.NotEmpty(streams);
-        foreach (string stream in streams)
+        // Table and TR are container roles that emit BMC, so count opens = BDC + BMC.
+        InternalConfiguration.EnableCompression = false;
+        try
         {
-            int bdc = SubstringCounter.Count(stream, "BDC");
-            int emc = SubstringCounter.Count(stream, "EMC");
-            Assert.True(bdc == emc, $"unbalanced marked-content on a page: BDC={bdc} EMC={emc}");
+            string pdf = GenerateTaggedTable(
+                hookHeader: t => t.AddHeader(
+                    new TableCell { Content = new TextBlock { Text = "A" } },
+                    new TableCell { Content = new TextBlock { Text = "B" } },
+                    new TableCell { Content = new TextBlock { Text = "C" } }),
+                populate: t =>
+                {
+                    for (int i = 0; i < 50; i++)
+                        t.AddRow(new TextBlock { Text = $"row {i}, a" },
+                                 new TextBlock { Text = $"row {i}, b" },
+                                 new TextBlock { Text = $"row {i}, c" });
+                });
+
+            string[] streams = PdfPageStreamSplitter.Split(pdf);
+            Assert.NotEmpty(streams);
+            foreach (string stream in streams)
+            {
+                // Container roles (Table, TR) emit BMC; cell content (TH/TD) emits BDC.
+                int opens = SubstringCounter.Count(stream, "BDC") + SubstringCounter.Count(stream, "BMC");
+                int emc = SubstringCounter.Count(stream, "EMC");
+                Assert.True(opens == emc, $"unbalanced marked-content on a page: opens={opens} EMC={emc}");
+            }
         }
+        finally { InternalConfiguration.EnableCompression = true; }
     }
 }

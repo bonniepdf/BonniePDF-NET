@@ -9,6 +9,8 @@ using Xunit;
 
 namespace BonniePDF.Tests;
 
+[Collection("Serial")]
+
 /// <summary>
 /// VisualToc tagging. A tagged <see cref="VisualToc"/> emits a
 /// <c>/TOC</c> structure element (via IRoleProvider auto-wrap on the
@@ -60,15 +62,22 @@ public class VisualTocTaggingTests
     [Fact]
     public void TaggedVisualToc_PagesStayBdcEmcBalanced()
     {
-        string pdf = GenerateTaggedTocPdf();
-        string[] streams = PdfPageStreamSplitter.Split(pdf);
-        Assert.NotEmpty(streams);
-        foreach (string stream in streams)
+        // TOC is a container role that emits BMC; TOCI entries emit BDC.
+        // Count opens = BDC + BMC to get the correct balance.
+        InternalConfiguration.EnableCompression = false;
+        try
         {
-            int bdc = SubstringCounter.Count(stream, "BDC");
-            int emc = SubstringCounter.Count(stream, "EMC");
-            Assert.True(bdc == emc, $"unbalanced marked-content: BDC={bdc} EMC={emc}");
+            string pdf = GenerateTaggedTocPdf();
+            string[] streams = PdfPageStreamSplitter.Split(pdf);
+            Assert.NotEmpty(streams);
+            foreach (string stream in streams)
+            {
+                int opens = SubstringCounter.Count(stream, "BDC") + SubstringCounter.Count(stream, "BMC");
+                int emc = SubstringCounter.Count(stream, "EMC");
+                Assert.True(opens == emc, $"unbalanced marked-content: opens={opens} EMC={emc}");
+            }
         }
+        finally { InternalConfiguration.EnableCompression = true; }
     }
 
     // ── Helpers ──────────────────────────────────────────────────

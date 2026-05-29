@@ -13,6 +13,8 @@ using Xunit;
 
 namespace BonniePDF.Tests;
 
+[Collection("Serial")]
+
 /// <summary>
 /// 10-fixture hardening pass. Throws representative edge-case
 /// documents at the tagging machinery to surface bugs the focused
@@ -67,22 +69,35 @@ public class HardeningTests
         // here), the serializer drops the PDF/A claim rather than
         // emitting an invalid one. PDF/UA-1 still ships because it has
         // no font-embedding requirement.
-        string pdf = Encoding.ASCII.GetString(Generate(doc =>
+        // Simulate a no-fonts environment: clear bundled fonts AND disable the OS
+        // system-font fallback so no TTF is available for the standard Helvetica name.
+        // The serializer must drop the PDF/A claim rather than emit an invalid one.
+        FontManager.Clear();
+        InternalConfiguration.AllowSystemFontFallback = false;
+        try
         {
-            doc.Settings.Version = PdfVersion.Pdf17;
-            doc.Settings.PdfAEnabled = true;
-            doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
-            doc.Settings.Language = "en-GB";
-            doc.Add(new Heading("Combined") { TocIdentifier = "c", Level = 1, FontSize = 18 });
-        }));
+            string pdf = Encoding.ASCII.GetString(Generate(doc =>
+            {
+                doc.Settings.Version = PdfVersion.Pdf17;
+                doc.Settings.PdfAEnabled = true;
+                doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+                doc.Settings.Language = "en-GB";
+                doc.Add(new Heading("Combined") { TocIdentifier = "c", Level = 1, FontSize = 18 });
+            }));
 
-        // PDF/A claim and OutputIntent are suppressed (honest about what we ship).
-        Assert.DoesNotContain("pdfaid:part", pdf);
-        Assert.DoesNotContain("/OutputIntents", pdf);
-        // PDF/UA-1 plumbing is unaffected.
-        Assert.Contains("pdfuaid:part", pdf);
-        Assert.Contains("/StructTreeRoot", pdf);
-        Assert.Contains("/MarkInfo << /Marked true >>", pdf);
+            // PDF/A claim and OutputIntent are suppressed (honest about what we ship).
+            Assert.DoesNotContain("pdfaid:part", pdf);
+            Assert.DoesNotContain("/OutputIntents", pdf);
+            // PDF/UA-1 plumbing is unaffected.
+            Assert.Contains("pdfuaid:part", pdf);
+            Assert.Contains("/StructTreeRoot", pdf);
+            Assert.Contains("/MarkInfo << /Marked true >>", pdf);
+        }
+        finally
+        {
+            InternalConfiguration.AllowSystemFontFallback = true;
+            FontManager.RestoreBundledFonts();
+        }
     }
 
     // ── 3. Encrypted tagged document ────────────────────────────────
@@ -204,28 +219,34 @@ public class HardeningTests
     {
         // this feature fixed this: header/footer template content is now tagged as
         // /Artifact so screen readers skip it.
-        string pdf = Encoding.ASCII.GetString(GenerateTagged(doc =>
+        // /Artifact BMC is in the page content stream — requires compression off.
+        InternalConfiguration.EnableCompression = false;
+        try
         {
-            doc.Settings.HeaderTemplate = pageNum => new TextBlock
+            string pdf = Encoding.ASCII.GetString(GenerateTagged(doc =>
             {
-                Text = $"Header — page {pageNum}",
-                FontSize = 9, TextColor = Color.Slate500,
-            };
-            doc.Settings.FooterTemplate = pageNum => new TextBlock
-            {
-                Text = $"— {pageNum} —",
-                FontSize = 9, TextColor = Color.Slate500,
-            };
-            doc.Add(new Heading("Body") { TocIdentifier = "b", Level = 1, FontSize = 18 });
-        }));
+                doc.Settings.HeaderTemplate = pageNum => new TextBlock
+                {
+                    Text = $"Header — page {pageNum}",
+                    FontSize = 9, TextColor = Color.Slate500,
+                };
+                doc.Settings.FooterTemplate = pageNum => new TextBlock
+                {
+                    Text = $"— {pageNum} —",
+                    FontSize = 9, TextColor = Color.Slate500,
+                };
+                doc.Add(new Heading("Body") { TocIdentifier = "b", Level = 1, FontSize = 18 });
+            }));
 
-        // Body content tags correctly.
-        Assert.Contains("/S /H1", pdf);
-        // Document structure exists.
-        Assert.Contains("/S /Document", pdf);
-        // this feature fixed this: header/footer template content is now tagged as
-        // /Artifact so screen readers skip it.
-        Assert.Contains("/Artifact BMC", pdf);
+            // Body content tags correctly.
+            Assert.Contains("/S /H1", pdf);
+            // Document structure exists.
+            Assert.Contains("/S /Document", pdf);
+            // this feature fixed this: header/footer template content is now tagged as
+            // /Artifact so screen readers skip it.
+            Assert.Contains("/Artifact BMC", pdf);
+        }
+        finally { InternalConfiguration.EnableCompression = true; }
     }
 
     // ── 9. Nested layout: VerticalStack containing Tables ───────────

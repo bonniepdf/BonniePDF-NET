@@ -11,6 +11,8 @@ using Xunit;
 
 namespace BonniePDF.Tests;
 
+[Collection("Serial")]
+
 /// <summary>
 /// this feature through Stage 2 accessibility hardening.
 /// Semantic groups, artifact tagging for headers/footers/watermarks,
@@ -85,27 +87,38 @@ public class Stage2Tests
     [Fact]
     public void HeaderTemplate_TaggedDocument_EmitsArtifactBmc()
     {
-        string pdf = GenerateTagged(doc =>
+        // /Artifact BMC is in the page content stream — requires compression off to find it.
+        InternalConfiguration.EnableCompression = false;
+        try
         {
-            doc.Settings.HeaderTemplate = _ => new TextBlock { Text = "Header", FontSize = 9 };
-            doc.Add(new TextBlock { Text = "Body content.", FontSize = 12 });
-        });
+            string pdf = GenerateTagged(doc =>
+            {
+                doc.Settings.HeaderTemplate = _ => new TextBlock { Text = "Header", FontSize = 9 };
+                doc.Add(new TextBlock { Text = "Body content.", FontSize = 12 });
+            });
 
-        // /Artifact BMC is emitted for the header; body content stays tagged.
-        Assert.Contains("/Artifact BMC", pdf);
-        Assert.Contains("/S /Document", pdf);
+            Assert.Contains("/Artifact BMC", pdf);
+            Assert.Contains("/S /Document", pdf);
+        }
+        finally { InternalConfiguration.EnableCompression = true; }
     }
 
     [Fact]
     public void FooterTemplate_TaggedDocument_EmitsArtifactBmc()
     {
-        string pdf = GenerateTagged(doc =>
+        // /Artifact BMC is in the page content stream — requires compression off to find it.
+        InternalConfiguration.EnableCompression = false;
+        try
         {
-            doc.Settings.FooterTemplate = _ => new TextBlock { Text = "Footer", FontSize = 9 };
-            doc.Add(new TextBlock { Text = "Body content.", FontSize = 12 });
-        });
+            string pdf = GenerateTagged(doc =>
+            {
+                doc.Settings.FooterTemplate = _ => new TextBlock { Text = "Footer", FontSize = 9 };
+                doc.Add(new TextBlock { Text = "Body content.", FontSize = 12 });
+            });
 
-        Assert.Contains("/Artifact BMC", pdf);
+            Assert.Contains("/Artifact BMC", pdf);
+        }
+        finally { InternalConfiguration.EnableCompression = true; }
     }
 
     // /Tabs /S

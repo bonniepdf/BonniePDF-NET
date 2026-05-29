@@ -19,6 +19,12 @@ internal sealed class Program
             doc.Save(Path.Combine(outputDir, "headers_footers_fluent.pdf"));
         }
 
+        Console.WriteLine("Generating Headers & Footers (Tagged / PDF/UA-1)...");
+        using (var doc = HeadersFootersTaggedExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "headers_footers_tagged.pdf"));
+        }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

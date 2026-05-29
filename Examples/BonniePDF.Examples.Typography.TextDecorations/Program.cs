@@ -19,6 +19,12 @@ internal sealed class Program
             doc.Save(Path.Combine(outputDir, "text_decorations_fluent.pdf"));
         }
 
+        Console.WriteLine("Generating Text Decorations (Tagged / PDF/UA-1)...");
+        using (var doc = TextDecorationTaggedExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "text_decorations_tagged.pdf"));
+        }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

@@ -9,6 +9,8 @@ using Xunit;
 
 namespace BonniePDF.Tests;
 
+[Collection("Serial")]
+
 /// <summary>
 /// hyperlink tagging. A standalone <see cref="Hyperlink"/>
 /// element in a tagged document produces a <c>/Link</c> structure
@@ -121,19 +123,24 @@ public class HyperlinkTaggingTests
     [Fact]
     public void TaggedDocument_LinkPagesStayBdcEmcBalanced()
     {
-        string pdf = Encoding.ASCII.GetString(GenerateBytes(doc =>
+        InternalConfiguration.EnableCompression = false;
+        try
         {
-            doc.Add(new Hyperlink("https://a.example.com", "A") { FontSize = 12 });
-            doc.Add(new Hyperlink("https://b.example.com", "B") { FontSize = 12 });
-        }));
+            string pdf = Encoding.ASCII.GetString(GenerateBytes(doc =>
+            {
+                doc.Add(new Hyperlink("https://a.example.com", "A") { FontSize = 12 });
+                doc.Add(new Hyperlink("https://b.example.com", "B") { FontSize = 12 });
+            }));
 
-        string[] streams = PdfPageStreamSplitter.Split(pdf);
-        Assert.NotEmpty(streams);
-        foreach (string stream in streams)
-        {
-            int bdc = SubstringCounter.Count(stream, "BDC");
-            int emc = SubstringCounter.Count(stream, "EMC");
-            Assert.True(bdc == emc, $"unbalanced marked-content: BDC={bdc} EMC={emc}");
+            string[] streams = PdfPageStreamSplitter.Split(pdf);
+            Assert.NotEmpty(streams);
+            foreach (string stream in streams)
+            {
+                int bdc = SubstringCounter.Count(stream, "BDC");
+                int emc = SubstringCounter.Count(stream, "EMC");
+                Assert.True(bdc == emc, $"unbalanced marked-content: BDC={bdc} EMC={emc}");
+            }
         }
+        finally { InternalConfiguration.EnableCompression = true; }
     }
 }

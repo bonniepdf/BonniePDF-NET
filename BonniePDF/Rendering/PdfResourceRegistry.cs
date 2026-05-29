@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using BonniePDF.Configuration;
 using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Writers;
 using BonniePDF.Typography;
@@ -115,8 +116,12 @@ public class PdfResourceRegistry
                 return resourceName;
             }
 
-            // 2. Legacy: file-path based resolution (system fonts)
-            string? ttfPath = ResolveStandardFontToTtf(fontIdentifier);
+            // 2. Legacy: file-path based resolution (system fonts).
+            // Skipped when InternalConfiguration.AllowSystemFontFallback is false
+            // (used by tests that need to simulate a no-TTF environment).
+            string? ttfPath = InternalConfiguration.AllowSystemFontFallback
+                ? ResolveStandardFontToTtf(fontIdentifier)
+                : null;
             if (ttfPath != null)
             {
                 string resourceName = RegisterEmbeddedFont(ttfPath);

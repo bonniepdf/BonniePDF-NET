@@ -9,6 +9,7 @@ using Xunit;
 namespace BonniePDF.Tests;
 
 /// <summary>this feature Stage 2 and this feature tests.</summary>
+[Collection("Serial")]
 public class FontEmbeddingAndTextStyleTests
 {
     // ── this feature Stage 2: FontManager ─────────────────────────────────────
@@ -38,8 +39,11 @@ public class FontEmbeddingAndTextStyleTests
     [Fact]
     public void PdfA_ClaimSuppressed_WhenStandardFontsUsed()
     {
-        // Clear fonts so auto-registration didn't happen in this registry instance
+        // Simulate an environment with no embeddable fonts: clear bundled fonts
+        // AND disable the OS system-font fallback so there is genuinely no TTF
+        // available for Helvetica. The serializer must then drop the PDF/A claim.
         FontManager.Clear();
+        InternalConfiguration.AllowSystemFontFallback = false;
         try
         {
             string pdf = Encoding.ASCII.GetString(Generate(doc =>
@@ -53,7 +57,7 @@ public class FontEmbeddingAndTextStyleTests
         }
         finally
         {
-            // Restore auto-registered fonts for subsequent tests
+            InternalConfiguration.AllowSystemFontFallback = true;
             FontManager.RestoreBundledFonts();
         }
     }

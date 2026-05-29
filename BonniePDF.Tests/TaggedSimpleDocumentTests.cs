@@ -9,6 +9,8 @@ using Xunit;
 
 namespace BonniePDF.Tests;
 
+[Collection("Serial")]
+
 /// <summary>
 /// stage-0 closeout. Builds a representative tagged document
 /// (mirrors the public <c>SimpleDocumentTaggedExample</c> in the

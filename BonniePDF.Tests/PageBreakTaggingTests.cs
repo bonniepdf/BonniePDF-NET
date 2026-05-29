@@ -9,6 +9,8 @@ using Xunit;
 
 namespace BonniePDF.Tests;
 
+[Collection("Serial")]
+
 /// <summary>
 /// page-break-aware tagging tests. Marked-content scopes
 /// (BDC/EMC) cannot cross a page boundary per PDF spec, but structure
@@ -35,25 +37,30 @@ public class PageBreakTaggingTests
     {
         // Construct a document that will exceed one page via a tall
         // TextBlock, render under tagging, and verify per-page balance.
-        string pdf = GenerateTagged(doc =>
+        InternalConfiguration.EnableCompression = false;
+        try
         {
-            // Lots of paragraphs to force a page break.
-            var sb = new StringBuilder();
-            for (int i = 0; i < 200; i++)
-                sb.Append("This is line ").Append(i).Append(" of a long block of text that should span multiple pages. ");
-            doc.Add(new TextBlock { Text = sb.ToString(), FontSize = 12 });
-        });
+            string pdf = GenerateTagged(doc =>
+            {
+                // Lots of paragraphs to force a page break.
+                var sb = new StringBuilder();
+                for (int i = 0; i < 200; i++)
+                    sb.Append("This is line ").Append(i).Append(" of a long block of text that should span multiple pages. ");
+                doc.Add(new TextBlock { Text = sb.ToString(), FontSize = 12 });
+            });
 
-        // Each page's content stream must have balanced BDC/EMC counts —
-        // otherwise the PDF is malformed per ISO 32000-1 §14.6.
-        string[] pageStreams = SplitPageContentStreams(pdf);
-        Assert.True(pageStreams.Length >= 2, "expected the test doc to overflow onto >1 page");
-        foreach (string stream in pageStreams)
-        {
-            int bdc = CountSubstring(stream, "BDC");
-            int emc = CountSubstring(stream, "EMC");
-            Assert.True(bdc == emc, $"unbalanced marked-content on a page: BDC={bdc} EMC={emc}");
+            // Each page's content stream must have balanced BDC/EMC counts —
+            // otherwise the PDF is malformed per ISO 32000-1 §14.6.
+            string[] pageStreams = SplitPageContentStreams(pdf);
+            Assert.True(pageStreams.Length >= 2, "expected the test doc to overflow onto >1 page");
+            foreach (string stream in pageStreams)
+            {
+                int bdc = CountSubstring(stream, "BDC");
+                int emc = CountSubstring(stream, "EMC");
+                Assert.True(bdc == emc, $"unbalanced marked-content on a page: BDC={bdc} EMC={emc}");
+            }
         }
+        finally { InternalConfiguration.EnableCompression = true; }
     }
 
     [Fact]
@@ -61,14 +68,19 @@ public class PageBreakTaggingTests
     {
         // Render under tagging but without any tagged element overflowing.
         // The page-break handler must not emit stray EMC/BDC pairs.
-        string pdf = GenerateTagged(doc =>
+        InternalConfiguration.EnableCompression = false;
+        try
         {
-            doc.Add(new TextBlock { Text = "short", FontSize = 12 });
-        });
+            string pdf = GenerateTagged(doc =>
+            {
+                doc.Add(new TextBlock { Text = "short", FontSize = 12 });
+            });
 
-        // Single page, one BDC/EMC pair for the TextBlock.
-        string[] pageStreams = SplitPageContentStreams(pdf);
-        Assert.Single(pageStreams);
+            // Single page, one BDC/EMC pair for the TextBlock.
+            string[] pageStreams = SplitPageContentStreams(pdf);
+            Assert.Single(pageStreams);
+        }
+        finally { InternalConfiguration.EnableCompression = true; }
     }
 
     [Fact]
