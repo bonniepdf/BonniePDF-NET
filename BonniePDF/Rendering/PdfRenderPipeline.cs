@@ -480,30 +480,33 @@ public static class PdfRenderPipeline
             float contentWidth = ctx.PageSize.Width - ctx.Margin * 2;
             float startX = ctx.Margin;
 
-            // Render Header
+            // Render Header — centred within the top-margin band so it sits in
+            // its own region with breathing room above and below, rather than
+            // flush against the page edge.
             if (hasHeader)
             {
                 IElement headerElement = settings.HeaderTemplate!(pageNumber);
                 if (headerElement != null)
                 {
-                    // Position at top of page (0)
+                    float headerHeight = headerElement.MeasureHeight(contentWidth);
                     ctx.CurrentX = startX;
-                    ctx.CurrentY = 0;
+                    ctx.CurrentY = MathF.Max(0f, (ctx.Margin - headerHeight) / 2f);
                     if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
                     headerElement.Render(ctx, contentWidth);
                     if (ctx.Tagging != null) ctx.Canvas.EndArtifact();
                 }
             }
 
-            // Render Footer
+            // Render Footer — symmetric: centred within the bottom-margin band.
             if (hasFooter)
             {
                 IElement footerElement = settings.FooterTemplate!(pageNumber);
                 if (footerElement != null)
                 {
-                    // Position at start of bottom margin
+                    float footerHeight = footerElement.MeasureHeight(contentWidth);
+                    float bandTop = ctx.PageSize.Height - ctx.Margin;
                     ctx.CurrentX = startX;
-                    ctx.CurrentY = ctx.PageSize.Height - ctx.Margin;
+                    ctx.CurrentY = bandTop + MathF.Max(0f, (ctx.Margin - footerHeight) / 2f);
                     if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
                     footerElement.Render(ctx, contentWidth);
                     if (ctx.Tagging != null) ctx.Canvas.EndArtifact();

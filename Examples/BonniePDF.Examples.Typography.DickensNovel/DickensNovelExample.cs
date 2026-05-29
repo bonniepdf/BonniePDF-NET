@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 
@@ -56,22 +57,33 @@ public static partial class DickensNovelExample
             DisplayDocTitle = true,
             DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11).WithColor(Color.Slate900),
 
-            // Running header: book title left, author right — static across all pages.
-            // (The template is called per page after layout, so a closure over fixed strings works.)
+            // Running header: book title on the left, author on the right, on every page.
             HeaderTemplate = pageNum =>
             {
                 if (pageNum <= 1) return null; // no header on the title page
-                return new TextBlock
+
+                var stack = new HorizontalStack
                 {
-                    Text      = pageNum % 2 == 0
-                        ? "A Tale of Two Cities"
-                        : "Charles Dickens",
+                    WidthDistribution = WidthDistribution.Weighted,
+                    Spacing = 0,
+                };
+                stack.AddChild(new TextBlock
+                {
+                    Text      = "A Tale of Two Cities",
                     FontName  = StandardFonts.TimesItalic,
                     FontSize  = 9,
                     TextColor = Color.Slate500,
-                    Alignment = pageNum % 2 == 0 ? TextAlignment.Left : TextAlignment.Right,
-                    Margin    = new Thickness(0, 0, 0, 2)
-                };
+                    Alignment = TextAlignment.Left,
+                }, 1f);
+                stack.AddChild(new TextBlock
+                {
+                    Text      = "Charles Dickens",
+                    FontName  = StandardFonts.TimesItalic,
+                    FontSize  = 9,
+                    TextColor = Color.Slate500,
+                    Alignment = TextAlignment.Right,
+                }, 1f);
+                return stack;
             },
 
             // Centred page number in footer; blank on the title page.

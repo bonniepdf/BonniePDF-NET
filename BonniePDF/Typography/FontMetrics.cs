@@ -16,6 +16,15 @@ public static class FontMetrics
     // Cache for parsed TTF widths: "C:/Fonts/arial.ttf" -> int[95]
     private static readonly Dictionary<string, int[]> TtfCache = [];
 
+    // Cache for full TtfFont instances loaded by file path. Used to measure text
+    // with accurate per-glyph advances (including supplementary-plane characters
+    // such as emoji), instead of the ASCII-only widths in TtfCache.
+    private static readonly Dictionary<string, TtfFont> TtfFontCache = [];
+
+    // Marks file paths that failed to load as a full TtfFont, so we fall back to
+    // the ASCII-only measurement path without re-attempting on every call.
+    private static readonly HashSet<string> TtfFontLoadFailed = new(StringComparer.OrdinalIgnoreCase);
+
     // Alias map: logical font name (e.g. "Helvetica-Bold") → physical TTF path (e.g. "C:/Windows/Fonts/arialbd.ttf")
     // Populated by PdfResourceRegistry when PDF/A mode resolves a standard font to an embedded TTF file.
     // This ensures measurement uses actual TTF metrics to match rendering exactly.
@@ -146,7 +155,34 @@ public static class FontMetrics
     // =====================================================
     private static float GetTtfWidth(string text, string filepath, float fontSize)
     {
-        // 1. Load into cache if missing
+        // Prefer the full TtfFont path: it enumerates Unicode runes (handling
+        // surrogate pairs correctly for emoji and other supplementary-plane
+        // characters) and queries real per-glyph advances. Without this, the
+        // ASCII-only widths table below sees each surrogate code unit as an
+        // unknown char and assigns the 500-unit fallback, badly under-measuring
+        // wide emoji glyphs — wrapping then fails to trigger and content runs
+        // off the page.
+        if (!TtfFontLoadFailed.Contains(filepath))
+        {
+            if (!TtfFontCache.TryGetValue(filepath, out TtfFont fullFont))
+            {
+                try
+                {
+                    fullFont = new TtfFont(filepath);
+                    TtfFontCache[filepath] = fullFont;
+                }
+                catch
+                {
+                    TtfFontLoadFailed.Add(filepath);
+                    fullFont = null;
+                }
+            }
+            if (fullFont != null)
+                return GetKernedStringWidth(text, fullFont, fontSize);
+        }
+
+        // Legacy fallback: ASCII-only width table for fonts that fail to parse
+        // as a full TtfFont. Kept for robustness; not exercised in the common case.
         if (!TtfCache.TryGetValue(filepath, out int[] widths))
             try
             {

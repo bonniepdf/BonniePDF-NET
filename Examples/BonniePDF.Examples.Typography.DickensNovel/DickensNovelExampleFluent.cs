@@ -72,27 +72,27 @@ public static partial class DickensNovelExampleFluent
                 settings.PdfAEnabled    = true;
                 settings.DisplayDocTitle = true;
 
-                // Running header: alternates book title (even pages) / author (odd pages).
-                // Skipped on page 1 (the title page) by returning early from the callback.
+                // Running header: book title on the left, author on the right, on every page.
                 settings.Header((pageNumber, header) =>
                 {
                     if (pageNumber <= 1) return;
 
-                    string headerText = pageNumber % 2 == 0
-                        ? "A Tale of Two Cities"
-                        : "Charles Dickens";
-
-                    var textBlock = header
-                        .Text(headerText)
-                        .Font(StandardFonts.TimesItalic)
-                        .FontSize(9)
-                        .TextColor(Color.Slate500)
-                        .Margin(0, 0, 0, 2);
-
-                    if (pageNumber % 2 == 0)
-                        textBlock.AlignLeft();
-                    else
-                        textBlock.AlignRight();
+                    header.Row(row =>
+                    {
+                        row.Spacing(0);
+                        row.RelativeItem(1f)
+                            .Text("A Tale of Two Cities")
+                            .Font(StandardFonts.TimesItalic)
+                            .FontSize(9)
+                            .TextColor(Color.Slate500)
+                            .AlignLeft();
+                        row.RelativeItem(1f)
+                            .Text("Charles Dickens")
+                            .Font(StandardFonts.TimesItalic)
+                            .FontSize(9)
+                            .TextColor(Color.Slate500)
+                            .AlignRight();
+                    });
                 });
 
                 // Centred page number in footer; blank on the title page.
