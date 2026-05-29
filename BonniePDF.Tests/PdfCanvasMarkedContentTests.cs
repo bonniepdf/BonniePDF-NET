@@ -105,16 +105,18 @@ public class PdfCanvasMarkedContentTests
         canvas.EndMarkedContent();
 
         string output = canvas.Stream.ToString();
-        int sectIdx = output.IndexOf("/Sect << /MCID");
-        int p1Idx = output.IndexOf("/P << /MCID 1 >>");
-        int p2Idx = output.IndexOf("/P << /MCID 2 >>");
+        // Sect is the outermost call — _openTaggedCount == 0 — so it gets MCID 0 and emits BDC.
+        // Both P calls are nested (openTaggedCount > 0) so they emit BMC with no MCID.
+        int sectIdx = output.IndexOf("/Sect << /MCID 0 >>");
+        int p1Idx   = output.IndexOf("P BMC");         // first nested P
+        int p2Idx   = output.LastIndexOf("P BMC");     // second nested P (last occurrence)
         int firstEmc = output.IndexOf("EMC");
-        int lastEmc = output.LastIndexOf("EMC");
+        int lastEmc  = output.LastIndexOf("EMC");
 
-        Assert.True(sectIdx >= 0);
-        Assert.True(p1Idx > sectIdx);
-        Assert.True(p2Idx > p1Idx);
-        Assert.True(lastEmc > firstEmc);
+        Assert.True(sectIdx >= 0, "Sect should emit BDC with MCID 0 as the outermost tagged element");
+        Assert.True(p1Idx > sectIdx, "first P BMC should appear after Sect BDC");
+        Assert.True(p2Idx > p1Idx, "second P BMC should appear after first P BMC");
+        Assert.True(lastEmc > firstEmc, "multiple EMC operators expected");
     }
 
     [Fact]

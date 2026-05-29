@@ -19,7 +19,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Suppress analyzer/doc warnings that are not relevant for a library consumed by the demo -->
-    <NoWarn>$(NoWarn);CS1591;CS1573;CS8632;MA0002;MA0004;MA0006;MA0009;MA0011;MA0015;MA0046;MA0048;MA0051;MA0074;MA0140</NoWarn>
+    <NoWarn>$(NoWarn);CS1591;CS1573;CS8632;MA0002;MA0004;MA0006;MA0009;MA0011;MA0015;MA0046;MA0048;MA0051;MA0074;MA0089;MA0140;CA1854;CA1859</NoWarn>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>BonniePDF</Title>
     <PackageProjectUrl>https://bonniepdf.dev</PackageProjectUrl>
@@ -27,21 +27,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="BonniePDF.Tests" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Typography/Fonts/LiberationSans-Regular.ttf" />
-    <EmbeddedResource Include="Typography/Fonts/LiberationSans-Bold.ttf" />
-    <EmbeddedResource Include="Typography/Fonts/LiberationSans-Italic.ttf" />
-    <EmbeddedResource Include="Typography/Fonts/LiberationSans-BoldItalic.ttf" />
-    <EmbeddedResource Include="Typography/Fonts/LiberationSerif-Regular.ttf" />
-    <EmbeddedResource Include="Typography/Fonts/LiberationSerif-Bold.ttf" />
-    <EmbeddedResource Include="Typography/Fonts/LiberationSerif-Italic.ttf" />
-    <EmbeddedResource Include="Typography/Fonts/LiberationSerif-BoldItalic.ttf" />
-    <EmbeddedResource Include="Typography/Fonts/LiberationMono-Regular.ttf" />
-    <EmbeddedResource Include="Typography/Fonts/LiberationMono-Bold.ttf" />
-    <EmbeddedResource Include="Typography/Fonts/LiberationMono-Italic.ttf" />
-    <EmbeddedResource Include="Typography/Fonts/LiberationMono-BoldItalic.ttf" />
   </ItemGroup>
 
   <ItemGroup>

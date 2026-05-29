@@ -88,24 +88,6 @@ public class PdfResourceRegistry
     };
 
     /// <summary>
-    /// Returns true if any standard (non-embedded) font has been registered without a corresponding
-    /// embedded font entry — indicating that the PDF/A claim cannot be safely made.
-    /// </summary>
-    public bool HasNonEmbeddedStandardFont()
-    {
-        foreach (var name in FontNameMap.Keys)
-        {
-            if (!StandardFontNames.Contains(name)) continue;
-            // Check if this standard font was resolved to an embedded (virtual or file) font
-            if (EmbeddedFonts.ContainsKey(name)) continue;
-            if (EmbeddedFonts.ContainsKey($"virtual:{name}")) continue;
-            if (FontAliasMap.ContainsKey(name)) continue;
-            return true;
-        }
-        return false;
-    }
-
-    /// <summary>
     /// Registers a font and returns its resource name (e.g., /F1).
     /// </summary>
     public string RegisterFont(string fontIdentifier)
@@ -124,7 +106,6 @@ public class PdfResourceRegistry
             byte[]? bytes = FontManager.GetBytesForStandardFont(fontIdentifier);
             if (bytes != null)
             {
-                string virtualKey = $"virtual:{fontIdentifier}";
                 string resourceName = RegisterEmbeddedFontFromBytes(bytes, virtualKey);
                 FontNameMap[fontIdentifier] = resourceName;
                 FontAliasMap[fontIdentifier] = virtualKey;
@@ -155,37 +136,6 @@ public class PdfResourceRegistry
         }
 
         return value;
-    }
-
-    private string RegisterEmbeddedFontFromBytes(byte[] bytes, string key)
-    {
-        if (!EmbeddedFonts.ContainsKey(key))
-        {
-            TtfFont font = null;
-            GlyphUsageTracker tracker = null;
-            try
-            {
-                font = TtfFont.LoadFromBytes(bytes);
-                tracker = new GlyphUsageTracker(font);
-            }
-            catch (Exception ex)
-            {
-                Diagnostics.AddWarning(DiagnosticCategory.Font, $"Could not load font from bytes: {ex.Message}", key, ex);
-            }
-            _fontCounter++;
-            string resourceName = $"/F{_fontCounter}";
-            string subsetPrefix = GenerateSubsetPrefix();
-            var info = new EmbeddedFontInfo
-            {
-                Font = font,
-                Tracker = tracker,
-                SubsetPrefix = subsetPrefix,
-                ResourceName = resourceName,
-            };
-            EmbeddedFonts[key] = info;
-            FontNameMap[key] = resourceName;
-        }
-        return EmbeddedFonts[key].ResourceName;
     }
 
     /// <summary>

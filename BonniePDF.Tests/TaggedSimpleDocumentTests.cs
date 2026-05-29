@@ -120,7 +120,9 @@ public class TaggedSimpleDocumentTests
     {
         string pdf = GenerateText();
         Assert.Contains("xmlns:pdfuaid=\"http://www.aiim.org/pdfua/ns/id/\"", pdf);
-        Assert.Contains("<pdfuaid:part>1</pdfuaid:part>", pdf);
+        // XmlWriter may place the namespace declaration inline on the element, so search for
+        // the closing '>' of the opening tag immediately followed by the value.
+        Assert.Contains(">1</pdfuaid:part>", pdf);
     }
 
     [Fact]
@@ -147,15 +149,23 @@ public class TaggedSimpleDocumentTests
     [Fact]
     public void EveryPageStreamHasBalancedMarkedContent()
     {
-        string pdf = GenerateText();
-        string[] pageStreams = PdfPageStreamSplitter.Split(pdf);
-        Assert.NotEmpty(pageStreams);
-
-        foreach (string stream in pageStreams)
+        InternalConfiguration.EnableCompression = false;
+        try
         {
-            int bdc = SubstringCounter.Count(stream, "BDC");
-            int emc = SubstringCounter.Count(stream, "EMC");
-            Assert.True(bdc == emc, $"unbalanced marked-content on a page: BDC={bdc} EMC={emc}");
+            string pdf = GenerateText();
+            string[] pageStreams = PdfPageStreamSplitter.Split(pdf);
+            Assert.NotEmpty(pageStreams);
+
+            foreach (string stream in pageStreams)
+            {
+                int bdc = SubstringCounter.Count(stream, "BDC");
+                int emc = SubstringCounter.Count(stream, "EMC");
+                Assert.True(bdc == emc, $"unbalanced marked-content on a page: BDC={bdc} EMC={emc}");
+            }
+        }
+        finally
+        {
+            InternalConfiguration.EnableCompression = true;
         }
     }
 
@@ -198,6 +208,10 @@ internal static class PdfPageStreamSplitter
     /// </summary>
     public static string[] Split(string pdf)
     {
+        // Normalize CRLF to LF so the search works on both Windows and Linux/macOS.
+        // PdfWriter.WriteLine emits \r\n on Windows; the literals in Write() use \n.
+        pdf = pdf.Replace("\r\n", "\n", System.StringComparison.Ordinal);
+
         var result = new System.Collections.Generic.List<string>();
         int idx = 0;
         while (true)

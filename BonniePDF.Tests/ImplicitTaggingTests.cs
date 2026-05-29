@@ -7,6 +7,8 @@ using Xunit;
 
 namespace BonniePDF.Tests;
 
+[Collection("Serial")]
+
 /// <summary>
 /// implicit tagging tests. Asserts that existing elements
 /// (Heading, TextBlock) automatically emit structure elements and
@@ -19,24 +21,29 @@ public class ImplicitTaggingTests
     [Fact]
     public void HeadingAndTextBlocks_GenerateHAndPStructElems()
     {
-        string pdf = GenerateTagged(doc =>
+        InternalConfiguration.EnableCompression = false;
+        try
         {
-            doc.Add(new Heading("Title") { TocIdentifier = "h1", Level = 1, FontSize = 24 });
-            doc.Add(new TextBlock { Text = "First paragraph.", FontSize = 12 });
-            doc.Add(new TextBlock { Text = "Second paragraph.", FontSize = 12 });
-        });
+            string pdf = GenerateTagged(doc =>
+            {
+                doc.Add(new Heading("Title") { TocIdentifier = "h1", Level = 1, FontSize = 24 });
+                doc.Add(new TextBlock { Text = "First paragraph.", FontSize = 12 });
+                doc.Add(new TextBlock { Text = "Second paragraph.", FontSize = 12 });
+            });
 
-        // Each Heading + TextBlock contributes a StructElem in the tree.
-        Assert.Contains("/S /Document", pdf);
-        Assert.Contains("/S /H1", pdf);
-        Assert.Contains("/S /P", pdf);
+            // Each Heading + TextBlock contributes a StructElem in the tree.
+            Assert.Contains("/S /Document", pdf);
+            Assert.Contains("/S /H1", pdf);
+            Assert.Contains("/S /P", pdf);
 
-        // The canvas wraps each tagged element in BDC/EMC. With three
-        // tagged elements we expect at least three BDC + three EMC pairs.
-        Assert.True(CountSubstring(pdf, "BDC") >= 3,
-            $"expected >=3 BDC operators, got {CountSubstring(pdf, "BDC")}");
-        Assert.True(CountSubstring(pdf, "EMC") >= 3,
-            $"expected >=3 EMC operators, got {CountSubstring(pdf, "EMC")}");
+            // The canvas wraps each tagged element in BDC/EMC. With three
+            // tagged elements we expect at least three BDC + three EMC pairs.
+            Assert.True(CountSubstring(pdf, "BDC") >= 3,
+                $"expected >=3 BDC operators, got {CountSubstring(pdf, "BDC")}");
+            Assert.True(CountSubstring(pdf, "EMC") >= 3,
+                $"expected >=3 EMC operators, got {CountSubstring(pdf, "EMC")}");
+        }
+        finally { InternalConfiguration.EnableCompression = true; }
     }
 
     [Fact]

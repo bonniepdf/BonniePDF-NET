@@ -116,6 +116,9 @@ public static class FontManager
     /// <summary>Removes all registered fonts (primarily for test isolation).</summary>
     public static void Clear() => _registry.Clear();
 
+    /// <summary>Re-registers the bundled Liberation fonts after a <see cref="Clear"/> call (test isolation).</summary>
+    public static void RestoreBundledFonts() => AutoRegisterBundledFonts();
+
     // ── Internal ─────────────────────────────────────────────────
 
     private static void AutoRegisterBundledFonts()

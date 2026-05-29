@@ -95,6 +95,12 @@ public class ChartTests
         {
             Operations.Add($"StrokeRoundedRect({x},{y},{width},{height},{radius},{strokeWidth})");
         }
+
+        public void BeginMarkedContent(string role) { }
+        public void BeginContainerContent(string role) { }
+        public void EndMarkedContent() { }
+        public void BeginArtifact() { }
+        public void EndArtifact() { }
     }
 
     private static ChartData CreateSampleData()

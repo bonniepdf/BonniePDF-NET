@@ -86,7 +86,7 @@ public class PdfDocumentSerializer
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin)
         {
             PdfAEnabled = _document.Settings.PdfAEnabled,
-            TocEntries = resolvedTocEntries,
+            TocEntries = resolvedTocEntries ?? new Dictionary<string, int>(),
             Tagging = taggingContext,
         };
         ctx.Resources.Diagnostics = _diagnostics;
@@ -357,7 +357,7 @@ public class PdfDocumentSerializer
 
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin);
         ctx.PdfAEnabled = _document.Settings.PdfAEnabled;
-        ctx.TocEntries = resolvedTocEntries;
+        ctx.TocEntries = resolvedTocEntries ?? new Dictionary<string, int>();
         ctx.Tagging = taggingContext;
         ctx.Resources.Diagnostics = _diagnostics;
 
