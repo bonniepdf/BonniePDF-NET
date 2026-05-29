@@ -137,6 +137,8 @@ public class ParentTreeTests
         public void WriteObject(int id, IDictionary<string, string> dict, string streamContent = null)
             => Objects.Add(new EmittedObject(id, new Dictionary<string, string>(dict)));
 
+        public void WriteRawObject(int id, string body) { }
+
         public void WriteCompressedObject(int id, IDictionary<string, string> dict, string content) => WriteObject(id, dict, content);
         public void WriteBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) => WriteObject(id, dict);
         public void WriteCompressedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) => WriteObject(id, dict);

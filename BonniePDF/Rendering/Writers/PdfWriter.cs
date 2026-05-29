@@ -140,6 +140,21 @@ public class PdfWriter : IPdfWriter, IDisposable
     }
 
     /// <summary>
+    /// Writes a PDF object whose body is already a pre-formatted PDF
+    /// fragment (e.g. the global Resources dict composed by
+    /// <c>PdfResourceRegistry.WriteResources</c>).
+    /// </summary>
+    public void WriteRawObject(int id, string body)
+    {
+        _writer.Flush();
+        _offsets[id] = _stream.Position;
+
+        _writer.WriteLine($"{id} 0 obj");
+        _writer.WriteLine(body);
+        _writer.WriteLine("endobj");
+    }
+
+    /// <summary>
     /// Compresses the string content using ZLib (FlateDecode) and writes it as a binary object.
     /// This drastically reduces PDF file size.
     /// </summary>

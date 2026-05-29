@@ -174,6 +174,8 @@ public class StructureTreeWriterTests
             Objects.Add(new EmittedObject(id, new Dictionary<string, string>(dict)));
         }
 
+        public void WriteRawObject(int id, string body) { }
+
         public void WriteCompressedObject(int id, IDictionary<string, string> dict, string content) =>
             WriteObject(id, dict, content);
 

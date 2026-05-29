@@ -21,6 +21,12 @@ internal static class XmpMetadataWriter
         public const string Pdf = "http://ns.adobe.com/pdf/1.3/";
         public const string Xml = "http://www.w3.org/XML/1998/namespace";
         public const string AdobeMeta = "adobe:ns:meta/";
+        // PDF/A extension-schema namespaces (ISO 19005-1 §6.7.11,
+        // -2/-3 §6.6.2.3) — describe non-predefined XMP schemas so
+        // PDF/A validators accept properties from them.
+        public const string PdfaExtension = "http://www.aiim.org/pdfa/ns/extension/";
+        public const string PdfaSchema = "http://www.aiim.org/pdfa/ns/schema#";
+        public const string PdfaProperty = "http://www.aiim.org/pdfa/ns/property#";
     }
 
     private static class XmlPrefixes
@@ -31,6 +37,9 @@ internal static class XmpMetadataWriter
         public const string Pdf = "pdf";
         public const string Xml = "xml";
         public const string AdobeX = "x";
+        public const string PdfaExtension = "pdfaExtension";
+        public const string PdfaSchema = "pdfaSchema";
+        public const string PdfaProperty = "pdfaProperty";
     }
 
     private static class XmlElements
@@ -99,6 +108,7 @@ internal static class XmpMetadataWriter
 
             WriteMetadataElements(xw, metadata);
             WriteConformanceBlocks(xw, conformanceBlocks);
+            WriteExtensionSchemas(xw, conformanceBlocks);
 
             xw.WriteEndElement(); // rdf:Description
             xw.WriteEndElement(); // rdf:RDF
@@ -127,6 +137,59 @@ internal static class XmpMetadataWriter
                 xw.WriteElementString(block.Prefix, element.Key, block.NamespaceUri, element.Value);
             }
         }
+    }
+
+    /// <summary>
+    /// Emits a <c>pdfaExtension:schemas</c> bag describing any
+    /// non-predefined XMP namespaces referenced by the conformance
+    /// blocks. Required by PDF/A-2/3 §6.6.2.3.1 for any namespace not
+    /// in the predefined set (dc, xmp, pdf, pdfaid, …). Skipped unless
+    /// at least one block actually carries a PDF/A claim — without
+    /// PDF/A there's no validator that checks this rule and the bag
+    /// would be dead weight.
+    /// </summary>
+    private static void WriteExtensionSchemas(XmlWriter xw, IReadOnlyList<XmpConformanceBlock> blocks)
+    {
+        if (blocks == null) return;
+        bool hasPdfA = false;
+        var schemas = new List<XmpExtensionSchema>();
+        foreach (var block in blocks)
+        {
+            if (string.Equals(block.Prefix, "pdfaid", System.StringComparison.Ordinal)) hasPdfA = true;
+            if (block.ExtensionSchema != null) schemas.Add(block.ExtensionSchema);
+        }
+        if (!hasPdfA || schemas.Count == 0) return;
+
+        xw.WriteStartElement(XmlPrefixes.PdfaExtension, "schemas", XmpNamespaces.PdfaExtension);
+        xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Bag, XmpNamespaces.Rdf);
+        foreach (var schema in schemas)
+        {
+            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf);
+            xw.WriteAttributeString(XmlPrefixes.Rdf, "parseType", XmpNamespaces.Rdf, "Resource");
+
+            xw.WriteElementString(XmlPrefixes.PdfaSchema, "namespaceURI", XmpNamespaces.PdfaSchema, schema.NamespaceUri);
+            xw.WriteElementString(XmlPrefixes.PdfaSchema, "prefix", XmpNamespaces.PdfaSchema, schema.Prefix);
+            xw.WriteElementString(XmlPrefixes.PdfaSchema, "schema", XmpNamespaces.PdfaSchema, schema.SchemaName);
+
+            xw.WriteStartElement(XmlPrefixes.PdfaSchema, "property", XmpNamespaces.PdfaSchema);
+            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Seq, XmpNamespaces.Rdf);
+            foreach (var prop in schema.Properties)
+            {
+                xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf);
+                xw.WriteAttributeString(XmlPrefixes.Rdf, "parseType", XmpNamespaces.Rdf, "Resource");
+                xw.WriteElementString(XmlPrefixes.PdfaProperty, "name", XmpNamespaces.PdfaProperty, prop.Name);
+                xw.WriteElementString(XmlPrefixes.PdfaProperty, "valueType", XmpNamespaces.PdfaProperty, prop.ValueType);
+                xw.WriteElementString(XmlPrefixes.PdfaProperty, "category", XmpNamespaces.PdfaProperty, prop.Category);
+                xw.WriteElementString(XmlPrefixes.PdfaProperty, "description", XmpNamespaces.PdfaProperty, prop.Description);
+                xw.WriteEndElement(); // rdf:li
+            }
+            xw.WriteEndElement(); // rdf:Seq
+            xw.WriteEndElement(); // pdfaSchema:property
+
+            xw.WriteEndElement(); // rdf:li
+        }
+        xw.WriteEndElement(); // rdf:Bag
+        xw.WriteEndElement(); // pdfaExtension:schemas
     }
 
     private static void WriteMetadataElements(XmlWriter xw, DocumentMetadata metadata)

@@ -28,6 +28,8 @@ public class ImageWriterTests
             throw new NotImplementedException();
         }
 
+        public void WriteRawObject(int id, string body) { }
+
         public void WriteCompressedObject(int id, IDictionary<string, string> dict, string content)
         {
             throw new NotImplementedException();

@@ -53,6 +53,14 @@ public class PdfDocumentSerializer
         int pagesId = writer.GetNewId(); // Parent object (written at the end)
         int documentInfoId = infoId;
 
+        // Resources are written as a single indirect object that every
+        // page references explicitly (PDF/A-2b clause 6.2.2.2 / ISO
+        // 32000-1 §7.8.3 — relying on /Pages-inheritance is rejected by
+        // veraPDF profile 2b even though §7.7.3.4 allows it). Allocate
+        // the ID up-front so pages can reference it during the streaming
+        // page loop; the body is written after rendering completes.
+        int resourcesId = writer.GetNewId();
+
         // 2. Initialize Shared Context
         PdfSize orientedPageSize = _document.Settings.GetOrientedPageSize();
 
@@ -138,7 +146,13 @@ public class PdfDocumentSerializer
                 ["/Type"] = "/Page",
                 ["/Parent"] = $"{pagesId} 0 R", // Refers to the parent we write later
                 ["/MediaBox"] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
-                ["/Contents"] = $"{contentId} 0 R"
+                ["/Contents"] = $"{contentId} 0 R",
+                // PDF/A-2b clause 6.2.2.2 / ISO 32000-1 §7.8.3: every
+                // page whose content stream references external objects
+                // (fonts, images, XObjects) must have an explicitly
+                // associated Resources dict. Inheritance from /Pages is
+                // valid per §7.7.3.4 but veraPDF profile 2b rejects it.
+                ["/Resources"] = $"{resourcesId} 0 R"
             };
 
             // Tagged PDF: each page gets /StructParents equal to its
@@ -231,15 +245,21 @@ public class PdfDocumentSerializer
             globalResources = MergeDicts(globalResources, extGStateRes);
         }
 
-        // 5. Write Parent Pages Object
+        // 5. Write the global Resources object that every page references.
+        // Written as an indirect object so individual pages can satisfy
+        // PDF/A-2b clause 6.2.2.2 (see page-dict comment above) without
+        // duplicating the resources dict per page.
+        writer.WriteRawObject(resourcesId, globalResources);
+
+        // 6. Write Parent Pages Object. /Resources is intentionally
+        // omitted — the per-page indirect references are authoritative.
         string kids = string.Join(' ', pageIds.Select(id => $"{id} 0 R"));
         writer.WriteObject(pagesId, new Dictionary<string, string>
 (StringComparer.OrdinalIgnoreCase)
         {
             ["/Type"] = "/Pages",
             ["/Kids"] = $"[ {kids} ]",
-            ["/Count"] = pageIds.Count.ToString(),
-            ["/Resources"] = globalResources
+            ["/Count"] = pageIds.Count.ToString()
         });
 
         // 6. Write Metadata & Close
@@ -325,6 +345,8 @@ public class PdfDocumentSerializer
         int infoId = writer.GetNewId();
         int pagesId = writer.GetNewId(); // Parent object (written at the end)
         int documentInfoId = infoId;
+        // See sync path for the PDF/A-2b clause 6.2.2.2 rationale.
+        int resourcesId = writer.GetNewId();
 
         // 2. Initialize Shared Context
         PdfSize orientedPageSize = _document.Settings.GetOrientedPageSize();
@@ -406,7 +428,13 @@ public class PdfDocumentSerializer
                 ["/Type"] = "/Page",
                 ["/Parent"] = $"{pagesId} 0 R", // Refers to the parent we write later
                 ["/MediaBox"] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
-                ["/Contents"] = $"{contentId} 0 R"
+                ["/Contents"] = $"{contentId} 0 R",
+                // PDF/A-2b clause 6.2.2.2 / ISO 32000-1 §7.8.3: every
+                // page whose content stream references external objects
+                // (fonts, images, XObjects) must have an explicitly
+                // associated Resources dict. Inheritance from /Pages is
+                // valid per §7.7.3.4 but veraPDF profile 2b rejects it.
+                ["/Resources"] = $"{resourcesId} 0 R"
             };
 
             // Tagged PDF: /StructParents keyed by 0-based page index.
@@ -483,15 +511,17 @@ public class PdfDocumentSerializer
             globalResources = MergeDicts(globalResources, extGStateRes);
         }
 
-        // 5. Write Parent Pages Object
+        // 5. Write the global Resources object (see sync path for rationale).
+        await writer.WriteRawObjectAsync(resourcesId, globalResources, cancellationToken).ConfigureAwait(false);
+
+        // 6. Write Parent Pages Object — /Resources omitted; pages own it.
         string kids = string.Join(' ', pageIds.Select(id => $"{id} 0 R"));
         await writer.WriteObjectAsync(pagesId, new Dictionary<string, string>
 (StringComparer.OrdinalIgnoreCase)
         {
             ["/Type"] = "/Pages",
             ["/Kids"] = $"[ {kids} ]",
-            ["/Count"] = pageIds.Count.ToString(),
-            ["/Resources"] = globalResources
+            ["/Count"] = pageIds.Count.ToString()
         }, null, cancellationToken).ConfigureAwait(false);
 
         // 6. Write Metadata & Close

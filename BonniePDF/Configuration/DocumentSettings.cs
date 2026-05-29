@@ -127,21 +127,47 @@ public class DocumentSettings
     public PdfVersion Version { get; set; } = PdfVersion.Pdf14;
 
     /// <summary>
-    /// Gets or sets whether PDF/A-1b archival mode is enabled.
-    /// Requires <c>Version == Pdf17</c>. Cannot be used with encryption.
-    /// <para/>
-    /// <b>Honest-claim behaviour:</b> setting this to <c>true</c>
-    /// is a request, not a guarantee. The serializer suppresses the
-    /// <c>pdfaid:part</c> XMP block and <c>/OutputIntents</c> entry
+    /// Gets or sets the PDF/A archival conformance level. Default
+    /// <see cref="PdfAConformance.None"/> — the document is a normal PDF.
+    ///
+    /// When set to any non-<see cref="PdfAConformance.None"/> value, the
+    /// serializer auto-upgrades <see cref="Version"/> to PDF 1.7 (PDF/A
+    /// emission requires PDF 1.7), embeds the sRGB ICC profile,
+    /// emits the matching <c>/OutputIntents</c> entry, and writes a
+    /// <c>pdfaid:part</c> / <c>pdfaid:conformance</c> XMP block.
+    ///
+    /// "a" levels (<see cref="PdfAConformance.PdfA1a"/>,
+    /// <see cref="PdfAConformance.PdfA2a"/>,
+    /// <see cref="PdfAConformance.PdfA3a"/>) require
+    /// <see cref="Accessibility"/> = <see cref="AccessibilityMode.PdfUa1"/>;
+    /// the serializer throws <c>PdfAConformanceException</c> otherwise.
+    ///
+    /// <b>Honest-claim behaviour:</b> setting this to a non-None
+    /// value is a request, not a guarantee. The serializer suppresses
+    /// the <c>pdfaid</c> XMP block and <c>/OutputIntents</c> entry
     /// whenever the document references any of the standard 14 fonts
     /// (Helvetica, Times-*, Courier-*, Symbol, ZapfDingbats), because
-    /// PDF/A-1b §6.3.4 requires every font to be embedded and BonniePDF
+    /// PDF/A §6.3.4 requires every font to be embedded and BonniePDF
     /// does not bundle subset versions of those faces. To actually
     /// produce a PDF/A-conformant file, register a real TTF via
     /// <c>TtfFont.FromFile()</c> / <c>FontMetrics.RegisterFontAlias()</c>
-    /// and use that for every text element.
+    /// (or rely on the bundled Liberation faces) and use that for every
+    /// text element.
     /// </summary>
-    public bool PdfAEnabled { get; set; }
+    public PdfAConformance Conformance { get; set; } = PdfAConformance.None;
+
+    /// <summary>
+    /// Legacy boolean PDF/A switch. Maps onto <see cref="Conformance"/>:
+    /// reading returns <c>true</c> whenever any PDF/A level is selected;
+    /// writing <c>true</c> selects <see cref="PdfAConformance.PdfA2b"/>
+    /// (the modern visual-reproducibility baseline) and writing
+    /// <c>false</c> selects <see cref="PdfAConformance.None"/>.
+    /// </summary>
+    public bool PdfAEnabled
+    {
+        get => Conformance != PdfAConformance.None;
+        set => Conformance = value ? PdfAConformance.PdfA2b : PdfAConformance.None;
+    }
 
     /// <summary>
     /// Gets or sets the accessibility / tagged-PDF conformance mode.

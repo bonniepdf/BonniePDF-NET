@@ -128,6 +128,21 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     }
 
     /// <summary>
+    /// Writes a PDF object whose body is already a pre-formatted PDF
+    /// fragment (e.g. the global Resources dict composed by
+    /// <c>PdfResourceRegistry.WriteResources</c>).
+    /// </summary>
+    public async Task WriteRawObjectAsync(int id, string body, CancellationToken cancellationToken = default)
+    {
+        await _writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+        _offsets[id] = _stream.Position;
+
+        await _writer.WriteLineAsync($"{id} 0 obj").ConfigureAwait(false);
+        await _writer.WriteLineAsync(body).ConfigureAwait(false);
+        await _writer.WriteLineAsync("endobj").ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Compresses the string content using ZLib (FlateDecode) and writes it as a binary object.
     /// This drastically reduces PDF file size.
     /// </summary>

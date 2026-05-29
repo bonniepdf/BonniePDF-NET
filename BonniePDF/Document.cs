@@ -390,18 +390,25 @@ public class Document : IDisposable
                 "AES-256 encryption requires PdfVersion.Pdf17. Set Settings.Version = PdfVersion.Pdf17.");
         }
 
-        // PDF/A requires PDF 1.7
-        if (Settings.PdfAEnabled && Settings.Version != PdfVersion.Pdf17)
+        // PDF/A requires PDF 1.7. Silently upgrade rather than throw —
+        // the caller asked for archival output, so honour that intent.
+        if (Settings.Conformance != PdfAConformance.None && Settings.Version != PdfVersion.Pdf17)
         {
-            throw new InvalidOperationException(
-                "PDF/A-1b mode requires PdfVersion.Pdf17. Set Settings.Version = PdfVersion.Pdf17.");
+            Settings.Version = PdfVersion.Pdf17;
         }
 
         // PDF/A cannot be combined with encryption
-        if (Settings.PdfAEnabled && Settings.IsEncrypted)
+        if (Settings.Conformance != PdfAConformance.None && Settings.IsEncrypted)
         {
             throw new InvalidOperationException(
-                "PDF/A-1b mode cannot be combined with encryption. Disable encryption or PDF/A.");
+                "PDF/A mode cannot be combined with encryption. Disable encryption or PDF/A.");
+        }
+
+        // "a" levels require tagged output (PDF/UA-1).
+        if (RequiresTagging(Settings.Conformance) && Settings.Accessibility != AccessibilityMode.PdfUa1)
+        {
+            throw new InvalidOperationException(
+                $"{Settings.Conformance} requires tagged output. Set Settings.Accessibility = AccessibilityMode.PdfUa1.");
         }
 
         // Bookmarks require PDF 1.7
@@ -411,6 +418,15 @@ public class Document : IDisposable
                 "Bookmarks require PdfVersion.Pdf17. Set Settings.Version = PdfVersion.Pdf17.");
         }
     }
+
+    /// <summary>
+    /// True for PDF/A "a" (accessible) conformance levels, which mandate
+    /// tagged structure on top of the underlying "b" requirements.
+    /// </summary>
+    private static bool RequiresTagging(PdfAConformance conformance) => conformance
+        is PdfAConformance.PdfA1a
+        or PdfAConformance.PdfA2a
+        or PdfAConformance.PdfA3a;
 
 
     /// <summary>

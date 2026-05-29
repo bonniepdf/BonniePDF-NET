@@ -30,6 +30,12 @@ public interface IAsyncPdfWriter : IAsyncDisposable
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Writes a PDF object whose body is already a pre-formatted PDF
+    /// fragment. See <see cref="IPdfWriter.WriteRawObject"/>.
+    /// </summary>
+    Task WriteRawObjectAsync(int id, string body, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Compresses and writes a PDF object
     /// </summary>
     Task WriteCompressedObjectAsync(int id, IDictionary<string, string> dict, string content,

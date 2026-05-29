@@ -172,7 +172,8 @@ public class MetadataWriter
     private static IReadOnlyList<XmpConformanceBlock> BuildConformanceBlocks(DocumentSettings settings)
     {
         var blocks = new List<XmpConformanceBlock>(2);
-        if (settings.PdfAEnabled) blocks.Add(XmpConformanceBlock.PdfA1B());
+        var pdfA = XmpConformanceBlock.ForPdfA(settings.Conformance);
+        if (pdfA != null) blocks.Add(pdfA);
         if (settings.Accessibility == AccessibilityMode.PdfUa1) blocks.Add(XmpConformanceBlock.PdfUa1());
         return blocks;
     }

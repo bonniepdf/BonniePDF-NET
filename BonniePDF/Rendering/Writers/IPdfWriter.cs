@@ -26,6 +26,16 @@ public interface IPdfWriter
     void WriteObject(int id, IDictionary<string, string> dict, string streamContent = null);
 
     /// <summary>
+    /// Writes a PDF object whose body is already a pre-formatted PDF
+    /// fragment (e.g. <c>&lt;&lt; /Font &lt;&lt; … &gt;&gt; &gt;&gt;</c>).
+    /// Used for the global Resources dictionary, which is composed as a
+    /// string by <c>PdfResourceRegistry</c>. The body is written verbatim
+    /// between <c>id 0 obj</c> and <c>endobj</c> with no encryption or
+    /// compression.
+    /// </summary>
+    void WriteRawObject(int id, string body);
+
+    /// <summary>
     /// Compresses and writes a PDF object
     /// </summary>
     void WriteCompressedObject(int id, IDictionary<string, string> dict, string content);

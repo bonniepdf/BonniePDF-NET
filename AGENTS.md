@@ -6,7 +6,7 @@ For the cross-project picture (the TypeScript port, the website, the licence mod
 
 ## Scope
 
-- **In scope:** generating PDFs from C# code — text, tables, lists, images, charts (bar / grouped bar / line / area / pie / lollipop / dot plot), watermarks, headers/footers, AES-256 encryption, PDF/A-1b archival output.
+- **In scope:** generating PDFs from C# code — text, tables, lists, images, charts (bar / grouped bar / line / area / pie / lollipop / dot plot), watermarks, headers/footers, AES-256 encryption, PDF/A archival output (A-1b through A-3a), PDF/UA-1 tagged output.
 - **Out of scope:** HTML-to-PDF, reading or parsing existing PDFs, form filling. Don't add them.
 
 ## API conventions
@@ -18,7 +18,10 @@ For the cross-project picture (the TypeScript port, the website, the licence mod
 
 ## Gotchas
 
-- **PDF/A-1b is opt-in** via `doc.Settings.PdfAEnabled = true`. When enabled, sRGB ICC profile + XMP metadata + OutputIntent are emitted automatically — do not also write them manually.
+- **PDF/A is opt-in via `doc.Settings.Conformance`** (enum `PdfAConformance`: `None`, `PdfA1b`, `PdfA1a`, `PdfA2b`, `PdfA2a`, `PdfA3b`, `PdfA3a`). The legacy `PdfAEnabled = true` boolean still works and maps to `PdfA2b` (the modern visual-reproducibility baseline). When any non-None value is set, sRGB ICC profile + XMP metadata + OutputIntent are emitted automatically — do not also write them manually. The serializer auto-upgrades `Version` to `Pdf17` if needed.
+- **"a" levels require tagged output.** `PdfA1a` / `PdfA2a` / `PdfA3a` throw at save time unless `Settings.Accessibility = AccessibilityMode.PdfUa1` is also set. The "b" levels have no such requirement.
+- **PDF/A + PDF/UA emits an XMP extension schema.** When both are claimed, [`XmpMetadataWriter`](BonniePDF/Metadata/XmpMetadataWriter.cs) appends a `pdfaExtension:schemas` bag describing the `pdfuaid` namespace (ISO 19005-2/3 §6.6.2.3). Don't strip it — veraPDF profile `2a` and above will fail without it.
+- **Resources live on the page, not the parent.** Each `/Page` carries its own `/Resources` indirect reference (PDF/A-2b clause 6.2.2.2). The `/Pages` parent does not. Don't "fix" this back to inheritance.
 - **`Color.Slate800` etc. are package-supplied tokens**, not arbitrary CSS strings. Don't introduce hex-string colour parameters on public APIs without checking how it interacts with the existing palette.
 - **Document mutation after `Save()` is unsupported.** The serializer assumes a frozen document tree. If a feature needs replay, it needs explicit support.
 

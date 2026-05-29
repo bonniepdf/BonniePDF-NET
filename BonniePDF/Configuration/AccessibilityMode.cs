@@ -11,6 +11,16 @@ namespace BonniePDF.Configuration;
 /// catalog-level <c>/MarkInfo</c> and <c>/Lang</c> entries — enough for
 /// screen readers and assistive tech to interpret the document.
 ///
+/// <para>
+/// <b>Why no <c>PdfUa2</c> here yet:</b> PDF/UA-2 (ISO 14289-2:2024) is
+/// bound to PDF 2.0 output. BonniePDF currently emits PDF 1.4 and
+/// PDF 1.7 only — there is no PDF 2.0 writer. Adding a <c>PdfUa2</c>
+/// value before that writer lands would create a "lying enum" — the
+/// same kind of claim-without-substance the this feature honest-claim guard
+/// exists to prevent. The value lands when the PDF 2.0 writer does.
+/// Roadmap, not launch — do not add it speculatively.
+/// </para>
+///
 /// See <c>the specification</c> for the
 /// full design and <c>this feature-implementation-plan.md</c> for the staged
 /// implementation.
@@ -18,9 +28,7 @@ namespace BonniePDF.Configuration;
 public enum AccessibilityMode
 {
     /// <summary>
-    /// No tagging. Default. Produces a visually-correct but
-    /// structurally-untagged PDF — same output as BonniePDF has always
-    /// produced.
+    /// No tagging. Produces a visually-correct but structurally-untagged PDF.
     /// </summary>
     None = 0,
 
