@@ -217,34 +217,6 @@ public class PdfDocumentSerializer
             _document.Settings.PdfAEnabled = false;
         }
 
-        // Write ExtGState for watermark opacity if configured
-        if (_document.Settings.Watermark != null)
-        {
-            int gsId = writer.GetNewId();
-            // PDF/A-1B forbids CA/ca < 1.0 — use full opacity and blend the color instead
-            float opacity = _document.Settings.PdfAEnabled ? 1.0f : _document.Settings.Watermark.Opacity;
-            writer.WriteObject(gsId, new Dictionary<string, string>
-(StringComparer.OrdinalIgnoreCase)
-            {
-                ["/Type"] = "/ExtGState",
-                ["/ca"] = opacity.ToString("F4"),
-                ["/CA"] = opacity.ToString("F4")
-            });
-            string extGStateRes = $"<< /ExtGState << /GS_WM {gsId} 0 R >> >>";
-
-            // Inline CombineResources equivalent
-            string MergeDicts(string d1, string d2)
-            {
-                if (string.IsNullOrEmpty(d2)) return d1;
-                string t2 = d2.StartsWith("<< ", StringComparison.OrdinalIgnoreCase) ? d2.Substring(3) : d2;
-                t2 = t2.EndsWith(" >>", StringComparison.OrdinalIgnoreCase) ? t2.Substring(0, t2.Length - 3) : t2;
-                string t1 = d1.EndsWith(" >>", StringComparison.OrdinalIgnoreCase) ? d1.Substring(0, d1.Length - 3) : d1;
-                return t1 + ' ' + t2 + " >>";
-            }
-
-            globalResources = MergeDicts(globalResources, extGStateRes);
-        }
-
         // 5. Write the global Resources object that every page references.
         // Written as an indirect object so individual pages can satisfy
         // PDF/A-2b clause 6.2.2.2 (see page-dict comment above) without
@@ -483,32 +455,6 @@ public class PdfDocumentSerializer
         if (_document.Settings.PdfAEnabled && ctx.Resources.HasNonEmbeddedStandardFont())
         {
             _document.Settings.PdfAEnabled = false;
-        }
-
-        // Write ExtGState for watermark opacity if configured
-        if (_document.Settings.Watermark != null)
-        {
-            int gsId = writer.GetNewId();
-            float opacity = _document.Settings.PdfAEnabled ? 1.0f : _document.Settings.Watermark.Opacity;
-            await writer.WriteObjectAsync(gsId, new Dictionary<string, string>
-(StringComparer.OrdinalIgnoreCase)
-            {
-                ["/Type"] = "/ExtGState",
-                ["/ca"] = opacity.ToString("F4"),
-                ["/CA"] = opacity.ToString("F4")
-            }, null, cancellationToken).ConfigureAwait(false);
-            string extGStateRes = $"<< /ExtGState << /GS_WM {gsId} 0 R >> >>";
-
-            static string MergeDicts(string d1, string d2)
-            {
-                if (string.IsNullOrEmpty(d2)) return d1;
-                string t2 = d2.StartsWith("<< ", StringComparison.OrdinalIgnoreCase) ? d2.Substring(3) : d2;
-                t2 = t2.EndsWith(" >>", StringComparison.OrdinalIgnoreCase) ? t2.Substring(0, t2.Length - 3) : t2;
-                string t1 = d1.EndsWith(" >>", StringComparison.OrdinalIgnoreCase) ? d1.Substring(0, d1.Length - 3) : d1;
-                return t1 + ' ' + t2 + " >>";
-            }
-
-            globalResources = MergeDicts(globalResources, extGStateRes);
         }
 
         // 5. Write the global Resources object (see sync path for rationale).

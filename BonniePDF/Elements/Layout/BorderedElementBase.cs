@@ -1,6 +1,5 @@
 using BonniePDF.Core;
 using BonniePDF.Rendering;
-using BonniePDF.Rendering.Pdf;
 
 namespace BonniePDF.Elements.Layout;
 
@@ -36,7 +35,6 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
     /// </summary>
     protected void DrawBackground(RenderContext ctx, float x, float y, float width, float height, Color color)
     {
-        float pdfY = ctx.PageSize.Height - y - height;
         // Decorative fill — tag as an artifact so tagged (PDF/UA) output does not
         // leave it as untagged content. No-op wrapper for non-tagged documents.
         ctx.Canvas.BeginArtifact();
@@ -44,14 +42,11 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
         {
             if (CornerRadius > 0)
             {
-                PdfDrawing.FillRoundedRect(ctx.CurrentStream, x, pdfY, width, height, CornerRadius, color);
+                ctx.Canvas.FillRoundedRect(x, y, width, height, CornerRadius, color);
             }
             else
             {
-                PdfOperators.SaveState(ctx.CurrentStream);
-                PdfOperators.SetFillColor(ctx.CurrentStream, color);
-                PdfOperators.RectangleFill(ctx.CurrentStream, x, pdfY, width, height);
-                PdfOperators.RestoreState(ctx.CurrentStream);
+                ctx.Canvas.FillRect(x, y, width, height, color);
             }
         }
         finally
@@ -70,8 +65,6 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
     {
         if (!border.HasAnyBorder) return;
 
-        float pdfY = ctx.PageSize.Height - y - height;
-
         // Decorative strokes — tag as an artifact (no-op for non-tagged output).
         ctx.Canvas.BeginArtifact();
         try
@@ -81,29 +74,25 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
             {
                 float strokeWidth = border.Top > 0 ? border.Top : border.Left > 0 ? border.Left : border.Bottom > 0 ? border.Bottom : border.Right;
                 Color strokeColor = borderColors.Top ?? borderColors.Left ?? borderColors.Bottom ?? borderColors.Right ?? Color.Black;
-                PdfDrawing.StrokeRoundedRect(ctx.CurrentStream, x, pdfY, width, height, CornerRadius, strokeColor, strokeWidth);
+                ctx.Canvas.StrokeRoundedRect(x, y, width, height, CornerRadius, strokeColor, strokeWidth);
                 return;
             }
 
-            PdfOperators.SaveState(ctx.CurrentStream);
-
             // Draw left border
             if (border.Left > 0 && borderColors.Left.HasValue)
-                DrawLine(ctx, x, pdfY, x, pdfY + height, border.Left, borderColors.Left.Value);
+                DrawLine(ctx, x, y, x, y + height, border.Left, borderColors.Left.Value);
 
             // Draw right border
             if (border.Right > 0 && borderColors.Right.HasValue)
-                DrawLine(ctx, x + width, pdfY, x + width, pdfY + height, border.Right, borderColors.Right.Value);
+                DrawLine(ctx, x + width, y, x + width, y + height, border.Right, borderColors.Right.Value);
 
             // Draw top border
             if (border.Top > 0 && borderColors.Top.HasValue)
-                DrawLine(ctx, x, pdfY + height, x + width, pdfY + height, border.Top, borderColors.Top.Value);
+                DrawLine(ctx, x, y, x + width, y, border.Top, borderColors.Top.Value);
 
             // Draw bottom border
             if (border.Bottom > 0 && borderColors.Bottom.HasValue)
-                DrawLine(ctx, x, pdfY, x + width, pdfY, border.Bottom, borderColors.Bottom.Value);
-
-            PdfOperators.RestoreState(ctx.CurrentStream);
+                DrawLine(ctx, x, y + height, x + width, y + height, border.Bottom, borderColors.Bottom.Value);
         }
         finally
         {
@@ -116,9 +105,7 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
     /// </summary>
     protected static void DrawLine(RenderContext ctx, float x1, float y1, float x2, float y2, float width, Color color)
     {
-        PdfOperators.SetStrokeColor(ctx.CurrentStream, color);
-        PdfOperators.SetLineWidth(ctx.CurrentStream, width);
-        PdfOperators.StrokeLine(ctx.CurrentStream, x1, y1, x2, y2);
+        ctx.Canvas.DrawLine(x1, y1, x2, y2, color, width);
     }
 
     /// <summary>

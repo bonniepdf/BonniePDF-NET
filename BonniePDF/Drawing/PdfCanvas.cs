@@ -22,6 +22,7 @@ public class PdfCanvas : ICanvas
     private readonly Func<string, string> _fontResolver;
     private readonly Func<ImageInfo, string> _imageResolver;
     private readonly Action<string, string> _glyphTracker;
+    private readonly Func<float, string> _alphaGraphicsStateResolver;
     private readonly StringBuilder _stream;
     private readonly float _xOffset;
     private readonly float _yOffset;
@@ -54,7 +55,8 @@ public class PdfCanvas : ICanvas
         Func<string, string> fontResolver = null,
         Func<ImageInfo, string> imageResolver = null,
         Func<string, TtfFont> embeddedFontResolver = null,
-        Action<string, string> glyphTracker = null)
+        Action<string, string> glyphTracker = null,
+        Func<float, string> alphaGraphicsStateResolver = null)
     {
         _stream = stream;
         Height = pageHeight;
@@ -66,6 +68,7 @@ public class PdfCanvas : ICanvas
         _imageResolver = imageResolver ?? (_ => throw new InvalidOperationException("Image resolver not provided"));
         _embeddedFontResolver = embeddedFontResolver ?? (_ => null);
         _glyphTracker = glyphTracker ?? ((_, _) => { });
+        _alphaGraphicsStateResolver = alphaGraphicsStateResolver ?? (alpha => $"/GS_ALPHA_{(int)Math.Round(alpha * 10000)}");
     }
 
     /// <summary>
@@ -109,7 +112,7 @@ public class PdfCanvas : ICanvas
         float pdfX = x + _xOffset;
         float pdfY = Height - (y + _yOffset + height);
 
-        PdfDrawing.FillRect(_stream, pdfX, pdfY, width, height, color);
+        DrawWithColorAlpha(color, () => PdfDrawing.FillRect(_stream, pdfX, pdfY, width, height, color));
     }
 
     /// <summary>
@@ -122,7 +125,7 @@ public class PdfCanvas : ICanvas
         float pdfX = x + _xOffset;
         float pdfY = Height - (y + _yOffset + height);
 
-        PdfDrawing.StrokeRect(_stream, pdfX, pdfY, width, height, color, strokeWidth);
+        DrawWithColorAlpha(color, () => PdfDrawing.StrokeRect(_stream, pdfX, pdfY, width, height, color, strokeWidth));
     }
 
     /// <summary>
@@ -133,7 +136,7 @@ public class PdfCanvas : ICanvas
     {
         float pdfX = x + _xOffset;
         float pdfY = Height - (y + _yOffset + height);
-        PdfDrawing.FillRoundedRect(_stream, pdfX, pdfY, width, height, radius, color);
+        DrawWithColorAlpha(color, () => PdfDrawing.FillRoundedRect(_stream, pdfX, pdfY, width, height, radius, color));
     }
 
     /// <summary>
@@ -145,7 +148,8 @@ public class PdfCanvas : ICanvas
     {
         float pdfX = x + _xOffset;
         float pdfY = Height - (y + _yOffset + height);
-        PdfDrawing.StrokeRoundedRect(_stream, pdfX, pdfY, width, height, radius, color, strokeWidth);
+        DrawWithColorAlpha(color, () =>
+            PdfDrawing.StrokeRoundedRect(_stream, pdfX, pdfY, width, height, radius, color, strokeWidth));
     }
 
     /// <summary>
@@ -160,9 +164,12 @@ public class PdfCanvas : ICanvas
         float pdfY1 = Height - (y1 + _yOffset);
         float pdfY2 = Height - (y2 + _yOffset);
 
-        PdfOperators.SetStrokeColor(_stream, color);
-        PdfOperators.SetLineWidth(_stream, lineWidth);
-        PdfOperators.StrokeLine(_stream, pdfX1, pdfY1, pdfX2, pdfY2);
+        DrawWithColorAlpha(color, () =>
+        {
+            PdfOperators.SetStrokeColor(_stream, color);
+            PdfOperators.SetLineWidth(_stream, lineWidth);
+            PdfOperators.StrokeLine(_stream, pdfX1, pdfY1, pdfX2, pdfY2);
+        });
     }
 
     /// <summary>
@@ -175,7 +182,7 @@ public class PdfCanvas : ICanvas
         float pdfCx = cx + _xOffset;
         float pdfCy = Height - (cy + _yOffset);
 
-        PdfDrawing.FillCircle(_stream, pdfCx, pdfCy, radius, color);
+        DrawWithColorAlpha(color, () => PdfDrawing.FillCircle(_stream, pdfCx, pdfCy, radius, color));
     }
 
     /// <summary>
@@ -195,7 +202,7 @@ public class PdfCanvas : ICanvas
             pdfPoints.Add(new Point(pdfX, pdfY));
         }
 
-        PdfDrawing.FillPath(_stream, pdfPoints, color);
+        DrawWithColorAlpha(color, () => PdfDrawing.FillPath(_stream, pdfPoints, color));
     }
 
     /// <summary>
@@ -210,6 +217,7 @@ public class PdfCanvas : ICanvas
         // Apply Y offset and approximation: y (top) + size (height) roughly equals baseline.
         float pdfY = Height - (y + _yOffset + fontSize);
 
+        BeginColorAlpha(color);
         PdfOperators.BeginText(_stream);
 
         // Set font using the resolver — this MUST happen before glyph tracking
@@ -243,6 +251,7 @@ public class PdfCanvas : ICanvas
             PdfOperators.ShowText(_stream, $"({PdfSyntax.Escape(text)})");
 
         PdfOperators.EndText(_stream);
+        EndColorAlpha(color);
     }
 
     /// <summary>
@@ -259,6 +268,7 @@ public class PdfCanvas : ICanvas
         PdfOperators.SaveState(_stream);
         PdfOperators.Translate(_stream, pdfX, pdfY);
         PdfOperators.Rotate(_stream, angleDegrees);
+        ApplyColorAlpha(color);
 
         // Now draw text at origin (0,0) since we've already translated
         PdfOperators.BeginText(_stream);
@@ -306,6 +316,7 @@ public class PdfCanvas : ICanvas
         float pdfY = Height - (y + _yOffset + fontSize);
         float pdfX = x + _xOffset;
 
+        BeginColorAlpha(color);
         PdfOperators.BeginText(_stream);
 
         string fontResourceName = _fontResolver(fontFamily);
@@ -324,6 +335,7 @@ public class PdfCanvas : ICanvas
         // Reset word spacing to 0 so it doesn't leak to subsequent text
         PdfOperators.SetWordSpacing(_stream, 0);
         PdfOperators.EndText(_stream);
+        EndColorAlpha(color);
     }
 
     /// <summary>
@@ -487,5 +499,31 @@ public class PdfCanvas : ICanvas
             var s when s.Contains("courier") || s.Contains("mono") => StandardFonts.Courier,
             _ => StandardFonts.Helvetica
         };
+    }
+
+    private void DrawWithColorAlpha(Color color, Action draw)
+    {
+        BeginColorAlpha(color);
+        draw();
+        EndColorAlpha(color);
+    }
+
+    private void BeginColorAlpha(Color color)
+    {
+        if (color.ScA >= 1f) return;
+        PdfOperators.SaveState(_stream);
+        ApplyColorAlpha(color);
+    }
+
+    private void EndColorAlpha(Color color)
+    {
+        if (color.ScA >= 1f) return;
+        PdfOperators.RestoreState(_stream);
+    }
+
+    private void ApplyColorAlpha(Color color)
+    {
+        if (color.ScA >= 1f) return;
+        PdfOperators.SetGraphicsState(_stream, _alphaGraphicsStateResolver(color.ScA));
     }
 }

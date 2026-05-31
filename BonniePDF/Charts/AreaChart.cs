@@ -47,8 +47,16 @@ public class AreaChart : CartesianChartBase
         IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
-        float fillOpacity = series.Style?.FillOpacity > 0 ? series.Style.FillOpacity : DefaultFillOpacity;
-        float lineWidth = series.Style?.LineWidth > 0 ? series.Style.LineWidth : DefaultLineWidth;
+        float fillOpacity = series.Style?.FillOpacity > 0 && series.Style.FillOpacity != DefaultFillOpacity
+            ? series.Style.FillOpacity
+            : data.Series.Count == 1
+                ? FillOpacity
+                : DefaultFillOpacity;
+        float lineWidth = series.Style?.LineWidth > 0 && series.Style.LineWidth != DefaultLineWidth
+            ? series.Style.LineWidth
+            : data.Series.Count == 1
+                ? LineWidth
+                : DefaultLineWidth;
 
         DrawAreaFill(canvas, coordinates, baselineY, series.Color, fillOpacity);
         DrawConnectingLine(canvas, coordinates, series.Color, lineWidth);
@@ -60,103 +68,26 @@ public class AreaChart : CartesianChartBase
     protected override float GetLabelVerticalOffset(ChartSeries series) => 7;
 
     /// <summary>
-    /// Draws the area fill using thin rectangles spanning from the axis baseline to the line.
-    /// In vertical mode: thin vertical rectangles from baselineY up to the line.
-    /// In horizontal mode: thin horizontal rectangles from LeftPadding right to the line.
+    /// Draws the area fill as a single closed polygon spanning from the axis baseline to the line.
     /// </summary>
     private void DrawAreaFill(ICanvas canvas, IList<Point> coordinates, float baselineY, Color color, float opacity)
     {
         if (coordinates.Count < 2) return;
 
         Color fillColor = color.WithAlpha(opacity);
-        const float stepSize = 2f;
+        Point first = coordinates[0];
+        Point last = coordinates[coordinates.Count - 1];
 
         if (Orientation == ChartOrientation.Horizontal)
         {
-            float minY = coordinates[0].Y;
-            float maxY = coordinates[coordinates.Count - 1].Y;
-
-            for (float y = minY; y < maxY; y += stepSize)
-            {
-                float x = InterpolateX(coordinates, y);
-                float rectWidth = x - LeftPadding;
-                canvas.FillRect(LeftPadding, y, rectWidth, stepSize, fillColor);
-            }
-
-            float lastY = maxY - (maxY - minY) % stepSize;
-            if (lastY < maxY)
-            {
-                float x = InterpolateX(coordinates, maxY);
-                canvas.FillRect(LeftPadding, lastY, x - LeftPadding, maxY - lastY, fillColor);
-            }
+            List<Point> path = [new(LeftPadding, first.Y), .. coordinates, new(LeftPadding, last.Y)];
+            canvas.FillPath(path, fillColor);
         }
         else
         {
-            float minX = coordinates[0].X;
-            float maxX = coordinates[coordinates.Count - 1].X;
-
-            for (float x = minX; x < maxX; x += stepSize)
-            {
-                float y = InterpolateY(coordinates, x);
-                float rectHeight = baselineY - y;
-                canvas.FillRect(x, y, stepSize, rectHeight, fillColor);
-            }
-
-            float lastX = maxX - (maxX - minX) % stepSize;
-            if (lastX < maxX)
-            {
-                float y = InterpolateY(coordinates, maxX);
-                float rectHeight = baselineY - y;
-                canvas.FillRect(lastX, y, maxX - lastX, rectHeight, fillColor);
-            }
+            List<Point> path = [new(first.X, baselineY), .. coordinates, new(last.X, baselineY)];
+            canvas.FillPath(path, fillColor);
         }
-    }
-
-    /// <summary>
-    /// Interpolates the X value on the line connecting data points for a given Y position.
-    /// Used in horizontal mode to find how far right the line is at a given vertical position.
-    /// </summary>
-    private static float InterpolateX(IList<Point> coordinates, float y)
-    {
-        for (int i = 0; i < coordinates.Count - 1; i++)
-        {
-            var p1 = coordinates[i];
-            var p2 = coordinates[i + 1];
-
-            if (y >= p1.Y && y <= p2.Y)
-            {
-                float t = (p2.Y - p1.Y) == 0 ? 0 : (y - p1.Y) / (p2.Y - p1.Y);
-                return p1.X + t * (p2.X - p1.X);
-            }
-        }
-
-        if (y < coordinates[0].Y) return coordinates[0].X;
-        return coordinates[coordinates.Count - 1].X;
-    }
-
-    /// <summary>
-    /// Interpolates the y value for a given x position on the line connecting data points.
-    /// </summary>
-    private static float InterpolateY(IList<Point> coordinates, float x)
-    {
-        // Find the two data points that x lies between
-        for (int i = 0; i < coordinates.Count - 1; i++)
-        {
-            var p1 = coordinates[i];
-            var p2 = coordinates[i + 1];
-
-            if (x >= p1.X && x <= p2.X)
-            {
-                // Linear interpolation
-                float t = (x - p1.X) / (p2.X - p1.X);
-                return p1.Y + t * (p2.Y - p1.Y);
-            }
-        }
-
-        // If x is outside the range, return the closest point's y
-        if (x < coordinates[0].X)
-            return coordinates[0].Y;
-        return coordinates[coordinates.Count - 1].Y;
     }
 
     /// <summary>

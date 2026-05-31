@@ -147,6 +147,12 @@ public class Hyperlink : IElement, IRoleProvider
         List<string> lines = ComputeLines(contentWidth);
         float localY = ctx.CurrentY;
 
+        if (TextColor.ScA < 1f)
+        {
+            PdfOperators.SaveState(ctx.CurrentStream);
+            PdfOperators.SetGraphicsState(ctx.CurrentStream, ctx.RegisterAlphaGraphicsState(TextColor.ScA));
+        }
+
         PdfOperators.BeginText(ctx.CurrentStream);
         PdfOperators.SetFont(ctx.CurrentStream, fontResourceName, FontSize);
         PdfOperators.SetFillColor(ctx.CurrentStream, TextColor);
@@ -171,6 +177,8 @@ public class Hyperlink : IElement, IRoleProvider
         }
 
         PdfOperators.EndText(ctx.CurrentStream);
+        if (TextColor.ScA < 1f)
+            PdfOperators.RestoreState(ctx.CurrentStream);
 
         // Calculate total content height
         float contentHeight = lines.Count * LineHeight;

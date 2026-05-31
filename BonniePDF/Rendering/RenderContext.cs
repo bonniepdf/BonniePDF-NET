@@ -160,7 +160,7 @@ public class RenderContext
         else
         {
             var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
-                ResolveEmbeddedFont, TrackGlyphUsage);
+                ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState);
             if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
             Canvas = pdfCanvas;
         }
@@ -173,7 +173,8 @@ public class RenderContext
     {
         if (IsSvgMode) return new SvgCanvas(PageSize.Width, PageSize.Height, x, y, CurrentStream, false, ResolveEmbeddedFont);
 
-        var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource, ResolveEmbeddedFont, TrackGlyphUsage);
+        var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource,
+            ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState);
         if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
         return pdfCanvas;
     }
@@ -201,6 +202,11 @@ public class RenderContext
     /// to use in content stream operators.
     /// </summary>
     public string RegisterFont(string fontIdentifier) => Resources.RegisterFont(fontIdentifier);
+
+    /// <summary>
+    /// Registers a reusable PDF transparency graphics state for the given alpha value.
+    /// </summary>
+    public string RegisterAlphaGraphicsState(float alpha) => Resources.RegisterAlphaGraphicsState(alpha);
 
     /// <summary>
     /// Returns <c>true</c> if the given font identifier refers to an embedded TrueType font

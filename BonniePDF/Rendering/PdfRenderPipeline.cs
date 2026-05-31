@@ -420,7 +420,7 @@ public static class PdfRenderPipeline
         // The operators are prepended to the page stream so they render behind all content
         StringBuilder wmOps = new();
         PdfOperators.SaveState(wmOps);
-        PdfOperators.SetGraphicsState(wmOps, "/GS_WM");
+        PdfOperators.SetGraphicsState(wmOps, ctx.RegisterAlphaGraphicsState(wm.Opacity));
         PdfOperators.ConcatMatrix(wmOps, cos, sin, -sin, cos, cx, cy);
         PdfOperators.BeginText(wmOps);
         PdfOperators.SetFont(wmOps, fontResourceName, wm.FontSize);

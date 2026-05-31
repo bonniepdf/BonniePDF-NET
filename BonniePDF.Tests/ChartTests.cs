@@ -1,9 +1,11 @@
+using BonniePDF;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Images;
+using System.Text;
 using Xunit;
 
 namespace BonniePDF.Tests;
@@ -268,8 +270,23 @@ public class ChartTests
         chart.Draw(canvas, data);
 
         Assert.NotEmpty(canvas.Operations);
-        // Area chart uses FillRect (not FillPath) to draw the area fill
-        Assert.Contains(canvas.Operations, op => op.Contains("FillRect"));
+        // Area chart uses one closed path to avoid visible seams in vector output.
+        Assert.Contains(canvas.Operations, op => op.Contains("FillPath"));
+        Assert.DoesNotContain(canvas.Operations, op => op.Contains("FillRect"));
+    }
+
+    [Fact]
+    public void AreaChart_Pdf_RegistersAlphaGraphicsStateForFillOpacity()
+    {
+        using var doc = new Document();
+        var chart = new AreaChart { FillOpacity = 0.42f };
+
+        doc.Add(new ChartElement(chart, CreateSampleData()));
+
+        string pdf = Encoding.ASCII.GetString(doc.ToByteArray());
+        Assert.Contains("/ExtGState", pdf);
+        Assert.Contains("/ca 0.4200", pdf);
+        Assert.Contains("/CA 0.4200", pdf);
     }
 
     [Fact]
@@ -416,6 +433,23 @@ public class ChartTests
         Assert.Equal(255, color.R);
         Assert.Equal(87, color.G);
         Assert.Equal(51, color.B);
+    }
+
+    [Fact]
+    public void Color_FromHex_ParsesTrailingAlpha()
+    {
+        var color = Color.FromHex("#FF573380");
+
+        Assert.Equal(255, color.R);
+        Assert.Equal(87, color.G);
+        Assert.Equal(51, color.B);
+        Assert.Equal(128, color.A);
+
+        var shorthand = Color.FromHex("#F538");
+        Assert.Equal(255, shorthand.R);
+        Assert.Equal(85, shorthand.G);
+        Assert.Equal(51, shorthand.B);
+        Assert.Equal(136, shorthand.A);
     }
 
     [Fact]

@@ -26,6 +26,7 @@ public class PdfResourceRegistry
 
     private int _fontCounter;
     private int _imageCounter;
+    private int _graphicsStateCounter;
 
     /// <summary>
     /// Gets or sets whether PDF/A compliance is enabled.
@@ -79,6 +80,8 @@ public class PdfResourceRegistry
     /// Stores deferred form XObjects like Total Pages indicators.
     /// </summary>
     public IDictionary<string, DeferredXObjectInfo> DeferredXObjects { get; } = new ConcurrentDictionary<string, DeferredXObjectInfo>();
+
+    private readonly Dictionary<string, AlphaGraphicsStateInfo> _alphaGraphicsStates = new();
 
     private static readonly HashSet<string> StandardFontNames = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -409,6 +412,25 @@ public class PdfResourceRegistry
         return info.ResourceName;
     }
 
+    /// <summary>
+    /// Registers a reusable transparency graphics state and returns its PDF resource name.
+    /// </summary>
+    public string RegisterAlphaGraphicsState(float alpha)
+    {
+        float clamped = Math.Clamp(alpha, 0f, 1f);
+        float effectiveAlpha = PdfAEnabled ? 1f : clamped;
+        string key = effectiveAlpha.ToString("F4", System.Globalization.CultureInfo.InvariantCulture);
+
+        if (!_alphaGraphicsStates.TryGetValue(key, out AlphaGraphicsStateInfo info))
+        {
+            _graphicsStateCounter++;
+            info = new AlphaGraphicsStateInfo($"/GS_ALPHA_{_graphicsStateCounter}", effectiveAlpha);
+            _alphaGraphicsStates[key] = info;
+        }
+
+        return info.ResourceName;
+    }
+
     private static string MapToStandardFontName(string fontIdentifier)
     {
         string lower = fontIdentifier.ToLowerInvariant();
@@ -575,7 +597,24 @@ public class PdfResourceRegistry
 
         string imageResources = xobjRefs.Count > 0 ? "<< /XObject << " + string.Join(' ', xobjRefs) + " >> >>" : "";
 
-        return CombineResources(fontResources, imageResources);
+        List<string> graphicsStateRefs = new();
+        foreach (AlphaGraphicsStateInfo info in _alphaGraphicsStates.Values)
+        {
+            int objectId = writer.GetNewId();
+            writer.WriteObject(objectId, new Dictionary<string, string>
+            {
+                ["/Type"] = "/ExtGState",
+                ["/ca"] = info.Alpha.ToString("F4", System.Globalization.CultureInfo.InvariantCulture),
+                ["/CA"] = info.Alpha.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)
+            });
+            graphicsStateRefs.Add($"{info.ResourceName} {objectId} 0 R");
+        }
+
+        string graphicsStateResources = graphicsStateRefs.Count > 0
+            ? "<< /ExtGState << " + string.Join(' ', graphicsStateRefs) + " >> >>"
+            : "";
+
+        return CombineResources(fontResources, imageResources, graphicsStateResources);
     }
 
     /// <summary>
@@ -724,24 +763,45 @@ public class PdfResourceRegistry
 
         string imageResources = xobjRefs.Count > 0 ? "<< /XObject << " + string.Join(' ', xobjRefs) + " >> >>" : "";
 
-        return CombineResources(fontResources, imageResources);
+        List<string> graphicsStateRefs = new();
+        foreach (AlphaGraphicsStateInfo info in _alphaGraphicsStates.Values)
+        {
+            int objectId = writer.GetNewId();
+            await writer.WriteObjectAsync(objectId, new Dictionary<string, string>
+            {
+                ["/Type"] = "/ExtGState",
+                ["/ca"] = info.Alpha.ToString("F4", System.Globalization.CultureInfo.InvariantCulture),
+                ["/CA"] = info.Alpha.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)
+            }, null, cancellationToken).ConfigureAwait(false);
+            graphicsStateRefs.Add($"{info.ResourceName} {objectId} 0 R");
+        }
+
+        string graphicsStateResources = graphicsStateRefs.Count > 0
+            ? "<< /ExtGState << " + string.Join(' ', graphicsStateRefs) + " >> >>"
+            : "";
+
+        return CombineResources(fontResources, imageResources, graphicsStateResources);
     }
 
-    private static string CombineResources(string fontResources, string imageResources)
+    private static string CombineResources(params string[] resources)
     {
-        if (string.IsNullOrEmpty(imageResources))
-            return fontResources;
+        List<string> parts = new();
 
-        string imageContent = imageResources;
-        if (imageContent.StartsWith("<< "))
-            imageContent = imageContent.Substring(3);
-        if (imageContent.EndsWith(" >>"))
-            imageContent = imageContent.Substring(0, imageContent.Length - 3);
+        foreach (string resource in resources)
+        {
+            if (string.IsNullOrWhiteSpace(resource)) continue;
 
-        string fontBase = fontResources;
-        if (fontBase.EndsWith(" >>"))
-            fontBase = fontBase.Substring(0, fontBase.Length - 3);
+            string content = resource.Trim();
+            if (content.StartsWith("<<", StringComparison.OrdinalIgnoreCase))
+                content = content.Substring(2).TrimStart();
+            if (content.EndsWith(">>", StringComparison.OrdinalIgnoreCase))
+                content = content.Substring(0, content.Length - 2).TrimEnd();
 
-        return fontBase + ' ' + imageContent + " >>";
+            if (!string.IsNullOrWhiteSpace(content)) parts.Add(content);
+        }
+
+        return parts.Count == 0 ? "<< >>" : "<< " + string.Join(' ', parts) + " >>";
     }
+
+    private sealed record AlphaGraphicsStateInfo(string ResourceName, float Alpha);
 }

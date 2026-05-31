@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
@@ -128,8 +129,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        string fill = color.ToHexString();
-        _sb.AppendLine($"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" fill=\"{fill}\"/>");
+        _sb.AppendLine($"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -140,9 +140,8 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        string stroke = color.ToHexString();
         _sb.AppendLine(
-            $"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" fill=\"none\" stroke=\"{stroke}\" stroke-width=\"{strokeWidth}\"/>");
+            $"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" fill=\"none\" {GetStrokeAttributes(color)} stroke-width=\"{strokeWidth}\"/>");
     }
 
     /// <summary>
@@ -152,8 +151,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        string fill = color.ToHexString();
-        _sb.AppendLine($"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" rx=\"{radius}\" ry=\"{radius}\" fill=\"{fill}\"/>");
+        _sb.AppendLine($"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" rx=\"{radius}\" ry=\"{radius}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -164,9 +162,8 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        string stroke = color.ToHexString();
         _sb.AppendLine(
-            $"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" rx=\"{radius}\" ry=\"{radius}\" fill=\"none\" stroke=\"{stroke}\" stroke-width=\"{strokeWidth}\"/>");
+            $"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" rx=\"{radius}\" ry=\"{radius}\" fill=\"none\" {GetStrokeAttributes(color)} stroke-width=\"{strokeWidth}\"/>");
     }
 
     /// <summary>
@@ -179,9 +176,8 @@ public class SvgCanvas : ICanvas
         float sy1 = y1 + _yOffset;
         float sx2 = x2 + _xOffset;
         float sy2 = y2 + _yOffset;
-        string stroke = color.ToHexString();
         _sb.AppendLine(
-            $"<line x1=\"{sx1}\" y1=\"{sy1}\" x2=\"{sx2}\" y2=\"{sy2}\" stroke=\"{stroke}\" stroke-width=\"{lineWidth}\"/>");
+            $"<line x1=\"{sx1}\" y1=\"{sy1}\" x2=\"{sx2}\" y2=\"{sy2}\" {GetStrokeAttributes(color)} stroke-width=\"{lineWidth}\"/>");
     }
 
     /// <summary>
@@ -192,8 +188,7 @@ public class SvgCanvas : ICanvas
     {
         float scx = cx + _xOffset;
         float scy = cy + _yOffset;
-        string fill = color.ToHexString();
-        _sb.AppendLine($"<circle cx=\"{scx}\" cy=\"{scy}\" r=\"{radius}\" fill=\"{fill}\"/>");
+        _sb.AppendLine($"<circle cx=\"{scx}\" cy=\"{scy}\" r=\"{radius}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -204,7 +199,6 @@ public class SvgCanvas : ICanvas
     {
         if (points == null || points.Count < 3) return;
 
-        string fill = color.ToHexString();
         StringBuilder pathData = new();
 
         // Move to the first point
@@ -221,7 +215,7 @@ public class SvgCanvas : ICanvas
         // Close the path
         pathData.Append(" Z");
 
-        _sb.AppendLine($"<path d=\"{pathData}\" fill=\"{fill}\"/>");
+        _sb.AppendLine($"<path d=\"{pathData}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -450,6 +444,25 @@ public class SvgCanvas : ICanvas
             _ => "start"
         };
     }
+
+    private static string GetFillAttributes(Color color)
+    {
+        string fill = color.ToHexString();
+        return color.ScA < 1f
+            ? $"fill=\"{fill}\" fill-opacity=\"{FormatOpacity(color.ScA)}\""
+            : $"fill=\"{fill}\"";
+    }
+
+    private static string GetStrokeAttributes(Color color)
+    {
+        string stroke = color.ToHexString();
+        return color.ScA < 1f
+            ? $"stroke=\"{stroke}\" stroke-opacity=\"{FormatOpacity(color.ScA)}\""
+            : $"stroke=\"{stroke}\"";
+    }
+
+    private static string FormatOpacity(float opacity)
+        => Math.Round(opacity, 4).ToString("0.####", CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Escapes special XML characters in text.

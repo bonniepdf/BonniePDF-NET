@@ -109,7 +109,7 @@ public class SvgExportTests
     }
 
     [Fact]
-    public void AreaChart_ToSvg_ProducesValidSvg()
+    public void AreaChart_ToSvg_RendersAreaFillAsSingleTransparentPath()
     {
         var chart = new AreaChart();
         var data = new ChartData
@@ -121,8 +121,9 @@ public class SvgExportTests
 
         Assert.NotEmpty(svg);
         Assert.Contains("<svg", svg);
-        // Area chart uses <rect> elements (via FillRect)
-        Assert.Contains("<rect", svg);
+        Assert.Contains("<path", svg);
+        Assert.Contains("fill-opacity=\"0.3\"", svg);
+        Assert.DoesNotContain("<rect", svg);
     }
 
     [Fact]
