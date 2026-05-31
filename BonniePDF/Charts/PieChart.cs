@@ -289,7 +289,8 @@ public class PieChart : ChartBase
             // Draw label text (vertically centered with the color box)
             string labelText = $"{dataPoint.Label} - {dataPoint.FormattedValue}";
             float textX = layout.LegendX + LegendBoxSize + LegendBoxTextGap;
-            canvas.DrawText(textX, y, labelText, LegendTextColor, LegendFontSize, FontFamily, TextAlignment.Left);
+            float textY = y + LegendBoxSize / 2 - LegendFontSize / 2;
+            canvas.DrawText(textX, textY, labelText, LegendTextColor, LegendFontSize, FontFamily, TextAlignment.Left);
         }
     }
 

@@ -1,13 +1,26 @@
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Core;
+using BonniePDF.Drawing;
+using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using System.Globalization;
 using Xunit;
 
 namespace BonniePDF.Tests;
 
 public class SvgExportTests
 {
+    [Fact]
+    public void SvgCanvas_DrawText_UsesTopCoordinateForY()
+    {
+        var canvas = new SvgCanvas(100, 50);
+
+        canvas.DrawText(10, 20, "Legend", Color.FromHex("#000000"), 10, "Arial, sans-serif", TextAlignment.Left);
+
+        Assert.Contains("y=\"28\"", canvas.GetSvg());
+    }
+
     [Fact]
     public void BarChart_ToSvg_ProducesValidSvg()
     {
@@ -186,6 +199,32 @@ public class SvgExportTests
     }
 
     [Fact]
+    public void PieChart_ToSvg_CentersLegendLabelsWithColorBoxes()
+    {
+        var chart = new PieChart
+        {
+            Width = 540,
+            Height = 320
+        };
+        var data = new ChartData
+        {
+            Series =
+            [
+                new ChartSeries
+                {
+                    DataPoints = [new() { Label = ".NET", Value = 48 }]
+                }
+            ]
+        };
+
+        string svg = chart.ToSvg(data);
+        float rectY = ExtractYAttribute(svg, """width="14" height="14" fill="#4F46E5"/>""");
+        float textY = ExtractYAttribute(svg, ".NET - 48</text>");
+
+        Assert.True(Math.Abs(textY - rectY - 10.3f) < 0.001f);
+    }
+
+    [Fact]
     public void Chart_ToSvg_WithEmptyData_ProducesValidSvg()
     {
         var chart = new BarChart();
@@ -282,5 +321,24 @@ public class SvgExportTests
         }
 
         return count;
+    }
+
+    private static float ExtractYAttribute(string svg, string marker)
+    {
+        int markerIndex = svg.IndexOf(marker, StringComparison.Ordinal);
+        Assert.True(markerIndex >= 0);
+
+        int tagStart = svg.LastIndexOf('<', markerIndex);
+        Assert.True(tagStart >= 0);
+
+        const string attributeStart = " y=\"";
+        int yStart = svg.IndexOf(attributeStart, tagStart, StringComparison.Ordinal);
+        Assert.True(yStart >= 0 && yStart < markerIndex);
+
+        yStart += attributeStart.Length;
+        int yEnd = svg.IndexOf('"', yStart);
+        Assert.True(yEnd > yStart);
+
+        return float.Parse(svg[yStart..yEnd], CultureInfo.InvariantCulture);
     }
 }

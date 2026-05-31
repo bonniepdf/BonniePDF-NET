@@ -21,8 +21,8 @@ public static class ImagesExample
     {
         // Setup paths
         string jpgPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "owl.jpg");
-        string pngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "test.png");
-        string alphaPngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "alpha_test.png");
+        string pngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "test.jpg");
+        string alphaPngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "alpha_test.jpg");
 
         // Create test PNGs if needed
         if (!File.Exists(pngPath)) CreateTestPng(pngPath);
