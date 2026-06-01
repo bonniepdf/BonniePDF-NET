@@ -47,15 +47,24 @@ public abstract class ElementBase : IElement, IMargin
     {
         // Save starting Y position for Y-position tracking
         StartingY = ctx.CurrentY;
+        float originalX = ctx.CurrentX;
 
         // Apply top margin
         ctx.CurrentY += Margin.Top;
+        ctx.CurrentX += Margin.Left;
 
         // Get content width after margins
         float contentWidth = GetContentWidth(width);
 
-        // Render the content
-        RenderContent(ctx, contentWidth);
+        try
+        {
+            // Render the content
+            RenderContent(ctx, contentWidth);
+        }
+        finally
+        {
+            ctx.CurrentX = originalX;
+        }
 
         // Apply bottom margin
         ctx.CurrentY += Margin.Bottom;

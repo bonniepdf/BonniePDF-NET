@@ -69,7 +69,7 @@ public class TableCell : BorderedElementBase, IRoleProvider
         Content.Render(ctx, contentWidth - padding.Left - padding.Right);
 
         ctx.CurrentX = originalX;
-        ctx.CurrentY = originalY;
+        ctx.CurrentY = originalY + totalHeight;
     }
 
     /// <summary>

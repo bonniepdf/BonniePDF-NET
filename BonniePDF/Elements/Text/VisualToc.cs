@@ -97,48 +97,57 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
         }
 
         float contentWidth = GetContentWidth(width);
+        float originalX = ctx.CurrentX;
+        ctx.CurrentX += Margin.Left;
         float lineHeight = FontSize * 1.2f;
         int startIndex = _lastRenderedIndex + 1;
 
-        if (startIndex >= HeadingIdentifiers.Count)
+        try
         {
-            ctx.CurrentY += Margin.Bottom;
-            return RenderStatus.Complete;
+            if (startIndex >= HeadingIdentifiers.Count)
+            {
+                ctx.CurrentY += Margin.Bottom;
+                return RenderStatus.Complete;
+            }
+
+            float localY = ctx.CurrentY;
+            int itemsThatFit = 0;
+            float testY = localY;
+
+            for (int i = startIndex; i < HeadingIdentifiers.Count; i++)
+            {
+                if (testY + lineHeight > ctx.MaxY) break;
+                itemsThatFit++;
+                testY += lineHeight;
+            }
+
+            if (itemsThatFit == 0)
+            {
+                return startIndex == 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+            }
+
+            int endIndex = startIndex + itemsThatFit;
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                DrawTaggedTocEntry(ctx, HeadingIdentifiers[i], contentWidth, localY);
+                localY += lineHeight;
+            }
+
+            _lastRenderedIndex = endIndex - 1;
+            ctx.CurrentY = localY;
+
+            if (endIndex >= HeadingIdentifiers.Count)
+            {
+                ctx.CurrentY += Margin.Bottom;
+                return RenderStatus.Complete;
+            }
+
+            return RenderStatus.Overflow;
         }
-
-        float localY = ctx.CurrentY;
-        int itemsThatFit = 0;
-        float testY = localY;
-
-        for (int i = startIndex; i < HeadingIdentifiers.Count; i++)
+        finally
         {
-            if (testY + lineHeight > ctx.MaxY) break;
-            itemsThatFit++;
-            testY += lineHeight;
+            ctx.CurrentX = originalX;
         }
-
-        if (itemsThatFit == 0)
-        {
-            return startIndex == 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
-        }
-
-        int endIndex = startIndex + itemsThatFit;
-        for (int i = startIndex; i < endIndex; i++)
-        {
-            DrawTaggedTocEntry(ctx, HeadingIdentifiers[i], contentWidth, localY);
-            localY += lineHeight;
-        }
-
-        _lastRenderedIndex = endIndex - 1;
-        ctx.CurrentY = localY;
-
-        if (endIndex >= HeadingIdentifiers.Count)
-        {
-            ctx.CurrentY += Margin.Bottom;
-            return RenderStatus.Complete;
-        }
-
-        return RenderStatus.Overflow;
     }
 
     /// <summary>

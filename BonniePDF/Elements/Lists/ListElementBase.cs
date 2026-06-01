@@ -143,8 +143,8 @@ public abstract class ListElementBase : TextElementBase
                 string line = lines[i];
                 CheckPageBreak(ctx, ref localY, LineHeight);
 
-                float markerX = ctx.CurrentX + Margin.Left;
-                float textX = ctx.CurrentX + Margin.Left + markerWidth + 5;
+                float markerX = ctx.CurrentX;
+                float textX = ctx.CurrentX + markerWidth + 5;
 
                 if (tagging is null)
                 {

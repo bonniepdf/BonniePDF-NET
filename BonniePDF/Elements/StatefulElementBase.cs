@@ -31,15 +31,25 @@ public abstract class StatefulElementBase : ElementBase, IStatefulElement
     {
         // Save starting Y position for Y-position tracking
         StartingY = ctx.CurrentY;
+        float originalX = ctx.CurrentX;
 
         // Apply top margin only on first render (not on continuation pages)
         if (!HasPendingContent) ctx.CurrentY += Margin.Top;
+        ctx.CurrentX += Margin.Left;
 
         // Get content width after margins
         float contentWidth = GetContentWidth(width);
 
-        // Render the content with state tracking
-        RenderStatus status = RenderContentStateful(ctx, contentWidth);
+        RenderStatus status;
+        try
+        {
+            // Render the content with state tracking
+            status = RenderContentStateful(ctx, contentWidth);
+        }
+        finally
+        {
+            ctx.CurrentX = originalX;
+        }
 
         // Apply bottom margin only when complete
         if (status == RenderStatus.Complete)

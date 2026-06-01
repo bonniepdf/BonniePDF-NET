@@ -169,6 +169,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     {
         // Apply top margin only on first render
         if (_lastRowRendered < 0 && _headersPending) ctx.CurrentY += Margin.Top;
+        float originalX = ctx.CurrentX;
+        ctx.CurrentX += Margin.Left;
 
         TaggingContext tagging = ctx.Tagging;
         // Guarantee a Table ancestor for the row-groups. The pipeline/stack opens
@@ -185,6 +187,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         }
         finally
         {
+            ctx.CurrentX = originalX;
             if (ownTable) tagging.Tree.End();
         }
     }
