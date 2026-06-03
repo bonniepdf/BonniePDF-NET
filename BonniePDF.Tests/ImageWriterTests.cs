@@ -352,6 +352,64 @@ public class ImageWriterTests
     }
 
     [Fact]
+    public void WritePngImage_WithAlphaAndPdfA2b_CreatesSoftMask()
+    {
+        var mockWriter = new MockPdfWriter();
+        var imageWriter = new ImageWriter(mockWriter)
+        {
+            Conformance = PdfAConformance.PdfA2b
+        };
+
+        var pngImage = new ImageInfo
+        {
+            Format = ImageFormat.Png,
+            Width = 10,
+            Height = 10,
+            BitsPerComponent = 8,
+            Components = 3,
+            ColorSpace = ImageColorSpace.DeviceRGB,
+            HasAlpha = true,
+            Data = new byte[300],
+            AlphaData = new byte[100]
+        };
+
+        imageWriter.WritePngImage(1, pngImage, "/Im1");
+
+        Assert.Equal(2, mockWriter.WrittenObjects.Count);
+        var mainImage = mockWriter.WrittenObjects.First(o => o.id == 1);
+        Assert.True(mainImage.dict.ContainsKey("/SMask"));
+    }
+
+    [Fact]
+    public void WritePngImage_WithAlphaAndPdfA1b_FlattensAlpha()
+    {
+        var mockWriter = new MockPdfWriter();
+        var imageWriter = new ImageWriter(mockWriter)
+        {
+            Conformance = PdfAConformance.PdfA1b
+        };
+
+        var pngImage = new ImageInfo
+        {
+            Format = ImageFormat.Png,
+            Width = 10,
+            Height = 10,
+            BitsPerComponent = 8,
+            Components = 3,
+            ColorSpace = ImageColorSpace.DeviceRGB,
+            HasAlpha = true,
+            Data = new byte[300],
+            AlphaData = new byte[100]
+        };
+
+        imageWriter.WritePngImage(1, pngImage, "/Im1");
+
+        Assert.Single(mockWriter.WrittenObjects);
+        var mainImage = mockWriter.WrittenObjects[0];
+        Assert.False(mainImage.dict.ContainsKey("/SMask"));
+    }
+
+    [Fact]
     public void WritePngImage_WithIndexedColor_UsesIndexedColorSpace()
     {
         var mockWriter = new MockPdfWriter();

@@ -21,8 +21,8 @@ public static class ImagesExample
     {
         // Setup paths
         string jpgPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "owl.jpg");
-        string pngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "test.jpg");
-        string alphaPngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "alpha_test.jpg");
+        string pngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "test.png");
+        string alphaPngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "alpha_test.png");
 
         // Create test PNGs if needed
         if (!File.Exists(pngPath)) CreateTestPng(pngPath);
@@ -30,7 +30,7 @@ public static class ImagesExample
 
         Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        doc.Settings.Conformance = PdfAConformance.PdfA2b;
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(new Color(128, 128, 128));
         doc.Metadata.Title = "Image Support Demo";
         doc.Metadata.Author = "BonniePDF";

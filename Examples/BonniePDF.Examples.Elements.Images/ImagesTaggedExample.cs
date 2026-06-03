@@ -9,7 +9,7 @@ using BonniePDF.Typography;
 namespace BonniePDF.Examples.Elements.Images;
 
 /// <summary>
-/// PDF/UA-1 + PDF/A-1b tagged example exercising raster images:
+/// PDF/UA-1 + PDF/A-2a tagged example exercising raster images:
 ///   - an informative <see cref="Image"/> with alt text  -> Figure + /Alt
 ///   - a decorative <see cref="Image"/> (IsDecorative)    -> Artifact
 ///
@@ -19,7 +19,7 @@ namespace BonniePDF.Examples.Elements.Images;
 /// flavours. The PNG is generated in-memory so the example has no asset
 /// dependency.
 ///
-/// Acceptance: VeraPDF profiles ua1 and 1b report zero failures
+/// Acceptance: VeraPDF profiles ua1 and 2a report zero failures
 /// (tools/verapdf/validate.sh). Wired into Program.cs as images_tagged.pdf.
 /// </summary>
 [System.ComponentModel.DisplayName("Images (Tagged / PDF-UA-1)")]
@@ -29,7 +29,13 @@ public static class ImagesTaggedExample
 {
     public static Document Generate()
     {
-        byte[] photoPng = BuildRgbPng(96, (x, y) => ((byte)(x * 255 / 95), (byte)(y * 255 / 95), (byte)128));
+        byte[] alphaPng = BuildRgbaPng(96, (x, y) =>
+        {
+            float dx = x - 48;
+            float dy = y - 48;
+            float t = Math.Min(1f, (float)Math.Sqrt(dx * dx + dy * dy) / 48f);
+            return ((byte)(t * 255), (byte)((1 - t) * 100), (byte)((1 - t) * 255), (byte)((1 - t) * 255));
+        });
         byte[] dividerPng = BuildRgbPng(48, (x, y) => ((byte)220, (byte)224, (byte)230));
 
         Document doc = new()
@@ -44,6 +50,7 @@ public static class ImagesTaggedExample
             Settings = new DocumentSettings
             {
                 Version = PdfVersion.Pdf17,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language = "en-GB",
                 DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate700),
@@ -70,11 +77,11 @@ public static class ImagesTaggedExample
         // Informative image -> Figure + /Alt (alt text present, not decorative).
         doc.Add(new Image
         {
-            ImageData = photoPng,
+            ImageData = alphaPng,
             Width = 200,
             Height = 200,
             FitMode = ImageFitMode.Contain,
-            AltText = "A square gradient blending red across the horizontal axis and green down the vertical axis.",
+            AltText = "A circular blue-to-red gradient fading to transparent at the edges.",
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -113,18 +120,34 @@ public static class ImagesTaggedExample
 
     private static byte[] BuildRgbPng(int size, Func<int, int, (byte R, byte G, byte B)> pixel)
     {
-        int stride = 1 + size * 3;
+        return BuildPng(size, false, (x, y) =>
+        {
+            (byte r, byte g, byte b) = pixel(x, y);
+            return (r, g, b, 255);
+        });
+    }
+
+    private static byte[] BuildRgbaPng(int size, Func<int, int, (byte R, byte G, byte B, byte A)> pixel)
+    {
+        return BuildPng(size, true, pixel);
+    }
+
+    private static byte[] BuildPng(int size, bool rgba, Func<int, int, (byte R, byte G, byte B, byte A)> pixel)
+    {
+        int bpp = rgba ? 4 : 3;
+        int stride = 1 + size * bpp;
         byte[] raw = new byte[stride * size];
         for (int y = 0; y < size; y++)
         {
             raw[y * stride] = 0; // filter = None
             for (int x = 0; x < size; x++)
             {
-                (byte r, byte g, byte b) = pixel(x, y);
-                int off = y * stride + 1 + x * 3;
+                (byte r, byte g, byte b, byte a) = pixel(x, y);
+                int off = y * stride + 1 + x * bpp;
                 raw[off] = r;
                 raw[off + 1] = g;
                 raw[off + 2] = b;
+                if (rgba) raw[off + 3] = a;
             }
         }
 
@@ -142,7 +165,7 @@ public static class ImagesTaggedExample
         var ihdr = new List<byte>();
         ihdr.AddRange(U32Be((uint)size));
         ihdr.AddRange(U32Be((uint)size));
-        ihdr.AddRange(new byte[] { 8, 2, 0, 0, 0 }); // 8-bit, colour type 2 (RGB)
+        ihdr.AddRange(new byte[] { 8, (byte)(rgba ? 6 : 2), 0, 0, 0 });
 
         var png = new List<byte> { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
         png.AddRange(PngChunk("IHDR", ihdr));

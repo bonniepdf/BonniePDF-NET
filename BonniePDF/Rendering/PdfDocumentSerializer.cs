@@ -70,7 +70,7 @@ public class PdfDocumentSerializer
         {
             RenderContext dryRunCtx = new(orientedPageSize, _document.Settings.Margin)
             {
-                PdfAEnabled = _document.Settings.PdfAEnabled
+                Conformance = _document.Settings.Conformance
             };
 
             foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
@@ -93,7 +93,7 @@ public class PdfDocumentSerializer
 
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin)
         {
-            PdfAEnabled = _document.Settings.PdfAEnabled,
+            Conformance = _document.Settings.Conformance,
             TocEntries = resolvedTocEntries ?? new Dictionary<string, int>(),
             Tagging = taggingContext,
         };
@@ -329,7 +329,7 @@ public class PdfDocumentSerializer
         {
             RenderContext dryRunCtx = new(orientedPageSize, _document.Settings.Margin)
             {
-                PdfAEnabled = _document.Settings.PdfAEnabled
+                Conformance = _document.Settings.Conformance
             };
 
             foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
@@ -350,7 +350,7 @@ public class PdfDocumentSerializer
         TaggingContext taggingContext = CreateTaggingContext();
 
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin);
-        ctx.PdfAEnabled = _document.Settings.PdfAEnabled;
+        ctx.Conformance = _document.Settings.Conformance;
         ctx.TocEntries = resolvedTocEntries ?? new Dictionary<string, int>();
         ctx.Tagging = taggingContext;
         ctx.Resources.Diagnostics = _diagnostics;

@@ -66,6 +66,15 @@ public class RenderContext
     }
 
     /// <summary>
+    /// Gets or sets the PDF/A conformance level used by resource writers.
+    /// </summary>
+    public PdfAConformance Conformance
+    {
+        get => Resources.Conformance;
+        set => Resources.Conformance = value;
+    }
+
+    /// <summary>
     /// Gets or sets whether the current page is the last page being rendered.
     /// Used by elements that need to know if more pages will follow.
     /// </summary>

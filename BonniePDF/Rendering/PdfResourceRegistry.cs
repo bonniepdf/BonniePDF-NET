@@ -28,11 +28,26 @@ public class PdfResourceRegistry
     private int _imageCounter;
     private int _graphicsStateCounter;
 
+    private PdfAConformance _conformance = PdfAConformance.None;
+
+    /// <summary>
+    /// Gets or sets the PDF/A conformance level used by resource writers.
+    /// </summary>
+    public PdfAConformance Conformance
+    {
+        get => _conformance;
+        set => _conformance = value;
+    }
+
     /// <summary>
     /// Gets or sets whether PDF/A compliance is enabled.
     /// When true, standard font names are automatically resolved to embedded TTF fonts.
     /// </summary>
-    public bool PdfAEnabled { get; set; }
+    public bool PdfAEnabled
+    {
+        get => _conformance != PdfAConformance.None;
+        set => _conformance = value ? PdfAConformance.PdfA2b : PdfAConformance.None;
+    }
 
     /// <summary>
     /// Collector that receives recoverable failures encountered while loading
@@ -418,7 +433,7 @@ public class PdfResourceRegistry
     public string RegisterAlphaGraphicsState(float alpha)
     {
         float clamped = Math.Clamp(alpha, 0f, 1f);
-        float effectiveAlpha = PdfAEnabled ? 1f : clamped;
+        float effectiveAlpha = RequiresPdfA1TransparencyFallback() ? 1f : clamped;
         string key = effectiveAlpha.ToString("F4", System.Globalization.CultureInfo.InvariantCulture);
 
         if (!_alphaGraphicsStates.TryGetValue(key, out AlphaGraphicsStateInfo info))
@@ -430,6 +445,9 @@ public class PdfResourceRegistry
 
         return info.ResourceName;
     }
+
+    private bool RequiresPdfA1TransparencyFallback() =>
+        _conformance is PdfAConformance.PdfA1b or PdfAConformance.PdfA1a;
 
     private static string MapToStandardFontName(string fontIdentifier)
     {
@@ -457,7 +475,7 @@ public class PdfResourceRegistry
     public string WriteResources(IPdfWriter writer, int totalPages)
     {
         FontWriter fontWriter = new(writer);
-        ImageWriter imageWriter = new(writer) { PdfAEnabled = PdfAEnabled };
+        ImageWriter imageWriter = new(writer) { Conformance = Conformance };
 
         // 1. Write Fonts
         foreach (KeyValuePair<string, string> fontEntry in FontNameMap)
@@ -623,7 +641,7 @@ public class PdfResourceRegistry
     public async Task<string> WriteResourcesAsync(IAsyncPdfWriter writer, int totalPages, CancellationToken cancellationToken = default)
     {
         FontWriter fontWriter = new(writer);
-        ImageWriter imageWriter = new(writer) { PdfAEnabled = PdfAEnabled };
+        ImageWriter imageWriter = new(writer) { Conformance = Conformance };
 
         // 1. Write Fonts
         foreach (KeyValuePair<string, string> fontEntry in FontNameMap)

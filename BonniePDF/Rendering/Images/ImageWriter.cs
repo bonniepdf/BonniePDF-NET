@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
+using BonniePDF.Configuration;
 using BonniePDF.Rendering.Writers;
 
 namespace BonniePDF.Rendering.Images;
@@ -17,11 +18,26 @@ public class ImageWriter
 {
     private readonly IAsyncPdfWriter _asyncWriter;
     private readonly IPdfWriter _writer;
+    private PdfAConformance _conformance = PdfAConformance.None;
 
     /// <summary>
-    /// When true, PDF/A-1B constraints are enforced (e.g. alpha channels are flattened).
+    /// Legacy PDF/A switch. Mirrors DocumentSettings: true selects PDF/A-2b.
     /// </summary>
-    public bool PdfAEnabled { get; set; }
+    public bool PdfAEnabled
+    {
+        get => _conformance != PdfAConformance.None;
+        set => _conformance = value ? PdfAConformance.PdfA2b : PdfAConformance.None;
+    }
+
+    /// <summary>
+    /// PDF/A conformance level used for image feature decisions. PDF/A-1 forbids
+    /// transparency, while PDF/A-2 and newer allow soft masks.
+    /// </summary>
+    public PdfAConformance Conformance
+    {
+        get => _conformance;
+        set => _conformance = value;
+    }
 
     /// <summary>
     /// Creates an ImageWriter for synchronous operations
@@ -81,11 +97,11 @@ public class ImageWriter
     /// </summary>
     public int WritePngImage(int id, ImageInfo image, string resourceName)
     {
-        // PDF/A-1B forbids SMask — flatten alpha by compositing against white
+        // PDF/A-1 forbids SMask — flatten alpha by compositing against white.
         byte[] pixelData = image.Data;
         bool writeSmask = image.HasAlpha && image.AlphaData.Length > 0;
 
-        if (writeSmask && PdfAEnabled)
+        if (writeSmask && RequiresPdfA1TransparencyFallback())
         {
             pixelData = FlattenAlpha(image.Data, image.AlphaData, image.Components, image.BitsPerComponent);
             writeSmask = false;
@@ -289,11 +305,11 @@ public class ImageWriter
     public async Task<int> WritePngImageAsync(int id, ImageInfo image, string resourceName,
         CancellationToken cancellationToken = default)
     {
-        // PDF/A-1B forbids SMask — flatten alpha by compositing against white
+        // PDF/A-1 forbids SMask — flatten alpha by compositing against white.
         byte[] pixelData = image.Data;
         bool writeSmask = image.HasAlpha && image.AlphaData.Length > 0;
 
-        if (writeSmask && PdfAEnabled)
+        if (writeSmask && RequiresPdfA1TransparencyFallback())
         {
             pixelData = FlattenAlpha(image.Data, image.AlphaData, image.Components, image.BitsPerComponent);
             writeSmask = false;
@@ -431,4 +447,7 @@ public class ImageWriter
 
         return result;
     }
+
+    private bool RequiresPdfA1TransparencyFallback() =>
+        _conformance is PdfAConformance.PdfA1b or PdfAConformance.PdfA1a;
 }

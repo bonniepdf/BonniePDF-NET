@@ -25,8 +25,8 @@ public static class ImagesExampleFluent
     public static Document Generate()
     {
         string jpgPath      = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "owl.jpg");
-        string pngPath      = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "test.jpg");
-        string alphaPngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "alpha_test.jpg");
+        string pngPath      = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "test.png");
+        string alphaPngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "alpha_test.png");
 
         if (!File.Exists(pngPath))      CreateTestPng(pngPath);
         if (!File.Exists(alphaPngPath)) CreateAlphaTestPng(alphaPngPath);
@@ -42,7 +42,7 @@ public static class ImagesExampleFluent
             doc.WithSettings(settings =>
             {
                 settings.Version     = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2b;
             });
 
             doc.WithDefaultTextStyle(style => style
