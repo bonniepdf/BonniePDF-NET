@@ -459,15 +459,8 @@ public class PdfCanvas : ICanvas
     /// </summary>
     public Size MeasureText(string text, float fontSize, string fontFamily)
     {
-        // Get the standard font name
-        string standardFontName = GetStandardFontName(fontFamily);
-
-        // Measure the text width using FontMetrics
-        float width = FontMetrics.GetStringWidth(text, standardFontName, (int)fontSize);
-
-        // Approximate height as font size * 1.2 (line height)
+        float width = FontMetrics.GetStringWidth(text, fontFamily, (int)fontSize);
         float height = fontSize * 1.2f;
-
         return new Size(width, height);
     }
 
@@ -476,29 +469,7 @@ public class PdfCanvas : ICanvas
     /// </summary>
     private static string GetDefaultFontResourceName(string fontFamily)
     {
-        // Map common font names to PDF standard fonts
-        return fontFamily.ToLowerInvariant() switch
-        {
-            var s when s.Contains("arial") || s.Contains("helvetica") => "/Helvetica",
-            var s when s.Contains("times") => "/Times-Roman",
-            var s when s.Contains("courier") || s.Contains("mono") => "/Courier",
-            _ => "/Helvetica"
-        };
-    }
-
-    /// <summary>
-    /// Maps a font family name to a standard font name for FontMetrics.
-    /// </summary>
-    private static string GetStandardFontName(string fontFamily)
-    {
-        // Map common font names to standard font names
-        return fontFamily.ToLowerInvariant() switch
-        {
-            var s when s.Contains("arial") || s.Contains("helvetica") => StandardFonts.Helvetica,
-            var s when s.Contains("times") => StandardFonts.TimesRoman,
-            var s when s.Contains("courier") || s.Contains("mono") => StandardFonts.Courier,
-            _ => StandardFonts.Helvetica
-        };
+        return $"/{fontFamily}";
     }
 
     private void DrawWithColorAlpha(Color color, Action draw)
