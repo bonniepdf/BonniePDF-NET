@@ -1,32 +1,31 @@
-# BonniePDF
-
-A dependency-free PDF creation library for .NET. No dependancies, native binaries or GDI+. Designed for high-performance scenarios and workloads with a simple, intuitive API.
+# BonniePDF for .NET
 
 [![NuGet](https://img.shields.io/nuget/v/BonniePDF)](https://www.nuget.org/packages/BonniePDF)
-[![NuGet Downloads](https://img.shields.io/nuget/dt/BonniePDF)](https://www.nuget.org/packages/BonniePDF)
+[![NuGet downloads](https://img.shields.io/nuget/dt/BonniePDF)](https://www.nuget.org/packages/BonniePDF)
+[![License: BonniePDF Community](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg)](https://www.bonniepdf.dev/license)
 
-## What it does
+[Live examples](https://www.bonniepdf.dev/examples) | [Documentation](https://www.bonniepdf.dev) | [TypeScript package](https://www.npmjs.com/package/@bonniepdf/core)
 
-- Creates PDF documents from C# code using a fluent or traditional API
-- Lays out text, tables, images, lists, and containers across pages automatically
-- Renders bar, line, area, pie, lollipop, dot plot, and grouped bar charts as embedded vector graphics
-- Embeds TrueType fonts with automatic subsetting
-- Encrypts documents with AES-256 and configurable permissions
-- Produces PDF/A-1b compliant output for archival
+BonniePDF builds PDF documents from C# as pure managed code: text, tables, charts, images, and accessible tagged output. It lays content out across pages automatically, embeds fonts, draws charts as vector graphics, and produces archival-grade PDF/A files, all without a single native dependency.
 
-## What it doesn't do
+BonniePDF creates new PDFs. It does not convert HTML, read or parse existing PDFs, or fill forms.
 
-- HTML-to-PDF conversion
-- Reading or parsing of existing PDFs
-- Form filling
+## Highlights
 
-## Installation
+- Fast and allocation-conscious, built for high-throughput server workloads and fully async/await aware.
+- No dependencies. No System.Drawing, no SkiaSharp, no libpdfium, no native interop. Runs the same on Windows, Linux, and macOS.
+- Two APIs over one engine: a declarative fluent API and a traditional imperative API that produce byte-identical output. Use whichever suits the task.
+- Automatic flow layout. Columns, rows, tables, and lists reflow across pages on their own.
+- Vector charts (bar, line, area, pie, and others) embedded directly, or exported to SVG.
+- Compliance support: PDF/A archival output (A-1b through A-3a), PDF/UA-1 tagged accessibility, and AES-256 encryption.
+
+## Install
 
 ```bash
 dotnet add package BonniePDF
 ```
 
-Requires .NET 10.0 or later.
+Targets .NET 8.0 and runs on .NET 8.0 or later.
 
 ## Quick start
 
@@ -119,67 +118,53 @@ byte[] bytes = Pdf.Create(doc => { /* ... */ }).GenerateBytes();
 
 ## Features
 
-**Layout:** Columns, rows, tables with repeating headers, ordered/unordered lists, horizontal stacks, containers with padding/margin/borders/rounded corners. Content flows across pages automatically.
-
-**Text:** 14 standard PDF fonts plus TrueType embedding. Rich text with mixed bold/italic/colour/size within a paragraph. Left, centre, right, and justified alignment. Underline and strikethrough decorations.
-
-**Charts:** Bar, grouped bar, line, area, pie, lollipop, and dot plot. Horizontal and vertical orientations. Multi-series with automatic legends. Charts render as PDF vector graphics and can also be exported as standalone SVG.
-
-**Images:** JPEG and PNG embedding with contain, cover, and fill sizing. PNG alpha transparency. QR code generation with configurable error correction.
-
-**Pages:** All standard sizes (A-series, B-series, North American) plus custom. Portrait and landscape. Headers and footers with page numbering. Watermarks.
-
-**Security:** AES-256 encryption. Separate user/owner passwords. Granular permission control (print, copy, modify, annotate). PDF/A-1b archival compliance with XMP metadata and sRGB profiles.
-
-**Runtime:** Zero native dependencies. Runs on Windows, Linux, and macOS. Full async/await support for web server workloads.
+| Area | Capabilities |
+| --- | --- |
+| Layout | Columns, rows, tables with repeating headers, ordered and unordered lists, horizontal stacks, containers with padding, margin, borders, and rounded corners, all flowing across pages automatically |
+| Text | 14 standard fonts plus TrueType embedding (auto-subset); rich inline mixing of bold, italic, colour, and size; left, centre, right, and justified alignment; underline and strikethrough |
+| Charts | Bar, grouped bar, line, area, pie, lollipop, and dot plot; horizontal and vertical; multi-series with automatic legends; rendered to PDF vectors or standalone SVG |
+| Images | JPEG and PNG with contain, cover, and fill sizing plus PNG alpha; QR code generation with configurable error correction |
+| Pages | All standard sizes (A-series, B-series, North American) plus custom; portrait and landscape; headers, footers, page numbering; watermarks |
+| Security | AES-256 encryption; separate user and owner passwords; granular permissions (print, copy, modify, annotate) |
+| Archival and accessibility | PDF/A-1b through A-3a with XMP metadata and sRGB profiles; PDF/UA-1 tagged output, validated against veraPDF |
+| Runtime | No native dependencies; Windows, Linux, and macOS; full async/await for web-server workloads |
 
 ## Examples
 
-The [`Examples/`]([Examples/](https://github.com/bonniepdf/BonniePDF/tree/master/.NET/Examples)) directory contains isolated example projects:
+The [`Examples/`](Examples/) directory contains isolated, runnable example projects that also serve as a smoke test of the public API:
 
-| Example         | What it demonstrates                                    |
-| --------------- | ------------------------------------------------------- |
-| SimpleDocument  | Basic text and multi-page layout                        |
-| BusinessInvoice | Tables, styled containers, payment details              |
-| ChartShowcase   | All chart types with sample data                        |
-| MovieCatalog    | Large table with alternating rows and repeating headers |
-| BookPageLayout  | Typography, justified text, pull quotes                 |
-| RichTextStyles  | Mixed formatting within paragraphs                      |
-| Encryption      | Password protection and permission control              |
-| Watermarking    | Diagonal watermark text behind content                  |
-| AsyncGeneration | Async save and in-memory generation                     |
-| WebApi          | ASP.NET Core integration patterns                       |
+| Example | Demonstrates |
+| --- | --- |
+| SimpleDocument | Basic text and multi-page layout |
+| BusinessInvoice | Tables, styled containers, payment details |
+| ChartShowcase | Every chart type with sample data |
+| MovieCatalog | Large table with alternating rows and repeating headers |
+| BookPageLayout | Typography, justified text, pull quotes |
+| RichTextStyles | Mixed formatting within a paragraph |
+| Encryption | Password protection and permission control |
+| Watermarking | Diagonal watermark behind content |
+| AsyncGeneration | Async save and in-memory generation |
+| WebApi | ASP.NET Core integration patterns |
+
+Every example can also be run live in your browser at [bonniepdf.dev/examples](https://www.bonniepdf.dev/examples).
 
 ## Documentation
 
-Full documentation is at [bonniepdf.dev](https://www.bonniepdf.dev).
+Full guides and the API reference are at [bonniepdf.dev](https://www.bonniepdf.dev), covering document setup, page layout, typography, tables, styling, images, headers and footers, charting, and advanced features.
 
-API guide by topic:
-
-- [Getting Started](.NET/docs/fluent-api/01-getting-started.md)
-- [Document Setup](.NET/docs/fluent-api/02-document-setup.md)
-- [Page Layout](.NET/docs/fluent-api/03-page-layout.md)
-- [Text & Typography](.NET/docs/fluent-api/04-text-and-typography.md)
-- [Tables](.NET/docs/fluent-api/05-tables.md)
-- [Styling](.NET/docs/fluent-api/06-styling.md)
-- [Images & Shapes](.NET/docs/fluent-api/07-images-and-shapes.md)
-- [Headers & Footers](.NET/docs/fluent-api/08-headers-and-footers.md)
-- [Advanced Features](.NET/docs/fluent-api/09-advanced-features.md)
-- [Charting](.NET/docs/fluent-api/11-charting.md)
-- [API Reference](.NET/docs/fluent-api/10-api-reference.md)
+This is the reference implementation. The [TypeScript port](https://www.npmjs.com/package/@bonniepdf/core) mirrors its API so the two stay consistent across languages.
 
 ## Licence
 
 BonniePDF uses a hybrid licence model:
 
-- **Community:** Free for individuals, open-source projects, non-profits, and companies with under $1m annual gross revenue. Full features, no restrictions on what you can build.
-- **Commercial:** For any form of commercial usage. Perpetual for the version purchased.
+- Community: Free for individuals, open-source projects, non-profits, and companies with under $1m annual gross revenue. Full features, no restrictions on what you can build.
+- Commercial: For any form of commercial usage. Perpetual for the version purchased.
 
-No licence keys, activation servers or runtime checks.
-
-Please see details at [bonniepdf.dev/license](https://www.bonniepdf.dev/license/).
+No licence keys, activation servers, or runtime checks. Full details at [bonniepdf.dev/license](https://www.bonniepdf.dev/license/).
 
 ## Contributing
 
-Bug reports and feature requests via [GitHub Issues](https://github.com/BonniePDF/BonniePDF/issues).  
-Pull requests are welcomed however please open an issue first for anything non-trivial (and potentially discuss the approach).
+Bug reports and feature requests go through [GitHub Issues](https://github.com/BonniePDF/BonniePDF/issues). Pull requests are welcome; for anything non-trivial, please open an issue first to discuss the approach.
+
+© 2026 BonniePDF
