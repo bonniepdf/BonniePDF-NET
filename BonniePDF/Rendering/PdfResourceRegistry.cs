@@ -504,7 +504,7 @@ public class PdfResourceRegistry
             {
                 int fontId = writer.GetNewId();
                 FontIdMap[fontIdentifier] = fontId;
-                fontWriter.WriteType1Font(fontId, MapToStandardFontName(fontIdentifier));
+                fontWriter.WriteType1Font(fontId, fontIdentifier);
             }
         }
 
@@ -670,7 +670,7 @@ public class PdfResourceRegistry
             {
                 int fontId = writer.GetNewId();
                 FontIdMap[fontIdentifier] = fontId;
-                await fontWriter.WriteType1FontAsync(fontId, MapToStandardFontName(fontIdentifier), cancellationToken).ConfigureAwait(false);
+                await fontWriter.WriteType1FontAsync(fontId, fontIdentifier, cancellationToken).ConfigureAwait(false);
             }
         }
 
