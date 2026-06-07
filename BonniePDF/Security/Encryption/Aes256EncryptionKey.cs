@@ -96,17 +96,15 @@ internal sealed class Aes256EncryptionKey
             rng.GetBytes(keySalt);
         }
 
-        // /U = SHA-256(password + validation_salt) + validation_salt + key_salt
-        byte[] hashInput = Concatenate(passwordBytes, validationSalt);
-        byte[] hash = SHA256Hash(hashInput);
+        // /U = Algorithm2B(password, validation_salt, "") + validation_salt + key_salt
+        byte[] hash = Algorithm2B(passwordBytes, validationSalt, Array.Empty<byte>());
         UserEntry = new byte[48];
         Buffer.BlockCopy(hash, 0, UserEntry, 0, 32);
         Buffer.BlockCopy(validationSalt, 0, UserEntry, 32, 8);
         Buffer.BlockCopy(keySalt, 0, UserEntry, 40, 8);
 
-        // /UE = AES-CBC encrypt of file key using SHA-256(password + key_salt)
-        byte[] ueKeyInput = Concatenate(passwordBytes, keySalt);
-        byte[] ueKey = SHA256Hash(ueKeyInput);
+        // /UE = AES-CBC encrypt of file key using Algorithm2B(password, key_salt, ""), IV=0
+        byte[] ueKey = Algorithm2B(passwordBytes, keySalt, Array.Empty<byte>());
         AesCipher cipher = new(ueKey);
         byte[] iv = new byte[16]; // zero IV for key wrapping
         UserEncryptionEntry = cipher.EncryptNoPadding(FileEncryptionKey, iv);
@@ -128,17 +126,15 @@ internal sealed class Aes256EncryptionKey
             rng.GetBytes(keySalt);
         }
 
-        // /O = SHA-256(password + validation_salt + /U) + validation_salt + key_salt
-        byte[] hashInput = Concatenate(passwordBytes, validationSalt, UserEntry);
-        byte[] hash = SHA256Hash(hashInput);
+        // /O = Algorithm2B(password, validation_salt, /U) + validation_salt + key_salt
+        byte[] hash = Algorithm2B(passwordBytes, validationSalt, UserEntry);
         OwnerEntry = new byte[48];
         Buffer.BlockCopy(hash, 0, OwnerEntry, 0, 32);
         Buffer.BlockCopy(validationSalt, 0, OwnerEntry, 32, 8);
         Buffer.BlockCopy(keySalt, 0, OwnerEntry, 40, 8);
 
-        // /OE = AES-CBC encrypt of file key using SHA-256(password + key_salt + /U)
-        byte[] oeKeyInput = Concatenate(passwordBytes, keySalt, UserEntry);
-        byte[] oeKey = SHA256Hash(oeKeyInput);
+        // /OE = AES-CBC encrypt of file key using Algorithm2B(password, key_salt, /U), IV=0
+        byte[] oeKey = Algorithm2B(passwordBytes, keySalt, UserEntry);
         AesCipher cipher = new(oeKey);
         byte[] iv = new byte[16]; // zero IV for key wrapping
         OwnerEncryptionEntry = cipher.EncryptNoPadding(FileEncryptionKey, iv);
@@ -203,9 +199,49 @@ internal sealed class Aes256EncryptionKey
         return bytes;
     }
 
-    private static byte[] SHA256Hash(byte[] data)
+    /// <summary>
+    /// Algorithm 2.B from ISO 32000-2:2020 §7.6.4.3.4.
+    /// Iterative hash used by R=6 for password validation and key derivation.
+    /// </summary>
+    private static byte[] Algorithm2B(byte[] password, byte[] salt, byte[] userKey)
     {
-        return SHA256.HashData(data);
+        byte[] K = SHA256.HashData(Concatenate(password, salt, userKey));
+
+        int round = 0;
+        while (true)
+        {
+            // K1 = (password + K + userKey) repeated 64 times
+            byte[] sequence = Concatenate(password, K, userKey);
+            byte[] K1 = new byte[sequence.Length * 64];
+            for (int i = 0; i < 64; i++)
+                Buffer.BlockCopy(sequence, 0, K1, i * sequence.Length, sequence.Length);
+
+            // E = AES-128-CBC encrypt K1 (no padding) using first 16 bytes of K as key, next 16 as IV
+            using Aes aes = Aes.Create();
+            aes.Key = K[..16];
+            aes.IV = K[16..32];
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.None;
+            using ICryptoTransform encryptor = aes.CreateEncryptor();
+            byte[] E = encryptor.TransformFinalBlock(K1, 0, K1.Length);
+
+            // Sum first 16 bytes mod 3 to pick hash algorithm
+            int sum = 0;
+            for (int i = 0; i < 16; i++) sum += E[i];
+            int mod3 = sum % 3;
+
+            K = mod3 switch
+            {
+                0 => SHA256.HashData(E),
+                1 => SHA384.HashData(E),
+                _ => SHA512.HashData(E)
+            };
+
+            if (round >= 63 && E[^1] <= round - 32) break;
+            round++;
+        }
+
+        return K[..32];
     }
 
     private static byte[] Concatenate(params byte[][] arrays)

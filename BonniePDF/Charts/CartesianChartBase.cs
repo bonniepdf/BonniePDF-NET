@@ -348,7 +348,8 @@ public abstract class CartesianChartBase : ChartBase
         else if (yAxis.VerticalLegend)
         {
             float x = 15;
-            float y = topY + chartAreaHeight / 2;
+            float textWidth = canvas.MeasureText(yAxis.Legend, LegendFontSize, FontFamily).Width;
+            float y = topY + chartAreaHeight / 2 + textWidth / 2 - LegendFontSize;
             canvas.DrawTextRotated(x, y, yAxis.Legend, AxisColor, LegendFontSize, FontFamily, 90);
         }
         else
@@ -370,7 +371,8 @@ public abstract class CartesianChartBase : ChartBase
         if (Orientation == ChartOrientation.Horizontal)
         {
             float x = 15;
-            float y = TitleAreaHeight + chartAreaHeight / 2;
+            float textWidth = canvas.MeasureText(legend, LegendFontSize, FontFamily).Width;
+            float y = TitleAreaHeight + chartAreaHeight / 2 + textWidth / 2 - LegendFontSize;
             canvas.DrawTextRotated(x, y, legend, AxisColor, LegendFontSize, FontFamily, 90);
         }
         else

@@ -295,7 +295,7 @@ public class SvgCanvas : ICanvas
         float sy = y + _yOffset;
         string fill = color.ToHexString();
         string escapedText = EscapeXml(text);
-        float baselineY = sy + fontSize * 0.8f;
+        float baselineY = sy + fontSize;
 
         _sb.AppendLine(
             $"<text x=\"{sx}\" y=\"{baselineY}\" font-family=\"{fontFamily}\" font-size=\"{fontSize}\" fill=\"{fill}\" text-anchor=\"start\" transform=\"rotate({angleDegrees}, {sx}, {baselineY})\">{escapedText}</text>");
