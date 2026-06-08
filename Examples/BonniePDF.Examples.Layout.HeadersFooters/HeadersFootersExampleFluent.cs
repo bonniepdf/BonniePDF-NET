@@ -3,6 +3,7 @@ using BonniePDF.Core;
 using BonniePDF.Extensions;
 using BonniePDF.Fluent;
 using BonniePDF.Fluent.Extensions;
+using BonniePDF.Prototyping;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Layout.HeadersFooters;
@@ -79,7 +80,7 @@ public static class HeadersFootersExampleFluent
                         .TextColor(Color.Slate800)
                         .Margin(0, 0, 0, 15);
 
-                    // Generate content that will span multiple pages
+                    var source = Placeholders.WithSeed(200);
                     for (int section = 1; section <= 8; section++)
                     {
                         column.Item()
@@ -89,31 +90,9 @@ public static class HeadersFootersExampleFluent
                             .TextColor(Color.Slate700)
                             .Margin(0, 15, 0, 10);
 
-                        string paragraphText = section switch
-                        {
-                            1 =>
-                                "This document demonstrates the header and footer template system in BonniePDF. Headers and footers are automatically rendered on each page after all content has been laid out.",
-                            2 =>
-                                "The header template function receives the page number and returns an IElement that is rendered at the top of each page. This allows for dynamic content like section titles or logos.",
-                            3 =>
-                                "Similarly, the footer template function creates elements for the bottom of each page. Common uses include page numbers, copyright notices, and document dates.",
-                            4 =>
-                                "Templates can contain any valid IElement, including HorizontalStack for multi-column layouts, TextBlocks for simple text, or even Images for logos and branding.",
-                            5 =>
-                                "The page number passed to templates is 1-based, making it easy to display 'Page 1 of N' style pagination. The total page count is available after rendering completes.",
-                            6 =>
-                                "Templates are rendered after all page content is finalized, ensuring accurate page counts and proper positioning regardless of how content flows across pages.",
-                            7 =>
-                                "You can conditionally render headers or footers by returning null from the template function. For example, you might omit the header on the first page.",
-                            8 =>
-                                "This flexible system supports professional document layouts while maintaining the simplicity that makes BonniePDF easy to use.",
-                            _ => "Additional content section."
-                        };
-
-                        // Add multiple paragraphs per section
                         for (int p = 0; p < 3; p++)
                             column.Item()
-                                .Text(paragraphText + ' ' + paragraphText)
+                                .Text(source.Paragraph())
                                 .TextColor(Color.Slate600)
                                 .Margin(0, 0, 0, 12);
                     }

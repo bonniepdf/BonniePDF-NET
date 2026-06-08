@@ -3,6 +3,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Prototyping;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Layout.VerticalStackOverflow;
@@ -64,9 +65,9 @@ public static class VerticalStackOverflowTaggedExample
         // 75 items — enough to span several pages
         var stack = new VerticalStack();
 
+        var source = Placeholders.WithSeed(401);
         for (int i = 1; i <= 75; i++)
         {
-            // Each card: H3 title + P description
             stack.AddChild(new Heading($"Item #{i:D3}")
             {
                 TocIdentifier = $"item-{i}",
@@ -79,7 +80,7 @@ public static class VerticalStackOverflowTaggedExample
 
             stack.AddChild(new TextBlock
             {
-                Text   = $"This is the description for item {i}. It contains details about what this item represents and why it is included in the catalogue.",
+                Text   = source.Sentence(),
                 FontSize = 10,
                 TextColor = Color.Slate600,
                 Margin  = new Thickness(0, 0, 0, 4),

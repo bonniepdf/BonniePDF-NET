@@ -48,6 +48,11 @@ public interface ICanvas
     void FillCircle(float cx, float cy, float radius, Color color);
 
     /// <summary>
+    /// Draws a filled ellipse.
+    /// </summary>
+    void FillEllipse(float cx, float cy, float rx, float ry, Color color);
+
+    /// <summary>
     /// Fills a closed path defined by a series of points.
     /// The path is automatically closed from the last point to the first.
     /// </summary>

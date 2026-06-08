@@ -2,6 +2,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
+using BonniePDF.Prototyping;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Layout.HorizontalStacks;
@@ -229,6 +230,8 @@ public static class HorizontalStacksExample
             Margin = new Thickness(0, 0, 0, 8)
         });
 
+        var kvSource = Placeholders.WithSeed(300);
+
         HorizontalStack kvStack = new()
         {
             Spacing = 10,
@@ -243,7 +246,7 @@ public static class HorizontalStacksExample
         }, 1f);
         kvStack.AddChild(new TextBlock
         {
-            Text = "John Doe",
+            Text = kvSource.Name(),
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
             TextColor = Color.Slate800
@@ -266,7 +269,7 @@ public static class HorizontalStacksExample
         }, 1f);
         kvStack2.AddChild(new TextBlock
         {
-            Text = "john.doe@example.com",
+            Text = kvSource.Email(),
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
             TextColor = Color.Slate800

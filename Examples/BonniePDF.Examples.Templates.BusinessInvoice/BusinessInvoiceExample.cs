@@ -4,6 +4,7 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Prototyping;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Templates.BusinessInvoice;
@@ -202,15 +203,10 @@ public static class BusinessInvoiceExample
             }.AlignRight()
         );
 
-        // Line items data
-        var items = new[]
-        {
-            new { Service = "Strategy Workshop", Desc = "2-day brand strategy intensive", Qty = 1, Price = 4500m },
-            new { Service = "Identity Design", Desc = "Logo, colors, typography system", Qty = 1, Price = 8000m },
-            new { Service = "Website Design", Desc = "Responsive website with animations", Qty = 5, Price = 1200m },
-            new { Service = "Development", Desc = "Next.js with CMS integration", Qty = 1, Price = 12000m },
-            new { Service = "Motion Graphics", Desc = "Hero animations, micro-interactions", Qty = 1, Price = 3500m }
-        };
+        // Line items data — generated via Placeholders for prototyping
+        var invoiceSource = Placeholders.WithSeed(42);
+        var lineItems = invoiceSource.InvoiceLines(5);
+        var items = lineItems.Select(li => new { Service = li.Service, Desc = li.Description, Qty = li.Quantity, Price = li.UnitPrice }).ToArray();
 
         decimal subtotal = 0;
         foreach (var item in items)

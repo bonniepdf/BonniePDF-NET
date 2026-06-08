@@ -151,6 +151,24 @@ public static class ContainerElementExtensions
     }
 
     /// <summary>
+    /// Adds a filled ellipse.
+    /// </summary>
+    public static Ellipse Ellipse(this IContentContainer c, float width, float height)
+    {
+        var el = new Ellipse { Width = width, Height = height };
+        return c.Element(el);
+    }
+
+    /// <summary>
+    /// Adds a filled ellipse with a specific color.
+    /// </summary>
+    public static Ellipse Ellipse(this IContentContainer c, float width, float height, Color color)
+    {
+        var el = new Ellipse { Width = width, Height = height, FillColor = color };
+        return c.Element(el);
+    }
+
+    /// <summary>
     /// Adds a QR code element.
     /// </summary>
     public static QRCode QRCode(this IContentContainer c, string data, float size = 100f)

@@ -3,6 +3,7 @@ using BonniePDF.Core;
 using BonniePDF.Extensions;
 using BonniePDF.Fluent;
 using BonniePDF.Fluent.Extensions;
+using BonniePDF.Prototyping;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Layout.VerticalStackOverflow;
@@ -59,11 +60,11 @@ public static class VerticalStackOverflowExampleFluent
                         .TextColor(Color.Slate500)
                         .Margin(0, 0, 0, 20);
 
-                    // 75 card-style items; the outer VerticalStack (Margin=0) maps to the
-                    // page column directly — each item card is added as a column item.
+                    var source = Placeholders.WithSeed(400);
                     for (int i = 1; i <= 75; i++)
                     {
-                        int capturedI = i; // capture loop variable for lambda safety
+                        int capturedI = i;
+                        string desc = source.Sentence();
                         column.Item()
                             .Margin(0, 0, 0, 15)
                             .Column(itemStack =>
@@ -76,7 +77,7 @@ public static class VerticalStackOverflowExampleFluent
                                     .Margin(0, 0, 0, 5);
 
                                 itemStack.Item()
-                                    .Text($"This is the description for item {capturedI}. It contains some details about what this item represents and why it's important.")
+                                    .Text(desc)
                                     .FontSize(10)
                                     .TextColor(Color.Slate600);
                             });

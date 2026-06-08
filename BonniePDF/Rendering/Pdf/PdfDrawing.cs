@@ -114,6 +114,25 @@ internal static class PdfDrawing
         PdfOperators.RestoreState(stream);
     }
 
+    public static void FillEllipse(StringBuilder stream, float centerX, float centerY, float rx, float ry, Color color)
+    {
+        const float k = 0.552284749831f;
+        float kx = k * rx;
+        float ky = k * ry;
+
+        PdfOperators.SaveState(stream);
+        PdfOperators.SetFillColor(stream, color);
+
+        PdfOperators.MoveTo(stream, centerX + rx, centerY);
+        PdfOperators.CurveTo(stream, centerX + rx, centerY + ky, centerX + kx, centerY + ry, centerX, centerY + ry);
+        PdfOperators.CurveTo(stream, centerX - kx, centerY + ry, centerX - rx, centerY + ky, centerX - rx, centerY);
+        PdfOperators.CurveTo(stream, centerX - rx, centerY - ky, centerX - kx, centerY - ry, centerX, centerY - ry);
+        PdfOperators.CurveTo(stream, centerX + kx, centerY - ry, centerX + rx, centerY - ky, centerX + rx, centerY);
+
+        PdfOperators.Fill(stream);
+        PdfOperators.RestoreState(stream);
+    }
+
     /// <summary>
     /// Draws a filled rounded rectangle using Bézier curves for the corners.
     /// </summary>

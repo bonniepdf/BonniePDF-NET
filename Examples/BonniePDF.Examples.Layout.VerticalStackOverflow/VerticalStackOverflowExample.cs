@@ -2,6 +2,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
+using BonniePDF.Prototyping;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Layout.VerticalStackOverflow;
@@ -44,12 +45,11 @@ public static class VerticalStackOverflowExample
             Margin = new Thickness(0, 0, 0, 20)
         });
 
-        // Create a vertical stack with many items
         VerticalStack stack = new() { Margin = new Thickness(0) };
 
+        var source = Placeholders.WithSeed(400);
         for (int i = 1; i <= 75; i++)
         {
-            // Each item is a small card-like element
             VerticalStack itemStack = new()
             {
                 Margin = new Thickness(0, 0, 0, 15)
@@ -64,11 +64,9 @@ public static class VerticalStackOverflowExample
                 Margin = new Thickness(0, 0, 0, 5)
             });
 
-            // Uses DefaultTextStyle: Helvetica, 10, Slate600
             itemStack.AddChild(new TextBlock
             {
-                Text =
-                    $"This is the description for item {i}. It contains some details about what this item represents and why it's important."
+                Text = source.Sentence()
             });
 
             stack.AddChild(itemStack);

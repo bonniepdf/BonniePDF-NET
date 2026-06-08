@@ -3,6 +3,7 @@ using BonniePDF.Core;
 using BonniePDF.Extensions;
 using BonniePDF.Fluent;
 using BonniePDF.Fluent.Extensions;
+using BonniePDF.Prototyping;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Layout.HorizontalStacks;
@@ -141,12 +142,13 @@ public static class HorizontalStacksExampleFluent
                         .TextColor(Color.Slate700)
                         .Margin(0, 0, 0, 8);
 
+                    var kvSource = Placeholders.WithSeed(300);
                     column.Item()
                         .Row(row =>
                         {
                             row.Spacing(10);
                             row.RelativeItem(1f).Text("Name:").Bold().TextColor(Color.Slate600);
-                            row.RelativeItem(3f).Text("John Doe").TextColor(Color.Slate800);
+                            row.RelativeItem(3f).Text(kvSource.Name()).TextColor(Color.Slate800);
                         });
 
                     column.Item()
@@ -155,7 +157,7 @@ public static class HorizontalStacksExampleFluent
                         {
                             row.Spacing(10);
                             row.RelativeItem(1f).Text("Email:").Bold().TextColor(Color.Slate600);
-                            row.RelativeItem(3f).Text("john.doe@example.com").TextColor(Color.Slate800);
+                            row.RelativeItem(3f).Text(kvSource.Email()).TextColor(Color.Slate800);
                         });
 
                     // Progress bar style
