@@ -9,13 +9,13 @@ using BonniePDF.Extensions;
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
 /// <summary>
-/// Demonstrates a horizontal bar chart — a good choice when category labels are long
+/// Demonstrates a horizontal bar chart - a good choice when category labels are long
 /// or when ranking data reads more naturally left-to-right.
 /// The only change from a standard BarChart is Orientation = ChartOrientation.Horizontal.
 /// </summary>
 [System.ComponentModel.DisplayName("Horizontal Bar Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("BarChart with Orientation = ChartOrientation.Horizontal — regional sales ranking where long category labels sit naturally on the left axis.")]
+[System.ComponentModel.Description("BarChart with Orientation = ChartOrientation.Horizontal - regional sales ranking where long category labels sit naturally on the left axis.")]
 public static class HorizontalBarChartExample
 {
     public static Document Generate()
@@ -41,7 +41,7 @@ public static class HorizontalBarChartExample
 
         document.Add(new TextBlock
         {
-            Text = "Full-year revenue by region — horizontal orientation suits ranked comparisons",
+            Text = "Full-year revenue by region - horizontal orientation suits ranked comparisons",
             FontSize = 13,
             TextColor = Color.Slate600,
             Alignment = TextAlignment.Center

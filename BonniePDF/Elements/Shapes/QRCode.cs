@@ -34,7 +34,7 @@ public class QRCode : ElementBase, IRoleProvider, IAltTextProvider
     /// <summary>
     /// When <c>true</c>, the QR code is purely decorative and is
     /// tagged as <c>/Artifact</c> with no alt-text warning. Rare for
-    /// QR codes (they're almost always meaningful) — included for
+    /// QR codes (they're almost always meaningful) - included for
     /// symmetry with <c>Image.IsDecorative</c>.
     /// </summary>
     public bool IsDecorative { get; set; }

@@ -8,7 +8,7 @@ using Xunit;
 namespace BonniePDF.Tests;
 
 /// <summary>
-/// Stage-1 prep — /Pg + /ParentTree foundational fix. Drives
+/// Stage-1 prep - /Pg + /ParentTree foundational fix. Drives
 /// StructureTreeWriter with explicit page IDs and asserts the
 /// per-element /Pg, the spanning-page /MCR layout, and the
 /// /ParentTree object's /Nums shape. Pre-existing
@@ -35,7 +35,7 @@ public class ParentTreeTests
     [Fact]
     public void MultiPageMcids_ProducesMcrDictsWithExplicitPg()
     {
-        // Same MCID number on different pages — exactly what
+        // Same MCID number on different pages - exactly what
         // page-break-aware tagging produces after a NewPage transition.
         var builder = new StructureTreeBuilder();
         builder.Begin(SemanticRole.P);

@@ -106,7 +106,7 @@ public static class ShapesAndBordersExample
             Margin = new Thickness(0, 0, 0, 12),
             Child = new TextBlock
             {
-                Text = "Rounded border combined with a background fill — great for alert boxes and callouts.",
+                Text = "Rounded border combined with a background fill - great for alert boxes and callouts.",
                 FontSize = 12,
                 TextColor = Color.FromHex("#92400e")
             }

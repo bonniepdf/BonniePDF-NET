@@ -39,7 +39,7 @@ public static class RichTextExampleFluent
                 settings.PdfAEnabled = true;
             });
 
-            // Document default: Helvetica 11pt — spans that don't specify size inherit this
+            // Document default: Helvetica 11pt - spans that don't specify size inherit this
             doc.WithDefaultTextStyle(style => style
                 .WithFamily(StandardFonts.Helvetica)
                 .WithSize(11));
@@ -50,7 +50,7 @@ public static class RichTextExampleFluent
                 {
                     // Title
                     column.Item()
-                        .Text("Rich Text (Mixed Styling) — Fluent API")
+                        .Text("Rich Text (Mixed Styling) - Fluent API")
                         .Bold()
                         .FontSize(24)
                         .TextColor(Color.Slate800)
@@ -171,7 +171,7 @@ public static class RichTextExampleFluent
                         });
 
                     // ── 8. Reusable TextStyle objects ────────────────────────────
-                    // text.Span(string, TextStyle) accepts pre-built styles — useful for
+                    // text.Span(string, TextStyle) accepts pre-built styles - useful for
                     // consistent label/value/unit formatting across multiple rows.
                     SectionHeader(column, "Reusable TextStyle Objects");
 
@@ -228,7 +228,7 @@ public static class RichTextExampleFluent
                         .Span("full justification", new TextStyle().Bold())
                         .Span(" where the text is evenly distributed across the line width. This works with ")
                         .Span("mixed styles", new TextStyle().WithItalic())
-                        .Span(" — each span maintains its own formatting while the spacing between words is adjusted to fill the available width. The last line remains left-aligned as per standard typographic convention.")
+                        .Span(" - each span maintains its own formatting while the spacing between words is adjusted to fill the available width. The last line remains left-aligned as per standard typographic convention.")
                     );
 
                     // ── 11. Practical: legal disclaimer ──────────────────────────
@@ -266,7 +266,7 @@ public static class RichTextExampleFluent
                         .Margin(0, 0, 0, 16)
                         .Text(text =>
                         {
-                            text.Span("In the Fluent API, every span is styled inline — this ");
+                            text.Span("In the Fluent API, every span is styled inline - this ");
                             text.Span("bold blue").Bold().FontColor(Color.Blue600);
                             text.Span(", ");
                             text.Span("italic green").Italic().FontColor(Color.Green600);

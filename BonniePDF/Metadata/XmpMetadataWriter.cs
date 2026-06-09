@@ -22,7 +22,7 @@ internal static class XmpMetadataWriter
         public const string Xml = "http://www.w3.org/XML/1998/namespace";
         public const string AdobeMeta = "adobe:ns:meta/";
         // PDF/A extension-schema namespaces (ISO 19005-1 §6.7.11,
-        // -2/-3 §6.6.2.3) — describe non-predefined XMP schemas so
+        // -2/-3 §6.6.2.3) - describe non-predefined XMP schemas so
         // PDF/A validators accept properties from them.
         public const string PdfaExtension = "http://www.aiim.org/pdfa/ns/extension/";
         public const string PdfaSchema = "http://www.aiim.org/pdfa/ns/schema#";
@@ -81,7 +81,7 @@ internal static class XmpMetadataWriter
     /// <summary>
     /// Generates the XMP XML string from document metadata, including
     /// any conformance-namespace blocks the caller wants to claim
-    /// (PDF/A, PDF/UA, ZUGFeRD/Factur-X, …). Blocks compose — pass any
+    /// (PDF/A, PDF/UA, ZUGFeRD/Factur-X, …). Blocks compose - pass any
     /// combination.
     /// </summary>
     public static string GenerateXmpXml(
@@ -123,7 +123,7 @@ internal static class XmpMetadataWriter
     /// <summary>
     /// Emit each <see cref="XmpConformanceBlock"/> inside the open
     /// <c>rdf:Description</c>. Blocks share the same RDF description
-    /// per the additive-hook design — namespaces are scoped via
+    /// per the additive-hook design - namespaces are scoped via
     /// per-element <c>xmlns:prefix</c> declarations that XmlWriter
     /// emits automatically.
     /// </summary>
@@ -144,7 +144,7 @@ internal static class XmpMetadataWriter
     /// non-predefined XMP namespaces referenced by the conformance
     /// blocks. Required by PDF/A-2/3 §6.6.2.3.1 for any namespace not
     /// in the predefined set (dc, xmp, pdf, pdfaid, …). Skipped unless
-    /// at least one block actually carries a PDF/A claim — without
+    /// at least one block actually carries a PDF/A claim - without
     /// PDF/A there's no validator that checks this rule and the bag
     /// would be dead weight.
     /// </summary>
@@ -257,7 +257,7 @@ internal static class XmpMetadataWriter
             xw.WriteElementString(XmlPrefixes.Pdf, XmlElements.Producer, XmpNamespaces.Pdf, metadata.Producer);
 
         // Conformance blocks (PDF/A, PDF/UA, ZUGFeRD, …) are emitted by
-        // WriteConformanceBlocks above — see this feature this feature design note for
+        // WriteConformanceBlocks above - see this feature this feature design note for
         // the additive-hook rationale.
     }
 

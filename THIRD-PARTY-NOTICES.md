@@ -18,15 +18,15 @@ upstream licence text in full and unmodified.
 
 - **Files:** `BonniePDF/Elements/Shapes/QrCodeEncoder.cs`,
   `BonniePDF/Elements/Shapes/QrSegment.cs`
-- **Upstream project:** [Project Nayuki — QR Code generator library](https://www.nayuki.io/page/qr-code-generator-library)
+- **Upstream project:** [Project Nayuki - QR Code generator library](https://www.nayuki.io/page/qr-code-generator-library)
 - **Upstream source:** https://github.com/nayuki/QR-Code-generator
 - **Licence:** MIT License
 - **Nature of use:** `QrCodeEncoder.cs` and `QrSegment.cs` are a C# port of
   Project Nayuki's TypeScript/JavaScript QR Code encoder (ISO/IEC 18004
   Model 2), reshaped to fit BonniePDF's `ElementBase` / `ICanvas` rendering
-  conventions. The encoding algorithms — version selection, Reed-Solomon
+  conventions. The encoding algorithms - version selection, Reed-Solomon
   error correction, mask penalty scoring, function-pattern drawing, and
-  codeword interleaving — originate from the upstream project.
+  codeword interleaving - originate from the upstream project.
 
 ### Licence text
 

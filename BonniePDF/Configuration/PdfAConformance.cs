@@ -11,7 +11,7 @@ namespace BonniePDF.Configuration;
 /// The serializer enforces this at write time and throws a
 /// <c>PdfAConformanceException</c> if the combination is inconsistent.
 ///
-/// "b" (basic) levels guarantee visual reproducibility only — they do
+/// "b" (basic) levels guarantee visual reproducibility only - they do
 /// not require structure tagging and so are the safe upgrade path for
 /// documents that have not yet adopted PDF/UA-1.
 ///
@@ -41,7 +41,7 @@ public enum PdfAConformance
 
     /// <summary>
     /// PDF/A-2b (ISO 19005-2:2011, conformance B). Modernised visual
-    /// reproducibility based on PDF 1.7 — allows transparency, JPEG2000,
+    /// reproducibility based on PDF 1.7 - allows transparency, JPEG2000,
     /// optional content (layers), and OpenType font embedding. The
     /// default baseline for new BonniePDF documents that opt in via the
     /// obsolete <c>PdfAEnabled = true</c>.
@@ -58,7 +58,7 @@ public enum PdfAConformance
 
     /// <summary>
     /// PDF/A-3b (ISO 19005-3:2012, conformance B). PDF/A-2b plus the
-    /// ability to embed arbitrary file attachments — the basis for
+    /// ability to embed arbitrary file attachments - the basis for
     /// ZUGFeRD / Factur-X e-invoicing.
     /// </summary>
     PdfA3b = 5,

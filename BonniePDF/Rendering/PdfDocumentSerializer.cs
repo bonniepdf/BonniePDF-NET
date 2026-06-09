@@ -55,7 +55,7 @@ public class PdfDocumentSerializer
 
         // Resources are written as a single indirect object that every
         // page references explicitly (PDF/A-2b clause 6.2.2.2 / ISO
-        // 32000-1 §7.8.3 — relying on /Pages-inheritance is rejected by
+        // 32000-1 §7.8.3 - relying on /Pages-inheritance is rejected by
         // veraPDF profile 2b even though §7.7.3.4 allows it). Allocate
         // the ID up-front so pages can reference it during the streaming
         // page loop; the body is written after rendering completes.
@@ -86,7 +86,7 @@ public class PdfDocumentSerializer
             }
         }
 
-        // PDF/UA tagging context — created once, shared between the
+        // PDF/UA tagging context - created once, shared between the
         // render pipeline (canvas attaches MCIDs to the builder) and the
         // structure-tree writer at the end (emits the populated tree).
         TaggingContext taggingContext = CreateTaggingContext();
@@ -204,7 +204,7 @@ public class PdfDocumentSerializer
         // non-embedded fonts. When the caller asked for PDF/A but the
         // document references any of the standard 14 (which we don't
         // embed), we silently drop the claim: no pdfaid block in XMP,
-        // no OutputIntent. The document is still a valid PDF — it just
+        // no OutputIntent. The document is still a valid PDF - it just
         // doesn't lie about being PDF/A-1b. To actually deliver PDF/A
         // the caller must register a real TTF.
         //
@@ -224,7 +224,7 @@ public class PdfDocumentSerializer
         writer.WriteRawObject(resourcesId, globalResources);
 
         // 6. Write Parent Pages Object. /Resources is intentionally
-        // omitted — the per-page indirect references are authoritative.
+        // omitted - the per-page indirect references are authoritative.
         string kids = string.Join(' ', pageIds.Select(id => $"{id} 0 R"));
         writer.WriteObject(pagesId, new Dictionary<string, string>
 (StringComparer.OrdinalIgnoreCase)
@@ -345,7 +345,7 @@ public class PdfDocumentSerializer
             }
         }
 
-        // PDF/UA tagging context — shared between the render pipeline and
+        // PDF/UA tagging context - shared between the render pipeline and
         // the async structure-tree writer below.
         TaggingContext taggingContext = CreateTaggingContext();
 
@@ -451,7 +451,7 @@ public class PdfDocumentSerializer
         string globalResources = await ctx.Resources.WriteResourcesAsync(writer, pageIds.Count, cancellationToken).ConfigureAwait(false);
 
         // drop the PDF/A claim if any standard-14 font slipped
-        // through unembedded — see the sync path for the rationale.
+        // through unembedded - see the sync path for the rationale.
         if (_document.Settings.PdfAEnabled && ctx.Resources.HasNonEmbeddedStandardFont())
         {
             _document.Settings.PdfAEnabled = false;
@@ -460,7 +460,7 @@ public class PdfDocumentSerializer
         // 5. Write the global Resources object (see sync path for rationale).
         await writer.WriteRawObjectAsync(resourcesId, globalResources, cancellationToken).ConfigureAwait(false);
 
-        // 6. Write Parent Pages Object — /Resources omitted; pages own it.
+        // 6. Write Parent Pages Object - /Resources omitted; pages own it.
         string kids = string.Join(' ', pageIds.Select(id => $"{id} 0 R"));
         await writer.WriteObjectAsync(pagesId, new Dictionary<string, string>
 (StringComparer.OrdinalIgnoreCase)

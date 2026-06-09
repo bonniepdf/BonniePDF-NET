@@ -15,7 +15,7 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// </summary>
 [System.ComponentModel.DisplayName("Horizontal Grouped Bar Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("GroupedBarChart with Orientation = ChartOrientation.Horizontal — quarterly sales for three product lines shown as horizontal grouped bars.")]
+[System.ComponentModel.Description("GroupedBarChart with Orientation = ChartOrientation.Horizontal - quarterly sales for three product lines shown as horizontal grouped bars.")]
 public static class HorizontalGroupedBarChartExample
 {
     public static Document Generate()
@@ -41,7 +41,7 @@ public static class HorizontalGroupedBarChartExample
 
         document.Add(new TextBlock
         {
-            Text = "Three product lines compared across four quarters — horizontal grouped layout",
+            Text = "Three product lines compared across four quarters - horizontal grouped layout",
             FontSize = 13,
             TextColor = Color.Slate600,
             Alignment = TextAlignment.Center

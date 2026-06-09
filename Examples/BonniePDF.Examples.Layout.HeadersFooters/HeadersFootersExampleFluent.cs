@@ -48,7 +48,7 @@ public static class HeadersFootersExampleFluent
                 settings.PdfAEnabled = true;
 
                 // Header/footer templates are rendered during save, outside the Page() scope,
-                // so they don't inherit the document default style — explicit font calls needed.
+                // so they don't inherit the document default style - explicit font calls needed.
                 settings.Header((pageNumber, header) =>
                 {
                     header.Text($"BonniePDF Documentation - Page {pageNumber}")

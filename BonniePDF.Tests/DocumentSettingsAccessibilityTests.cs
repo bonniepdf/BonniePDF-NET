@@ -5,7 +5,7 @@ namespace BonniePDF.Tests;
 
 /// <summary>
 /// Round-trip tests for the new accessibility-related properties on
-/// <see cref="DocumentSettings"/>. this feature of the this feature (PDF/UA) plan —
+/// <see cref="DocumentSettings"/>. this feature of the this feature (PDF/UA) plan -
 /// only verifies the public surface; no writer behaviour yet.
 /// </summary>
 public class DocumentSettingsAccessibilityTests

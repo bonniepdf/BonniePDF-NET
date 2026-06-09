@@ -31,13 +31,13 @@ PDF/A and PDF/UA standards using a local VeraPDF API instance.
    - `/api/validate/{profileId}` - Validation endpoint (default: `1b` for PDF/A-1B)
 
    Available validation profiles:
-   - `1a` — PDF/A-1A (basic + accessibility)
-   - `1b` — PDF/A-1B (basic compliance, default)
-   - `2a` — PDF/A-2A
-   - `2b` — PDF/A-2B
-   - `3a` — PDF/A-3A
-   - `3b` — PDF/A-3B
-   - `ua1` — PDF/UA-1 (Universal Accessibility, ISO 14289-1)
+   - `1a` - PDF/A-1A (basic + accessibility)
+   - `1b` - PDF/A-1B (basic compliance, default)
+   - `2a` - PDF/A-2A
+   - `2b` - PDF/A-2B
+   - `3a` - PDF/A-3A
+   - `3b` - PDF/A-3B
+   - `ua1` - PDF/UA-1 (Universal Accessibility, ISO 14289-1)
 
 3. **Generated PDFs**: Run the BonniePDF Examples project first to generate sample PDFs.
 

@@ -68,7 +68,7 @@ public class PdfCanvasMarkedContentTests
         canvas.BeginMarkedContent("P");
         canvas.EndMarkedContent();
 
-        // After ResetPage the counter starts at 0 again — required because
+        // After ResetPage the counter starts at 0 again - required because
         // MCIDs are per-page in PDF (ISO 32000-1 §14.7.4).
         Assert.Contains("/MCID 0 >>", canvas.Stream.ToString());
     }
@@ -105,7 +105,7 @@ public class PdfCanvasMarkedContentTests
         canvas.EndMarkedContent();
 
         string output = canvas.Stream.ToString();
-        // Sect is the outermost call — _openTaggedCount == 0 — so it gets MCID 0 and emits BDC.
+        // Sect is the outermost call - _openTaggedCount == 0 - so it gets MCID 0 and emits BDC.
         // Both P calls are nested (openTaggedCount > 0) so they emit BMC with no MCID.
         int sectIdx = output.IndexOf("/Sect << /MCID 0 >>");
         int p1Idx   = output.IndexOf("P BMC");         // first nested P
@@ -125,7 +125,7 @@ public class PdfCanvasMarkedContentTests
         var (canvas, tree, _) = NewTaggedCanvas();
         tree.Begin(SemanticRole.P);
 
-        // No matching Begin — End is a no-op rather than emitting a stray EMC.
+        // No matching Begin - End is a no-op rather than emitting a stray EMC.
         canvas.EndMarkedContent();
 
         Assert.Equal(string.Empty, canvas.Stream.ToString());

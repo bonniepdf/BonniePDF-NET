@@ -175,7 +175,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         TaggingContext tagging = ctx.Tagging;
         // Guarantee a Table ancestor for the row-groups. The pipeline/stack opens
         // the Table for the first fragment, but a continuation fragment after a
-        // page break re-enters with only the page/Document open — so open a Table
+        // page break re-enters with only the page/Document open - so open a Table
         // here when one isn't already current (PDF/UA 7.2). Guard avoids
         // double-wrapping the common (already-wrapped) case. A paginated table can
         // yield one Table per page fragment, which is structurally valid.
@@ -406,7 +406,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         float[] widths = CalculateColumnWidths(contentWidth);
         bool isFirstPage = true;
 
-        // Render headers — grouped under THead (PDF/UA 7.2).
+        // Render headers - grouped under THead (PDF/UA 7.2).
         if (_headers.Count > 0)
         {
             if (tagging != null) tagging.Tree.Begin(SemanticRole.THead);
@@ -423,7 +423,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         // Track if we've added headers on a new page
         bool headersAddedOnNewPage = false;
 
-        // Render data rows — grouped under TBody.
+        // Render data rows - grouped under TBody.
         if (_rows.Count > 0)
         {
             if (tagging != null) tagging.Tree.Begin(SemanticRole.TBody);
@@ -456,7 +456,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             }
         }
 
-        // Render footers — grouped under TFoot.
+        // Render footers - grouped under TFoot.
         if (_footers.Count > 0)
         {
             if (tagging != null) tagging.Tree.Begin(SemanticRole.TFoot);

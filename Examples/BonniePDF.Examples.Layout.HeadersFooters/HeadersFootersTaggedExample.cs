@@ -17,7 +17,7 @@ namespace BonniePDF.Examples.Layout.HeadersFooters;
 /// </summary>
 [System.ComponentModel.DisplayName("Headers & Footers (PDF/UA-1)")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("PDF/UA-1 tagged document with header/footer templates — template content tagged as Artifact, body content tagged semantically.")]
+[System.ComponentModel.Description("PDF/UA-1 tagged document with header/footer templates - template content tagged as Artifact, body content tagged semantically.")]
 public static class HeadersFootersTaggedExample
 {
     public static Document Generate()
@@ -26,7 +26,7 @@ public static class HeadersFootersTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title   = "Headers & Footers — Tagged (PDF/UA-1)",
+                Title   = "Headers & Footers - Tagged (PDF/UA-1)",
                 Author  = "BonniePDF",
                 Subject = "Demonstrates header/footer templates in a PDF/UA-1 accessible document.",
                 Keywords = "pdf, pdf/ua, accessibility, headers, footers",
@@ -41,10 +41,10 @@ public static class HeadersFootersTaggedExample
                     .WithSize(11)
                     .WithColor(Color.Slate700),
 
-                // Header/footer template content is rendered as /Artifact — screen readers skip it.
+                // Header/footer template content is rendered as /Artifact - screen readers skip it.
                 HeaderTemplate = pageNum => new TextBlock
                 {
-                    Text      = $"BonniePDF Documentation — page {pageNum}",
+                    Text      = $"BonniePDF Documentation - page {pageNum}",
                     FontName  = StandardFonts.Helvetica,
                     FontSize  = 9,
                     TextColor = Color.Slate500,
@@ -87,7 +87,7 @@ public static class HeadersFootersTaggedExample
 
             ("Any IElement is accepted",
                 "Templates are not limited to plain text. You can return a HorizontalStack containing a " +
-                "logo image on one side and a page number on the other — all tagged as /Artifact " +
+                "logo image on one side and a page number on the other - all tagged as /Artifact " +
                 "automatically."),
 
             ("Body content is fully tagged",

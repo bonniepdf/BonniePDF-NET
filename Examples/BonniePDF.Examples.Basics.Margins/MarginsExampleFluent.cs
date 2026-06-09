@@ -46,7 +46,7 @@ public static class MarginsExampleFluent
             {
                 page.Content().Column(column =>
                 {
-                    // Title — only override size and weight (font family inherited from default)
+                    // Title - only override size and weight (font family inherited from default)
                     column.Item()
                         .Text("Margin Example (Fluent API)")
                         .Bold()
@@ -170,7 +170,7 @@ public static class MarginsExampleFluent
                                 .TextColor(Color.Red800);
                         });
 
-                    // Final note — Italic overrides the default weight
+                    // Final note - Italic overrides the default weight
                     column.Item()
                         .Text("Note: Margins collapse with adjacent content, creating clean spacing throughout the document.")
                         .Italic()

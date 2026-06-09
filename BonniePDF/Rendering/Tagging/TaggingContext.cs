@@ -55,7 +55,7 @@ public sealed class TaggingContext
     }
 
     /// <summary>
-    /// Back-compat overload — resets the MCID counter without changing
+    /// Back-compat overload - resets the MCID counter without changing
     /// the current page index. Used by tests that don't care about
     /// per-MCID page tracking.
     /// </summary>

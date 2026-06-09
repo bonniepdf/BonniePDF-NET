@@ -14,7 +14,7 @@ namespace BonniePDF.Tests;
 /// <summary>
 /// stage-0 closeout. Builds a representative tagged document
 /// (mirrors the public <c>SimpleDocumentTaggedExample</c> in the
-/// Examples project — inline here so the test project doesn't take a
+/// Examples project - inline here so the test project doesn't take a
 /// cross-project reference) and asserts the byte-level shape VeraPDF
 /// profile <c>ua1</c> verifies:
 ///
@@ -37,7 +37,7 @@ public class TaggedSimpleDocumentTests
         {
             Metadata = new DocumentMetadata
             {
-                Title = "Simple Document — Tagged (PDF/UA-1)",
+                Title = "Simple Document - Tagged (PDF/UA-1)",
                 Author = "BonniePDF",
                 Subject = "this feature stage-0 closeout fixture.",
                 Keywords = "pdf, pdf/ua, accessibility",
@@ -71,7 +71,7 @@ public class TaggedSimpleDocumentTests
 
         doc.Add(new TextBlock
         {
-            Text = "Existing elements tag themselves automatically — no semantic verbs required.",
+            Text = "Existing elements tag themselves automatically - no semantic verbs required.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
             TextColor = Color.Slate700,

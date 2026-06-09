@@ -32,7 +32,7 @@ public static class WatermarkDraftExample
         doc.Metadata.Title = "Draft Document with Watermark";
         doc.Metadata.Author = "BonniePDF";
 
-        // Apply the watermark — default settings: gray, 15% opacity, -45 degrees, 72pt
+        // Apply the watermark - default settings: gray, 15% opacity, -45 degrees, 72pt
         doc.Settings.Watermark = new WatermarkSettings { Text = "DRAFT" };
 
         // Page 1: Title page

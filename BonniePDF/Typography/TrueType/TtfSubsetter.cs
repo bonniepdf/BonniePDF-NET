@@ -716,7 +716,7 @@ public class TtfSubsetter
     ///
     /// A format 2.0 'post' table carries its own numberOfGlyphs field reflecting
     /// the original glyph count, which no longer matches the subset's rewritten
-    /// 'maxp' numGlyphs — veraPDF flags that mismatch. Glyph names are not used
+    /// 'maxp' numGlyphs - veraPDF flags that mismatch. Glyph names are not used
     /// for embedded PDF fonts (text extraction relies on the ToUnicode CMap), so
     /// downgrading to format 3.0 drops the names and resolves the discrepancy.
     /// </summary>

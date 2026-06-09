@@ -33,7 +33,7 @@ namespace BonniePDF.Tests;
 /// - Header/footer template content is rendered but not tagged as
 ///   /Artifact (this feature fixes this).
 /// - Hyperlink annotations don't carry /StructParent (full
-///   annotation reachability — deferred from this feature).
+///   annotation reachability - deferred from this feature).
 /// </summary>
 public class HardeningTests
 {
@@ -174,7 +174,7 @@ public class HardeningTests
         }
     }
 
-    // ── 6. Heading.Level out of range — clamped to H1/H6 ────────────
+    // ── 6. Heading.Level out of range - clamped to H1/H6 ────────────
 
     [Fact]
     public void Fixture06_HeadingLevelOutOfRange_ClampedToH1AndH6()
@@ -197,7 +197,7 @@ public class HardeningTests
     public void Fixture07_LongHeadingWrappingMultiLines_StaysOneStructElem()
     {
         // A heading whose text exceeds one line still produces exactly
-        // one /H1 StructElem — wrapping is a layout concern, not a
+        // one /H1 StructElem - wrapping is a layout concern, not a
         // semantic one.
         string pdf = Encoding.ASCII.GetString(GenerateTagged(doc =>
         {
@@ -219,7 +219,7 @@ public class HardeningTests
     {
         // this feature fixed this: header/footer template content is now tagged as
         // /Artifact so screen readers skip it.
-        // /Artifact BMC is in the page content stream — requires compression off.
+        // /Artifact BMC is in the page content stream - requires compression off.
         InternalConfiguration.EnableCompression = false;
         try
         {
@@ -227,12 +227,12 @@ public class HardeningTests
             {
                 doc.Settings.HeaderTemplate = pageNum => new TextBlock
                 {
-                    Text = $"Header — page {pageNum}",
+                    Text = $"Header - page {pageNum}",
                     FontSize = 9, TextColor = Color.Slate500,
                 };
                 doc.Settings.FooterTemplate = pageNum => new TextBlock
                 {
-                    Text = $"— {pageNum} —",
+                    Text = $"- {pageNum} -",
                     FontSize = 9, TextColor = Color.Slate500,
                 };
                 doc.Add(new Heading("Body") { TocIdentifier = "b", Level = 1, FontSize = 18 });
@@ -254,7 +254,7 @@ public class HardeningTests
     [Fact]
     public void Fixture09_NestedLayout_PreservesStructHierarchy()
     {
-        // VerticalStack itself isn't IRoleProvider — it's a layout
+        // VerticalStack itself isn't IRoleProvider - it's a layout
         // primitive that doesn't claim a semantic role. Inner content
         // (the Table) still gets tagged correctly.
         string pdf = Encoding.ASCII.GetString(GenerateTagged(doc =>
@@ -312,7 +312,7 @@ public class HardeningTests
             {
                 Data = "https://example.com",
                 Size = 60,
-                AltText = "Year 2026 — projection",
+                AltText = "Year 2026 - projection",
             });
         }));
 
@@ -320,7 +320,7 @@ public class HardeningTests
         Assert.Matches(@"/Alt <FEFF[0-9A-F]*2014[0-9A-F]*>", pdf);
     }
 
-    // ── 11. this feature Stage 2 — real PDF/A when fonts are registered ────────
+    // ── 11. this feature Stage 2 - real PDF/A when fonts are registered ────────
 
     [Fact]
     public void Fixture11a_FontManager_HasBundledFonts_AfterStaticInit()

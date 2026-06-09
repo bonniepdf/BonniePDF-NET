@@ -208,7 +208,7 @@ public sealed class StructureTreeWriter
         if (!string.IsNullOrEmpty(element.Title))
             dict["/T"] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.Title);
 
-        // /A — attributes dictionary (raw PDF syntax provided by caller).
+        // /A - attributes dictionary (raw PDF syntax provided by caller).
         // Tables use this for /ColSpan; future stages may use it for
         // /RowSpan and list characteristics.
         if (!string.IsNullOrEmpty(element.Attributes))
@@ -264,7 +264,7 @@ public sealed class StructureTreeWriter
 
             if (entries.Count == 0)
             {
-                // Empty page-level array — keeps the key→value mapping
+                // Empty page-level array - keeps the key→value mapping
                 // contiguous even for pages with no marked content.
                 parts.Add("[ ]");
                 continue;
@@ -341,7 +341,7 @@ public sealed class StructureTreeWriter
             }
             else if (pageIds != null)
             {
-                // MCIDs span pages — emit /MCR dicts with explicit /Pg.
+                // MCIDs span pages - emit /MCR dicts with explicit /Pg.
                 for (int i = 0; i < element.McIds.Count; i++)
                 {
                     int mcid = element.McIds[i];
@@ -352,14 +352,14 @@ public sealed class StructureTreeWriter
                     }
                     else
                     {
-                        // Defensive fallback — bare int.
+                        // Defensive fallback - bare int.
                         parts.Add(mcid.ToString(CultureInfo.InvariantCulture));
                     }
                 }
             }
             else
             {
-                // Test mode (no page IDs) — bare ints, no /Pg.
+                // Test mode (no page IDs) - bare ints, no /Pg.
                 foreach (var mcid in element.McIds)
                     parts.Add(mcid.ToString(CultureInfo.InvariantCulture));
             }

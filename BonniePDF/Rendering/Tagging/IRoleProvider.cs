@@ -9,7 +9,7 @@ namespace BonniePDF.Rendering.Tagging;
 ///
 /// Elements that don't implement this interface render as before with
 /// no structure-tree contribution. Implementing the interface is
-/// strictly additive — untagged documents are unaffected because the
+/// strictly additive - untagged documents are unaffected because the
 /// pipeline checks <c>RenderContext.Tagging</c> first.
 /// </summary>
 public interface IRoleProvider

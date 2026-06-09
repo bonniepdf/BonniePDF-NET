@@ -12,13 +12,13 @@ namespace BonniePDF.Examples.Typography.TextAlignment;
 ///
 /// Demonstrates left, centre, right, and justified alignment. Section headers are /H2
 /// structure elements; each aligned paragraph is a /P. Alignment is purely presentational
-/// and does not affect the structure-tree type — all four paragraphs are /P.
+/// and does not affect the structure-tree type - all four paragraphs are /P.
 ///
 /// Acceptance: VeraPDF profile ua1 reports zero failures.
 /// </summary>
 [System.ComponentModel.DisplayName("Text Alignment (PDF/UA-1)")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("PDF/UA-1 tagged text showing left, centre, right, and justified alignment — each paragraph tagged as /P.")]
+[System.ComponentModel.Description("PDF/UA-1 tagged text showing left, centre, right, and justified alignment - each paragraph tagged as /P.")]
 public static class TextAlignmentTaggedExample
 {
     private const string SampleText =
@@ -33,7 +33,7 @@ public static class TextAlignmentTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Text Alignment — Tagged (PDF/UA-1)",
+                Title    = "Text Alignment - Tagged (PDF/UA-1)",
                 Author   = "BonniePDF",
                 Subject  = "Demonstrates all four text alignments in a PDF/UA-1 accessible document.",
                 Keywords = "pdf, pdf/ua, accessibility, text, alignment, justified",
@@ -64,7 +64,7 @@ public static class TextAlignmentTaggedExample
 
         doc.Add(new TextBlock
         {
-            Text   = "The four standard alignments are shown below. Each paragraph carries the same text and the same /P structure-tree role — alignment is a purely visual property.",
+            Text   = "The four standard alignments are shown below. Each paragraph carries the same text and the same /P structure-tree role - alignment is a purely visual property.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 

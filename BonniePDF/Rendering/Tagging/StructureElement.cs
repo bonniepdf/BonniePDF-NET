@@ -52,7 +52,7 @@ public sealed class StructureElement
     /// <c>McIds[i]</c> was emitted). The structure-tree writer uses
     /// this to emit <c>/Pg</c> on the StructElem (when all MCIDs share
     /// a page) or <c>/MCR</c> dicts with explicit <c>/Pg</c> per entry
-    /// (when MCIDs span multiple pages — which happens whenever a
+    /// (when MCIDs span multiple pages - which happens whenever a
     /// tagged element overflows past a page break).
     /// </summary>
     public IList<int> McIdPages { get; } = new List<int>();
@@ -66,33 +66,33 @@ public sealed class StructureElement
     public IList<(int annotId, int pageObjectId)> ObjrAnnotations { get; } = new System.Collections.Generic.List<(int, int)>();
 
     /// <summary>
-    /// <c>/Alt</c> alternate text — read by assistive tech in place of
+    /// <c>/Alt</c> alternate text - read by assistive tech in place of
     /// the visible content. Required by PDF/UA on <see cref="SemanticRole.Figure"/>
     /// elements that aren't <see cref="SemanticRole.Artifact"/>.
     /// </summary>
     public string Alt { get; set; }
 
     /// <summary>
-    /// <c>/ActualText</c> — the literal text equivalent of the
+    /// <c>/ActualText</c> - the literal text equivalent of the
     /// rendered content. Used for ligatures, decorative letterforms, and
     /// figures whose visible content is itself words (e.g. a logo).
     /// </summary>
     public string ActualText { get; set; }
 
     /// <summary>
-    /// <c>/Lang</c> — BCP-47 language tag for this subtree.
+    /// <c>/Lang</c> - BCP-47 language tag for this subtree.
     /// Overrides the document-level language for content underneath.
     /// </summary>
     public string Lang { get; set; }
 
     /// <summary>
-    /// <c>/T</c> — a short title for the structure element. Used by
+    /// <c>/T</c> - a short title for the structure element. Used by
     /// some viewers' navigation panes.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// <c>/A</c> — raw structure-element attributes dictionary as PDF
+    /// <c>/A</c> - raw structure-element attributes dictionary as PDF
     /// syntax (e.g. <c>"&lt;&lt; /O /Table /ColSpan 2 &gt;&gt;"</c>).
     /// Used for table cell column/row spans, list label characteristics,
     /// and other attribute-owner-namespaced metadata per ISO 32000-1

@@ -10,7 +10,7 @@ namespace BonniePDF.Metadata;
 /// with its own XML namespace prefix.
 ///
 /// Per the this feature design (<c>the specification</c>),
-/// XMP injection must be additive — every conformance feature
+/// XMP injection must be additive - every conformance feature
 /// (current PDF/A, PDF/UA from this feature, ZUGFeRD's <c>fx</c> later)
 /// registers through this same hook so no one feature has to rewrite
 /// the packet.
@@ -28,7 +28,7 @@ internal sealed class XmpConformanceBlock
 
     /// <summary>
     /// Optional PDF/A extension-schema descriptor. Set when this block's
-    /// namespace is NOT one of the schemas predefined by ISO 19005 — in
+    /// namespace is NOT one of the schemas predefined by ISO 19005 - in
     /// which case PDF/A-2/3 §6.6.2.3.1 requires the namespace to be
     /// declared in a <c>pdfaExtension:schemas</c> bag. <c>null</c> when
     /// the namespace is already predefined (e.g. <c>pdfaid</c>) and no

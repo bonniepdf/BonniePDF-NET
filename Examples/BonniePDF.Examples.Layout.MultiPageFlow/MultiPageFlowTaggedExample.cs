@@ -62,7 +62,7 @@ public static class MultiPageFlowTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Employee Directory — Tagged (PDF/UA-1)",
+                Title    = "Employee Directory - Tagged (PDF/UA-1)",
                 Author   = "BonniePDF",
                 Subject  = "Multi-page flow demonstration with tagged table and prose sections.",
                 Keywords = "pdf, pdf/ua, accessibility, table, multi-page",

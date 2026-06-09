@@ -367,7 +367,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         string openAction = GetOpenActionString(firstPageId, settings);
         dict["/OpenAction"] = openAction;
 
-        // Add PageMode — auto-set to UseOutlines when outlines are present
+        // Add PageMode - auto-set to UseOutlines when outlines are present
         if (options?.OutlinesId > 0)
             dict["/PageMode"] = "/UseOutlines";
         else if (settings.PageMode != PageMode.UseNone)

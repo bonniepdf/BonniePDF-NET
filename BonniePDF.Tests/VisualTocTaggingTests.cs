@@ -17,7 +17,7 @@ namespace BonniePDF.Tests;
 /// element) containing one <c>/TOCI</c> per entry (pushed directly by
 /// <c>DrawTaggedTocEntry</c>).
 ///
-/// The plan's TOCI > Reference + Lbl nested shape is deferred — the
+/// The plan's TOCI > Reference + Lbl nested shape is deferred - the
 /// current TOC renders heading text + page number as marked-content
 /// inside each TOCI directly, which is a valid PDF/UA TOC
 /// representation. Splitting the inner content into separate
@@ -44,7 +44,7 @@ public class VisualTocTaggingTests
     [Fact]
     public void TociCountMatchesHeadingCount()
     {
-        // Three headings registered, three matching TOC entries — should
+        // Three headings registered, three matching TOC entries - should
         // produce exactly three TOCI struct elements.
         string pdf = GenerateTaggedTocPdf();
         Assert.Equal(3, SubstringCounter.Count(pdf, "/S /TOCI"));

@@ -22,7 +22,7 @@ namespace BonniePDF.Examples.Typography.EmojisAndUnicode;
 /// </summary>
 [System.ComponentModel.DisplayName("Emojis & Unicode (PDF/UA-1)")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("PDF/UA-1 tagged emoji and supplementary Unicode — section headings tagged as /H2, emoji paragraphs as /P.")]
+[System.ComponentModel.Description("PDF/UA-1 tagged emoji and supplementary Unicode - section headings tagged as /H2, emoji paragraphs as /P.")]
 public static class EmojiTaggedExample
 {
     public static Document? Generate()
@@ -47,7 +47,7 @@ public static class EmojiTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Emoji & Unicode — Tagged (PDF/UA-1)",
+                Title    = "Emoji & Unicode - Tagged (PDF/UA-1)",
                 Author   = "BonniePDF",
                 Subject  = "Demonstrates supplementary Unicode and emoji rendering in a PDF/UA-1 accessible document.",
                 Keywords = "pdf, pdf/ua, accessibility, emoji, unicode",

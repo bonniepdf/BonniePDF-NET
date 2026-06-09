@@ -11,7 +11,7 @@ namespace BonniePDF.Examples.Elements.ShapesAndBorders;
 /// <summary>
 /// Demonstrates rounded rectangles (corner radius) on containers and bordered elements
 /// using the Fluent API.
-/// All sections use chained extension methods — no property-initialiser syntax.
+/// All sections use chained extension methods - no property-initialiser syntax.
 /// The card layout uses doc.Page → col.Item().Row(row => { row.RelativeItem(1)... })
 /// with each card built inline.
 /// </summary>
@@ -93,7 +93,7 @@ public static class ShapesAndBordersExampleFluent
                         .Border(2, Color.FromHex("#f59e0b"))
                         .CornerRadius(10)
                         .Margin(0, 0, 0, 12)
-                        .Text("Rounded border combined with a background fill — great for alert boxes and callouts.")
+                        .Text("Rounded border combined with a background fill - great for alert boxes and callouts.")
                         .TextColor(Color.FromHex("#92400e"));
 
                     // ── Section 3: Card Layout ────────────────────────────────

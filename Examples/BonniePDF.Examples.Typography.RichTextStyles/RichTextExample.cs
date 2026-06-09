@@ -193,9 +193,9 @@ public static class RichTextExample
             .Span("full justification", new TextStyle().Bold())
             .Span(" where the text is evenly distributed across the line width. This works with ")
             .Span("mixed styles", new TextStyle().WithItalic())
-            .Span(" — each span maintains its own formatting while the spacing between words is adjusted to fill the available width. The last line remains left-aligned as per standard typographic convention."));
+            .Span(" - each span maintains its own formatting while the spacing between words is adjusted to fill the available width. The last line remains left-aligned as per standard typographic convention."));
 
-        // --- Section 11: Practical example — legal disclaimer ---
+        // --- Section 11: Practical example - legal disclaimer ---
         doc.Add(new Spacer(12));
         doc.Add(new Line { Color = Color.Slate300, Thickness = 1 });
         doc.Add(CreateSectionHeader("Practical Example: Legal Disclaimer"));

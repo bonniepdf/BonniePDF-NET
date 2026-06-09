@@ -27,7 +27,7 @@ public class Document : IDisposable
 
     /// <summary>
     /// Recoverable issues collected during the most recent Save / SaveAsync /
-    /// ToByteArray call — typically font load failures or subset fallbacks.
+    /// ToByteArray call - typically font load failures or subset fallbacks.
     /// Empty before generation. Call <see cref="PrintDiagnostics"/> to surface
     /// them via the console, or inspect directly to feed into custom UI /
     /// telemetry.
@@ -37,7 +37,7 @@ public class Document : IDisposable
     /// <summary>
     /// Convenience: writes each diagnostic to <see cref="Console.Error"/> /
     /// <see cref="Console.Out"/> according to its severity. Library code never
-    /// calls this implicitly — callers opt in.
+    /// calls this implicitly - callers opt in.
     /// </summary>
     public void PrintDiagnostics() => _diagnostics.Print();
 
@@ -390,7 +390,7 @@ public class Document : IDisposable
                 "AES-256 encryption requires PdfVersion.Pdf17. Set Settings.Version = PdfVersion.Pdf17.");
         }
 
-        // PDF/A requires PDF 1.7. Silently upgrade rather than throw —
+        // PDF/A requires PDF 1.7. Silently upgrade rather than throw -
         // the caller asked for archival output, so honour that intent.
         if (Settings.Conformance != PdfAConformance.None && Settings.Version != PdfVersion.Pdf17)
         {

@@ -74,7 +74,7 @@ public static class FontFamilyResolver
         // If it's a TTF file path, check custom families first
         if (family.EndsWith(".ttf", System.StringComparison.OrdinalIgnoreCase) ||
             family.EndsWith(".otf", System.StringComparison.OrdinalIgnoreCase))
-            return family; // Direct file path — no variant resolution
+            return family; // Direct file path - no variant resolution
 
         bool isBold = weight >= FontWeight.SemiBold;
 
@@ -129,15 +129,15 @@ public static class FontFamilyResolver
     {
         return name switch
         {
-            // Helvetica variants — base "Helvetica" excluded so Bold/Italic can still be applied
+            // Helvetica variants - base "Helvetica" excluded so Bold/Italic can still be applied
             Typography.StandardFonts.HelveticaBold
                 or Typography.StandardFonts.HelveticaOblique
                 or Typography.StandardFonts.HelveticaBoldOblique
-            // Times variants — base "Times-Roman" excluded so Bold/Italic can still be applied
+            // Times variants - base "Times-Roman" excluded so Bold/Italic can still be applied
                 or Typography.StandardFonts.TimesBold
                 or Typography.StandardFonts.TimesItalic
                 or Typography.StandardFonts.TimesBoldItalic
-            // Courier variants — base "Courier" excluded so Bold/Italic can still be applied
+            // Courier variants - base "Courier" excluded so Bold/Italic can still be applied
                 or Typography.StandardFonts.CourierBold
                 or Typography.StandardFonts.CourierOblique
                 or Typography.StandardFonts.CourierBoldOblique

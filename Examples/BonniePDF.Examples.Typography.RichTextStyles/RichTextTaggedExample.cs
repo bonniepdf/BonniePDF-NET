@@ -18,7 +18,7 @@ namespace BonniePDF.Examples.Typography.RichTextStyles;
 /// </summary>
 [System.ComponentModel.DisplayName("Rich Text Styles (PDF/UA-1)")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("PDF/UA-1 tagged mixed-style rich text — section headings tagged as /H2, rich paragraphs as /P.")]
+[System.ComponentModel.Description("PDF/UA-1 tagged mixed-style rich text - section headings tagged as /H2, rich paragraphs as /P.")]
 public static class RichTextTaggedExample
 {
     public static Document Generate()
@@ -27,7 +27,7 @@ public static class RichTextTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Rich Text (Mixed Styling) — Tagged (PDF/UA-1)",
+                Title    = "Rich Text (Mixed Styling) - Tagged (PDF/UA-1)",
                 Author   = "BonniePDF",
                 Subject  = "Demonstrates mixed inline text styles in a PDF/UA-1 accessible document.",
                 Keywords = "pdf, pdf/ua, accessibility, rich text, inline styles",
@@ -46,7 +46,7 @@ public static class RichTextTaggedExample
             },
         };
 
-        doc.Add(new Heading("Rich Text (Mixed Styling) — PDF/UA-1")
+        doc.Add(new Heading("Rich Text (Mixed Styling) - PDF/UA-1")
         {
             TocIdentifier = "intro",
             Level         = 1,
@@ -139,7 +139,7 @@ public static class RichTextTaggedExample
         .Span("full justification", new TextStyle().Bold())
         .Span(" where the text is evenly distributed across the line width. This works with ")
         .Span("mixed styles", new TextStyle().WithItalic())
-        .Span(" — each span maintains its own formatting while the spacing between words is adjusted to fill the available width.")
+        .Span(" - each span maintains its own formatting while the spacing between words is adjusted to fill the available width.")
         );
 
         // ── Practical: legal disclaimer ────────────────────────────────────────

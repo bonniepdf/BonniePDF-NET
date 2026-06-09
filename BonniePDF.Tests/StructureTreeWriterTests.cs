@@ -91,7 +91,7 @@ public class StructureTreeWriterTests
         var span = writer.Objects.First(o =>
             o.Dict["/Type"] == "/StructElem" && o.Dict["/S"] == "/Span");
 
-        // P's /K = [ Span_ref, 0, 1, 3 ] — struct refs first, then MCIDs.
+        // P's /K = [ Span_ref, 0, 1, 3 ] - struct refs first, then MCIDs.
         Assert.Equal($"[ {span.Id} 0 R 0 1 3 ]", p.Dict["/K"]);
         // Span has only MCID 2.
         Assert.Equal("[ 2 ]", span.Dict["/K"]);
@@ -169,7 +169,7 @@ public class StructureTreeWriterTests
 
         public void WriteObject(int id, IDictionary<string, string> dict, string streamContent = null)
         {
-            // Snapshot the dict — the production writer reads it once and
+            // Snapshot the dict - the production writer reads it once and
             // emits, but the tests want to assert against the recorded copy.
             Objects.Add(new EmittedObject(id, new Dictionary<string, string>(dict)));
         }

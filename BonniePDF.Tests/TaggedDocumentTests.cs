@@ -11,7 +11,7 @@ namespace BonniePDF.Tests;
 /// PDF/UA-1, saves it, and inspects the raw bytes for the catalog
 /// entries that the writer should now emit.
 ///
-/// VeraPDF integration lives in <c>BonniePDF.Validation</c> — these
+/// VeraPDF integration lives in <c>BonniePDF.Validation</c> - these
 /// tests just verify that the byte-level wiring is present so a
 /// validator run can pick up from here.
 /// </summary>

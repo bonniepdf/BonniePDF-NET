@@ -9,7 +9,7 @@ namespace BonniePDF.Examples.Typography.TextDecorations;
 
 /// <summary>
 /// Demonstrates text decorations (underline and strikethrough) using the Fluent API.
-/// All sections use chained extension methods — no property-initialiser syntax.
+/// All sections use chained extension methods - no property-initialiser syntax.
 /// </summary>
 [System.ComponentModel.DisplayName("Text Decorations (Fluent API)")]
 [System.ComponentModel.Category("Typography")]
@@ -34,7 +34,7 @@ public static class TextDecorationExampleFluent
                 settings.PdfAEnabled = true;
             });
 
-            // Helvetica 12pt as document default — section headers override size only
+            // Helvetica 12pt as document default - section headers override size only
             doc.WithDefaultTextStyle(style => style
                 .WithFamily(StandardFonts.Helvetica)
                 .WithSize(12));
@@ -92,7 +92,7 @@ public static class TextDecorationExampleFluent
                         .Margin(0, 0, 0, 12);
 
                     column.Item()
-                        .Text("Chained decorations are additive: .Underline().Strikethrough() — both apply.")
+                        .Text("Chained decorations are additive: .Underline().Strikethrough() - both apply.")
                         .TextColor(Color.Slate700)
                         .Underline()
                         .Strikethrough()
@@ -140,7 +140,7 @@ public static class TextDecorationExampleFluent
                     column.Item().Margin(0, 4, 0, 4).Line(1, Color.Slate300);
                     SectionHeader(column, "Practical Example: Price List");
 
-                    // Original price — struck through, muted
+                    // Original price - struck through, muted
                     column.Item()
                         .Text("Original Price: $199.99")
                         .FontSize(14)
@@ -148,7 +148,7 @@ public static class TextDecorationExampleFluent
                         .Strikethrough()
                         .Margin(0, 0, 0, 4);
 
-                    // Sale price — bold, red, underlined for emphasis
+                    // Sale price - bold, red, underlined for emphasis
                     column.Item()
                         .Text("Sale Price: $149.99")
                         .Bold()

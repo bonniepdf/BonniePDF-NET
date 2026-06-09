@@ -11,7 +11,7 @@ namespace BonniePDF.Fluent.Extensions;
 
 /// <summary>
 /// Fluent extension methods for adding content elements to containers.
-/// These are typically terminal methods — they create an element and end the chain,
+/// These are typically terminal methods - they create an element and end the chain,
 /// or return the concrete element type for element-specific styling.
 /// </summary>
 public static class ContainerElementExtensions

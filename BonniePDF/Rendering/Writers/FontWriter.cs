@@ -90,7 +90,7 @@ public class FontWriter
         WriteFontFile2(fontFile2Id, fontData);
 
         // 2. Write CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap
-        //    domain (0..MaxOriginalGid) — see BuildCIDSetData.
+        //    domain (0..MaxOriginalGid) - see BuildCIDSetData.
         int cidSetId = 0;
         if (enableSubsetting && subsetter != null)
         {
@@ -185,7 +185,7 @@ public class FontWriter
     }
 
     /// <summary>
-    /// Writes the CIDSet stream — a bit-field identifying which CIDs are present
+    /// Writes the CIDSet stream - a bit-field identifying which CIDs are present
     /// in the embedded CIDFont file. Required for PDF/A-1b compliance (ISO 19005-1:2005, 6.3.5).
     /// Each bit corresponds to a CID; bit 7 of byte 0 = CID 0, bit 6 = CID 1, etc.
     /// </summary>
@@ -199,8 +199,8 @@ public class FontWriter
     /// Builds the CIDSet bit-field for a CIDFontType2 subset.
     ///
     /// The CIDSet must mirror the CIDToGIDMap's domain (CIDs 0..maxCid). VeraPDF
-    /// (PDF/UA-1, clause 7.21.4.2) treats every in-range CID as "present" — an
-    /// unmapped CIDToGIDMap entry points at GID 0, which is &lt; numGlyphs — and
+    /// (PDF/UA-1, clause 7.21.4.2) treats every in-range CID as "present" - an
+    /// unmapped CIDToGIDMap entry points at GID 0, which is &lt; numGlyphs - and
     /// requires the CIDSet to mark all of them, so set every bit 0..maxCid.
     /// Bit ordering: bit 7 of byte 0 = CID 0, bit 6 of byte 0 = CID 1, etc.
     /// </summary>
@@ -363,7 +363,7 @@ public class FontWriter
         await WriteFontFile2Async(fontFile2Id, fontData, cancellationToken).ConfigureAwait(false);
 
         // 2. Write CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap
-        //    domain (0..MaxOriginalGid) — see BuildCIDSetData.
+        //    domain (0..MaxOriginalGid) - see BuildCIDSetData.
         int cidSetId = 0;
         if (enableSubsetting && subsetter != null)
         {

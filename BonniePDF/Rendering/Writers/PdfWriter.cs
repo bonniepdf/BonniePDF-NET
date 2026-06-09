@@ -205,7 +205,7 @@ public class PdfWriter : IPdfWriter, IDisposable
             // this feature / PDF/UA rule 7-18: /Contents on the annotation must
             // carry an alt-text that mirrors the visible link text. Used
             // by screen readers when the structure tree omits or can't
-            // resolve the link's text. Emitted unconditionally — even
+            // resolve the link's text. Emitted unconditionally - even
             // untagged docs benefit, and the field is a no-op for
             // viewers that don't surface annotation alt-text.
             ["/Contents"] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
@@ -362,7 +362,7 @@ public class PdfWriter : IPdfWriter, IDisposable
         string openAction = GetOpenActionString(firstPageId, settings);
         dict["/OpenAction"] = openAction;
 
-        // Add PageMode — auto-set to UseOutlines when outlines are present
+        // Add PageMode - auto-set to UseOutlines when outlines are present
         if (options?.OutlinesId > 0)
             dict["/PageMode"] = "/UseOutlines";
         else if (settings.PageMode != PageMode.UseNone)

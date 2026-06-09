@@ -281,7 +281,7 @@ public class RichText : ElementBase, IStatefulElement
 
             if (currentWidth + totalNeeded > maxWidth && currentWidth > 0)
             {
-                // Line is full — wrap to next line
+                // Line is full - wrap to next line
                 currentLine.TotalWidth = currentWidth;
                 UpdateLineHeight(currentLine);
                 lines.Add(currentLine);
@@ -667,7 +667,7 @@ internal class StyledWord
     /// The style to use when rendering the leading space character.
     /// For intra-span spaces (space between words within the same span) this equals Style.
     /// For inter-span spaces (trailing space from the preceding span) this is the preceding
-    /// span's resolved style — so the space inherits that span's background/color, not the
+    /// span's resolved style - so the space inherits that span's background/color, not the
     /// following word's background/color.
     /// </summary>
     public TextStyle LeadingSpaceStyle { get; set; }

@@ -32,7 +32,7 @@ public static class TextAlignmentExampleFluent
                 settings.PdfAEnabled = true;
             });
 
-            // Body text defaults to Times Roman 11pt — only headers need overrides
+            // Body text defaults to Times Roman 11pt - only headers need overrides
             doc.WithDefaultTextStyle(style => style
                 .WithFamily(StandardFonts.TimesRoman)
                 .WithSize(11));
@@ -41,7 +41,7 @@ public static class TextAlignmentExampleFluent
             {
                 page.Content().Column(column =>
                 {
-                    // Title — override family and size; weight resolved automatically
+                    // Title - override family and size; weight resolved automatically
                     column.Item()
                         .Text("Text Alignment Comparison")
                         .Font(StandardFonts.Helvetica)
@@ -57,7 +57,7 @@ public static class TextAlignmentExampleFluent
                         "the margins, creating a clean, professional look commonly seen in books, newspapers, " +
                         "and formal documents.";
 
-                    // Left-aligned (default) — no alignment call needed
+                    // Left-aligned (default) - no alignment call needed
                     column.Item().Text("Left Aligned (Default)")
                         .Font(StandardFonts.Helvetica).Bold().FontSize(13)
                         .TextColor(Color.Indigo600).Margin(0, 0, 0, 6);
@@ -89,7 +89,7 @@ public static class TextAlignmentExampleFluent
                         .AlignRight()
                         .Margin(0, 0, 0, 20);
 
-                    // Justified — fluent .AlignJustify() extension
+                    // Justified - fluent .AlignJustify() extension
                     column.Item().Text("Justified")
                         .Font(StandardFonts.Helvetica).Bold().FontSize(13)
                         .TextColor(Color.Indigo600).Margin(0, 0, 0, 6);

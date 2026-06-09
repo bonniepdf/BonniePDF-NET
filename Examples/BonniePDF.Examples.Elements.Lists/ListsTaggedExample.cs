@@ -18,7 +18,7 @@ namespace BonniePDF.Examples.Elements.Lists;
 /// </summary>
 [System.ComponentModel.DisplayName("Lists (PDF/UA-1)")]
 [System.ComponentModel.Category("Elements")]
-[System.ComponentModel.Description("PDF/UA-1 tagged ordered and unordered lists — L > LI > Lbl + LBody structure for full screen-reader compatibility.")]
+[System.ComponentModel.Description("PDF/UA-1 tagged ordered and unordered lists - L > LI > Lbl + LBody structure for full screen-reader compatibility.")]
 public static class ListsTaggedExample
 {
     public static Document Generate()
@@ -27,7 +27,7 @@ public static class ListsTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title = "Accessible Lists — Tagged (PDF/UA-1)",
+                Title = "Accessible Lists - Tagged (PDF/UA-1)",
                 Author = "BonniePDF",
                 Subject = "PDF/UA-1 tagged ordered and unordered lists with nested items.",
                 Keywords = "pdf, pdf/ua, accessibility, lists, ordered, unordered",

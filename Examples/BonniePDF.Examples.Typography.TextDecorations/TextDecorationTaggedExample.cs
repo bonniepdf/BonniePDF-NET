@@ -17,7 +17,7 @@ namespace BonniePDF.Examples.Typography.TextDecorations;
 /// </summary>
 [System.ComponentModel.DisplayName("Text Decorations (PDF/UA-1)")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("PDF/UA-1 tagged text with underline and strikethrough decorations — all paragraphs tagged as /P.")]
+[System.ComponentModel.Description("PDF/UA-1 tagged text with underline and strikethrough decorations - all paragraphs tagged as /P.")]
 public static class TextDecorationTaggedExample
 {
     public static Document Generate()
@@ -26,7 +26,7 @@ public static class TextDecorationTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Text Decorations — Tagged (PDF/UA-1)",
+                Title    = "Text Decorations - Tagged (PDF/UA-1)",
                 Author   = "BonniePDF",
                 Subject  = "Demonstrates text decorations in a PDF/UA-1 accessible document.",
                 Keywords = "pdf, pdf/ua, accessibility, text, underline, strikethrough",
@@ -45,7 +45,7 @@ public static class TextDecorationTaggedExample
             },
         };
 
-        doc.Add(new Heading("Text Decorations — PDF/UA-1")
+        doc.Add(new Heading("Text Decorations - PDF/UA-1")
         {
             TocIdentifier = "intro",
             Level         = 1,

@@ -27,7 +27,7 @@ public static class TextBlockOverflowTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Long Text Document — Tagged (PDF/UA-1)",
+                Title    = "Long Text Document - Tagged (PDF/UA-1)",
                 Author   = "BonniePDF",
                 Subject  = "Demonstrates a TextBlock spanning multiple pages in a PDF/UA-1 accessible document.",
                 Keywords = "pdf, pdf/ua, accessibility, text overflow, multi-page",
@@ -42,7 +42,7 @@ public static class TextBlockOverflowTaggedExample
                     .WithSize(11)
                     .WithColor(Color.Slate700),
 
-                // Page numbers in the footer are /Artifact — screen readers skip them.
+                // Page numbers in the footer are /Artifact - screen readers skip them.
                 FooterTemplate = pageNum => new TextBlock
                 {
                     Text      = $"Page {pageNum}",

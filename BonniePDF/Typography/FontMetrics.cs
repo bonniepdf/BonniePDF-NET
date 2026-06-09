@@ -260,7 +260,7 @@ public static class FontMetrics
         // characters) and queries real per-glyph advances. Without this, the
         // ASCII-only widths table below sees each surrogate code unit as an
         // unknown char and assigns the 500-unit fallback, badly under-measuring
-        // wide emoji glyphs — wrapping then fails to trigger and content runs
+        // wide emoji glyphs - wrapping then fails to trigger and content runs
         // off the page.
         if (!TtfFontLoadFailed.Contains(filepath))
         {

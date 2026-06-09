@@ -23,7 +23,7 @@ namespace BonniePDF.Examples.Typography.DickensNovel;
 /// </summary>
 [System.ComponentModel.DisplayName("Dickens: A Tale of Two Cities (PDF/UA-1)")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("PDF/UA-1 tagged complete Project Gutenberg novel — book and chapter headings tagged semantically.")]
+[System.ComponentModel.Description("PDF/UA-1 tagged complete Project Gutenberg novel - book and chapter headings tagged semantically.")]
 public static partial class DickensNovelTaggedExample
 {
     private const string LocalFilePath = @"C:\GITHUB\pg98.txt";
@@ -40,9 +40,9 @@ public static partial class DickensNovelTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "A Tale of Two Cities — Tagged (PDF/UA-1)",
+                Title    = "A Tale of Two Cities - Tagged (PDF/UA-1)",
                 Author   = "Charles Dickens",
-                Subject  = "Project Gutenberg eBook #98 — A public domain classic.",
+                Subject  = "Project Gutenberg eBook #98 - A public domain classic.",
                 Keywords = "pdf, pdf/ua, accessibility, dickens, novel, gutenberg",
             },
             Settings = new DocumentSettings
@@ -58,7 +58,7 @@ public static partial class DickensNovelTaggedExample
                     .WithSize(11)
                     .WithColor(Color.Slate900),
 
-                // Running header — tagged as /Artifact automatically.
+                // Running header - tagged as /Artifact automatically.
                 HeaderTemplate = pageNum =>
                 {
                     if (pageNum <= 1) return null;
@@ -73,7 +73,7 @@ public static partial class DickensNovelTaggedExample
                     };
                 },
 
-                // Page number footer — tagged as /Artifact automatically.
+                // Page number footer - tagged as /Artifact automatically.
                 FooterTemplate = pageNum =>
                 {
                     if (pageNum <= 1) return null;
@@ -194,7 +194,7 @@ public static partial class DickensNovelTaggedExample
                     break;
 
                 case SectionKind.Chapter:
-                    // Chapter number label (not a heading — it's presentational)
+                    // Chapter number label (not a heading - it's presentational)
                     doc.Add(new TextBlock
                     {
                         Text      = number,

@@ -124,7 +124,7 @@ internal static class PdfSyntax
         // Use EnumerateRunes to correctly handle surrogate pairs (emoji, CJK Extension B+)
         foreach (Rune rune in text.EnumerateRunes())
         {
-            // Skip control characters (newlines, tabs, etc.) — these are invisible
+            // Skip control characters (newlines, tabs, etc.) - these are invisible
             // in standard fonts and should not be encoded as glyphs
             if (Rune.IsControl(rune))
                 continue;

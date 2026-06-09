@@ -10,7 +10,7 @@ namespace BonniePDF.Examples.Basics.SimpleDocument;
 /// <summary>
 /// Demonstrates basic PDF creation using the Fluent API.
 /// Covers metadata, document settings, multi-page documents with a custom page size,
-/// and feature lists — all using chained extension methods instead of property-initialiser syntax.
+/// and feature lists - all using chained extension methods instead of property-initialiser syntax.
 /// </summary>
 [System.ComponentModel.DisplayName("Simple Document (Fluent API)")]
 [System.ComponentModel.Category("Basics")]

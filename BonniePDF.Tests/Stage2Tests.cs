@@ -87,7 +87,7 @@ public class Stage2Tests
     [Fact]
     public void HeaderTemplate_TaggedDocument_EmitsArtifactBmc()
     {
-        // /Artifact BMC is in the page content stream — requires compression off to find it.
+        // /Artifact BMC is in the page content stream - requires compression off to find it.
         InternalConfiguration.EnableCompression = false;
         try
         {
@@ -106,7 +106,7 @@ public class Stage2Tests
     [Fact]
     public void FooterTemplate_TaggedDocument_EmitsArtifactBmc()
     {
-        // /Artifact BMC is in the page content stream — requires compression off to find it.
+        // /Artifact BMC is in the page content stream - requires compression off to find it.
         InternalConfiguration.EnableCompression = false;
         try
         {

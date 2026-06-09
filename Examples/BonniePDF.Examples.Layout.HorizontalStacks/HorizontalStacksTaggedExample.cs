@@ -19,7 +19,7 @@ namespace BonniePDF.Examples.Layout.HorizontalStacks;
 /// </summary>
 [System.ComponentModel.DisplayName("Horizontal Stacks (PDF/UA-1)")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("PDF/UA-1 tagged horizontal layout blocks — text content inside stacks tagged as /P paragraphs.")]
+[System.ComponentModel.Description("PDF/UA-1 tagged horizontal layout blocks - text content inside stacks tagged as /P paragraphs.")]
 public static class HorizontalStacksTaggedExample
 {
     public static Document Generate()
@@ -28,7 +28,7 @@ public static class HorizontalStacksTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Horizontal Stacks — Tagged (PDF/UA-1)",
+                Title    = "Horizontal Stacks - Tagged (PDF/UA-1)",
                 Author   = "BonniePDF",
                 Subject  = "Demonstrates HorizontalStack layout in a PDF/UA-1 accessible document.",
                 Keywords = "pdf, pdf/ua, accessibility, layout, horizontal stack",

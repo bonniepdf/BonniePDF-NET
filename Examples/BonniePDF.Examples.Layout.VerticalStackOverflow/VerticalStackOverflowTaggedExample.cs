@@ -20,7 +20,7 @@ namespace BonniePDF.Examples.Layout.VerticalStackOverflow;
 /// </summary>
 [System.ComponentModel.DisplayName("VerticalStack Overflow (PDF/UA-1)")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("PDF/UA-1 tagged VerticalStack spanning multiple pages — each item's text tagged semantically.")]
+[System.ComponentModel.Description("PDF/UA-1 tagged VerticalStack spanning multiple pages - each item's text tagged semantically.")]
 public static class VerticalStackOverflowTaggedExample
 {
     public static Document Generate()
@@ -29,7 +29,7 @@ public static class VerticalStackOverflowTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Item Catalogue — Tagged (PDF/UA-1)",
+                Title    = "Item Catalogue - Tagged (PDF/UA-1)",
                 Author   = "BonniePDF",
                 Subject  = "Demonstrates a VerticalStack spanning multiple pages in a PDF/UA-1 accessible document.",
                 Keywords = "pdf, pdf/ua, accessibility, vertical stack, multi-page",
@@ -58,11 +58,11 @@ public static class VerticalStackOverflowTaggedExample
 
         doc.Add(new TextBlock
         {
-            Text   = "A collection of items demonstrating automatic pagination. Each item is an independent tagged element — its heading is /H3 and its description is /P in the structure tree.",
+            Text   = "A collection of items demonstrating automatic pagination. Each item is an independent tagged element - its heading is /H3 and its description is /P in the structure tree.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 
-        // 75 items — enough to span several pages
+        // 75 items - enough to span several pages
         var stack = new VerticalStack();
 
         var source = Placeholders.WithSeed(401);

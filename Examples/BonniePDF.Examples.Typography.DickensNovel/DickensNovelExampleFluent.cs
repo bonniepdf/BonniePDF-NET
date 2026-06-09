@@ -18,12 +18,12 @@ namespace BonniePDF.Examples.Typography.DickensNovel;
 /// (pg98.txt) and renders it as a beautifully formatted multi-hundred-page PDF.
 ///
 /// Key Fluent API patterns demonstrated:
-/// • <c>doc.WithDefaultTextStyle()</c> — Times Roman 11pt set once; all paragraphs inherit it.
-/// • <c>settings.Header() / settings.Footer()</c> — running headers and centred page numbers.
-/// • Multiple <c>doc.Page()</c> calls — title, TOC, and body are separate layout sections
+/// • <c>doc.WithDefaultTextStyle()</c> - Times Roman 11pt set once; all paragraphs inherit it.
+/// • <c>settings.Header() / settings.Footer()</c> - running headers and centred page numbers.
+/// • Multiple <c>doc.Page()</c> calls - title, TOC, and body are separate layout sections
 ///   (equivalent to the traditional API's <c>doc.AddPage()</c> page-break calls).
-/// • <c>column.Item().Element(new Heading { ... })</c> — escape hatch for TOC-registered headings.
-/// • <c>column.Item().Element(new VisualToc { ... })</c> — escape hatch for the visual TOC.
+/// • <c>column.Item().Element(new Heading { ... })</c> - escape hatch for TOC-registered headings.
+/// • <c>column.Item().Element(new VisualToc { ... })</c> - escape hatch for the visual TOC.
 ///
 /// Source file expected at C:\GITHUB\pg98.txt.
 /// Download from https://www.gutenberg.org/cache/epub/98/pg98.txt if not present.
@@ -61,7 +61,7 @@ public static partial class DickensNovelExampleFluent
             {
                 metadata.Title   = "A Tale of Two Cities";
                 metadata.Author  = "Charles Dickens";
-                metadata.Subject = "Project Gutenberg eBook #98 — A public domain classic.";
+                metadata.Subject = "Project Gutenberg eBook #98 - A public domain classic.";
             });
 
             doc.WithSettings(settings =>
@@ -109,7 +109,7 @@ public static partial class DickensNovelExampleFluent
                 });
             });
 
-            // Document default: Times Roman 11pt — body paragraphs inherit this
+            // Document default: Times Roman 11pt - body paragraphs inherit this
             doc.WithDefaultTextStyle(style => style
                 .WithFamily(StandardFonts.TimesRoman)
                 .WithSize(11));
@@ -137,7 +137,7 @@ public static partial class DickensNovelExampleFluent
                         .Margin(0, 0, 0, 40);
 
                     column.Item()
-                        .Text("———————————————")
+                        .Text("---------------")
                         .FontSize(13)
                         .TextColor(Color.Slate400)
                         .AlignCenter()
@@ -159,7 +159,7 @@ public static partial class DickensNovelExampleFluent
                         .Margin(0, 0, 0, 4);
 
                     column.Item()
-                        .Text("Public domain — free to read, copy, and share.")
+                        .Text("Public domain - free to read, copy, and share.")
                         .Font(StandardFonts.TimesItalic)
                         .FontSize(9)
                         .TextColor(Color.Slate400)
@@ -180,7 +180,7 @@ public static partial class DickensNovelExampleFluent
                         .AlignCenter()
                         .Margin(0, 40, 0, 40);
 
-                    // VisualToc has no fluent equivalent — use Element() escape hatch
+                    // VisualToc has no fluent equivalent - use Element() escape hatch
                     column.Item().Element(new VisualToc
                     {
                         HeadingIdentifiers = tocIdentifiers,
@@ -228,13 +228,13 @@ public static partial class DickensNovelExampleFluent
     private static void AddBookHeading(ColumnDescriptor column, string title)
     {
         column.Item()
-            .Text("———————————————")
+            .Text("---------------")
             .FontSize(11)
             .TextColor(Color.Slate300)
             .AlignCenter()
             .Margin(0, 56, 0, 14);
 
-        // Heading registers TocIdentifier for VisualToc — requires Element() escape hatch
+        // Heading registers TocIdentifier for VisualToc - requires Element() escape hatch
         column.Item().Element(new Heading
         {
             TocIdentifier = title,
@@ -247,7 +247,7 @@ public static partial class DickensNovelExampleFluent
         });
 
         column.Item()
-            .Text("———————————————")
+            .Text("---------------")
             .FontSize(11)
             .TextColor(Color.Slate300)
             .AlignCenter()
@@ -281,7 +281,7 @@ public static partial class DickensNovelExampleFluent
 
     /// <summary>
     /// Renders a single body paragraph in 11pt justified Times Roman.
-    /// Font and size are inherited from the document default — only alignment is set.
+    /// Font and size are inherited from the document default - only alignment is set.
     /// </summary>
     private static void AddParagraph(ColumnDescriptor column, string text)
     {

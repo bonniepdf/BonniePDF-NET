@@ -35,7 +35,7 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
     /// </summary>
     protected void DrawBackground(RenderContext ctx, float x, float y, float width, float height, Color color)
     {
-        // Decorative fill — tag as an artifact so tagged (PDF/UA) output does not
+        // Decorative fill - tag as an artifact so tagged (PDF/UA) output does not
         // leave it as untagged content. No-op wrapper for non-tagged documents.
         ctx.Canvas.BeginArtifact();
         try
@@ -65,7 +65,7 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
     {
         if (!border.HasAnyBorder) return;
 
-        // Decorative strokes — tag as an artifact (no-op for non-tagged output).
+        // Decorative strokes - tag as an artifact (no-op for non-tagged output).
         ctx.Canvas.BeginArtifact();
         try
         {

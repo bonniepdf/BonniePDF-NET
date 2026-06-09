@@ -20,7 +20,7 @@ namespace BonniePDF.Tests;
 ///
 /// Annotation reachability from the structure tree (<c>/OBJR</c>
 /// + <c>/StructParent</c> + the corresponding <c>/ParentTree</c>
-/// keys) is intentionally deferred to a follow-up within stage 1 —
+/// keys) is intentionally deferred to a follow-up within stage 1 -
 /// see the design note in the matching commit message.
 /// </summary>
 public class HyperlinkTaggingTests
@@ -62,7 +62,7 @@ public class HyperlinkTaggingTests
     [Fact]
     public void LinkAnnotation_CarriesContentsMatchingLinkText()
     {
-        // Rule 7-18 — VeraPDF requires /Contents on every /Link
+        // Rule 7-18 - VeraPDF requires /Contents on every /Link
         // annotation in a tagged document. Emitted unconditionally so
         // untagged docs benefit too.
         string pdf = Encoding.ASCII.GetString(GenerateBytes(doc =>
@@ -83,7 +83,7 @@ public class HyperlinkTaggingTests
     [Fact]
     public void LinkContents_EscapesParenthesesInLinkText()
     {
-        // Defensive — link text that contains literal parens needs PDF
+        // Defensive - link text that contains literal parens needs PDF
         // escaping in the /Contents string literal.
         string pdf = Encoding.ASCII.GetString(GenerateBytes(doc =>
         {

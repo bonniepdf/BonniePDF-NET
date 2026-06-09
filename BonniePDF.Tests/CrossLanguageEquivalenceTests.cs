@@ -10,12 +10,12 @@ namespace BonniePDF.Tests;
 /// <summary>
 /// cross-language equivalence. The .NET and TS implementations
 /// must produce structurally-equivalent PDF/UA output (not
-/// byte-identical PDFs — object IDs differ between runs and between
-/// languages — but the same structure-tree shape).
+/// byte-identical PDFs - object IDs differ between runs and between
+/// languages - but the same structure-tree shape).
 ///
 /// This test extracts a "canonical fingerprint" from a generated PDF
-/// — a sorted list of <c>(role, count)</c> pairs for every
-/// <c>StructElem</c> in the output — and asserts the expected
+/// - a sorted list of <c>(role, count)</c> pairs for every
+/// <c>StructElem</c> in the output - and asserts the expected
 /// fingerprint for each of the three stage-1 exemplar fixtures. The
 /// corresponding TS test in
 /// <c>core/tests/cross-language-equivalence.test.ts</c> asserts the
@@ -86,8 +86,8 @@ public class CrossLanguageEquivalenceTests
         // semantics (re-emitted header rows produce extra TR/TH structs
         // per overflow boundary) and the per-page row-fit math, which
         // varies with font metrics. We assert the *set* of roles
-        // matches between languages — that's what equivalence really
-        // means — and require minimum counts that hold regardless of
+        // matches between languages - that's what equivalence really
+        // means - and require minimum counts that hold regardless of
         // pagination details.
         string pdf = Generate(Stage1CloseoutTests.BuildMultiPageFlowDocument());
         IDictionary<string, int> fp = Fingerprint(pdf);

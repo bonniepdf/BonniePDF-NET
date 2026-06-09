@@ -67,7 +67,7 @@ public static class CustomFontExampleFluent
             {
                 page.Content().Column(column =>
                 {
-                    // Title — inherits Arial TTF, overrides size only
+                    // Title - inherits Arial TTF, overrides size only
                     column.Item()
                         .Text("TrueType Font Embedding Demo (Fluent API)")
                         .FontSize(24)
@@ -144,13 +144,13 @@ public static class CustomFontExampleFluent
                         .TextColor(Color.Slate700)
                         .Margin(0, 0, 0, 6);
 
-                    // Standard Helvetica (Type1 — not embedded)
+                    // Standard Helvetica (Type1 - not embedded)
                     column.Item()
                         .Text("This line uses standard Helvetica (Type1, not embedded)")
                         .Font(StandardFonts.Helvetica)
                         .TextColor(Color.Slate600);
 
-                    // Embedded Arial (TrueType — inherits from default)
+                    // Embedded Arial (TrueType - inherits from default)
                     column.Item()
                         .Text("This line uses embedded Arial (TrueType, full Unicode)")
                         .TextColor(Color.Slate600)

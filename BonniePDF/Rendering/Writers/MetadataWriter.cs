@@ -124,7 +124,7 @@ public class MetadataWriter
     /// XMP (Extensible Metadata Platform) provides standardized metadata
     /// plus any conformance claims the document makes (PDF/A, PDF/UA, …).
     /// The conformance blocks are derived from <paramref name="settings"/>
-    /// via the additive-hook design — see <c>XmpConformanceBlock</c>.
+    /// via the additive-hook design - see <c>XmpConformanceBlock</c>.
     /// </summary>
     /// <param name="id">The object ID for the XMP metadata dictionary.</param>
     /// <param name="metadata">The document metadata.</param>

@@ -38,7 +38,7 @@ public enum ValidationProfile
     PDF_A_3a,
 
     /// <summary>
-    /// PDF/UA-1 — accessibility / Universal Accessibility (ISO 14289-1).
+    /// PDF/UA-1 - accessibility / Universal Accessibility (ISO 14289-1).
     /// Independent from PDF/A; a document can claim both.
     /// </summary>
     PDF_UA_1

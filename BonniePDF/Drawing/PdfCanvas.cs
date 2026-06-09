@@ -227,7 +227,7 @@ public class PdfCanvas : ICanvas
         BeginColorAlpha(color);
         PdfOperators.BeginText(_stream);
 
-        // Set font using the resolver — this MUST happen before glyph tracking
+        // Set font using the resolver - this MUST happen before glyph tracking
         // because RegisterFont creates the GlyphUsageTracker for embedded fonts.
         string fontResourceName = _fontResolver(fontFamily);
 

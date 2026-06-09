@@ -47,7 +47,7 @@ public static partial class DickensNovelExample
         string raw = LoadText();
         List<NovelSection> sections = ParseNovel(raw);
 
-        // A4 with 72 pt margins (~1 inch) gives 451 pt content width — ideal for body text.
+        // A4 with 72 pt margins (~1 inch) gives 451 pt content width - ideal for body text.
         DocumentSettings settings = new()
         {
             PageSize    = PdfSize.A4,
@@ -105,7 +105,7 @@ public static partial class DickensNovelExample
         Document doc = new(settings);
         doc.Metadata.Title   = "A Tale of Two Cities";
         doc.Metadata.Author  = "Charles Dickens";
-        doc.Metadata.Subject = "Project Gutenberg eBook #98 — A public domain classic.";
+        doc.Metadata.Subject = "Project Gutenberg eBook #98 - A public domain classic.";
 
         // ── Title Page ───────────────────────────────────────────────────────
         AddTitlePage(doc);
@@ -194,7 +194,7 @@ public static partial class DickensNovelExample
 
         doc.Add(new TextBlock
         {
-            Text      = "———————————————",
+            Text      = "---------------",
             FontName  = StandardFonts.TimesRoman,
             FontSize  = 13,
             TextColor = Color.Slate400,
@@ -224,7 +224,7 @@ public static partial class DickensNovelExample
 
         doc.Add(new TextBlock
         {
-            Text      = "Public domain — free to read, copy, and share.",
+            Text      = "Public domain - free to read, copy, and share.",
             FontName  = StandardFonts.TimesItalic,
             FontSize  = 9,
             TextColor = Color.Slate400,
@@ -241,7 +241,7 @@ public static partial class DickensNovelExample
     {
         doc.Add(new TextBlock
         {
-            Text      = "———————————————",
+            Text      = "---------------",
             FontName  = StandardFonts.TimesRoman,
             FontSize  = 11,
             TextColor = Color.Slate300,
@@ -262,7 +262,7 @@ public static partial class DickensNovelExample
 
         doc.Add(new TextBlock
         {
-            Text      = "———————————————",
+            Text      = "---------------",
             FontName  = StandardFonts.TimesRoman,
             FontSize  = 11,
             TextColor = Color.Slate300,
@@ -456,7 +456,7 @@ public static partial class DickensNovelExample
 internal enum SectionType { BookTitle, Chapter, Paragraph }
 
 /// <summary>
-/// Represents a single parsed section of the novel — a book division, chapter heading, or body paragraph.
+/// Represents a single parsed section of the novel - a book division, chapter heading, or body paragraph.
 /// </summary>
 internal sealed class NovelSection
 {
@@ -473,13 +473,13 @@ internal sealed class NovelSection
         Type   = type;
         Number = number;
         Title  = title;
-        Text   = $"{number} — {title}";
+        Text   = $"{number} - {title}";
     }
 
     /// <summary>Gets the type of this section (BookTitle, Chapter, or Paragraph).</summary>
     public SectionType Type   { get; }
 
-    /// <summary>Full text (BookTitle / Paragraph) or "CHAPTER X. — Title" (Chapter).</summary>
+    /// <summary>Full text (BookTitle / Paragraph) or "CHAPTER X. - Title" (Chapter).</summary>
     public string Text   { get; }
 
     /// <summary>e.g. "CHAPTER I."  (Chapter sections only)</summary>

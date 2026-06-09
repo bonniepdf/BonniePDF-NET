@@ -128,7 +128,7 @@ public class DocumentSettings
 
     /// <summary>
     /// Gets or sets the PDF/A archival conformance level. Default
-    /// <see cref="PdfAConformance.None"/> — the document is a normal PDF.
+    /// <see cref="PdfAConformance.None"/> - the document is a normal PDF.
     ///
     /// When set to any non-<see cref="PdfAConformance.None"/> value, the
     /// serializer auto-upgrades <see cref="Version"/> to PDF 1.7 (PDF/A
@@ -171,7 +171,7 @@ public class DocumentSettings
 
     /// <summary>
     /// Gets or sets the accessibility / tagged-PDF conformance mode.
-    /// Default <see cref="AccessibilityMode.None"/> — the writer
+    /// Default <see cref="AccessibilityMode.None"/> - the writer
     /// produces an untagged PDF and ignores all tagging machinery.
     /// Set to <see cref="AccessibilityMode.PdfUa1"/> to opt the
     /// document into PDF/UA-1 emission (structure tree, MCIDs, XMP

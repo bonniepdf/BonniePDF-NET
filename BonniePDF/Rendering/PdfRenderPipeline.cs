@@ -135,7 +135,7 @@ public static class PdfRenderPipeline
         // canvas's draw calls attach as marked content. Pop after.
         //
         // No-op when tagging is off (Tagging == null) or the element
-        // isn't an IRoleProvider — pre-G-1 elements behave exactly as
+        // isn't an IRoleProvider - pre-G-1 elements behave exactly as
         // they did.
         //
         // Known limitation deferred to a later stage-0 task: elements
@@ -232,7 +232,7 @@ public static class PdfRenderPipeline
                         wrapAttempts++;
                         if (wrapAttempts > MaxWrapAttempts)
                         {
-                            // Element cannot fit even on a fresh page — skip it to avoid infinite loop
+                            // Element cannot fit even on a fresh page - skip it to avoid infinite loop
                             statefulElement.ResetState();
                             return;
                         }
@@ -338,7 +338,7 @@ public static class PdfRenderPipeline
 
         // Now yield all rendered pages (including dynamically created ones)
         // IMPORTANT: Snapshot the count BEFORE the yield loop. Template rendering
-        // (headers/footers) can inadvertently trigger ctx.NewPage() — e.g. a Container's
+        // (headers/footers) can inadvertently trigger ctx.NewPage() - e.g. a Container's
         // pagination check fires when CurrentY is near MaxY during footer rendering.
         // If we evaluated ctx.Pages.Count on each iteration, new pages would be added
         // endlessly, causing an infinite loop.
@@ -359,7 +359,7 @@ public static class PdfRenderPipeline
             ctx.Margin = pageDimensions.TryGetValue(i, out dimensions) ? dimensions.Margin : settings.Margin;
             ctx.SwitchToPage(i);
 
-            // Render Watermark (behind all content — prepended to stream)
+            // Render Watermark (behind all content - prepended to stream)
             RenderWatermark(ctx, settings, i, pageSize.Width, pageSize.Height);
 
             // Render Templates (Headers/Footers)
@@ -410,7 +410,7 @@ public static class PdfRenderPipeline
         // Approximate text width for centering
         float textWidth = FontMetrics.GetStringWidth(wm.Text, StandardFonts.Helvetica, (int)wm.FontSize);
 
-        // Determine text encoding — embedded fonts use glyph ID hex strings
+        // Determine text encoding - embedded fonts use glyph ID hex strings
         TtfFont embeddedFont = ctx.ResolveEmbeddedFont(wm.FontName);
         string textOperand = embeddedFont != null
             ? PdfSyntax.ToGlyphIdHexString(wm.Text, embeddedFont)
@@ -425,7 +425,7 @@ public static class PdfRenderPipeline
         PdfOperators.BeginText(wmOps);
         PdfOperators.SetFont(wmOps, fontResourceName, wm.FontSize);
 
-        // PDF/A-1B forbids transparency — blend the color toward white to simulate opacity
+        // PDF/A-1B forbids transparency - blend the color toward white to simulate opacity
         Color fillColor = wm.TextColor;
         if (ctx.PdfAEnabled && wm.Opacity < 1.0f)
         {
@@ -480,7 +480,7 @@ public static class PdfRenderPipeline
             float contentWidth = ctx.PageSize.Width - ctx.Margin * 2;
             float startX = ctx.Margin;
 
-            // Render Header — centred within the top-margin band so it sits in
+            // Render Header - centred within the top-margin band so it sits in
             // its own region with breathing room above and below, rather than
             // flush against the page edge.
             if (hasHeader)
@@ -497,7 +497,7 @@ public static class PdfRenderPipeline
                 }
             }
 
-            // Render Footer — symmetric: centred within the bottom-margin band.
+            // Render Footer - symmetric: centred within the bottom-margin band.
             if (hasFooter)
             {
                 IElement footerElement = settings.FooterTemplate!(pageNumber);

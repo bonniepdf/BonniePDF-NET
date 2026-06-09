@@ -26,7 +26,7 @@ public static class BookPageLayoutTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "The Architecture of Memory — Tagged (PDF/UA-1)",
+                Title    = "The Architecture of Memory - Tagged (PDF/UA-1)",
                 Author   = "Professor Halloway",
                 Subject  = "Chapter III of 'The Architecture of Consciousness'.",
                 Keywords = "pdf, pdf/ua, accessibility, book, typography",
@@ -45,7 +45,7 @@ public static class BookPageLayoutTaggedExample
             },
         };
 
-        // Chapter label — plain paragraph (not a heading)
+        // Chapter label - plain paragraph (not a heading)
         doc.Add(new TextBlock
         {
             Text      = "CHAPTER III",
@@ -55,7 +55,7 @@ public static class BookPageLayoutTaggedExample
             Alignment = TextAlignment.Center,
         });
 
-        // Chapter title — H1
+        // Chapter title - H1
         doc.Add(new Heading("The Architecture of Memory")
         {
             TocIdentifier = "ch3",
@@ -76,7 +76,7 @@ public static class BookPageLayoutTaggedExample
 
         Body(doc,
             "“Memory,” he began, his voice gravelly with age, “is not a repository of facts, " +
-            "neatly cataloged and retrieved at will. It is something far more complex—a living, breathing " +
+            "neatly cataloged and retrieved at will. It is something far more complex-a living, breathing " +
             "architecture that shapes and is shaped by who we are.”",
             StandardFonts.TimesItalic);
 
@@ -89,16 +89,16 @@ public static class BookPageLayoutTaggedExample
         Body(doc,
             "Halloway smiled, and for a moment, the years seemed to fall away. “An excellent question, " +
             "Ms. Chen. Consider a cathedral. From a distance, it appears to follow a precise architectural " +
-            "plan—spires, nave, transept. Yet upon closer inspection, you find modifications made by " +
+            "plan-spires, nave, transept. Yet upon closer inspection, you find modifications made by " +
             "generations of builders, each leaving their mark. Memory is much the same.”");
 
         Body(doc,
-            "He turned to the board and drew a simple diagram—a series of interconnected nodes that " +
+            "He turned to the board and drew a simple diagram-a series of interconnected nodes that " +
             "resembled both a neural network and a medieval cathedral’s flying buttresses. “We have " +
             "the foundational framework: sensory encoding, short-term consolidation, and long-term storage. " +
             "These are the nave and transept of our memory cathedral.”");
 
-        // Pull-quote block — still tagged as /P, styled for visual emphasis
+        // Pull-quote block - still tagged as /P, styled for visual emphasis
         doc.Add(new TextBlock
         {
             Text      = "We have discovered that the architectural blueprint of memory is not unique to humans. " +

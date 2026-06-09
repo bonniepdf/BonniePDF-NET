@@ -14,7 +14,7 @@ namespace BonniePDF.Tests;
 /// (Heading, TextBlock) automatically emit structure elements and
 /// marked-content sequences when the document opts into
 /// <see cref="AccessibilityMode.PdfUa1"/>. No source-level semantic
-/// verbs needed — authors just flip the flag.
+/// verbs needed - authors just flip the flag.
 /// </summary>
 public class ImplicitTaggingTests
 {
@@ -66,7 +66,7 @@ public class ImplicitTaggingTests
     {
         // The back-compat invariant from the plan: when Accessibility =
         // None, existing elements produce the same content streams they
-        // always have — no /StructElem, no BDC, no EMC.
+        // always have - no /StructElem, no BDC, no EMC.
         string pdf = GeneratePdf(doc =>
         {
             doc.Settings.Accessibility = AccessibilityMode.None;
@@ -82,7 +82,7 @@ public class ImplicitTaggingTests
     [Fact]
     public void TaggedDocument_HeadingLevelDefaultsToOne()
     {
-        // Heading's Level property defaults to 1 — existing call sites
+        // Heading's Level property defaults to 1 - existing call sites
         // that don't set Level get H1 implicitly.
         string pdf = GenerateTagged(doc =>
         {

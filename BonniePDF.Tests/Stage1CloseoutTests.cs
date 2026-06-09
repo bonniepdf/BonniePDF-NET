@@ -15,9 +15,9 @@ namespace BonniePDF.Tests;
 /// stage-1 closeout. Three representative tagged documents
 /// exercising the stage-1 surface area:
 /// <list type="bullet">
-///   <item><description><c>business-invoice</c> shape — Heading + body + table with header row, totals;</description></item>
-///   <item><description><c>multi-page-flow</c> shape — long table that overflows multiple pages;</description></item>
-///   <item><description><c>dickens-novel</c> shape — headings + VisualToc + paragraphs.</description></item>
+///   <item><description><c>business-invoice</c> shape - Heading + body + table with header row, totals;</description></item>
+///   <item><description><c>multi-page-flow</c> shape - long table that overflows multiple pages;</description></item>
+///   <item><description><c>dickens-novel</c> shape - headings + VisualToc + paragraphs.</description></item>
 /// </list>
 ///
 /// Each test asserts the byte-level structural shape that VeraPDF
@@ -228,7 +228,7 @@ public class Stage1CloseoutTests
     {
         // The table overflows across pages. With RepeatHeadersOnNewPage=true,
         // each page fragment produces its own Table/THead struct elements.
-        // Verify at least 2 THead groups exist — confirming the header-repeat
+        // Verify at least 2 THead groups exist - confirming the header-repeat
         // logic is running and the table is genuinely multi-page.
         // (True cross-page MCR dicts would require a single StructElement
         // spanning multiple pages, which only arises for flowing text that

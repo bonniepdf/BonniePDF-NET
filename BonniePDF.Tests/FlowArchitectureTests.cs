@@ -410,7 +410,7 @@ public class FlowArchitectureTests
 
         RenderStatus status = stack.RenderStateful(ctx, 500);
 
-        // First child can't fit and it's the first child attempted — WrapRequired
+        // First child can't fit and it's the first child attempted - WrapRequired
         Assert.Equal(RenderStatus.WrapRequired, status);
     }
 
@@ -431,7 +431,7 @@ public class FlowArchitectureTests
 
         RenderStatus status = stack.RenderStateful(ctx, 500);
 
-        // First child rendered (progress made), second can't fit — Overflow, not WrapRequired
+        // First child rendered (progress made), second can't fit - Overflow, not WrapRequired
         Assert.Equal(RenderStatus.Overflow, status);
     }
 
@@ -496,7 +496,7 @@ public class FlowArchitectureTests
         using MemoryStream ms = new();
         doc.Save(ms, true);
 
-        // Should not hang — pipeline gives up after MaxWrapAttempts
+        // Should not hang - pipeline gives up after MaxWrapAttempts
         Assert.True(ms.Length > 0);
     }
 
@@ -559,14 +559,14 @@ public class FlowArchitectureTests
 
         RenderStatus status = stack.RenderStateful(ctx, 100);
 
-        // Filler fits, keepTogether has many lines and BreakAllowed=false — should overflow
+        // Filler fits, keepTogether has many lines and BreakAllowed=false - should overflow
         Assert.Equal(RenderStatus.Overflow, status);
     }
 
     [Fact]
     public void BreakAllowedFalse_ElementTooLargeForPage_RendersAnyway()
     {
-        // Element that can't fit on any single page — must render anyway to avoid infinite loop
+        // Element that can't fit on any single page - must render anyway to avoid infinite loop
         string hugeText = string.Join('\n', Enumerable.Range(1, 200).Select(i => $"Line {i}"));
         VerticalStack stack = new() { BreakAllowed = false };
         stack.AddChild(new TextBlock { Text = hugeText });
@@ -759,7 +759,7 @@ public class FlowArchitectureTests
         HorizontalStack stack = new();
         stack.AddChild(new Circle { Diameter = 300 });
 
-        // At top of a small page — should render anyway
+        // At top of a small page - should render anyway
         RenderContext ctx = new(new PdfSize(612, 200), 50);
 
         RenderStatus status = ((IStatefulElement)stack).RenderStateful(ctx, 500);

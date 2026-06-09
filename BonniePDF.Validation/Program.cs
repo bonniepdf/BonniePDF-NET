@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace BonniePDF.Validation;
 
 /// <summary>
-/// BonniePDF Validation Tool — Entry Point.
+/// BonniePDF Validation Tool - Entry Point.
 /// Validates PDFs against a VeraPDF profile (PDF/A 1a/1b/2a/2b/3a/3b or PDF/UA-1).
 /// </summary>
 internal sealed class Program

@@ -42,7 +42,7 @@ public static class ImagesTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title = "Accessible Images — Tagged (PDF/UA-1)",
+                Title = "Accessible Images - Tagged (PDF/UA-1)",
                 Author = "BonniePDF",
                 Subject = "A tagged document with an informative figure and a decorative artifact image.",
                 Keywords = "pdf, pdf/ua, accessibility, image, figure, alt-text",

@@ -49,7 +49,7 @@ public class PageBreakTaggingTests
                 doc.Add(new TextBlock { Text = sb.ToString(), FontSize = 12 });
             });
 
-            // Each page's content stream must have balanced BDC/EMC counts —
+            // Each page's content stream must have balanced BDC/EMC counts -
             // otherwise the PDF is malformed per ISO 32000-1 §14.6.
             string[] pageStreams = SplitPageContentStreams(pdf);
             Assert.True(pageStreams.Length >= 2, "expected the test doc to overflow onto >1 page");

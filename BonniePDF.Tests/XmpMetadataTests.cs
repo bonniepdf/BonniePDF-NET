@@ -118,7 +118,7 @@ public class XmpMetadataTests
     {
         // The additive-hook contract: two registered blocks emit into the
         // same XMP packet without collision. This is the future-proofing
-        // smoke test promised by the this feature this feature design — when ZUGFeRD lands
+        // smoke test promised by the this feature this feature design - when ZUGFeRD lands
         // it'll be a third entry in this same array.
         var metadata = new DocumentMetadata { Title = "Both" };
         string xml = XmpMetadataWriter.GenerateXmpXml(metadata, new[]
@@ -130,7 +130,7 @@ public class XmpMetadataTests
         Assert.Contains("pdfaid:part", xml);
         Assert.Contains("pdfaid:conformance", xml);
         Assert.Contains("pdfuaid:part", xml);
-        // The output is well-formed XML — namespaces don't collide and
+        // The output is well-formed XML - namespaces don't collide and
         // we're not double-declaring xmlns attributes.
         var doc = new System.Xml.XmlDocument();
         doc.LoadXml(xml);

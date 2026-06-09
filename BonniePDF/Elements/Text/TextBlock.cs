@@ -114,7 +114,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
             // Don't violate orphan control when adjusting for widows
             if (startLine == 0 && targetFit < MinLinesBeforeBreak && notAtTop)
             {
-                // Can't satisfy both constraints — move the entire block
+                // Can't satisfy both constraints - move the entire block
                 return RenderStatus.WrapRequired;
             }
 
@@ -206,7 +206,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     private void DrawSingleLine(RenderContext ctx, string line, float contentWidth, float y, float baseX,
         bool isLastLine)
     {
-        // Substitute current page number inline — it is known at render time
+        // Substitute current page number inline - it is known at render time
         if (line.Contains(CurrentPageToken))
             line = line.Replace(CurrentPageToken, (ctx.CurrentPageIndex + 1).ToString());
 

@@ -148,7 +148,7 @@ public abstract class ListElementBase : TextElementBase
 
                 if (tagging is null)
                 {
-                    // Non-tagged: original behaviour — marker drawn on every wrapped line
+                    // Non-tagged: original behaviour - marker drawn on every wrapped line
                     renderMarker(markerX, localY);
                     ctx.Canvas.DrawText(textX, localY, line, TextColor, FontSize, FontName, TextAlignment.Left);
                 }
@@ -156,7 +156,7 @@ public abstract class ListElementBase : TextElementBase
                 {
                     if (i == 0)
                     {
-                        // Lbl — list item label (drawn once, on the first line only)
+                        // Lbl - list item label (drawn once, on the first line only)
                         tagging.Tree.Begin(SemanticRole.Lbl);
                         ctx.Canvas.BeginMarkedContent("Lbl");
                         renderMarker(markerX, localY);

@@ -121,7 +121,7 @@ public class PdfResourceRegistry
 
         if (PdfAEnabled)
         {
-            // 1. Try FontManager (bytes-based — works in all environments)
+            // 1. Try FontManager (bytes-based - works in all environments)
             byte[]? bytes = FontManager.GetBytesForStandardFont(fontIdentifier);
             if (bytes != null)
             {
@@ -486,7 +486,7 @@ public class PdfResourceRegistry
             if (FontAliasMap.ContainsKey(fontIdentifier))
                 continue;
 
-            // Skip logical names that were mapped to a virtual (bytes-based) font — written under "virtual:" key
+            // Skip logical names that were mapped to a virtual (bytes-based) font - written under "virtual:" key
             if (EmbeddedFonts.ContainsKey($"virtual:{fontIdentifier}"))
                 continue;
 
@@ -572,7 +572,7 @@ public class PdfResourceRegistry
             if (FontAliasMap.ContainsKey(fontIdentifier))
                 continue;
 
-            // Skip logical names that were mapped to a virtual (bytes-based) font — handled under "virtual:" key
+            // Skip logical names that were mapped to a virtual (bytes-based) font - handled under "virtual:" key
             if (EmbeddedFonts.ContainsKey($"virtual:{fontIdentifier}"))
                 continue;
 
@@ -652,7 +652,7 @@ public class PdfResourceRegistry
             if (FontAliasMap.ContainsKey(fontIdentifier))
                 continue;
 
-            // Skip logical names that were mapped to a virtual (bytes-based) font — written under "virtual:" key
+            // Skip logical names that were mapped to a virtual (bytes-based) font - written under "virtual:" key
             if (EmbeddedFonts.ContainsKey($"virtual:{fontIdentifier}"))
                 continue;
 

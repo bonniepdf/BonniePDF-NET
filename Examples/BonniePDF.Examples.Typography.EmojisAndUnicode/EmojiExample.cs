@@ -5,7 +5,7 @@ using BonniePDF.Elements.Text;
 namespace BonniePDF.Examples.Typography.EmojisAndUnicode;
 
 /// <summary>
-/// Demonstrates supplementary Unicode plane support — emoji and symbols beyond U+FFFF
+/// Demonstrates supplementary Unicode plane support - emoji and symbols beyond U+FFFF
 /// </summary>
 [System.ComponentModel.DisplayName("Emojis & Unicode")]
 [System.ComponentModel.Category("Typography")]
@@ -30,7 +30,7 @@ public static class EmojiExample
 
         Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf17;
-        // PDF/A compliance is disabled — emoji fonts often contain COLR/CBDT tables
+        // PDF/A compliance is disabled - emoji fonts often contain COLR/CBDT tables
         // that require relaxed validation and are incompatible with PDF/A-1b.
         doc.Settings.PdfAEnabled = false;
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(textFont).WithSize(11).WithColor(Color.Slate600);

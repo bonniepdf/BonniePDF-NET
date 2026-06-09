@@ -4,7 +4,7 @@
 #
 # Resolves the veraPDF greenfield engine from Maven Central, compiles the
 # Validate helper, and validates every PDF in <pdf-dir> against the given
-# flavours. Exits non-zero if any file is non-compliant — wire it into CI.
+# flavours. Exits non-zero if any file is non-compliant - wire it into CI.
 #
 # Usage:
 #   tools/verapdf/validate.sh <pdf-dir> [flavours]

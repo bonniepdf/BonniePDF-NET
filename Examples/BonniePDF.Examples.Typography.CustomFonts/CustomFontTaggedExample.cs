@@ -11,7 +11,7 @@ namespace BonniePDF.Examples.Typography.CustomFonts;
 ///
 /// Embeds Arial (falling back to Segoe UI) as the document default font so every element
 /// inherits it. Section headings are /Hx structure elements; body paragraphs are /P.
-/// PDF/UA-1 requires all fonts to be embedded — the TTF embedding satisfies that rule.
+/// PDF/UA-1 requires all fonts to be embedded - the TTF embedding satisfies that rule.
 ///
 /// Returns <c>null</c> when no suitable TTF font is found on the machine, allowing the
 /// calling Program.cs to skip the example gracefully.
@@ -20,7 +20,7 @@ namespace BonniePDF.Examples.Typography.CustomFonts;
 /// </summary>
 [System.ComponentModel.DisplayName("Custom Fonts (PDF/UA-1)")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("PDF/UA-1 tagged document with an embedded TrueType font — each section uses a semantic heading.")]
+[System.ComponentModel.Description("PDF/UA-1 tagged document with an embedded TrueType font - each section uses a semantic heading.")]
 public static class CustomFontTaggedExample
 {
     private static readonly string[] UnicodeSymbols =
@@ -29,7 +29,7 @@ public static class CustomFontTaggedExample
         "© Copyright symbol (U+00A9)",
         "® Registered trademark (U+00AE)",
         "™ Trademark (U+2122)",
-        "– En-dash (U+2013) — Em-dash (U+2014)",
+        "– En-dash (U+2013) - Em-dash (U+2014)",
         "← ↑ → ↓ Directional arrows",
         "✓ Check mark (U+2713)",
     };
@@ -56,7 +56,7 @@ public static class CustomFontTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Embedded Font Demo — Tagged (PDF/UA-1)",
+                Title    = "Embedded Font Demo - Tagged (PDF/UA-1)",
                 Author   = "BonniePDF",
                 Subject  = "Demonstrates TrueType font embedding in a PDF/UA-1 accessible document.",
                 Keywords = "pdf, pdf/ua, accessibility, font, truetype, unicode",

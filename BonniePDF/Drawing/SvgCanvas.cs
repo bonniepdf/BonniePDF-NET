@@ -288,7 +288,7 @@ public class SvgCanvas : ICanvas
         }
         else
         {
-            // Fallback: no embedded TTF available — rely on browser/viewer rendering
+            // Fallback: no embedded TTF available - rely on browser/viewer rendering
             string anchor = GetTextAnchor(align);
             string escapedText = EscapeXml(text);
             _sb.AppendLine(
@@ -402,7 +402,7 @@ public class SvgCanvas : ICanvas
     /// <inheritdoc />
     public void EndMarkedContent()
     {
-        // See BeginMarkedContent — no-op for SVG output.
+        // See BeginMarkedContent - no-op for SVG output.
     }
 
     /// <inheritdoc />

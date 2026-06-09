@@ -71,13 +71,13 @@ public class PieChart : ChartBase
     /// <summary>
     /// Font size for the total label in the donut hole.
     /// </summary>
-    /// <remarks>No longer used — the total is now shown in the legend. Kept for API compatibility.</remarks>
+    /// <remarks>No longer used - the total is now shown in the legend. Kept for API compatibility.</remarks>
     public float TotalLabelFontSize { get; set; } = 11;
 
     /// <summary>
     /// Font size for the total value in the donut hole.
     /// </summary>
-    /// <remarks>No longer used — the total is now shown in the legend. Kept for API compatibility.</remarks>
+    /// <remarks>No longer used - the total is now shown in the legend. Kept for API compatibility.</remarks>
     public float TotalValueFontSize { get; set; } = 16;
 
     /// <summary>

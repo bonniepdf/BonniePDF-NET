@@ -9,7 +9,7 @@ using Xunit;
 namespace BonniePDF.Tests;
 
 /// <summary>
-/// this feature stage-0 closeout — opt-in VeraPDF integration test. Runs the
+/// this feature stage-0 closeout - opt-in VeraPDF integration test. Runs the
 /// tagged simple-document fixture through a local VeraPDF REST
 /// service (the same one <c>BonniePDF.Validation</c> uses) and
 /// asserts zero failed rules under profile <c>ua1</c>.
@@ -21,7 +21,7 @@ namespace BonniePDF.Tests;
 ///   - outbound network is not required (the service is local), but
 ///     the container image must already be present.
 ///
-/// Without <c>VERAPDF=1</c> the test is skipped — keeps day-to-day
+/// Without <c>VERAPDF=1</c> the test is skipped - keeps day-to-day
 /// <c>dotnet test</c> runs fast and offline.
 /// </summary>
 public class VeraPdfStageZeroCloseoutTests
@@ -33,7 +33,7 @@ public class VeraPdfStageZeroCloseoutTests
     {
         if (Environment.GetEnvironmentVariable("VERAPDF") != "1")
         {
-            // xUnit 2.x has no Assert.Skip — treat unset as a no-op so
+            // xUnit 2.x has no Assert.Skip - treat unset as a no-op so
             // day-to-day `dotnet test` runs stay fast and offline. The
             // test only does meaningful work when explicitly opted in.
             return;

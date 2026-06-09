@@ -21,7 +21,7 @@ namespace BonniePDF.Examples.Basics.SimpleDocument;
 /// </summary>
 [System.ComponentModel.DisplayName("Simple Document (Tagged / PDF-UA-1)")]
 [System.ComponentModel.Category("Basics")]
-[System.ComponentModel.Description("PDF/UA-1 tagged variant of SimpleDocumentExample — this feature stage-0 closeout.")]
+[System.ComponentModel.Description("PDF/UA-1 tagged variant of SimpleDocumentExample - this feature stage-0 closeout.")]
 public static class SimpleDocumentTaggedExample
 {
     public static Document Generate()
@@ -30,7 +30,7 @@ public static class SimpleDocumentTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title = "Simple Document — Tagged (PDF/UA-1)",
+                Title = "Simple Document - Tagged (PDF/UA-1)",
                 Author = "BonniePDF",
                 Subject = "this feature stage-0 closeout: a screen-reader-friendly tagged PDF.",
                 Keywords = "pdf, pdf/ua, accessibility, tagged, BonniePDF",
@@ -43,7 +43,7 @@ public static class SimpleDocumentTaggedExample
             },
         };
 
-        // H1 — implicit via Heading + Level
+        // H1 - implicit via Heading + Level
         doc.Add(new Heading("Accessible PDF Demo")
         {
             TocIdentifier = "intro",
@@ -54,7 +54,7 @@ public static class SimpleDocumentTaggedExample
             Margin = new Thickness(0, 0, 0, 12),
         });
 
-        // Two paragraphs — implicit P tagging via TextBlock
+        // Two paragraphs - implicit P tagging via TextBlock
         doc.Add(new TextBlock
         {
             Text = "This document opts into PDF/UA-1 tagging by setting Settings.Accessibility = AccessibilityMode.PdfUa1. " +
@@ -68,7 +68,7 @@ public static class SimpleDocumentTaggedExample
 
         doc.Add(new TextBlock
         {
-            Text = "Existing elements (Heading, TextBlock, Image, QRCode) tag themselves automatically — no semantic " +
+            Text = "Existing elements (Heading, TextBlock, Image, QRCode) tag themselves automatically - no semantic " +
                    "verbs required. Authors who want explicit control over the structure tree can use the Semantic* " +
                    "extensions that arrive in stage 2.",
             FontName = StandardFonts.Helvetica,
@@ -77,7 +77,7 @@ public static class SimpleDocumentTaggedExample
             Margin = new Thickness(0, 0, 0, 12),
         });
 
-        // H2 — sub-heading
+        // H2 - sub-heading
         doc.Add(new Heading("Scan to verify")
         {
             TocIdentifier = "qr",
@@ -88,7 +88,7 @@ public static class SimpleDocumentTaggedExample
             Margin = new Thickness(0, 0, 0, 8),
         });
 
-        // Figure with alt-text — implicit Figure + /Alt
+        // Figure with alt-text - implicit Figure + /Alt
         doc.Add(new QRCode
         {
             Data = "https://github.com/bonniepdf/BonniePDF-NET",

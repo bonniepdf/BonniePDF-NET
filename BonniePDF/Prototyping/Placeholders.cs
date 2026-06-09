@@ -308,7 +308,7 @@ public class PlaceholderSource
         ihdr[9] = 2; // color type RGB
         WritePngChunk(ms, "IHDR", ihdr);
 
-        // IDAT — uncompressed deflate wrapped in zlib
+        // IDAT - uncompressed deflate wrapped in zlib
         byte[] deflated = DeflateRawSimple(raw);
         WritePngChunk(ms, "IDAT", deflated);
 

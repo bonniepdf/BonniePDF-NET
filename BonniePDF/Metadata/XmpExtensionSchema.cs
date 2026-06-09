@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace BonniePDF.Metadata;
 
 /// <summary>
-/// Describes one entry in the PDF/A <c>pdfaExtension:schemas</c> bag —
+/// Describes one entry in the PDF/A <c>pdfaExtension:schemas</c> bag -
 /// the mechanism ISO 19005-2/3 §6.6.2.3 provides for declaring XMP
 /// namespaces that are NOT predefined by the standard (e.g.
 /// <c>pdfuaid</c> for PDF/UA-1 identification, <c>fx</c> for
@@ -24,7 +24,7 @@ internal sealed class XmpExtensionSchema
     /// <summary>Human-readable schema name (free text).</summary>
     public string SchemaName { get; }
 
-    /// <summary>Property descriptors — one per property the schema exposes.</summary>
+    /// <summary>Property descriptors - one per property the schema exposes.</summary>
     public IReadOnlyList<XmpExtensionSchemaProperty> Properties { get; }
 
     public XmpExtensionSchema(

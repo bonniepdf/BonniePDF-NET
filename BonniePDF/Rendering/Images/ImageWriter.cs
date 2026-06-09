@@ -97,7 +97,7 @@ public class ImageWriter
     /// </summary>
     public int WritePngImage(int id, ImageInfo image, string resourceName)
     {
-        // PDF/A-1 forbids SMask — flatten alpha by compositing against white.
+        // PDF/A-1 forbids SMask - flatten alpha by compositing against white.
         byte[] pixelData = image.Data;
         bool writeSmask = image.HasAlpha && image.AlphaData.Length > 0;
 
@@ -305,7 +305,7 @@ public class ImageWriter
     public async Task<int> WritePngImageAsync(int id, ImageInfo image, string resourceName,
         CancellationToken cancellationToken = default)
     {
-        // PDF/A-1 forbids SMask — flatten alpha by compositing against white.
+        // PDF/A-1 forbids SMask - flatten alpha by compositing against white.
         byte[] pixelData = image.Data;
         bool writeSmask = image.HasAlpha && image.AlphaData.Length > 0;
 

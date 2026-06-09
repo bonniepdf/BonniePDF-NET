@@ -10,10 +10,10 @@ using Xunit;
 namespace BonniePDF.Tests;
 
 /// <summary>
-/// this feature stage-1 closeout — opt-in VeraPDF integration tests for the
+/// this feature stage-1 closeout - opt-in VeraPDF integration tests for the
 /// three exemplar scenarios (business-invoice, multi-page-flow,
 /// dickens-novel). Mirrors <see cref="VeraPdfStageZeroCloseoutTests"/>
-/// — same opt-in gating (<c>VERAPDF=1</c>) + local VeraPDF REST
+/// - same opt-in gating (<c>VERAPDF=1</c>) + local VeraPDF REST
 /// service on <c>localhost:8080</c>.
 ///
 /// Document construction is shared with <see cref="Stage1CloseoutTests"/>
@@ -40,7 +40,7 @@ public class VeraPdfStageOneCloseoutTests
     {
         if (Environment.GetEnvironmentVariable("VERAPDF") != "1")
         {
-            // xUnit 2.x has no Assert.Skip — treat unset as a no-op so
+            // xUnit 2.x has no Assert.Skip - treat unset as a no-op so
             // day-to-day `dotnet test` runs stay fast and offline.
             doc.Dispose();
             return;

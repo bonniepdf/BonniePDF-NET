@@ -80,7 +80,7 @@ public static class BusinessInvoiceExample
         companyStack.AddChild(new TextBlock { Text = "Phone  (555) 123-4567" });
         companyStack.AddChild(new TextBlock { Text = "Email  hello@studioeleven.co" });
 
-        // Right: Invoice title — Heading (H1) instead of plain TextBlock so it
+        // Right: Invoice title - Heading (H1) instead of plain TextBlock so it
         // carries the semantic role for screen readers (PDF/UA-1 Matterhorn §14-1).
         // Visually identical to the prior styled TextBlock.
         VerticalStack titleStack = new();
@@ -203,7 +203,7 @@ public static class BusinessInvoiceExample
             }.AlignRight()
         );
 
-        // Line items data — generated via Placeholders for prototyping
+        // Line items data - generated via Placeholders for prototyping
         var invoiceSource = Placeholders.WithSeed(42);
         var lineItems = invoiceSource.InvoiceLines(5);
         var items = lineItems.Select(li => new { Service = li.Service, Desc = li.Description, Qty = li.Quantity, Price = li.UnitPrice }).ToArray();

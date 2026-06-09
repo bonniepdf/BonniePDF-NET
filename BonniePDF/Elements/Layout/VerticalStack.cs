@@ -63,7 +63,7 @@ public class VerticalStack : ElementBase, IStatefulElement
             // closed before Overflow/WrapRequired propagates upward.
             var tagging = ctx.Tagging;
             SemanticRole? role = tagging != null && child is IRoleProvider rp ? rp.SemanticRole : (SemanticRole?)null;
-            // Artifact is a marked-content type, not a structure type — a
+            // Artifact is a marked-content type, not a structure type - a
             // decorative child is wrapped in /Artifact and kept out of the tree.
             bool isArtifact = role == SemanticRole.Artifact;
             bool tagChild = role != null && !isArtifact;
@@ -271,7 +271,7 @@ public class VerticalStack : ElementBase, IStatefulElement
             // Tag children that declare a semantic role (same pattern as RenderStateful).
             var tagging = ctx.Tagging;
             SemanticRole? role = tagging != null && child is IRoleProvider rp ? rp.SemanticRole : (SemanticRole?)null;
-            // Artifact is a marked-content type, not a structure type — a
+            // Artifact is a marked-content type, not a structure type - a
             // decorative child is wrapped in /Artifact and kept out of the tree.
             bool isArtifact = role == SemanticRole.Artifact;
             bool tagChild = role != null && !isArtifact;

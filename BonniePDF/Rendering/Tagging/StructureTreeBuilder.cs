@@ -10,7 +10,7 @@ namespace BonniePDF.Rendering.Tagging;
 /// is written.
 ///
 /// A new builder starts with an implicit <see cref="SemanticRole.Document"/>
-/// root already open and at the top of the stack — every element added
+/// root already open and at the top of the stack - every element added
 /// is a descendant of Document.
 /// </summary>
 public sealed class StructureTreeBuilder
@@ -31,7 +31,7 @@ public sealed class StructureTreeBuilder
     public StructureElement Root => _root;
 
     /// <summary>
-    /// The element currently at the top of the open-element stack —
+    /// The element currently at the top of the open-element stack -
     /// the element that <see cref="AddMcid"/> attaches to and that new
     /// <see cref="Begin"/> calls nest under.
     /// </summary>
@@ -54,7 +54,7 @@ public sealed class StructureTreeBuilder
     /// <summary>
     /// Close the current structure element, returning to its parent.
     /// Throws <see cref="StructureTreeException"/> if called more times
-    /// than <see cref="Begin"/> (the document root cannot be closed —
+    /// than <see cref="Begin"/> (the document root cannot be closed -
     /// it is owned by the builder).
     /// </summary>
     public void End()

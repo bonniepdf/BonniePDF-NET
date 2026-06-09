@@ -8,7 +8,7 @@ using BonniePDF.Fluent.Extensions;
 namespace BonniePDF.Examples.Typography.EmojisAndUnicode;
 
 /// <summary>
-/// Demonstrates supplementary Unicode plane support — emoji and symbols beyond U+FFFF —
+/// Demonstrates supplementary Unicode plane support - emoji and symbols beyond U+FFFF -
 /// using the Fluent API. Section headers inherit the text-font default;
 /// emoji rows override with the emoji font per-item.
 /// </summary>
@@ -52,7 +52,7 @@ public static class EmojiExampleFluent
             doc.WithSettings(settings =>
             {
                 settings.Version = PdfVersion.Pdf17;
-                // PDF/A compliance is disabled — emoji fonts often contain COLR/CBDT tables
+                // PDF/A compliance is disabled - emoji fonts often contain COLR/CBDT tables
                 // that require relaxed validation and are incompatible with PDF/A-1b.
                 settings.PdfAEnabled = false;
             });

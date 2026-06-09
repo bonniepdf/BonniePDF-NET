@@ -83,7 +83,7 @@ public class FontEmbeddingAndTextStyleTests
     public void DefaultTextStyle_AppliedToUnstyledElements()
     {
         var tb = new TextBlock { Text = "Hello" };
-        // Do NOT set FontSize or TextColor — leave them at defaults
+        // Do NOT set FontSize or TextColor - leave them at defaults
         Generate(doc =>
         {
             doc.Settings.DefaultTextStyle = new TextStyle().WithSize(11).WithColor(Color.Slate600);
@@ -133,7 +133,7 @@ public class FontEmbeddingAndTextStyleTests
     [Fact]
     public void DefaultTextStyle_Null_DoesNotThrow()
     {
-        // DefaultTextStyle is null by default — Save should not throw
+        // DefaultTextStyle is null by default - Save should not throw
         var tb = new TextBlock { Text = "Hello" };
         var bytes = Generate(doc =>
         {
