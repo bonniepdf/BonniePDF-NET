@@ -22,6 +22,22 @@ public class SvgExportTests
     }
 
     [Fact]
+    public void SvgCanvas_FillEllipse_EmitsEllipseElement()
+    {
+        var canvas = new SvgCanvas(100, 50);
+
+        canvas.FillEllipse(25, 20, 15, 10, Color.FromHex("#336699"));
+
+        string svg = canvas.GetSvg();
+        Assert.Contains("<ellipse", svg);
+        Assert.Contains("cx=\"25\"", svg);
+        Assert.Contains("cy=\"20\"", svg);
+        Assert.Contains("rx=\"15\"", svg);
+        Assert.Contains("ry=\"10\"", svg);
+        Assert.Contains("fill=\"#336699\"", svg);
+    }
+
+    [Fact]
     public void BarChart_ToSvg_ProducesValidSvg()
     {
         var chart = new BarChart();

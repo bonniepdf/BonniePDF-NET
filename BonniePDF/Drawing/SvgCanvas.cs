@@ -192,7 +192,7 @@ public class SvgCanvas : ICanvas
     }
 
     /// <summary>
-    /// Fills an ellipse. SVG coordinates are screen-space (Y-down), matching ours directly.
+    /// Draws a filled ellipse.
     /// No coordinate transformation needed for SVG.
     /// </summary>
     public void FillEllipse(float cx, float cy, float rx, float ry, Color color)
