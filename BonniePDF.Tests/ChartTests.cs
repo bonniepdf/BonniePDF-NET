@@ -72,6 +72,11 @@ public class ChartTests
             Operations.Add($"FillCircle({cx},{cy},{radius})");
         }
 
+        public void FillEllipse(float cx, float cy, float rx, float ry, Color color)
+        {
+            Operations.Add($"FillEllipse({cx},{cy},{rx},{ry})");
+        }
+
         public void FillPath(IList<Point> points, Color color)
         {
             Operations.Add($"FillPath({points.Count} points)");

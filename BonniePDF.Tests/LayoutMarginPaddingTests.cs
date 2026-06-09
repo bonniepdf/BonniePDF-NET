@@ -158,6 +158,8 @@ public class LayoutMarginPaddingTests
             Operations.Add($"DrawLine({x1},{y1},{x2},{y2},{lineWidth})");
         public void FillCircle(float cx, float cy, float radius, Color color) =>
             Operations.Add($"FillCircle({cx},{cy},{radius})");
+        public void FillEllipse(float cx, float cy, float rx, float ry, Color color) =>
+            Operations.Add($"FillEllipse({cx},{cy},{rx},{ry})");
         public void FillPath(IList<Point> points, Color color) =>
             Operations.Add($"FillPath({points.Count} points)");
         public void FillRoundedRect(float x, float y, float width, float height, float radius, Color color) =>
