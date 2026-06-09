@@ -2,7 +2,6 @@ using BonniePDF.Core;
 using BonniePDF.Configuration;
 using BonniePDF.Drawing;
 using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Lists;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
