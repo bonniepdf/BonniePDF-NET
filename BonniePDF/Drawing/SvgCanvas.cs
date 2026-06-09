@@ -192,6 +192,17 @@ public class SvgCanvas : ICanvas
     }
 
     /// <summary>
+    /// Fills an ellipse. SVG coordinates are screen-space (Y-down), matching ours directly.
+    /// No coordinate transformation needed for SVG.
+    /// </summary>
+    public void FillEllipse(float cx, float cy, float rx, float ry, Color color)
+    {
+        float scx = cx + _xOffset;
+        float scy = cy + _yOffset;
+        _sb.AppendLine($"<ellipse cx=\"{scx}\" cy=\"{scy}\" rx=\"{rx}\" ry=\"{ry}\" {GetFillAttributes(color)}/>");
+    }
+
+    /// <summary>
     /// Fills a closed path defined by a series of points.
     /// No coordinate transformation needed for SVG.
     /// </summary>

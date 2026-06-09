@@ -378,7 +378,12 @@ public abstract class CartesianChartBase : ChartBase
         else
         {
             float x = LeftPadding + chartAreaWidth / 2;
-            float y = baselineY + 50;
+            // Center the legend in the space below the x-axis tick labels (within the
+            // bottom-padding band), then shift up by half the font size to account for
+            // DrawText's `y` representing the top of the text box rather than its visual center.
+            float labelsBottom = baselineY + 15 + AxisLabelFontSize;
+            float marginBottom = baselineY + BottomPadding;
+            float y = (labelsBottom + marginBottom) / 2 - LegendFontSize / 2;
             canvas.DrawText(x, y, legend, AxisColor, LegendFontSize, FontFamily, TextAlignment.Center);
         }
     }
