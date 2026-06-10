@@ -1,8 +1,8 @@
 # BonniePDF for .NET
 
-[![NuGet](https://img.shields.io/nuget/v/BonniePDF)](https://www.nuget.org/packages/BonniePDF)
-[![NuGet downloads](https://img.shields.io/nuget/dt/BonniePDF)](https://www.nuget.org/packages/BonniePDF)
-[![License: BonniePDF Community](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg)](https://www.bonniepdf.dev/license)
+[![NuGet](https://img.shields.io/nuget/v/BonniePDF?style=flat-square&logo=nuget)](https://www.nuget.org/packages/BonniePDF)
+[![NuGet downloads](https://img.shields.io/nuget/dt/BonniePDF?style=flat-square&logo=nuget)](https://www.nuget.org/packages/BonniePDF)
+[![License: BonniePDF Community](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg?style=flat-square)](https://www.bonniepdf.dev/license)
 ![coverage](./badges/coverage.svg)
 
 [Live examples](https://www.bonniepdf.dev/examples) | [Documentation](https://www.bonniepdf.dev) | [TypeScript package](https://www.npmjs.com/package/@bonniepdf/core)
