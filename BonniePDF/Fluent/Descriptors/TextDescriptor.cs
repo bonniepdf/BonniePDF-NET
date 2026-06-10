@@ -12,6 +12,29 @@ public sealed class TextDescriptor
     internal RichText RichText { get; } = new();
 
     /// <summary>
+    /// Sets the paragraph alignment for the whole text block
+    /// (Left, Center, Right, or Justify).
+    /// </summary>
+    /// <returns>This descriptor for continued chaining.</returns>
+    public TextDescriptor Align(TextAlignment alignment)
+    {
+        RichText.Alignment = alignment;
+        return this;
+    }
+
+    /// <summary>Aligns the paragraph to the left (default).</summary>
+    public TextDescriptor AlignLeft() => Align(TextAlignment.Left);
+
+    /// <summary>Centers the paragraph.</summary>
+    public TextDescriptor AlignCenter() => Align(TextAlignment.Center);
+
+    /// <summary>Aligns the paragraph to the right.</summary>
+    public TextDescriptor AlignRight() => Align(TextAlignment.Right);
+
+    /// <summary>Justifies the paragraph (flush on both edges, except the last line).</summary>
+    public TextDescriptor Justify() => Align(TextAlignment.Justify);
+
+    /// <summary>
     /// Adds a text span with optional styling.
     /// </summary>
     /// <returns>A <see cref="TextSpanDescriptor"/> for configuring the span's style.</returns>

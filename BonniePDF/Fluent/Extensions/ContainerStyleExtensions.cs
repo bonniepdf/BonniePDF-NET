@@ -163,6 +163,24 @@ public static class ContainerStyleExtensions
         return container;
     }
 
+    /// <summary>Sets horizontal borders (left and right), matching the PaddingHorizontal convention.</summary>
+    public static IContentContainer BorderHorizontal(this IContentContainer c, float width, Color? color = null)
+    {
+        var container = GetOrCreateContainer(c);
+        container.Border = Core.Border.VerticalSides(width);
+        container.BorderColors = new BorderColors(color ?? Color.Black);
+        return container;
+    }
+
+    /// <summary>Sets vertical borders (top and bottom), matching the PaddingVertical convention.</summary>
+    public static IContentContainer BorderVertical(this IContentContainer c, float width, Color? color = null)
+    {
+        var container = GetOrCreateContainer(c);
+        container.Border = Core.Border.HorizontalSides(width);
+        container.BorderColors = new BorderColors(color ?? Color.Black);
+        return container;
+    }
+
     // --- Size Constraints ---
 
     /// <summary>Sets a fixed width.</summary>
@@ -178,6 +196,15 @@ public static class ContainerStyleExtensions
     {
         var container = GetOrCreateContainer(c);
         container.Height = value;
+        return container;
+    }
+
+    /// <summary>Sets a fixed width and height.</summary>
+    public static IContentContainer Size(this IContentContainer c, float width, float height)
+    {
+        var container = GetOrCreateContainer(c);
+        container.Width = width;
+        container.Height = height;
         return container;
     }
 
@@ -214,6 +241,54 @@ public static class ContainerStyleExtensions
     {
         var container = GetOrCreateContainer(c);
         container.Margin = new Core.Thickness(left, top, right, bottom);
+        return container;
+    }
+
+    /// <summary>Sets top margin.</summary>
+    public static IContentContainer MarginTop(this IContentContainer c, float value)
+    {
+        var container = GetOrCreateContainer(c);
+        container.Margin = new Core.Thickness(0, value, 0, 0);
+        return container;
+    }
+
+    /// <summary>Sets bottom margin.</summary>
+    public static IContentContainer MarginBottom(this IContentContainer c, float value)
+    {
+        var container = GetOrCreateContainer(c);
+        container.Margin = new Core.Thickness(0, 0, 0, value);
+        return container;
+    }
+
+    /// <summary>Sets left margin.</summary>
+    public static IContentContainer MarginLeft(this IContentContainer c, float value)
+    {
+        var container = GetOrCreateContainer(c);
+        container.Margin = new Core.Thickness(value, 0, 0, 0);
+        return container;
+    }
+
+    /// <summary>Sets right margin.</summary>
+    public static IContentContainer MarginRight(this IContentContainer c, float value)
+    {
+        var container = GetOrCreateContainer(c);
+        container.Margin = new Core.Thickness(0, 0, value, 0);
+        return container;
+    }
+
+    /// <summary>Sets horizontal margin (left and right).</summary>
+    public static IContentContainer MarginHorizontal(this IContentContainer c, float value)
+    {
+        var container = GetOrCreateContainer(c);
+        container.Margin = new Core.Thickness(value, 0, value, 0);
+        return container;
+    }
+
+    /// <summary>Sets vertical margin (top and bottom).</summary>
+    public static IContentContainer MarginVertical(this IContentContainer c, float value)
+    {
+        var container = GetOrCreateContainer(c);
+        container.Margin = new Core.Thickness(0, value, 0, value);
         return container;
     }
 
