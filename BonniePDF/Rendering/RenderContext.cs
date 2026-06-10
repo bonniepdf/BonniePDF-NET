@@ -38,8 +38,28 @@ public class RenderContext
     /// <param name="margin">The uniform page margin in points.</param>
     /// <param name="isSvgMode">When <c>true</c>, the context emits SVG instead of PDF operators.</param>
     public RenderContext(PdfSize size, float margin, bool isSvgMode = false)
+        : this(size, margin, isSvgMode, SvgRenderOptions.Legacy, false)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="RenderContext"/> for SVG export with explicit
+    /// low-level options.
+    /// </summary>
+    /// <param name="size">The page size (width and height in points).</param>
+    /// <param name="margin">The uniform page margin in points.</param>
+    /// <param name="isSvgMode">When <c>true</c>, the context emits SVG instead of PDF operators.</param>
+    /// <param name="svgOptions">Low-level SVG canvas options (precision, baseline parity, image embedding).</param>
+    /// <param name="svgContentOnly">
+    /// When <c>true</c>, SVG canvases emit page-body markup without an enclosing
+    /// <c>&lt;svg&gt;</c> header, so the page export pipeline can wrap each page in
+    /// a standalone, deterministic root element.
+    /// </param>
+    public RenderContext(PdfSize size, float margin, bool isSvgMode, SvgRenderOptions svgOptions, bool svgContentOnly)
     {
         IsSvgMode = isSvgMode;
+        SvgOptions = svgOptions ?? SvgRenderOptions.Legacy;
+        _svgContentOnly = svgContentOnly;
         PageSize = size;
         Margin = margin;
         Pages.Add(new StringBuilder());
@@ -48,6 +68,11 @@ public class RenderContext
 
         UpdateCanvas();
     }
+
+    /// <summary>Low-level SVG canvas options threaded into every <see cref="SvgCanvas"/> this context creates.</summary>
+    public SvgRenderOptions SvgOptions { get; } = SvgRenderOptions.Legacy;
+
+    private readonly bool _svgContentOnly;
 
     /// <summary>
     /// Gets the shared PDF resource registry that tracks fonts, images, and other PDF resources
@@ -164,7 +189,13 @@ public class RenderContext
     {
         if (IsSvgMode)
         {
-            Canvas = new SvgCanvas(PageSize.Width, PageSize.Height, 0, 0, CurrentStream, true, ResolveEmbeddedFont);
+            // Content-only mode emits page-body markup (no <svg> header) so the
+            // page export pipeline can wrap each page in a standalone root.
+            Canvas = new SvgCanvas(PageSize.Width, PageSize.Height, 0, 0, CurrentStream, !_svgContentOnly,
+                ResolveEmbeddedFont)
+            {
+                Options = SvgOptions
+            };
         }
         else
         {
@@ -180,7 +211,11 @@ public class RenderContext
     /// </summary>
     public ICanvas GetCanvas(float x, float y)
     {
-        if (IsSvgMode) return new SvgCanvas(PageSize.Width, PageSize.Height, x, y, CurrentStream, false, ResolveEmbeddedFont);
+        if (IsSvgMode)
+            return new SvgCanvas(PageSize.Width, PageSize.Height, x, y, CurrentStream, false, ResolveEmbeddedFont)
+            {
+                Options = SvgOptions
+            };
 
         var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource,
             ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState);

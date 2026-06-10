@@ -312,7 +312,7 @@ public class HardeningTests
             {
                 Data = "https://example.com",
                 Size = 60,
-                AltText = "Year 2026 - projection",
+                AltText = "Year 2026 — projection",
             });
         }));
 

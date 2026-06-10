@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
+using BonniePDF.Export;
 using BonniePDF.Rendering.Images;
 using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
@@ -70,15 +71,56 @@ public class SvgCanvas : ICanvas
 
         if (shouldWriteHeader)
             _sb.AppendLine(
-                $"<svg width=\"{width}\" height=\"{height}\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">");
+                $"<svg width=\"{Inv(width)}\" height=\"{Inv(height)}\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">");
 
         // In multipage mode, open a group for this page with vertical translation
         if (IsMultiPageMode)
         {
             float translateY = PageNumber * height;
-            _sb.AppendLine($"<g id=\"page{PageNumber + 1}\" transform=\"translate(0, {translateY})\">");
+            _sb.AppendLine($"<g id=\"page{PageNumber + 1}\" transform=\"translate(0, {Inv(translateY)})\">");
         }
     }
+
+    /// <summary>
+    /// Low-level rendering options (coordinate precision, PDF baseline parity,
+    /// image embedding mode). Defaults to <see cref="SvgRenderOptions.Legacy"/>,
+    /// which reproduces the original byte-for-byte output used by chart export.
+    /// </summary>
+    public SvgRenderOptions Options { get; set; } = SvgRenderOptions.Legacy;
+
+    /// <summary>
+    /// Formats a coordinate. When <see cref="SvgRenderOptions.Precision"/> is set
+    /// the value is rounded to that many decimals (invariant, trailing zeros
+    /// trimmed) for compact, deterministic output; otherwise it is emitted
+    /// verbatim to preserve the legacy chart golden output.
+    /// </summary>
+    private string N(float v) => Options.Precision is int p
+        ? Math.Round((double)v, p).ToString(CultureInfo.InvariantCulture)
+        // SVG/XML numeric values must use '.' as the decimal separator regardless
+        // of the host locale. Always format invariantly - emitting CurrentCulture
+        // here produced malformed output (e.g. "595,276") on comma-decimal locales.
+        : v.ToString(CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// Computes the text baseline Y. PDF-parity mode places it a full em below
+    /// the top of the line box (matching PdfCanvas); the legacy chart path keeps
+    /// the historical 0.8 approximation so its golden output stays stable.
+    /// </summary>
+    private float BaselineY(float topY, float fontSize)
+        => Options.PdfBaseline ? topY + fontSize : topY + fontSize * 0.8f;
+
+    /// <summary>
+    /// Locale-safe number formatting for SVG output (always '.' decimal separator).
+    /// </summary>
+    private static string Inv(float v) => v.ToString(CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// Formats a per-glyph <c>&lt;tspan&gt;</c> coordinate. Honours configured
+    /// precision; otherwise falls back to the historical two-decimal format.
+    /// </summary>
+    private string Tspan(float v) => Options.Precision is int p
+        ? Math.Round((double)v, p).ToString(CultureInfo.InvariantCulture)
+        : v.ToString("F2", CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Gets the page number (0-based) for multipage mode.
@@ -129,7 +171,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        _sb.AppendLine($"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" {GetFillAttributes(color)}/>");
+        _sb.AppendLine($"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -141,7 +183,7 @@ public class SvgCanvas : ICanvas
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         _sb.AppendLine(
-            $"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" fill=\"none\" {GetStrokeAttributes(color)} stroke-width=\"{strokeWidth}\"/>");
+            $"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" fill=\"none\" {GetStrokeAttributes(color)} stroke-width=\"{N(strokeWidth)}\"/>");
     }
 
     /// <summary>
@@ -151,7 +193,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        _sb.AppendLine($"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" rx=\"{radius}\" ry=\"{radius}\" {GetFillAttributes(color)}/>");
+        _sb.AppendLine($"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" rx=\"{N(radius)}\" ry=\"{N(radius)}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -163,7 +205,7 @@ public class SvgCanvas : ICanvas
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         _sb.AppendLine(
-            $"<rect x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" rx=\"{radius}\" ry=\"{radius}\" fill=\"none\" {GetStrokeAttributes(color)} stroke-width=\"{strokeWidth}\"/>");
+            $"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" rx=\"{N(radius)}\" ry=\"{N(radius)}\" fill=\"none\" {GetStrokeAttributes(color)} stroke-width=\"{N(strokeWidth)}\"/>");
     }
 
     /// <summary>
@@ -177,7 +219,7 @@ public class SvgCanvas : ICanvas
         float sx2 = x2 + _xOffset;
         float sy2 = y2 + _yOffset;
         _sb.AppendLine(
-            $"<line x1=\"{sx1}\" y1=\"{sy1}\" x2=\"{sx2}\" y2=\"{sy2}\" {GetStrokeAttributes(color)} stroke-width=\"{lineWidth}\"/>");
+            $"<line x1=\"{N(sx1)}\" y1=\"{N(sy1)}\" x2=\"{N(sx2)}\" y2=\"{N(sy2)}\" {GetStrokeAttributes(color)} stroke-width=\"{N(lineWidth)}\"/>");
     }
 
     /// <summary>
@@ -188,7 +230,7 @@ public class SvgCanvas : ICanvas
     {
         float scx = cx + _xOffset;
         float scy = cy + _yOffset;
-        _sb.AppendLine($"<circle cx=\"{scx}\" cy=\"{scy}\" r=\"{radius}\" {GetFillAttributes(color)}/>");
+        _sb.AppendLine($"<circle cx=\"{N(scx)}\" cy=\"{N(scy)}\" r=\"{N(radius)}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -199,7 +241,7 @@ public class SvgCanvas : ICanvas
     {
         float scx = cx + _xOffset;
         float scy = cy + _yOffset;
-        _sb.AppendLine($"<ellipse cx=\"{scx}\" cy=\"{scy}\" rx=\"{rx}\" ry=\"{ry}\" {GetFillAttributes(color)}/>");
+        _sb.AppendLine($"<ellipse cx=\"{N(scx)}\" cy=\"{N(scy)}\" rx=\"{N(rx)}\" ry=\"{N(ry)}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -214,13 +256,13 @@ public class SvgCanvas : ICanvas
 
         // Move to the first point
         var first = points[0];
-        pathData.Append($"M {first.X + _xOffset} {first.Y + _yOffset}");
+        pathData.Append($"M {N(first.X + _xOffset)} {N(first.Y + _yOffset)}");
 
         // Draw lines to subsequent points
         for (int i = 1; i < points.Count; i++)
         {
             Point p = points[i];
-            pathData.Append($" L {p.X + _xOffset} {p.Y + _yOffset}");
+            pathData.Append($" L {N(p.X + _xOffset)} {N(p.Y + _yOffset)}");
         }
 
         // Close the path
@@ -244,7 +286,7 @@ public class SvgCanvas : ICanvas
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         string fill = color.ToHexString();
-        float baselineY = sy + fontSize * 0.8f;
+        float baselineY = BaselineY(sy, fontSize);
 
         TtfFont ttfFont = _fontResolver?.Invoke(fontFamily);
 
@@ -259,7 +301,7 @@ public class SvgCanvas : ICanvas
 
             float scale = fontSize / ttfFont.UnitsPerEm;
 
-            _sb.Append($"<text font-family=\"{fontFamily}\" font-size=\"{fontSize}\" fill=\"{fill}\" xml:space=\"preserve\">");
+            _sb.Append($"<text font-family=\"{fontFamily}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" xml:space=\"preserve\">");
 
             ushort prevGid = 0;
             bool hasPrev = false;
@@ -277,7 +319,7 @@ public class SvgCanvas : ICanvas
                 }
 
                 string charStr = EscapeXml(rune.ToString());
-                _sb.Append($"<tspan x=\"{cursorX:F2}\" y=\"{baselineY:F2}\">{charStr}</tspan>");
+                _sb.Append($"<tspan x=\"{Tspan(cursorX)}\" y=\"{Tspan(baselineY)}\">{charStr}</tspan>");
 
                 cursorX += ttfFont.GetGlyphWidth(gid) * scale;
                 prevGid = gid;
@@ -292,7 +334,7 @@ public class SvgCanvas : ICanvas
             string anchor = GetTextAnchor(align);
             string escapedText = EscapeXml(text);
             _sb.AppendLine(
-                $"<text x=\"{sx}\" y=\"{baselineY}\" font-family=\"{fontFamily}\" font-size=\"{fontSize}\" fill=\"{fill}\" text-anchor=\"{anchor}\">{escapedText}</text>");
+                $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" font-family=\"{fontFamily}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"{anchor}\">{escapedText}</text>");
         }
     }
 
@@ -309,7 +351,7 @@ public class SvgCanvas : ICanvas
         float baselineY = sy + fontSize;
 
         _sb.AppendLine(
-            $"<text x=\"{sx}\" y=\"{baselineY}\" font-family=\"{fontFamily}\" font-size=\"{fontSize}\" fill=\"{fill}\" text-anchor=\"start\" transform=\"rotate({angleDegrees}, {sx}, {baselineY})\">{escapedText}</text>");
+            $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" font-family=\"{fontFamily}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"start\" transform=\"rotate({N(angleDegrees)}, {N(sx)}, {N(baselineY)})\">{escapedText}</text>");
     }
 
     /// <summary>
@@ -367,16 +409,19 @@ public class SvgCanvas : ICanvas
     /// </summary>
     public void DrawImage(ImageInfo image, float x, float y, float width, float height)
     {
+        if (Options.EmbedImages == SvgImageEmbedding.Omit) return;
+        if (image == null) return;
+
         float sx = x + _xOffset;
         float sy = y + _yOffset;
 
         string mimeType = image.Format == ImageFormat.Png ? "image/png" : "image/jpeg";
-        string base64 = Convert.ToBase64String(image.OriginalData is { Length: > 0 }
-            ? image.OriginalData
-            : image.Data);
-        string dataUri = $"data:{mimeType};base64,{base64}";
+        byte[] bytes = image.OriginalData is { Length: > 0 } ? image.OriginalData : image.Data;
+        if (bytes == null || bytes.Length == 0) return;
+        string dataUri = $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}";
 
-        _sb.AppendLine($"<image x=\"{sx}\" y=\"{sy}\" width=\"{width}\" height=\"{height}\" href=\"{dataUri}\"/>");
+        _sb.AppendLine(
+            $"<image x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" href=\"{dataUri}\" preserveAspectRatio=\"none\"/>");
     }
 
     /// <summary>

@@ -390,6 +390,12 @@ public static class PdfRenderPipeline
         if (settings.Watermark == null || string.IsNullOrEmpty(settings.Watermark.Text))
             return;
 
+        if (ctx.IsSvgMode)
+        {
+            RenderWatermarkSvg(ctx, settings.Watermark, pageIndex, pageWidth, pageHeight);
+            return;
+        }
+
         WatermarkSettings wm = settings.Watermark;
 
         // Register the watermark font so it gets a resource name and is included in the PDF
@@ -451,6 +457,43 @@ public static class PdfRenderPipeline
 
         // Prepend to page stream (painter's model: first drawn = behind)
         ctx.Pages[pageIndex].Insert(0, wmOps);
+    }
+
+    /// <summary>
+    /// Renders the watermark as an SVG group prepended to the page body so it
+    /// paints behind content. Mirrors the PDF watermark: centred, rotated,
+    /// semi-transparent text.
+    /// </summary>
+    private static void RenderWatermarkSvg(RenderContext ctx, WatermarkSettings wm, int pageIndex,
+        float pageWidth, float pageHeight)
+    {
+        float cx = pageWidth / 2f;
+        float cy = pageHeight / 2f;
+        string hex = wm.TextColor.ToHexString();
+        string text = EscapeXmlText(wm.Text);
+
+        // rotate() in SVG is clockwise-positive; the layout model treats positive
+        // as counter-clockwise (matching the PDF rotate operator), so negate.
+        string fmt(float v) => v.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        string markup =
+            $"<g transform=\"rotate({fmt(-wm.RotationDegrees)} {fmt(cx)} {fmt(cy)})\" opacity=\"{fmt(wm.Opacity)}\">" +
+            $"<text x=\"{fmt(cx)}\" y=\"{fmt(cy)}\" fill=\"{hex}\" font-size=\"{fmt(wm.FontSize)}\" " +
+            $"font-family=\"{wm.FontName}\" text-anchor=\"middle\" dominant-baseline=\"central\">{text}</text>" +
+            "</g>\n";
+
+        ctx.Pages[pageIndex].Insert(0, markup);
+    }
+
+    /// <summary>Escapes XML special characters for SVG text content.</summary>
+    private static string EscapeXmlText(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        return text
+            .Replace("&", "&amp;")
+            .Replace("<", "&lt;")
+            .Replace(">", "&gt;")
+            .Replace("\"", "&quot;")
+            .Replace("'", "&apos;");
     }
 
     /// <summary>

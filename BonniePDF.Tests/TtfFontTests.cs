@@ -5,7 +5,8 @@ namespace BonniePDF.Tests;
 
 public class TtfFontTests
 {
-    private const string ArialFontPath = @"C:\Windows\Fonts\arial.ttf";
+    // Bundled, cross-platform Liberation Sans (metric-compatible with Arial).
+    private static readonly string ArialFontPath = TestFonts.SansRegularPath;
 
     [Fact]
     public void Constructor_WithValidFont_LoadsSuccessfully()

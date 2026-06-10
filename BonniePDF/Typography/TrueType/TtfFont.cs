@@ -493,7 +493,7 @@ public class TtfFont
         int usWidthClass = reader.ReadUInt16();
         int fsType = reader.ReadUInt16();
 
-        reader.Skip(22); // subscript/superscript metrics
+        reader.Skip(16); // subscript (8) + superscript (8) metrics
 
         reader.Skip(2); // yStrikeoutSize
         reader.Skip(2); // yStrikeoutPosition
@@ -515,13 +515,14 @@ public class TtfFont
 
         reader.Skip(4); // usWinAscent, usWinDescent
 
-        // Read sCapHeight and sxHeight if version >= 2
-        // Note: In the actual font file, sCapHeight appears before sxHeight
+        // Read sxHeight and sCapHeight if version >= 2.
+        // Per the OpenType OS/2 spec the field order is sxHeight THEN sCapHeight
+        // (both follow the two ulCodePageRange uint32s).
         if (version >= 2)
         {
-            reader.Skip(8); // ulCodePageRange
-            CapHeight = reader.ReadInt16();
+            reader.Skip(8); // ulCodePageRange1 + ulCodePageRange2
             XHeight = reader.ReadInt16();
+            CapHeight = reader.ReadInt16();
         }
         else
         {

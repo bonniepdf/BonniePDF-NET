@@ -10,6 +10,7 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Lists;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
+using BonniePDF.Export;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Writers;
 
@@ -286,6 +287,68 @@ public class Document : IDisposable
             await this.SaveAsync(ms, leaveOpen: false).ConfigureAwait(false);
             return ms.ToArray();
         }
+    }
+
+    // ─── SVG page export ────────────────────────────────────────────────
+
+    /// <summary>
+    /// Renders every laid-out page of the document to a standalone SVG string.
+    ///
+    /// Runs the same layout, pagination, watermark, and header/footer pipeline as
+    /// PDF output, so the returned list has one entry per generated PDF page and
+    /// the visual layout matches.
+    /// </summary>
+    /// <param name="options">Export options; defaults are used when <c>null</c>.</param>
+    public IReadOnlyList<string> GenerateSvgPages(SvgPageExportOptions options = null)
+    {
+        ApplyDefaultStyleToTree();
+        return SvgPageExporter.Export(this, options);
+    }
+
+    /// <summary>
+    /// Renders a single page (zero-based index) to a standalone SVG string.
+    /// </summary>
+    public string GenerateSvgPage(int pageIndex, SvgPageExportOptions options = null)
+    {
+        IReadOnlyList<string> pages = GenerateSvgPages(options);
+        if (pageIndex < 0 || pageIndex >= pages.Count)
+            throw new ArgumentOutOfRangeException(nameof(pageIndex),
+                $"Page index {pageIndex} out of range (document has {pages.Count} page(s)).");
+        return pages[pageIndex];
+    }
+
+    /// <summary>
+    /// Convenience for example cards and social previews: renders the first page
+    /// to a standalone SVG string.
+    /// </summary>
+    public string GenerateFirstPageSvg(SvgPageExportOptions options = null) => GenerateSvgPage(0, options);
+
+    /// <summary>
+    /// Asynchronous sibling of <see cref="GenerateSvgPages"/>. SVG export is
+    /// CPU-bound and runs synchronously; this overload exists for API symmetry
+    /// and cancellation support.
+    /// </summary>
+    public Task<IReadOnlyList<string>> GenerateSvgPagesAsync(SvgPageExportOptions options = null,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(GenerateSvgPages(options));
+    }
+
+    /// <summary>Asynchronous sibling of <see cref="GenerateSvgPage"/>.</summary>
+    public Task<string> GenerateSvgPageAsync(int pageIndex, SvgPageExportOptions options = null,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(GenerateSvgPage(pageIndex, options));
+    }
+
+    /// <summary>Asynchronous sibling of <see cref="GenerateFirstPageSvg"/>.</summary>
+    public Task<string> GenerateFirstPageSvgAsync(SvgPageExportOptions options = null,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(GenerateFirstPageSvg(options));
     }
 
     /// <summary>
