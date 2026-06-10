@@ -42,39 +42,7 @@ public class MetadataWriter
     /// </summary>
     public int WriteDocumentInfo(int id, DocumentMetadata metadata)
     {
-        Dictionary<string, string> dict = new();
-
-        if (!string.IsNullOrEmpty(metadata.Title))
-            dict["/Title"] = PdfSyntax.EncodeMetadataString(metadata.Title);
-
-        if (!string.IsNullOrEmpty(metadata.Author))
-            dict["/Author"] = PdfSyntax.EncodeMetadataString(metadata.Author);
-
-        if (!string.IsNullOrEmpty(metadata.Subject))
-            dict["/Subject"] = PdfSyntax.EncodeMetadataString(metadata.Subject);
-
-        if (!string.IsNullOrEmpty(metadata.Keywords))
-            dict["/Keywords"] = PdfSyntax.EncodeMetadataString(metadata.Keywords);
-
-        if (!string.IsNullOrEmpty(metadata.Creator))
-            dict["/Creator"] = PdfSyntax.EncodeMetadataString(metadata.Creator);
-
-        if (!string.IsNullOrEmpty(metadata.Producer))
-            dict["/Producer"] = PdfSyntax.EncodeMetadataString(metadata.Producer);
-
-        if (metadata.CreationDate.HasValue)
-            dict["/CreationDate"] = $"({PdfSyntax.FormatDate(metadata.CreationDate.Value)})";
-
-        if (metadata.ModifiedDate.HasValue)
-            dict["/ModDate"] = $"({PdfSyntax.FormatDate(metadata.ModifiedDate.Value)})";
-
-        if (metadata.Trapped.HasValue)
-            dict["/Trapped"] = metadata.Trapped.Value ? "/True" : "/False";
-
-        foreach (KeyValuePair<string, string> kvp in metadata.CustomProperties)
-            dict[$"/{PdfSyntax.Escape(kvp.Key)}"] = PdfSyntax.EncodeMetadataString(kvp.Value);
-
-        _writer.WriteObject(id, dict);
+        _writer.WriteObject(id, BuildDocumentInfoDict(metadata));
         return id;
     }
 
@@ -82,6 +50,15 @@ public class MetadataWriter
     /// Writes a document info dictionary with metadata asynchronously
     /// </summary>
     public async Task<int> WriteDocumentInfoAsync(int id, DocumentMetadata metadata, CancellationToken cancellationToken = default)
+    {
+        await _asyncWriter.WriteObjectAsync(id, BuildDocumentInfoDict(metadata), null, cancellationToken).ConfigureAwait(false);
+        return id;
+    }
+
+    /// <summary>
+    /// Builds the /Info dictionary shared by the sync and async paths.
+    /// </summary>
+    private static Dictionary<string, string> BuildDocumentInfoDict(DocumentMetadata metadata)
     {
         Dictionary<string, string> dict = new();
 
@@ -115,8 +92,7 @@ public class MetadataWriter
         foreach (KeyValuePair<string, string> kvp in metadata.CustomProperties)
             dict[$"/{PdfSyntax.Escape(kvp.Key)}"] = PdfSyntax.EncodeMetadataString(kvp.Value);
 
-        await _asyncWriter.WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
-        return id;
+        return dict;
     }
 
     /// <summary>
