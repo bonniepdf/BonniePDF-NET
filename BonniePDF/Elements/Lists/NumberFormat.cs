@@ -1,4 +1,4 @@
-namespace BonniePDF.Charts.Models;
+namespace BonniePDF.Elements.Lists;
 
 /// <summary>
 /// Number format options for ordered lists

@@ -1,4 +1,3 @@
-using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Lists;

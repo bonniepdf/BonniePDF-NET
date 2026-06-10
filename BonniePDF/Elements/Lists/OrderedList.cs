@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Text;
-using BonniePDF.Charts.Models;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering;
 
