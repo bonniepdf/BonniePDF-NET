@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using BonniePDF.Configuration;
+using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Rendering;
 
@@ -65,13 +66,13 @@ internal static class SvgPageExporter
 
         if (options.IncludeAccessibilityMetadata)
         {
-            sb.Append($" role=\"img\" aria-label=\"{EscapeAttr(title)} - page {pageNumber}\"");
+            sb.Append($" role=\"img\" aria-label=\"{XmlEscape.EscapeAttr(title)} - page {pageNumber}\"");
         }
         sb.Append('>');
 
         if (options.IncludeAccessibilityMetadata)
         {
-            sb.Append($"<title>{EscapeXml(title + " - page " + pageNumber)}</title>");
+            sb.Append($"<title>{XmlEscape.EscapeXml(title + " - page " + pageNumber)}</title>");
         }
 
         sb.Append($"<g id=\"page-{pageNumber}\" data-bonniepdf-page=\"{pageNumber}\">");
@@ -82,21 +83,4 @@ internal static class SvgPageExporter
 
     private static string Round(float value, int precision)
         => System.Math.Round((double)value, precision).ToString(CultureInfo.InvariantCulture);
-
-    private static string EscapeXml(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return "";
-        return text
-            .Replace("&", "&amp;")
-            .Replace("<", "&lt;")
-            .Replace(">", "&gt;")
-            .Replace("\"", "&quot;")
-            .Replace("'", "&apos;");
-    }
-
-    private static string EscapeAttr(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return "";
-        return text.Replace("&", "&amp;").Replace("<", "&lt;").Replace("\"", "&quot;");
-    }
 }

@@ -318,7 +318,7 @@ public class SvgCanvas : ICanvas
                     cursorX += kern * scale;
                 }
 
-                string charStr = EscapeXml(rune.ToString());
+                string charStr = XmlEscape.EscapeXml(rune.ToString());
                 _sb.Append($"<tspan x=\"{Tspan(cursorX)}\" y=\"{Tspan(baselineY)}\">{charStr}</tspan>");
 
                 cursorX += ttfFont.GetGlyphWidth(gid) * scale;
@@ -332,7 +332,7 @@ public class SvgCanvas : ICanvas
         {
             // Fallback: no embedded TTF available - rely on browser/viewer rendering
             string anchor = GetTextAnchor(align);
-            string escapedText = EscapeXml(text);
+            string escapedText = XmlEscape.EscapeXml(text);
             _sb.AppendLine(
                 $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" font-family=\"{fontFamily}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"{anchor}\">{escapedText}</text>");
         }
@@ -347,7 +347,7 @@ public class SvgCanvas : ICanvas
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         string fill = color.ToHexString();
-        string escapedText = EscapeXml(text);
+        string escapedText = XmlEscape.EscapeXml(text);
         float baselineY = sy + fontSize;
 
         _sb.AppendLine(
@@ -381,7 +381,7 @@ public class SvgCanvas : ICanvas
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         string fill = color.ToHexString();
-        string escapedText = EscapeXml(text);
+        string escapedText = XmlEscape.EscapeXml(text);
         float baselineY = sy + fontSize * 0.8f;
 
         _sb.AppendLine(
@@ -520,17 +520,4 @@ public class SvgCanvas : ICanvas
     private static string FormatOpacity(float opacity)
         => Math.Round(opacity, 4).ToString("0.####", CultureInfo.InvariantCulture);
 
-    /// <summary>
-    /// Escapes special XML characters in text.
-    /// </summary>
-    private static string EscapeXml(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return "";
-        return text
-            .Replace("&", "\u0026amp;", StringComparison.OrdinalIgnoreCase)
-            .Replace("<", "\u0026lt;", StringComparison.OrdinalIgnoreCase)
-            .Replace(">", "\u0026gt;", StringComparison.OrdinalIgnoreCase)
-            .Replace("\"", "\u0026quot;", StringComparison.OrdinalIgnoreCase)
-            .Replace("'", "\u0026apos;", StringComparison.OrdinalIgnoreCase);
-    }
 }

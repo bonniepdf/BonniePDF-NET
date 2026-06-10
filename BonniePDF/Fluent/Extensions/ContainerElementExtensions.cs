@@ -177,6 +177,16 @@ public static class ContainerElementExtensions
         return c.Element(qr);
     }
 
+    /// <summary>
+    /// Adds a 1D barcode element (Code 128 by default).
+    /// </summary>
+    public static Barcode Barcode(this IContentContainer c, string value,
+        BarcodeSymbology symbology = BarcodeSymbology.Code128)
+    {
+        var barcode = new Barcode { Value = value, Symbology = symbology };
+        return c.Element(barcode);
+    }
+
     // --- Raw Element Escape Hatch ---
 
     /// <summary>

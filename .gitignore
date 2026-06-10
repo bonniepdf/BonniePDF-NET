@@ -18,6 +18,9 @@ bin
 debug
 obj
 
+# Coverage output (the badge in badges/ is committed; raw reports are not)
+TestResults/
+
 # Visual Studio cache/options directory
 .vs/
 

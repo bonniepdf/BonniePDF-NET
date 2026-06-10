@@ -470,7 +470,7 @@ public static class PdfRenderPipeline
         float cx = pageWidth / 2f;
         float cy = pageHeight / 2f;
         string hex = wm.TextColor.ToHexString();
-        string text = EscapeXmlText(wm.Text);
+        string text = XmlEscape.EscapeXml(wm.Text);
 
         // rotate() in SVG is clockwise-positive; the layout model treats positive
         // as counter-clockwise (matching the PDF rotate operator), so negate.
@@ -482,18 +482,6 @@ public static class PdfRenderPipeline
             "</g>\n";
 
         ctx.Pages[pageIndex].Insert(0, markup);
-    }
-
-    /// <summary>Escapes XML special characters for SVG text content.</summary>
-    private static string EscapeXmlText(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return "";
-        return text
-            .Replace("&", "&amp;")
-            .Replace("<", "&lt;")
-            .Replace(">", "&gt;")
-            .Replace("\"", "&quot;")
-            .Replace("'", "&apos;");
     }
 
     /// <summary>
