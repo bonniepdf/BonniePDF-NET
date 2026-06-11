@@ -17,9 +17,9 @@ namespace BonniePDF.Examples.Elements.ColorPaletteSwatches;
 [System.ComponentModel.Description("The full ColorPalette as a swatch grid of little squares.")]
 public static class ColorPaletteExample
 {
-    // Layout constants for the swatch grid. Squares are kept small so all 22 palettes
-    // (× 11 shades) fit on a single A4 sheet.
-    private const float Square = 28f;
+    // Layout constants for the swatch grid. Boxes are short so all 22 palettes
+    // (× 11 shades) fit on a single A4 sheet; their width is filled to the page.
+    private const float BoxHeight = 28f;
     private const float HGap = 4f;
     private const float VGap = 3f;
     private const float LabelWidth = 56f;
@@ -88,30 +88,33 @@ public static class ColorPaletteExample
         VerticalStack grid = new() { Spacing = VGap };
 
         // Header row: an empty gutter above the labels, then a shade number per column.
+        // Weighted distribution: the gutter keeps its fixed width (null weight), and the 11
+        // columns share the remaining page width equally (weight 1 each).
         HorizontalStack header = new()
         {
-            WidthDistribution = WidthDistribution.Auto,
+            WidthDistribution = WidthDistribution.Weighted,
             Spacing = HGap
         };
         header.AddChild(new Container { Width = LabelWidth });
         foreach (int shade in ColorPalette.Shades)
         {
-            header.AddChild(HeaderCell(shade.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            header.AddChild(HeaderCell(shade.ToString(System.Globalization.CultureInfo.InvariantCulture)), 1f);
         }
         grid.AddChild(header);
 
         // One row per palette, lightest (50) on the left to darkest (950) on the right.
         foreach ((string name, ColorPalette ramp) in Palettes)
         {
+            // Fixed-width label (null weight) + 11 swatches that fill the rest equally (weight 1).
             HorizontalStack row = new()
             {
-                WidthDistribution = WidthDistribution.Auto,
+                WidthDistribution = WidthDistribution.Weighted,
                 Spacing = HGap
             };
             row.AddChild(RowLabel(name));
             foreach (int shade in ColorPalette.Shades)
             {
-                row.AddChild(Swatch(ramp, shade));
+                row.AddChild(Swatch(ramp, shade), 1f);
             }
             grid.AddChild(row);
         }
