@@ -62,14 +62,15 @@ public class SvgPageExportTests
     }
 
     [Fact]
-    public void AccessibilityMetadata_OffByDefault_OnByOption()
+    public void AccessibilityMetadata_OnByDefault_OffByOption()
     {
-        string without = SimpleDoc().GenerateFirstPageSvg();
-        Assert.DoesNotContain("role=\"img\"", without, StringComparison.Ordinal);
-
-        string with = SimpleDoc().GenerateFirstPageSvg(new SvgPageExportOptions { IncludeAccessibilityMetadata = true });
+        string with = SimpleDoc().GenerateFirstPageSvg();
         Assert.Contains("role=\"img\"", with, StringComparison.Ordinal);
         Assert.Contains("<title>", with, StringComparison.Ordinal);
+
+        string without = SimpleDoc().GenerateFirstPageSvg(new SvgPageExportOptions { IncludeAccessibilityMetadata = false });
+        Assert.DoesNotContain("role=\"img\"", without, StringComparison.Ordinal);
+        Assert.DoesNotContain("<title>", without, StringComparison.Ordinal);
     }
 
     [Fact]

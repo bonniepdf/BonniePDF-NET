@@ -51,9 +51,9 @@ public sealed class SvgPageExportOptions
     /// <summary>
     /// Include <c>&lt;title&gt;</c>, <c>role</c>, and <c>aria-label</c> on the root
     /// <c>&lt;svg&gt;</c>. This is a lightweight preview affordance, not PDF/UA
-    /// structure export. Defaults to <c>false</c>.
+    /// structure export. Defaults to <c>true</c> (matches the TypeScript port).
     /// </summary>
-    public bool IncludeAccessibilityMetadata { get; init; }
+    public bool IncludeAccessibilityMetadata { get; init; } = true;
 
     /// <summary>
     /// Human-readable document title used to build the <c>&lt;title&gt;</c>/<c>aria-label</c>
