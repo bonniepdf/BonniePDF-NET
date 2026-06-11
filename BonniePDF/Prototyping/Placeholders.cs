@@ -38,9 +38,9 @@ public static class Placeholders
     public static Color BackgroundColor() => _global.BackgroundColor();
     public static Color Color() => _global.Color();
 
-    public static List<InvoiceLineItem> InvoiceLines(int count = 5) => _global.InvoiceLines(count);
-    public static List<string[]> TableRows(int rows = 5, int columns = 4) => _global.TableRows(rows, columns);
-    public static List<int> MonthlyValues(int count = 12, int min = 50, int max = 300) => _global.MonthlyValues(count, min, max);
+    public static IList<InvoiceLineItem> InvoiceLines(int count = 5) => _global.InvoiceLines(count);
+    public static IList<string[]> TableRows(int rows = 5, int columns = 4) => _global.TableRows(rows, columns);
+    public static IList<int> MonthlyValues(int count = 12, int min = 50, int max = 300) => _global.MonthlyValues(count, min, max);
 
     public static byte[] Image(int width, int height) => _global.Image(width, height);
 
@@ -234,7 +234,7 @@ public class PlaceholderSource
     public Color BackgroundColor() => BackgroundColors[Next(BackgroundColors.Length)];
     public Color Color() => AccentColors[Next(AccentColors.Length)];
 
-    public List<InvoiceLineItem> InvoiceLines(int count = 5)
+    public IList<InvoiceLineItem> InvoiceLines(int count = 5)
     {
         var items = new List<InvoiceLineItem>(count);
         for (int i = 0; i < count; i++)
@@ -247,7 +247,7 @@ public class PlaceholderSource
         return items;
     }
 
-    public List<string[]> TableRows(int rows = 5, int columns = 4)
+    public IList<string[]> TableRows(int rows = 5, int columns = 4)
     {
         var result = new List<string[]>(rows);
         for (int r = 0; r < rows; r++)
@@ -268,7 +268,7 @@ public class PlaceholderSource
         return result;
     }
 
-    public List<int> MonthlyValues(int count = 12, int min = 50, int max = 300)
+    public IList<int> MonthlyValues(int count = 12, int min = 50, int max = 300)
     {
         var values = new List<int>(count);
         for (int i = 0; i < count; i++) values.Add(Integer(min, max));

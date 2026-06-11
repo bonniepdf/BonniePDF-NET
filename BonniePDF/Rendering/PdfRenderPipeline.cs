@@ -461,7 +461,7 @@ public static class PdfRenderPipeline
         if (ctx.Tagging != null)
         {
             wmOps.Insert(0, "/Artifact BMC\n");
-            wmOps.AppendLine("EMC");
+            wmOps.AppendLf("EMC");
         }
 
         // Prepend to page stream (painter's model: first drawn = behind)

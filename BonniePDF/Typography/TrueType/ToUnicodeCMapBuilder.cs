@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using BonniePDF.Core; // AppendLf - platform-independent '\n' (see StringBuilderExtensions)
 
 namespace BonniePDF.Typography.TrueType;
 
@@ -49,19 +50,19 @@ public class ToUnicodeCMapBuilder
         StringBuilder sb = new();
 
         // CMap header
-        sb.AppendLine("/CIDInit /ProcSet findresource begin");
-        sb.AppendLine("12 dict begin");
-        sb.AppendLine("begincmap");
-        sb.AppendLine("/CIDSystemInfo <<");
-        sb.AppendLine("  /Registry (Adobe)");
-        sb.AppendLine("  /Ordering (UCS)");
-        sb.AppendLine("  /Supplement 0");
-        sb.AppendLine(">> def");
-        sb.AppendLine("/CMapName /Adobe-Identity-UCS def");
-        sb.AppendLine("/CMapType 2 def");
-        sb.AppendLine("1 begincodespacerange");
-        sb.AppendLine("<0000> <FFFF>");
-        sb.AppendLine("endcodespacerange");
+        sb.AppendLf("/CIDInit /ProcSet findresource begin");
+        sb.AppendLf("12 dict begin");
+        sb.AppendLf("begincmap");
+        sb.AppendLf("/CIDSystemInfo <<");
+        sb.AppendLf("  /Registry (Adobe)");
+        sb.AppendLf("  /Ordering (UCS)");
+        sb.AppendLf("  /Supplement 0");
+        sb.AppendLf(">> def");
+        sb.AppendLf("/CMapName /Adobe-Identity-UCS def");
+        sb.AppendLf("/CMapType 2 def");
+        sb.AppendLf("1 begincodespacerange");
+        sb.AppendLf("<0000> <FFFF>");
+        sb.AppendLf("endcodespacerange");
 
         // Sort mappings by glyph ID for consistent output
         List<(ushort glyphId, int unicode)> sorted = _mappings
@@ -74,22 +75,22 @@ public class ToUnicodeCMapBuilder
         for (int i = 0; i < count; i += 100)
         {
             int chunkSize = Math.Min(100, count - i);
-            sb.AppendLine($"{chunkSize} beginbfchar");
+            sb.AppendLf($"{chunkSize} beginbfchar");
 
             for (int j = 0; j < chunkSize; j++)
             {
                 (ushort gid, int unicode) = sorted[i + j];
-                sb.AppendLine($"<{gid:X4}> {FormatUnicode(unicode)}");
+                sb.AppendLf($"<{gid:X4}> {FormatUnicode(unicode)}");
             }
 
-            sb.AppendLine("endbfchar");
+            sb.AppendLf("endbfchar");
         }
 
         // CMap footer
-        sb.AppendLine("endcmap");
-        sb.AppendLine("CMapName currentdict /CMap defineresource pop");
-        sb.AppendLine("end");
-        sb.AppendLine("end");
+        sb.AppendLf("endcmap");
+        sb.AppendLf("CMapName currentdict /CMap defineresource pop");
+        sb.AppendLf("end");
+        sb.AppendLf("end");
 
         return sb.ToString();
     }
@@ -114,23 +115,23 @@ public class ToUnicodeCMapBuilder
     {
         StringBuilder sb = new();
 
-        sb.AppendLine("/CIDInit /ProcSet findresource begin");
-        sb.AppendLine("12 dict begin");
-        sb.AppendLine("begincmap");
-        sb.AppendLine("/CIDSystemInfo <<");
-        sb.AppendLine("  /Registry (Adobe)");
-        sb.AppendLine("  /Ordering (UCS)");
-        sb.AppendLine("  /Supplement 0");
-        sb.AppendLine(">> def");
-        sb.AppendLine("/CMapName /Adobe-Identity-UCS def");
-        sb.AppendLine("/CMapType 2 def");
-        sb.AppendLine("1 begincodespacerange");
-        sb.AppendLine("<0000> <FFFF>");
-        sb.AppendLine("endcodespacerange");
-        sb.AppendLine("endcmap");
-        sb.AppendLine("CMapName currentdict /CMap defineresource pop");
-        sb.AppendLine("end");
-        sb.AppendLine("end");
+        sb.AppendLf("/CIDInit /ProcSet findresource begin");
+        sb.AppendLf("12 dict begin");
+        sb.AppendLf("begincmap");
+        sb.AppendLf("/CIDSystemInfo <<");
+        sb.AppendLf("  /Registry (Adobe)");
+        sb.AppendLf("  /Ordering (UCS)");
+        sb.AppendLf("  /Supplement 0");
+        sb.AppendLf(">> def");
+        sb.AppendLf("/CMapName /Adobe-Identity-UCS def");
+        sb.AppendLf("/CMapType 2 def");
+        sb.AppendLf("1 begincodespacerange");
+        sb.AppendLf("<0000> <FFFF>");
+        sb.AppendLf("endcodespacerange");
+        sb.AppendLf("endcmap");
+        sb.AppendLf("CMapName currentdict /CMap defineresource pop");
+        sb.AppendLf("end");
+        sb.AppendLf("end");
 
         return sb.ToString();
     }

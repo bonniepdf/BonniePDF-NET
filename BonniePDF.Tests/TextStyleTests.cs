@@ -143,4 +143,45 @@ public class TextStyleTests
         Assert.Null(new TextStyle().ResolvedFontName);
         Assert.Equal("Helvetica", new TextStyle { FontFamily = "Helvetica" }.ResolvedFontName);
     }
+
+    // --- Fluent setters ---
+
+    [Fact]
+    public void Fluent_WeightShortcutsSetWeight()
+    {
+        Assert.Equal(FontWeight.Bold, new TextStyle().Bold().Weight);
+        Assert.Equal(FontWeight.Light, new TextStyle().Light().Weight);
+        Assert.Equal(FontWeight.Thin, new TextStyle().Thin().Weight);
+    }
+
+    [Fact]
+    public void Fluent_ValueSettersAssignTheirField()
+    {
+        Assert.True(new TextStyle().WithItalic().Italic);
+        Assert.Equal(18, new TextStyle().WithSize(18).FontSize);
+        Assert.Equal(Color.Red, new TextStyle().WithColor(Color.Red).Color);
+        Assert.Equal(Color.Amber400, new TextStyle().WithBackground(Color.Amber400).BackgroundColor);
+        Assert.Equal(FontWeight.Bold, new TextStyle().WithWeight(FontWeight.Bold).Weight);
+        Assert.Equal("Times", new TextStyle().WithFamily("Times").FontFamily);
+        Assert.Equal(1.5f, new TextStyle().WithLineHeight(1.5f).LineHeightMultiplier);
+    }
+
+    [Fact]
+    public void Fluent_DecorationSettersAreAdditive()
+    {
+        Assert.Equal(TextDecoration.Underline, new TextStyle().Underline().Decoration);
+        TextDecoration both = new TextStyle().Underline().Strikethrough().Decoration;
+        Assert.Equal(TextDecoration.Underline, both & TextDecoration.Underline);
+        Assert.Equal(TextDecoration.Strikethrough, both & TextDecoration.Strikethrough);
+    }
+
+    [Fact]
+    public void Fluent_SettersReturnSameInstanceForChaining()
+    {
+        TextStyle s = new();
+        Assert.Same(s, s.Bold());
+        Assert.Same(s, s.WithSize(10));
+        Assert.Same(s, s.WithColor(Color.Red));
+        Assert.Same(s, s.Underline());
+    }
 }

@@ -70,14 +70,14 @@ public class SvgCanvas : ICanvas
         bool shouldWriteHeader = includeHeader ?? existingSb == null;
 
         if (shouldWriteHeader)
-            _sb.AppendLine(
+            _sb.AppendLf(
                 $"<svg width=\"{Inv(width)}\" height=\"{Inv(height)}\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">");
 
         // In multipage mode, open a group for this page with vertical translation
         if (IsMultiPageMode)
         {
             float translateY = PageNumber * height;
-            _sb.AppendLine($"<g id=\"page{PageNumber + 1}\" transform=\"translate(0, {Inv(translateY)})\">");
+            _sb.AppendLf($"<g id=\"page{PageNumber + 1}\" transform=\"translate(0, {Inv(translateY)})\">");
         }
     }
 
@@ -147,7 +147,7 @@ public class SvgCanvas : ICanvas
     /// </summary>
     public void SaveState()
     {
-        _sb.AppendLine("<g>");
+        _sb.AppendLf("<g>");
         _stateDepth++;
     }
 
@@ -158,7 +158,7 @@ public class SvgCanvas : ICanvas
     {
         if (_stateDepth > 0)
         {
-            _sb.AppendLine("</g>");
+            _sb.AppendLf("</g>");
             _stateDepth--;
         }
     }
@@ -171,7 +171,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        _sb.AppendLine($"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" {GetFillAttributes(color)}/>");
+        _sb.AppendLf($"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -182,7 +182,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        _sb.AppendLine(
+        _sb.AppendLf(
             $"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" fill=\"none\" {GetStrokeAttributes(color)} stroke-width=\"{N(strokeWidth)}\"/>");
     }
 
@@ -193,7 +193,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        _sb.AppendLine($"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" rx=\"{N(radius)}\" ry=\"{N(radius)}\" {GetFillAttributes(color)}/>");
+        _sb.AppendLf($"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" rx=\"{N(radius)}\" ry=\"{N(radius)}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -204,7 +204,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        _sb.AppendLine(
+        _sb.AppendLf(
             $"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" rx=\"{N(radius)}\" ry=\"{N(radius)}\" fill=\"none\" {GetStrokeAttributes(color)} stroke-width=\"{N(strokeWidth)}\"/>");
     }
 
@@ -218,7 +218,7 @@ public class SvgCanvas : ICanvas
         float sy1 = y1 + _yOffset;
         float sx2 = x2 + _xOffset;
         float sy2 = y2 + _yOffset;
-        _sb.AppendLine(
+        _sb.AppendLf(
             $"<line x1=\"{N(sx1)}\" y1=\"{N(sy1)}\" x2=\"{N(sx2)}\" y2=\"{N(sy2)}\" {GetStrokeAttributes(color)} stroke-width=\"{N(lineWidth)}\"/>");
     }
 
@@ -230,7 +230,7 @@ public class SvgCanvas : ICanvas
     {
         float scx = cx + _xOffset;
         float scy = cy + _yOffset;
-        _sb.AppendLine($"<circle cx=\"{N(scx)}\" cy=\"{N(scy)}\" r=\"{N(radius)}\" {GetFillAttributes(color)}/>");
+        _sb.AppendLf($"<circle cx=\"{N(scx)}\" cy=\"{N(scy)}\" r=\"{N(radius)}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -241,7 +241,7 @@ public class SvgCanvas : ICanvas
     {
         float scx = cx + _xOffset;
         float scy = cy + _yOffset;
-        _sb.AppendLine($"<ellipse cx=\"{N(scx)}\" cy=\"{N(scy)}\" rx=\"{N(rx)}\" ry=\"{N(ry)}\" {GetFillAttributes(color)}/>");
+        _sb.AppendLf($"<ellipse cx=\"{N(scx)}\" cy=\"{N(scy)}\" rx=\"{N(rx)}\" ry=\"{N(ry)}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -268,7 +268,7 @@ public class SvgCanvas : ICanvas
         // Close the path
         pathData.Append(" Z");
 
-        _sb.AppendLine($"<path d=\"{pathData}\" {GetFillAttributes(color)}/>");
+        _sb.AppendLf($"<path d=\"{pathData}\" {GetFillAttributes(color)}/>");
     }
 
     /// <summary>
@@ -326,14 +326,14 @@ public class SvgCanvas : ICanvas
                 hasPrev = true;
             }
 
-            _sb.AppendLine("</text>");
+            _sb.AppendLf("</text>");
         }
         else
         {
             // Fallback: no embedded TTF available - rely on browser/viewer rendering
             string anchor = GetTextAnchor(align);
             string escapedText = XmlEscape.EscapeXml(text);
-            _sb.AppendLine(
+            _sb.AppendLf(
                 $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" font-family=\"{fontFamily}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"{anchor}\">{escapedText}</text>");
         }
     }
@@ -350,7 +350,7 @@ public class SvgCanvas : ICanvas
         string escapedText = XmlEscape.EscapeXml(text);
         float baselineY = sy + fontSize;
 
-        _sb.AppendLine(
+        _sb.AppendLf(
             $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" font-family=\"{fontFamily}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"start\" transform=\"rotate({N(angleDegrees)}, {N(sx)}, {N(baselineY)})\">{escapedText}</text>");
     }
 
@@ -384,7 +384,7 @@ public class SvgCanvas : ICanvas
         string escapedText = XmlEscape.EscapeXml(text);
         float baselineY = sy + fontSize * 0.8f;
 
-        _sb.AppendLine(
+        _sb.AppendLf(
             $"<text x=\"{sx}\" y=\"{baselineY}\" font-family=\"{fontFamily}\" font-size=\"{fontSize}\" fill=\"{fill}\" text-anchor=\"start\" word-spacing=\"{wordSpacing:F2}\">{escapedText}</text>");
     }
 
@@ -420,7 +420,7 @@ public class SvgCanvas : ICanvas
         if (bytes == null || bytes.Length == 0) return;
         string dataUri = $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}";
 
-        _sb.AppendLine(
+        _sb.AppendLf(
             $"<image x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" href=\"{dataUri}\" preserveAspectRatio=\"none\"/>");
     }
 
@@ -462,7 +462,7 @@ public class SvgCanvas : ICanvas
     /// </summary>
     public void ClosePageGroup()
     {
-        if (IsMultiPageMode) _sb.AppendLine("</g>");
+        if (IsMultiPageMode) _sb.AppendLf("</g>");
     }
 
     /// <summary>
@@ -471,16 +471,16 @@ public class SvgCanvas : ICanvas
     public string GetSvg()
     {
         // Close any open groups
-        for (int i = 0; i < _stateDepth; i++) _sb.AppendLine("</g>");
+        for (int i = 0; i < _stateDepth; i++) _sb.AppendLf("</g>");
 
         // Close the page group in multipage mode
-        if (IsMultiPageMode) _sb.AppendLine("</g>");
+        if (IsMultiPageMode) _sb.AppendLf("</g>");
 
         // Close SVG document if we created the StringBuilder
         // If we didn't create it, we assume the caller manages the closing tag
         if (_sb.ToString().StartsWith("<svg", StringComparison.OrdinalIgnoreCase))
             // Simple check, robust enough for our usage
-            _sb.AppendLine("</svg>");
+            _sb.AppendLf("</svg>");
 
         return _sb.ToString();
     }
