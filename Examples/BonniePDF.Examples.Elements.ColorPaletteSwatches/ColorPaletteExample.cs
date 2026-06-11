@@ -1,0 +1,165 @@
+using BonniePDF.Configuration;
+using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Text;
+using BonniePDF.Typography;
+
+
+namespace BonniePDF.Examples.Elements.ColorPaletteSwatches;
+
+/// <summary>
+/// Draws the entire <see cref="BonniePDF.Core.ColorPalette"/> as a swatch grid - all 22 Tailwind v4
+/// ramps × 11 shades, rendered as little squares via <c>ColorPalette[name][shade]</c>. Doubles as a
+/// living reference for the palette tokens.
+/// </summary>
+[System.ComponentModel.DisplayName("Colour ColorPalette")]
+[System.ComponentModel.Category("Elements")]
+[System.ComponentModel.Description("The full ColorPalette as a swatch grid of little squares.")]
+public static class ColorPaletteExample
+{
+    // Layout constants for the swatch grid. Squares are kept small so all 22 palettes
+    // (× 11 shades) fit on a single A4 sheet.
+    private const float Square = 28f;
+    private const float HGap = 4f;
+    private const float VGap = 3f;
+    private const float LabelWidth = 56f;
+
+    // The 22 ramps paired with their lower-case names, in the same order as the TypeScript port.
+    private static readonly (string Name, ColorPalette Ramp)[] Palettes =
+    [
+        ("slate", ColorPalette.Slate),
+        ("gray", ColorPalette.Gray),
+        ("zinc", ColorPalette.Zinc),
+        ("neutral", ColorPalette.Neutral),
+        ("stone", ColorPalette.Stone),
+        ("red", ColorPalette.Red),
+        ("orange", ColorPalette.Orange),
+        ("amber", ColorPalette.Amber),
+        ("yellow", ColorPalette.Yellow),
+        ("lime", ColorPalette.Lime),
+        ("green", ColorPalette.Green),
+        ("emerald", ColorPalette.Emerald),
+        ("teal", ColorPalette.Teal),
+        ("cyan", ColorPalette.Cyan),
+        ("sky", ColorPalette.Sky),
+        ("blue", ColorPalette.Blue),
+        ("indigo", ColorPalette.Indigo),
+        ("violet", ColorPalette.Violet),
+        ("purple", ColorPalette.Purple),
+        ("fuchsia", ColorPalette.Fuchsia),
+        ("pink", ColorPalette.Pink),
+        ("rose", ColorPalette.Rose),
+    ];
+
+    public static Document Generate()
+    {
+        Document doc = new(new DocumentSettings
+        {
+            PageSize = PdfSize.A4,
+            Margin = 36
+        });
+
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
+
+        doc.Metadata.Title = "ColorPalette Swatches";
+        doc.Metadata.Author = "BonniePDF";
+
+        // --- Title ---
+        doc.Add(new TextBlock
+        {
+            Text = "ColorPalette",
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 18,
+            TextColor = ColorPalette.Slate[800]
+        });
+
+        doc.Add(new TextBlock
+        {
+            Text = "Every Tailwind v4 ramp in the palette - 22 colours × 11 shades, drawn as ColorPalette[name][shade].",
+            FontName = StandardFonts.Helvetica,
+            FontSize = 9,
+            TextColor = ColorPalette.Slate[500],
+            Margin = new Thickness(0, 4, 0, 0)
+        });
+
+        doc.Add(new Spacer(8));
+
+        // --- Grid ---
+        VerticalStack grid = new() { Spacing = VGap };
+
+        // Header row: an empty gutter above the labels, then a shade number per column.
+        HorizontalStack header = new()
+        {
+            WidthDistribution = WidthDistribution.Auto,
+            Spacing = HGap
+        };
+        header.AddChild(new Container { Width = LabelWidth });
+        foreach (int shade in ColorPalette.Shades)
+        {
+            header.AddChild(HeaderCell(shade.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+        }
+        grid.AddChild(header);
+
+        // One row per palette, lightest (50) on the left to darkest (950) on the right.
+        foreach ((string name, ColorPalette ramp) in Palettes)
+        {
+            HorizontalStack row = new()
+            {
+                WidthDistribution = WidthDistribution.Auto,
+                Spacing = HGap
+            };
+            row.AddChild(RowLabel(name));
+            foreach (int shade in ColorPalette.Shades)
+            {
+                row.AddChild(Swatch(ramp, shade));
+            }
+            grid.AddChild(row);
+        }
+
+        doc.Add(grid);
+
+        return doc;
+    }
+
+    /// <summary>A single colour square for one palette/shade.</summary>
+    private static Container Swatch(ColorPalette ramp, int shade) => new()
+    {
+        Width = Square,
+        Height = Square,
+        BackgroundColor = ramp[shade],
+        // A hairline border keeps the lightest shades (50) visible against the white page.
+        Border = new Border(0.5f),
+        BorderColors = new BorderColors(ColorPalette.Slate[200]),
+        CornerRadius = 2
+    };
+
+    /// <summary>The left-hand row label carrying the palette name.</summary>
+    private static Container RowLabel(string name) => new()
+    {
+        Width = LabelWidth,
+        Height = Square,
+        // Nudge the label down so it sits roughly centred against the square.
+        Padding = new Thickness(0, 9, HGap, 0),
+        Child = new TextBlock
+        {
+            Text = name,
+            FontName = StandardFonts.Helvetica,
+            FontSize = 9,
+            TextColor = ColorPalette.Slate[700]
+        }
+    };
+
+    /// <summary>A centred header cell carrying a shade number (50, 100, … 950).</summary>
+    private static Container HeaderCell(string label) => new()
+    {
+        Width = Square,
+        Child = new TextBlock
+        {
+            Text = label,
+            FontName = StandardFonts.Helvetica,
+            FontSize = 7,
+            TextColor = ColorPalette.Slate[500],
+            Alignment = TextAlignment.Center
+        }
+    };
+}
