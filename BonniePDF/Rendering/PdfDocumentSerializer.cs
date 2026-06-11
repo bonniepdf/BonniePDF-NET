@@ -98,6 +98,10 @@ public class PdfDocumentSerializer
             Tagging = taggingContext,
         };
         ctx.Resources.Diagnostics = _diagnostics;
+        // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
+        // independently of any PDF/A claim - substitute embedded Liberation for
+        // the standard-14 references in tagged output too.
+        ctx.Resources.EmbedStandardFonts = _document.Settings.Accessibility == AccessibilityMode.PdfUa1;
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = [];
@@ -351,6 +355,10 @@ public class PdfDocumentSerializer
 
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin);
         ctx.Conformance = _document.Settings.Conformance;
+        // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
+        // independently of any PDF/A claim - substitute embedded Liberation for
+        // the standard-14 references in tagged output too.
+        ctx.Resources.EmbedStandardFonts = _document.Settings.Accessibility == AccessibilityMode.PdfUa1;
         ctx.TocEntries = resolvedTocEntries ?? new Dictionary<string, int>();
         ctx.Tagging = taggingContext;
         ctx.Resources.Diagnostics = _diagnostics;

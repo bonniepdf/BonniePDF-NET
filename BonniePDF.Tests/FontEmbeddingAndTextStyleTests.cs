@@ -77,6 +77,41 @@ public class FontEmbeddingAndTextStyleTests
         Assert.Contains("/OutputIntents", pdf);
     }
 
+    // ── PDF/UA-1 font embedding (veraPDF 7.21.4.1) ───────────────────
+
+    [Fact]
+    public void PdfUa1_EmbedsStandardFonts_WithoutPdfAClaim()
+    {
+        // PDF/UA-1 mandates font embedding independently of PDF/A. A tagged
+        // document that uses Helvetica must substitute the embedded Liberation
+        // face, not reference an unembedded /Type1 standard font.
+        Assert.True(FontManager.HasBundledFonts());
+        string pdf = Encoding.ASCII.GetString(Generate(doc =>
+        {
+            doc.Settings.Version = PdfVersion.Pdf17;
+            doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+            doc.Add(new TextBlock { Text = "Accessible text", FontName = StandardFonts.Helvetica });
+        }));
+        Assert.Contains("/FontFile2", pdf); // embedded TrueType program
+        Assert.Contains("LiberationSans", pdf); // metric-compatible substitute
+        Assert.DoesNotContain("/BaseFont /Helvetica", pdf); // no unembedded standard-14
+    }
+
+    [Fact]
+    public void PlainDocument_LeavesStandardFontsUnembedded()
+    {
+        // Regression guard: the UA-1 embedding path must not leak into ordinary
+        // documents, where standard-14 fonts are legitimately referenced without
+        // embedding.
+        string pdf = Encoding.ASCII.GetString(Generate(doc =>
+        {
+            doc.Settings.Version = PdfVersion.Pdf17;
+            doc.Add(new TextBlock { Text = "Plain text", FontName = StandardFonts.Helvetica });
+        }));
+        Assert.Contains("/BaseFont /Helvetica", pdf);
+        Assert.DoesNotContain("/FontFile2", pdf);
+    }
+
     // ── DefaultTextStyle cascade ────────────────────────────────
 
     [Fact]
