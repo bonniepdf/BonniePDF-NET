@@ -17,6 +17,8 @@ public sealed class PageDescriptor
     internal ContentSlot HeaderSlot { get; } = new();
     internal ContentSlot ContentSlot { get; } = new();
     internal ContentSlot FooterSlot { get; } = new();
+    internal ContentSlot BackgroundSlot { get; } = new();
+    internal ContentSlot ForegroundSlot { get; } = new();
     internal TextStyle DefaultStyle { get; private set; }
 
     /// <summary>
@@ -65,4 +67,20 @@ public sealed class PageDescriptor
     /// Content placed here appears at the bottom of every page.
     /// </summary>
     public IContentContainer Footer() => FooterSlot;
+
+    /// <summary>
+    /// Returns a container for the full-page <b>background</b> slot.
+    /// Content placed here is painted behind everything else and spans the
+    /// entire page, ignoring the margins - ideal for letterhead, certificate
+    /// backgrounds, and bleed images.
+    /// </summary>
+    public IContentContainer Background() => BackgroundSlot;
+
+    /// <summary>
+    /// Returns a container for the full-page <b>foreground</b> slot.
+    /// Content placed here is painted on top of everything else and spans the
+    /// entire page, ignoring the margins - ideal for "DRAFT"/"CONFIDENTIAL"
+    /// overlays and stamps.
+    /// </summary>
+    public IContentContainer Foreground() => ForegroundSlot;
 }

@@ -159,6 +159,19 @@ public sealed class PdfBuilder
             settings.FooterTemplate = _ => footerElement;
         }
 
+        // full-page background / foreground slots.
+        if (firstPage.BackgroundSlot.Child != null)
+        {
+            IElement backgroundElement = firstPage.BackgroundSlot.Child;
+            settings.PageBackground = _ => backgroundElement;
+        }
+
+        if (firstPage.ForegroundSlot.Child != null)
+        {
+            IElement foregroundElement = firstPage.ForegroundSlot.Child;
+            settings.PageForeground = _ => foregroundElement;
+        }
+
         var doc = new Document(settings);
 
         // Apply metadata

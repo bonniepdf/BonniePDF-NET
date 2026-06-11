@@ -1,5 +1,7 @@
+using System;
 using BonniePDF.Core;
 using BonniePDF.Fluent;
+using BonniePDF.Fluent.Descriptors;
 using BonniePDF.Rendering;
 
 namespace BonniePDF.Elements.Layout;
@@ -22,6 +24,26 @@ public class Container : BorderedElementBase, IContentContainer
         set => Child = value!;
     }
     public Thickness Padding { get; set; }
+
+    /// <summary>
+    /// Fills this container with an inline z-stack. Layers paint in
+    /// declaration order: <c>Background</c> behind, <c>PrimaryLayer</c> in the
+    /// middle (it sets the flow height), and <c>Foreground</c> on top.
+    /// <example>
+    /// <code>
+    /// new Container().Layers(layers => layers
+    ///     .Background(new Image("card-bg.jpg"))
+    ///     .Foreground(new TextBlock("Horizon Ventures").Bold().FontSize(32)));
+    /// </code>
+    /// </example>
+    /// </summary>
+    public Container Layers(Action<LayersDescriptor> configure)
+    {
+        LayersDescriptor descriptor = new();
+        configure(descriptor);
+        Child = descriptor.Build();
+        return this;
+    }
 
     /// <summary>
     /// Optional fixed width for the container (null = use available width)

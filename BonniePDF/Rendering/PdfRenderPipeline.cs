@@ -362,8 +362,17 @@ public static class PdfRenderPipeline
             // Render Watermark (behind all content - prepended to stream)
             RenderWatermark(ctx, settings, i, pageSize.Width, pageSize.Height);
 
+            // full-page background slot. Painted behind everything
+            // (even the watermark), ignoring margins. Prepended last so it
+            // ends up at the very back of the painter's-model stream.
+            RenderPageSlot(ctx, settings.PageBackground, i, isBackground: true);
+
             // Render Templates (Headers/Footers)
             RenderTemplate(ctx, settings, i);
+
+            // full-page foreground slot. Painted on top of everything,
+            // ignoring margins (DRAFT / CONFIDENTIAL overlays and stamps).
+            RenderPageSlot(ctx, settings.PageForeground, i, isBackground: false);
 
             PageRenderOutput output = new()
             {
@@ -550,6 +559,63 @@ public static class PdfRenderPipeline
             ctx.SetCanvas(originalCanvas);
             ctx.CurrentX = originalX;
             ctx.CurrentY = originalY;
+        }
+    }
+
+    /// <summary>
+    /// Renders a full-page slot element (this feature page Background / Foreground).
+    /// The slot spans the entire page and ignores the margins, so the element
+    /// is rendered at the page origin (0, 0) with the full page width.
+    ///
+    /// When <paramref name="isBackground"/> is <c>true</c> the slot's operators
+    /// are prepended to the page stream so they paint behind all existing
+    /// content (including the watermark); otherwise they are appended so they
+    /// paint on top of everything.
+    /// </summary>
+    private static void RenderPageSlot(RenderContext ctx, Func<int, IElement?>? template, int pageIndex, bool isBackground)
+    {
+        if (template == null) return;
+
+        IElement? element = template(pageIndex + 1);
+        if (element == null) return;
+
+        // For the background slot we render into the freshly-emptied stream and
+        // re-append the captured content afterwards, leaving the slot operators
+        // at the very front. The foreground slot renders straight onto the end.
+        StringBuilder stream = ctx.Pages[pageIndex];
+        string? captured = null;
+        if (isBackground)
+        {
+            captured = stream.ToString();
+            stream.Clear();
+        }
+
+        ICanvas originalCanvas = ctx.Canvas;
+        float originalX = ctx.CurrentX;
+        float originalY = ctx.CurrentY;
+
+        // Fixed canvas writes to the current page stream with absolute positioning.
+        ctx.SetCanvas(ctx.GetFixedCanvas());
+        try
+        {
+            // Slots ignore margins: full page width, origin at the top-left corner.
+            float fullWidth = ctx.PageSize.Width;
+            ctx.CurrentX = 0;
+            ctx.CurrentY = 0;
+
+            // Page slots are decorative chrome - keep them out of the structure
+            // tree (PDF/UA) by wrapping in an /Artifact marked-content section.
+            if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
+            element.Render(ctx, fullWidth);
+            if (ctx.Tagging != null) ctx.Canvas.EndArtifact();
+        }
+        finally
+        {
+            ctx.SetCanvas(originalCanvas);
+            ctx.CurrentX = originalX;
+            ctx.CurrentY = originalY;
+
+            if (isBackground && captured != null) stream.Append(captured);
         }
     }
 }

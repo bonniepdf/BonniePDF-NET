@@ -121,11 +121,11 @@ byte[] bytes = Pdf.Create(doc => { /* ... */ }).GenerateBytes();
 
 | Area | Capabilities |
 | --- | --- |
-| Layout | Columns, rows, tables with repeating headers, ordered and unordered lists, horizontal stacks, containers with padding, margin, borders, and rounded corners, all flowing across pages automatically |
+| Layout | Columns, rows, tables with repeating headers, ordered and unordered lists, horizontal stacks, containers with padding, margin, borders, and rounded corners, plus inline z-stacking with `Layers`, all flowing across pages automatically |
 | Text | 14 standard fonts plus TrueType embedding (auto-subset); rich inline mixing of bold, italic, colour, and size; left, centre, right, and justified alignment; underline and strikethrough |
 | Charts | Bar, grouped bar, line, area, pie, lollipop, and dot plot; horizontal and vertical; multi-series with automatic legends; rendered to PDF vectors or standalone SVG |
 | Images | JPEG and PNG with contain, cover, and fill sizing plus PNG alpha; QR code generation with configurable error correction |
-| Pages | All standard sizes (A-series, B-series, North American) plus custom; portrait and landscape; headers, footers, page numbering; watermarks |
+| Pages | All standard sizes (A-series, B-series, North American) plus custom; portrait and landscape; headers, footers, page numbering; full-page background and foreground slots (bleed images, letterhead, "DRAFT" overlays); watermarks |
 | Security | AES-256 encryption; separate user and owner passwords; granular permissions (print, copy, modify, annotate) |
 | Archival and accessibility | PDF/A-1b through A-3a with XMP metadata and sRGB profiles; PDF/UA-1 tagged output, validated against veraPDF |
 | Runtime | No native dependencies; Windows, Linux, and macOS; full async/await for web-server workloads |

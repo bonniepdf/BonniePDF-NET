@@ -62,6 +62,29 @@ public class DocumentSettings
     public Func<int, IElement?>? FooterTemplate { get; set; }
 
     /// <summary>
+    /// Template function for the full-page <b>background</b> slot.
+    /// Called with the page number (1-based); the returned element is
+    /// painted <i>behind</i> all page content. Unlike
+    /// <see cref="HeaderTemplate"/> / <see cref="FooterTemplate"/>, the
+    /// background slot spans the <b>entire page and ignores the margins</b>,
+    /// so bleed images, scanned letterhead, and certificate backgrounds
+    /// reach the page edge. Rendered at the page origin (0, 0) with the
+    /// full page width available.
+    /// </summary>
+    public Func<int, IElement?>? PageBackground { get; set; }
+
+    /// <summary>
+    /// Template function for the full-page <b>foreground</b> slot.
+    /// Called with the page number (1-based); the returned element is
+    /// painted <i>on top of</i> all page content (including headers and
+    /// footers), making it ideal for "DRAFT"/"CONFIDENTIAL" overlays and
+    /// stamps. Like <see cref="PageBackground"/> it spans the entire page
+    /// and ignores the margins, rendered at the page origin (0, 0) with
+    /// the full page width available.
+    /// </summary>
+    public Func<int, IElement?>? PageForeground { get; set; }
+
+    /// <summary>
     /// The page size for the document (default: A4)
     /// </summary>
     public PdfSize PageSize { get; set; } = PdfSize.A4;
