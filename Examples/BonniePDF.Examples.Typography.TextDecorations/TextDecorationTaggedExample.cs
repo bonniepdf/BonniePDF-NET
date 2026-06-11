@@ -41,7 +41,7 @@ public static class TextDecorationTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(12)
-                    .WithColor(Color.Slate700),
+                    .WithColor(ColorPalette.Slate[700]),
             },
         };
 
@@ -51,7 +51,7 @@ public static class TextDecorationTaggedExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 22,
-            TextColor     = Color.Slate800,
+            TextColor     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 14),
         });
 
@@ -69,7 +69,7 @@ public static class TextDecorationTaggedExample
         {
             Text        = "This text has an underline decoration applied.",
             TextDecoration = TextDecoration.Underline,
-            TextColor   = Color.Slate700,
+            TextColor   = ColorPalette.Slate[700],
             Margin      = new Thickness(0, 0, 0, 8),
         });
 
@@ -77,7 +77,7 @@ public static class TextDecorationTaggedExample
         {
             Text        = "Underlines can mark hyperlinks, emphasis, or headings in informal documents.",
             TextDecoration = TextDecoration.Underline,
-            TextColor   = Color.Slate700,
+            TextColor   = ColorPalette.Slate[700],
             Margin      = new Thickness(0, 0, 0, 8),
         });
 
@@ -89,7 +89,7 @@ public static class TextDecorationTaggedExample
         {
             Text          = "This text has a strikethrough decoration, useful for showing deleted or superseded content.",
             TextDecoration = TextDecoration.Strikethrough,
-            TextColor     = Color.Slate700,
+            TextColor     = ColorPalette.Slate[700],
             Margin        = new Thickness(0, 0, 0, 8),
         });
 
@@ -97,7 +97,7 @@ public static class TextDecorationTaggedExample
         {
             Text          = "Strikethrough visually signals content that has been withdrawn or revised.",
             TextDecoration = TextDecoration.Strikethrough,
-            TextColor     = Color.Slate700,
+            TextColor     = ColorPalette.Slate[700],
             Margin        = new Thickness(0, 0, 0, 8),
         });
 
@@ -109,7 +109,7 @@ public static class TextDecorationTaggedExample
         {
             Text           = "This text has both underline and strikethrough applied simultaneously.",
             TextDecoration = TextDecoration.Underline | TextDecoration.Strikethrough,
-            TextColor     = Color.Slate700,
+            TextColor     = ColorPalette.Slate[700],
             Margin        = new Thickness(0, 0, 0, 8),
         });
 
@@ -124,7 +124,7 @@ public static class TextDecorationTaggedExample
                 Text           = $"Underline at {size}pt",
                 FontSize       = size,
                 TextDecoration = TextDecoration.Underline,
-                TextColor = Color.Slate700,
+                TextColor = ColorPalette.Slate[700],
                 Margin    = new Thickness(0, 0, 0, 4),
             });
         }
@@ -137,7 +137,7 @@ public static class TextDecorationTaggedExample
         {
             Text          = "Original Price: £199.99",
             FontSize      = 14,
-            TextColor     = Color.Slate400,
+            TextColor     = ColorPalette.Slate[400],
             TextDecoration = TextDecoration.Strikethrough,
             Margin        = new Thickness(0, 0, 0, 4),
         });
@@ -156,7 +156,7 @@ public static class TextDecorationTaggedExample
         {
             Text      = "You save £50.00!",
             FontSize  = 11,
-            TextColor = Color.Green600,
+            TextColor = ColorPalette.Green[600],
         });
 
         return doc;
@@ -170,7 +170,7 @@ public static class TextDecorationTaggedExample
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 14,
-            TextColor     = Color.Indigo600,
+            TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 12, 0, 6),
         });
     }

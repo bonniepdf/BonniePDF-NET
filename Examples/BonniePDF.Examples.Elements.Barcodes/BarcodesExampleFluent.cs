@@ -38,7 +38,7 @@ public static class BarcodesExampleFluent
             doc.WithDefaultTextStyle(style => style
                 .WithFamily(StandardFonts.Helvetica)
                 .WithSize(11)
-                .WithColor(Color.Slate700));
+                .WithColor(ColorPalette.Slate[700]));
 
             doc.Page(page =>
             {
@@ -49,7 +49,7 @@ public static class BarcodesExampleFluent
                         .Text("1D Barcodes (Fluent API)")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 16);
 
                     col.Item()
@@ -111,18 +111,18 @@ public static class BarcodesExampleFluent
             .Text(title)
             .Font(StandardFonts.HelveticaBold)
             .FontSize(15)
-            .TextColor(Color.Indigo600)
+            .TextColor(ColorPalette.Indigo[600])
             .Margin(0, 0, 0, 8);
 
         col.Item()
             .Text(description)
             .FontSize(10)
-            .TextColor(Color.Slate600)
+            .TextColor(ColorPalette.Slate[600])
             .Margin(0, 0, 0, 12);
 
         col.Item()
             .Background(Color.White)
-            .Border(1, Color.Slate200)
+            .Border(1, ColorPalette.Slate[200])
             .Padding(14)
             .AlignCenter()
             .Barcode(value, symbology)
@@ -130,6 +130,6 @@ public static class BarcodesExampleFluent
             .AltText($"{title}: {value}");
 
         if (!isLast)
-            col.Item().Line(1, Color.Slate200).Margin(0, 20, 0, 20);
+            col.Item().Line(1, ColorPalette.Slate[200]).Margin(0, 20, 0, 20);
     }
 }

@@ -48,7 +48,7 @@ public static class ListsExampleFluent
                         .Text("Ordered List Examples")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 12);
 
                     // Decimal
@@ -100,7 +100,7 @@ public static class ListsExampleFluent
                         .Text("Nested Ordered Lists")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 12);
 
                     var nestedOrdered = new OrderedList { NumberFormat = NumberFormat.LowerAlpha, StartNumber = 1, FontSize = 12, ItemSpacing = 6, Indent = 20 };
@@ -128,7 +128,7 @@ public static class ListsExampleFluent
                         .Text("Unordered List Examples")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 12);
 
                     // Disc
@@ -183,7 +183,7 @@ public static class ListsExampleFluent
                         .Text("Nested Unordered Lists")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 12);
 
                     var nestedUnordered = new UnorderedList { BulletStyle = BulletStyle.Circle, FontSize = 12, ItemSpacing = 6, Indent = 20 };
@@ -207,7 +207,7 @@ public static class ListsExampleFluent
                     {
                         BulletStyle = BulletStyle.Square,
                         BulletColor = Color.Red,
-                        TextColor   = Color.Slate600,
+                        TextColor   = ColorPalette.Slate[600],
                         FontSize    = 12,
                         ItemSpacing = 8
                     };
@@ -231,7 +231,7 @@ public static class ListsExampleFluent
             .Text(title)
             .Font(StandardFonts.HelveticaBold)
             .FontSize(14)
-            .TextColor(Color.Slate700)
+            .TextColor(ColorPalette.Slate[700])
             .Margin(0, topMargin, 0, 0);
     }
 }

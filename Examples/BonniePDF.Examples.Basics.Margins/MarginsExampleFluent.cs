@@ -51,46 +51,46 @@ public static class MarginsExampleFluent
                         .Text("Margin Example (Fluent API)")
                         .Bold()
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 20); // Bottom margin of 20pt
 
                     // Paragraph with margin on all sides
                     column.Item()
                         .Text("This paragraph has a 10pt margin on all sides. Margins create space around elements, helping to visually separate content and improve readability.")
                         .FontSize(12)
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(10); // 10pt margin on all sides
 
                     // Container with background color and margin
                     column.Item()
                         .Margin(0, 10, 0, 10) // Top and bottom margin
                         .Padding(15)
-                        .Background(Color.Blue100)
-                        .Border(1, Color.Blue500)
+                        .Background(ColorPalette.Blue[100])
+                        .Border(1, ColorPalette.Blue[500])
                         .Text("This container has a 10pt top and bottom margin, plus 15pt padding inside. Notice how the margin creates space outside the border, while padding creates space inside.")
-                        .TextColor(Color.Blue900);
+                        .TextColor(ColorPalette.Blue[900]);
 
                     // Section header with top margin
                     column.Item()
                         .Text("Image with Margin")
                         .Bold()
                         .FontSize(16)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 20, 0, 10); // 20pt top, 10pt bottom
 
                     column.Item()
                         .Text("Images can also have margins. The image below has a 20pt margin on all sides:")
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 10);
 
                     // Create a simple colored rectangle as a placeholder "image"
                     column.Item()
                         .Margin(20) // 20pt margin on all sides
-                        .Background(Color.Amber400)
+                        .Background(ColorPalette.Amber[400])
                         .Padding(10, 25, 10, 25)
                         .Text("Image Placeholder (100x60)")
                         .FontSize(10)
-                        .TextColor(Color.Amber900)
+                        .TextColor(ColorPalette.Amber[900])
                         .AlignCenter();
 
                     // Table with margin
@@ -98,7 +98,7 @@ public static class MarginsExampleFluent
                         .Text("Table with Margin")
                         .Bold()
                         .FontSize(16)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 20, 0, 10);
 
                     column.Item()
@@ -107,9 +107,9 @@ public static class MarginsExampleFluent
                         {
                             table.Columns(1f, 2f);
                             table.CellPadding(8);
-                            table.Border(1, Color.Slate300);
-                            table.HeaderBackground(Color.Slate200);
-                            table.HeaderTextColor(Color.Slate800);
+                            table.Border(1, ColorPalette.Slate[300]);
+                            table.HeaderBackground(ColorPalette.Slate[200]);
+                            table.HeaderTextColor(ColorPalette.Slate[800]);
 
                             table.Header(row =>
                             {
@@ -139,7 +139,7 @@ public static class MarginsExampleFluent
                         .Text("VerticalStack with Margin")
                         .Bold()
                         .FontSize(16)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 20, 0, 10);
 
                     column.Item()
@@ -147,27 +147,27 @@ public static class MarginsExampleFluent
                         .Column(stack =>
                         {
                             stack.Item()
-                                .Background(Color.Green100)
+                                .Background(ColorPalette.Green[100])
                                 .Padding(10)
                                 .Text("Item 1 in stack")
                                 .FontSize(10)
-                                .TextColor(Color.Green800);
+                                .TextColor(ColorPalette.Green[800]);
 
                             stack.Item()
                                 .Margin(0, 5, 0, 0) // 5pt top margin
-                                .Background(Color.Purple100)
+                                .Background(ColorPalette.Purple[100])
                                 .Padding(10)
                                 .Text("Item 2 in stack (with top margin)")
                                 .FontSize(10)
-                                .TextColor(Color.Purple800);
+                                .TextColor(ColorPalette.Purple[800]);
 
                             stack.Item()
                                 .Margin(0, 5, 0, 0) // 5pt top margin
-                                .Background(Color.Red100)
+                                .Background(ColorPalette.Red[100])
                                 .Padding(10)
                                 .Text("Item 3 in stack (with top margin)")
                                 .FontSize(10)
-                                .TextColor(Color.Red800);
+                                .TextColor(ColorPalette.Red[800]);
                         });
 
                     // Final note - Italic overrides the default weight
@@ -175,7 +175,7 @@ public static class MarginsExampleFluent
                         .Text("Note: Margins collapse with adjacent content, creating clean spacing throughout the document.")
                         .Italic()
                         .FontSize(10)
-                        .TextColor(Color.Slate500)
+                        .TextColor(ColorPalette.Slate[500])
                         .Margin(0, 30, 0, 0);
                 });
             });

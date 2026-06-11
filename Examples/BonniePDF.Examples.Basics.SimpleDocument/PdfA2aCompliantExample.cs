@@ -61,7 +61,7 @@ public static class PdfA2aCompliantExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -72,7 +72,7 @@ public static class PdfA2aCompliantExample
                    "Both claims are verified by veraPDF against profiles 2a and ua1 respectively.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -81,7 +81,7 @@ public static class PdfA2aCompliantExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 16, 0, 8),
         });
 
@@ -93,7 +93,7 @@ public static class PdfA2aCompliantExample
                    "PDF/A-2a is the natural target - and BonniePDF reaches it with two lines of configuration.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -104,7 +104,7 @@ public static class PdfA2aCompliantExample
                    "Settings.Conformance = PdfAConformance.PdfA2a shown above.",
             FontName = StandardFonts.Helvetica,
             FontSize = 10,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
         });
 
         return doc;

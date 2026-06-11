@@ -75,7 +75,7 @@ public static class MultiPageFlowTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
-                    .WithColor(Color.Slate700),
+                    .WithColor(ColorPalette.Slate[700]),
             },
         };
 
@@ -87,7 +87,7 @@ public static class MultiPageFlowTaggedExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 20,
-            TextColor     = Color.Slate800,
+            TextColor     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 10),
         });
 
@@ -99,7 +99,7 @@ public static class MultiPageFlowTaggedExample
 
         var table = new Table(100f, 160f, 140f)
         {
-            HeaderBackgroundColor  = Color.Blue600,
+            HeaderBackgroundColor  = ColorPalette.Blue[600],
             HeaderTextColor        = Color.White,
             RepeatHeadersOnNewPage = true,
         };
@@ -112,11 +112,11 @@ public static class MultiPageFlowTaggedExample
         int row = 0;
         foreach ((string name, string dept, string role) in Employees)
         {
-            Color bg = row++ % 2 == 0 ? Color.White : Color.Slate50;
+            Color bg = row++ % 2 == 0 ? Color.White : ColorPalette.Slate[50];
             table.AddRow(
-                new TableCell { Content = new TextBlock { Text = dept,  FontSize = 10, TextColor = Color.Slate600 }, BackgroundColor = bg },
-                new TableCell { Content = new TextBlock { Text = name,  FontSize = 10, TextColor = Color.Slate800 }, BackgroundColor = bg },
-                new TableCell { Content = new TextBlock { Text = role,  FontSize = 10, TextColor = Color.Slate600 }, BackgroundColor = bg });
+                new TableCell { Content = new TextBlock { Text = dept,  FontSize = 10, TextColor = ColorPalette.Slate[600] }, BackgroundColor = bg },
+                new TableCell { Content = new TextBlock { Text = name,  FontSize = 10, TextColor = ColorPalette.Slate[800] }, BackgroundColor = bg },
+                new TableCell { Content = new TextBlock { Text = role,  FontSize = 10, TextColor = ColorPalette.Slate[600] }, BackgroundColor = bg });
         }
 
         doc.Add(table);
@@ -129,7 +129,7 @@ public static class MultiPageFlowTaggedExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 20,
-            TextColor     = Color.Slate800,
+            TextColor     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 20, 0, 10),
         });
 
@@ -165,7 +165,7 @@ public static class MultiPageFlowTaggedExample
                 Level         = 2,
                 FontName      = StandardFonts.HelveticaBold,
                 FontSize      = 14,
-                TextColor     = Color.Slate700,
+                TextColor     = ColorPalette.Slate[700],
                 Margin        = new Thickness(0, 14, 0, 6),
             });
 

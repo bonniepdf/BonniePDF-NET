@@ -25,13 +25,13 @@ public static class EncryptionOwnerOnlyExample
         );
 
         Document doc = new(settings);
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[700]);
 
         doc.Add(new TextBlock
         {
             Text = "Open Without Password (Restricted)",
             FontSize = 24,
-            TextColor = Color.Blue700
+            TextColor = ColorPalette.Blue[700]
         });
 
         doc.Add(new TextBlock
@@ -46,18 +46,18 @@ public static class EncryptionOwnerOnlyExample
             Margin = new Thickness(0, 10, 0, 5)
         });
 
-        doc.Add(new TextBlock { Text = "  - Low-quality printing: Allowed", TextColor = Color.Green600 });
-        doc.Add(new TextBlock { Text = "  - Accessibility extraction: Allowed", TextColor = Color.Green600 });
-        doc.Add(new TextBlock { Text = "  - Copying text: Denied", TextColor = Color.Red600 });
-        doc.Add(new TextBlock { Text = "  - Modifying: Denied", TextColor = Color.Red600 });
-        doc.Add(new TextBlock { Text = "  - High-quality printing: Denied", TextColor = Color.Red600 });
+        doc.Add(new TextBlock { Text = "  - Low-quality printing: Allowed", TextColor = ColorPalette.Green[600] });
+        doc.Add(new TextBlock { Text = "  - Accessibility extraction: Allowed", TextColor = ColorPalette.Green[600] });
+        doc.Add(new TextBlock { Text = "  - Copying text: Denied", TextColor = ColorPalette.Red[600] });
+        doc.Add(new TextBlock { Text = "  - Modifying: Denied", TextColor = ColorPalette.Red[600] });
+        doc.Add(new TextBlock { Text = "  - High-quality printing: Denied", TextColor = ColorPalette.Red[600] });
 
         doc.Add(new TextBlock
         {
             Text = "Owner password: secret",
             FontSize = 14,
             Margin = new Thickness(0, 20, 0, 0),
-            TextColor = Color.Red600
+            TextColor = ColorPalette.Red[600]
         });
         return doc;
     }

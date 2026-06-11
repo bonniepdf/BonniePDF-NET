@@ -20,7 +20,7 @@ public static class ListsExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
         doc.Metadata.Title = "List Examples";
@@ -36,7 +36,7 @@ public static class ListsExample
             Text = "Ordered List Examples",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -46,7 +46,7 @@ public static class ListsExample
             Text = "Decimal Numbered List (1, 2, 3...)",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700
+            TextColor = ColorPalette.Slate[700]
         });
 
         OrderedList decimalList = new()
@@ -69,7 +69,7 @@ public static class ListsExample
             Text = "Upper Roman Numerals (I, II, III...)",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 0)
         });
 
@@ -93,7 +93,7 @@ public static class ListsExample
             Text = "Lowercase Letters (a, b, c...)",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 0)
         });
 
@@ -116,7 +116,7 @@ public static class ListsExample
             Text = "List Starting at Number 5",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 0)
         });
 
@@ -141,7 +141,7 @@ public static class ListsExample
             Text = "Nested Ordered Lists",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -191,7 +191,7 @@ public static class ListsExample
             Text = "Unordered List Examples",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -201,7 +201,7 @@ public static class ListsExample
             Text = "Disc Bullet Style (•)",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700
+            TextColor = ColorPalette.Slate[700]
         });
 
         UnorderedList discList = new()
@@ -223,7 +223,7 @@ public static class ListsExample
             Text = "Circle Bullet Style (◦)",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 0)
         });
 
@@ -245,7 +245,7 @@ public static class ListsExample
             Text = "Square Bullet Style (■)",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 0)
         });
 
@@ -267,7 +267,7 @@ public static class ListsExample
             Text = "Dash Bullet Style (-)",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 0)
         });
 
@@ -289,7 +289,7 @@ public static class ListsExample
             Text = "Custom Bullet Style (★)",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 0)
         });
 
@@ -314,7 +314,7 @@ public static class ListsExample
             Text = "Nested Unordered Lists",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -353,7 +353,7 @@ public static class ListsExample
             Text = "Colored Bullets",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 0)
         });
 
@@ -361,7 +361,7 @@ public static class ListsExample
         {
             BulletStyle = BulletStyle.Square,
             BulletColor = Color.Red,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             FontSize = 12,
             ItemSpacing = 8
         };

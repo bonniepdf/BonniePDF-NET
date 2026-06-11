@@ -51,7 +51,7 @@ public static class SimpleDocumentExample
             DisplayDocTitle = false,
             Version = PdfVersion.Pdf17,
             PdfAEnabled = true,
-            DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate600)
+            DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600])
         };
 
         // Add content to the first page
@@ -60,7 +60,7 @@ public static class SimpleDocumentExample
             Text = "Hello, Document API!",
             FontName = File.Exists(fontPath) ? fontPath : StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -77,7 +77,7 @@ public static class SimpleDocumentExample
             Text = "Key Features:",
             FontName = File.Exists(fontPath) ? fontPath : StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -98,7 +98,7 @@ public static class SimpleDocumentExample
             Text = "Page 2",
             FontName = File.Exists(fontPath) ? fontPath : StandardFonts.HelveticaBold,
             FontSize = 20,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -117,7 +117,7 @@ public static class SimpleDocumentExample
             Text = $"Page 3: {customSize.Name}",
             FontName = File.Exists(fontPath) ? fontPath : StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 50, 0, 0)
         });

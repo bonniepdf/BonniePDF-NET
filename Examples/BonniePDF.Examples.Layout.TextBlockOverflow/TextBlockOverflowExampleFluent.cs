@@ -44,7 +44,7 @@ public static class TextBlockOverflowExampleFluent
                 {
                     footer.Text($"Page {pageNumber} of {TextElementBase.TotalPagesToken}")
                           .FontSize(10)
-                          .TextColor(Color.Slate500)
+                          .TextColor(ColorPalette.Slate[500])
                           .AlignRight();
                 });
             });
@@ -60,7 +60,7 @@ public static class TextBlockOverflowExampleFluent
                         .Text("Long Text Document")
                         .Bold()
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 20);
 
                     var source = Placeholders.WithSeed(500);
@@ -69,7 +69,7 @@ public static class TextBlockOverflowExampleFluent
 
                     column.Item()
                         .Text(longText)
-                        .TextColor(Color.Slate700);
+                        .TextColor(ColorPalette.Slate[700]);
                 });
             });
         }).Build();

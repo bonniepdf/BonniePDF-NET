@@ -34,7 +34,7 @@ public static class HorizontalLollipopChartExample
         {
             Text = "Product Revenue Ranking",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 10));
 
@@ -42,7 +42,7 @@ public static class HorizontalLollipopChartExample
         {
             Text = "Year-to-date revenue per product line - lollipop style reduces ink without losing clarity",
             FontSize = 13,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 

@@ -174,8 +174,8 @@ public class SvgPageExportTests
     {
         var doc = new Document();
         doc.Add(new TextBlock { Text = "Body" });
-        doc.Settings.HeaderTemplate = pageNum => new TextBlock { Text = $"Header {pageNum}", FontSize = 9, TextColor = Color.Slate500 };
-        doc.Settings.FooterTemplate = pageNum => new TextBlock { Text = $"Footer {pageNum}", FontSize = 9, TextColor = Color.Slate500 };
+        doc.Settings.HeaderTemplate = pageNum => new TextBlock { Text = $"Header {pageNum}", FontSize = 9, TextColor = ColorPalette.Slate[500] };
+        doc.Settings.FooterTemplate = pageNum => new TextBlock { Text = $"Footer {pageNum}", FontSize = 9, TextColor = ColorPalette.Slate[500] };
         string svg = doc.GenerateFirstPageSvg();
         Assert.Contains("Header 1", svg, StringComparison.Ordinal);
         Assert.Contains("Footer 1", svg, StringComparison.Ordinal);

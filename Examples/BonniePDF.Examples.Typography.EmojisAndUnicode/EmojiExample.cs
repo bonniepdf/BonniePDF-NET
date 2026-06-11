@@ -33,7 +33,7 @@ public static class EmojiExample
         // PDF/A compliance is disabled - emoji fonts often contain COLR/CBDT tables
         // that require relaxed validation and are incompatible with PDF/A-1b.
         doc.Settings.PdfAEnabled = false;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(textFont).WithSize(11).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(textFont).WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Emoji & Supplementary Unicode Demo";
         doc.Metadata.Author = "BonniePDF";
@@ -45,14 +45,14 @@ public static class EmojiExample
             Text = "Emoji & Supplementary Unicode Support",
             FontName = textFont,
             FontSize = 22,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
         doc.Add(new TextBlock
         {
             Text = "BonniePDF supports the full Unicode range including characters beyond U+FFFF.",
-            TextColor = Color.Slate500,
+            TextColor = ColorPalette.Slate[500],
             Margin = new Thickness(0, 0, 0, 24)
         });
 
@@ -79,14 +79,14 @@ public static class EmojiExample
         {
             Text = "Mixed Content",
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 4)
         });
 
         doc.Add(new TextBlock
         {
             Text = "Emoji can be used inline with regular text using an emoji-capable font:",
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -106,7 +106,7 @@ public static class EmojiExample
                 Text = line,
                 FontName = emojiFont,
                 FontSize = 13,
-                TextColor = Color.Slate700,
+                TextColor = ColorPalette.Slate[700],
                 Margin = new Thickness(12, 0, 0, 4)
             });
         }
@@ -119,7 +119,7 @@ public static class EmojiExample
         {
             Text = title,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 4)
         });
 
@@ -128,7 +128,7 @@ public static class EmojiExample
             Text = emojis,
             FontName = emojiFont,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 4)
         });
     }

@@ -114,7 +114,7 @@ public static class TemplateRenderer
             Alignment = TextAlignment.Center,
             FontName = StandardFonts.Helvetica,
             FontSize = 10,
-            TextColor = Color.Gray500
+            TextColor = ColorPalette.Gray[500]
         };
     }
 }

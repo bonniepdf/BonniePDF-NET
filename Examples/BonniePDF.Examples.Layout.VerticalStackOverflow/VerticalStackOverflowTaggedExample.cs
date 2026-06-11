@@ -42,7 +42,7 @@ public static class VerticalStackOverflowTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
-                    .WithColor(Color.Slate700),
+                    .WithColor(ColorPalette.Slate[700]),
             },
         };
 
@@ -52,7 +52,7 @@ public static class VerticalStackOverflowTaggedExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 22,
-            TextColor     = Color.Slate800,
+            TextColor     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 8),
         });
 
@@ -74,7 +74,7 @@ public static class VerticalStackOverflowTaggedExample
                 Level         = 3,
                 FontName      = StandardFonts.HelveticaBold,
                 FontSize      = 12,
-                TextColor     = Color.Blue600,
+                TextColor     = ColorPalette.Blue[600],
                 Margin        = new Thickness(0, 10, 0, 2),
             });
 
@@ -82,7 +82,7 @@ public static class VerticalStackOverflowTaggedExample
             {
                 Text   = source.Sentence(),
                 FontSize = 10,
-                TextColor = Color.Slate600,
+                TextColor = ColorPalette.Slate[600],
                 Margin  = new Thickness(0, 0, 0, 4),
             });
         }

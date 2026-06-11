@@ -28,15 +28,15 @@ public class TextStyleTests
     [Fact]
     public void MergeWith_ColourAndBackgroundInheritWhenUnsetAndOverrideWhenSet()
     {
-        TextStyle baseStyle = new() { Color = Color.Black, BackgroundColor = Color.Amber400 };
+        TextStyle baseStyle = new() { Color = Color.Black, BackgroundColor = ColorPalette.Amber[400] };
 
         TextStyle inherits = new TextStyle().MergeWith(baseStyle);
         Assert.Equal(Color.Black, inherits.Color);
-        Assert.Equal(Color.Amber400, inherits.BackgroundColor);
+        Assert.Equal(ColorPalette.Amber[400], inherits.BackgroundColor);
 
         TextStyle overrides = new TextStyle { Color = Color.Red }.MergeWith(baseStyle);
         Assert.Equal(Color.Red, overrides.Color);
-        Assert.Equal(Color.Amber400, overrides.BackgroundColor); // still inherited
+        Assert.Equal(ColorPalette.Amber[400], overrides.BackgroundColor); // still inherited
     }
 
     // --- Weight precedence ---
@@ -160,7 +160,7 @@ public class TextStyleTests
         Assert.True(new TextStyle().WithItalic().Italic);
         Assert.Equal(18, new TextStyle().WithSize(18).FontSize);
         Assert.Equal(Color.Red, new TextStyle().WithColor(Color.Red).Color);
-        Assert.Equal(Color.Amber400, new TextStyle().WithBackground(Color.Amber400).BackgroundColor);
+        Assert.Equal(ColorPalette.Amber[400], new TextStyle().WithBackground(ColorPalette.Amber[400]).BackgroundColor);
         Assert.Equal(FontWeight.Bold, new TextStyle().WithWeight(FontWeight.Bold).Weight);
         Assert.Equal("Times", new TextStyle().WithFamily("Times").FontFamily);
         Assert.Equal(1.5f, new TextStyle().WithLineHeight(1.5f).LineHeightMultiplier);

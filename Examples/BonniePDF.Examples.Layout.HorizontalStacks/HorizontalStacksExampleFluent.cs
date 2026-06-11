@@ -48,7 +48,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Horizontal Stack Examples")
                         .Bold()
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 12);
 
                     // Equal width distribution
@@ -56,13 +56,13 @@ public static class HorizontalStacksExampleFluent
                         .Text("Equal Width Distribution")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 8);
 
                     // Wrap in container with background color, then equal-width row
                     column.Item()
                         .Padding(10)
-                        .Background(Color.Slate200)
+                        .Background(ColorPalette.Slate[200])
                         .Row(row =>
                         {
                             row.Spacing(10);
@@ -76,12 +76,12 @@ public static class HorizontalStacksExampleFluent
                         .Text("Weighted Width Distribution (1:2:3 ratio)")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 16, 0, 8);
 
                     column.Item()
                         .Padding(10)
-                        .Background(Color.Slate200)
+                        .Background(ColorPalette.Slate[200])
                         .Row(row =>
                         {
                             row.Spacing(10);
@@ -95,7 +95,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Center Vertical Alignment")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 16, 0, 8);
 
                     column.Item()
@@ -114,7 +114,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Colored Containers")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 16, 0, 8);
 
                     column.Item()
@@ -122,7 +122,7 @@ public static class HorizontalStacksExampleFluent
                         {
                             row.Spacing(5);
                             row.RelativeItem().Padding(15).Background(Color.Red).Text("Red").Bold().FontSize(14).TextColor(Color.White);
-                            row.RelativeItem().Padding(15).Background(Color.Green600).Text("Green").Bold().FontSize(14).TextColor(Color.White);
+                            row.RelativeItem().Padding(15).Background(ColorPalette.Green[600]).Text("Green").Bold().FontSize(14).TextColor(Color.White);
                             row.RelativeItem().Padding(15).Background(Color.Blue).Text("Blue").Bold().FontSize(14).TextColor(Color.White);
                         });
 
@@ -131,7 +131,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Practical Examples")
                         .Bold()
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 12);
 
                     // Key-value pairs
@@ -139,7 +139,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Key-Value Pairs")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 8);
 
                     var kvSource = Placeholders.WithSeed(300);
@@ -147,8 +147,8 @@ public static class HorizontalStacksExampleFluent
                         .Row(row =>
                         {
                             row.Spacing(10);
-                            row.RelativeItem(1f).Text("Name:").Bold().TextColor(Color.Slate600);
-                            row.RelativeItem(3f).Text(kvSource.Name()).TextColor(Color.Slate800);
+                            row.RelativeItem(1f).Text("Name:").Bold().TextColor(ColorPalette.Slate[600]);
+                            row.RelativeItem(3f).Text(kvSource.Name()).TextColor(ColorPalette.Slate[800]);
                         });
 
                     column.Item()
@@ -156,8 +156,8 @@ public static class HorizontalStacksExampleFluent
                         .Row(row =>
                         {
                             row.Spacing(10);
-                            row.RelativeItem(1f).Text("Email:").Bold().TextColor(Color.Slate600);
-                            row.RelativeItem(3f).Text(kvSource.Email()).TextColor(Color.Slate800);
+                            row.RelativeItem(1f).Text("Email:").Bold().TextColor(ColorPalette.Slate[600]);
+                            row.RelativeItem(3f).Text(kvSource.Email()).TextColor(ColorPalette.Slate[800]);
                         });
 
                     // Progress bar style
@@ -165,16 +165,16 @@ public static class HorizontalStacksExampleFluent
                         .Text("Progress Bar Style")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 16, 0, 8);
 
                     column.Item()
                         .Row(row =>
                         {
                             row.Spacing(0);
-                            row.RelativeItem(75f).Padding(10, 5, 10, 5).Background(Color.Green600).Height(24)
+                            row.RelativeItem(75f).Padding(10, 5, 10, 5).Background(ColorPalette.Green[600]).Height(24)
                                 .Text("75%").Bold().TextColor(Color.White);
-                            row.RelativeItem(25f).Padding(10, 5, 10, 5).Background(Color.Slate300).Height(24).Empty();
+                            row.RelativeItem(25f).Padding(10, 5, 10, 5).Background(ColorPalette.Slate[300]).Height(24).Empty();
                         });
 
                     // Badge style
@@ -182,7 +182,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Badge Style Layout")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 16, 0, 8);
 
                     // NOTE: HorizontalStack.Alignment (HorizontalAlignment.Center) has no direct
@@ -191,8 +191,8 @@ public static class HorizontalStacksExampleFluent
                         .Row(row =>
                         {
                             row.Spacing(10);
-                            row.AutoItem().Text("Status:").TextColor(Color.Slate600);
-                            row.AutoItem().Padding(8, 4, 8, 4).Background(Color.Green600).Text("Active").Bold().FontSize(11).TextColor(Color.White);
+                            row.AutoItem().Text("Status:").TextColor(ColorPalette.Slate[600]);
+                            row.AutoItem().Padding(8, 4, 8, 4).Background(ColorPalette.Green[600]).Text("Active").Bold().FontSize(11).TextColor(Color.White);
                             row.AutoItem().Padding(8, 4, 8, 4).Background(Color.Blue).Text("Verified").Bold().FontSize(11).TextColor(Color.White);
                         });
                 });

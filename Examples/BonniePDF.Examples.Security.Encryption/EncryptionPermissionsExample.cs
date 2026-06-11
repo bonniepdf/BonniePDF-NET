@@ -26,13 +26,13 @@ public static class EncryptionPermissionsExample
         );
 
         Document doc = new(settings);
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[700]);
 
         doc.Add(new TextBlock
         {
             Text = "Document with Permission Restrictions",
             FontSize = 24,
-            TextColor = Color.Blue700
+            TextColor = ColorPalette.Blue[700]
         });
 
         doc.Add(new TextBlock
@@ -41,10 +41,10 @@ public static class EncryptionPermissionsExample
             Margin = new Thickness(0, 20, 0, 10)
         });
 
-        doc.Add(new TextBlock { Text = "  - Printing: Allowed", TextColor = Color.Green600 });
-        doc.Add(new TextBlock { Text = "  - Copying: Allowed", TextColor = Color.Green600 });
-        doc.Add(new TextBlock { Text = "  - Modifying: Denied", TextColor = Color.Red600 });
-        doc.Add(new TextBlock { Text = "  - Annotations: Denied", TextColor = Color.Red600 });
+        doc.Add(new TextBlock { Text = "  - Printing: Allowed", TextColor = ColorPalette.Green[600] });
+        doc.Add(new TextBlock { Text = "  - Copying: Allowed", TextColor = ColorPalette.Green[600] });
+        doc.Add(new TextBlock { Text = "  - Modifying: Denied", TextColor = ColorPalette.Red[600] });
+        doc.Add(new TextBlock { Text = "  - Annotations: Denied", TextColor = ColorPalette.Red[600] });
 
         doc.Add(new TextBlock
         {

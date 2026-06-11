@@ -42,7 +42,7 @@ public static class PieChartExample
         {
             Text = $"Monthly Sales Report {DateTime.Now.Year}",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -50,7 +50,7 @@ public static class PieChartExample
         {
             Text = "Generated using the PieChart component with donut style",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 

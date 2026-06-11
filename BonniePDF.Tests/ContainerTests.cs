@@ -142,7 +142,7 @@ public class ContainerTests
     public void Render_FillsBackgroundAcrossFullBox()
     {
         (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
-        Container c = new() { Child = new Probe(10), BackgroundColor = Color.Amber400 };
+        Container c = new() { Child = new Probe(10), BackgroundColor = ColorPalette.Amber[400] };
         c.Render(ctx, 500);
 
         Assert.Single(canvas.Rects);
@@ -153,7 +153,7 @@ public class ContainerTests
     public void Render_UsesRoundedFillWhenCornerRadiusSet()
     {
         (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
-        Container c = new() { Child = new Probe(10), BackgroundColor = Color.Amber400, CornerRadius = 6 };
+        Container c = new() { Child = new Probe(10), BackgroundColor = ColorPalette.Amber[400], CornerRadius = 6 };
         c.Render(ctx, 500);
 
         Assert.Empty(canvas.Rects); // not a sharp fill

@@ -21,7 +21,7 @@ public static class WebApiStreamingExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Monthly Report";
         doc.Metadata.Author = "Report Generator";
@@ -31,14 +31,14 @@ public static class WebApiStreamingExample
             Text = "Monthly Sales Report",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
         doc.Add(new TextBlock
         {
             Text = $"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-            TextColor = Color.Slate500
+            TextColor = ColorPalette.Slate[500]
         });
         return doc;
     }
@@ -52,7 +52,7 @@ public static class WebApiStreamingExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Monthly Report";
         doc.Metadata.Author = "Report Generator";
@@ -62,14 +62,14 @@ public static class WebApiStreamingExample
             Text = "Monthly Sales Report",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
         doc.Add(new TextBlock
         {
             Text = $"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-            TextColor = Color.Slate500
+            TextColor = ColorPalette.Slate[500]
         });
 
         // Save to the provided stream without closing it

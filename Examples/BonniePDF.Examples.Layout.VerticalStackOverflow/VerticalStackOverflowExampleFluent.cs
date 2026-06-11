@@ -51,13 +51,13 @@ public static class VerticalStackOverflowExampleFluent
                         .Text("Item Catalog")
                         .Bold()
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 10);
 
                     column.Item()
                         .Text("A collection of items demonstrating automatic pagination")
                         .FontSize(12)
-                        .TextColor(Color.Slate500)
+                        .TextColor(ColorPalette.Slate[500])
                         .Margin(0, 0, 0, 20);
 
                     var source = Placeholders.WithSeed(400);
@@ -73,13 +73,13 @@ public static class VerticalStackOverflowExampleFluent
                                     .Text($"Item #{capturedI:D3}")
                                     .Bold()
                                     .FontSize(12)
-                                    .TextColor(Color.Blue600)
+                                    .TextColor(ColorPalette.Blue[600])
                                     .Margin(0, 0, 0, 5);
 
                                 itemStack.Item()
                                     .Text(desc)
                                     .FontSize(10)
-                                    .TextColor(Color.Slate600);
+                                    .TextColor(ColorPalette.Slate[600]);
                             });
                     }
                 });

@@ -29,7 +29,7 @@ public static class ShapesAndBordersExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]);
 
         doc.Metadata.Title = "Rounded Rectangles";
         doc.Metadata.Author = "BonniePDF";
@@ -40,7 +40,7 @@ public static class ShapesAndBordersExample
             Text = "Rounded Rectangles",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -50,7 +50,7 @@ public static class ShapesAndBordersExample
         // Simple rounded container with background
         doc.Add(new Container
         {
-            BackgroundColor = Color.Blue50,
+            BackgroundColor = ColorPalette.Blue[50],
             CornerRadius = 8,
             Padding = new Thickness(16),
             Margin = new Thickness(0, 0, 0, 12),
@@ -58,14 +58,14 @@ public static class ShapesAndBordersExample
             {
                 Text = "A container with 8pt corner radius and a light blue background.",
                 FontSize = 12,
-                TextColor = Color.Blue800
+                TextColor = ColorPalette.Blue[800]
             }
         });
 
         // Larger radius
         doc.Add(new Container
         {
-            BackgroundColor = Color.Green50,
+            BackgroundColor = ColorPalette.Green[50],
             CornerRadius = 16,
             Padding = new Thickness(20),
             Margin = new Thickness(0, 0, 0, 12),
@@ -73,7 +73,7 @@ public static class ShapesAndBordersExample
             {
                 Text = "A container with a larger 16pt corner radius. The arcs become more pronounced as the radius increases.",
                 FontSize = 12,
-                TextColor = Color.Green800
+                TextColor = ColorPalette.Green[800]
             }
         });
 
@@ -84,7 +84,7 @@ public static class ShapesAndBordersExample
         doc.Add(new Container
         {
             Border = new Border(2),
-            BorderColors = new BorderColors(Color.Indigo500),
+            BorderColors = new BorderColors(ColorPalette.Indigo[500]),
             CornerRadius = 10,
             Padding = new Thickness(16),
             Margin = new Thickness(0, 0, 0, 12),
@@ -122,9 +122,9 @@ public static class ShapesAndBordersExample
             Margin = new Thickness(0, 0, 0, 12)
         };
 
-        cardRow.AddChild(CreateCard("Feature A", "Rounded corners make UI elements feel modern and approachable.", Color.Blue500, Color.Blue50), 1f);
-        cardRow.AddChild(CreateCard("Feature B", "Bezier curves approximate perfect quarter-circle arcs.", Color.Purple500, Color.FromHex("#faf5ff")), 1f);
-        cardRow.AddChild(CreateCard("Feature C", "Works with backgrounds, borders, or both combined.", Color.Teal500, Color.FromHex("#f0fdfa")), 1f);
+        cardRow.AddChild(CreateCard("Feature A", "Rounded corners make UI elements feel modern and approachable.", ColorPalette.Blue[500], ColorPalette.Blue[50]), 1f);
+        cardRow.AddChild(CreateCard("Feature B", "Bezier curves approximate perfect quarter-circle arcs.", ColorPalette.Purple[500], Color.FromHex("#faf5ff")), 1f);
+        cardRow.AddChild(CreateCard("Feature C", "Works with backgrounds, borders, or both combined.", ColorPalette.Teal[500], Color.FromHex("#f0fdfa")), 1f);
 
         doc.Add(cardRow);
 
@@ -143,7 +143,7 @@ public static class ShapesAndBordersExample
         {
             Text = "Chaining: .Padding(16).Background(...).Rounded(12).Border(...)",
             FontSize = 11,
-            TextColor = Color.Slate500,
+            TextColor = ColorPalette.Slate[500],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -155,9 +155,9 @@ public static class ShapesAndBordersExample
         {
             doc.Add(new Container
             {
-                BackgroundColor = Color.Slate100,
+                BackgroundColor = ColorPalette.Slate[100],
                 Border = new Border(1),
-                BorderColors = new BorderColors(Color.Slate400),
+                BorderColors = new BorderColors(ColorPalette.Slate[400]),
                 CornerRadius = r,
                 Padding = new Thickness(12, 8, 12, 8),
                 Margin = new Thickness(0, 0, 0, 6),
@@ -171,7 +171,7 @@ public static class ShapesAndBordersExample
 
         // --- Section 6: Practical Examples ---
         doc.Add(new Spacer(16));
-        doc.Add(new Line { Color = Color.Slate300, Thickness = 1 });
+        doc.Add(new Line { Color = ColorPalette.Slate[300], Thickness = 1 });
         doc.Add(CreateSectionHeader("Practical Examples"));
 
         // Success banner
@@ -179,7 +179,7 @@ public static class ShapesAndBordersExample
         {
             BackgroundColor = Color.FromHex("#dcfce7"),
             Border = new Border(1),
-            BorderColors = new BorderColors(Color.Green600),
+            BorderColors = new BorderColors(ColorPalette.Green[600]),
             CornerRadius = 8,
             Padding = new Thickness(16, 12, 16, 12),
             Margin = new Thickness(0, 0, 0, 8),
@@ -188,7 +188,7 @@ public static class ShapesAndBordersExample
                 Text = "Success! Your document has been generated successfully.",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 12,
-                TextColor = Color.Green800
+                TextColor = ColorPalette.Green[800]
             }
         });
 
@@ -233,7 +233,7 @@ public static class ShapesAndBordersExample
         {
             BackgroundColor = Color.FromHex("#dbeafe"),
             Border = new Border(1),
-            BorderColors = new BorderColors(Color.Blue600),
+            BorderColors = new BorderColors(ColorPalette.Blue[600]),
             CornerRadius = 8,
             Padding = new Thickness(16, 12, 16, 12),
             Margin = new Thickness(0, 0, 0, 8),
@@ -242,7 +242,7 @@ public static class ShapesAndBordersExample
                 Text = "Info: Rounded corners are built from four Bezier arcs using the k=0.5523 approximation constant.",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 12,
-                TextColor = Color.Blue800
+                TextColor = ColorPalette.Blue[800]
             },
         });
         return doc;
@@ -264,7 +264,7 @@ public static class ShapesAndBordersExample
             Text = description,
             FontName = StandardFonts.Helvetica,
             FontSize = 10,
-            TextColor = Color.Slate600
+            TextColor = ColorPalette.Slate[600]
         });
 
         return new Container
@@ -285,7 +285,7 @@ public static class ShapesAndBordersExample
             Text = title,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Indigo600,
+            TextColor = ColorPalette.Indigo[600],
             Margin = new Thickness(0, 12, 0, 6)
         };
     }

@@ -121,12 +121,12 @@ public class FontEmbeddingAndTextStyleTests
         // Do NOT set FontSize or TextColor - leave them at defaults
         Generate(doc =>
         {
-            doc.Settings.DefaultTextStyle = new TextStyle().WithSize(11).WithColor(Color.Slate600);
+            doc.Settings.DefaultTextStyle = new TextStyle().WithSize(11).WithColor(ColorPalette.Slate[600]);
             doc.Add(tb);
         });
         // After Save (which calls ApplyDefaultStyleToTree), defaults should be applied
         Assert.Equal(11f, tb.FontSize);
-        Assert.Equal(Color.Slate600, tb.TextColor);
+        Assert.Equal(ColorPalette.Slate[600], tb.TextColor);
     }
 
     [Fact]

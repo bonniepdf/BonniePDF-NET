@@ -134,14 +134,14 @@ public class PlaceholderSource
 
     private static readonly Color[] BackgroundColors =
     [
-        Core.Color.Blue50, Core.Color.Green50, Core.Color.Amber50, Core.Color.Rose50,
-        Core.Color.Indigo50, Core.Color.Slate50, Core.Color.Purple50, Core.Color.Cyan50
+        Core.ColorPalette.Blue[50], Core.ColorPalette.Green[50], Core.ColorPalette.Amber[50], Core.ColorPalette.Rose[50],
+        Core.ColorPalette.Indigo[50], Core.ColorPalette.Slate[50], Core.ColorPalette.Purple[50], Core.ColorPalette.Cyan[50]
     ];
 
     private static readonly Color[] AccentColors =
     [
-        Core.Color.Indigo600, Core.Color.Blue600, Core.Color.Green600, Core.Color.Amber600,
-        Core.Color.Rose600, Core.Color.Purple600, Core.Color.Cyan600, Core.Color.Slate600
+        Core.ColorPalette.Indigo[600], Core.ColorPalette.Blue[600], Core.ColorPalette.Green[600], Core.ColorPalette.Amber[600],
+        Core.ColorPalette.Rose[600], Core.ColorPalette.Purple[600], Core.ColorPalette.Cyan[600], Core.ColorPalette.Slate[600]
     ];
 
     public string Word()

@@ -41,7 +41,7 @@ public static class BookPageLayoutTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.TimesRoman)
                     .WithSize(11)
-                    .WithColor(Color.Slate800),
+                    .WithColor(ColorPalette.Slate[800]),
             },
         };
 
@@ -51,7 +51,7 @@ public static class BookPageLayoutTaggedExample
             Text      = "CHAPTER III",
             FontName  = StandardFonts.TimesBold,
             FontSize  = 11,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Alignment = TextAlignment.Center,
         });
 
@@ -62,7 +62,7 @@ public static class BookPageLayoutTaggedExample
             Level         = 1,
             FontName      = StandardFonts.TimesBold,
             FontSize      = 18,
-            TextColor     = Color.Slate900,
+            TextColor     = ColorPalette.Slate[900],
             Alignment     = TextAlignment.Center,
             Margin        = new Thickness(0, 4, 0, 20),
         });
@@ -106,7 +106,7 @@ public static class BookPageLayoutTaggedExample
                         "predating consciousness itself.",
             FontName  = StandardFonts.TimesItalic,
             FontSize  = 10,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify,
             Margin    = new Thickness(20, 8, 20, 8),
         });
@@ -130,7 +130,7 @@ public static class BookPageLayoutTaggedExample
             Text      = "THE ARCHITECTURE OF CONSCIOUSNESS · Cambridge University Press, 2024",
             FontName  = StandardFonts.TimesItalic,
             FontSize  = 8,
-            TextColor = Color.Slate400,
+            TextColor = ColorPalette.Slate[400],
             Alignment = TextAlignment.Center,
             Margin    = new Thickness(0, 20, 0, 0),
         });
@@ -145,7 +145,7 @@ public static class BookPageLayoutTaggedExample
             Text      = text,
             FontName  = fontName ?? StandardFonts.TimesRoman,
             FontSize  = 11,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Justify,
             Margin    = new Thickness(0, 0, 0, 8),
         });

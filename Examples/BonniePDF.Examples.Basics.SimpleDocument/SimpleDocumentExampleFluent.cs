@@ -63,12 +63,12 @@ public static class SimpleDocumentFluentExample
                         .Text("Hello, Fluent API!")
                         .Font(boldFont)
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 12);
 
                     col.Item()
                         .Text("This PDF was created using the BonniePDF Fluent API.")
-                        .TextColor(Color.Slate600);
+                        .TextColor(ColorPalette.Slate[600]);
 
                     col.Item().Spacer(16);
 
@@ -76,7 +76,7 @@ public static class SimpleDocumentFluentExample
                         .Text("Key Features:")
                         .Font(boldFont)
                         .FontSize(14)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 6);
 
                     foreach (string feature in Features)
@@ -84,7 +84,7 @@ public static class SimpleDocumentFluentExample
                         col.Item()
                             .Text(feature)
                             .FontSize(11)
-                            .TextColor(Color.Slate600);
+                            .TextColor(ColorPalette.Slate[600]);
                     }
                 });
             });
@@ -98,14 +98,14 @@ public static class SimpleDocumentFluentExample
                         .Text("Page 2")
                         .Font(boldFont)
                         .FontSize(20)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 12);
 
                     col.Item()
                         .Text("This demonstrates multi-page support using the Fluent API. " +
                               "Each doc.Page() call adds a new page to the document, " +
                               "and content flows automatically.")
-                        .TextColor(Color.Slate600);
+                        .TextColor(ColorPalette.Slate[600]);
                 });
             });
 
@@ -120,20 +120,20 @@ public static class SimpleDocumentFluentExample
                         .Text($"Page 3: {squareCard.Name}")
                         .Font(boldFont)
                         .FontSize(16)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .AlignCenter()
                         .Margin(0, 50, 0, 8);
 
                     col.Item()
                         .Text($"{squareCard.Width}pt × {squareCard.Height}pt")
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .AlignCenter()
                         .Margin(0, 0, 0, 16);
 
                     col.Item()
                         .Text("Custom page sizes are set per page via page.Size().")
                         .FontSize(10)
-                        .TextColor(Color.Slate400)
+                        .TextColor(ColorPalette.Slate[400])
                         .AlignCenter();
                 });
             });

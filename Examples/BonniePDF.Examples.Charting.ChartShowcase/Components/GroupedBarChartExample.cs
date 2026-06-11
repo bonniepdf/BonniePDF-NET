@@ -40,7 +40,7 @@ public static class GroupedBarChartExample
         {
             Text = "Quarterly Revenue by Product Line",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -48,7 +48,7 @@ public static class GroupedBarChartExample
         {
             Text = "Comparison of three product lines across all months",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -57,9 +57,9 @@ public static class GroupedBarChartExample
         decimal[] clothingValues = [3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200];
         decimal[] homeValues = [2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800];
 
-        ChartSeries electronicsSeries = new() { Name = "Electronics", Color = Color.Indigo600 };
-        ChartSeries clothingSeries = new() { Name = "Clothing", Color = Color.Rose600 };
-        ChartSeries homeSeries = new() { Name = "Home & Garden", Color = Color.Emerald600 };
+        ChartSeries electronicsSeries = new() { Name = "Electronics", Color = ColorPalette.Indigo[600] };
+        ChartSeries clothingSeries = new() { Name = "Clothing", Color = ColorPalette.Rose[600] };
+        ChartSeries homeSeries = new() { Name = "Home & Garden", Color = ColorPalette.Emerald[600] };
 
         for (int i = 0; i < months.Count; i++)
         {

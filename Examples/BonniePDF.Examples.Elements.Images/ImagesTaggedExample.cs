@@ -53,7 +53,7 @@ public static class ImagesTaggedExample
                 Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language = "en-GB",
-                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate700),
+                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]),
             },
         };
 
@@ -62,7 +62,7 @@ public static class ImagesTaggedExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -90,7 +90,7 @@ public static class ImagesTaggedExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 8),
         });
 

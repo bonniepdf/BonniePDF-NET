@@ -49,14 +49,14 @@ public static class WatermarkFluentExample
                         .Text("Fluent Watermark API")
                         .Bold()
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 16);
 
                     column.Item()
                         .Text("This document demonstrates the fluent API for adding watermarks. " +
                               "A single call to Settings.WithWatermark(\"SAMPLE\", opacity: 0.12f, " +
                               "rotationDegrees: -40) configures the watermark with custom opacity and rotation.")
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .AlignJustify()
                         .Margin(0, 0, 0, 16);
 
@@ -64,7 +64,7 @@ public static class WatermarkFluentExample
                         .Text("The watermark appears behind all content on every page, using PDF " +
                               "ExtGState for transparency and the cm operator for rotation. The text " +
                               "is centered on each page and automatically sized to fit diagonally.")
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .AlignJustify();
                 });
             });

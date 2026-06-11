@@ -37,7 +37,7 @@ public static class QRCodesExampleFluent
             doc.WithDefaultTextStyle(style => style
                 .WithFamily(StandardFonts.Helvetica)
                 .WithSize(11)
-                .WithColor(Color.Slate700));
+                .WithColor(ColorPalette.Slate[700]));
 
             doc.Page(page =>
             {
@@ -48,7 +48,7 @@ public static class QRCodesExampleFluent
                         .Text("QR Code Generator (Fluent API)")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 20);
 
                     col.Item()
@@ -81,7 +81,7 @@ public static class QRCodesExampleFluent
                             });
                     });
                     
-                    col.Item().Line(1, Color.Slate200).Margin(0, 20, 0, 20);
+                    col.Item().Line(1, ColorPalette.Slate[200]).Margin(0, 20, 0, 20);
 
                     // ── Section 2: Error Correction Levels ─────────────────────
                     SectionHeader(col, "Error Correction Levels");
@@ -99,57 +99,57 @@ public static class QRCodesExampleFluent
                         // Low (7%)
                         row.RelativeItem().Column(card =>
                         {
-                            card.Item().Background(Color.Slate50).Border(1, Color.Slate200).Padding(10).AlignCenter()
+                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.Low)
                                 .QuietZone(1);
                                 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Low").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~7% restoration").FontSize(9).TextColor(Color.Slate500);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(Color.Slate400).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text("~7% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
                         });
 
                         // Medium (15%)
                         row.RelativeItem().Column(card =>
                         {
-                            card.Item().Background(Color.Slate50).Border(1, Color.Slate200).Padding(10).AlignCenter()
+                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.Medium)
                                 .QuietZone(1);
                                 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Medium").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~15% restoration").FontSize(9).TextColor(Color.Slate500);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(Color.Slate400).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text("~15% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
                         });
 
                         // Quartile (25%)
                         row.RelativeItem().Column(card =>
                         {
-                            card.Item().Background(Color.Slate50).Border(1, Color.Slate200).Padding(10).AlignCenter()
+                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.Quartile)
                                 .QuietZone(1);
                                 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Quartile").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~25% restoration").FontSize(9).TextColor(Color.Slate500);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(Color.Slate400).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text("~25% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
                         });
 
                         // High (30%)
                         row.RelativeItem().Column(card =>
                         {
-                            card.Item().Background(Color.Slate50).Border(1, Color.Slate200).Padding(10).AlignCenter()
+                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.High)
                                 .QuietZone(1);
                                 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("High").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~30% restoration").FontSize(9).TextColor(Color.Slate500);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(Color.Slate400).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text("~30% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
                         });
                     });
                     
-                    col.Item().Line(1, Color.Slate200).Margin(0, 20, 0, 20);
+                    col.Item().Line(1, ColorPalette.Slate[200]).Margin(0, 20, 0, 20);
 
                     // ── Section 3: Colors and Styling ──────────────────────────
                     SectionHeader(col, "Colors & Backgrounds");
@@ -162,23 +162,23 @@ public static class QRCodesExampleFluent
                         row.RelativeItem().Column(c =>
                         {
                             c.Item().Text("Custom Foreground").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
-                            c.Item().Border(1, Color.Blue200).Padding(10).AlignCenter()
+                            c.Item().Border(1, ColorPalette.Blue[200]).Padding(10).AlignCenter()
                                 .QRCode("tel:+1234567890", size: 120)
-                                .ForegroundColor(Color.Blue700)
+                                .ForegroundColor(ColorPalette.Blue[700])
                                 .QuietZone(2);
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("tel:+1234567890").FontSize(9).TextColor(Color.Slate500);
+                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("tel:+1234567890").FontSize(9).TextColor(ColorPalette.Slate[500]);
                         });
 
                         // Custom Colors
                         row.RelativeItem().Column(c =>
                         {
                             c.Item().Text("Custom Background").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
-                            c.Item().Border(1, Color.Rose200).Padding(10).AlignCenter()
+                            c.Item().Border(1, ColorPalette.Rose[200]).Padding(10).AlignCenter()
                                 .QRCode("mailto:hello@example.com", size: 120)
-                                .ForegroundColor(Color.Rose900)
-                                .BackgroundColor(Color.Rose50)
+                                .ForegroundColor(ColorPalette.Rose[900])
+                                .BackgroundColor(ColorPalette.Rose[50])
                                 .QuietZone(2);
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("mailto:hello@example.com").FontSize(9).TextColor(Color.Slate500);
+                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("mailto:hello@example.com").FontSize(9).TextColor(ColorPalette.Slate[500]);
                         });
 
                         // Transparent Background
@@ -186,15 +186,15 @@ public static class QRCodesExampleFluent
                         {
                             c.Item().Text("Transparent Background").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
                             c.Item()
-                                .Background(Color.Amber100)
-                                .Border(1, Color.Amber300)
+                                .Background(ColorPalette.Amber[100])
+                                .Border(1, ColorPalette.Amber[300])
                                 .Padding(10)
                                 .AlignCenter()
                                 .QRCode("WIFI:S:MyNetwork;T:WPA;P:password;;", size: 120)
-                                .ForegroundColor(Color.Amber900)
+                                .ForegroundColor(ColorPalette.Amber[900])
                                 .DrawBackground(false) // Let the container's background show through
                                 .QuietZone(2);
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("WIFI:S:MyNetwork;...").FontSize(9).TextColor(Color.Slate500);
+                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("WIFI:S:MyNetwork;...").FontSize(9).TextColor(ColorPalette.Slate[500]);
                         });
                     });
                 });
@@ -210,7 +210,7 @@ public static class QRCodesExampleFluent
             .Text(title)
             .Font(StandardFonts.HelveticaBold)
             .FontSize(16)
-            .TextColor(Color.Indigo600)
+            .TextColor(ColorPalette.Indigo[600])
             .Margin(0, 0, 0, 10);
     }
 }

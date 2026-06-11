@@ -28,7 +28,7 @@ public static class TextDecorationExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]);
 
         doc.Metadata.Title = "Text Decorations";
         doc.Metadata.Author = "BonniePDF";
@@ -39,7 +39,7 @@ public static class TextDecorationExample
             Text = "Text Decorations",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -94,7 +94,7 @@ public static class TextDecorationExample
         }.Underline().Strikethrough());
 
         // --- Decorations with different alignments ---
-        doc.Add(new Line { Color = Color.Slate300, Thickness = 1 });
+        doc.Add(new Line { Color = ColorPalette.Slate[300], Thickness = 1 });
         doc.Add(CreateSectionHeader("Decorations with Different Alignments"));
 
         doc.Add(new TextBlock
@@ -122,7 +122,7 @@ public static class TextDecorationExample
         });
 
         // --- Decorations with different font sizes ---
-        doc.Add(new Line { Color = Color.Slate300, Thickness = 1 });
+        doc.Add(new Line { Color = ColorPalette.Slate[300], Thickness = 1 });
         doc.Add(CreateSectionHeader("Decoration Thickness Scales with Font Size"));
 
         int[] sizes = { 8, 12, 18, 24, 36 };
@@ -138,7 +138,7 @@ public static class TextDecorationExample
         }
 
         // --- Practical use case: price comparison ---
-        doc.Add(new Line { Color = Color.Slate300, Thickness = 1 });
+        doc.Add(new Line { Color = ColorPalette.Slate[300], Thickness = 1 });
         doc.Add(CreateSectionHeader("Practical Example: Price List"));
 
         VerticalStack priceList = new();
@@ -149,7 +149,7 @@ public static class TextDecorationExample
             Text = "Original Price: $199.99",
             FontName = StandardFonts.Helvetica,
             FontSize = 14,
-            TextColor = Color.Slate400,
+            TextColor = ColorPalette.Slate[400],
             TextDecoration = TextDecoration.Strikethrough,
             Margin = new Thickness(0, 0, 0, 4)
         });
@@ -170,7 +170,7 @@ public static class TextDecorationExample
             Text = "You save $50.00!",
             FontName = StandardFonts.Helvetica,
             FontSize = 11,
-            TextColor = Color.Green600
+            TextColor = ColorPalette.Green[600]
         });
 
         doc.Add(priceList);
@@ -184,7 +184,7 @@ public static class TextDecorationExample
             Text = title,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Indigo600,
+            TextColor = ColorPalette.Indigo[600],
             Margin = new Thickness(0, 12, 0, 6)
         };
     }

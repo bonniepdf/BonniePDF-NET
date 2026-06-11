@@ -47,7 +47,7 @@ public static class TextAlignmentExampleFluent
                         .Font(StandardFonts.Helvetica)
                         .Bold()
                         .FontSize(22)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 20);
 
                     const string sampleText =
@@ -60,54 +60,54 @@ public static class TextAlignmentExampleFluent
                     // Left-aligned (default) - no alignment call needed
                     column.Item().Text("Left Aligned (Default)")
                         .Font(StandardFonts.Helvetica).Bold().FontSize(13)
-                        .TextColor(Color.Indigo600).Margin(0, 0, 0, 6);
+                        .TextColor(ColorPalette.Indigo[600]).Margin(0, 0, 0, 6);
 
                     column.Item()
                         .Text(sampleText)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 20);
 
                     // Center-aligned
                     column.Item().Text("Center Aligned")
                         .Font(StandardFonts.Helvetica).Bold().FontSize(13)
-                        .TextColor(Color.Indigo600).Margin(0, 0, 0, 6);
+                        .TextColor(ColorPalette.Indigo[600]).Margin(0, 0, 0, 6);
 
                     column.Item()
                         .Text(sampleText)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .AlignCenter()
                         .Margin(0, 0, 0, 20);
 
                     // Right-aligned
                     column.Item().Text("Right Aligned")
                         .Font(StandardFonts.Helvetica).Bold().FontSize(13)
-                        .TextColor(Color.Indigo600).Margin(0, 0, 0, 6);
+                        .TextColor(ColorPalette.Indigo[600]).Margin(0, 0, 0, 6);
 
                     column.Item()
                         .Text(sampleText)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .AlignRight()
                         .Margin(0, 0, 0, 20);
 
                     // Justified - fluent .AlignJustify() extension
                     column.Item().Text("Justified")
                         .Font(StandardFonts.Helvetica).Bold().FontSize(13)
-                        .TextColor(Color.Indigo600).Margin(0, 0, 0, 6);
+                        .TextColor(ColorPalette.Indigo[600]).Margin(0, 0, 0, 6);
 
                     column.Item()
                         .Text(sampleText)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .AlignJustify()
                         .Margin(0, 0, 0, 20);
 
                     // Divider before book-style section
                     column.Item()
                         .Margin(0, 4, 0, 4)
-                        .Line(1, Color.Slate300);
+                        .Line(1, ColorPalette.Slate[300]);
 
                     column.Item().Text("Book-Style Justified Paragraphs")
                         .Font(StandardFonts.Helvetica).Bold().FontSize(13)
-                        .TextColor(Color.Indigo600).Margin(0, 6, 0, 6);
+                        .TextColor(ColorPalette.Indigo[600]).Margin(0, 6, 0, 6);
 
                     string[] paragraphs =
                     {
@@ -128,7 +128,7 @@ public static class TextAlignmentExampleFluent
                     {
                         column.Item()
                             .Text(paragraph)
-                            .TextColor(Color.Slate800)
+                            .TextColor(ColorPalette.Slate[800])
                             .AlignJustify()
                             .Margin(0, 0, 0, 8);
                     }

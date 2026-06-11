@@ -79,14 +79,14 @@ public static class MultiPageFlowExampleFluent
                         .Text("Employee Directory & Company Overview")
                         .Bold()
                         .FontSize(28)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .AlignCenter()
                         .Margin(0, 0, 0, 10);
 
                     column.Item()
                         .Text($"Annual Report {DateTime.Now.Year}")
                         .FontSize(14)
-                        .TextColor(Color.Slate500)
+                        .TextColor(ColorPalette.Slate[500])
                         .AlignCenter()
                         .Margin(0, 0, 0, 30);
 
@@ -95,12 +95,12 @@ public static class MultiPageFlowExampleFluent
                         .Text("Part 1: Complete Employee Directory")
                         .Bold()
                         .FontSize(18)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 15);
 
                     column.Item()
                         .Text("The following table lists all employees across all departments. Headers repeat on each page for easy reference.")
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 15);
 
                     column.Item()
@@ -109,7 +109,7 @@ public static class MultiPageFlowExampleFluent
                             // 5-column layout matching original float widths
                             table.Columns(0.5f, 1.5f, 1f, 1f, 1f);
                             table.CellPadding(8);
-                            table.HeaderBackground(Color.Blue600);
+                            table.HeaderBackground(ColorPalette.Blue[600]);
                             table.HeaderTextColor(Color.White);
                             table.RepeatHeaders();
 
@@ -132,15 +132,15 @@ public static class MultiPageFlowExampleFluent
                                 int startYear = 2015 + i % 10;
                                 int startMonth = i * 5 % 12 + 1;
 
-                                Color rowBgColor = i % 2 == 0 ? Color.Slate50 : Color.White;
+                                Color rowBgColor = i % 2 == 0 ? ColorPalette.Slate[50] : Color.White;
 
                                 table.Row(rowBgColor, row =>
                                 {
-                                    row.Cell().Text(i.ToString("D4")).FontSize(9).TextColor(Color.Slate600);
-                                    row.Cell().Text($"{firstName} {lastName}").FontSize(9).TextColor(Color.Slate800);
-                                    row.Cell().Text(department).FontSize(9).TextColor(Color.Slate600);
-                                    row.Cell().Text(position).FontSize(9).TextColor(Color.Slate600);
-                                    row.Cell().Text($"{startMonth:D2}/{startYear}").FontSize(9).TextColor(Color.Slate500);
+                                    row.Cell().Text(i.ToString("D4")).FontSize(9).TextColor(ColorPalette.Slate[600]);
+                                    row.Cell().Text($"{firstName} {lastName}").FontSize(9).TextColor(ColorPalette.Slate[800]);
+                                    row.Cell().Text(department).FontSize(9).TextColor(ColorPalette.Slate[600]);
+                                    row.Cell().Text(position).FontSize(9).TextColor(ColorPalette.Slate[600]);
+                                    row.Cell().Text($"{startMonth:D2}/{startYear}").FontSize(9).TextColor(ColorPalette.Slate[500]);
                                 });
                             }
                         });
@@ -152,7 +152,7 @@ public static class MultiPageFlowExampleFluent
                         .Text("Part 2: Company Overview & History")
                         .Bold()
                         .FontSize(18)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 15);
 
                     (string, string)[] sections = new[]
@@ -185,12 +185,12 @@ public static class MultiPageFlowExampleFluent
                             .Text(title)
                             .Bold()
                             .FontSize(14)
-                            .TextColor(Color.Slate700)
+                            .TextColor(ColorPalette.Slate[700])
                             .Margin(0, 20, 0, 8);
 
                         column.Item()
                             .Text(content)
-                            .TextColor(Color.Slate600)
+                            .TextColor(ColorPalette.Slate[600])
                             .Margin(0, 0, 0, 8);
 
                         column.Item()
@@ -200,7 +200,7 @@ public static class MultiPageFlowExampleFluent
                                   "remain relevant and effective in an ever-changing business environment. " +
                                   "The leadership team reviews progress quarterly and adjusts our approach as needed " +
                                   "to maintain alignment with our long-term objectives.")
-                            .TextColor(Color.Slate600)
+                            .TextColor(ColorPalette.Slate[600])
                             .Margin(0, 0, 0, 12);
                     }
 
@@ -211,7 +211,7 @@ public static class MultiPageFlowExampleFluent
                         .Text("Conclusion")
                         .Bold()
                         .FontSize(18)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 15);
 
                     column.Item()
@@ -221,14 +221,14 @@ public static class MultiPageFlowExampleFluent
                               "The text sections that follow flow naturally across page boundaries, maintaining readability " +
                               "and professional formatting throughout. This unified approach to content flow enables the " +
                               "creation of complex, multipage documents with consistent quality and appearance.")
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 20);
 
                     column.Item()
                         .Text("Generated with BonniePDF - Flow Architecture Demo")
                         .Italic()
                         .FontSize(10)
-                        .TextColor(Color.Slate400)
+                        .TextColor(ColorPalette.Slate[400])
                         .AlignCenter()
                         .Margin(0, 20, 0, 0);
                 });

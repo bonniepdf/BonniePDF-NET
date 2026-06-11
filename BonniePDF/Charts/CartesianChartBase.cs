@@ -432,7 +432,7 @@ public abstract class CartesianChartBase : ChartBase
     /// Gets the default color for the first series.
     /// Derived classes can override this to provide their specific default color.
     /// </summary>
-    protected virtual Color GetDefaultSeriesColor() => Color.Blue600;
+    protected virtual Color GetDefaultSeriesColor() => ColorPalette.Blue[600];
 
     /// <summary>
     /// Calculates the chart layout dimensions.

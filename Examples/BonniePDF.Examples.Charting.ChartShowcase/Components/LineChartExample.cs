@@ -40,7 +40,7 @@ public static class LineChartExample
         {
             Text = "Monthly Revenue Trends",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -48,7 +48,7 @@ public static class LineChartExample
         {
             Text = "Generated using the new ICanvas architecture",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 

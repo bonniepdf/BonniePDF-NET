@@ -50,7 +50,7 @@ public static class HyperlinksExampleFluent
                         .Text("Hyperlink Support Demo (Fluent API)")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 12);
 
                     // ── Basic Links ────────────────────────────────────────────────
@@ -72,7 +72,7 @@ public static class HyperlinksExampleFluent
                     // Green
                     col.Item().Element(new Hyperlink("https://microsoft.com", "Green Link")
                     {
-                        TextColor = Color.Green500,
+                        TextColor = ColorPalette.Green[500],
                         Margin    = new Thickness(0, 0, 0, 8)
                     });
 
@@ -80,7 +80,7 @@ public static class HyperlinksExampleFluent
                     col.Item().Element(new Hyperlink("https://google.com", "Large Purple Link")
                     {
                         FontSize  = 16,
-                        TextColor = Color.Purple500,
+                        TextColor = ColorPalette.Purple[500],
                         Margin    = new Thickness(0, 0, 0, 8)
                     });
 
@@ -122,7 +122,7 @@ public static class HyperlinksExampleFluent
             .Text(title)
             .Font(StandardFonts.HelveticaBold)
             .FontSize(14)
-            .TextColor(Color.Slate700)
+            .TextColor(ColorPalette.Slate[700])
             .Margin(0, 0, 0, 8);
     }
 }

@@ -69,7 +69,7 @@ public static class CustomFontTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(fontPath)
                     .WithSize(11)
-                    .WithColor(Color.Slate700),
+                    .WithColor(ColorPalette.Slate[700]),
             },
         };
 
@@ -78,7 +78,7 @@ public static class CustomFontTaggedExample
             TocIdentifier = "intro",
             Level         = 1,
             FontSize      = 22,
-            TextColor     = Color.Slate800,
+            TextColor     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 10),
         });
 
@@ -97,7 +97,7 @@ public static class CustomFontTaggedExample
             TocIdentifier = "unicode",
             Level         = 2,
             FontSize      = 14,
-            TextColor     = Color.Slate700,
+            TextColor     = ColorPalette.Slate[700],
             Margin        = new Thickness(0, 0, 0, 6),
         });
 
@@ -119,7 +119,7 @@ public static class CustomFontTaggedExample
             TocIdentifier = "currency",
             Level         = 2,
             FontSize      = 14,
-            TextColor     = Color.Slate700,
+            TextColor     = ColorPalette.Slate[700],
             Margin        = new Thickness(0, 10, 0, 6),
         });
 
@@ -136,7 +136,7 @@ public static class CustomFontTaggedExample
             TocIdentifier = "math",
             Level         = 2,
             FontSize      = 14,
-            TextColor     = Color.Slate700,
+            TextColor     = ColorPalette.Slate[700],
             Margin        = new Thickness(0, 10, 0, 6),
         });
 
@@ -153,7 +153,7 @@ public static class CustomFontTaggedExample
             TocIdentifier = "greek",
             Level         = 2,
             FontSize      = 14,
-            TextColor     = Color.Slate700,
+            TextColor     = ColorPalette.Slate[700],
             Margin        = new Thickness(0, 10, 0, 6),
         });
 
@@ -168,7 +168,7 @@ public static class CustomFontTaggedExample
         {
             Text   = $"© {DateTime.Now.Year} BonniePDF • TrueType Font Embedding",
             FontSize = 9,
-            TextColor = Color.Slate400,
+            TextColor = ColorPalette.Slate[400],
         });
 
         return doc;

@@ -23,7 +23,7 @@ public static class WebApiInvoiceExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = $"Invoice INV-{DateTime.Now.Year}-001";
         doc.Metadata.Author = "MyCompany";
@@ -34,7 +34,7 @@ public static class WebApiInvoiceExample
             Text = $"INVOICE #INV-{DateTime.Now.Year}-001",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 20,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -82,7 +82,7 @@ public static class WebApiInvoiceExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = $"Invoice {invoiceNumber}";
         doc.Metadata.Author = "MyCompany";
@@ -93,7 +93,7 @@ public static class WebApiInvoiceExample
             Text = $"INVOICE #{invoiceNumber}",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 20,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 

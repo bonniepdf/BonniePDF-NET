@@ -32,7 +32,7 @@ public class LargeDocumentTests : IntegrationTestBase
                 Text = $"Page {pageNumber}",
                 FontSize = 10,
                 Alignment = TextAlignment.Center,
-                TextColor = Color.Slate500
+                TextColor = ColorPalette.Slate[500]
             }
         }))
         {

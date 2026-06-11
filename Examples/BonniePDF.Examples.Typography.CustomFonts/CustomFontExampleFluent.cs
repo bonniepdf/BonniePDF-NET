@@ -71,27 +71,27 @@ public static class CustomFontExampleFluent
                     column.Item()
                         .Text("TrueType Font Embedding Demo (Fluent API)")
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 12);
 
                     column.Item()
                         .Text("Full Unicode Support with Embedded Fonts")
                         .FontSize(14)
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 16);
 
                     // ── Unicode Symbols ──────────────────────────────────────────
                     column.Item()
                         .Text("Unicode Symbols:")
                         .FontSize(12)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 6);
 
                     foreach (string sym in UnicodeSymbols)
                     {
                         column.Item()
                             .Text(sym)
-                            .TextColor(Color.Slate600);
+                            .TextColor(ColorPalette.Slate[600]);
                     }
 
                     // Bottom margin on the last symbol line
@@ -101,66 +101,66 @@ public static class CustomFontExampleFluent
                     column.Item()
                         .Text("Currency Symbols:")
                         .FontSize(12)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 6);
 
                     column.Item()
                         .Text("\u20AC Euro \u00A3 Pound \u00A5 Yen \u20B9 Rupee")
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 12);
 
                     // ── Mathematical Symbols ─────────────────────────────────────
                     column.Item()
                         .Text("Mathematical Symbols:")
                         .FontSize(12)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 6);
 
                     column.Item()
                         .Text("\u00B1 Plus-minus \u00D7 Multiply \u00F7 Divide \u2260 Not equal")
-                        .TextColor(Color.Slate600);
+                        .TextColor(ColorPalette.Slate[600]);
 
                     column.Item()
                         .Text("\u2264 Less-equal \u2265 Greater-equal \u221E Infinity")
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 12);
 
                     // ── Greek Letters ────────────────────────────────────────────
                     column.Item()
                         .Text("Greek Letters:")
                         .FontSize(12)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 6);
 
                     column.Item()
                         .Text("\u03B1 Alpha \u03B2 Beta \u03B3 Gamma \u03B4 Delta \u03C0 Pi \u03A9 Omega")
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 16);
 
                     // ── Mixed Fonts ──────────────────────────────────────────────
                     column.Item()
                         .Text("Mixed Font Demonstration:")
                         .FontSize(12)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 6);
 
                     // Standard Helvetica (Type1 - not embedded)
                     column.Item()
                         .Text("This line uses standard Helvetica (Type1, not embedded)")
                         .Font(StandardFonts.Helvetica)
-                        .TextColor(Color.Slate600);
+                        .TextColor(ColorPalette.Slate[600]);
 
                     // Embedded Arial (TrueType - inherits from default)
                     column.Item()
                         .Text("This line uses embedded Arial (TrueType, full Unicode)")
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 16);
 
                     // Footer
                     column.Item()
                         .Text($"\u00A9 {DateTime.Now.Year} BonniePDF \u2022 TrueType Font Embedding")
                         .FontSize(10)
-                        .TextColor(Color.Slate400);
+                        .TextColor(ColorPalette.Slate[400]);
                 });
             });
         }).Build();

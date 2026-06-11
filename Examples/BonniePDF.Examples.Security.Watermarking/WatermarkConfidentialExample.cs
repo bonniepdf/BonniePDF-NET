@@ -25,7 +25,7 @@ public static class WatermarkConfidentialExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[700]);
 
         doc.Metadata.Title = "Confidential Report";
         doc.Metadata.Author = "BonniePDF";
@@ -45,7 +45,7 @@ public static class WatermarkConfidentialExample
             Text = $"Financial Performance Report Q4 {DateTime.Now.Year}",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 22,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -74,7 +74,7 @@ public static class WatermarkConfidentialExample
                    "authorized recipients. Unauthorized disclosure or distribution is prohibited.",
             FontName = StandardFonts.TimesItalic,
             FontSize = 10,
-            TextColor = Color.Slate500,
+            TextColor = ColorPalette.Slate[500],
             Margin = new Thickness(0, 20, 0, 0)
         });
         return doc;
@@ -91,7 +91,7 @@ public static class WatermarkConfidentialExample
                 FontSize = 11,
                 TextColor = Color.White
             },
-            BackgroundColor = Color.Slate700,
+            BackgroundColor = ColorPalette.Slate[700],
             Padding = new Thickness(8, 6, 8, 6)
         };
     }
@@ -105,11 +105,11 @@ public static class WatermarkConfidentialExample
                 Text = text,
                 FontName = StandardFonts.Helvetica,
                 FontSize = 11,
-                TextColor = Color.Slate700
+                TextColor = ColorPalette.Slate[700]
             },
             Padding = new Thickness(8, 5, 8, 5),
             Border = new Border(0.5f),
-            BorderColors = new BorderColors(Color.Slate200)
+            BorderColors = new BorderColors(ColorPalette.Slate[200])
         };
     }
 }

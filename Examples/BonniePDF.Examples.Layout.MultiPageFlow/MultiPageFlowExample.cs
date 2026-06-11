@@ -29,7 +29,7 @@ public static class MultiPageFlowExample
         Document doc = new(settings);
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Flow Architecture Demo";
         doc.Metadata.Author = "BonniePDF";
@@ -41,7 +41,7 @@ public static class MultiPageFlowExample
             Text = "Employee Directory & Company Overview",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 28,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 0, 0, 10)
         });
@@ -50,7 +50,7 @@ public static class MultiPageFlowExample
         {
             Text = $"Annual Report {DateTime.Now.Year}",
             FontSize = 14,
-            TextColor = Color.Slate500,
+            TextColor = ColorPalette.Slate[500],
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 0, 0, 30)
         });
@@ -61,7 +61,7 @@ public static class MultiPageFlowExample
             Text = "Part 1: Complete Employee Directory",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 15)
         });
 
@@ -76,7 +76,7 @@ public static class MultiPageFlowExample
         Table table = new(0.5f, 1.5f, 1f, 1f, 1f)
         {
             RepeatHeadersOnNewPage = true,
-            HeaderBackgroundColor = Color.Blue600,
+            HeaderBackgroundColor = ColorPalette.Blue[600],
             HeaderTextColor = Color.White,
             CellPadding = 8
         };
@@ -123,32 +123,32 @@ public static class MultiPageFlowExample
             int startMonth = i * 5 % 12 + 1;
 
             // Alternate row colors for readability
-            Color rowBgColor = i % 2 == 0 ? Color.Slate50 : Color.White;
+            Color rowBgColor = i % 2 == 0 ? ColorPalette.Slate[50] : Color.White;
 
             table.AddRow(
                 TableRow.From(
                     new TextBlock
                     {
                         Text = i.ToString("D4"), FontName = StandardFonts.Helvetica, FontSize = 9,
-                        TextColor = Color.Slate600
+                        TextColor = ColorPalette.Slate[600]
                     },
                     new TextBlock
                     {
                         Text = $"{firstName} {lastName}", FontName = StandardFonts.Helvetica, FontSize = 9,
-                        TextColor = Color.Slate800
+                        TextColor = ColorPalette.Slate[800]
                     },
                     new TextBlock
                     {
-                        Text = department, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = Color.Slate600
+                        Text = department, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[600]
                     },
                     new TextBlock
                     {
-                        Text = position, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = Color.Slate600
+                        Text = position, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[600]
                     },
                     new TextBlock
                     {
                         Text = $"{startMonth:D2}/{startYear}", FontName = StandardFonts.Helvetica, FontSize = 9,
-                        TextColor = Color.Slate500
+                        TextColor = ColorPalette.Slate[500]
                     }
                 ).WithBackground(rowBgColor)
             );
@@ -164,7 +164,7 @@ public static class MultiPageFlowExample
             Text = "Part 2: Company Overview & History",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 15)
         });
 
@@ -200,7 +200,7 @@ public static class MultiPageFlowExample
                 Text = title,
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 14,
-                TextColor = Color.Slate700,
+                TextColor = ColorPalette.Slate[700],
                 Margin = new Thickness(0, 20, 0, 8)
             });
 
@@ -232,7 +232,7 @@ public static class MultiPageFlowExample
             Text = "Conclusion",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 15)
         });
 
@@ -252,7 +252,7 @@ public static class MultiPageFlowExample
             Text = "Generated with BonniePDF - Flow Architecture Demo",
             FontName = StandardFonts.HelveticaOblique,
             FontSize = 10,
-            TextColor = Color.Slate400,
+            TextColor = ColorPalette.Slate[400],
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 20, 0, 0)
         });

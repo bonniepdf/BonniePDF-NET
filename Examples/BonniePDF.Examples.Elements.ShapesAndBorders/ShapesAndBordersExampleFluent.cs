@@ -54,7 +54,7 @@ public static class ShapesAndBordersExampleFluent
                         .Text("Rounded Rectangles (Fluent API)")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 20);
 
                     // ── Section 1: Basic Rounded Containers ────────────────────
@@ -62,30 +62,30 @@ public static class ShapesAndBordersExampleFluent
 
                     col.Item()
                         .Padding(16)
-                        .Background(Color.Blue50)
+                        .Background(ColorPalette.Blue[50])
                         .CornerRadius(8)
                         .Margin(0, 0, 0, 12)
                         .Text("A container with 8pt corner radius and a light blue background.")
-                        .TextColor(Color.Blue800);
+                        .TextColor(ColorPalette.Blue[800]);
 
                     col.Item()
                         .Padding(20)
-                        .Background(Color.Green50)
+                        .Background(ColorPalette.Green[50])
                         .CornerRadius(16)
                         .Margin(0, 0, 0, 12)
                         .Text("A container with a larger 16pt corner radius. The arcs become more pronounced as the radius increases.")
-                        .TextColor(Color.Green800);
+                        .TextColor(ColorPalette.Green[800]);
 
                     // ── Section 2: Rounded Borders ────────────────────────────
                     SectionHeader(col, "Rounded Borders");
 
                     col.Item()
                         .Padding(16)
-                        .Border(2, Color.Indigo500)
+                        .Border(2, ColorPalette.Indigo[500])
                         .CornerRadius(10)
                         .Margin(0, 0, 0, 12)
                         .Text("A rounded border with no background fill. The stroke follows the curved path.")
-                        .TextColor(Color.Slate700);
+                        .TextColor(ColorPalette.Slate[700]);
 
                     col.Item()
                         .Padding(16)
@@ -108,8 +108,8 @@ public static class ShapesAndBordersExampleFluent
                             // Card A
                             row.RelativeItem(1)
                                 .Padding(14)
-                                .Background(Color.Blue50)
-                                .Border(1, Color.Blue500)
+                                .Background(ColorPalette.Blue[50])
+                                .Border(1, ColorPalette.Blue[500])
                                 .CornerRadius(10)
                                 .Column(card =>
                                 {
@@ -117,19 +117,19 @@ public static class ShapesAndBordersExampleFluent
                                         .Text("Feature A")
                                         .Font(StandardFonts.HelveticaBold)
                                         .FontSize(14)
-                                        .TextColor(Color.Blue500)
+                                        .TextColor(ColorPalette.Blue[500])
                                         .Margin(0, 0, 0, 6);
                                     card.Item()
                                         .Text("Rounded corners make UI elements feel modern and approachable.")
                                         .FontSize(10)
-                                        .TextColor(Color.Slate600);
+                                        .TextColor(ColorPalette.Slate[600]);
                                 });
 
                             // Card B
                             row.RelativeItem(1)
                                 .Padding(14)
                                 .Background(Color.FromHex("#faf5ff"))
-                                .Border(1, Color.Purple500)
+                                .Border(1, ColorPalette.Purple[500])
                                 .CornerRadius(10)
                                 .Column(card =>
                                 {
@@ -137,19 +137,19 @@ public static class ShapesAndBordersExampleFluent
                                         .Text("Feature B")
                                         .Font(StandardFonts.HelveticaBold)
                                         .FontSize(14)
-                                        .TextColor(Color.Purple500)
+                                        .TextColor(ColorPalette.Purple[500])
                                         .Margin(0, 0, 0, 6);
                                     card.Item()
                                         .Text("Bezier curves approximate perfect quarter-circle arcs.")
                                         .FontSize(10)
-                                        .TextColor(Color.Slate600);
+                                        .TextColor(ColorPalette.Slate[600]);
                                 });
 
                             // Card C
                             row.RelativeItem(1)
                                 .Padding(14)
                                 .Background(Color.FromHex("#f0fdfa"))
-                                .Border(1, Color.Teal500)
+                                .Border(1, ColorPalette.Teal[500])
                                 .CornerRadius(10)
                                 .Column(card =>
                                 {
@@ -157,12 +157,12 @@ public static class ShapesAndBordersExampleFluent
                                         .Text("Feature C")
                                         .Font(StandardFonts.HelveticaBold)
                                         .FontSize(14)
-                                        .TextColor(Color.Teal500)
+                                        .TextColor(ColorPalette.Teal[500])
                                         .Margin(0, 0, 0, 6);
                                     card.Item()
                                         .Text("Works with backgrounds, borders, or both combined.")
                                         .FontSize(10)
-                                        .TextColor(Color.Slate600);
+                                        .TextColor(ColorPalette.Slate[600]);
                                 });
                         });
 
@@ -176,13 +176,13 @@ public static class ShapesAndBordersExampleFluent
                         .Border(1, Color.FromHex("#8b5cf6"))
                         .Text("This element uses chained fluent extensions: .Padding().Background().CornerRadius().Border().Text()")
                         .FontSize(12)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 0, 0, 8);
 
                     col.Item()
                         .Text("Chaining: col.Item().Padding(16).Background(...).CornerRadius(12).Border(...).Text(...)")
                         .FontSize(11)
-                        .TextColor(Color.Slate500)
+                        .TextColor(ColorPalette.Slate[500])
                         .Margin(0, 0, 0, 12);
 
                     // ── Section 5: Radius Comparison ──────────────────────────
@@ -192,31 +192,31 @@ public static class ShapesAndBordersExampleFluent
                     {
                         col.Item()
                             .Padding(12, 8, 12, 8)
-                            .Background(Color.Slate100)
-                            .Border(1, Color.Slate400)
+                            .Background(ColorPalette.Slate[100])
+                            .Border(1, ColorPalette.Slate[400])
                             .CornerRadius(r)
                             .Margin(0, 0, 0, 6)
                             .Text(r == 0 ? "CornerRadius = 0 (sharp corners, default)" : $"CornerRadius = {r}")
                             .FontSize(11)
-                            .TextColor(Color.Slate700);
+                            .TextColor(ColorPalette.Slate[700]);
                     }
 
                     // ── Section 6: Practical Examples ─────────────────────────
                     col.Item().Spacer(16);
-                    col.Item().Line(1, Color.Slate300);
+                    col.Item().Line(1, ColorPalette.Slate[300]);
                     SectionHeader(col, "Practical Examples");
 
                     // Success
                     col.Item()
                         .Padding(16, 12, 16, 12)
                         .Background(Color.FromHex("#dcfce7"))
-                        .Border(1, Color.Green600)
+                        .Border(1, ColorPalette.Green[600])
                         .CornerRadius(8)
                         .Margin(0, 0, 0, 8)
                         .Text("✓  Success! Your document has been generated successfully.")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(12)
-                        .TextColor(Color.Green800);
+                        .TextColor(ColorPalette.Green[800]);
 
                     // Warning
                     col.Item()
@@ -246,11 +246,11 @@ public static class ShapesAndBordersExampleFluent
                     col.Item()
                         .Padding(16, 12, 16, 12)
                         .Background(Color.FromHex("#dbeafe"))
-                        .Border(1, Color.Blue600)
+                        .Border(1, ColorPalette.Blue[600])
                         .CornerRadius(8)
                         .Margin(0, 0, 0, 8)
                         .Text("ℹ  Info: Rounded corners are built from four Bezier arcs using the k=0.5523 approximation constant.")
-                        .TextColor(Color.Blue800);
+                        .TextColor(ColorPalette.Blue[800]);
                 });
             });
 
@@ -265,7 +265,7 @@ public static class ShapesAndBordersExampleFluent
             .Text(title)
             .Font(StandardFonts.HelveticaBold)
             .FontSize(14)
-            .TextColor(Color.Indigo600)
+            .TextColor(ColorPalette.Indigo[600])
             .Margin(0, 12, 0, 6);
     }
 }

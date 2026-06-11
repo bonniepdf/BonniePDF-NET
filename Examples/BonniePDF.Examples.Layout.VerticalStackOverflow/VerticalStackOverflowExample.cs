@@ -21,7 +21,7 @@ public static class VerticalStackOverflowExample
         Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "VerticalStack Overflow Demo";
         doc.Metadata.Author = "BonniePDF";
@@ -33,7 +33,7 @@ public static class VerticalStackOverflowExample
             Text = "Item Catalog",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 10)
         });
 
@@ -41,7 +41,7 @@ public static class VerticalStackOverflowExample
         {
             Text = "A collection of items demonstrating automatic pagination",
             FontSize = 12,
-            TextColor = Color.Slate500,
+            TextColor = ColorPalette.Slate[500],
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -60,7 +60,7 @@ public static class VerticalStackOverflowExample
                 Text = $"Item #{i:D3}",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 12,
-                TextColor = Color.Blue600,
+                TextColor = ColorPalette.Blue[600],
                 Margin = new Thickness(0, 0, 0, 5)
             });
 

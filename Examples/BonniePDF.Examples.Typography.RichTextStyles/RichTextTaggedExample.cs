@@ -42,7 +42,7 @@ public static class RichTextTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
-                    .WithColor(Color.Slate700),
+                    .WithColor(ColorPalette.Slate[700]),
             },
         };
 
@@ -52,7 +52,7 @@ public static class RichTextTaggedExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 22,
-            TextColor     = Color.Slate800,
+            TextColor     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 14),
         });
 
@@ -102,13 +102,13 @@ public static class RichTextTaggedExample
             .Span("Text can be ")
             .Span("red", new TextStyle().WithColor(Color.Red))
             .Span(", ")
-            .Span("blue", new TextStyle().WithColor(Color.Blue600))
+            .Span("blue", new TextStyle().WithColor(ColorPalette.Blue[600]))
             .Span(", ")
-            .Span("green", new TextStyle().WithColor(Color.Green600))
+            .Span("green", new TextStyle().WithColor(ColorPalette.Green[600]))
             .Span(", or ")
-            .Span("any color", new TextStyle().WithColor(Color.Purple600))
+            .Span("any color", new TextStyle().WithColor(ColorPalette.Purple[600]))
             .Span(" you choose. Colors can be combined with ")
-            .Span("bold colored text", new TextStyle().Bold().WithColor(Color.Indigo600))
+            .Span("bold colored text", new TextStyle().Bold().WithColor(ColorPalette.Indigo[600]))
             .Span(" for maximum emphasis.")
         );
 
@@ -146,7 +146,7 @@ public static class RichTextTaggedExample
 
         Section(doc, "Practical Example: Legal Disclaimer", "h-legal");
 
-        TextStyle disclaimerBase  = new() { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = Color.Slate600 };
+        TextStyle disclaimerBase  = new() { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[600] };
         TextStyle disclaimerBold  = new TextStyle().Bold().WithColor(Color.Red);
         TextStyle disclaimerLink  = new() { FontFamily = StandardFonts.Helvetica, FontSize = 10 };
 
@@ -163,7 +163,7 @@ public static class RichTextTaggedExample
         .Span(". All data is processed in accordance with ")
         .Span("GDPR", new TextStyle().Bold())
         .Span(" regulations. For questions, contact ")
-        .Span("support@example.com", new TextStyle { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = Color.Blue600 })
+        .Span("support@example.com", new TextStyle { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Blue[600] })
         .Span(".")
         );
 
@@ -178,7 +178,7 @@ public static class RichTextTaggedExample
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 13,
-            TextColor     = Color.Indigo600,
+            TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 14, 0, 6),
         });
     }

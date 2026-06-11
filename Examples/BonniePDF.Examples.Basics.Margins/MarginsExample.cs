@@ -21,7 +21,7 @@ public static class MarginsExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Margin Example";
         doc.Metadata.Author = "BonniePDF";
@@ -33,7 +33,7 @@ public static class MarginsExample
             Text = "Margin Example",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 20) // Bottom margin of 20pt
         });
 
@@ -51,16 +51,16 @@ public static class MarginsExample
         {
             Margin = new Thickness(0, 10, 0, 10), // Top and bottom margin
             Padding = new Thickness(15),
-            BackgroundColor = Color.Blue100,
+            BackgroundColor = ColorPalette.Blue[100],
             Border = new Border(1),
-            BorderColors = new BorderColors(Color.Blue500),
+            BorderColors = new BorderColors(ColorPalette.Blue[500]),
             Child = new TextBlock
             {
                 Text =
                     "This container has a 10pt top and bottom margin, plus 15pt padding inside. Notice how the margin creates space outside the border, while padding creates space inside.",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 11,
-                TextColor = Color.Blue900
+                TextColor = ColorPalette.Blue[900]
             }
         });
 
@@ -70,7 +70,7 @@ public static class MarginsExample
             Text = "Image with Margin",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 20, 0, 10) // 20pt top, 10pt bottom
         });
 
@@ -84,13 +84,13 @@ public static class MarginsExample
         doc.Add(new Container
         {
             Margin = new Thickness(20), // 20pt margin on all sides
-            BackgroundColor = Color.Amber400,
+            BackgroundColor = ColorPalette.Amber[400],
             Child = new TextBlock
             {
                 Text = "Image Placeholder (100x60)",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 10,
-                TextColor = Color.Amber900,
+                TextColor = ColorPalette.Amber[900],
                 Alignment = TextAlignment.Center
             },
             Padding = new Thickness(10, 25, 10, 25)
@@ -102,7 +102,7 @@ public static class MarginsExample
             Text = "Table with Margin",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 20, 0, 10)
         });
 
@@ -111,9 +111,9 @@ public static class MarginsExample
             Margin = new Thickness(10, 0, 10, 0), // Left and right margin
             CellPadding = 8,
             Border = new Border(1),
-            BorderColors = new BorderColors(Color.Slate300),
-            HeaderBackgroundColor = Color.Slate200,
-            HeaderTextColor = Color.Slate800
+            BorderColors = new BorderColors(ColorPalette.Slate[300]),
+            HeaderBackgroundColor = ColorPalette.Slate[200],
+            HeaderTextColor = ColorPalette.Slate[800]
         };
 
         table.AddHeader(
@@ -149,7 +149,7 @@ public static class MarginsExample
             Text = "VerticalStack with Margin",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 20, 0, 10)
         });
 
@@ -160,39 +160,39 @@ public static class MarginsExample
 
         stack.AddChild(new Container
         {
-            BackgroundColor = Color.Green100,
+            BackgroundColor = ColorPalette.Green[100],
             Padding = new Thickness(10),
             Child = new TextBlock
             {
                 Text = "Item 1 in stack",
                 FontSize = 10,
-                TextColor = Color.Green800
+                TextColor = ColorPalette.Green[800]
             }
         });
 
         stack.AddChild(new Container
         {
-            BackgroundColor = Color.Purple100,
+            BackgroundColor = ColorPalette.Purple[100],
             Padding = new Thickness(10),
             Margin = new Thickness(0, 5, 0, 0), // 5pt top margin
             Child = new TextBlock
             {
                 Text = "Item 2 in stack (with top margin)",
                 FontSize = 10,
-                TextColor = Color.Purple800
+                TextColor = ColorPalette.Purple[800]
             }
         });
 
         stack.AddChild(new Container
         {
-            BackgroundColor = Color.Red100,
+            BackgroundColor = ColorPalette.Red[100],
             Padding = new Thickness(10),
             Margin = new Thickness(0, 5, 0, 0), // 5pt top margin
             Child = new TextBlock
             {
                 Text = "Item 3 in stack (with top margin)",
                 FontSize = 10,
-                TextColor = Color.Red800
+                TextColor = ColorPalette.Red[800]
             }
         });
 
@@ -204,7 +204,7 @@ public static class MarginsExample
             Text = "Note: Margins collapse with adjacent content, creating clean spacing throughout the document.",
             FontName = StandardFonts.HelveticaOblique,
             FontSize = 10,
-            TextColor = Color.Slate500,
+            TextColor = ColorPalette.Slate[500],
             Margin = new Thickness(0, 30, 0, 0)
         });
         return doc;

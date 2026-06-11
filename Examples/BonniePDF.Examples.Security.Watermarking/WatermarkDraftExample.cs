@@ -27,7 +27,7 @@ public static class WatermarkDraftExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[700]);
 
         doc.Metadata.Title = "Draft Document with Watermark";
         doc.Metadata.Author = "BonniePDF";
@@ -41,7 +41,7 @@ public static class WatermarkDraftExample
             Text = "Project Proposal",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 28,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 80, 0, 12)
         }.AlignCenter());
 
@@ -50,7 +50,7 @@ public static class WatermarkDraftExample
             Text = "Prepared for Internal Review",
             FontName = StandardFonts.Helvetica,
             FontSize = 14,
-            TextColor = Color.Slate500,
+            TextColor = ColorPalette.Slate[500],
             Margin = new Thickness(0, 0, 0, 40)
         }.AlignCenter());
 
@@ -61,7 +61,7 @@ public static class WatermarkDraftExample
                    "Please do not share this document outside the review team.",
             FontName = StandardFonts.TimesRoman,
             FontSize = 12,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify
         });
 
@@ -72,7 +72,7 @@ public static class WatermarkDraftExample
             Text = "Section 1: Executive Summary",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -85,7 +85,7 @@ public static class WatermarkDraftExample
                    "budget allocation of two million dollars across engineering and operations teams.",
             FontName = StandardFonts.TimesRoman,
             FontSize = 11,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Alignment = TextAlignment.Justify,
             Margin = new Thickness(0, 0, 0, 12)
         });
@@ -97,7 +97,7 @@ public static class WatermarkDraftExample
                    "to review progress against milestones and address any blockers or scope changes.",
             FontName = StandardFonts.TimesRoman,
             FontSize = 11,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Alignment = TextAlignment.Justify
         });
         return doc;

@@ -20,13 +20,13 @@ public static class EncryptionPasswordExample
         settings.WithPassword("demo123");
 
         Document doc = new(settings);
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[700]);
 
         doc.Add(new TextBlock
         {
             Text = "Password Protected Document",
             FontSize = 24,
-            TextColor = Color.Blue700
+            TextColor = ColorPalette.Blue[700]
         });
 
         doc.Add(new TextBlock
@@ -39,7 +39,7 @@ public static class EncryptionPasswordExample
         {
             Text = "Password: demo123",
             FontSize = 14,
-            TextColor = Color.Red600
+            TextColor = ColorPalette.Red[600]
         });
 
         doc.Add(new TextBlock

@@ -29,7 +29,7 @@ public static class HeadersFootersExample
                 Text = $"BonniePDF Documentation - Page {pageNumber}",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 10,
-                TextColor = Color.Slate600,
+                TextColor = ColorPalette.Slate[600],
                 Alignment = TextAlignment.Center
             },
 
@@ -39,7 +39,7 @@ public static class HeadersFootersExample
                 Text = $"Page {pageNumber} - Confidential",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 10,
-                TextColor = Color.Slate500,
+                TextColor = ColorPalette.Slate[500],
                 Alignment = TextAlignment.Center
             }
         };
@@ -47,7 +47,7 @@ public static class HeadersFootersExample
         Document doc = new(settings);
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Headers and Footers Demo";
         doc.Metadata.Author = "BonniePDF";
@@ -58,7 +58,7 @@ public static class HeadersFootersExample
             Text = "Chapter 1: Introduction",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 20,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 15)
         });
 
@@ -71,7 +71,7 @@ public static class HeadersFootersExample
                 Text = $"1.{section} Section Title",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 14,
-                TextColor = Color.Slate700,
+                TextColor = ColorPalette.Slate[700],
                 Margin = new Thickness(0, 15, 0, 10)
             });
 

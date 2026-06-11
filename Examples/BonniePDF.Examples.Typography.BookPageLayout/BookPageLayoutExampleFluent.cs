@@ -51,21 +51,21 @@ public static class BookPageLayoutExampleFluent
                         .Text("CHAPTER III")
                         .Font(StandardFonts.TimesBold)
                         .FontSize(11)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .AlignCenter();
 
                     column.Item()
                         .Text("The Architecture of Memory")
                         .Font(StandardFonts.TimesBold)
                         .FontSize(18)
-                        .TextColor(Color.Slate900)
+                        .TextColor(ColorPalette.Slate[900])
                         .AlignCenter();
 
                     column.Item()
                         .Text("--------------------------------------------------------------------")
                         .Font(StandardFonts.Courier)
                         .FontSize(8)
-                        .TextColor(Color.Slate400)
+                        .TextColor(ColorPalette.Slate[400])
                         .AlignCenter();
 
                     column.Item().Spacer(20);
@@ -80,7 +80,7 @@ public static class BookPageLayoutExampleFluent
                     column.Item()
                         .Text("\"Memory,\" he began, his voice gravelly with age, \"is not a repository of facts, neatly cataloged and retrieved at will. It is something far more complex-a living, breathing architecture that shapes and is shaped by who we are.\"")
                         .Font(StandardFonts.TimesItalic)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .AlignJustify();
 
                     // Paragraph 3
@@ -114,12 +114,12 @@ public static class BookPageLayoutExampleFluent
                     column.Item()
                         .Margin(5)
                         .Padding(20, 8, 20, 8)
-                        .Background(Color.Slate50)
-                        .Border(1, Color.Slate300)
+                        .Background(ColorPalette.Slate[50])
+                        .Border(1, ColorPalette.Slate[300])
                         .Text("We have discovered, through decades of research across multiple disciplines, that the architectural blueprint of memory is not unique to humans. It exists in varying forms across all mammalian species, suggesting an ancient origin predating consciousness itself. More remarkably-and this is where conventional science begins to grow uncomfortable-we have found evidence that this architecture can be influenced, modified, and in some cases, completely redesigned.")
                         .Italic()
                         .FontSize(10)
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .AlignJustify();
 
                     // Paragraph 10
@@ -137,21 +137,21 @@ public static class BookPageLayoutExampleFluent
                         .Text("--------------------------------------------------------------------")
                         .Font(StandardFonts.Courier)
                         .FontSize(8)
-                        .TextColor(Color.Slate400)
+                        .TextColor(ColorPalette.Slate[400])
                         .AlignCenter();
 
                     column.Item()
                         .Text("42")
                         .Font(StandardFonts.TimesBold)
                         .FontSize(10)
-                        .TextColor(Color.Slate500)
+                        .TextColor(ColorPalette.Slate[500])
                         .AlignCenter();
 
                     column.Item()
                         .Text("THE ARCHITECTURE OF CONSCIOUSNESS | Cambridge University Press, 2024")
                         .Font(StandardFonts.TimesItalic)
                         .FontSize(8)
-                        .TextColor(Color.Slate400)
+                        .TextColor(ColorPalette.Slate[400])
                         .AlignCenter();
                 });
             });
@@ -167,7 +167,7 @@ public static class BookPageLayoutExampleFluent
     {
         column.Item()
             .Text(text)
-            .TextColor(Color.Slate800)
+            .TextColor(ColorPalette.Slate[800])
             .AlignJustify();
     }
 }

@@ -237,7 +237,7 @@ public class DocumentSettings
     ///
     /// <example>
     /// <code>
-    /// settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
+    /// settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
     /// </code>
     /// </example>
     /// </summary>

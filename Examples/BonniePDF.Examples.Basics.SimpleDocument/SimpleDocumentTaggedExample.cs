@@ -50,7 +50,7 @@ public static class SimpleDocumentTaggedExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -62,7 +62,7 @@ public static class SimpleDocumentTaggedExample
                    "and an XMP packet declaring pdfuaid:part 1.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 8),
         });
 
@@ -73,7 +73,7 @@ public static class SimpleDocumentTaggedExample
                    "extensions that arrive in stage 2.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -84,7 +84,7 @@ public static class SimpleDocumentTaggedExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 8),
         });
 

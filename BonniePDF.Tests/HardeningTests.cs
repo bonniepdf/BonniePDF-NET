@@ -228,12 +228,12 @@ public class HardeningTests
                 doc.Settings.HeaderTemplate = pageNum => new TextBlock
                 {
                     Text = $"Header - page {pageNum}",
-                    FontSize = 9, TextColor = Color.Slate500,
+                    FontSize = 9, TextColor = ColorPalette.Slate[500],
                 };
                 doc.Settings.FooterTemplate = pageNum => new TextBlock
                 {
                     Text = $"- {pageNum} -",
-                    FontSize = 9, TextColor = Color.Slate500,
+                    FontSize = 9, TextColor = ColorPalette.Slate[500],
                 };
                 doc.Add(new Heading("Body") { TocIdentifier = "b", Level = 1, FontSize = 18 });
             }));

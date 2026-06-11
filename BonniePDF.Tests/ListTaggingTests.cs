@@ -159,7 +159,7 @@ public class ListTaggingTests
     public void DefaultTextStyle_CascadesIntoNestedOrderedAndUnorderedLists()
     {
         using var doc = new Document();
-        doc.Settings.DefaultTextStyle = new TextStyle().WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithColor(ColorPalette.Slate[700]);
 
         var orderedOuter = MakeOrdered("Parent");
         var orderedInner = MakeOrdered("Child");
@@ -174,16 +174,16 @@ public class ListTaggingTests
         using var ms = new MemoryStream();
         doc.Save(ms, true);
 
-        Assert.Equal(Color.Slate700, orderedInner.TextColor);
-        Assert.Equal(Color.Slate700, unorderedInner.TextColor);
-        Assert.Equal(Color.Slate700, unorderedInner.BulletColor);
+        Assert.Equal(ColorPalette.Slate[700], orderedInner.TextColor);
+        Assert.Equal(ColorPalette.Slate[700], unorderedInner.TextColor);
+        Assert.Equal(ColorPalette.Slate[700], unorderedInner.BulletColor);
     }
 
     [Fact]
     public void ExplicitUnorderedBulletColor_IsPreservedWhenTextStyleCascades()
     {
         using var doc = new Document();
-        doc.Settings.DefaultTextStyle = new TextStyle().WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithColor(ColorPalette.Slate[700]);
 
         var outer = MakeUnordered("Parent");
         var inner = MakeUnordered("Child");
@@ -194,7 +194,7 @@ public class ListTaggingTests
         using var ms = new MemoryStream();
         doc.Save(ms, true);
 
-        Assert.Equal(Color.Slate700, inner.TextColor);
+        Assert.Equal(ColorPalette.Slate[700], inner.TextColor);
         Assert.Equal(Color.Red, inner.BulletColor);
     }
 

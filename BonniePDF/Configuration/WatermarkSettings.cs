@@ -27,7 +27,7 @@ public class WatermarkSettings
     /// <summary>
     /// Color of the watermark text (default: Gray500).
     /// </summary>
-    public Color TextColor { get; set; } = Color.Gray500;
+    public Color TextColor { get; set; } = ColorPalette.Gray[500];
 
     /// <summary>
     /// Opacity of the watermark from 0.0 (invisible) to 1.0 (fully opaque). Default: 0.15.

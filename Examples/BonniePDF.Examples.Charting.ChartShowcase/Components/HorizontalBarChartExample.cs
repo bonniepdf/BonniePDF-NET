@@ -35,7 +35,7 @@ public static class HorizontalBarChartExample
         {
             Text = "Regional Sales Performance",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 10));
 
@@ -43,7 +43,7 @@ public static class HorizontalBarChartExample
         {
             Text = "Full-year revenue by region - horizontal orientation suits ranked comparisons",
             FontSize = 13,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 

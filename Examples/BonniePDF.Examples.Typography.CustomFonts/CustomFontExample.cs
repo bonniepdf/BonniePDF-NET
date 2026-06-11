@@ -35,7 +35,7 @@ public static class CustomFontExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(arialPath).WithSize(11).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(arialPath).WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         // Set metadata
         doc.Metadata.Title = "Embedded Font Example";
@@ -47,7 +47,7 @@ public static class CustomFontExample
             Text = "TrueType Font Embedding Demo",
             FontName = arialPath,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -57,7 +57,7 @@ public static class CustomFontExample
             Text = "Full Unicode Support with Embedded Fonts",
             FontName = arialPath,
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 16)
         });
 
@@ -67,7 +67,7 @@ public static class CustomFontExample
             Text = "Unicode Symbols:",
             FontName = arialPath,
             FontSize = 12,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -87,7 +87,7 @@ public static class CustomFontExample
             Text = "Currency Symbols:",
             FontName = arialPath,
             FontSize = 12,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -99,7 +99,7 @@ public static class CustomFontExample
             Text = "Mathematical Symbols:",
             FontName = arialPath,
             FontSize = 12,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -112,7 +112,7 @@ public static class CustomFontExample
             Text = "Greek Letters:",
             FontName = arialPath,
             FontSize = 12,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -124,7 +124,7 @@ public static class CustomFontExample
             Text = "Mixed Font Demonstration:",
             FontName = arialPath,
             FontSize = 12,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -134,7 +134,7 @@ public static class CustomFontExample
             Text = "This line uses standard Helvetica (Type1, not embedded)",
             FontName = StandardFonts.Helvetica,
             FontSize = 11,
-            TextColor = Color.Slate600
+            TextColor = ColorPalette.Slate[600]
         });
 
         // Embedded font
@@ -149,7 +149,7 @@ public static class CustomFontExample
         {
             Text = $"\u00A9 {DateTime.Now.Year} BonniePDF \u2022 TrueType Font Embedding",
             FontSize = 10,
-            TextColor = Color.Slate400
+            TextColor = ColorPalette.Slate[400]
         });
         return doc;
     }

@@ -30,7 +30,7 @@ public static class UserDirectoryExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(ColorPalette.Slate[700]);
 
         doc.Metadata.Title = "User Directory";
         doc.Metadata.Author = "Company HR";
@@ -41,7 +41,7 @@ public static class UserDirectoryExample
             Text = "User Directory",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800
+            TextColor = ColorPalette.Slate[800]
         };
 
         TextBlock subtitle = new()
@@ -49,7 +49,7 @@ public static class UserDirectoryExample
             Text = $"Generated on {DateTime.Now:MMMM dd, yyyy} | Total Users: 50",
             FontName = StandardFonts.Helvetica,
             FontSize = 11,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0,0,0,5)
         };
 
@@ -62,8 +62,8 @@ public static class UserDirectoryExample
         {
             CellPadding = 8,
             Border = new Border(0.5f),
-            BorderColors = new BorderColors(Color.Slate300),
-            HeaderBackgroundColor = Color.Slate800,
+            BorderColors = new BorderColors(ColorPalette.Slate[300]),
+            HeaderBackgroundColor = ColorPalette.Slate[800],
             HeaderTextColor = Color.White,
             RepeatHeadersOnNewPage = true
         };
@@ -87,30 +87,30 @@ public static class UserDirectoryExample
         int rowIndex = 0;
         foreach (User user in users)
         {
-            Color statusColor = user.Status == "Active" ? Color.Green600 :
-                user.Status == "Inactive" ? Color.Gray500 : Color.Amber600;
-            Color statusBgColor = user.Status == "Active" ? Color.Green50 :
-                user.Status == "Inactive" ? Color.Gray100 : Color.Amber50;
+            Color statusColor = user.Status == "Active" ? ColorPalette.Green[600] :
+                user.Status == "Inactive" ? ColorPalette.Gray[500] : ColorPalette.Amber[600];
+            Color statusBgColor = user.Status == "Active" ? ColorPalette.Green[50] :
+                user.Status == "Inactive" ? ColorPalette.Gray[100] : ColorPalette.Amber[50];
 
             // Alternating row background
-            Color rowBgColor = rowIndex % 2 == 0 ? Color.White : Color.Slate50;
+            Color rowBgColor = rowIndex % 2 == 0 ? Color.White : ColorPalette.Slate[50];
 
             TableRow row = TableRow.From(
                 new TextBlock
-                    { Text = user.Id, FontName = StandardFonts.Courier, FontSize = 9, TextColor = Color.Slate700 },
+                    { Text = user.Id, FontName = StandardFonts.Courier, FontSize = 9, TextColor = ColorPalette.Slate[700] },
                 new TextBlock
-                    { Text = user.Name, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = Color.Slate800 },
+                    { Text = user.Name, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[800] },
                 new TextBlock
-                    { Text = user.Email, FontName = StandardFonts.Helvetica, FontSize = 8, TextColor = Color.Slate600 },
+                    { Text = user.Email, FontName = StandardFonts.Helvetica, FontSize = 8, TextColor = ColorPalette.Slate[600] },
                 new TextBlock
                 {
-                    Text = user.Department, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = Color.Slate700
+                    Text = user.Department, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[700]
                 },
                 new TextBlock
-                    { Text = user.Role, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = Color.Slate700 },
+                    { Text = user.Role, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[700] },
                 new TextBlock
                 {
-                    Text = user.Location, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = Color.Slate600
+                    Text = user.Location, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[600]
                 },
                 // Using TableCell for custom cell styling with background that fills the entire cell
                 new TextBlock
@@ -120,7 +120,7 @@ public static class UserDirectoryExample
                     }.AlignCenter().AsCell()
                     .Background(statusBgColor)
                     .Padding(4)
-                    .Border(Color.Slate300, 0.5f) // Keep border consistent for this cell
+                    .Border(ColorPalette.Slate[300], 0.5f) // Keep border consistent for this cell
             );
 
             row.BackgroundColor = rowBgColor;
@@ -139,7 +139,7 @@ public static class UserDirectoryExample
             Text = "* This is a confidential document. For internal use only.",
             FontName = StandardFonts.HelveticaOblique,
             FontSize = 8,
-            TextColor = Color.Slate400
+            TextColor = ColorPalette.Slate[400]
         };
 
         mainStack.AddChild(footer);

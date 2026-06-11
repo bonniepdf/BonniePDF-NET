@@ -70,12 +70,12 @@ public static class EmojiExampleFluent
                     column.Item()
                         .Text("Emoji & Supplementary Unicode Support (Fluent API)")
                         .FontSize(22)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 8);
 
                     column.Item()
                         .Text("BonniePDF supports the full Unicode range including characters beyond U+FFFF.")
-                        .TextColor(Color.Slate500)
+                        .TextColor(ColorPalette.Slate[500])
                         .Margin(0, 0, 0, 24);
 
                     // ── Emoji sections ───────────────────────────────────────────
@@ -90,12 +90,12 @@ public static class EmojiExampleFluent
                     column.Item()
                         .Text("Mixed Content")
                         .FontSize(14)
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Margin(0, 16, 0, 4);
 
                     column.Item()
                         .Text("Emoji can be used inline with regular text using an emoji-capable font:")
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 8);
 
                     foreach (string line in MixedContentLines)
@@ -104,7 +104,7 @@ public static class EmojiExampleFluent
                             .Text(line)
                             .Font(emojiFont)   // emoji font handles both text and glyphs in these lines
                             .FontSize(13)
-                            .TextColor(Color.Slate700)
+                            .TextColor(ColorPalette.Slate[700])
                             .Margin(12, 0, 0, 4);
                     }
                 });
@@ -128,14 +128,14 @@ public static class EmojiExampleFluent
         column.Item()
             .Text(title)
             .FontSize(14)
-            .TextColor(Color.Slate700)
+            .TextColor(ColorPalette.Slate[700])
             .Margin(0, 16, 0, 4);
 
         column.Item()
             .Text(emojis)
             .Font(emojiFont)
             .FontSize(24)
-            .TextColor(Color.Slate800)
+            .TextColor(ColorPalette.Slate[800])
             .Margin(0, 0, 0, 4);
     }
 }

@@ -130,7 +130,7 @@ public class TableTests
         TableRow row = TableRow.From(
             TableCell.From(new Probe(20)).WithBackground(Color.Red), // cell override
             TableCell.From(new Probe(20))                            // inherits row
-        ).WithBackground(Color.Amber400);                            // row beats table default
+        ).WithBackground(ColorPalette.Amber[400]);                            // row beats table default
         t.AddRow(row);
         t.Render(ctx, 500);
 
@@ -138,7 +138,7 @@ public class TableTests
         Assert.Equal(new List<(float, float, float, float, Color)>
         {
             (0, 0, 250, rowHeight, Color.Red),
-            (250, 0, 250, rowHeight, Color.Amber400),
+            (250, 0, 250, rowHeight, ColorPalette.Amber[400]),
         }, canvas.Rects);
     }
 

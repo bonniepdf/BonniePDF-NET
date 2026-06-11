@@ -20,7 +20,7 @@ public static class HyperlinksExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
         doc.Metadata.Title = "Hyperlink Examples";
@@ -37,7 +37,7 @@ public static class HyperlinksExample
             Text = "Hyperlink Support Demo",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -47,7 +47,7 @@ public static class HyperlinksExample
             Text = "Basic Links:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -70,7 +70,7 @@ public static class HyperlinksExample
             Text = "Styled Links:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -83,7 +83,7 @@ public static class HyperlinksExample
         // Green link
         doc.Add(new Hyperlink("https://microsoft.com", "Green Link")
         {
-            TextColor = Color.Green500,
+            TextColor = ColorPalette.Green[500],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -91,7 +91,7 @@ public static class HyperlinksExample
         doc.Add(new Hyperlink("https://google.com", "Large Purple Link")
         {
             FontSize = 16,
-            TextColor = Color.Purple500,
+            TextColor = ColorPalette.Purple[500],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -110,7 +110,7 @@ public static class HyperlinksExample
             Text = "Links with Margins:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700
+            TextColor = ColorPalette.Slate[700]
         });
 
         doc.Add(new TextBlock { Text = "Text before link.", FontSize = 10 });

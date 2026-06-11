@@ -39,7 +39,7 @@ public static class HeadersFootersTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
-                    .WithColor(Color.Slate700),
+                    .WithColor(ColorPalette.Slate[700]),
 
                 // Header/footer template content is rendered as /Artifact - screen readers skip it.
                 HeaderTemplate = pageNum => new TextBlock
@@ -47,7 +47,7 @@ public static class HeadersFootersTaggedExample
                     Text      = $"BonniePDF Documentation - page {pageNum}",
                     FontName  = StandardFonts.Helvetica,
                     FontSize  = 9,
-                    TextColor = Color.Slate500,
+                    TextColor = ColorPalette.Slate[500],
                     Alignment = TextAlignment.Center,
                 },
                 FooterTemplate = pageNum => new TextBlock
@@ -55,7 +55,7 @@ public static class HeadersFootersTaggedExample
                     Text      = $"Page {pageNum} · Confidential",
                     FontName  = StandardFonts.Helvetica,
                     FontSize  = 9,
-                    TextColor = Color.Slate500,
+                    TextColor = ColorPalette.Slate[500],
                     Alignment = TextAlignment.Center,
                 },
             },
@@ -69,7 +69,7 @@ public static class HeadersFootersTaggedExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 20,
-            TextColor     = Color.Slate800,
+            TextColor     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 12),
         });
 
@@ -125,7 +125,7 @@ public static class HeadersFootersTaggedExample
                 Level         = 2,
                 FontName      = StandardFonts.HelveticaBold,
                 FontSize      = 14,
-                TextColor     = Color.Slate700,
+                TextColor     = ColorPalette.Slate[700],
                 Margin        = new Thickness(0, 14, 0, 6),
             });
 

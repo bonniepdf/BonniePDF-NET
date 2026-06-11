@@ -56,7 +56,7 @@ public static partial class DickensNovelTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.TimesRoman)
                     .WithSize(11)
-                    .WithColor(Color.Slate900),
+                    .WithColor(ColorPalette.Slate[900]),
 
                 // Running header - tagged as /Artifact automatically.
                 HeaderTemplate = pageNum =>
@@ -67,7 +67,7 @@ public static partial class DickensNovelTaggedExample
                         Text      = pageNum % 2 == 0 ? "A Tale of Two Cities" : "Charles Dickens",
                         FontName  = StandardFonts.TimesItalic,
                         FontSize  = 9,
-                        TextColor = Color.Slate500,
+                        TextColor = ColorPalette.Slate[500],
                         Alignment = pageNum % 2 == 0 ? TextAlignment.Left : TextAlignment.Right,
                         Margin    = new Thickness(0, 0, 0, 2),
                     };
@@ -82,7 +82,7 @@ public static partial class DickensNovelTaggedExample
                         Text      = pageNum.ToString(),
                         FontName  = StandardFonts.TimesRoman,
                         FontSize  = 9,
-                        TextColor = Color.Slate500,
+                        TextColor = ColorPalette.Slate[500],
                         Alignment = TextAlignment.Center,
                         Margin    = new Thickness(0, 2, 0, 0),
                     };
@@ -97,7 +97,7 @@ public static partial class DickensNovelTaggedExample
             Text      = "A TALE OF TWO CITIES",
             FontName  = StandardFonts.TimesBold,
             FontSize  = 28,
-            TextColor = Color.Slate900,
+            TextColor = ColorPalette.Slate[900],
             Alignment = TextAlignment.Center,
             Margin    = new Thickness(0, 100, 0, 12),
         });
@@ -107,7 +107,7 @@ public static partial class DickensNovelTaggedExample
             Text      = "A Story of the French Revolution",
             FontName  = StandardFonts.TimesItalic,
             FontSize  = 15,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
             Margin    = new Thickness(0, 0, 0, 40),
         });
@@ -117,7 +117,7 @@ public static partial class DickensNovelTaggedExample
             Text      = "Charles Dickens",
             FontName  = StandardFonts.TimesBold,
             FontSize  = 20,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center,
             Margin    = new Thickness(0, 0, 0, 60),
         });
@@ -126,7 +126,7 @@ public static partial class DickensNovelTaggedExample
         {
             Text      = "Project Gutenberg Edition · eBook #98",
             FontSize  = 10,
-            TextColor = Color.Slate400,
+            TextColor = ColorPalette.Slate[400],
             Alignment = TextAlignment.Center,
         });
 
@@ -140,7 +140,7 @@ public static partial class DickensNovelTaggedExample
             Level         = 1,
             FontName      = StandardFonts.TimesBold,
             FontSize      = 24,
-            TextColor     = Color.Slate900,
+            TextColor     = ColorPalette.Slate[900],
             Alignment     = TextAlignment.Center,
             Margin        = new Thickness(0, 40, 0, 30),
         });
@@ -155,7 +155,7 @@ public static partial class DickensNovelTaggedExample
                     Text      = title,
                     FontName  = StandardFonts.TimesBold,
                     FontSize  = 11,
-                    TextColor = Color.Slate800,
+                    TextColor = ColorPalette.Slate[800],
                     Margin    = new Thickness(0, 8, 0, 2),
                 });
             }
@@ -166,7 +166,7 @@ public static partial class DickensNovelTaggedExample
                     Text      = "    " + title,
                     FontName  = StandardFonts.TimesRoman,
                     FontSize  = 10,
-                    TextColor = Color.Slate700,
+                    TextColor = ColorPalette.Slate[700],
                     Margin    = new Thickness(0, 2, 0, 2),
                 });
             }
@@ -187,7 +187,7 @@ public static partial class DickensNovelTaggedExample
                         Level         = 1,
                         FontName      = StandardFonts.TimesBold,
                         FontSize      = 14,
-                        TextColor     = Color.Slate800,
+                        TextColor     = ColorPalette.Slate[800],
                         Alignment     = TextAlignment.Center,
                         Margin        = new Thickness(0, 56, 0, 14),
                     });
@@ -200,7 +200,7 @@ public static partial class DickensNovelTaggedExample
                         Text      = number,
                         FontName  = StandardFonts.TimesBold,
                         FontSize  = 10,
-                        TextColor = Color.Slate500,
+                        TextColor = ColorPalette.Slate[500],
                         Alignment = TextAlignment.Center,
                         Margin    = new Thickness(0, 32, 0, 6),
                     });
@@ -210,7 +210,7 @@ public static partial class DickensNovelTaggedExample
                         Level         = 2,
                         FontName      = StandardFonts.TimesBold,
                         FontSize      = 17,
-                        TextColor     = Color.Slate900,
+                        TextColor     = ColorPalette.Slate[900],
                         Alignment     = TextAlignment.Center,
                         Margin        = new Thickness(0, 0, 0, 18),
                     });
@@ -223,7 +223,7 @@ public static partial class DickensNovelTaggedExample
                         {
                             Text      = title,
                             FontSize  = 11,
-                            TextColor = Color.Slate900,
+                            TextColor = ColorPalette.Slate[900],
                             Alignment = TextAlignment.Justify,
                             Margin    = new Thickness(0, 0, 0, 7),
                         });

@@ -22,7 +22,7 @@ public static class WebApiBasicExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         // Set metadata
         doc.Metadata.Title = "Web API PDF";
@@ -35,7 +35,7 @@ public static class WebApiBasicExample
             Text = "PDF from Web API",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -52,7 +52,7 @@ public static class WebApiBasicExample
             Text = "Benefits of this approach:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6)
         });
         features.AddChild(new TextBlock { Text = "• No temporary files on disk" });
@@ -75,7 +75,7 @@ public static class WebApiBasicExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         // Set metadata
         doc.Metadata.Title = "Web API PDF";
@@ -88,7 +88,7 @@ public static class WebApiBasicExample
             Text = "PDF from Web API",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -105,7 +105,7 @@ public static class WebApiBasicExample
             Text = "Benefits of this approach:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6)
         });
         features.AddChild(new TextBlock { Text = "• No temporary files on disk" });

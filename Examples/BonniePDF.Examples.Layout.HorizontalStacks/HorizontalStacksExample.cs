@@ -22,7 +22,7 @@ public static class HorizontalStacksExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
         doc.Metadata.Title = "Horizontal Stack Example";
@@ -34,7 +34,7 @@ public static class HorizontalStacksExample
             Text = "Horizontal Stack Examples",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -44,7 +44,7 @@ public static class HorizontalStacksExample
             Text = "Equal Width Distribution",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -80,7 +80,7 @@ public static class HorizontalStacksExample
         {
             Child = equalStack,
             Padding = new Thickness(10),
-            BackgroundColor = Color.Slate200
+            BackgroundColor = ColorPalette.Slate[200]
         };
 
         doc.Add(wrappedEqualStack);
@@ -91,7 +91,7 @@ public static class HorizontalStacksExample
             Text = "Weighted Width Distribution (1:2:3 ratio)",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 8)
         });
 
@@ -126,7 +126,7 @@ public static class HorizontalStacksExample
         {
             Child = weightedStack,
             Padding = new Thickness(10),
-            BackgroundColor = Color.Slate200
+            BackgroundColor = ColorPalette.Slate[200]
         };
 
         doc.Add(wrappedWeightedStack);
@@ -137,7 +137,7 @@ public static class HorizontalStacksExample
             Text = "Center Vertical Alignment",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 8)
         });
 
@@ -175,7 +175,7 @@ public static class HorizontalStacksExample
             Text = "Colored Containers",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 8)
         });
 
@@ -196,7 +196,7 @@ public static class HorizontalStacksExample
             Child = new TextBlock
                 { Text = "Green", FontName = StandardFonts.HelveticaBold, FontSize = 14, TextColor = Color.White },
             Padding = new Thickness(15),
-            BackgroundColor = Color.Green600
+            BackgroundColor = ColorPalette.Green[600]
         });
         colorStack.AddChild(new Container
         {
@@ -216,7 +216,7 @@ public static class HorizontalStacksExample
             Text = "Practical Examples",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -226,7 +226,7 @@ public static class HorizontalStacksExample
             Text = "Key-Value Pairs",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -242,14 +242,14 @@ public static class HorizontalStacksExample
             Text = "Name:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 12,
-            TextColor = Color.Slate600
+            TextColor = ColorPalette.Slate[600]
         }, 1f);
         kvStack.AddChild(new TextBlock
         {
             Text = kvSource.Name(),
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = Color.Slate800
+            TextColor = ColorPalette.Slate[800]
         }, 3f);
 
         doc.Add(kvStack);
@@ -265,14 +265,14 @@ public static class HorizontalStacksExample
             Text = "Email:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 12,
-            TextColor = Color.Slate600
+            TextColor = ColorPalette.Slate[600]
         }, 1f);
         kvStack2.AddChild(new TextBlock
         {
             Text = kvSource.Email(),
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = Color.Slate800
+            TextColor = ColorPalette.Slate[800]
         }, 3f);
 
         doc.Add(kvStack2);
@@ -283,7 +283,7 @@ public static class HorizontalStacksExample
             Text = "Progress Bar Style",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 8)
         });
 
@@ -297,13 +297,13 @@ public static class HorizontalStacksExample
             Child = new TextBlock
                 { Text = "75%", FontName = StandardFonts.HelveticaBold, FontSize = 12, TextColor = Color.White },
             Padding = new Thickness(10, 5, 10, 5),
-            BackgroundColor = Color.Green600,
+            BackgroundColor = ColorPalette.Green[600],
             Height = 24
         }, 75f);
         progressBar.AddChild(new Container
         {
             Padding = new Thickness(10, 5, 10, 5),
-            BackgroundColor = Color.Slate300,
+            BackgroundColor = ColorPalette.Slate[300],
             Height = 24
         }, 25f);
 
@@ -315,7 +315,7 @@ public static class HorizontalStacksExample
             Text = "Badge Style Layout",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 16, 0, 8)
         });
 
@@ -329,14 +329,14 @@ public static class HorizontalStacksExample
             Text = "Status:",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = Color.Slate600
+            TextColor = ColorPalette.Slate[600]
         });
         badgeStack.AddChild(new Container
         {
             Child = new TextBlock
                 { Text = "Active", FontName = StandardFonts.HelveticaBold, FontSize = 11, TextColor = Color.White },
             Padding = new Thickness(8, 4, 8, 4),
-            BackgroundColor = Color.Green600
+            BackgroundColor = ColorPalette.Green[600]
         });
         badgeStack.AddChild(new Container
         {

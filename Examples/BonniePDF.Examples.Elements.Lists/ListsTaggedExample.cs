@@ -36,7 +36,7 @@ public static class ListsTaggedExample
                 Version = PdfVersion.Pdf17,
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language = "en-GB",
-                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate700),
+                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]),
             },
         };
 
@@ -47,7 +47,7 @@ public static class ListsTaggedExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 22,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 10),
         });
 
@@ -62,7 +62,7 @@ public static class ListsTaggedExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 14, 0, 6),
         });
 
@@ -78,7 +78,7 @@ public static class ListsTaggedExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 14, 0, 6),
         });
 
@@ -108,7 +108,7 @@ public static class ListsTaggedExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 22,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 10),
         });
 
@@ -123,7 +123,7 @@ public static class ListsTaggedExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 14, 0, 6),
         });
 
@@ -138,7 +138,7 @@ public static class ListsTaggedExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Slate700,
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 14, 0, 6),
         });
 

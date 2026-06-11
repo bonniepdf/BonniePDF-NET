@@ -20,13 +20,13 @@ public static class TextBlockOverflowExample
         Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[700]);
         doc.Settings.FooterTemplate = pageNumber => new TextBlock
         {
             Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
             FontName = StandardFonts.Helvetica,
             FontSize = 10,
-            TextColor = Color.Slate500,
+            TextColor = ColorPalette.Slate[500],
             Alignment = TextAlignment.Right
         };
 
@@ -40,7 +40,7 @@ public static class TextBlockOverflowExample
             Text = "Long Text Document",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 20)
         });
 

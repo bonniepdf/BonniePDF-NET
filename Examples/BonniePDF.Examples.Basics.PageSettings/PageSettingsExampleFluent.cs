@@ -42,7 +42,7 @@ public static class PageSettingsExampleFluent
                     footer.Text($"Page {pageNumber} - BonniePDF Standard Formats")
                         .Font(StandardFonts.Helvetica)
                         .FontSize(9)
-                        .TextColor(Color.Slate400)
+                        .TextColor(ColorPalette.Slate[400])
                         .AlignCenter();
                 });
             });
@@ -69,37 +69,37 @@ public static class PageSettingsExampleFluent
                                 .Text($"{formatName} ({orientation})")
                                 .Font(StandardFonts.HelveticaBold)
                                 .FontSize(28)
-                                .TextColor(Color.Slate800)
+                                .TextColor(ColorPalette.Slate[800])
                                 .Margin(0, 0, 0, 4);
 
                             col.Item()
                                 .Text("Technical Specifications")
                                 .Font(StandardFonts.Helvetica)
                                 .FontSize(14)
-                                .TextColor(Color.Slate500)
+                                .TextColor(ColorPalette.Slate[500])
                                 .Margin(0, 0, 0, 4);
 
-                            col.Item().Line(1, Color.Slate200);
+                            col.Item().Line(1, ColorPalette.Slate[200]);
 
                             // Spec rows in monospace for alignment
                             col.Item()
                                 .Text($"{"Points:".PadRight(15)} {current.Width:F2}pt x {current.Height:F2}pt")
                                 .Font(StandardFonts.Courier)
                                 .FontSize(11)
-                                .TextColor(Color.Slate600)
+                                .TextColor(ColorPalette.Slate[600])
                                 .Margin(0, 6, 0, 0);
 
                             col.Item()
                                 .Text($"{"Inches:".PadRight(15)} {current.Width / 72:F2}\" x {current.Height / 72:F2}\"")
                                 .Font(StandardFonts.Courier)
                                 .FontSize(11)
-                                .TextColor(Color.Slate600);
+                                .TextColor(ColorPalette.Slate[600]);
 
                             col.Item()
                                 .Text($"{"Millimeters:".PadRight(15)} {current.Width / 72 * 25.4f:F1}mm x {current.Height / 72 * 25.4f:F1}mm")
                                 .Font(StandardFonts.Courier)
                                 .FontSize(11)
-                                .TextColor(Color.Slate600);
+                                .TextColor(ColorPalette.Slate[600]);
                         });
                     });
                 }

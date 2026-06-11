@@ -48,7 +48,7 @@ public static class TextDecorationExampleFluent
                         .Text("Text Decorations (Fluent API)")
                         .Bold()
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 20);
 
                     // ── Underline ────────────────────────────────────────────────
@@ -56,13 +56,13 @@ public static class TextDecorationExampleFluent
 
                     column.Item()
                         .Text("This text has an underline decoration applied.")
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Underline()
                         .Margin(0, 0, 0, 12);
 
                     column.Item()
                         .Text("This underline was applied using the fluent .Underline() extension method.")
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Underline()
                         .Margin(0, 0, 0, 12);
 
@@ -71,13 +71,13 @@ public static class TextDecorationExampleFluent
 
                     column.Item()
                         .Text("This text has a strikethrough decoration, useful for showing deleted or superseded content.")
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Strikethrough()
                         .Margin(0, 0, 0, 12);
 
                     column.Item()
                         .Text("This strikethrough was applied using the fluent .Strikethrough() extension method.")
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Strikethrough()
                         .Margin(0, 0, 0, 12);
 
@@ -86,44 +86,44 @@ public static class TextDecorationExampleFluent
 
                     column.Item()
                         .Text("This text has both underline and strikethrough applied simultaneously.")
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Underline()
                         .Strikethrough()
                         .Margin(0, 0, 0, 12);
 
                     column.Item()
                         .Text("Chained decorations are additive: .Underline().Strikethrough() - both apply.")
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Underline()
                         .Strikethrough()
                         .Margin(0, 0, 0, 12);
 
                     // ── Decorations with different alignments ────────────────────
-                    column.Item().Margin(0, 4, 0, 4).Line(1, Color.Slate300);
+                    column.Item().Margin(0, 4, 0, 4).Line(1, ColorPalette.Slate[300]);
                     SectionHeader(column, "Decorations with Different Alignments");
 
                     column.Item()
                         .Text("Left-aligned underlined text")
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Underline()
                         .Margin(0, 0, 0, 8);
 
                     column.Item()
                         .Text("Center-aligned underlined text")
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Underline()
                         .AlignCenter()
                         .Margin(0, 0, 0, 8);
 
                     column.Item()
                         .Text("Right-aligned underlined text")
-                        .TextColor(Color.Slate700)
+                        .TextColor(ColorPalette.Slate[700])
                         .Underline()
                         .AlignRight()
                         .Margin(0, 0, 0, 8);
 
                     // ── Decoration thickness scales with font size ───────────────
-                    column.Item().Margin(0, 4, 0, 4).Line(1, Color.Slate300);
+                    column.Item().Margin(0, 4, 0, 4).Line(1, ColorPalette.Slate[300]);
                     SectionHeader(column, "Decoration Thickness Scales with Font Size");
 
                     foreach (int size in DecorationSizes)
@@ -131,20 +131,20 @@ public static class TextDecorationExampleFluent
                         column.Item()
                             .Text($"Underline at {size}pt")
                             .FontSize(size)
-                            .TextColor(Color.Slate700)
+                            .TextColor(ColorPalette.Slate[700])
                             .Underline()
                             .Margin(0, 0, 0, 6);
                     }
 
                     // ── Practical example: price list ────────────────────────────
-                    column.Item().Margin(0, 4, 0, 4).Line(1, Color.Slate300);
+                    column.Item().Margin(0, 4, 0, 4).Line(1, ColorPalette.Slate[300]);
                     SectionHeader(column, "Practical Example: Price List");
 
                     // Original price - struck through, muted
                     column.Item()
                         .Text("Original Price: $199.99")
                         .FontSize(14)
-                        .TextColor(Color.Slate400)
+                        .TextColor(ColorPalette.Slate[400])
                         .Strikethrough()
                         .Margin(0, 0, 0, 4);
 
@@ -160,7 +160,7 @@ public static class TextDecorationExampleFluent
                     column.Item()
                         .Text("You save $50.00!")
                         .FontSize(11)
-                        .TextColor(Color.Green600);
+                        .TextColor(ColorPalette.Green[600]);
                 });
             });
         }).Build();
@@ -176,7 +176,7 @@ public static class TextDecorationExampleFluent
             .Text(title)
             .Bold()
             .FontSize(14)
-            .TextColor(Color.Indigo600)
+            .TextColor(ColorPalette.Indigo[600])
             .Margin(0, 12, 0, 6);
     }
 }

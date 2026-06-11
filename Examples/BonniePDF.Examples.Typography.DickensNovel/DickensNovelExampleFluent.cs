@@ -84,13 +84,13 @@ public static partial class DickensNovelExampleFluent
                             .Text("A Tale of Two Cities")
                             .Font(StandardFonts.TimesItalic)
                             .FontSize(9)
-                            .TextColor(Color.Slate500)
+                            .TextColor(ColorPalette.Slate[500])
                             .AlignLeft();
                         row.RelativeItem(1f)
                             .Text("Charles Dickens")
                             .Font(StandardFonts.TimesItalic)
                             .FontSize(9)
-                            .TextColor(Color.Slate500)
+                            .TextColor(ColorPalette.Slate[500])
                             .AlignRight();
                     });
                 });
@@ -103,7 +103,7 @@ public static partial class DickensNovelExampleFluent
                     footer.Text(pageNumber.ToString())
                         .Font(StandardFonts.TimesRoman)
                         .FontSize(9)
-                        .TextColor(Color.Slate500)
+                        .TextColor(ColorPalette.Slate[500])
                         .AlignCenter()
                         .Margin(0, 2, 0, 0);
                 });
@@ -124,7 +124,7 @@ public static partial class DickensNovelExampleFluent
                         .Text("A TALE OF TWO CITIES")
                         .Font(StandardFonts.TimesBold)
                         .FontSize(28)
-                        .TextColor(Color.Slate900)
+                        .TextColor(ColorPalette.Slate[900])
                         .AlignCenter()
                         .Margin(0, 100, 0, 12);
 
@@ -132,14 +132,14 @@ public static partial class DickensNovelExampleFluent
                         .Text("A Story of the French Revolution")
                         .Font(StandardFonts.TimesItalic)
                         .FontSize(15)
-                        .TextColor(Color.Slate600)
+                        .TextColor(ColorPalette.Slate[600])
                         .AlignCenter()
                         .Margin(0, 0, 0, 40);
 
                     column.Item()
                         .Text("---------------")
                         .FontSize(13)
-                        .TextColor(Color.Slate400)
+                        .TextColor(ColorPalette.Slate[400])
                         .AlignCenter()
                         .Margin(0, 0, 0, 40);
 
@@ -147,14 +147,14 @@ public static partial class DickensNovelExampleFluent
                         .Text("Charles Dickens")
                         .Font(StandardFonts.TimesBold)
                         .FontSize(20)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .AlignCenter()
                         .Margin(0, 0, 0, 60);
 
                     column.Item()
                         .Text("Project Gutenberg Edition · eBook #98")
                         .FontSize(10)
-                        .TextColor(Color.Slate400)
+                        .TextColor(ColorPalette.Slate[400])
                         .AlignCenter()
                         .Margin(0, 0, 0, 4);
 
@@ -162,7 +162,7 @@ public static partial class DickensNovelExampleFluent
                         .Text("Public domain - free to read, copy, and share.")
                         .Font(StandardFonts.TimesItalic)
                         .FontSize(9)
-                        .TextColor(Color.Slate400)
+                        .TextColor(ColorPalette.Slate[400])
                         .AlignCenter();
                 });
             });
@@ -176,7 +176,7 @@ public static partial class DickensNovelExampleFluent
                         .Text("Table of Contents")
                         .Font(StandardFonts.TimesBold)
                         .FontSize(24)
-                        .TextColor(Color.Slate900)
+                        .TextColor(ColorPalette.Slate[900])
                         .AlignCenter()
                         .Margin(0, 40, 0, 40);
 
@@ -186,7 +186,7 @@ public static partial class DickensNovelExampleFluent
                         HeadingIdentifiers = tocIdentifiers,
                         FontName  = StandardFonts.TimesRoman,
                         FontSize  = 11,
-                        TextColor = Color.Slate800,
+                        TextColor = ColorPalette.Slate[800],
                         Margin    = new Thickness(0, 0, 0, 40)
                     });
                 });
@@ -230,7 +230,7 @@ public static partial class DickensNovelExampleFluent
         column.Item()
             .Text("---------------")
             .FontSize(11)
-            .TextColor(Color.Slate300)
+            .TextColor(ColorPalette.Slate[300])
             .AlignCenter()
             .Margin(0, 56, 0, 14);
 
@@ -241,7 +241,7 @@ public static partial class DickensNovelExampleFluent
             Text      = title.ToUpperInvariant(),
             FontName  = StandardFonts.TimesBold,
             FontSize  = 14,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center,
             Margin    = new Thickness(0, 0, 0, 14)
         });
@@ -249,7 +249,7 @@ public static partial class DickensNovelExampleFluent
         column.Item()
             .Text("---------------")
             .FontSize(11)
-            .TextColor(Color.Slate300)
+            .TextColor(ColorPalette.Slate[300])
             .AlignCenter()
             .Margin(0, 0, 0, 32);
     }
@@ -263,7 +263,7 @@ public static partial class DickensNovelExampleFluent
             .Text(number)
             .Font(StandardFonts.TimesBold)
             .FontSize(10)
-            .TextColor(Color.Slate500)
+            .TextColor(ColorPalette.Slate[500])
             .AlignCenter()
             .Margin(0, 32, 0, 6);
 
@@ -273,7 +273,7 @@ public static partial class DickensNovelExampleFluent
             Text      = title,
             FontName  = StandardFonts.TimesBold,
             FontSize  = 17,
-            TextColor = Color.Slate900,
+            TextColor = ColorPalette.Slate[900],
             Alignment = TextAlignment.Center,
             Margin    = new Thickness(0, 0, 0, 18)
         });
@@ -289,7 +289,7 @@ public static partial class DickensNovelExampleFluent
 
         column.Item()
             .Text(text)
-            .TextColor(Color.Slate900)
+            .TextColor(ColorPalette.Slate[900])
             .AlignJustify()
             .Margin(0, 0, 0, 7);
     }

@@ -53,7 +53,7 @@ public static class RichTextExampleFluent
                         .Text("Rich Text (Mixed Styling) - Fluent API")
                         .Bold()
                         .FontSize(24)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 20);
 
                     // ── 1. Bold words ────────────────────────────────────────────
@@ -112,13 +112,13 @@ public static class RichTextExampleFluent
                             text.Span("Text can be ");
                             text.Span("red").FontColor(Color.Red);
                             text.Span(", ");
-                            text.Span("blue").FontColor(Color.Blue600);
+                            text.Span("blue").FontColor(ColorPalette.Blue[600]);
                             text.Span(", ");
-                            text.Span("green").FontColor(Color.Green600);
+                            text.Span("green").FontColor(ColorPalette.Green[600]);
                             text.Span(", or ");
-                            text.Span("any color").FontColor(Color.Purple600);
+                            text.Span("any color").FontColor(ColorPalette.Purple[600]);
                             text.Span(" you choose. Colors can be combined with ");
-                            text.Span("bold colored text").Bold().FontColor(Color.Indigo600);
+                            text.Span("bold colored text").Bold().FontColor(ColorPalette.Indigo[600]);
                             text.Span(" for maximum emphasis.");
                         });
 
@@ -175,9 +175,9 @@ public static class RichTextExampleFluent
                     // consistent label/value/unit formatting across multiple rows.
                     SectionHeader(column, "Reusable TextStyle Objects");
 
-                    TextStyle label = new() { FontFamily = StandardFonts.Helvetica, Weight = FontWeight.Bold, Color = Color.Slate800 };
-                    TextStyle value = new() { FontFamily = StandardFonts.Helvetica, Color = Color.Blue600 };
-                    TextStyle unit  = new() { FontFamily = StandardFonts.Helvetica, FontSize = 9, Color = Color.Slate500 };
+                    TextStyle label = new() { FontFamily = StandardFonts.Helvetica, Weight = FontWeight.Bold, Color = ColorPalette.Slate[800] };
+                    TextStyle value = new() { FontFamily = StandardFonts.Helvetica, Color = ColorPalette.Blue[600] };
+                    TextStyle unit  = new() { FontFamily = StandardFonts.Helvetica, FontSize = 9, Color = ColorPalette.Slate[500] };
 
                     column.Item().Margin(0, 0, 0, 4).Text(text =>
                     {
@@ -233,13 +233,13 @@ public static class RichTextExampleFluent
 
                     // ── 11. Practical: legal disclaimer ──────────────────────────
                     column.Item().Spacer(12);
-                    column.Item().Line(1, Color.Slate300);
+                    column.Item().Line(1, ColorPalette.Slate[300]);
                     SectionHeader(column, "Practical Example: Legal Disclaimer");
 
                     column.Item().Element(
                         new RichText
                         {
-                            DefaultStyle = new TextStyle { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = Color.Slate600 },
+                            DefaultStyle = new TextStyle { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[600] },
                             Alignment = TextAlignment.Justify,
                             Margin = new Thickness(0, 0, 0, 16)
                         }
@@ -251,15 +251,15 @@ public static class RichTextExampleFluent
                         .Span(". All data is processed in accordance with ")
                         .Span("GDPR", new TextStyle().Bold())
                         .Span(" regulations. For questions, contact ")
-                        .Span("support@example.com", new TextStyle().WithColor(Color.Blue600))
+                        .Span("support@example.com", new TextStyle().WithColor(ColorPalette.Blue[600]))
                         .Span(".")
                     );
 
                     // ── 12. The fluent pattern IS the callback API ───────────────
                     // In the traditional RichText API, callback-based styling was:
-                    //   .Span("bold blue", s => s.Bold().WithColor(Color.Blue600))
+                    //   .Span("bold blue", s => s.Bold().WithColor(ColorPalette.Blue[600]))
                     // In the Fluent API this becomes the standard pattern:
-                    //   text.Span("bold blue").Bold().FontColor(Color.Blue600)
+                    //   text.Span("bold blue").Bold().FontColor(ColorPalette.Blue[600])
                     SectionHeader(column, "The Fluent Span Pattern");
 
                     column.Item()
@@ -267,9 +267,9 @@ public static class RichTextExampleFluent
                         .Text(text =>
                         {
                             text.Span("In the Fluent API, every span is styled inline - this ");
-                            text.Span("bold blue").Bold().FontColor(Color.Blue600);
+                            text.Span("bold blue").Bold().FontColor(ColorPalette.Blue[600]);
                             text.Span(", ");
-                            text.Span("italic green").Italic().FontColor(Color.Green600);
+                            text.Span("italic green").Italic().FontColor(ColorPalette.Green[600]);
                             text.Span(", and ");
                             text.Span("underlined red").Underline().FontColor(Color.Red);
                             text.Span(" are all set directly on the TextSpanDescriptor. No callback or TextStyle object needed.");
@@ -286,7 +286,7 @@ public static class RichTextExampleFluent
             .Text(title)
             .Bold()
             .FontSize(14)
-            .TextColor(Color.Indigo600)
+            .TextColor(ColorPalette.Indigo[600])
             .Margin(0, 12, 0, 6);
     }
 }

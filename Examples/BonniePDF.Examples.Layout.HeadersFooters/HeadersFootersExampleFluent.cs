@@ -54,7 +54,7 @@ public static class HeadersFootersExampleFluent
                     header.Text($"BonniePDF Documentation - Page {pageNumber}")
                           .Bold()
                           .FontSize(10)
-                          .TextColor(Color.Slate600)
+                          .TextColor(ColorPalette.Slate[600])
                           .AlignCenter();
                 });
 
@@ -62,7 +62,7 @@ public static class HeadersFootersExampleFluent
                 {
                     footer.Text($"Page {pageNumber} - Confidential")
                           .FontSize(10)
-                          .TextColor(Color.Slate500)
+                          .TextColor(ColorPalette.Slate[500])
                           .AlignCenter();
                 });
             });
@@ -77,7 +77,7 @@ public static class HeadersFootersExampleFluent
                         .Text("Chapter 1: Introduction")
                         .Bold()
                         .FontSize(20)
-                        .TextColor(Color.Slate800)
+                        .TextColor(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 15);
 
                     var source = Placeholders.WithSeed(200);
@@ -87,13 +87,13 @@ public static class HeadersFootersExampleFluent
                             .Text($"1.{section} Section Title")
                             .Bold()
                             .FontSize(14)
-                            .TextColor(Color.Slate700)
+                            .TextColor(ColorPalette.Slate[700])
                             .Margin(0, 15, 0, 10);
 
                         for (int p = 0; p < 3; p++)
                             column.Item()
                                 .Text(source.Paragraph())
-                                .TextColor(Color.Slate600)
+                                .TextColor(ColorPalette.Slate[600])
                                 .Margin(0, 0, 0, 12);
                     }
                 });

@@ -39,7 +39,7 @@ public static class AreaChartExample
         {
             Text = "Monthly Sales Performance",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -47,7 +47,7 @@ public static class AreaChartExample
         {
             Text = "Area Chart Demonstration",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 

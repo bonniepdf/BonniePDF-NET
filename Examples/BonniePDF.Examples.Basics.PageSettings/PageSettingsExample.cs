@@ -23,14 +23,14 @@ public static class PageSettingsExample
                 Text = $"Page {pageNumber} - BonniePDF Standard Formats",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 9,
-                TextColor = Color.Slate400,
+                TextColor = ColorPalette.Slate[400],
                 Alignment = TextAlignment.Center
             }
         });
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(Color.Slate600);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Standard PDF Page Formats Gallery";
 
@@ -66,11 +66,11 @@ public static class PageSettingsExample
                     Text = $"{formatName} ({orientation})",
                     FontName = StandardFonts.HelveticaBold,
                     FontSize = 28,
-                    TextColor = Color.Slate800
+                    TextColor = ColorPalette.Slate[800]
                 });
 
-                content.AddChild(new TextBlock { Text = "Technical Specifications", FontSize = 14, TextColor = Color.Slate500 });
-                content.AddChild(new Line { Color = Color.Slate200, Thickness = 1 });
+                content.AddChild(new TextBlock { Text = "Technical Specifications", FontSize = 14, TextColor = ColorPalette.Slate[500] });
+                content.AddChild(new Line { Color = ColorPalette.Slate[200], Thickness = 1 });
 
                 // Data Table Simulation
                 content.AddChild(CreateSpecLine("Points:", $"{current.Width:F2}pt x {current.Height:F2}pt"));
@@ -90,7 +90,7 @@ public static class PageSettingsExample
             Text = $"{label.PadRight(15)} {value}",
             FontName = StandardFonts.Courier, // Monospace for alignment
             FontSize = 11,
-            TextColor = Color.Slate600
+            TextColor = ColorPalette.Slate[600]
         };
     }
 }

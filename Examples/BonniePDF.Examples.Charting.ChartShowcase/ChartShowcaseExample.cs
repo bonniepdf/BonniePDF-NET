@@ -40,7 +40,7 @@ public static class ChartShowcaseExample
                     Text = "BonniePDF Charting Examples",
                     FontName = StandardFonts.Helvetica,
                     FontSize = 10,
-                    TextColor = Color.Slate500
+                    TextColor = ColorPalette.Slate[500]
                 }, null); // Auto width
 
                 // Right: Page Numbers (weighted to fill remaining space, right-aligned within that space)
@@ -49,7 +49,7 @@ public static class ChartShowcaseExample
                     Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                     FontName = StandardFonts.Helvetica,
                     FontSize = 10,
-                    TextColor = Color.Slate500,
+                    TextColor = ColorPalette.Slate[500],
                     Alignment = TextAlignment.Right
                 }, 1f); // Takes all remaining space and right-aligns within it
 
@@ -59,7 +59,7 @@ public static class ChartShowcaseExample
 
         document.Settings.Version = PdfVersion.Pdf17;
         document.Settings.PdfAEnabled = true;
-        document.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(Color.Slate700);
+        document.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]);
 
         // Set document metadata
         document.Metadata.Title = "Charting Examples";
@@ -109,7 +109,7 @@ public static class ChartShowcaseExample
         {
             Text = "Bar Chart: Monthly Sales Report",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -117,7 +117,7 @@ public static class ChartShowcaseExample
         {
             Text = "Generated using new ICanvas architecture",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -156,7 +156,7 @@ public static class ChartShowcaseExample
         {
             Text = "Grouped Bar Chart: Quarterly Revenue",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -164,7 +164,7 @@ public static class ChartShowcaseExample
         {
             Text = "Comparison of three product lines across all months",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -220,7 +220,7 @@ public static class ChartShowcaseExample
         {
             Text = "Line Chart: Monthly Revenue Trends",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -228,7 +228,7 @@ public static class ChartShowcaseExample
         {
             Text = "Generated using new ICanvas architecture",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -275,7 +275,7 @@ public static class ChartShowcaseExample
         {
             Text = "Multi-Series Line Chart: Year-over-Year Comparison",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -283,7 +283,7 @@ public static class ChartShowcaseExample
         {
             Text = $"Comparing {DateTime.Now.Year - 1} and {DateTime.Now.Year} revenue with multiple series",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -370,7 +370,7 @@ public static class ChartShowcaseExample
         {
             Text = "Area Chart: Monthly Sales Performance",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -378,7 +378,7 @@ public static class ChartShowcaseExample
         {
             Text = "Generated using new ICanvas architecture",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -425,7 +425,7 @@ public static class ChartShowcaseExample
         {
             Text = "Lollipop Chart: Quarterly Metrics",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -433,7 +433,7 @@ public static class ChartShowcaseExample
         {
             Text = "Generated using new ICanvas architecture",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -480,7 +480,7 @@ public static class ChartShowcaseExample
         {
             Text = "Dot Plot Chart: Product Performance",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -488,7 +488,7 @@ public static class ChartShowcaseExample
         {
             Text = "Generated using new ICanvas architecture",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -534,7 +534,7 @@ public static class ChartShowcaseExample
         {
             Text = $"Pie Chart: Monthly Sales {DateTime.Now.Year}",
             FontSize = 24,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -542,7 +542,7 @@ public static class ChartShowcaseExample
         {
             Text = "Generated using new ICanvas architecture",
             FontSize = 14,
-            TextColor = Color.Slate600,
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 

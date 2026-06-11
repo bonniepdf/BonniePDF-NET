@@ -23,7 +23,7 @@ public static class TextAlignmentExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11).WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11).WithColor(ColorPalette.Slate[700]);
 
         doc.Metadata.Title = "Justified Text Alignment";
         doc.Metadata.Author = "BonniePDF";
@@ -34,7 +34,7 @@ public static class TextAlignmentExample
             Text = "Text Alignment Comparison",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 22,
-            TextColor = Color.Slate800,
+            TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -89,7 +89,7 @@ public static class TextAlignmentExample
         }.AlignJustify());
 
         // Multi-paragraph justified text (like a book page)
-        doc.Add(new Line { Color = Color.Slate300, Thickness = 1 });
+        doc.Add(new Line { Color = ColorPalette.Slate[300], Thickness = 1 });
         doc.Add(CreateSectionHeader("Book-Style Justified Paragraphs"));
 
         string[] paragraphs = new[]
@@ -112,7 +112,7 @@ public static class TextAlignmentExample
             doc.Add(new TextBlock
             {
                 Text = paragraph,
-                TextColor = Color.Slate800,
+                TextColor = ColorPalette.Slate[800],
                 Alignment = Elements.Text.TextAlignment.Justify,
                 Margin = new Thickness(0, 0, 0, 8)
             });
@@ -127,7 +127,7 @@ public static class TextAlignmentExample
             Text = title,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 13,
-            TextColor = Color.Indigo600,
+            TextColor = ColorPalette.Indigo[600],
             Margin = new Thickness(0, 0, 0, 6)
         };
     }

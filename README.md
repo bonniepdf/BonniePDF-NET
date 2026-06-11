@@ -53,13 +53,13 @@ Pdf.Create(doc =>
                 .Text("Quarterly Report")
                 .Bold()
                 .FontSize(24)
-                .TextColor(Color.Slate800)
+                .TextColor(ColorPalette.Slate[800])
                 .Margin(0, 0, 0, 16);
 
             col.Item().Table(table =>
             {
                 table.Columns(2f, 1f, 1f);
-                table.HeaderBackground(Color.Slate800);
+                table.HeaderBackground(ColorPalette.Slate[800]);
                 table.HeaderTextColor(Color.White);
 
                 table.Header(row =>
@@ -101,7 +101,7 @@ doc.Add(new TextBlock
     Text = "Quarterly Report",
     FontName = StandardFonts.HelveticaBold,
     FontSize = 24,
-    TextColor = Color.Slate800
+    TextColor = ColorPalette.Slate[800]
 });
 
 doc.Save("report.pdf");

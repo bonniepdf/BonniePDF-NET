@@ -25,7 +25,7 @@ public static class BookPageLayoutExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11).WithColor(Color.Slate800);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11).WithColor(ColorPalette.Slate[800]);
 
         doc.Metadata.Title = "The Architecture of Memory";
         doc.Metadata.Author = "Professor Halloway";
@@ -39,7 +39,7 @@ public static class BookPageLayoutExample
             Text = "CHAPTER III",
             FontName = StandardFonts.TimesBold,
             FontSize = 11,
-            TextColor = Color.Slate700
+            TextColor = ColorPalette.Slate[700]
         }.AlignCenter());
 
         // Main Title
@@ -48,7 +48,7 @@ public static class BookPageLayoutExample
             Text = "The Architecture of Memory",
             FontName = StandardFonts.TimesBold,
             FontSize = 18,
-            TextColor = Color.Slate900
+            TextColor = ColorPalette.Slate[900]
         }.AlignCenter());
 
         // Decorative Line
@@ -57,7 +57,7 @@ public static class BookPageLayoutExample
             Text = "--------------------------------------------------------------------",
             FontName = StandardFonts.Courier,
             FontSize = 8,
-            TextColor = Color.Slate400
+            TextColor = ColorPalette.Slate[400]
         }.AlignCenter());
 
         // Main Content - Book Style TextBlock
@@ -76,7 +76,7 @@ public static class BookPageLayoutExample
                 "\"Memory,\" he began, his voice gravelly with age, \"is not a repository of facts, neatly cataloged and retrieved at will. It is something far more complex-a living, breathing architecture that shapes and is shaped by who we are.\"",
             FontName = StandardFonts.TimesItalic,
             FontSize = 11,
-            TextColor = Color.Slate700
+            TextColor = ColorPalette.Slate[700]
         });
         contentStack.AddChild(para2Stack);
 
@@ -102,14 +102,14 @@ public static class BookPageLayoutExample
             Text = "But then-",
             FontName = StandardFonts.TimesBold,
             FontSize = 11,
-            TextColor = Color.Slate800
+            TextColor = ColorPalette.Slate[800]
         });
         para6Stack.AddChild(new TextBlock
         {
             Text = "he continued, his voice dropping to a conspiratorial whisper-",
             FontName = StandardFonts.TimesItalic,
             FontSize = 11,
-            TextColor = Color.Slate700
+            TextColor = ColorPalette.Slate[700]
         });
         contentStack.AddChild(para6Stack);
 
@@ -131,15 +131,15 @@ public static class BookPageLayoutExample
                 "We have discovered, through decades of research across multiple disciplines, that the architectural blueprint of memory is not unique to humans. It exists in varying forms across all mammalian species, suggesting an ancient origin predating consciousness itself. More remarkably-and this is where conventional science begins to grow uncomfortable-we have found evidence that this architecture can be influenced, modified, and in some cases, completely redesigned.",
             FontName = StandardFonts.TimesItalic,
             FontSize = 10,
-            TextColor = Color.Slate600
+            TextColor = ColorPalette.Slate[600]
         });
 
         Container quoteBlock = new()
         {
             Child = quoteStack,
-            BackgroundColor = Color.Slate50,
+            BackgroundColor = ColorPalette.Slate[50],
             Border = new Border(1),
-            BorderColors = new BorderColors(Color.Slate300),
+            BorderColors = new BorderColors(ColorPalette.Slate[300]),
             Padding = new Thickness(20, 8, 20, 8)
         };
         contentStack.AddChild(quoteBlock);
@@ -161,7 +161,7 @@ public static class BookPageLayoutExample
             Text = "--------------------------------------------------------------------",
             FontName = StandardFonts.Courier,
             FontSize = 8,
-            TextColor = Color.Slate400
+            TextColor = ColorPalette.Slate[400]
         }.AlignCenter());
 
         TextBlock pageNumbers = new TextBlock
@@ -169,7 +169,7 @@ public static class BookPageLayoutExample
             Text = "42",
             FontName = StandardFonts.TimesBold,
             FontSize = 10,
-            TextColor = Color.Slate500
+            TextColor = ColorPalette.Slate[500]
         }.AlignCenter();
 
         footerStack.AddChild(pageNumbers);
@@ -178,7 +178,7 @@ public static class BookPageLayoutExample
             Text = "THE ARCHITECTURE OF CONSCIOUSNESS | Cambridge University Press, 2024",
             FontName = StandardFonts.TimesItalic,
             FontSize = 8,
-            TextColor = Color.Slate400
+            TextColor = ColorPalette.Slate[400]
         }.AlignCenter());
 
         // Main Layout

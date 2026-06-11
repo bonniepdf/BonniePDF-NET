@@ -48,7 +48,7 @@ public static class TextAlignmentTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.TimesRoman)
                     .WithSize(11)
-                    .WithColor(Color.Slate700),
+                    .WithColor(ColorPalette.Slate[700]),
             },
         };
 
@@ -58,7 +58,7 @@ public static class TextAlignmentTaggedExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 22,
-            TextColor     = Color.Slate800,
+            TextColor     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 16),
         });
 
@@ -91,7 +91,7 @@ public static class TextAlignmentTaggedExample
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 13,
-            TextColor     = Color.Indigo600,
+            TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 6, 0, 6),
         });
 
@@ -117,7 +117,7 @@ public static class TextAlignmentTaggedExample
                 Text      = p,
                 FontName  = StandardFonts.TimesRoman,
                 FontSize  = 11,
-                TextColor = Color.Slate800,
+                TextColor = ColorPalette.Slate[800],
                 Alignment = Align.Justify,
                 Margin    = new Thickness(0, 0, 0, 8),
             });
@@ -134,7 +134,7 @@ public static class TextAlignmentTaggedExample
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 13,
-            TextColor     = Color.Indigo600,
+            TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 0, 0, 6),
         });
     }

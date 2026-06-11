@@ -30,7 +30,7 @@ public static class MovieCatalogExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Color.Slate700);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(ColorPalette.Slate[700]);
 
         doc.Metadata.Title = "Classic MoviesData Collection";
         doc.Metadata.Author = "Classic Cinema Archive";
@@ -43,21 +43,21 @@ public static class MovieCatalogExample
             Text = "Classic MoviesData Collection",
             FontName = StandardFonts.TimesBold,
             FontSize = 26,
-            TextColor = Color.Slate900
+            TextColor = ColorPalette.Slate[900]
         });
         titleStack.AddChild(new TextBlock
         {
             Text = "A curated selection of timeless cinema from the golden age of Hollywood",
             FontName = StandardFonts.TimesItalic,
             FontSize = 12,
-            TextColor = Color.Slate600
+            TextColor = ColorPalette.Slate[600]
         });
         titleStack.AddChild(new TextBlock
         {
             Text = $"Total MoviesData: {MoviesData.GetMockMovies().Count} | Compiled: {DateTime.Now:MMMM yyyy}",
             FontName = StandardFonts.Helvetica,
             FontSize = 10,
-            TextColor = Color.Slate500
+            TextColor = ColorPalette.Slate[500]
         });
 
         // MoviesData Table
@@ -65,8 +65,8 @@ public static class MovieCatalogExample
         {
             CellPadding = 8,
             Border = new Border(0.5f),
-            BorderColors = new BorderColors(Color.Slate400),
-            HeaderBackgroundColor = Color.Indigo800,
+            BorderColors = new BorderColors(ColorPalette.Slate[400]),
+            HeaderBackgroundColor = ColorPalette.Indigo[800],
             HeaderTextColor = Color.White,
             RepeatHeadersOnNewPage = true
         };
@@ -84,31 +84,31 @@ public static class MovieCatalogExample
         int rowIndex = 0;
         foreach (Movie movie in movies)
         {
-            Color ratingColor = movie.Rating >= 9.0 ? Color.Green600 :
-                movie.Rating >= 7.5 ? Color.Amber600 : Color.Slate600;
-            Color ratingBg = movie.Rating >= 9.0 ? Color.Green50 : movie.Rating >= 7.5 ? Color.Amber50 : Color.Slate100;
+            Color ratingColor = movie.Rating >= 9.0 ? ColorPalette.Green[600] :
+                movie.Rating >= 7.5 ? ColorPalette.Amber[600] : ColorPalette.Slate[600];
+            Color ratingBg = movie.Rating >= 9.0 ? ColorPalette.Green[50] : movie.Rating >= 7.5 ? ColorPalette.Amber[50] : ColorPalette.Slate[100];
 
             // Alternating row background
-            Color rowBgColor = rowIndex % 2 == 0 ? Color.White : Color.Slate50;
+            Color rowBgColor = rowIndex % 2 == 0 ? Color.White : ColorPalette.Slate[50];
 
             TableRow row = TableRow.From(
                 new TextBlock
                 {
                     Text = movie.Year.ToString(), FontName = StandardFonts.CourierBold, FontSize = 10,
-                    TextColor = Color.Indigo700
+                    TextColor = ColorPalette.Indigo[700]
                 },
                 new TextBlock
                 {
                     Text = movie.Title, FontName = StandardFonts.HelveticaBold, FontSize = 10,
-                    TextColor = Color.Slate900
+                    TextColor = ColorPalette.Slate[900]
                 },
                 new TextBlock
                 {
-                    Text = movie.Director, FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = Color.Slate700
+                    Text = movie.Director, FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[700]
                 },
                 new TextBlock
                 {
-                    Text = movie.Genre, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = Color.Slate600
+                    Text = movie.Genre, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[600]
                 },
                 // Using TableCell for custom cell styling with background that fills the entire cell
                 new TextBlock
@@ -119,10 +119,10 @@ public static class MovieCatalogExample
                     .AsCell()
                     .Background(ratingBg)
                     .Padding(4)
-                    .Border(Color.Slate300, 0.5f),
+                    .Border(ColorPalette.Slate[300], 0.5f),
                 new TextBlock
                 {
-                    Text = movie.Duration, FontName = StandardFonts.Courier, FontSize = 9, TextColor = Color.Slate600
+                    Text = movie.Duration, FontName = StandardFonts.Courier, FontSize = 9, TextColor = ColorPalette.Slate[600]
                 }.AlignCenter()
             );
 
@@ -136,7 +136,7 @@ public static class MovieCatalogExample
         statsStack.AddChild(new TextBlock
         {
             Text = "Collection Statistics", FontName = StandardFonts.HelveticaBold, FontSize = 12,
-            TextColor = Color.Slate800
+            TextColor = ColorPalette.Slate[800]
         });
 
         float avgRating = movies.Average(m => m.Rating);
@@ -147,22 +147,22 @@ public static class MovieCatalogExample
         statsStack.AddChild(new TextBlock
         {
             Text = $"- Average Rating: {avgRating:F1}/10", FontName = StandardFonts.Helvetica, FontSize = 10,
-            TextColor = Color.Slate700
+            TextColor = ColorPalette.Slate[700]
         });
         statsStack.AddChild(new TextBlock
         {
             Text = $"- Top Rated: {topRated.Title} ({topRated.Rating:F1})", FontName = StandardFonts.Helvetica,
-            FontSize = 10, TextColor = Color.Slate700
+            FontSize = 10, TextColor = ColorPalette.Slate[700]
         });
         statsStack.AddChild(new TextBlock
         {
             Text = $"- Year Range: {earliest.Year} - {latest.Year}", FontName = StandardFonts.Helvetica, FontSize = 10,
-            TextColor = Color.Slate700
+            TextColor = ColorPalette.Slate[700]
         });
         statsStack.AddChild(new TextBlock
         {
             Text = "- Most Represented Genre: Drama", FontName = StandardFonts.Helvetica, FontSize = 10,
-            TextColor = Color.Slate700
+            TextColor = ColorPalette.Slate[700]
         });
 
         // Footer
@@ -171,7 +171,7 @@ public static class MovieCatalogExample
             Text = $"© {DateTime.Now.Year} Classic Cinema Archive. All rights reserved. | Films listed for educational purposes.",
             FontName = StandardFonts.HelveticaOblique,
             FontSize = 8,
-            TextColor = Color.Slate400
+            TextColor = ColorPalette.Slate[400]
         };
 
         // Main Layout

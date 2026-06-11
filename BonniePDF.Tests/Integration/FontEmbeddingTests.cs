@@ -266,12 +266,12 @@ public class FontEmbeddingTests : IntegrationTestBase
             Color[] colors = new[]
             {
                 Color.Red,
-                Color.Green500,
+                ColorPalette.Green[500],
                 Color.Blue,
-                Color.Orange500,
-                Color.Purple700,
-                Color.Teal600,
-                Color.Pink500
+                ColorPalette.Orange[500],
+                ColorPalette.Purple[700],
+                ColorPalette.Teal[600],
+                ColorPalette.Pink[500]
             };
 
             string[] colorNames = { "Red", "Green", "Blue", "Orange", "Purple", "Teal", "Pink" };
