@@ -124,11 +124,12 @@ public static class ColorPaletteExample
         return doc;
     }
 
-    /// <summary>A single colour square for one palette/shade.</summary>
+    /// <summary>A single colour box for one palette/shade.</summary>
     private static Container Swatch(ColorPalette ramp, int shade) => new()
     {
-        Width = Square,
-        Height = Square,
+        // No fixed Width: under the row's Weighted distribution the stack stretches each swatch
+        // to fill the page, so the 11 boxes span the full width minus the label gutter.
+        Height = BoxHeight,
         BackgroundColor = ramp[shade],
         // A hairline border keeps the lightest shades (50) visible against the white page.
         Border = new Border(0.5f),
@@ -140,7 +141,7 @@ public static class ColorPaletteExample
     private static Container RowLabel(string name) => new()
     {
         Width = LabelWidth,
-        Height = Square,
+        Height = BoxHeight,
         // Nudge the label down so it sits roughly centred against the square.
         Padding = new Thickness(0, 9, HGap, 0),
         Child = new TextBlock
@@ -155,7 +156,7 @@ public static class ColorPaletteExample
     /// <summary>A centred header cell carrying a shade number (50, 100, … 950).</summary>
     private static Container HeaderCell(string label) => new()
     {
-        Width = Square,
+        // No fixed Width: header cells stretch with their columns so numbers stay centred.
         Child = new TextBlock
         {
             Text = label,
