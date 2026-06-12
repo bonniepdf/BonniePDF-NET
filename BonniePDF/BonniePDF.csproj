@@ -10,7 +10,9 @@
     <Description>BonniePDF is a high-performance, zero-dependency PDF generation engine for .NET. Engineered for speed and compliance, it features an intuitive Fluent API for building complex documents, reports, integrated charting, and native PDF/A support.</Description>
     <Version>2026.5.1</Version>
     <Authors>BonniePDF</Authors>
-    
+    <!-- source-available: BonniePDF Community License 1.0 for free use, Commercial License at >= $1M revenue.
+         Not a single SPDX expression, so the full dual-license text is packed as a file. -->
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl></RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>pdf;generation;charting;report</PackageTags>
@@ -31,6 +33,11 @@
 
   <ItemGroup>
     <None Update="BonniePDF.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <!-- Pack the dual-license text (BonniePDF Community License 1.0 + Commercial) referenced by PackageLicenseFile. -->
+    <None Include="..\LICENSE">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
