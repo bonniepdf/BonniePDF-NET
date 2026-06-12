@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/BonniePDF?style=flat-square&logo=nuget)](https://www.nuget.org/packages/BonniePDF)
 [![NuGet downloads](https://img.shields.io/nuget/dt/BonniePDF?style=flat-square&logo=nuget)](https://www.nuget.org/packages/BonniePDF)
-[![License: BonniePDF Community](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg?style=flat-square)](https://www.bonniepdf.dev/license)
+[![License: source-available](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg?style=flat-square)](https://www.bonniepdf.dev/license)
 ![coverage](./badges/coverage.svg)
 
 [Live examples](https://www.bonniepdf.dev/examples) | [Documentation](https://www.bonniepdf.dev) | [TypeScript package](https://www.npmjs.com/package/@bonniepdf/core)
@@ -157,10 +157,10 @@ This is the reference implementation. The [TypeScript port](https://www.npmjs.co
 
 ## Licence
 
-BonniePDF uses a hybrid licence model:
+BonniePDF is **source-available** (BonniePDF Community License 1.0) - not OSI open source:
 
-- Community: Free for individuals, open-source projects, non-profits, and companies with under $1m annual gross revenue. Full features, no restrictions on what you can build.
-- Commercial: For any form of commercial usage. Perpetual for the version purchased.
+- Free (BonniePDF Community License 1.0): Free for individuals, open-source projects, non-profits, education, and companies with under $1m annual gross revenue. Full features, full source, no restrictions on what you build - the only thing forbidden is reselling BonniePDF itself as a competing library or service.
+- Commercial: Required at or above $1m annual gross revenue. A perpetual licence plus one year of updates, renewable annually.
 
 No licence keys, activation servers, or runtime checks. Full details at [bonniepdf.dev/license](https://www.bonniepdf.dev/license/).
 

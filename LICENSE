@@ -1,0 +1,325 @@
+BONNIEPDF COMMUNITY LICENSE 1.0
+
+Version 1.0
+Effective 23 October 2026
+
+This licence is a source-available software licence. It is not an open-source
+licence approved by the Open Source Initiative. Each version remains governed
+by this licence unless the Licensor separately offers different terms.
+
+By using, copying, modifying, or distributing the Software, You accept this
+licence. If You do not accept it, do not use, copy, modify, or distribute the
+Software.
+
+1. DEFINITIONS
+
+"Affiliate" means an Organisation that controls, is controlled by, or is under
+common control with another Organisation, where control means holding more than
+fifty per cent of the voting rights or the power to direct management.
+
+"Annual Gross Revenue" means the total worldwide gross revenue, turnover, or
+receipts of an Organisation and all of its Affiliates, from all sources, before
+deduction of costs and taxes, for its most recently completed financial year,
+converted to United States dollars at the rate in effect on the last day of
+that year. For an Organisation that has not completed a financial year, it
+means that Organisation's annualised revenue to date. Grant income, donations,
+and investment or fundraising proceeds are included only where the Organisation
+recognises them as revenue in its own financial statements.
+
+"Benefiting Organisation" means the person or Organisation receiving the
+primary business benefit of a Production Use, being the one whose internal
+operations, professional activities, customers, or revenue the resulting
+documents serve. Where the Software is used to produce documents for or on
+behalf of a client, the client is the Benefiting Organisation. Where an
+Organisation embeds the Software in an application or service that it owns and
+makes generally available to its own customers or users as its own product,
+and not as work for a particular client, that Organisation is the Benefiting
+Organisation, and its customers and users are end users under section 4.
+
+"Commercial Production Use" means Production Use by or for a business,
+government, public-sector body, or other Organisation in connection with its
+internal operations, professional activities, customers, revenue-generating
+activities, or other commercial benefit. It includes Production Use in a
+closed-source application or service and Production Use performed for a client.
+
+"Competing Product" means a general-purpose PDF generation library, software
+development kit, toolkit, component, API, hosted service, or substantially
+similar product whose primary purpose is to provide third parties with PDF
+generation functionality that substitutes for the Software. A domain-specific
+application or service that generates PDFs only as an ancillary part of its
+own broader functionality is not a Competing Product.
+
+"Community User" means a person or Organisation that satisfies section 2.
+
+"Evaluation Use" means internal evaluation, development, testing, security
+review, proof of concept, and non-production staging without live customer
+data or live business operations.
+
+"Licensor" means CodeFocus Limited, a company registered in England and Wales
+under company number 16088203 whose registered office is at 1 Little Lane,
+Haxby, York, YO32 3QU, England, and any successor that validly acquires the
+relevant rights and makes the Software available under the BonniePDF name.
+
+"Organisation" means a legal entity.
+
+"Production Use" means use in a live application, service, workflow, or
+environment for the benefit of You, an Organisation, a customer, or another
+third party. Production Use excludes Evaluation Use.
+
+"Small Organisation" means a Benefiting Organisation whose Annual Gross Revenue
+is less than one million United States dollars (US $1,000,000).
+
+"Software" means the BonniePDF core PDF generation software, source code,
+compiled code, documentation, and examples distributed with this licence. It
+does not include BonniePDF.Signing, @bonniepdf/signing, or anything distributed
+under a separate licence notice.
+
+"You" means the individual or Organisation exercising rights under this
+licence. If an individual acts for an Organisation, "You" means that
+Organisation.
+
+2. COMMUNITY ELIGIBILITY
+
+You are a Community User only for a use described below and only while that use
+continues to satisfy its conditions:
+
+2.1 Personal and independent non-commercial use. You are an individual, or a
+group of individuals acting together without forming or acting for an
+Organisation, using the Software solely for personal or other non-commercial
+purposes. The use must not be for an employer, client, business, profession,
+trade, or other Organisation.
+
+2.2 Charity and non-profit use. You are a registered charity or non-profit
+Organisation using the Software solely in furtherance of Your charitable or
+non-profit purpose, not for commercial trading and not primarily for the
+commercial benefit of another person or Organisation.
+
+2.3 Education and research. You are an accredited educational institution
+using the Software solely for teaching, learning, or non-commercial academic
+research. Administrative, operational, client, or other Production Use does
+not qualify under this paragraph.
+
+2.4 Open-source projects. You maintain or contribute to a project whose
+complete source code is publicly available under an OSI-approved open-source
+licence. The project must not be a Competing Product or be primarily developed
+to meet a particular Organisation's Commercial Production Use. Funding,
+sponsorship, contributions, or governance by an Organisation do not alone
+disqualify an otherwise qualifying project. This paragraph permits development
+and distribution of the qualifying project; it does not grant its sponsors,
+contributors, maintainers, or users Commercial Production Use rights.
+
+2.5 Evaluation. You are any person or Organisation using the Software solely
+for Evaluation Use.
+
+2.6 Small organisation use. The Benefiting Organisation is a Small
+Organisation. This paragraph permits Commercial Production Use, including use
+in a closed-source application or service, for so long as the Benefiting
+Organisation remains a Small Organisation. It does not permit distribution of a
+Competing Product, and it does not apply where any Benefiting Organisation of
+the same Production Use is not a Small Organisation.
+
+Except where paragraph 2.6 applies, Commercial Production Use is not Community
+Use. It requires an applicable paid commercial licence before Production Use
+begins, regardless of funding, developer count, public or private ownership, or
+whether the resulting application is distributed externally.
+
+3. COMMUNITY LICENCE GRANT
+
+Subject to Your continuing eligibility, compliance with this licence, and use
+solely for the Community purpose that qualifies under section 2, the Licensor
+grants You a worldwide, non-exclusive, royalty-free, non-transferable licence
+to:
+
+(a) use and reproduce the Software;
+
+(b) inspect, audit, modify, and create derivative works of the Software;
+
+(c) use the Software in an application, service, workflow, or environment only
+to the extent necessary for the qualifying Community purpose;
+
+(d) permit Your employees and contractors to use the Software solely on Your
+behalf for that qualifying Community purpose;
+
+(e) deploy applications only for qualifying personal, charity, non-profit,
+education, research, open-source-project, or Small Organisation use under
+section 2; and
+
+(f) distribute compiled copies only as an embedded component of (i) a
+qualifying open-source project under section 2.4, or (ii) an application or
+service whose use qualifies under section 2, including use permitted by
+paragraph 2.6, in each case where recipients cannot reasonably use the Software
+as a standalone PDF generation library. Delivering the Software to end users'
+browsers or devices as part of the client-side code of a web, desktop, or
+mobile application is distribution of an embedded component.
+
+No licence key, activation, or telemetry is required for Community Use. The
+absence of technical enforcement does not grant Commercial Production Use.
+
+4. CONTRACTORS, CLIENTS, AND TRANSITIVE USERS
+
+A contractor may perform Evaluation Use solely on behalf of a client. A
+contractor may not rely on personal, charity, education, open-source, or
+evaluation eligibility to provide Commercial Production Use to a client.
+
+A contractor may not rely on its own Annual Gross Revenue under paragraph 2.6
+to provide Commercial Production Use to a client. Where the Software is used
+for or on behalf of a client, eligibility under paragraph 2.6 is determined by
+the client's Annual Gross Revenue and not the contractor's.
+
+End users of an application containing the Software as an embedded,
+non-standalone component do not need a separate BonniePDF licence merely
+because they use that application, provided the person or Organisation that
+owns, operates, or distributes the application has the required rights.
+
+5. REDISTRIBUTION AND MODIFICATIONS
+
+You may distribute source code, modifications, or derivative works containing a
+substantial part of the Software only as part of a qualifying open-source
+project under section 2.4. You must:
+
+(a) include this licence and all copyright and attribution notices;
+
+(b) state prominently that You modified the Software, if applicable;
+
+(c) distribute the BonniePDF-derived portion only under this licence; and
+
+(d) not represent that the Licensor endorses or supports Your modification.
+
+You may not sublicense the Software. Each recipient receives any rights
+directly from the Licensor and only if that recipient independently qualifies
+and complies with this licence.
+
+6. RESTRICTIONS
+
+You must not:
+
+(a) use the Software for Commercial Production Use without an applicable paid
+commercial licence;
+
+(b) use, modify, distribute, or make the Software available as, or as a
+material component of, a Competing Product;
+
+(c) offer the Software's general-purpose PDF generation capability to third
+parties as a standalone hosted API or service;
+
+(d) remove, alter, or obscure copyright, licence, or attribution notices;
+
+(e) use the Software or BonniePDF name in a way that implies endorsement;
+
+(f) use the Software in violation of applicable law; or
+
+(g) circumvent a technical measure in a separately licensed BonniePDF product.
+
+The restrictions in this section apply to both original and modified versions
+of the Software.
+
+7. COMMERCIAL LICENCE REQUIREMENT
+
+Evaluation may include development and testing of a proposed commercial
+application, but it must not include Production Use, live customer data, live
+business operations, or external distribution. Before the Software is used in
+commercial production, the Benefiting Organisation must obtain a Professional,
+Enterprise, Enterprise+, or other applicable paid commercial licence, unless it
+is a Small Organisation and paragraph 2.6 applies to that use.
+
+8. CHANGE IN USE
+
+Community rights apply only while the use qualifies under section 2 and do not
+vest permanently in any version. If a use becomes commercial, closed-source,
+client-facing, operational, or otherwise ceases to qualify, You must obtain an
+applicable paid commercial licence before that changed use begins or stop using
+and distributing the Software for it.
+
+Where eligibility rested on paragraph 2.6 and the Benefiting Organisation's
+Annual Gross Revenue reaches or exceeds the threshold in the definition of
+Small Organisation, You must obtain an applicable paid commercial licence
+within ninety (90) days of the end of the financial year in which that first
+occurred, or stop the Production Use.
+
+No fee is due retroactively for use that was lawful Community Use.
+
+9. OWNERSHIP AND FEEDBACK
+
+The Licensor and its licensors retain all right, title, and interest in the
+Software. This licence grants limited rights to use the Software and does not
+sell or assign any ownership.
+
+If You voluntarily provide feedback, You grant the Licensor a worldwide,
+perpetual, irrevocable, royalty-free licence to use and incorporate that
+feedback without restriction or obligation.
+
+10. PATENTS
+
+To the extent Your permitted use would necessarily infringe a patent owned and
+licensable by the Licensor, the licence grant includes a patent licence for that
+use. If You or Your Affiliate assert that the Software infringes a patent, the
+patent licence granted to You under this section terminates immediately.
+
+11. TRADEMARKS
+
+This licence does not grant permission to use the BonniePDF name, logo, or
+other trademarks except to identify the Software accurately and reproduce
+notices required by this licence.
+
+12. TERMINATION
+
+This licence terminates automatically if You materially breach it. Except for
+a deliberate Competing Product use or deliberate circumvention, You may cure a
+breach within thirty (30) days after receiving written notice from the
+Licensor, in which case the licence is reinstated from the date of cure.
+
+On termination, You must stop using and distributing the Software and destroy
+copies in Your control, except copies retained solely where required by law.
+Sections 6 and 9 through 15 survive termination.
+
+13. DISCLAIMER OF WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTY,
+CONDITION, OR REPRESENTATION OF ANY KIND. TO THE MAXIMUM EXTENT PERMITTED BY
+LAW, THE LICENSOR DISCLAIMS ALL EXPRESS, IMPLIED, AND STATUTORY WARRANTIES AND
+CONDITIONS, INCLUDING MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A
+PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. THE LICENSOR DOES NOT WARRANT
+THAT THE SOFTWARE IS ERROR-FREE, SECURE, UNINTERRUPTED, OR SUITABLE FOR ANY
+PARTICULAR LEGAL, REGULATORY, ACCESSIBILITY, ARCHIVAL, OR SIGNING REQUIREMENT.
+
+14. LIMITATION OF LIABILITY
+
+Nothing in this licence limits or excludes liability for death or personal
+injury caused by negligence, fraud or fraudulent misrepresentation, or any other
+liability that cannot lawfully be limited or excluded.
+
+Subject to that rule, and to the maximum extent permitted by law, the Licensor
+is not liable, whether in contract, tort (including negligence), breach of
+statutory duty, or otherwise, for loss of profit, revenue, business, goodwill,
+data, or anticipated savings, or for indirect, incidental, special,
+consequential, exemplary, or punitive loss.
+
+Subject to the same rule, the Licensor's total aggregate liability arising out
+of or relating to the Software or this licence, whether in contract, tort
+(including negligence), breach of statutory duty, or otherwise, is limited to
+one hundred United States dollars (US $100). The Software is provided free of
+charge, and this limit reflects that.
+
+15. GENERAL
+
+This licence is governed by the laws of England and Wales. The courts of
+England and Wales have exclusive jurisdiction over disputes relating to it.
+
+If a provision is unenforceable, it will be modified only to the minimum extent
+necessary, and the remaining provisions continue in effect. A failure to
+enforce a provision is not a waiver. You may not assign this licence without
+the Licensor's written consent, except that a transfer causing loss of
+Community eligibility is governed by section 8.
+
+This licence is the entire agreement for Community Use of the Software. A
+signed commercial agreement or order may grant additional rights and will
+control for the rights it covers.
+
+16. CONTINUING LICENCE
+
+Versions distributed under this licence remain under this licence unless the
+Licensor separately offers a different licence. The passage of time does not
+change the terms governing a version.
+
+Current commercial options and contact details are available at:
+https://www.bonniepdf.dev/pricing
