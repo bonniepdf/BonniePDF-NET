@@ -187,6 +187,15 @@ public static class ContainerElementExtensions
         return c.Element(barcode);
     }
 
+    /// <summary>
+    /// Adds a Data Matrix (ECC200) element.
+    /// </summary>
+    public static DataMatrix DataMatrix(this IContentContainer c, string data, float size = 100f)
+    {
+        var dm = new DataMatrix { Data = data, Size = size };
+        return c.Element(dm);
+    }
+
     // --- Raw Element Escape Hatch ---
 
     /// <summary>
