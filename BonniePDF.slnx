@@ -32,6 +32,7 @@
     <Project Path="Examples/BonniePDF.Examples.Templates.BusinessInvoice/BonniePDF.Examples.Templates.BusinessInvoice.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.MovieCatalog/BonniePDF.Examples.Templates.MovieCatalog.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.UserDirectory/BonniePDF.Examples.Templates.UserDirectory.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.AnnualReport/BonniePDF.Examples.Templates.AnnualReport.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Integration.AsyncGeneration/BonniePDF.Examples.Integration.AsyncGeneration.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Integration.WebApi/BonniePDF.Examples.Integration.WebApi.csproj" />
   </Folder>

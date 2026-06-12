@@ -1,7 +1,7 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Security.Watermarking;
@@ -22,7 +22,7 @@ public static class WatermarkDraftExample
         Document doc = new(new DocumentSettings
         {
             PageSize = PdfSize.A4,
-            Margin = 60
+            Margin = 64
         });
 
         doc.Settings.Version = PdfVersion.Pdf17;
@@ -32,47 +32,86 @@ public static class WatermarkDraftExample
         doc.Metadata.Title = "Draft Document with Watermark";
         doc.Metadata.Author = "BonniePDF";
 
-        // Apply the watermark - default settings: gray, 15% opacity, -45 degrees, 72pt
-        doc.Settings.Watermark = new WatermarkSettings { Text = "DRAFT" };
-
-        // Page 1: Title page
-        doc.Add(new TextBlock
+        // A tuned watermark: a large, faint diagonal DRAFT sits behind the content
+        // on every page. WatermarkSettings exposes the font, size, colour, opacity
+        // and rotation so the stamp can be matched to the document's palette.
+        doc.Settings.Watermark = new WatermarkSettings
         {
-            Text = "Project Proposal",
+            Text = "DRAFT",
             FontName = StandardFonts.HelveticaBold,
-            FontSize = 28,
-            TextColor = ColorPalette.Slate[800],
-            Margin = new Thickness(0, 80, 0, 12)
-        }.AlignCenter());
+            FontSize = 120,
+            TextColor = ColorPalette.Slate[400],
+            Opacity = 0.12f,
+            RotationDegrees = -45
+        };
+
+        // ── Page 1: Title page ────────────────────────────────────────────────
+
+        // Brand banner - a filled container introduces the document above the stamp.
+        VerticalStack bannerStack = new();
+        bannerStack.AddChild(new TextBlock
+        {
+            Text = "HORIZON VENTURES",
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 11,
+            TextColor = ColorPalette.Blue[200],
+            Margin = new Thickness(0, 0, 0, 6)
+        });
+        bannerStack.AddChild(new TextBlock
+        {
+            Text = "Product Strategy Proposal",
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 26,
+            TextColor = ColorPalette.Slate[50]
+        });
+
+        doc.Add(new Container
+        {
+            BackgroundColor = ColorPalette.Blue[700],
+            CornerRadius = 10,
+            Padding = new Thickness(28, 26, 28, 26),
+            Margin = new Thickness(0, 0, 0, 24),
+            Child = bannerStack
+        });
+
+        // Draft-status callout - a tinted box that explains the watermark.
+        doc.Add(new Container
+        {
+            BackgroundColor = ColorPalette.Amber[50],
+            Border = Border.LeftOnly(4),
+            BorderColors = new BorderColors(ColorPalette.Amber[500]),
+            Padding = new Thickness(16, 14, 16, 14),
+            Margin = new Thickness(0, 0, 0, 24),
+            Child = new TextBlock
+            {
+                Text = "This document is a draft and has not been approved for distribution. " +
+                       "All content is subject to change pending final review by the project committee. " +
+                       "Please do not share this document outside the review team.",
+                FontName = StandardFonts.Helvetica,
+                FontSize = 11,
+                TextColor = ColorPalette.Amber[800],
+                Alignment = TextAlignment.Justify
+            }
+        });
 
         doc.Add(new TextBlock
         {
-            Text = "Prepared for Internal Review",
+            Text = "Prepared for internal review by the strategy team. The sections that follow outline " +
+                   "the proposed initiative, its objectives, and the resourcing required to deliver it.",
             FontName = StandardFonts.Helvetica,
-            FontSize = 14,
-            TextColor = ColorPalette.Slate[500],
-            Margin = new Thickness(0, 0, 0, 40)
-        }.AlignCenter());
-
-        doc.Add(new TextBlock
-        {
-            Text = "This document is a draft and has not been approved for distribution. " +
-                   "All content is subject to change pending final review by the project committee. " +
-                   "Please do not share this document outside the review team.",
-            FontName = StandardFonts.TimesRoman,
             FontSize = 12,
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify
         });
 
-        // Page 2: Some content
+        // ── Page 2: Content page ──────────────────────────────────────────────
         doc.AddPage();
         doc.Add(new TextBlock
         {
             Text = "Section 1: Executive Summary",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = ColorPalette.Slate[800],
+            TextColor = ColorPalette.Blue[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -83,7 +122,7 @@ public static class WatermarkDraftExample
                    "enable greater scalability, improved fault tolerance, and faster deployment cycles. " +
                    "The estimated timeline for Phase 1 completion is twelve months, with a projected " +
                    "budget allocation of two million dollars across engineering and operations teams.",
-            FontName = StandardFonts.TimesRoman,
+            FontName = StandardFonts.Helvetica,
             FontSize = 11,
             TextColor = ColorPalette.Slate[700],
             Alignment = TextAlignment.Justify,
@@ -95,12 +134,35 @@ public static class WatermarkDraftExample
             Text = "Key stakeholders include the VP of Engineering, the CTO, and department leads " +
                    "from Product, Security, and Operations. A steering committee will convene monthly " +
                    "to review progress against milestones and address any blockers or scope changes.",
-            FontName = StandardFonts.TimesRoman,
+            FontName = StandardFonts.Helvetica,
             FontSize = 11,
             TextColor = ColorPalette.Slate[700],
             Alignment = TextAlignment.Justify
         });
+
+        doc.Add(new Spacer(18));
+
+        doc.Add(new TextBlock
+        {
+            Text = "Section 2: Expected Outcomes",
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 18,
+            TextColor = ColorPalette.Blue[800],
+            Margin = new Thickness(0, 0, 0, 12)
+        });
+
+        doc.Add(new TextBlock
+        {
+            Text = "On completion, the platform is expected to reduce infrastructure costs by twenty " +
+                   "percent, cut average deployment time from hours to minutes, and improve service " +
+                   "availability to four nines. These outcomes will be measured against a baseline " +
+                   "captured during the discovery phase and reported to the steering committee.",
+            FontName = StandardFonts.Helvetica,
+            FontSize = 11,
+            TextColor = ColorPalette.Slate[700],
+            Alignment = TextAlignment.Justify
+        });
+
         return doc;
     }
 }
-
