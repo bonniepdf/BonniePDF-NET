@@ -635,11 +635,14 @@ public class PdfResourceRegistry
         foreach (AlphaGraphicsStateInfo info in _alphaGraphicsStates.Values)
         {
             int objectId = writer.GetNewId();
+            // When PDF/A is enabled, rewrite alpha graphics states to be fully opaque
+            // (mitigated issue: the original transparency was flattened to a background).
+            float alphaValue = _conformance != PdfAConformance.None ? 1.0f : info.Alpha;
             writer.WriteObject(objectId, new Dictionary<string, string>
             {
                 ["/Type"] = "/ExtGState",
-                ["/ca"] = info.Alpha.ToString("F4", System.Globalization.CultureInfo.InvariantCulture),
-                ["/CA"] = info.Alpha.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)
+                ["/ca"] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture),
+                ["/CA"] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)
             });
             graphicsStateRefs.Add($"{info.ResourceName} {objectId} 0 R");
         }
@@ -801,11 +804,14 @@ public class PdfResourceRegistry
         foreach (AlphaGraphicsStateInfo info in _alphaGraphicsStates.Values)
         {
             int objectId = writer.GetNewId();
+            // When PDF/A is enabled, rewrite alpha graphics states to be fully opaque
+            // (mitigated issue: the original transparency was flattened to a background).
+            float alphaValue = _conformance != PdfAConformance.None ? 1.0f : info.Alpha;
             await writer.WriteObjectAsync(objectId, new Dictionary<string, string>
             {
                 ["/Type"] = "/ExtGState",
-                ["/ca"] = info.Alpha.ToString("F4", System.Globalization.CultureInfo.InvariantCulture),
-                ["/CA"] = info.Alpha.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)
+                ["/ca"] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture),
+                ["/CA"] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)
             }, null, cancellationToken).ConfigureAwait(false);
             graphicsStateRefs.Add($"{info.ResourceName} {objectId} 0 R");
         }
