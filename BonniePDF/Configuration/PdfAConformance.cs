@@ -68,4 +68,14 @@ public enum PdfAConformance
     /// structure. Requires <see cref="AccessibilityMode.PdfUa1"/>.
     /// </summary>
     PdfA3a = 6,
+
+    /// <summary>
+    /// PDF/A-4 (ISO 19005-4:2020 baseline). PDF 2.0-based archival output.
+    /// Drops the legacy a/b/u conformance split - there is a single
+    /// PDF/A-4 baseline with no "a"/"b" suffix. Requires
+    /// <see cref="PdfVersion.Pdf20"/>; the serializer auto-upgrades the
+    /// version when this value is selected. The PDF/A-4f (embedded files)
+    /// and PDF/A-4e (engineering) profiles are not implemented yet.
+    /// </summary>
+    PdfA4 = 7,
 }

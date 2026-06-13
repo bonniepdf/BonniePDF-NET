@@ -444,6 +444,15 @@ public class Document : IDisposable
 
     private void ValidateSettings()
     {
+        // PDF/A cannot be combined with encryption. Checked before the
+        // version-specific encryption rule so this clearer message wins
+        // for e.g. PDF/A-4 + AES-256.
+        if (Settings.Conformance != PdfAConformance.None && Settings.IsEncrypted)
+        {
+            throw new InvalidOperationException(
+                "PDF/A mode cannot be combined with encryption. Disable encryption or PDF/A.");
+        }
+
         // AES-256 requires PDF 1.7
         if (Settings.IsEncrypted &&
             Settings.Encryption.Algorithm == Security.Models.EncryptionAlgorithm.AES_256 &&
@@ -453,18 +462,16 @@ public class Document : IDisposable
                 "AES-256 encryption requires PdfVersion.Pdf17. Set Settings.Version = PdfVersion.Pdf17.");
         }
 
-        // PDF/A requires PDF 1.7. Silently upgrade rather than throw -
+        // PDF/A version requirements. Silently upgrade rather than throw -
         // the caller asked for archival output, so honour that intent.
-        if (Settings.Conformance != PdfAConformance.None && Settings.Version != PdfVersion.Pdf17)
+        // PDF/A-1/2/3 are built on PDF 1.7; PDF/A-4 is built on PDF 2.0.
+        if (Settings.Conformance == PdfAConformance.PdfA4)
+        {
+            Settings.Version = PdfVersion.Pdf20;
+        }
+        else if (Settings.Conformance != PdfAConformance.None && Settings.Version != PdfVersion.Pdf17)
         {
             Settings.Version = PdfVersion.Pdf17;
-        }
-
-        // PDF/A cannot be combined with encryption
-        if (Settings.Conformance != PdfAConformance.None && Settings.IsEncrypted)
-        {
-            throw new InvalidOperationException(
-                "PDF/A mode cannot be combined with encryption. Disable encryption or PDF/A.");
         }
 
         // "a" levels require tagged output (PDF/UA-1).
@@ -472,6 +479,15 @@ public class Document : IDisposable
         {
             throw new InvalidOperationException(
                 $"{Settings.Conformance} requires tagged output. Set Settings.Accessibility = AccessibilityMode.PdfUa1.");
+        }
+
+        // PDF/UA-1 is bound to PDF 1.7. PDF/UA-2 (the PDF 2.0 accessibility
+        // standard) is not implemented yet, so reject PDF/UA-1 on a PDF 2.0
+        // document rather than silently dropping the tagging.
+        if (Settings.Accessibility == AccessibilityMode.PdfUa1 && Settings.Version == PdfVersion.Pdf20)
+        {
+            throw new InvalidOperationException(
+                "PDF/UA-1 output is only supported with PdfVersion.Pdf17. PDF/UA-2 for PdfVersion.Pdf20 is not implemented yet.");
         }
 
         // Bookmarks require PDF 1.7

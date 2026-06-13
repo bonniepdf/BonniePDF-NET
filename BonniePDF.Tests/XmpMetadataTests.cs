@@ -58,6 +58,26 @@ public class XmpMetadataTests
     }
 
     [Fact]
+    public void PdfA4_ContainsBaselineIdentificationWithoutConformanceSuffix()
+    {
+        using Document doc = new();
+        doc.Settings.AsPdfA4();
+        doc.Metadata.Title = "PDF/A-4 Document";
+
+        using MemoryStream ms = new();
+        doc.Save(ms, true);
+
+        ms.Position = 0;
+        using StreamReader reader = new(ms);
+        string content = reader.ReadToEnd();
+        // PDF/A-4 (ISO 19005-4:2020): pdfaid:part = 4, pdfaid:rev = 2020,
+        // and NO pdfaid:conformance (the a/b/u split is gone).
+        Assert.Contains("pdfaid:part", content);
+        Assert.Contains("pdfaid:rev", content);
+        Assert.DoesNotContain("pdfaid:conformance", content);
+    }
+
+    [Fact]
     public void XmpMetadataWriter_GeneratesValidXml()
     {
         var metadata = new DocumentMetadata

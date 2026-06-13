@@ -21,6 +21,17 @@ public static class DocumentSettingsExtensions
     }
 
     /// <summary>
+    /// Sets the PDF version to 2.0. This is the foundation for PDF/A-4 and
+    /// PDF/UA-2, but does not enable either conformance claim by itself.
+    /// </summary>
+    public static DocumentSettings AsPdf20(this DocumentSettings settings)
+    {
+        if (settings == null) throw new ArgumentNullException(nameof(settings));
+        settings.Version = PdfVersion.Pdf20;
+        return settings;
+    }
+
+    /// <summary>
     /// Enables PDF/A-1b archival mode. Automatically sets version to PDF 1.7.
     /// Cannot be used with encryption.
     /// </summary>
@@ -29,6 +40,19 @@ public static class DocumentSettingsExtensions
         if (settings == null) throw new ArgumentNullException(nameof(settings));
         settings.Version = PdfVersion.Pdf17;
         settings.PdfAEnabled = true;
+        return settings;
+    }
+
+    /// <summary>
+    /// Enables PDF/A-4 baseline archival mode. Automatically sets version to PDF 2.0.
+    /// This does not enable PDF/A-4f attachments, PDF/A-4e engineering features, or PDF/UA-2.
+    /// Cannot be used with encryption.
+    /// </summary>
+    public static DocumentSettings AsPdfA4(this DocumentSettings settings)
+    {
+        if (settings == null) throw new ArgumentNullException(nameof(settings));
+        settings.Version = PdfVersion.Pdf20;
+        settings.Conformance = PdfAConformance.PdfA4;
         return settings;
     }
 
