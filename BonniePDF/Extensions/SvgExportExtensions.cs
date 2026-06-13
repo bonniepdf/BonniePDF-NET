@@ -4,6 +4,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Drawing;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Shapes;
 using BonniePDF.Rendering;
 
 namespace BonniePDF.Extensions;
@@ -52,5 +53,45 @@ public static class SvgExportExtensions
 
         // Finalize SVG
         return canvas.GetSvg();
+    }
+
+    /// <summary>
+    /// Renders a 1D barcode to a standalone SVG string using the same vector
+    /// element renderer as PDF output.
+    /// </summary>
+    public static string ToSvg(this Barcode barcode)
+    {
+        return ElementToSvg(barcode);
+    }
+
+    /// <summary>
+    /// Renders a QR code to a standalone SVG string using the same vector
+    /// element renderer as PDF output.
+    /// </summary>
+    public static string ToSvg(this QRCode qrCode)
+    {
+        return ElementToSvg(qrCode);
+    }
+
+    /// <summary>
+    /// Renders a Data Matrix symbol to a standalone SVG string using the same
+    /// vector element renderer as PDF output.
+    /// </summary>
+    public static string ToSvg(this DataMatrix dataMatrix)
+    {
+        return ElementToSvg(dataMatrix);
+    }
+
+    private static string ElementToSvg(IElement element)
+    {
+        float width = element.GetPreferredWidth();
+        float height = element.MeasureHeight(width);
+        RenderContext ctx = new(new PdfSize(width, height), 0, true);
+
+        element.Render(ctx, width);
+
+        if (ctx.Canvas is SvgCanvas svgCanvas) return svgCanvas.GetSvg();
+
+        return ctx.CurrentStream.ToString();
     }
 }
