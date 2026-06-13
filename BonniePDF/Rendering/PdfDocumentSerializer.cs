@@ -70,7 +70,8 @@ public class PdfDocumentSerializer
         {
             RenderContext dryRunCtx = new(orientedPageSize, _document.Settings.Margin)
             {
-                Conformance = _document.Settings.Conformance
+                Conformance = _document.Settings.Conformance,
+                TocEntries = new Dictionary<string, int>(),
             };
 
             foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
@@ -333,7 +334,8 @@ public class PdfDocumentSerializer
         {
             RenderContext dryRunCtx = new(orientedPageSize, _document.Settings.Margin)
             {
-                Conformance = _document.Settings.Conformance
+                Conformance = _document.Settings.Conformance,
+                TocEntries = new Dictionary<string, int>(),
             };
 
             foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
