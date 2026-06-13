@@ -12,9 +12,9 @@ using BonniePDF.Security.Encryption;
 namespace BonniePDF.Rendering.Writers;
 
 /// <summary>
-/// A PDF writer that creates PDF 1.4 compliant files.
-/// Manages object writing, offset tracking, and the cross-reference table.
-/// Supports optional encryption of stream contents.
+/// A PDF writer that emits PDF 1.4, 1.7, or 2.0 files (selected via
+/// <see cref="PdfVersion"/>). Manages object writing, offset tracking, and
+/// the cross-reference table. Supports optional encryption of stream contents.
 /// </summary>
 public class PdfWriter : IPdfWriter, IDisposable
 {
@@ -48,7 +48,7 @@ public class PdfWriter : IPdfWriter, IDisposable
         _stream = _fs;
         _leaveOpen = false;
         _writer = new StreamWriter(_stream, Iso88591) { NewLine = "\n" };
-        _writer.WriteLine(version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
+        _writer.WriteLine(version == PdfVersion.Pdf20 ? "%PDF-2.0" : version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
         _writer.WriteLine("%\u00E2\u00E3\u00CF\u00D3");
     }
 
@@ -71,7 +71,7 @@ public class PdfWriter : IPdfWriter, IDisposable
         _stream = stream;
         _leaveOpen = leaveOpen;
         _writer = new StreamWriter(_stream, Iso88591, 1024, leaveOpen) { NewLine = "\n" };
-        _writer.WriteLine(version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
+        _writer.WriteLine(version == PdfVersion.Pdf20 ? "%PDF-2.0" : version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
         _writer.WriteLine("%\u00E2\u00E3\u00CF\u00D3");
     }
 

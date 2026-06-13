@@ -92,4 +92,98 @@ public class PdfVersionTests
         using MemoryStream ms = new();
         Assert.Throws<InvalidOperationException>(() => doc.Save(ms, true));
     }
+
+    [Fact]
+    public void AsPdf20_SetsVersionWithoutConformanceClaims()
+    {
+        using Document doc = new();
+        doc.Settings.AsPdf20();
+        Assert.Equal(PdfVersion.Pdf20, doc.Settings.Version);
+        Assert.False(doc.Settings.PdfAEnabled);
+    }
+
+    [Fact]
+    public void AsPdfA4_SetsConformanceAndVersion()
+    {
+        using Document doc = new();
+        doc.Settings.AsPdfA4();
+        Assert.Equal(PdfVersion.Pdf20, doc.Settings.Version);
+        Assert.Equal(PdfAConformance.PdfA4, doc.Settings.Conformance);
+        Assert.True(doc.Settings.PdfAEnabled);
+    }
+
+    [Fact]
+    public void Pdf20_OutputStartsWithCorrectHeader()
+    {
+        using Document doc = new();
+        doc.Settings.AsPdf20();
+        using MemoryStream ms = new();
+
+        doc.Save(ms, true);
+
+        ms.Position = 0;
+        using StreamReader reader = new(ms);
+        string line = reader.ReadLine();
+        Assert.StartsWith("%PDF-2.0", line);
+    }
+
+    [Fact]
+    public void Pdf20_IncludesMetadataWithoutConformanceClaims()
+    {
+        using Document doc = new();
+        doc.Settings.AsPdf20();
+        using MemoryStream ms = new();
+
+        doc.Save(ms, true);
+
+        ms.Position = 0;
+        using StreamReader reader = new(ms);
+        string content = reader.ReadToEnd();
+        Assert.Contains("/Metadata", content);
+        Assert.DoesNotContain("pdfaid:part", content);
+        Assert.DoesNotContain("pdfuaid:part", content);
+    }
+
+    [Fact]
+    public void Pdf20_WithPdfUa1_Throws()
+    {
+        using Document doc = new();
+        doc.Settings.AsPdf20();
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        using MemoryStream ms = new();
+
+        Assert.Throws<InvalidOperationException>(() => doc.Save(ms, true));
+    }
+
+    [Fact]
+    public void PdfA4_DirectConformanceAutoUpgradesToPdf20()
+    {
+        using Document doc = new();
+        doc.Settings.Conformance = PdfAConformance.PdfA4;
+        using MemoryStream ms = new();
+
+        doc.Save(ms, true);
+
+        Assert.Equal(PdfVersion.Pdf20, doc.Settings.Version);
+        ms.Position = 0;
+        using StreamReader reader = new(ms);
+        string line = reader.ReadLine();
+        Assert.StartsWith("%PDF-2.0", line);
+    }
+
+    [Fact]
+    public void PdfA4_WithEncryption_ThrowsInvalidOperation()
+    {
+        using Document doc = new();
+        doc.Settings.AsPdfA4();
+        doc.Settings.Encryption = new EncryptionSettings
+        {
+            Algorithm = EncryptionAlgorithm.RC4_128,
+            UserPassword = "test",
+            OwnerPassword = "test"
+        };
+
+        using MemoryStream ms = new();
+        Assert.Throws<InvalidOperationException>(() => doc.Save(ms, true));
+    }
 }

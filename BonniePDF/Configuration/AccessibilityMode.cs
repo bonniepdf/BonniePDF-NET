@@ -13,12 +13,15 @@ namespace BonniePDF.Configuration;
 ///
 /// <para>
 /// <b>Why no <c>PdfUa2</c> here yet:</b> PDF/UA-2 (ISO 14289-2:2024) is
-/// bound to PDF 2.0 output. BonniePDF currently emits PDF 1.4 and
-/// PDF 1.7 only - there is no PDF 2.0 writer. Adding a <c>PdfUa2</c>
-/// value before that writer lands would create a "lying enum" - the
-/// same kind of claim-without-substance the this feature honest-claim guard
-/// exists to prevent. The value lands when the PDF 2.0 writer does.
-/// Roadmap, not launch - do not add it speculatively.
+/// bound to PDF 2.0 output. A PDF 2.0 writer now exists
+/// (<see cref="PdfVersion.Pdf20"/>, used by the PDF/A-4 baseline), but the
+/// PDF 2.0 tagged-PDF structure model that PDF/UA-2 requires is not
+/// implemented - the structure tree is still emitted for PDF 1.7 only.
+/// Adding a <c>PdfUa2</c> value before that lands would create a "lying
+/// enum" - the same kind of claim-without-substance the this feature honest-claim
+/// guard exists to prevent. Requesting <see cref="PdfUa1"/> on a PDF 2.0
+/// document throws rather than silently dropping the tagging. Roadmap, not
+/// launch - do not add <c>PdfUa2</c> speculatively.
 /// </para>
 ///
 /// See <c>the specification</c> for the

@@ -47,7 +47,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         _stream = _fs;
         _leaveOpen = false;
         _writer = new StreamWriter(_stream, Iso88591, leaveOpen: true) { NewLine = "\n" };
-        _writer.WriteLine(version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
+        _writer.WriteLine(version == PdfVersion.Pdf20 ? "%PDF-2.0" : version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
         _writer.WriteLine("%\u00E2\u00E3\u00CF\u00D3");
     }
 
@@ -69,7 +69,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         _stream = stream;
         _leaveOpen = leaveOpen;
         _writer = new StreamWriter(_stream, Iso88591, leaveOpen: true) { NewLine = "\n" };
-        _writer.WriteLine(version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
+        _writer.WriteLine(version == PdfVersion.Pdf20 ? "%PDF-2.0" : version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
         _writer.WriteLine("%\u00E2\u00E3\u00CF\u00D3");
     }
 

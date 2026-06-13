@@ -51,14 +51,19 @@ internal sealed class XmpConformanceBlock
 
     private const string PdfAidNamespace = "http://www.aiim.org/pdfa/ns/id/";
 
-    private static XmpConformanceBlock PdfAid(string part, string conformance) => new(
-        prefix: "pdfaid",
-        namespaceUri: PdfAidNamespace,
-        elements: new[]
+    private static XmpConformanceBlock PdfAid(string part, string conformance = null, string rev = null)
+    {
+        var elements = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("part", part),
-            new KeyValuePair<string, string>("conformance", conformance),
-        });
+            new("part", part),
+        };
+        if (conformance != null) elements.Add(new("conformance", conformance));
+        if (rev != null) elements.Add(new("rev", rev));
+        return new XmpConformanceBlock(
+            prefix: "pdfaid",
+            namespaceUri: PdfAidNamespace,
+            elements: elements);
+    }
 
     /// <summary>PDF/A-1b: ISO 19005-1, part 1, conformance B.</summary>
     public static XmpConformanceBlock PdfA1B() => PdfAid("1", "B");
@@ -78,6 +83,9 @@ internal sealed class XmpConformanceBlock
     /// <summary>PDF/A-3a: ISO 19005-3, part 3, conformance A (tagged; allows embedded files).</summary>
     public static XmpConformanceBlock PdfA3A() => PdfAid("3", "A");
 
+    /// <summary>PDF/A-4: ISO 19005-4:2020 baseline. No legacy A/B/U conformance suffix.</summary>
+    public static XmpConformanceBlock PdfA4() => PdfAid("4", rev: "2020");
+
     /// <summary>
     /// Returns the conformance block matching <paramref name="conformance"/>,
     /// or <c>null</c> if no PDF/A claim should be emitted.
@@ -90,6 +98,7 @@ internal sealed class XmpConformanceBlock
         Configuration.PdfAConformance.PdfA2a => PdfA2A(),
         Configuration.PdfAConformance.PdfA3b => PdfA3B(),
         Configuration.PdfAConformance.PdfA3a => PdfA3A(),
+        Configuration.PdfAConformance.PdfA4 => PdfA4(),
         _ => null,
     };
 

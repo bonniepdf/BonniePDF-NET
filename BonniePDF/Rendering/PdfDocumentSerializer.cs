@@ -254,8 +254,8 @@ public class PdfDocumentSerializer
 
         bool effectivePdfA = _document.Settings.PdfAEnabled && !ctx.Resources.HasNonEmbeddedStandardFont();
 
-        // Write XMP Metadata for PDF 1.7
-        if (_document.Settings.Version == PdfVersion.Pdf17)
+        // Write XMP Metadata for PDF 1.7 and 2.0
+        if (_document.Settings.Version == PdfVersion.Pdf17 || _document.Settings.Version == PdfVersion.Pdf20)
         {
             catalogOptions.XmpMetadataId = writer.GetNewId();
             metadataWriter.WriteXmpMetadata(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings);
@@ -269,8 +269,8 @@ public class PdfDocumentSerializer
             catalogOptions.OutlinesId = navWriter.WriteOutlineTree(outlinesStartId, _document.Settings.Bookmarks, pageIds);
         }
 
-        // Write PDF/A Output Intents
-        if (effectivePdfA && _document.Settings.Version == PdfVersion.Pdf17)
+        // Write PDF/A Output Intents (PDF/A-1/2/3 on PDF 1.7, PDF/A-4 on PDF 2.0)
+        if (effectivePdfA && (_document.Settings.Version == PdfVersion.Pdf17 || _document.Settings.Version == PdfVersion.Pdf20))
         {
             ComplianceWriter complianceWriter = new(writer);
             catalogOptions.PdfAEnabled = true;
@@ -494,8 +494,8 @@ public class PdfDocumentSerializer
 
         bool effectivePdfA = _document.Settings.PdfAEnabled && !ctx.Resources.HasNonEmbeddedStandardFont();
 
-        // Write XMP Metadata for PDF 1.7
-        if (_document.Settings.Version == PdfVersion.Pdf17)
+        // Write XMP Metadata for PDF 1.7 and 2.0
+        if (_document.Settings.Version == PdfVersion.Pdf17 || _document.Settings.Version == PdfVersion.Pdf20)
         {
             catalogOptions.XmpMetadataId = writer.GetNewId();
             await metadataWriter.WriteXmpMetadataAsync(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings, cancellationToken).ConfigureAwait(false);
@@ -509,8 +509,8 @@ public class PdfDocumentSerializer
             catalogOptions.OutlinesId = await navWriter.WriteOutlineTreeAsync(outlinesStartId, _document.Settings.Bookmarks, pageIds, cancellationToken).ConfigureAwait(false);
         }
 
-        // Write PDF/A Output Intents
-        if (effectivePdfA && _document.Settings.Version == PdfVersion.Pdf17)
+        // Write PDF/A Output Intents (PDF/A-1/2/3 on PDF 1.7, PDF/A-4 on PDF 2.0)
+        if (effectivePdfA && (_document.Settings.Version == PdfVersion.Pdf17 || _document.Settings.Version == PdfVersion.Pdf20))
         {
             ComplianceWriter complianceWriter = new(writer);
             catalogOptions.PdfAEnabled = true;
