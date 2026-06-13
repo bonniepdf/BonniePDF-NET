@@ -313,3 +313,5 @@ dist/
 dist-examples/
 # CI-generated PDFs
 generated-pdfs/
+# CI veraPDF gate summary (written by tools/verapdf/Validate.java)
+verapdf-summary.md
