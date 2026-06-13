@@ -50,9 +50,14 @@ public class Heading : TextBlock, IStatefulElement, IRoleProvider
     /// Initializes a new instance of <see cref="Heading"/> with the specified text.
     /// </summary>
     /// <param name="text">The heading text to display.</param>
+    /// <remarks>
+    /// The <see cref="TocIdentifier"/> is initialized to an empty string and should be set
+    /// by the caller if this heading is part of a TOC. Headings without a TOC will work fine.
+    /// </remarks>
     [SetsRequiredMembers]
     public Heading(string text) : base(text)
     {
+        TocIdentifier = string.Empty;
     }
 
     /// <summary>
