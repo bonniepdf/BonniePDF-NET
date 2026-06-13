@@ -385,19 +385,19 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
         TaggingContext tagging = ctx.Tagging;
-        // Nested tables (rendered inside a container/cell) don't pass through the
-        // pipeline's role wrapper, so they get no Table structure element. Open one
-        // here so the THead/TBody/TFoot groups have a Table parent (PDF/UA 7.2).
-        // Top-level tables use RenderStateful instead and are wrapped by the
-        // pipeline, so this path only ever runs for nested tables.
-        if (tagging != null) tagging.Tree.Begin(SemanticRole.Table);
+        // Some hosts (e.g. VerticalStack) already open a Table struct element for
+        // IRoleProvider children before calling Render. Only open our own when one
+        // isn't already current, so the THead/TBody/TFoot groups get exactly one
+        // Table ancestor (PDF/UA 7.2) instead of Table-in-Table.
+        bool ownTable = tagging != null && tagging.Tree.Current.Role != SemanticRole.Table;
+        if (ownTable) tagging.Tree.Begin(SemanticRole.Table);
         try
         {
             RenderContentRows(ctx, contentWidth, tagging);
         }
         finally
         {
-            if (tagging != null) tagging.Tree.End();
+            if (ownTable) tagging.Tree.End();
         }
     }
 

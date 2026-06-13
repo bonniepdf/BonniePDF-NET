@@ -2,6 +2,7 @@ using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Tagging;
@@ -109,6 +110,43 @@ public class TableTaggingTests
         // PDF/UA 7.2: rows are grouped under THead/TBody.
         Assert.Equal(1, SubstringCounter.Count(pdf, "/S /THead"));
         Assert.Equal(1, SubstringCounter.Count(pdf, "/S /TBody"));
+    }
+
+    [Fact]
+    public void TaggedTable_NestedInsideCellVerticalStack_DoesNotDoubleWrapAsTable()
+    {
+        // Mirrors the BusinessInvoice footer: an outer Table whose cell content
+        // is a VerticalStack containing another Table (e.g. a totals table
+        // nested inside a footer cell's stack). The cell content renders via
+        // Table.RenderContent (non-stateful), and VerticalStack.RenderContent
+        // already opens a /Table StructElem for IRoleProvider children, so the
+        // nested Table must not open a second one - otherwise the tree has
+        // /Table > /Table, which violates PDF/UA 7.2-3 (a Table may only
+        // contain TR, THead, TBody, TFoot, Caption).
+        using var doc = new Document();
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
+
+        VerticalStack cellStack = new();
+        Table nested = new(1f, 1f) { Border = Border.None };
+        nested.AddRow(new TextBlock { Text = "Subtotal" }, new TextBlock { Text = "$1.00" });
+        cellStack.AddChild(nested);
+
+        Table outer = new(1f, 1f) { Border = Border.None };
+        outer.AddRow(new TextBlock { Text = "left" }, new TableCell { Content = cellStack });
+        doc.Add(outer);
+
+        using var ms = new MemoryStream();
+        doc.Save(ms, true);
+        string pdf = Encoding.ASCII.GetString(ms.ToArray());
+
+        // Two Table StructElems: the outer table and the nested totals table -
+        // never three (which would mean the nested table got double-wrapped).
+        Assert.Equal(2, SubstringCounter.Count(pdf, "/S /Table"));
+        Assert.Equal(2, SubstringCounter.Count(pdf, "/S /TBody"));
+        Assert.Equal(2, SubstringCounter.Count(pdf, "/S /TR"));
+        Assert.Equal(4, SubstringCounter.Count(pdf, "/S /TD"));
     }
 
     [Fact]
