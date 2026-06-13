@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace BonniePDF.Elements.Shapes;
@@ -249,6 +250,7 @@ internal static class DataMatrixEncoder
         return encoded;
     }
 
+    [StructLayout(LayoutKind.Auto)]
     private readonly struct SymbolSize
     {
         public SymbolSize(int width, int height, int columns, int rows, int blocks, int symbolBytes, int checkwords)
