@@ -144,7 +144,7 @@ public static class AnnualReportExample
     // margins and mis-place its later children.
 
     /// <summary>Full-bleed deep-blue field for the cover.</summary>
-    private static IElement CoverBackground() => new Container
+    private static Container CoverBackground() => new Container
     {
         BackgroundColor = CoverBg,
         Height = PdfSize.A4.Height,
@@ -156,7 +156,7 @@ public static class AnnualReportExample
     /// brand-coloured hairlines, giving a crisp band/content separation. The
     /// header/footer text is centred onto the bands by their own slots.
     /// </summary>
-    private static IElement PageBands() => new Container
+    private static Container PageBands() => new Container
     {
         BackgroundColor = BandBg,
         Height = PdfSize.A4.Height,
@@ -191,14 +191,14 @@ public static class AnnualReportExample
         return row;
     }
 
-    private static IElement HeaderRow(int pageNumber) => BandRow(
+    private static HorizontalStack HeaderRow(int pageNumber) => BandRow(
         BandCell("BonniePDF", TextAlignment.Left, bold: true, Primary),
         BandCell(ReportTitle, TextAlignment.Center, bold: false, ColorPalette.Blue[700]),
         BandCell($"Page {pageNumber}", TextAlignment.Right, bold: false, ColorPalette.Blue[600]));
 
     // The generation time needs a wider column than the page number, so the
     // footer leans on weighted columns rather than equal thirds.
-    private static IElement FooterRow(int pageNumber) => BandRow(
+    private static HorizontalStack FooterRow(int pageNumber) => BandRow(
         BandCell(Generated, TextAlignment.Left, bold: false, ColorPalette.Blue[600]),
         BandCell($"{Company} - Confidential", TextAlignment.Center, bold: false, ColorPalette.Blue[600]),
         BandCell($"Page {pageNumber}", TextAlignment.Right, bold: true, Primary),

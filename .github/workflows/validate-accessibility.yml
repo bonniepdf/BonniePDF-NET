@@ -49,25 +49,24 @@ jobs:
             tools/verapdf/Validate.class
           key: verapdf-${{ runner.os }}-${{ hashFiles('tools/verapdf/pom.xml', 'tools/verapdf/Validate.java') }}
 
-      - name: Build the tagged-example projects
+      # Build and run every example project. Each writes its PDFs to
+      # <project>/bin/.../GeneratedPdfs/. Iterating over Examples/* means a new
+      # example project is picked up automatically — no edit needed here.
+      - name: Generate all example PDFs
         run: |
-          dotnet build Examples/BonniePDF.Examples.Basics.SimpleDocument -c Release
-          dotnet build Examples/BonniePDF.Examples.Templates.BusinessInvoice -c Release
-          dotnet build Examples/BonniePDF.Examples.Elements.Images -c Release
-
-      - name: Generate tagged example PDFs
-        run: |
-          dotnet run --project Examples/BonniePDF.Examples.Basics.SimpleDocument -c Release --no-build
-          dotnet run --project Examples/BonniePDF.Examples.Templates.BusinessInvoice -c Release --no-build
-          dotnet run --project Examples/BonniePDF.Examples.Elements.Images -c Release --no-build
+          for proj in Examples/*/; do
+            echo "::group::${proj}"
+            dotnet run --project "$proj" -c Release
+            echo "::endgroup::"
+          done
 
       - name: Collect tagged PDFs
         run: |
           mkdir -p generated-pdfs
-          # The example programs write to <project>/bin/.../GeneratedPdfs/.
-          find Examples -path '*/GeneratedPdfs/simple_document_tagged.pdf' -exec cp {} generated-pdfs/ \;
-          find Examples -path '*/GeneratedPdfs/invoice.pdf' -exec cp {} generated-pdfs/ \;
-          find Examples -path '*/GeneratedPdfs/images_tagged.pdf' -exec cp {} generated-pdfs/ \;
+          # PDF/UA-1 examples write their tagged output as *_tagged.pdf into
+          # GeneratedPdfs/. Collect every one — any new tagged example is
+          # included automatically, with no change to this workflow.
+          find Examples -path '*/GeneratedPdfs/*_tagged.pdf' -exec cp {} generated-pdfs/ \;
           ls -l generated-pdfs
 
       - name: Validate with veraPDF (PDF/UA-1)

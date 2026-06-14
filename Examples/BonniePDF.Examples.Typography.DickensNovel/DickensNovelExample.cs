@@ -15,15 +15,15 @@ namespace BonniePDF.Examples.Typography.DickensNovel;
 /// Demonstrates automatic word-wrapping, justified text, multi-page pagination,
 /// PDF/A-compliant Times-family font embedding, running headers, and footer page numbers.
 ///
-/// Source file expected at C:\GITHUB\pg98.txt.
-/// Download from https://www.gutenberg.org/cache/epub/98/pg98.txt if not present.
+/// The source text (pg98.txt) is bundled next to this example and copied to the
+/// build output directory, so it resolves on any platform.
 /// </summary>
 [System.ComponentModel.DisplayName("Dickens: A Tale of Two Cities")]
 [System.ComponentModel.Category("Typography")]
 [System.ComponentModel.Description("Formats the complete Project Gutenberg novel as a book-quality PDF.")]
 public static partial class DickensNovelExample
 {
-    private const string LocalFilePath = @"C:\GITHUB\pg98.txt";
+    private static readonly string LocalFilePath = Path.Combine(AppContext.BaseDirectory, "pg98.txt");
 
     /// <summary>Matches chapter number lines: "CHAPTER I." … "CHAPTER XXIV."</summary>
     [GeneratedRegex(@"^CHAPTER\s+[IVXLC]+\.$")]

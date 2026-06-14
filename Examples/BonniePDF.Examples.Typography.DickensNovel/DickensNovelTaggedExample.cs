@@ -16,8 +16,8 @@ namespace BonniePDF.Examples.Typography.DickensNovel;
 /// /H1, chapter headings are /H2, and body paragraphs are /P. Running headers and the
 /// centred page number in the footer are both tagged as /Artifact.
 ///
-/// Source file expected at C:\GITHUB\pg98.txt.
-/// Download from https://www.gutenberg.org/cache/epub/98/pg98.txt if not present.
+/// The source text (pg98.txt) is bundled next to this example and copied to the
+/// build output directory, so it resolves on any platform.
 ///
 /// Acceptance: VeraPDF profile ua1 reports zero failures.
 /// </summary>
@@ -26,7 +26,7 @@ namespace BonniePDF.Examples.Typography.DickensNovel;
 [System.ComponentModel.Description("PDF/UA-1 tagged complete Project Gutenberg novel - book and chapter headings tagged semantically.")]
 public static partial class DickensNovelTaggedExample
 {
-    private const string LocalFilePath = @"C:\GITHUB\pg98.txt";
+    private static readonly string LocalFilePath = Path.Combine(AppContext.BaseDirectory, "pg98.txt");
 
     [GeneratedRegex(@"^CHAPTER\s+[IVXLC]+\.$")]
     private static partial Regex ChapterLineRegex();
