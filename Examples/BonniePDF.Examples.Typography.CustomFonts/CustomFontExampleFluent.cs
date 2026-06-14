@@ -23,14 +23,12 @@ public static class CustomFontExampleFluent
         "\u00A9 Copyright symbol (U+00A9)",
         "\u00AE Registered trademark (U+00AE)",
         "\u2122 Trademark (U+2122)",
-        "\u2013 En-dash (U+2013) \u2014 Em-dash (U+2014)",
-        "\u2190 \u2191 \u2192 \u2193 Arrows",
-        "\u2713 Check mark (U+2713)"
+        "\u2013 En-dash (U+2013) \u2014 Em-dash (U+2014)"
     };
 
     public static Document Generate()
     {
-        // Embed the Liberation Sans TTF bundled with this example (see BundledFont).
+        // Embed the bundled NotoSans TTF as the document default (see BundledFont).
         string fontPath = BundledFont.SansPath;
 
         return Pdf.Create(doc =>
@@ -56,7 +54,7 @@ public static class CustomFontExampleFluent
             {
                 page.Content().Column(column =>
                 {
-                    // Title - inherits Arial TTF, overrides size only
+                    // Title - inherits the NotoSans TTF, overrides size only
                     column.Item()
                         .Text("TrueType Font Embedding Demo (Fluent API)")
                         .FontSize(24)
@@ -83,6 +81,16 @@ public static class CustomFontExampleFluent
                             .TextColor(ColorPalette.Slate[600]);
                     }
 
+                    // Arrows live in NotoSansMath; the dingbat check mark in NotoSansSymbols2.
+                    column.Item()
+                        .Text("← ↑ → ↓ Arrows")
+                        .Font(BundledFont.MathPath)
+                        .TextColor(ColorPalette.Slate[600]);
+                    column.Item()
+                        .Text("✓ Check mark (U+2713)")
+                        .Font(BundledFont.SymbolsPath)
+                        .TextColor(ColorPalette.Slate[600]);
+
                     // Bottom margin on the last symbol line
                     column.Item().Margin(0, 0, 0, 12).Empty();
 
@@ -107,10 +115,12 @@ public static class CustomFontExampleFluent
 
                     column.Item()
                         .Text("\u00B1 Plus-minus \u00D7 Multiply \u00F7 Divide \u2260 Not equal")
+                        .Font(BundledFont.MathPath)
                         .TextColor(ColorPalette.Slate[600]);
 
                     column.Item()
                         .Text("\u2264 Less-equal \u2265 Greater-equal \u221E Infinity")
+                        .Font(BundledFont.MathPath)
                         .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 12);
 
@@ -139,9 +149,9 @@ public static class CustomFontExampleFluent
                         .Font(StandardFonts.Helvetica)
                         .TextColor(ColorPalette.Slate[600]);
 
-                    // Embedded Arial (TrueType - inherits from default)
+                    // Embedded Noto Sans (TrueType - inherits from default)
                     column.Item()
-                        .Text("This line uses embedded Arial (TrueType, full Unicode)")
+                        .Text("This line uses embedded Noto Sans (TrueType, full Unicode)")
                         .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 16);
 

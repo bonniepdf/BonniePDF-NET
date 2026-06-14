@@ -5,12 +5,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Reuse the library's bundled Liberation Sans TTF (no duplicate file) and
-         copy it to fonts/ in the output, so the example can embed a real TTF
-         from disk on any platform. -->
-    <None Include="..\..\BonniePDF\Typography\Fonts\LiberationSans-Regular.ttf"
-          Link="fonts\LiberationSans-Regular.ttf"
-          CopyToOutputDirectory="PreserveNewest" />
+    <!-- Google Noto fonts (OFL 1.1) shared by the example projects, copied to
+         fonts/ in the output so the example embeds real TTFs from disk on any
+         platform. These are example-only assets - they are NOT part of the
+         published BonniePDF library/NuGet package. -->
+    <None Include="..\assets\fonts\NotoSans-Regular.ttf" Link="fonts\NotoSans-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\assets\fonts\NotoSansMath-Regular.ttf" Link="fonts\NotoSansMath-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\assets\fonts\NotoSansSymbols2-Regular.ttf" Link="fonts\NotoSansSymbols2-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <PropertyGroup>
