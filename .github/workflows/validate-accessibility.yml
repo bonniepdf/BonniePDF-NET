@@ -50,13 +50,14 @@ jobs:
           key: verapdf-${{ runner.os }}-${{ hashFiles('tools/verapdf/pom.xml', 'tools/verapdf/Validate.java') }}
 
       # Build and run every example project. Each writes its PDFs to
-      # <project>/bin/.../GeneratedPdfs/. Iterating over Examples/* means a new
-      # example project is picked up automatically — no edit needed here.
+      # <project>/bin/.../GeneratedPdfs/. Iterating over the .csproj files means a
+      # new example project is picked up automatically — no edit needed here, and
+      # non-project folders (e.g. Examples/assets) are skipped.
       - name: Generate all example PDFs
         run: |
-          for proj in Examples/*/; do
-            echo "::group::${proj}"
-            dotnet run --project "$proj" -c Release
+          for csproj in Examples/*/*.csproj; do
+            echo "::group::${csproj}"
+            dotnet run --project "$csproj" -c Release
             echo "::endgroup::"
           done
 

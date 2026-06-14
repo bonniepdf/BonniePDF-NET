@@ -14,19 +14,9 @@ public static class EmojiExample
 {
     public static Document Generate()
     {
-        // Segoe UI Emoji is the standard Windows emoji font
-        string emojiFont = @"C:\Windows\Fonts\seguiemj.ttf";
-
-        if (!File.Exists(emojiFont))
-        {
-            Console.WriteLine("Segoe UI Emoji font not found. Skipping emoji example.");
-            return null;
-        }
-
-        // Also use Arial for regular text
-        string textFont = @"C:\Windows\Fonts\arial.ttf";
-        if (!File.Exists(textFont))
-            textFont = @"C:\Windows\Fonts\segoeui.ttf";
+        // Embed the bundled NotoEmoji (glyphs) and NotoSans (text) - see BundledFont.
+        string emojiFont = BundledFont.EmojiPath;
+        string textFont = BundledFont.SansPath;
 
         Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf17;

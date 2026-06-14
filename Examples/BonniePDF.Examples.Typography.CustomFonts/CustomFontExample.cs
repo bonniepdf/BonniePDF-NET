@@ -15,7 +15,8 @@ public static class CustomFontExample
 {
     public static Document Generate()
     {
-        // Embed the Liberation Sans TTF bundled with this example (see BundledFont).
+        // Embed the bundled Noto fonts (see BundledFont): NotoSans for text, with
+        // arrows/maths routed through NotoSansMath and dingbats through NotoSansSymbols2.
         string fontPath = BundledFont.SansPath;
 
         Document doc = new();
@@ -64,9 +65,11 @@ public static class CustomFontExample
         doc.Add(new TextBlock { Text = "\u00AE Registered trademark (U+00AE)" });
         doc.Add(new TextBlock { Text = "\u2122 Trademark (U+2122)" });
         doc.Add(new TextBlock { Text = "\u2013 En-dash (U+2013) \u2014 Em-dash (U+2014)" });
-        doc.Add(new TextBlock { Text = "\u2190 \u2191 \u2192 \u2193 Arrows" });
+        // Arrows (U+2190..) live in NotoSansMath, not NotoSans.
+        doc.Add(new TextBlock { Text = "\u2190 \u2191 \u2192 \u2193 Arrows", FontName = BundledFont.MathPath });
 
-        doc.Add(new TextBlock { Text = "\u2713 Check mark (U+2713)", Margin = new Thickness(0, 0, 0, 12) });
+        // The check mark (U+2713) is a dingbat - NotoSansSymbols2.
+        doc.Add(new TextBlock { Text = "\u2713 Check mark (U+2713)", FontName = BundledFont.SymbolsPath, Margin = new Thickness(0, 0, 0, 12) });
 
         // Currency symbols
         doc.Add(new TextBlock
@@ -90,8 +93,9 @@ public static class CustomFontExample
             Margin = new Thickness(0, 0, 0, 6)
         });
 
-        doc.Add(new TextBlock { Text = "\u00B1 Plus-minus \u00D7 Multiply \u00F7 Divide \u2260 Not equal" });
-        doc.Add(new TextBlock { Text = "\u2264 Less-equal \u2265 Greater-equal \u221E Infinity", Margin = new Thickness(0, 0, 0, 12) });
+        // Mathematical operators (U+2200..) live in NotoSansMath.
+        doc.Add(new TextBlock { Text = "\u00B1 Plus-minus \u00D7 Multiply \u00F7 Divide \u2260 Not equal", FontName = BundledFont.MathPath });
+        doc.Add(new TextBlock { Text = "\u2264 Less-equal \u2265 Greater-equal \u221E Infinity", FontName = BundledFont.MathPath, Margin = new Thickness(0, 0, 0, 12) });
 
         // Greek letters
         doc.Add(new TextBlock
@@ -127,7 +131,7 @@ public static class CustomFontExample
         // Embedded font
         doc.Add(new TextBlock
         {
-            Text = "This line uses embedded Arial (TrueType, full Unicode)",
+            Text = "This line uses embedded Noto Sans (TrueType, full Unicode)",
             Margin = new Thickness(0, 0, 0, 16)
         });
 

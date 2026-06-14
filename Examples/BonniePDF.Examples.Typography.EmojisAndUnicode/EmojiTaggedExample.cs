@@ -9,16 +9,14 @@ namespace BonniePDF.Examples.Typography.EmojisAndUnicode;
 /// <summary>
 /// PDF/UA-1 tagged emoji-and-unicode example.
 ///
-/// Emoji require a dedicated TTF font (Segoe UI Emoji on Windows). PDF/A-1b is disabled
-/// because emoji fonts typically contain COLR/CBDT colour tables that are incompatible with
-/// the PDF/A sRGB output-intent requirement. PDF/UA-1 accessibility is enabled separately.
+/// Emoji require a dedicated TTF font; this example embeds the bundled NotoEmoji
+/// (monochrome outlines). PDF/A-1b is disabled because colour emoji fonts typically
+/// contain COLR/CBDT tables incompatible with the PDF/A sRGB output-intent requirement.
+/// PDF/UA-1 accessibility is enabled separately.
 ///
 /// Section headers are /H2 structure elements; emoji and description paragraphs are /P.
-/// Returns <c>null</c> when Segoe UI Emoji is not found on the machine.
 ///
-/// Acceptance: VeraPDF profile ua1 reports zero failures (when the emoji TTF is available).
-/// Note: colour emoji fonts may still produce font-glyph warnings in strict validators;
-/// the structure-tree tagging itself is correct.
+/// Acceptance: VeraPDF profile ua1 reports zero failures.
 /// </summary>
 [System.ComponentModel.DisplayName("Emojis & Unicode (PDF/UA-1)")]
 [System.ComponentModel.Category("Typography")]
@@ -27,21 +25,9 @@ public static class EmojiTaggedExample
 {
     public static Document? Generate()
     {
-        string emojiFont = @"C:\Windows\Fonts\seguiemj.ttf";
-        if (!File.Exists(emojiFont))
-        {
-            Console.WriteLine("Segoe UI Emoji font not found. Skipping tagged emoji example.");
-            return null;
-        }
-
-        string textFont = @"C:\Windows\Fonts\arial.ttf";
-        if (!File.Exists(textFont))
-            textFont = @"C:\Windows\Fonts\segoeui.ttf";
-        if (!File.Exists(textFont))
-        {
-            Console.WriteLine("No suitable text font found. Skipping tagged emoji example.");
-            return null;
-        }
+        // Embed the bundled NotoEmoji (glyphs) and NotoSans (text) - see BundledFont.
+        string emojiFont = BundledFont.EmojiPath;
+        string textFont = BundledFont.SansPath;
 
         Document doc = new()
         {
