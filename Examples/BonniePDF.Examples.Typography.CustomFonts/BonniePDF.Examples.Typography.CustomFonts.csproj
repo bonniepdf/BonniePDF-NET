@@ -4,6 +4,15 @@
     <ProjectReference Include="..\..\BonniePDF\BonniePDF.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Reuse the library's bundled Liberation Sans TTF (no duplicate file) and
+         copy it to fonts/ in the output, so the example can embed a real TTF
+         from disk on any platform. -->
+    <None Include="..\..\BonniePDF\Typography\Fonts\LiberationSans-Regular.ttf"
+          Link="fonts\LiberationSans-Regular.ttf"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <PropertyGroup>
     <Version>2026.04.1</Version>
     <OutputType>Exe</OutputType>
