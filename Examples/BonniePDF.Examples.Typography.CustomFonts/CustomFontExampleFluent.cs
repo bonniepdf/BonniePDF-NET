@@ -30,19 +30,8 @@ public static class CustomFontExampleFluent
 
     public static Document Generate()
     {
-        // Prefer Arial; fall back to Segoe UI on systems where Arial is absent
-        string arialPath = @"C:\Windows\Fonts\arial.ttf";
-        if (!File.Exists(arialPath))
-        {
-            Console.WriteLine("Arial not found, trying Segoe UI...");
-            arialPath = @"C:\Windows\Fonts\segoeui.ttf";
-        }
-
-        if (!File.Exists(arialPath))
-        {
-            Console.WriteLine("No suitable TTF font found. Skipping embedded font example.");
-            return null;
-        }
+        // Embed the Liberation Sans TTF bundled with this example (see BundledFont).
+        string fontPath = BundledFont.SansPath;
 
         return Pdf.Create(doc =>
         {
@@ -60,7 +49,7 @@ public static class CustomFontExampleFluent
 
             // Set the TTF path as the document default so all text inherits it
             doc.WithDefaultTextStyle(style => style
-                .WithFamily(arialPath)
+                .WithFamily(fontPath)
                 .WithSize(11));
 
             doc.Page(page =>

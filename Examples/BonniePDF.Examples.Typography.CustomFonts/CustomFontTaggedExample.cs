@@ -9,14 +9,11 @@ namespace BonniePDF.Examples.Typography.CustomFonts;
 /// <summary>
 /// PDF/UA-1 tagged custom-fonts example.
 ///
-/// Embeds Arial (falling back to Segoe UI) as the document default font so every element
+/// Embeds the bundled Liberation Sans TTF as the document default font so every element
 /// inherits it. Section headings are /Hx structure elements; body paragraphs are /P.
 /// PDF/UA-1 requires all fonts to be embedded - the TTF embedding satisfies that rule.
 ///
-/// Returns <c>null</c> when no suitable TTF font is found on the machine, allowing the
-/// calling Program.cs to skip the example gracefully.
-///
-/// Acceptance: VeraPDF profile ua1 reports zero failures (when a TTF font is available).
+/// Acceptance: VeraPDF profile ua1 reports zero failures.
 /// </summary>
 [System.ComponentModel.DisplayName("Custom Fonts (PDF/UA-1)")]
 [System.ComponentModel.Category("Typography")]
@@ -39,18 +36,8 @@ public static class CustomFontTaggedExample
     /// </summary>
     public static Document? Generate()
     {
-        // Prefer Arial; fall back to Segoe UI on systems where Arial is absent.
-        string? fontPath = null;
-        foreach (string candidate in new[] { @"C:\Windows\Fonts\arial.ttf", @"C:\Windows\Fonts\segoeui.ttf" })
-        {
-            if (File.Exists(candidate)) { fontPath = candidate; break; }
-        }
-
-        if (fontPath is null)
-        {
-            Console.WriteLine("No suitable TTF font found. Skipping tagged custom-font example.");
-            return null;
-        }
+        // Embed the Liberation Sans TTF bundled with this example (see BundledFont).
+        string fontPath = BundledFont.SansPath;
 
         Document doc = new()
         {
