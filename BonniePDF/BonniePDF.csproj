@@ -44,8 +44,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Bundled Liberation fonts (OFL license, metric-compatible with Helvetica/Times/Courier).
-         Embedded as assembly resources so PDF/A-1b works without file-system font paths. -->
+    <!-- SIL Open Font License 1.1 text for the bundled Liberation fonts below.
+         Packed into the NuGet so the licence travels with the embedded fonts. -->
+    <None Include="Typography\Fonts\OFL.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Bundled Liberation fonts (SIL OFL 1.1 - see Typography/Fonts/OFL.txt;
+         metric-compatible with Helvetica/Times/Courier). Embedded as assembly
+         resources so PDF/A-1b works without file-system font paths. -->
     <EmbeddedResource Include="Typography\Fonts\LiberationSans-Regular.ttf" />
     <EmbeddedResource Include="Typography\Fonts\LiberationSans-Bold.ttf" />
     <EmbeddedResource Include="Typography\Fonts\LiberationSans-Italic.ttf" />

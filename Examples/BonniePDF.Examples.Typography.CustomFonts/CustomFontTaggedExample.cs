@@ -20,6 +20,8 @@ namespace BonniePDF.Examples.Typography.CustomFonts;
 [System.ComponentModel.Description("PDF/UA-1 tagged document with an embedded TrueType font - each section uses a semantic heading.")]
 public static class CustomFontTaggedExample
 {
+    // NotoSans-covered symbols rendered with the default font; arrows and the
+    // dingbat check mark are routed to NotoSansMath / NotoSansSymbols2 below.
     private static readonly string[] UnicodeSymbols =
     {
         "• Bullet point (U+2022)",
@@ -27,8 +29,6 @@ public static class CustomFontTaggedExample
         "® Registered trademark (U+00AE)",
         "™ Trademark (U+2122)",
         "– En-dash (U+2013) - Em-dash (U+2014)",
-        "← ↑ → ↓ Directional arrows",
-        "✓ Check mark (U+2713)",
     };
 
     /// <summary>
@@ -36,7 +36,7 @@ public static class CustomFontTaggedExample
     /// </summary>
     public static Document? Generate()
     {
-        // Embed the Liberation Sans TTF bundled with this example (see BundledFont).
+        // Embed the bundled NotoSans TTF as the document default (see BundledFont).
         string fontPath = BundledFont.SansPath;
 
         Document doc = new()
@@ -71,7 +71,7 @@ public static class CustomFontTaggedExample
 
         doc.Add(new TextBlock
         {
-            Text   = "This document embeds a TrueType font (Arial or Segoe UI) as the document-wide default. " +
+            Text   = "This document embeds a TrueType font (Noto Sans) as the document-wide default. " +
                      "PDF/UA-1 requires all fonts to be embedded so that text reflow and copy/paste work " +
                      "correctly for assistive technology.",
             Margin = new Thickness(0, 0, 0, 12),
@@ -98,6 +98,10 @@ public static class CustomFontTaggedExample
         {
             doc.Add(new TextBlock { Text = sym, FontSize = 11, Margin = new Thickness(0, 0, 0, 2) });
         }
+
+        // Arrows live in NotoSansMath; the check mark (a dingbat) in NotoSansSymbols2.
+        doc.Add(new TextBlock { Text = "← ↑ → ↓ Directional arrows", FontName = BundledFont.MathPath, FontSize = 11, Margin = new Thickness(0, 0, 0, 2) });
+        doc.Add(new TextBlock { Text = "✓ Check mark (U+2713)", FontName = BundledFont.SymbolsPath, FontSize = 11, Margin = new Thickness(0, 0, 0, 2) });
 
         // ── Currency symbols ───────────────────────────────────────────────────
 
@@ -130,6 +134,7 @@ public static class CustomFontTaggedExample
         doc.Add(new TextBlock
         {
             Text     = "± Plus-minus  × Multiply  ÷ Divide  ≠ Not equal  ∞ Infinity",
+            FontName = BundledFont.MathPath,
             FontSize = 12,
         });
 

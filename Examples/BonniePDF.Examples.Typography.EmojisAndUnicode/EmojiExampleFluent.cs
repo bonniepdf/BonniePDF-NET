@@ -29,16 +29,9 @@ public static class EmojiExampleFluent
 
     public static Document Generate()
     {
-        string emojiFont = @"C:\Windows\Fonts\seguiemj.ttf";
-        if (!File.Exists(emojiFont))
-        {
-            Console.WriteLine("Segoe UI Emoji font not found. Skipping emoji example.");
-            return null;
-        }
-
-        string textFont = @"C:\Windows\Fonts\arial.ttf";
-        if (!File.Exists(textFont))
-            textFont = @"C:\Windows\Fonts\segoeui.ttf";
+        // Embed the bundled NotoEmoji (glyphs) and NotoSans (text) - see BundledFont.
+        string emojiFont = BundledFont.EmojiPath;
+        string textFont = BundledFont.SansPath;
 
         return Pdf.Create(doc =>
         {
