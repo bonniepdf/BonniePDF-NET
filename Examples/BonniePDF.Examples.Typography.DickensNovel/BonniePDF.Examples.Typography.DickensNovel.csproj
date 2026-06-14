@@ -4,10 +4,16 @@
     <ProjectReference Include="..\..\BonniePDF\BonniePDF.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Project Gutenberg source text, copied next to the executable so the
+         example reads it from AppContext.BaseDirectory on any platform. -->
+    <None Update="pg98.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <PropertyGroup>
     <Version>2026.04.1</Version>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>

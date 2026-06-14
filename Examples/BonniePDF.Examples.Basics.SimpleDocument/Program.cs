@@ -26,7 +26,7 @@ internal sealed class Program
         Console.WriteLine("Generating PDF/A-2a + PDF/UA-1...");
         using (var doc = PdfA2aCompliantExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "pdfa2a_compliant.pdf"));
+            doc.Save(Path.Combine(outputDir, "pdfa2a_compliant_tagged.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

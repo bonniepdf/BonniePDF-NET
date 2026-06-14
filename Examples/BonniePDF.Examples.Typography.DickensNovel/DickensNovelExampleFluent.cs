@@ -25,15 +25,15 @@ namespace BonniePDF.Examples.Typography.DickensNovel;
 /// • <c>column.Item().Element(new Heading { ... })</c> - escape hatch for TOC-registered headings.
 /// • <c>column.Item().Element(new VisualToc { ... })</c> - escape hatch for the visual TOC.
 ///
-/// Source file expected at C:\GITHUB\pg98.txt.
-/// Download from https://www.gutenberg.org/cache/epub/98/pg98.txt if not present.
+/// The source text (pg98.txt) is bundled next to this example and copied to the
+/// build output directory, so it resolves on any platform.
 /// </summary>
 [System.ComponentModel.DisplayName("Dickens: A Tale of Two Cities (Fluent API)")]
 [System.ComponentModel.Category("Typography")]
 [System.ComponentModel.Description("Formats the complete Project Gutenberg novel as a book-quality PDF using the Fluent API.")]
 public static partial class DickensNovelExampleFluent
 {
-    private const string LocalFilePath = @"C:\GITHUB\pg98.txt";
+    private static readonly string LocalFilePath = Path.Combine(AppContext.BaseDirectory, "pg98.txt");
 
     /// <summary>Matches chapter number lines: "CHAPTER I." … "CHAPTER XXIV."</summary>
     [GeneratedRegex(@"^CHAPTER\s+[IVXLC]+\.$")]
