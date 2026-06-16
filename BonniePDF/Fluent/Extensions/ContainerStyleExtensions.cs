@@ -298,6 +298,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer AlignCenter(this IContentContainer c)
     {
         var container = GetOrCreateContainer(c);
+        container.HorizontalAlignment = HorizontalAlignment.Center;
         return container;
     }
 
@@ -305,6 +306,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer AlignRight(this IContentContainer c)
     {
         var container = GetOrCreateContainer(c);
+        container.HorizontalAlignment = HorizontalAlignment.End;
         return container;
     }
 
@@ -312,6 +314,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer AlignLeft(this IContentContainer c)
     {
         var container = GetOrCreateContainer(c);
+        container.HorizontalAlignment = HorizontalAlignment.Start;
         return container;
     }
 }

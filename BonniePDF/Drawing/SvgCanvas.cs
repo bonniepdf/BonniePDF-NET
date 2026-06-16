@@ -456,6 +456,12 @@ public class SvgCanvas : ICanvas
     /// <inheritdoc />
     public void EndArtifact() { } // no-op for SVG output
 
+    /// <inheritdoc />
+    public void BeginCrispEdges() => _sb.AppendLf("<g shape-rendering=\"crispEdges\">");
+
+    /// <inheritdoc />
+    public void EndCrispEdges() => _sb.AppendLf("</g>");
+
     /// <summary>
     /// Closes the page group in multipage mode.
     /// Should be called before GetSvg() or when switching pages.

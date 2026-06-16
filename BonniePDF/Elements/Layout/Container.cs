@@ -55,6 +55,16 @@ public class Container : BorderedElementBase, IContentContainer
     /// </summary>
     public float? Height { get; set; }
 
+    /// <summary>
+    /// Horizontal alignment of the child within the container's available width
+    /// (<c>AlignCenter</c>/<c>AlignRight</c>/<c>AlignLeft</c>).
+    /// When the child is narrower than the container it is positioned
+    /// accordingly; otherwise it fills the width as before. <c>null</c>/
+    /// <c>Start</c> keep the default left placement; <c>Stretch</c> is treated
+    /// as "fill" (no offset).
+    /// </summary>
+    public HorizontalAlignment? HorizontalAlignment { get; set; }
+
     protected override float GetPreferredContentWidth()
     {
         if (Width.HasValue)
@@ -116,6 +126,20 @@ public class Container : BorderedElementBase, IContentContainer
         ctx.CurrentY += Padding.Top;
 
         float childWidth = effectiveWidth - Padding.Left - Padding.Right - Border.HorizontalWidth;
+
+        // Horizontal alignment: when the child is narrower than the available
+        // inner width, position it within that width rather than pinning it left.
+        var align = HorizontalAlignment;
+        if (align == BonniePDF.Core.HorizontalAlignment.Center || align == BonniePDF.Core.HorizontalAlignment.End)
+        {
+            float preferred = Child.GetPreferredWidth();
+            if (preferred > 0 && preferred < childWidth)
+            {
+                float slack = childWidth - preferred;
+                ctx.CurrentX += align == BonniePDF.Core.HorizontalAlignment.Center ? slack / 2f : slack;
+                childWidth = preferred;
+            }
+        }
 
         // Save Y position before child render
         float yBeforeChildRender = ctx.CurrentY;

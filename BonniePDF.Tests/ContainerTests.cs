@@ -136,6 +136,76 @@ public class ContainerTests
         Assert.Equal(200, ctx.CurrentY - startY, 3);
     }
 
+    // --- Horizontal alignment of a narrower child ---
+
+    private static Probe RenderAligned(HorizontalAlignment? alignment, float preferredWidth = 100f)
+    {
+        (RenderContext ctx, _) = MakeContext();
+        Probe probe = new(10) { PreferredWidth = preferredWidth };
+        Container c = new() { Child = probe };
+        if (alignment.HasValue) c.HorizontalAlignment = alignment.Value;
+        c.Render(ctx, 500);
+        return probe;
+    }
+
+    [Fact]
+    public void Render_LeftAlignsByDefault()
+    {
+        Probe probe = RenderAligned(null);
+        Assert.Equal(0, probe.RenderedX, 3);
+        Assert.Equal(500, probe.RenderedWidth, 3); // fills, no centering
+    }
+
+    [Fact]
+    public void Render_StartKeepsChildPinnedLeft()
+    {
+        Probe probe = RenderAligned(HorizontalAlignment.Start);
+        Assert.Equal(0, probe.RenderedX, 3);
+        Assert.Equal(500, probe.RenderedWidth, 3);
+    }
+
+    [Fact]
+    public void Render_CenterOffsetsByHalfSlackAndUsesPreferredWidth()
+    {
+        Probe probe = RenderAligned(HorizontalAlignment.Center);
+        Assert.Equal((500 - 100) / 2f, probe.RenderedX, 3); // 200
+        Assert.Equal(100, probe.RenderedWidth, 3);
+    }
+
+    [Fact]
+    public void Render_EndRightAlignsChild()
+    {
+        Probe probe = RenderAligned(HorizontalAlignment.End);
+        Assert.Equal(500 - 100, probe.RenderedX, 3); // 400
+        Assert.Equal(100, probe.RenderedWidth, 3);
+    }
+
+    [Fact]
+    public void Render_DoesNotOffsetWhenChildFillsWidth()
+    {
+        Probe probe = RenderAligned(HorizontalAlignment.Center, preferredWidth: 0f);
+        Assert.Equal(0, probe.RenderedX, 3);
+        Assert.Equal(500, probe.RenderedWidth, 3);
+    }
+
+    [Fact]
+    public void Render_HonoursAlignmentWithinFixedWidthAndPadding()
+    {
+        (RenderContext ctx, _) = MakeContext();
+        Probe probe = new(10) { PreferredWidth = 40 };
+        Container c = new()
+        {
+            Child = probe,
+            Width = 200,
+            Padding = new Thickness(10, 0, 10, 0), // inner width 180
+            HorizontalAlignment = HorizontalAlignment.Center
+        };
+        c.Render(ctx, 500);
+        // inner width 180, slack 140, half = 70, plus padding.left 10
+        Assert.Equal(10 + 70, probe.RenderedX, 3);
+        Assert.Equal(40, probe.RenderedWidth, 3);
+    }
+
     // --- Background and border drawing ---
 
     [Fact]
