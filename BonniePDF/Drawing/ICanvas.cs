@@ -184,4 +184,17 @@ public interface ICanvas
     /// Emits <c>EMC</c> on PDF; no-op on SVG.
     /// </summary>
     void EndArtifact();
+
+    /// <summary>
+    /// Begin a region whose shapes should render with <c>shape-rendering="crispEdges"</c>
+    /// (axis-aligned lines/rects snapped to the device pixel grid, no antialiasing
+    /// blur). Used for chart axis lines so they stay sharp even when the chart as a
+    /// whole keeps default antialiasing for diagonals/arcs. On SVG this opens a
+    /// <c>&lt;g shape-rendering="crispEdges"&gt;</c>; on PDF (and other canvases) it
+    /// is a no-op via this default implementation. Pair with <see cref="EndCrispEdges"/>.
+    /// </summary>
+    void BeginCrispEdges() { }
+
+    /// <summary>End the region opened by <see cref="BeginCrispEdges"/>.</summary>
+    void EndCrispEdges() { }
 }

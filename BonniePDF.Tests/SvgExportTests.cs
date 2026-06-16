@@ -55,6 +55,43 @@ public class SvgExportTests
         Assert.Contains("xmlns", svg);
     }
 
+    private static ChartData SampleChartData() => new()
+    {
+        Title = "Test Chart",
+        Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 10 }, new() { Label = "B", Value = 20 }] }]
+    };
+
+    [Fact]
+    public void BarChart_ToSvg_UsesCrispEdges()
+    {
+        // Bars + gridlines are axis-aligned: crisp edges render sharper than antialiased.
+        string svg = new BarChart().ToSvg(SampleChartData());
+        Assert.Contains("shape-rendering=\"crispEdges\"", svg);
+    }
+
+    [Fact]
+    public void GroupedBarChart_ToSvg_UsesCrispEdges()
+    {
+        string svg = new GroupedBarChart().ToSvg(SampleChartData());
+        Assert.Contains("shape-rendering=\"crispEdges\"", svg);
+    }
+
+    [Fact]
+    public void LineChart_ToSvg_KeepsDefaultAntialiasing()
+    {
+        // Diagonal segments + circle markers must stay antialiased.
+        string svg = new LineChart().ToSvg(SampleChartData());
+        Assert.DoesNotContain("shape-rendering", svg);
+    }
+
+    [Fact]
+    public void PieChart_ToSvg_KeepsDefaultAntialiasing()
+    {
+        // Arc paths must stay antialiased.
+        string svg = new PieChart().ToSvg(SampleChartData());
+        Assert.DoesNotContain("shape-rendering", svg);
+    }
+
     [Fact]
     public void BarChart_ToSvg_ContainsChartTitle()
     {
