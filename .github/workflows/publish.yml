@@ -11,12 +11,14 @@ on:
         required: false
         type: string
 
+# Serialize releases so two quick tag pushes can't publish concurrently.
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .NET
 
     steps:
     - uses: actions/checkout@v4
