@@ -33,3 +33,22 @@ jobs:
 
     - name: Pack
       run: dotnet pack BonniePDF/BonniePDF.csproj --configuration Release --output nupkgs
+
+    # Smoke-test the produced package: confirm a .nupkg exists and actually
+    # contains the compiled assembly (catches an empty/broken pack before it
+    # ever reaches a release tag).
+    - name: Verify package contents
+      run: |
+        set -euo pipefail
+        nupkg=$(ls nupkgs/*.nupkg | head -n1)
+        echo "Inspecting $nupkg"
+        unzip -l "$nupkg" | grep -q 'lib/net8.0/BonniePDF.dll' \
+          || { echo "::error::BonniePDF.dll missing from package"; exit 1; }
+        echo "Package contains BonniePDF.dll ✓"
+
+    - name: Upload package artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: nupkg
+        path: nupkgs/*.nupkg
+        retention-days: 14

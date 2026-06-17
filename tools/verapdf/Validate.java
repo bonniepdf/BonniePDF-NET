@@ -11,20 +11,28 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Self-contained veraPDF compliance gate.
  *
  * Usage: Validate &lt;pdf-or-dir&gt; &lt;flavour[,flavour...]&gt;
  *   e.g. Validate generated-pdfs ua1,1b
+ *        Validate generated-pdfs auto
  *
  * Validates every PDF (a single file, or every *.pdf in a directory)
- * against every requested flavour. Prints a per-file/flavour verdict and
+ * against every requested flavour. When the flavour list is `auto`, the
+ * validator derives the veraPDF profiles from each file's XMP conformance
+ * claims (`pdfaid` and `pdfuaid`) instead of forcing one fixed profile across
+ * the whole directory. Prints a per-file/flavour verdict and
  * the failing clause ids. Exits 0 only if EVERY file is compliant with
  * EVERY flavour; exits 1 otherwise (so it gates CI).
  *
@@ -55,9 +63,15 @@ public final class Validate {
             System.exit(2);
         }
 
-        List<PDFAFlavour> flavours = new ArrayList<>();
-        for (String f : args[1].split(",")) {
-            flavours.add(PDFAFlavour.fromString(f.trim()));
+        boolean autoFlavours = "auto".equalsIgnoreCase(args[1].trim());
+        List<PDFAFlavour> requestedFlavours = new ArrayList<>();
+        if (!autoFlavours) {
+            for (String f : args[1].split(",")) {
+                String trimmed = f.trim();
+                if (!trimmed.isEmpty()) {
+                    requestedFlavours.add(PDFAFlavour.fromString(trimmed));
+                }
+            }
         }
 
         VeraGreenfieldFoundryProvider.initialise();
@@ -65,6 +79,14 @@ public final class Validate {
         List<String[]> summaryRows = new ArrayList<>();
 
         for (File pdf : pdfs) {
+            List<PDFAFlavour> flavours = autoFlavours ? detectFlavours(pdf) : requestedFlavours;
+            if (flavours.isEmpty()) {
+                System.out.printf("FAIL  %-28s [auto] no PDF/A or PDF/UA XMP conformance claim found%n", pdf.getName());
+                allPass = false;
+                summaryRows.add(new String[] { pdf.getName(), "auto", "FAIL", "No PDF/A or PDF/UA XMP conformance claim found" });
+                continue;
+            }
+
             for (PDFAFlavour flavour : flavours) {
                 boolean compliant = false;
                 Map<String, int[]> failures = new LinkedHashMap<>();
@@ -114,6 +136,55 @@ public final class Validate {
         System.exit(allPass ? 0 : 1);
     }
 
+
+    private static List<PDFAFlavour> detectFlavours(File pdf) throws IOException {
+        String text = Files.readString(pdf.toPath(), StandardCharsets.ISO_8859_1);
+        List<PDFAFlavour> flavours = new ArrayList<>();
+
+        String pdfAPart = firstXmlElementValue(text, "pdfaid", "part");
+        if (pdfAPart != null) {
+            String pdfAConformance = firstXmlElementValue(text, "pdfaid", "conformance");
+            String flavour = pdfAFlavourName(pdfAPart, pdfAConformance);
+            if (flavour != null) {
+                flavours.add(PDFAFlavour.fromString(flavour));
+            }
+        }
+
+        String pdfUaPart = firstXmlElementValue(text, "pdfuaid", "part");
+        if ("1".equals(pdfUaPart)) {
+            flavours.add(PDFAFlavour.fromString("ua1"));
+        }
+
+        return flavours;
+    }
+
+    private static String pdfAFlavourName(String part, String conformance) {
+        switch (part) {
+            case "1":
+            case "2":
+            case "3":
+                if (conformance == null || conformance.isEmpty()) {
+                    return null;
+                }
+                return part + conformance.toLowerCase();
+            case "4":
+                return "4";
+            default:
+                return null;
+        }
+    }
+
+    private static String firstXmlElementValue(String text, String prefix, String localName) {
+        Pattern pattern = Pattern.compile("<" + Pattern.quote(prefix) + ":" + Pattern.quote(localName)
+                + "\\b[^>]*>(.*?)</" + Pattern.quote(prefix) + ":" + Pattern.quote(localName) + ">",
+                Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(text);
+        if (!matcher.find()) {
+            return null;
+        }
+        return matcher.group(1).trim();
+    }
+
     /**
      * Writes a Markdown results table to $GITHUB_STEP_SUMMARY (appended, if
      * the env var is set) and to ./verapdf-summary.md (overwritten), so the
@@ -129,6 +200,8 @@ public final class Validate {
             String icon;
             if ("PASS".equals(row[2])) {
                 icon = "PASS ✅";
+            } else if ("SKIP".equals(row[2])) {
+                icon = "SKIP ⏭️";
             } else if ("ERROR".equals(row[2])) {
                 icon = "ERROR ⚠️";
             } else {
