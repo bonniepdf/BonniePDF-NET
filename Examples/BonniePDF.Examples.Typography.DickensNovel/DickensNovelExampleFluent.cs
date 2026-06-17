@@ -298,13 +298,13 @@ public static partial class DickensNovelExampleFluent
 
     private static string LoadText()
     {
-        if (File.Exists(LocalFilePath))
-            return File.ReadAllText(LocalFilePath, Encoding.UTF8);
-
-        throw new FileNotFoundException(
+        if (!File.Exists(LocalFilePath))
+        return 
             $"Novel source file not found at '{LocalFilePath}'. " +
             "Download it from https://www.gutenberg.org/cache/epub/98/pg98.txt " +
-            "and save it to that path.");
+            "and save it to that path.";
+
+        return File.ReadAllText(LocalFilePath, Encoding.UTF8);
     }
 
     // ── Novel parser ──────────────────────────────────────────────────────────

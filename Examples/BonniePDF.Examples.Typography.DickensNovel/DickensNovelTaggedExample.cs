@@ -242,10 +242,10 @@ public static partial class DickensNovelTaggedExample
         if (File.Exists(LocalFilePath))
             return File.ReadAllText(LocalFilePath, Encoding.UTF8);
 
-        throw new FileNotFoundException(
+        return
             $"Novel source file not found at '{LocalFilePath}'. " +
             "Download it from https://www.gutenberg.org/cache/epub/98/pg98.txt " +
-            "and save it to that path.");
+            "and save it to that path.";
     }
 
     // ── Novel parser ──────────────────────────────────────────────────────────
