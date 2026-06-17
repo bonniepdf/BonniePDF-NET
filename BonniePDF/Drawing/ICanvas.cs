@@ -186,6 +186,14 @@ public interface ICanvas
     void EndArtifact();
 
     /// <summary>
+    /// True when drawing currently sits inside an /Artifact region. Used by the
+    /// child-tagging helper to suppress structure tags (PDF/UA 7.1-2 forbids
+    /// tagged content inside an artifact). Defaults to <c>false</c> for canvases
+    /// that don't track artifact nesting (e.g. SVG output).
+    /// </summary>
+    bool IsInsideArtifact() => false;
+
+    /// <summary>
     /// Begin a region whose shapes should render with <c>shape-rendering="crispEdges"</c>
     /// (axis-aligned lines/rects snapped to the device pixel grid, no antialiasing
     /// blur). Used for chart axis lines so they stay sharp even when the chart as a

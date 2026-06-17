@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
+using BonniePDF.Rendering;
 using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Pdf;
 using BonniePDF.Rendering.Tagging;
@@ -23,6 +24,8 @@ public class PdfCanvas : ICanvas
     private readonly Func<ImageInfo, string> _imageResolver;
     private readonly Action<string, string> _glyphTracker;
     private readonly Func<float, string> _alphaGraphicsStateResolver;
+    private readonly Func<string, string, List<ResolvedTextRun>> _textRunResolver;
+    private readonly Action _reportUntaggedImage;
     private readonly StringBuilder _stream;
     private readonly float _xOffset;
     private readonly float _yOffset;
@@ -35,6 +38,8 @@ public class PdfCanvas : ICanvas
     private readonly Stack<bool> _markedContentTagged = new();
     // Per-BeginArtifact record of whether an /Artifact wrapper was actually emitted.
     private readonly System.Collections.Generic.Stack<bool> _artifactEmitStack = new();
+    // Logical nesting depth of /Artifact regions (whether or not each emitted a BMC).
+    private int _artifactDepth;
 
     /// <summary>
     /// Creates a new PdfCanvas for writing to the specified PDF content stream.
@@ -56,7 +61,9 @@ public class PdfCanvas : ICanvas
         Func<ImageInfo, string> imageResolver = null,
         Func<string, TtfFont> embeddedFontResolver = null,
         Action<string, string> glyphTracker = null,
-        Func<float, string> alphaGraphicsStateResolver = null)
+        Func<float, string> alphaGraphicsStateResolver = null,
+        Func<string, string, List<ResolvedTextRun>> textRunResolver = null,
+        Action reportUntaggedImage = null)
     {
         _stream = stream;
         Height = pageHeight;
@@ -69,6 +76,8 @@ public class PdfCanvas : ICanvas
         _embeddedFontResolver = embeddedFontResolver ?? (_ => null);
         _glyphTracker = glyphTracker ?? ((_, _) => { });
         _alphaGraphicsStateResolver = alphaGraphicsStateResolver ?? (alpha => $"/GS_ALPHA_{(int)Math.Round(alpha * 10000)}");
+        _textRunResolver = textRunResolver;
+        _reportUntaggedImage = reportUntaggedImage;
     }
 
     /// <summary>
@@ -227,35 +236,23 @@ public class PdfCanvas : ICanvas
         BeginColorAlpha(color);
         PdfOperators.BeginText(_stream);
 
-        // Set font using the resolver - this MUST happen before glyph tracking
-        // because RegisterFont creates the GlyphUsageTracker for embedded fonts.
-        string fontResourceName = _fontResolver(fontFamily);
-
-        // Track glyph usage for font subsetting (after font registration)
-        _glyphTracker(fontFamily, text);
-        PdfOperators.SetFont(_stream, fontResourceName, fontSize);
+        // Resolve runs first so any embedded/fallback fonts are registered before
+        // glyph tracking and width measurement.
+        List<ResolvedTextRun> runs = ResolveRuns(text, fontFamily);
         PdfOperators.SetFillColor(_stream, color);
 
         // Calculate X offset based on alignment
         float xOffset = 0;
         if (align == TextAlignment.Center || align == TextAlignment.Right)
         {
-            Size textSize = MeasureText(text, fontSize, fontFamily);
-            if (align == TextAlignment.Center)
-                xOffset = -textSize.Width / 2;
-            else if (align == TextAlignment.Right)
-                xOffset = -textSize.Width;
+            float width = MeasureRuns(runs, fontSize);
+            xOffset = align == TextAlignment.Center ? -width / 2 : -width;
         }
 
         float pdfX = x + _xOffset + xOffset;
         PdfOperators.SetTextPosition(_stream, pdfX, pdfY);
 
-        // Check if this is an embedded font (TTF/OTF)
-        TtfFont embeddedFont = _embeddedFontResolver(fontFamily);
-        if (embeddedFont != null)
-            PdfOperators.ShowText(_stream, PdfSyntax.ToGlyphIdHexString(text, embeddedFont));
-        else
-            PdfOperators.ShowText(_stream, $"({PdfSyntax.Escape(text)})");
+        EmitShowText(runs, fontSize);
 
         PdfOperators.EndText(_stream);
         EndColorAlpha(color);
@@ -280,17 +277,11 @@ public class PdfCanvas : ICanvas
         // Now draw text at origin (0,0) since we've already translated
         PdfOperators.BeginText(_stream);
 
-        string fontResourceName = _fontResolver(fontFamily);
-        _glyphTracker(fontFamily, text);
-        PdfOperators.SetFont(_stream, fontResourceName, fontSize);
+        List<ResolvedTextRun> runs = ResolveRuns(text, fontFamily);
         PdfOperators.SetFillColor(_stream, color);
         PdfOperators.SetTextPosition(_stream, 0, 0);
 
-        TtfFont embeddedFont = _embeddedFontResolver(fontFamily);
-        if (embeddedFont != null)
-            PdfOperators.ShowText(_stream, PdfSyntax.ToGlyphIdHexString(text, embeddedFont));
-        else
-            PdfOperators.ShowText(_stream, $"({PdfSyntax.Escape(text)})");
+        EmitShowText(runs, fontSize);
 
         PdfOperators.EndText(_stream);
         PdfOperators.RestoreState(_stream);
@@ -314,9 +305,9 @@ public class PdfCanvas : ICanvas
             return;
         }
 
-        // Measure natural text width
-        Size textSize = MeasureText(text, fontSize, fontFamily);
-        float extraSpace = availableWidth - textSize.Width;
+        // Resolve runs and measure per-run so spacing matches what is emitted.
+        List<ResolvedTextRun> runs = ResolveRuns(text, fontFamily);
+        float extraSpace = availableWidth - MeasureRuns(runs, fontSize);
         float wordSpacing = extraSpace / spaceCount;
 
         // PDF text y is the baseline
@@ -326,18 +317,11 @@ public class PdfCanvas : ICanvas
         BeginColorAlpha(color);
         PdfOperators.BeginText(_stream);
 
-        string fontResourceName = _fontResolver(fontFamily);
-        _glyphTracker(fontFamily, text);
-        PdfOperators.SetFont(_stream, fontResourceName, fontSize);
         PdfOperators.SetFillColor(_stream, color);
         PdfOperators.SetWordSpacing(_stream, wordSpacing);
         PdfOperators.SetTextPosition(_stream, pdfX, pdfY);
 
-        TtfFont embeddedFont = _embeddedFontResolver(fontFamily);
-        if (embeddedFont != null)
-            PdfOperators.ShowText(_stream, PdfSyntax.ToGlyphIdHexString(text, embeddedFont));
-        else
-            PdfOperators.ShowText(_stream, $"({PdfSyntax.Escape(text)})");
+        EmitShowText(runs, fontSize);
 
         // Reset word spacing to 0 so it doesn't leak to subsequent text
         PdfOperators.SetWordSpacing(_stream, 0);
@@ -360,11 +344,14 @@ public class PdfCanvas : ICanvas
         // _pageHeight - (bottom) is the PDF Y.
         float pdfY = Height - (y + _yOffset + height);
 
-        PdfOperators.SaveState(_stream);
-        PdfOperators.Translate(_stream, pdfX, pdfY);
-        PdfOperators.Scale(_stream, width, height);
-        PdfOperators.PaintXObject(_stream, imageName);
-        PdfOperators.RestoreState(_stream);
+        DrawAsArtifactFallback(() =>
+        {
+            PdfOperators.SaveState(_stream);
+            PdfOperators.Translate(_stream, pdfX, pdfY);
+            PdfOperators.Scale(_stream, width, height);
+            PdfOperators.PaintXObject(_stream, imageName);
+            PdfOperators.RestoreState(_stream);
+        }, _reportUntaggedImage);
     }
 
     /// <summary>
@@ -381,10 +368,13 @@ public class PdfCanvas : ICanvas
         // By translating to (pdfX, pdfY), (0,0) of the form aligns with this point.
         float pdfY = Height - (y + _yOffset);
 
-        PdfOperators.SaveState(_stream);
-        PdfOperators.Translate(_stream, pdfX, pdfY);
-        PdfOperators.PaintXObject(_stream, resourceName);
-        PdfOperators.RestoreState(_stream);
+        DrawAsArtifactFallback(() =>
+        {
+            PdfOperators.SaveState(_stream);
+            PdfOperators.Translate(_stream, pdfX, pdfY);
+            PdfOperators.PaintXObject(_stream, resourceName);
+            PdfOperators.RestoreState(_stream);
+        }, _reportUntaggedImage);
     }
 
     /// <summary>
@@ -448,17 +438,30 @@ public class PdfCanvas : ICanvas
         // a structure element (e.g. a table cell's /TD) is already enclosed real
         // content (satisfies PDF/UA 7.1), and nesting an artifact inside a tag
         // is invalid. The emit decision is recorded so EndArtifact stays balanced.
-        bool emit = _tagging != null && _openMarkedContent == 0;
+        // Only emit a BMC at the outermost artifact level: a nested /Artifact is
+        // redundant, and emitting one inside an open structure scope is invalid.
+        bool emit = _tagging != null && _openMarkedContent == 0 && _artifactDepth == 0;
         if (emit) PdfOperators.BeginArtifact(_stream);
         _artifactEmitStack.Push(emit);
+        _artifactDepth++;
     }
 
     /// <inheritdoc />
     public void EndArtifact()
     {
+        if (_artifactDepth > 0) _artifactDepth--;
         bool emit = _artifactEmitStack.Count > 0 && _artifactEmitStack.Pop();
         if (emit) PdfOperators.EndMarkedContent(_stream);
     }
+
+    /// <summary>
+    /// True when drawing currently sits inside an /Artifact region. Structure
+    /// tagging must be suppressed here: PDF/UA 7.1-2 forbids tagged (real)
+    /// content inside an artifact, so role-bearing children of a decorative
+    /// subtree (header/footer/slot/chart) stay artifact content rather than
+    /// getting their own BDC.
+    /// </summary>
+    public bool IsInsideArtifact() => _artifactDepth > 0;
 
     /// <summary>
     /// Measures text size to allow for precise alignment calculations in charts.
@@ -466,16 +469,75 @@ public class PdfCanvas : ICanvas
     /// </summary>
     public Size MeasureText(string text, float fontSize, string fontFamily)
     {
-        // Get the standard font name
-        string standardFontName = GetStandardFontName(fontFamily);
+        // Measure per glyph-fallback run so the width matches what is actually
+        // emitted (including any fallback-font glyphs and excluding dropped
+        // default-ignorable code points). When the primary font covers the whole
+        // string this collapses to a single run and is identical to before.
+        float width = MeasureRuns(ResolveRuns(text, fontFamily), fontSize);
+        return new Size(width, fontSize * 1.2f);
+    }
 
-        // Measure the text width using FontMetrics
-        float width = FontMetrics.GetStringWidth(text, standardFontName, (int)fontSize);
+    /// <summary>
+    /// Resolves <paramref name="text"/> into per-font runs via the injected run
+    /// resolver (glyph fallback). Without a resolver, returns a single legacy run
+    /// using the primary font resolvers, preserving standalone-canvas behaviour.
+    /// </summary>
+    private List<ResolvedTextRun> ResolveRuns(string text, string fontFamily)
+    {
+        if (_textRunResolver != null) return _textRunResolver(fontFamily, text);
+        return new List<ResolvedTextRun>
+        {
+            new()
+            {
+                ResourceName = _fontResolver(fontFamily),
+                EmbeddedFont = _embeddedFontResolver(fontFamily),
+                FontIdentifier = fontFamily,
+                Text = text
+            }
+        };
+    }
 
-        // Approximate height as font size * 1.2 (line height)
-        float height = fontSize * 1.2f;
+    /// <summary>Sums the rendered width of <paramref name="runs"/> at <paramref name="fontSize"/>, each run in its own font.</summary>
+    private static float MeasureRuns(List<ResolvedTextRun> runs, float fontSize)
+    {
+        float total = 0;
+        foreach (ResolvedTextRun run in runs)
+        {
+            TtfFont font = run.EmbeddedFont;
+            if (font != null)
+            {
+                foreach (System.Text.Rune rune in run.Text.EnumerateRunes())
+                {
+                    if (rune.Value < 32) continue; // matches ToGlyphIdHexString
+                    total += font.GetCharWidthInPoints(rune.Value, fontSize);
+                }
+            }
+            else
+            {
+                total += FontMetrics.GetStringWidth(run.Text, run.FontIdentifier, fontSize);
+            }
+        }
+        return total;
+    }
 
-        return new Size(width, height);
+    /// <summary>
+    /// Emits the font-selection (<c>Tf</c>) and show-text (<c>Tj</c>) operators for
+    /// the resolved runs. The caller must have positioned the text matrix and set
+    /// the fill colour first; each <c>Tj</c> advances the text point by its glyph
+    /// widths, so consecutive runs flow on naturally.
+    /// </summary>
+    private void EmitShowText(List<ResolvedTextRun> runs, float fontSize)
+    {
+        foreach (ResolvedTextRun run in runs)
+        {
+            if (run.Text.Length == 0) continue;
+            _glyphTracker(run.FontIdentifier, run.Text);
+            PdfOperators.SetFont(_stream, run.ResourceName, fontSize);
+            if (run.EmbeddedFont != null)
+                PdfOperators.ShowText(_stream, PdfSyntax.ToGlyphIdHexString(run.Text, run.EmbeddedFont));
+            else
+                PdfOperators.ShowText(_stream, $"({PdfSyntax.Escape(run.Text)})");
+        }
     }
 
     /// <summary>
@@ -493,26 +555,43 @@ public class PdfCanvas : ICanvas
         };
     }
 
-    /// <summary>
-    /// Maps a font family name to a standard font name for FontMetrics.
-    /// </summary>
-    private static string GetStandardFontName(string fontFamily)
-    {
-        // Map common font names to standard font names
-        return fontFamily.ToLowerInvariant() switch
-        {
-            var s when s.Contains("arial") || s.Contains("helvetica") => StandardFonts.Helvetica,
-            var s when s.Contains("times") => StandardFonts.TimesRoman,
-            var s when s.Contains("courier") || s.Contains("mono") => StandardFonts.Courier,
-            _ => StandardFonts.Helvetica
-        };
-    }
-
     private void DrawWithColorAlpha(Color color, Action draw)
     {
-        BeginColorAlpha(color);
-        draw();
-        EndColorAlpha(color);
+        DrawAsArtifactFallback(() =>
+        {
+            BeginColorAlpha(color);
+            draw();
+            EndColorAlpha(color);
+        });
+    }
+
+    /// <summary>
+    /// Wraps unscoped drawing in an /Artifact BMC for tagged documents, so the
+    /// marks aren't left as bare (untagged) real content (PDF/UA 7.1). Skips the
+    /// wrapper when already inside a structure scope or an explicit /Artifact
+    /// region, so decorative content in headers/footers/slots isn't double-marked.
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="onAutoArtifact"/> runs only when the fallback actually
+    /// fires, letting image callers surface a diagnostic rather than silently
+    /// demoting meaningful content to an artifact.
+    /// </remarks>
+    private void DrawAsArtifactFallback(Action draw, Action onAutoArtifact = null)
+    {
+        bool needsFallbackArtifact = _tagging != null && _openMarkedContent == 0 && _artifactDepth == 0;
+        if (needsFallbackArtifact)
+        {
+            PdfOperators.BeginArtifact(_stream);
+            onAutoArtifact?.Invoke();
+        }
+        try
+        {
+            draw();
+        }
+        finally
+        {
+            if (needsFallbackArtifact) PdfOperators.EndMarkedContent(_stream);
+        }
     }
 
     private void BeginColorAlpha(Color color)

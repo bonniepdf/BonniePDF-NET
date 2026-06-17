@@ -3,6 +3,7 @@ using BonniePDF.Core;
 using BonniePDF.Fluent;
 using BonniePDF.Fluent.Descriptors;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Elements.Layout;
 
@@ -141,9 +142,19 @@ public class Container : BorderedElementBase, IContentContainer
             }
         }
 
-        // Save Y position before child render
+        // Save Y position before child render. Tag the child so a role-bearing
+        // leaf nested directly under a Container isn't emitted as untagged
+        // content (PDF/UA 7.1); suppressed automatically inside /Artifact regions.
         float yBeforeChildRender = ctx.CurrentY;
-        Child.Render(ctx, childWidth);
+        ChildTagToken token = ChildTagging.BeginChildTag(ctx, Child);
+        try
+        {
+            Child.Render(ctx, childWidth);
+        }
+        finally
+        {
+            ChildTagging.EndChildTag(ctx, token);
+        }
         float yAfterChildRender = ctx.CurrentY;
 
         ctx.CurrentX = originalX;

@@ -25,10 +25,27 @@ namespace BonniePDF.Typography;
 /// or <see cref="RegisterFont(Stream, string?, string?)"/> to register additional or
 /// replacement fonts before generating any document.</para>
 /// </remarks>
+/// <summary>A registered font available to the glyph-fallback chain.</summary>
+public sealed class FallbackFont
+{
+    /// <summary>Registry key (<c>family:weight</c>), stable across the document.</summary>
+    public required string Key { get; init; }
+
+    /// <summary>Raw TTF bytes, for embedding the fallback font on demand.</summary>
+    public required byte[] Bytes { get; init; }
+
+    /// <summary>Parsed font, for glyph-coverage probing.</summary>
+    public required TtfFont Font { get; init; }
+}
+
 public static class FontManager
 {
     // Keys: $"{family.ToLower()}:{normalizedWeight}"
     private static readonly Dictionary<string, byte[]> _registry = new(StringComparer.OrdinalIgnoreCase);
+
+    // Parsed-font cache for the fallback chain, keyed like _registry. Entries are
+    // null when the bytes failed to parse, so we don't re-attempt on every call.
+    private static readonly Dictionary<string, TtfFont?> _fallbackCache = new(StringComparer.OrdinalIgnoreCase);
 
     // Standard PDF font → Liberation family+weight mapping
     private static readonly Dictionary<string, (string family, string weight)> StandardFontMap =
@@ -113,8 +130,50 @@ public static class FontManager
     /// <summary>Returns <c>true</c> if at least one substitution font is registered.</summary>
     public static bool HasBundledFonts() => _registry.Count > 0;
 
+    /// <summary>
+    /// Returns every registered font (in registration order) parsed for
+    /// glyph-coverage probing, for use as a glyph-fallback chain. Fonts whose
+    /// bytes fail to parse are skipped. The parsed instances are cached.
+    /// </summary>
+    /// <remarks>
+    /// The fallback chain lets the encoder render a code point the primary font
+    /// lacks (e.g. a <c>★</c> bullet, a symbol, an emoji) using the first
+    /// registered font that covers it, rather than emitting a forbidden
+    /// <c>.notdef</c> glyph.
+    /// </remarks>
+    public static List<FallbackFont> GetFallbackFonts()
+    {
+        var result = new List<FallbackFont>();
+        foreach (var entry in _registry)
+        {
+            string key = entry.Key;
+            byte[] bytes = entry.Value;
+
+            if (!_fallbackCache.TryGetValue(key, out TtfFont? font))
+            {
+                try
+                {
+                    font = TtfFont.LoadFromBytes(bytes);
+                }
+                catch
+                {
+                    font = null;
+                }
+                _fallbackCache[key] = font;
+            }
+
+            if (font != null)
+                result.Add(new FallbackFont { Key = key, Bytes = bytes, Font = font });
+        }
+        return result;
+    }
+
     /// <summary>Removes all registered fonts (primarily for test isolation).</summary>
-    public static void Clear() => _registry.Clear();
+    public static void Clear()
+    {
+        _registry.Clear();
+        _fallbackCache.Clear();
+    }
 
     /// <summary>Re-registers the bundled Liberation fonts after a <see cref="Clear"/> call (test isolation).</summary>
     public static void RestoreBundledFonts() => AutoRegisterBundledFonts();

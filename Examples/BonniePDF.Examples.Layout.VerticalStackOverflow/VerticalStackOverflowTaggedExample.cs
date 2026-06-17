@@ -13,7 +13,7 @@ namespace BonniePDF.Examples.Layout.VerticalStackOverflow;
 ///
 /// Seventy-five card-style items are laid out in a VerticalStack that spans multiple pages.
 /// VerticalStack is a layout primitive with no structure-tree role; each card's heading and
-/// description are tagged as /H3 and /P respectively. The structure tree contains one entry
+/// description are tagged as /H2 and /P respectively. The structure tree contains one entry
 /// per readable item regardless of which page it lands on.
 ///
 /// Acceptance: VeraPDF profile ua1 reports zero failures.
@@ -58,7 +58,7 @@ public static class VerticalStackOverflowTaggedExample
 
         doc.Add(new TextBlock
         {
-            Text   = "A collection of items demonstrating automatic pagination. Each item is an independent tagged element - its heading is /H3 and its description is /P in the structure tree.",
+            Text   = "A collection of items demonstrating automatic pagination. Each item is an independent tagged element - its heading is /H2 and its description is /P in the structure tree.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 
@@ -71,7 +71,7 @@ public static class VerticalStackOverflowTaggedExample
             stack.AddChild(new Heading($"Item #{i:D3}")
             {
                 TocIdentifier = $"item-{i}",
-                Level         = 3,
+                Level         = 2,
                 FontName      = StandardFonts.HelveticaBold,
                 FontSize      = 12,
                 TextColor     = ColorPalette.Blue[600],
