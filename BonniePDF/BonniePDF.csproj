@@ -16,7 +16,6 @@
     <RepositoryUrl></RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>pdf;generation;charting;report</PackageTags>
-    <PackageIcon>BonniePDF.png</PackageIcon>
     <PackageReadmeFile></PackageReadmeFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -32,10 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="BonniePDF.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
     <!-- Pack the dual-license text (BonniePDF Community License 1.0 + Commercial) referenced by PackageLicenseFile. -->
     <None Include="..\LICENSE">
       <Pack>True</Pack>
