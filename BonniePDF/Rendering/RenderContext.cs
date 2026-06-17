@@ -200,7 +200,7 @@ public class RenderContext
         else
         {
             var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
-                ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState);
+                ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage);
             if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
             Canvas = pdfCanvas;
         }
@@ -218,7 +218,7 @@ public class RenderContext
             };
 
         var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource,
-            ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState);
+            ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage);
         if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
         return pdfCanvas;
     }
@@ -240,6 +240,30 @@ public class RenderContext
     /// enabling accurate glyph subsetting when the PDF is written.
     /// </summary>
     internal void TrackGlyphUsage(string fontIdentifier, string text) => Resources.TrackGlyphUsage(fontIdentifier, text);
+
+    /// <summary>
+    /// Resolves a draw call's text into one or more runs, each renderable by a
+    /// single font, applying glyph fallback. Wired into each per-page
+    /// <see cref="PdfCanvas"/> so multi-script text never emits a <c>.notdef</c>
+    /// reference.
+    /// </summary>
+    internal List<ResolvedTextRun> ResolveTextRuns(string fontIdentifier, string text)
+        => Resources.ResolveTextRuns(fontIdentifier, text);
+
+    /// <summary>
+    /// Called when an image/XObject reaches the canvas in a tagged document with
+    /// no enclosing structure tag or artifact scope, so it was auto-wrapped as an
+    /// /Artifact to stay PDF/UA-valid. Surfacing this as a diagnostic keeps a
+    /// meaningful image from being demoted to an artifact <em>silently</em> — the
+    /// author should tag it (alt text → Figure) or mark it decorative on purpose.
+    /// </summary>
+    internal void ReportUntaggedImage()
+    {
+        Resources.Diagnostics.AddWarning(
+            DiagnosticCategory.Tagging,
+            "An image was drawn in a tagged document without a structure tag or artifact scope; " +
+            "it was emitted as an /Artifact. Provide alt text (tags it as /Figure) or mark it decorative to silence this.");
+    }
 
     /// <summary>
     /// Registers a font by its identifier and returns the PDF resource name (e.g. <c>/F1</c>)

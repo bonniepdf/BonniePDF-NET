@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BonniePDF.Core;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Elements.Text;
@@ -12,8 +13,14 @@ namespace BonniePDF.Elements.Text;
 /// Text spans with different fonts, sizes, colors, weights, and decorations flow together
 /// with automatic word wrapping across span boundaries.
 /// </summary>
-public class RichText : ElementBase, IStatefulElement
+public class RichText : ElementBase, IStatefulElement, IRoleProvider
 {
+    /// <summary>
+    /// RichText renders one flowing paragraph, so it tags as /P. Without a role
+    /// the pipeline would emit its text as untagged content (PDF/UA 7.1).
+    /// </summary>
+    public SemanticRole SemanticRole => SemanticRole.P;
+
     private readonly List<TextSpan> _spans = new();
     private float _cachedContentWidth = -1;
     private List<RichTextLine> _cachedLines;

@@ -61,28 +61,7 @@ public class VerticalStack : ElementBase, IStatefulElement
             // Tag children that declare a semantic role. Uses the same
             // try/finally pattern as PdfRenderPipeline so tagging is
             // closed before Overflow/WrapRequired propagates upward.
-            var tagging = ctx.Tagging;
-            SemanticRole? role = tagging != null && child is IRoleProvider rp ? rp.SemanticRole : (SemanticRole?)null;
-            // Artifact is a marked-content type, not a structure type - a
-            // decorative child is wrapped in /Artifact and kept out of the tree.
-            bool isArtifact = role == SemanticRole.Artifact;
-            bool tagChild = role != null && !isArtifact;
-            if (isArtifact)
-            {
-                ctx.Canvas.BeginArtifact();
-            }
-            else if (tagChild)
-            {
-                var elem = tagging!.Tree.Begin(role.Value);
-                if (child is IAltTextProvider alt && !string.IsNullOrEmpty(alt.AltText))
-                    tagging.Tree.SetAlt(alt.AltText);
-                if (child is Hyperlink hl)
-                    hl.LinkedStructElement = elem;
-                if (role.Value.IsContainerRole())
-                    ctx.Canvas.BeginContainerContent(role.Value.ToPdfTag());
-                else
-                    ctx.Canvas.BeginMarkedContent(role.Value.ToPdfTag());
-            }
+            ChildTagToken token = ChildTagging.BeginChildTag(ctx, child);
 
             try
             {
@@ -185,15 +164,7 @@ public class VerticalStack : ElementBase, IStatefulElement
             }
             finally
             {
-                if (isArtifact)
-                {
-                    ctx.Canvas.EndArtifact();
-                }
-                else if (tagChild)
-                {
-                    ctx.Canvas.EndMarkedContent();
-                    ctx.Tagging!.Tree.End();
-                }
+                ChildTagging.EndChildTag(ctx, token);
             }
         }
 
@@ -269,28 +240,7 @@ public class VerticalStack : ElementBase, IStatefulElement
             if (wouldOverflow && notAtTop && elementFitsOnOnePage && !canPaginateInternally) ctx.NewPage();
 
             // Tag children that declare a semantic role (same pattern as RenderStateful).
-            var tagging = ctx.Tagging;
-            SemanticRole? role = tagging != null && child is IRoleProvider rp ? rp.SemanticRole : (SemanticRole?)null;
-            // Artifact is a marked-content type, not a structure type - a
-            // decorative child is wrapped in /Artifact and kept out of the tree.
-            bool isArtifact = role == SemanticRole.Artifact;
-            bool tagChild = role != null && !isArtifact;
-            if (isArtifact)
-            {
-                ctx.Canvas.BeginArtifact();
-            }
-            else if (tagChild)
-            {
-                var elem = tagging!.Tree.Begin(role.Value);
-                if (child is IAltTextProvider alt && !string.IsNullOrEmpty(alt.AltText))
-                    tagging.Tree.SetAlt(alt.AltText);
-                if (child is Hyperlink hl)
-                    hl.LinkedStructElement = elem;
-                if (role.Value.IsContainerRole())
-                    ctx.Canvas.BeginContainerContent(role.Value.ToPdfTag());
-                else
-                    ctx.Canvas.BeginMarkedContent(role.Value.ToPdfTag());
-            }
+            ChildTagToken token = ChildTagging.BeginChildTag(ctx, child);
 
             try
             {
@@ -308,15 +258,7 @@ public class VerticalStack : ElementBase, IStatefulElement
             }
             finally
             {
-                if (isArtifact)
-                {
-                    ctx.Canvas.EndArtifact();
-                }
-                else if (tagChild)
-                {
-                    ctx.Canvas.EndMarkedContent();
-                    ctx.Tagging!.Tree.End();
-                }
+                ChildTagging.EndChildTag(ctx, token);
             }
         }
 

@@ -138,25 +138,15 @@ public class Hyperlink : IElement, IRoleProvider
         // Apply top margin
         ctx.CurrentY += Margin.Top;
 
-        // Register font
-        string fontResourceName = ctx.RegisterFont(FontName);
-        TtfFont embeddedFont = ctx.ResolveEmbeddedFont(FontName);
-        bool isEmbedded = embeddedFont != null;
-
         float contentWidth = width - Margin.Left - Margin.Right;
         List<string> lines = ComputeLines(contentWidth);
         float localY = ctx.CurrentY;
 
-        if (TextColor.ScA < 1f)
-        {
-            PdfOperators.SaveState(ctx.CurrentStream);
-            PdfOperators.SetGraphicsState(ctx.CurrentStream, ctx.RegisterAlphaGraphicsState(TextColor.ScA));
-        }
-
-        PdfOperators.BeginText(ctx.CurrentStream);
-        PdfOperators.SetFont(ctx.CurrentStream, fontResourceName, FontSize);
-        PdfOperators.SetFillColor(ctx.CurrentStream, TextColor);
-
+        // Draw through the canvas (not by appending raw operators to the page
+        // stream) so the link text lands inside the /Link marked-content scope
+        // the pipeline opens around this element. Writing to the page stream
+        // directly emitted the text outside that scope, leaving it untagged
+        // (PDF/UA 7.1). Drawing via the canvas also picks up glyph fallback.
         float maxWidth = 0;
         foreach (string line in lines)
         {
@@ -164,21 +154,11 @@ public class Hyperlink : IElement, IRoleProvider
             if (lineWidth > maxWidth)
                 maxWidth = lineWidth;
 
-            float pdfY = ctx.PageSize.Height - (localY + FontSize);
-
-            PdfOperators.SetTextPosition(ctx.CurrentStream, ctx.CurrentX + Margin.Left, pdfY);
-
-            if (isEmbedded)
-                PdfOperators.ShowText(ctx.CurrentStream, EncodeTextAsGlyphIds(ctx, line));
-            else
-                PdfOperators.ShowText(ctx.CurrentStream, $"({PdfSyntax.Escape(line)})");
+            ctx.Canvas.DrawText(ctx.CurrentX + Margin.Left, localY, line, TextColor, FontSize, FontName,
+                Elements.Text.TextAlignment.Left);
 
             localY += LineHeight;
         }
-
-        PdfOperators.EndText(ctx.CurrentStream);
-        if (TextColor.ScA < 1f)
-            PdfOperators.RestoreState(ctx.CurrentStream);
 
         // Calculate total content height
         float contentHeight = lines.Count * LineHeight;
@@ -249,22 +229,5 @@ public class Hyperlink : IElement, IRoleProvider
 
         if (!string.IsNullOrEmpty(currentLine)) lines.Add(currentLine);
         return lines;
-    }
-
-    /// <summary>
-    /// Encodes <paramref name="text"/> as a PDF hex string of Glyph IDs for the current font,
-    /// and records glyph usage for subsetting. Falls back to a plain escaped PDF string if the
-    /// font is not embedded (i.e. a standard PDF font).
-    /// </summary>
-    private string EncodeTextAsGlyphIds(RenderContext ctx, string text)
-    {
-        TtfFont font = ctx.ResolveEmbeddedFont(FontName);
-        if (font == null)
-            return $"({PdfSyntax.Escape(text)})";
-
-        // Track glyph usage for font subsetting (alias-aware)
-        ctx.TrackGlyphUsage(FontName, text);
-
-        return PdfSyntax.ToGlyphIdHexString(text, font);
     }
 }
