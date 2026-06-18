@@ -90,4 +90,39 @@ public static class ChildTagging
             ctx.Tagging!.Tree.End();
         }
     }
+
+    /// <summary>
+    /// Closes the canvas-side marked-content operator for a page break without touching
+    /// the in-memory structure tree. Call just before <c>ctx.NewPage()</c> when a stateful
+    /// element overflows so that the current page's content stream is self-contained.
+    /// Pair with <see cref="ResumeChildTag"/> on the new page.
+    /// </summary>
+    public static void PauseChildTag(RenderContext ctx, ChildTagToken token)
+    {
+        if (token.IsArtifact)
+            ctx.Canvas.EndArtifact();
+        else if (token.TagThis)
+            ctx.Canvas.EndMarkedContent();
+    }
+
+    /// <summary>
+    /// Re-opens the canvas-side marked-content operator on a new page after a page break.
+    /// The structure tree node remains open; this only re-emits the BDC/BMC on the new
+    /// page's content stream so each page is self-contained.
+    /// </summary>
+    public static void ResumeChildTag(RenderContext ctx, IElement element, ChildTagToken token)
+    {
+        if (token.IsArtifact)
+        {
+            ctx.Canvas.BeginArtifact();
+        }
+        else if (token.TagThis && element is IRoleProvider rp && ctx.Tagging != null)
+        {
+            SemanticRole role = rp.SemanticRole;
+            if (role.IsContainerRole())
+                ctx.Canvas.BeginContainerContent(role.ToPdfTag());
+            else
+                ctx.Canvas.BeginMarkedContent(role.ToPdfTag());
+        }
+    }
 }

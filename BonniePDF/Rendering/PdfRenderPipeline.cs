@@ -142,16 +142,10 @@ public static class PdfRenderPipeline
         // every child-render site tags consistently (and suppresses structure
         // tags inside /Artifact regions per PDF/UA 7.1-2).
         //
-        // Known limitation deferred to a later stage-0 task: elements
-        // that overflow across pages emit BDC on one page and EMC on
-        // the next, which is technically invalid marked content per the
-        // PDF spec. The renderer-side fix is to close + reopen the
-        // marked-content pair around each NewPage() call. Tests below
-        // use small content that fits on one page.
         ChildTagToken token = ChildTagging.BeginChildTag(ctx, element);
         try
         {
-            RenderElementWithOverflowCore(element, ctx, contentWidth);
+            RenderElementWithOverflowCore(element, ctx, contentWidth, token);
         }
         finally
         {
@@ -159,7 +153,7 @@ public static class PdfRenderPipeline
         }
     }
 
-    private static void RenderElementWithOverflowCore(IElement element, RenderContext ctx, float contentWidth)
+    private static void RenderElementWithOverflowCore(IElement element, RenderContext ctx, float contentWidth, ChildTagToken token = default)
     {
         if (element is IStatefulElement statefulElement)
         {
@@ -205,10 +199,16 @@ public static class PdfRenderPipeline
                         wrapAttempts = 0;
                     }
 
-                    // Close state on current page, start new page, open state on new page
+                    // Each page's content stream must have balanced BDC/EMC operators.
+                    // Close the canvas-side marked-content scope before switching pages,
+                    // then reopen it on the new page. The structure-tree node stays open
+                    // throughout; BeginMarkedContent on the new page allocates a fresh MCID
+                    // and attaches it to the same structure element.
                     ctx.Canvas.RestoreState();
+                    ChildTagging.PauseChildTag(ctx, token);
                     ctx.NewPage();
                     ctx.Canvas.SaveState();
+                    ChildTagging.ResumeChildTag(ctx, element, token);
                     status = statefulElement.RenderStateful(ctx, contentWidth);
                 }
             }

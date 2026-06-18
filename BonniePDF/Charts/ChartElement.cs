@@ -2,13 +2,14 @@
 using BonniePDF.Drawing;
 using BonniePDF.Elements;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Charts;
 
 /// <summary>
 /// Custom element that renders a chart using ICanvas to PDF.
 /// </summary>
-public class ChartElement : ElementBase
+public class ChartElement : ElementBase, IRoleProvider, IAltTextProvider
 {
     private readonly ChartBase _chart;
     private readonly ChartData _data;
@@ -18,6 +19,25 @@ public class ChartElement : ElementBase
         _chart = chart;
         _data = data;
     }
+
+    /// <summary>
+    /// Alternate text description for screen readers (e.g. "Bar chart showing monthly sales").
+    /// When set on a PDF/UA-1 document, the chart is tagged as a /Figure with this alt text.
+    /// When empty the chart is tagged as /Artifact (decorative), matching the TS ChartElement
+    /// behaviour when no altText is provided.
+    /// </summary>
+    public string AltText { get; set; } = string.Empty;
+
+    /// <summary>
+    /// When <c>true</c> the chart is unconditionally tagged as /Artifact regardless of AltText.
+    /// </summary>
+    public bool IsDecorative { get; set; }
+
+    /// <inheritdoc />
+    public SemanticRole SemanticRole =>
+        IsDecorative || string.IsNullOrEmpty(AltText)
+            ? SemanticRole.Artifact
+            : SemanticRole.Figure;
 
     protected override float GetPreferredContentWidth()
     {

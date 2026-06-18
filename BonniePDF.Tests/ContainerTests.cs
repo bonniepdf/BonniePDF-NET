@@ -233,6 +233,48 @@ public class ContainerTests
     }
 
     [Fact]
+    public void Render_ClipsContentToRoundedRectWhenClipContentSet()
+    {
+        (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
+        Container c = new()
+        {
+            Child = new Probe(10),
+            BackgroundColor = ColorPalette.Amber[400],
+            CornerRadius = 6,
+            ClipContent = true
+        };
+        c.Render(ctx, 500);
+
+        // The whole box (full width, full height incl. child) is clipped to the rounded outline,
+        // and the clip is balanced (opened and closed exactly once).
+        Assert.Single(canvas.Clips);
+        Assert.Equal((0f, 0f, 500f, 10f, 6f), canvas.Clips[0]);
+        Assert.Equal(0, canvas.OpenClips);
+    }
+
+    [Fact]
+    public void Render_DoesNotClipWhenCornerRadiusIsZeroEvenIfClipContentSet()
+    {
+        (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
+        Container c = new() { Child = new Probe(10), ClipContent = true }; // CornerRadius defaults to 0
+        c.Render(ctx, 500);
+
+        Assert.Empty(canvas.Clips);
+    }
+
+    [Fact]
+    public void Render_CornerRadiusAloneDoesNotClip()
+    {
+        (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
+        Container c = new() { Child = new Probe(10), BackgroundColor = ColorPalette.Amber[400], CornerRadius = 6 };
+        c.Render(ctx, 500);
+
+        // A rounded fill is emitted, but content is not masked unless ClipContent is set.
+        Assert.Single(canvas.RoundedRects);
+        Assert.Empty(canvas.Clips);
+    }
+
+    [Fact]
     public void Render_DrawsEachBorderSideAsAStroke()
     {
         (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
@@ -310,9 +352,18 @@ public class ContainerTests
         public List<(float X, float Y, float Width, float Height)> Rects { get; } = new();
         public List<(float X, float Y, float Width, float Height, float Radius)> RoundedRects { get; } = new();
         public List<(float X1, float Y1, float X2, float Y2, float Thickness)> Lines { get; } = new();
+        public List<(float X, float Y, float Width, float Height, float Radius)> Clips { get; } = new();
+        public int OpenClips { get; private set; }
 
         public float Width => 5000;
         public float Height => 5000;
+
+        public void BeginRoundedClip(float x, float y, float width, float height, float radius)
+        {
+            Clips.Add((x, y, width, height, radius));
+            OpenClips++;
+        }
+        public void EndClip() => OpenClips--;
 
         public void FillRect(float x, float y, float width, float height, Color color) =>
             Rects.Add((x, y, width, height));

@@ -205,4 +205,22 @@ public interface ICanvas
 
     /// <summary>End the region opened by <see cref="BeginCrispEdges"/>.</summary>
     void EndCrispEdges() { }
+
+    // --- 5. Clipping ---
+
+    /// <summary>
+    /// Begin a rounded-rectangle clipping region: all subsequent drawing is
+    /// masked to the rounded rectangle at (<paramref name="x"/>,
+    /// <paramref name="y"/>) sized <paramref name="width"/>×<paramref name="height"/>
+    /// with the given corner <paramref name="radius"/> (top-left origin, like every
+    /// other canvas coordinate). On PDF this pushes the graphics state and emits a
+    /// rounded-rect clip path (<c>W n</c>); on SVG it opens a <c>&lt;g clip-path&gt;</c>
+    /// referencing a generated <c>&lt;clipPath&gt;</c>. Canvases that don't support
+    /// clipping fall back to this no-op default (the content simply isn't masked).
+    /// Must be paired with <see cref="EndClip"/>.
+    /// </summary>
+    void BeginRoundedClip(float x, float y, float width, float height, float radius) { }
+
+    /// <summary>End the clipping region opened by <see cref="BeginRoundedClip"/>.</summary>
+    void EndClip() { }
 }
