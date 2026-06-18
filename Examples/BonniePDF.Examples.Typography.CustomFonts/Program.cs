@@ -24,7 +24,7 @@ internal sealed class Program
         if (taggedFont is not null)
         {
             using (taggedFont)
-                taggedFont.Save(Path.Combine(outputDir, "embedded_font_tagged.pdf"));
+                taggedFont.SaveWithPreview(Path.Combine(outputDir, "embedded_font_tagged.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

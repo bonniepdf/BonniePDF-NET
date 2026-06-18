@@ -22,7 +22,7 @@ internal sealed class Program
         Console.WriteLine("Generating Multi-Page Flow (Tagged / PDF/UA-1)...");
         using (var doc = MultiPageFlowTaggedExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "flow_demo_tagged.pdf"));
+            doc.SaveWithPreview(Path.Combine(outputDir, "flow_demo_tagged.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

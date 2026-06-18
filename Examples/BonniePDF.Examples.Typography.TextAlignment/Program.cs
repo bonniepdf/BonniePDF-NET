@@ -22,7 +22,7 @@ internal sealed class Program
         Console.WriteLine("Generating Text Alignment (Tagged / PDF/UA-1)...");
         using (var doc = TextAlignmentTaggedExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "justified_text_tagged.pdf"));
+            doc.SaveWithPreview(Path.Combine(outputDir, "justified_text_tagged.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
