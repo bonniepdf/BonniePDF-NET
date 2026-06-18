@@ -17,6 +17,7 @@ concurrency:
 
 permissions:
   contents: read
+  actions: write
 
 jobs:
   validate:
@@ -100,3 +101,17 @@ jobs:
             generated-pdfs/*.svg
           retention-days: 14
           if-no-files-found: ignore
+
+      - name: Delete prior workflow runs
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run list \
+            --repo "${{ github.repository }}" \
+            --workflow validate-accessibility.yml \
+            --json databaseId \
+            --jq '.[].databaseId' \
+            --limit 100 \
+          | grep -v '^${{ github.run_id }}$' \
+          | xargs -r -I{} gh run delete --repo "${{ github.repository }}" {}
