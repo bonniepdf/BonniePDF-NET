@@ -11,7 +11,7 @@ internal sealed class Program
         Console.WriteLine("Generating Business Invoice...");
         using (var doc = BusinessInvoiceExample.Generate())
         {
-            doc.SaveWithPreview(Path.Combine(outputDir, "invoice_tagged.pdf"));
+            doc.Save(Path.Combine(outputDir, "invoice_tagged.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

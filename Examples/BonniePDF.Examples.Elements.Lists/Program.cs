@@ -22,7 +22,7 @@ internal sealed class Program
         Console.WriteLine("Generating Lists (Tagged / PDF/UA-1)...");
         using (var doc = ListsTaggedExample.Generate())
         {
-            doc.SaveWithPreview(Path.Combine(outputDir, "lists_tagged.pdf"));
+            doc.Save(Path.Combine(outputDir, "lists_tagged.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

@@ -22,7 +22,7 @@ internal sealed class Program
         Console.WriteLine("Generating Text Decorations (Tagged / PDF/UA-1)...");
         using (var doc = TextDecorationTaggedExample.Generate())
         {
-            doc.SaveWithPreview(Path.Combine(outputDir, "text_decorations_tagged.pdf"));
+            doc.Save(Path.Combine(outputDir, "text_decorations_tagged.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

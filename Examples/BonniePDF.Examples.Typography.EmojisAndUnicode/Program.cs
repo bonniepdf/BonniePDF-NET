@@ -24,7 +24,7 @@ internal sealed class Program
         if (taggedEmoji is not null)
         {
             using (taggedEmoji)
-                taggedEmoji.SaveWithPreview(Path.Combine(outputDir, "emoji_tagged.pdf"));
+                taggedEmoji.Save(Path.Combine(outputDir, "emoji_tagged.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
