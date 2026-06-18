@@ -1,0 +1,5 @@
+# Global fallback - all PRs need at least one maintainer review
+*   @bonniepdf/dotnet-maintainers
+
+# Published library - extra scrutiny
+BonniePDF/   @bonniepdf/dotnet-maintainers
