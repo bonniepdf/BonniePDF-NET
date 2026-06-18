@@ -22,7 +22,7 @@ internal sealed class Program
         Console.WriteLine("Generating Book Page Layout (Tagged / PDF/UA-1)...");
         using (var doc = BookPageLayoutTaggedExample.Generate())
         {
-            doc.SaveWithPreview(Path.Combine(outputDir, "book_page_tagged.pdf"));
+            doc.Save(Path.Combine(outputDir, "book_page_tagged.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

@@ -68,10 +68,6 @@ jobs:
           # GeneratedPdfs/. Collect every one — any new tagged example is
           # included automatically, with no change to this workflow.
           find Examples -path '*/GeneratedPdfs/*_tagged.pdf' -exec cp {} generated-pdfs/ \;
-          # Each tagged PDF is saved with a sibling first-page SVG preview
-          # (Document.SaveWithPreview); collect those too so the veraPDF card
-          # report can show a thumbnail per file.
-          find Examples -path '*/GeneratedPdfs/*_tagged.svg' -exec cp {} generated-pdfs/ \;
           ls -l generated-pdfs
 
       # `auto` reads each PDF's XMP conformance claims (pdfaid + pdfuaid) and
@@ -87,20 +83,6 @@ jobs:
           name: generated-pdfs
           path: generated-pdfs/
           retention-days: 14
-
-      # Self-contained card report: the HTML plus the first-page SVG previews it
-      # references via relative <img src>. Both must travel together for the
-      # thumbnails to render when the artifact is downloaded.
-      - name: Upload conformance report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: conformance-report
-          path: |
-            generated-pdfs/verapdf-report.html
-            generated-pdfs/*.svg
-          retention-days: 14
-          if-no-files-found: ignore
 
       - name: Delete prior workflow runs
         if: always()

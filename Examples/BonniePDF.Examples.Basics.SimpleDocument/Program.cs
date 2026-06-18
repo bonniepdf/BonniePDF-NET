@@ -21,12 +21,12 @@ internal sealed class Program
         Console.WriteLine("Generating Simple Document (Tagged / PDF/UA-1)...");
         using (var doc = SimpleDocumentTaggedExample.Generate())
         {
-            doc.SaveWithPreview(Path.Combine(outputDir, "simple_document_tagged.pdf"));
+            doc.Save(Path.Combine(outputDir, "simple_document_tagged.pdf"));
         }
         Console.WriteLine("Generating PDF/A-2a + PDF/UA-1...");
         using (var doc = PdfA2aCompliantExample.Generate())
         {
-            doc.SaveWithPreview(Path.Combine(outputDir, "pdfa2a_compliant_tagged.pdf"));
+            doc.Save(Path.Combine(outputDir, "pdfa2a_compliant_tagged.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
