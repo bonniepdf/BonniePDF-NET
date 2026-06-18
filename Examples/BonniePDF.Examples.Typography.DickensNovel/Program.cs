@@ -22,7 +22,7 @@ internal sealed class Program
         Console.WriteLine("Generating Dickens: A Tale of Two Cities (Tagged / PDF/UA-1)...");
         using (var doc = DickensNovelTaggedExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "dickens_a_tale_of_two_cities_tagged.pdf"));
+            doc.SaveWithPreview(Path.Combine(outputDir, "dickens_a_tale_of_two_cities_tagged.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

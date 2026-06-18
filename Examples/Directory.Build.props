@@ -1,0 +1,17 @@
+<Project>
+
+  <!-- MSBuild stops at the first Directory.Build.props found while walking up, so
+       we must import the repo-root one explicitly to keep <Version> and the
+       shared analyzers for the example projects. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <ItemGroup>
+    <!-- Link the shared example-output helper (SaveWithPreview) into every example
+         project, with a global using so Program.cs needs no extra import. The file
+         lives outside any single project dir, so the SDK's default globbing does
+         not pick it up twice. -->
+    <Compile Include="$(MSBuildThisFileDirectory)_shared\ExampleOutput.cs" Link="_shared\ExampleOutput.cs" />
+    <Using Include="BonniePDF.Examples.Shared" />
+  </ItemGroup>
+
+</Project>
