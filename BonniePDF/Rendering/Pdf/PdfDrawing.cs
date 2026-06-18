@@ -240,6 +240,31 @@ internal static class PdfDrawing
     }
 
     /// <summary>
+    /// Intersects the current clipping path with a rounded-rectangle region.
+    /// Appends the rounded-rect path (reusing the same Bézier construction as the
+    /// fill/stroke variants) followed by <c>W n</c>, so subsequent drawing is
+    /// masked to the rounded rect. The caller owns the surrounding <c>q</c>/<c>Q</c>
+    /// so the clip can be undone. A radius of zero clips to a plain rectangle.
+    /// </summary>
+    public static void ClipRoundedRect(StringBuilder stream, float x, float y, float width, float height,
+        float radius)
+    {
+        if (radius <= 0)
+        {
+            PdfOperators.Rectangle(stream, x, y, width, height);
+            PdfOperators.Clip(stream);
+            return;
+        }
+
+        // Clamp radius to half the smallest dimension, matching FillRoundedRect.
+        float maxRadius = System.Math.Min(width, height) / 2f;
+        if (radius > maxRadius) radius = maxRadius;
+
+        AppendRoundedRectPath(stream, x, y, width, height, radius);
+        PdfOperators.Clip(stream);
+    }
+
+    /// <summary>
     /// Fills a closed path defined by a series of points.
     /// </summary>
     /// <param name="stream">The PDF content stream to write to</param>

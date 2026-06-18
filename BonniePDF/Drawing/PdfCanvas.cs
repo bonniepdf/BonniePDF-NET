@@ -162,6 +162,22 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>
+    /// Begin a rounded-rectangle clip. Pushes the graphics state, then narrows the
+    /// clip to the rounded rect so all drawing up to <see cref="EndClip"/> is masked.
+    /// Converts Top-Left (y) to Bottom-Left (pdfY).
+    /// </summary>
+    public void BeginRoundedClip(float x, float y, float width, float height, float radius)
+    {
+        float pdfX = x + _xOffset;
+        float pdfY = Height - (y + _yOffset + height);
+        SaveState();
+        PdfDrawing.ClipRoundedRect(_stream, pdfX, pdfY, width, height, radius);
+    }
+
+    /// <summary>Restores the graphics state pushed by <see cref="BeginRoundedClip"/>.</summary>
+    public void EndClip() => RestoreState();
+
+    /// <summary>
     /// Draws a line between two points.
     /// Converts both points from Top-Left to Bottom-Left coordinates.
     /// </summary>

@@ -57,6 +57,18 @@ public class Container : BorderedElementBase, IContentContainer
     public float? Height { get; set; }
 
     /// <summary>
+    /// When <c>true</c> and <see cref="BorderedElementBase.CornerRadius"/> is
+    /// positive, the container's content (background, border, and child) is
+    /// clipped to the rounded-rectangle outline. This is what turns a
+    /// rounded background into a true rounded-corner card: a full-bleed image or
+    /// any overflowing child is masked to the rounded box rather than spilling
+    /// past the corners. Defaults to <c>false</c>, so setting
+    /// <see cref="BorderedElementBase.CornerRadius"/> alone keeps the historical
+    /// behaviour of a rounded fill/stroke with un-clipped content.
+    /// </summary>
+    public bool ClipContent { get; set; }
+
+    /// <summary>
     /// Horizontal alignment of the child within the container's available width
     /// (<c>AlignCenter</c>/<c>AlignRight</c>/<c>AlignLeft</c>).
     /// When the child is narrower than the container it is positioned
@@ -99,11 +111,29 @@ public class Container : BorderedElementBase, IContentContainer
         // If not, we trigger a new page here too, to keep borders intact.
         if (ctx.CurrentY + containerHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin) ctx.NewPage();
 
+        // Rounded-corner clipping: mask the background, border, and child to
+        // the rounded outline. Opened here and closed in the finally so the early
+        // childless return still balances the clip.
+        bool clip = ClipContent && CornerRadius > 0;
+        if (clip)
+            ctx.Canvas.BeginRoundedClip(ctx.CurrentX, ctx.CurrentY, effectiveWidth, containerHeight, CornerRadius);
+
+        try
+        {
+            RenderClippedContent(ctx, effectiveWidth, containerHeight);
+        }
+        finally
+        {
+            if (clip) ctx.Canvas.EndClip();
+        }
+    }
+
+    private void RenderClippedContent(RenderContext ctx, float effectiveWidth, float containerHeight)
+    {
         if (BackgroundColor.HasValue || Border.HasAnyBorder)
         {
             float rectX = ctx.CurrentX;
             float rectWidth = effectiveWidth;
-            float rectY = ctx.PageSize.Height - ctx.CurrentY - containerHeight;
 
             if (BackgroundColor.HasValue)
                 DrawBackground(ctx, rectX, ctx.CurrentY, rectWidth, containerHeight, BackgroundColor.Value);

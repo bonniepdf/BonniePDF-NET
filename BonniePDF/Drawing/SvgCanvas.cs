@@ -27,6 +27,13 @@ public class SvgCanvas : ICanvas
     private readonly Func<string, TtfFont> _fontResolver;
 
     /// <summary>
+    /// Process-wide counter for generating unique <c>&lt;clipPath&gt;</c> ids. Static so
+    /// ids stay unique even when several canvases compose into one shared buffer
+    /// (page export writes positioned child canvases into the same StringBuilder).
+    /// </summary>
+    private static int _clipIdCounter;
+
+    /// <summary>
     /// Creates a new SvgCanvas for generating SVG markup.
     /// </summary>
     /// <param name="width">Width of the SVG canvas</param>
@@ -461,6 +468,28 @@ public class SvgCanvas : ICanvas
 
     /// <inheritdoc />
     public void EndCrispEdges() => _sb.AppendLf("</g>");
+
+    /// <inheritdoc />
+    public void BeginRoundedClip(float x, float y, float width, float height, float radius)
+    {
+        float sx = x + _xOffset;
+        float sy = y + _yOffset;
+        string id = $"clip{_clipIdCounter++}";
+        _sb.AppendLf(
+            $"<clipPath id=\"{id}\"><rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" rx=\"{N(radius)}\" ry=\"{N(radius)}\"/></clipPath>");
+        _sb.AppendLf($"<g clip-path=\"url(#{id})\">");
+        _stateDepth++;
+    }
+
+    /// <inheritdoc />
+    public void EndClip()
+    {
+        if (_stateDepth > 0)
+        {
+            _sb.AppendLf("</g>");
+            _stateDepth--;
+        }
+    }
 
     /// <summary>
     /// Closes the page group in multipage mode.

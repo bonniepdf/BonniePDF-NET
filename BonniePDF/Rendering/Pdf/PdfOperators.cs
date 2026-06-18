@@ -142,6 +142,15 @@ internal static class PdfOperators
     /// </summary>
     internal static void ClosePath(StringBuilder s) => s.AppendLf("h");
 
+    /// <summary>
+    /// <c>W n</c> - intersect the current clipping path with the current path
+    /// (non-zero winding rule), then end the path without painting it. All
+    /// subsequent marking operators are confined to the intersection until the
+    /// enclosing <c>q</c>/<c>Q</c> restores the previous clip.
+    /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=235"/>
+    /// </summary>
+    internal static void Clip(StringBuilder s) => s.AppendLf("W n");
+
     // ── Path Painting (PDF Ref 8.5.3) ───────────────────────────────────
 
     /// <summary>
