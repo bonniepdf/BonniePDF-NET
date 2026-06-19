@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using BonniePDF.Core;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Elements.Layout;
 
@@ -146,11 +147,21 @@ public class HorizontalStack : ElementBase, IStatefulElement
             // Note: Stretch is not implemented for horizontal stack as it would require
             // modifying the child's height, which is not supported by the IElement interface
 
-            // Save state and render child
+            // Save state and render child. Tag role-bearing children so their
+            // content isn't emitted untagged (PDF/UA 7.1) - the stack itself
+            // renders children directly rather than via the pipeline.
             float yBefore = ctx.CurrentY;
             ctx.CurrentY += verticalOffset;
 
-            child.Render(ctx, childWidth);
+            ChildTagToken token = ChildTagging.BeginChildTag(ctx, child);
+            try
+            {
+                child.Render(ctx, childWidth);
+            }
+            finally
+            {
+                ChildTagging.EndChildTag(ctx, token);
+            }
 
             ctx.CurrentY = yBefore;
             ctx.CurrentX += childWidth + Spacing;

@@ -200,26 +200,47 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         // are opened lazily (only once a row actually renders, so no empty groups)
         // and closed before every return so the structure tree stays balanced.
 
-        // Render headers if pending (first page or continuation with RepeatHeadersOnNewPage)
+        // Render headers if pending (first page or continuation with RepeatHeadersOnNewPage).
+        // On the first page the header rows are tagged as THead (structural).
+        // On continuation pages the repeated rows are purely presentational, so they are
+        // wrapped in /Artifact to avoid a second THead child under the same Table element
+        // (PDF/UA 7.2-11: a Table shall contain zero or one THead).
         if (_headersPending)
         {
+            bool isContinuation = _lastRowRendered >= 0;
             bool theadOpen = false;
+            bool artifactOpen = false;
+
             foreach (TableRow headerRow in _headers)
             {
                 float headerHeight = MeasureRowHeight(headerRow, widths);
 
                 if (ctx.CurrentY + headerHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
                 {
-                    // Header doesn't fit
                     if (theadOpen && tagging != null) tagging.Tree.End();
+                    if (artifactOpen) ctx.Canvas.EndArtifact();
                     return _lastRowRendered < 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
                 }
 
-                if (!theadOpen && tagging != null) { tagging.Tree.Begin(SemanticRole.THead); theadOpen = true; }
+                if (!theadOpen && !artifactOpen)
+                {
+                    if (isContinuation && tagging != null)
+                    {
+                        ctx.Canvas.BeginArtifact();
+                        artifactOpen = true;
+                    }
+                    else if (tagging != null)
+                    {
+                        tagging.Tree.Begin(SemanticRole.THead);
+                        theadOpen = true;
+                    }
+                }
+
                 RenderRowDirect(ctx, headerRow, widths);
             }
 
             if (theadOpen && tagging != null) tagging.Tree.End();
+            if (artifactOpen) ctx.Canvas.EndArtifact();
             _headersPending = false;
         }
 

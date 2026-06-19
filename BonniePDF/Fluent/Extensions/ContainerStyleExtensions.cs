@@ -218,6 +218,27 @@ public static class ContainerStyleExtensions
         return container;
     }
 
+    /// <summary>
+    /// Rounds the container's corners <em>and</em> clips its content to that
+    /// rounded outline. Unlike <see cref="CornerRadius"/> — which only
+    /// rounds the background fill and border stroke — this masks the child too, so
+    /// a full-bleed image or any overflowing content is cut to the rounded box.
+    /// This is the idiomatic way to build rounded image cards and avatars.
+    /// <example>
+    /// <code>
+    /// container.RoundedCorners(12).Image("avatar.png");
+    /// container.RoundedCorners(6).Background(ColorPalette.Slate[100]);
+    /// </code>
+    /// </example>
+    /// </summary>
+    public static IContentContainer RoundedCorners(this IContentContainer c, float radius)
+    {
+        var container = GetOrCreateContainer(c);
+        container.CornerRadius = radius;
+        container.ClipContent = true;
+        return container;
+    }
+
     // --- Margin ---
 
     /// <summary>Sets uniform margin on all sides.</summary>
@@ -298,6 +319,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer AlignCenter(this IContentContainer c)
     {
         var container = GetOrCreateContainer(c);
+        container.HorizontalAlignment = HorizontalAlignment.Center;
         return container;
     }
 
@@ -305,6 +327,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer AlignRight(this IContentContainer c)
     {
         var container = GetOrCreateContainer(c);
+        container.HorizontalAlignment = HorizontalAlignment.End;
         return container;
     }
 
@@ -312,6 +335,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer AlignLeft(this IContentContainer c)
     {
         var container = GetOrCreateContainer(c);
+        container.HorizontalAlignment = HorizontalAlignment.Start;
         return container;
     }
 }

@@ -25,6 +25,12 @@ public class BarChart : CartesianChartBase
     /// </summary>
     public float BarWidthRatio { get; set; } = 0.6f;
 
+    /// <summary>Bars and gridlines are axis-aligned, so crisp edges render sharper than antialiased.</summary>
+    public BarChart()
+    {
+        SvgShapeRendering = "crispEdges";
+    }
+
     /// <summary>
     /// Draws the bar chart elements for a single series.
     /// In vertical mode draws upward bars; in horizontal mode draws rightward bars.

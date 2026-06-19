@@ -17,12 +17,36 @@ using BonniePDF.Rendering.Pdf;
 namespace BonniePDF.Rendering;
 
 /// <summary>
+/// A maximal substring of a draw call that renders with one font, after
+/// glyph-fallback resolution. <see cref="EmbeddedFont"/> is <c>null</c> for
+/// non-embedded (standard Type1) fonts, in which case the text is emitted as a
+/// literal string rather than glyph IDs.
+/// </summary>
+public sealed class ResolvedTextRun
+{
+    /// <summary>PDF resource name (e.g. <c>/F1</c>) of the font for this run.</summary>
+    public required string ResourceName { get; init; }
+
+    /// <summary>The embedded font, or <c>null</c> for a non-embedded standard Type1 font.</summary>
+    public TtfFont EmbeddedFont { get; init; }
+
+    /// <summary>The font identifier used to track glyph usage on this run.</summary>
+    public required string FontIdentifier { get; init; }
+
+    /// <summary>The substring rendered by this run's font.</summary>
+    public required string Text { get; init; }
+}
+
+/// <summary>
 /// Manages PDF resources (fonts, images, XObjects) for a document.
 /// Tracks used resources during rendering and handles their serialization.
 /// </summary>
 public class PdfResourceRegistry
 {
     private static readonly Random _random = new();
+
+    /// <summary>Identifier prefix for glyph-fallback fonts registered on demand.</summary>
+    private const string FallbackPrefix = "virtual:fallback:";
 
     private int _fontCounter;
     private int _imageCounter;
@@ -369,6 +393,90 @@ public class PdfResourceRegistry
             EmbeddedFontInfo fontInfo = GetEmbeddedFont(ttfPath);
             fontInfo?.Tracker.MarkUsed(text);
         }
+    }
+
+    /// <summary>
+    /// Resolves a draw call's text into one or more runs, each renderable by a
+    /// single font. The primary font is used wherever it has the glyph; code
+    /// points it lacks are routed to the first registered fallback font that
+    /// covers them (registering it for embedding on demand). Control and
+    /// default-ignorable code points are dropped, as are code points no font can
+    /// render — both silently in output, the latter with a diagnostic — so the
+    /// content stream never references the forbidden <c>.notdef</c> glyph.
+    /// </summary>
+    /// <remarks>
+    /// When the primary font covers the whole string (or is a non-embedded
+    /// Type1 font) the result is a single run identical to the legacy path.
+    /// </remarks>
+    public List<ResolvedTextRun> ResolveTextRuns(string primaryFontIdentifier, string text)
+    {
+        string resourceName = RegisterFont(primaryFontIdentifier);
+        TtfFont primaryFont = ResolveEmbeddedFont(primaryFontIdentifier);
+
+        // Non-embedded standard Type1 fonts can't be shaped (no cmap/glyph IDs);
+        // preserve the literal-string emission path unchanged.
+        if (primaryFont == null)
+        {
+            return new List<ResolvedTextRun>
+            {
+                new() { ResourceName = resourceName, EmbeddedFont = null, FontIdentifier = primaryFontIdentifier, Text = text }
+            };
+        }
+
+        // candidates[0] is the primary font; fallbackByIndex is aligned to
+        // candidates (index 0 is the primary and has no FallbackFont entry).
+        var candidates = new List<ShaperFont> { new() { FontIdentifier = primaryFontIdentifier, Font = primaryFont } };
+        var fallbackByIndex = new List<FallbackFont> { null };
+        foreach (FallbackFont fb in FontManager.GetFallbackFonts())
+        {
+            if (fb.Font == primaryFont) continue;
+            candidates.Add(new ShaperFont { FontIdentifier = $"{FallbackPrefix}{fb.Key}", Font = fb.Font });
+            fallbackByIndex.Add(fb);
+        }
+
+        ShapeResult shaped = TextRunShaper.ShapeTextRuns(text, candidates);
+
+        if (shaped.Unsupported.Count > 0)
+        {
+            string sample = string.Join(", ", shaped.Unsupported
+                .Distinct()
+                .Take(8)
+                .Select(cp => $"U+{cp:X4}"));
+            Diagnostics.AddWarning(
+                DiagnosticCategory.Font,
+                $"Dropped {shaped.Unsupported.Count} code point(s) with no glyph in the selected or fallback fonts ({sample}).",
+                primaryFontIdentifier);
+        }
+
+        var result = new List<ResolvedTextRun>(shaped.Runs.Count);
+        foreach (ShapedRun run in shaped.Runs)
+        {
+            if (run.FontIndex == 0)
+            {
+                result.Add(new ResolvedTextRun
+                {
+                    ResourceName = resourceName,
+                    EmbeddedFont = primaryFont,
+                    FontIdentifier = primaryFontIdentifier,
+                    Text = run.Text
+                });
+                continue;
+            }
+
+            FallbackFont fb = fallbackByIndex[run.FontIndex];
+            string fbIdentifier = candidates[run.FontIndex].FontIdentifier;
+            string fbResource = RegisterEmbeddedFontFromBytes(fb.Bytes, fbIdentifier);
+            TtfFont fbFont = ResolveEmbeddedFont(fbIdentifier);
+            result.Add(new ResolvedTextRun
+            {
+                ResourceName = fbResource,
+                EmbeddedFont = fbFont,
+                FontIdentifier = fbIdentifier,
+                Text = run.Text
+            });
+        }
+
+        return result;
     }
 
     /// <summary>

@@ -224,18 +224,15 @@ public class Stage1CloseoutTests
     }
 
     [Fact]
-    public void MultiPageFlow_PageBreakAwareTagging_ProducesMcrForSpannedCells()
+    public void MultiPageFlow_PageBreakAwareTagging_ProducesSingleTHead()
     {
         // The table overflows across pages. With RepeatHeadersOnNewPage=true,
-        // each page fragment produces its own Table/THead struct elements.
-        // Verify at least 2 THead groups exist - confirming the header-repeat
-        // logic is running and the table is genuinely multi-page.
-        // (True cross-page MCR dicts would require a single StructElement
-        // spanning multiple pages, which only arises for flowing text that
-        // wraps across a page boundary, not for atomic table rows.)
+        // headers are re-drawn visually on each continuation page, but only the
+        // first page's headers are tagged as THead (structural). Repeated headers
+        // are Artifacts, so there must be exactly one /THead in the structure tree
+        // (PDF/UA 7.2-11: Table shall contain zero or one THead kid).
         string pdf = Generate(BuildMultiPageFlowDocument());
-        Assert.True(SubstringCounter.Count(pdf, "/S /THead") >= 2,
-            "expected repeated headers to produce at least 2 THead struct elems across pages");
+        Assert.Equal(1, SubstringCounter.Count(pdf, "/S /THead"));
     }
 
     // ── Dickens novel / TOC ─────────────────────────────────────────

@@ -52,7 +52,21 @@ public static class SvgExportExtensions
         chart.Draw(canvas, data);
 
         // Finalize SVG
-        return canvas.GetSvg();
+        string svg = canvas.GetSvg();
+
+        // Axis-aligned charts (bar, grouped bar) opt into crisp edges so their
+        // bars/gridlines snap to the pixel grid; others keep the default
+        // antialiasing for their diagonals/arcs/circles. Injected on the root tag
+        // (the header is written in the SvgCanvas constructor, before options).
+        if (!string.IsNullOrEmpty(chart.SvgShapeRendering))
+        {
+            const string rootTag = "<svg ";
+            int idx = svg.IndexOf(rootTag, System.StringComparison.Ordinal);
+            if (idx >= 0)
+                svg = svg.Insert(idx + rootTag.Length, $"shape-rendering=\"{chart.SvgShapeRendering}\" ");
+        }
+
+        return svg;
     }
 
     /// <summary>
@@ -90,8 +104,19 @@ public static class SvgExportExtensions
 
         element.Render(ctx, width);
 
-        if (ctx.Canvas is SvgCanvas svgCanvas) return svgCanvas.GetSvg();
+        string svg = ctx.Canvas is SvgCanvas svgCanvas ? svgCanvas.GetSvg() : ctx.CurrentStream.ToString();
 
-        return ctx.CurrentStream.ToString();
+        // Barcodes, QR, and Data Matrix are pixel-grid symbologies drawn as a
+        // mosaic of abutting rectangles. crispEdges snaps module edges to the
+        // device pixel grid so adjacent modules meet exactly, eliminating the
+        // faint anti-aliasing seams ("1px lines") that otherwise appear between
+        // blocks. Injected on the root tag (the header is written in the
+        // SvgCanvas constructor, before Options are available).
+        const string rootTag = "<svg ";
+        int idx = svg.IndexOf(rootTag, System.StringComparison.Ordinal);
+        if (idx >= 0)
+            svg = svg.Insert(idx + rootTag.Length, "shape-rendering=\"crispEdges\" ");
+
+        return svg;
     }
 }

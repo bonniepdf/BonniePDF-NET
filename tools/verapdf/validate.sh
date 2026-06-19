@@ -7,7 +7,8 @@
 # flavours. Exits non-zero if any file is non-compliant - wire it into CI.
 #
 # Usage:
-#   tools/verapdf/validate.sh <pdf-dir> [flavours]
+#   tools/verapdf/validate.sh <pdf-dir> [flavours|auto]
+#   tools/verapdf/validate.sh generated-pdfs auto
 #   tools/verapdf/validate.sh generated-pdfs ua1,1b
 #
 # Requirements: a JDK (java/javac 11+) and Maven on PATH. Both are provided
@@ -16,12 +17,12 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PDF_DIR="${1:?usage: validate.sh <pdf-dir> [flavours]}"
-FLAVOURS="${2:-ua1,1b}"
+FLAVOURS="${2:-auto}"
 
 # Resolve dependencies into tools/verapdf/lib (offline-cached after first run).
 if [ ! -d "$HERE/lib" ] || [ -z "$(ls -A "$HERE/lib" 2>/dev/null)" ]; then
   echo "==> Resolving veraPDF engine from Maven Central..."
-  mvn -q -f "$HERE/pom.xml" dependency:copy-dependencies -DoutputDirectory=lib
+  mvn -q -f "$HERE/pom.xml" org.apache.maven.plugins:maven-dependency-plugin:3.9.0:copy-dependencies -DoutputDirectory=lib
 fi
 
 # Compile the validator once (or when the source is newer than the class).
