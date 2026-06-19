@@ -42,6 +42,17 @@ public abstract class ChartBase
     public bool StretchToFit { get; set; }
 
     /// <summary>
+    /// Preferred root <c>shape-rendering</c> for standalone SVG export
+    /// (<see cref="Extensions.SvgExportExtensions.ToSvg(ChartBase, Models.ChartData)"/>).
+    /// <c>null</c> (the default) keeps the SVG default antialiasing, which is
+    /// required for charts with diagonal lines, arcs, or circles. Axis-aligned
+    /// charts (bar, grouped bar) set this to <c>"crispEdges"</c> so their bars
+    /// and gridlines snap to the pixel grid instead of softening into blurred
+    /// edges. Text is governed by <c>text-rendering</c>, so it is unaffected.
+    /// </summary>
+    public string? SvgShapeRendering { get; set; }
+
+    /// <summary>
     /// Draws the chart to the specified canvas.
     /// This method handles the common setup (background, title) and calls the abstract DrawContent method.
     /// </summary>

@@ -23,6 +23,12 @@ public class GroupedBarChart : CartesianChartBase
     /// </summary>
     public float GroupGapRatio { get; set; } = 0.2f;
 
+    /// <summary>Bars and gridlines are axis-aligned, so crisp edges render sharper than antialiased.</summary>
+    public GroupedBarChart()
+    {
+        SvgShapeRendering = "crispEdges";
+    }
+
     /// <summary>
     /// Draws the grouped bar chart elements for a single series.
     /// In vertical mode draws grouped vertical bars; in horizontal mode draws grouped horizontal bars.

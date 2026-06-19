@@ -1,3 +1,4 @@
+using System;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Core;
@@ -53,6 +54,57 @@ public class SvgExportTests
         Assert.Contains("<svg", svg);
         Assert.Contains("</svg>", svg);
         Assert.Contains("xmlns", svg);
+    }
+
+    private static ChartData SampleChartData() => new()
+    {
+        Title = "Test Chart",
+        Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 10 }, new() { Label = "B", Value = 20 }] }]
+    };
+
+    [Fact]
+    public void BarChart_ToSvg_RootUsesCrispEdges()
+    {
+        // Bars + gridlines are axis-aligned: the whole bar chart renders crisp.
+        string svg = new BarChart().ToSvg(SampleChartData());
+        Assert.Matches("<svg[^>]*shape-rendering=\"crispEdges\"", svg);
+    }
+
+    [Fact]
+    public void GroupedBarChart_ToSvg_RootUsesCrispEdges()
+    {
+        string svg = new GroupedBarChart().ToSvg(SampleChartData());
+        Assert.Matches("<svg[^>]*shape-rendering=\"crispEdges\"", svg);
+    }
+
+    [Fact]
+    public void LineChart_ToSvg_KeepsRootAntialiasedButCrispAxisLines()
+    {
+        // The diagonal trend line + circle markers stay antialiased (root is NOT
+        // crisp), but the axis lines are wrapped in a crisp-edges group.
+        string svg = new LineChart().ToSvg(SampleChartData());
+        Assert.DoesNotMatch("<svg[^>]*shape-rendering", svg);
+        Assert.Contains("<g shape-rendering=\"crispEdges\">", svg);
+    }
+
+    [Theory]
+    [InlineData(typeof(LineChart))]
+    [InlineData(typeof(AreaChart))]
+    [InlineData(typeof(DotPlotChart))]
+    [InlineData(typeof(LollipopChart))]
+    public void CartesianCharts_ToSvg_WrapAxisLinesInCrispGroup(Type chartType)
+    {
+        // Axis lines render crisp uniformly across every cartesian chart type.
+        var chart = (ChartBase)Activator.CreateInstance(chartType)!;
+        Assert.Contains("<g shape-rendering=\"crispEdges\">", chart.ToSvg(SampleChartData()));
+    }
+
+    [Fact]
+    public void PieChart_ToSvg_HasNoShapeRendering()
+    {
+        // Pie has no axes and only arc paths, so it stays fully antialiased.
+        string svg = new PieChart().ToSvg(SampleChartData());
+        Assert.DoesNotContain("shape-rendering", svg);
     }
 
     [Fact]

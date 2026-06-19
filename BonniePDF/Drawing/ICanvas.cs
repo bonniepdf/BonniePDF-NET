@@ -184,4 +184,43 @@ public interface ICanvas
     /// Emits <c>EMC</c> on PDF; no-op on SVG.
     /// </summary>
     void EndArtifact();
+
+    /// <summary>
+    /// True when drawing currently sits inside an /Artifact region. Used by the
+    /// child-tagging helper to suppress structure tags (PDF/UA 7.1-2 forbids
+    /// tagged content inside an artifact). Defaults to <c>false</c> for canvases
+    /// that don't track artifact nesting (e.g. SVG output).
+    /// </summary>
+    bool IsInsideArtifact() => false;
+
+    /// <summary>
+    /// Begin a region whose shapes should render with <c>shape-rendering="crispEdges"</c>
+    /// (axis-aligned lines/rects snapped to the device pixel grid, no antialiasing
+    /// blur). Used for chart axis lines so they stay sharp even when the chart as a
+    /// whole keeps default antialiasing for diagonals/arcs. On SVG this opens a
+    /// <c>&lt;g shape-rendering="crispEdges"&gt;</c>; on PDF (and other canvases) it
+    /// is a no-op via this default implementation. Pair with <see cref="EndCrispEdges"/>.
+    /// </summary>
+    void BeginCrispEdges() { }
+
+    /// <summary>End the region opened by <see cref="BeginCrispEdges"/>.</summary>
+    void EndCrispEdges() { }
+
+    // --- 5. Clipping ---
+
+    /// <summary>
+    /// Begin a rounded-rectangle clipping region: all subsequent drawing is
+    /// masked to the rounded rectangle at (<paramref name="x"/>,
+    /// <paramref name="y"/>) sized <paramref name="width"/>×<paramref name="height"/>
+    /// with the given corner <paramref name="radius"/> (top-left origin, like every
+    /// other canvas coordinate). On PDF this pushes the graphics state and emits a
+    /// rounded-rect clip path (<c>W n</c>); on SVG it opens a <c>&lt;g clip-path&gt;</c>
+    /// referencing a generated <c>&lt;clipPath&gt;</c>. Canvases that don't support
+    /// clipping fall back to this no-op default (the content simply isn't masked).
+    /// Must be paired with <see cref="EndClip"/>.
+    /// </summary>
+    void BeginRoundedClip(float x, float y, float width, float height, float radius) { }
+
+    /// <summary>End the clipping region opened by <see cref="BeginRoundedClip"/>.</summary>
+    void EndClip() { }
 }

@@ -280,11 +280,18 @@ public abstract class CartesianChartBase : ChartBase
     /// </summary>
     protected static void DrawAxisLines(ICanvas canvas, float chartAreaWidth, float baselineY, float topY)
     {
+        // The X and Y axis lines are axis-aligned, so render them with crisp edges
+        // on every chart type (a sharp, fully-opaque hairline rather than a blurred
+        // antialiased one) while leaving any diagonal/curved series geometry smooth.
+        canvas.BeginCrispEdges();
+
         // Left vertical line
         canvas.DrawLine(LeftPadding, topY, LeftPadding, baselineY, AxisColor, AxisLineWidth);
 
         // Bottom horizontal line
         canvas.DrawLine(LeftPadding, baselineY, LeftPadding + chartAreaWidth, baselineY, AxisColor, AxisLineWidth);
+
+        canvas.EndCrispEdges();
     }
 
     /// <summary>

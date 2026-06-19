@@ -136,6 +136,76 @@ public class ContainerTests
         Assert.Equal(200, ctx.CurrentY - startY, 3);
     }
 
+    // --- Horizontal alignment of a narrower child ---
+
+    private static Probe RenderAligned(HorizontalAlignment? alignment, float preferredWidth = 100f)
+    {
+        (RenderContext ctx, _) = MakeContext();
+        Probe probe = new(10) { PreferredWidth = preferredWidth };
+        Container c = new() { Child = probe };
+        if (alignment.HasValue) c.HorizontalAlignment = alignment.Value;
+        c.Render(ctx, 500);
+        return probe;
+    }
+
+    [Fact]
+    public void Render_LeftAlignsByDefault()
+    {
+        Probe probe = RenderAligned(null);
+        Assert.Equal(0, probe.RenderedX, 3);
+        Assert.Equal(500, probe.RenderedWidth, 3); // fills, no centering
+    }
+
+    [Fact]
+    public void Render_StartKeepsChildPinnedLeft()
+    {
+        Probe probe = RenderAligned(HorizontalAlignment.Start);
+        Assert.Equal(0, probe.RenderedX, 3);
+        Assert.Equal(500, probe.RenderedWidth, 3);
+    }
+
+    [Fact]
+    public void Render_CenterOffsetsByHalfSlackAndUsesPreferredWidth()
+    {
+        Probe probe = RenderAligned(HorizontalAlignment.Center);
+        Assert.Equal((500 - 100) / 2f, probe.RenderedX, 3); // 200
+        Assert.Equal(100, probe.RenderedWidth, 3);
+    }
+
+    [Fact]
+    public void Render_EndRightAlignsChild()
+    {
+        Probe probe = RenderAligned(HorizontalAlignment.End);
+        Assert.Equal(500 - 100, probe.RenderedX, 3); // 400
+        Assert.Equal(100, probe.RenderedWidth, 3);
+    }
+
+    [Fact]
+    public void Render_DoesNotOffsetWhenChildFillsWidth()
+    {
+        Probe probe = RenderAligned(HorizontalAlignment.Center, preferredWidth: 0f);
+        Assert.Equal(0, probe.RenderedX, 3);
+        Assert.Equal(500, probe.RenderedWidth, 3);
+    }
+
+    [Fact]
+    public void Render_HonoursAlignmentWithinFixedWidthAndPadding()
+    {
+        (RenderContext ctx, _) = MakeContext();
+        Probe probe = new(10) { PreferredWidth = 40 };
+        Container c = new()
+        {
+            Child = probe,
+            Width = 200,
+            Padding = new Thickness(10, 0, 10, 0), // inner width 180
+            HorizontalAlignment = HorizontalAlignment.Center
+        };
+        c.Render(ctx, 500);
+        // inner width 180, slack 140, half = 70, plus padding.left 10
+        Assert.Equal(10 + 70, probe.RenderedX, 3);
+        Assert.Equal(40, probe.RenderedWidth, 3);
+    }
+
     // --- Background and border drawing ---
 
     [Fact]
@@ -160,6 +230,48 @@ public class ContainerTests
         Assert.Single(canvas.RoundedRects);
         var r = canvas.RoundedRects[0];
         Assert.Equal((0f, 0f, 500f, 6f), (r.X, r.Y, r.Width, r.Radius));
+    }
+
+    [Fact]
+    public void Render_ClipsContentToRoundedRectWhenClipContentSet()
+    {
+        (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
+        Container c = new()
+        {
+            Child = new Probe(10),
+            BackgroundColor = ColorPalette.Amber[400],
+            CornerRadius = 6,
+            ClipContent = true
+        };
+        c.Render(ctx, 500);
+
+        // The whole box (full width, full height incl. child) is clipped to the rounded outline,
+        // and the clip is balanced (opened and closed exactly once).
+        Assert.Single(canvas.Clips);
+        Assert.Equal((0f, 0f, 500f, 10f, 6f), canvas.Clips[0]);
+        Assert.Equal(0, canvas.OpenClips);
+    }
+
+    [Fact]
+    public void Render_DoesNotClipWhenCornerRadiusIsZeroEvenIfClipContentSet()
+    {
+        (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
+        Container c = new() { Child = new Probe(10), ClipContent = true }; // CornerRadius defaults to 0
+        c.Render(ctx, 500);
+
+        Assert.Empty(canvas.Clips);
+    }
+
+    [Fact]
+    public void Render_CornerRadiusAloneDoesNotClip()
+    {
+        (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
+        Container c = new() { Child = new Probe(10), BackgroundColor = ColorPalette.Amber[400], CornerRadius = 6 };
+        c.Render(ctx, 500);
+
+        // A rounded fill is emitted, but content is not masked unless ClipContent is set.
+        Assert.Single(canvas.RoundedRects);
+        Assert.Empty(canvas.Clips);
     }
 
     [Fact]
@@ -240,9 +352,18 @@ public class ContainerTests
         public List<(float X, float Y, float Width, float Height)> Rects { get; } = new();
         public List<(float X, float Y, float Width, float Height, float Radius)> RoundedRects { get; } = new();
         public List<(float X1, float Y1, float X2, float Y2, float Thickness)> Lines { get; } = new();
+        public List<(float X, float Y, float Width, float Height, float Radius)> Clips { get; } = new();
+        public int OpenClips { get; private set; }
 
         public float Width => 5000;
         public float Height => 5000;
+
+        public void BeginRoundedClip(float x, float y, float width, float height, float radius)
+        {
+            Clips.Add((x, y, width, height, radius));
+            OpenClips++;
+        }
+        public void EndClip() => OpenClips--;
 
         public void FillRect(float x, float y, float width, float height, Color color) =>
             Rects.Add((x, y, width, height));

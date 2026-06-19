@@ -1,9 +1,9 @@
-name: PDF/UA-1 Validation
+name: PDF Conformance Validation
 
 # Compliance gate: builds the library, generates the tagged example PDFs, and
-# validates every one against PDF/UA-1 with veraPDF. The job fails if any PDF
-# is non-compliant (tools/verapdf/validate.sh exits non-zero), so a regression
-# cannot reach master. See docs/ci/pdf-validation.md.
+# validates every claimed PDF/A and PDF/UA conformance level with veraPDF. The
+# job fails if any PDF is non-compliant (tools/verapdf/validate.sh exits
+# non-zero), so a regression cannot reach master. See docs/ci/pdf-validation.md.
 
 on:
   push:
@@ -17,14 +17,31 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write
+  actions: write
 
 jobs:
   validate:
-    name: Generate & validate (UA-1)
+    name: Generate & validate claimed conformance
     runs-on: ubuntu-latest
 
     steps:
+      # Delete this workflow's prior runs before doing anything else, so the
+      # Actions tab only ever shows the current run. Best-effort: never block
+      # the real job if the cleanup API call hiccups.
+      - name: Delete prior workflow runs
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run list \
+            --repo "${{ github.repository }}" \
+            --workflow validate-accessibility.yml \
+            --json databaseId \
+            --jq '.[].databaseId' \
+            --limit 100 \
+          | grep -v '^${{ github.run_id }}$' \
+          | xargs -r -I{} gh run delete --repo "${{ github.repository }}" {}
+
       - uses: actions/checkout@v4
 
       - name: Setup .NET
@@ -70,8 +87,24 @@ jobs:
           find Examples -path '*/GeneratedPdfs/*_tagged.pdf' -exec cp {} generated-pdfs/ \;
           ls -l generated-pdfs
 
-      - name: Validate with veraPDF (PDF/UA-1)
-        run: tools/verapdf/validate.sh generated-pdfs ua1
+      # `auto` reads each PDF's XMP conformance claims (pdfaid + pdfuaid) and
+      # validates every level it claims - so a PDF/A regression is caught, and a
+      # file that lost its claim fails instead of silently passing.
+
+      # Fail fast with a clear message if validate.sh lost its executable bit
+      # (mode 100644 instead of 100755) - otherwise the validate step below
+      # dies with an opaque exit-126 "Permission denied". See
+      # docs/developer/ci/workflow-maintenance.
+      - name: Verify validate.sh is executable
+        run: |
+          mode=$(git ls-files -s tools/verapdf/validate.sh | cut -d' ' -f1)
+          if [ "$mode" != "100755" ]; then
+            echo "::error::tools/verapdf/validate.sh has mode $mode, expected 100755. Fix with: git update-index --chmod=+x tools/verapdf/validate.sh"
+            exit 1
+          fi
+
+      - name: Validate with veraPDF (auto-detected claims)
+        run: tools/verapdf/validate.sh generated-pdfs auto
 
       - name: Upload generated PDFs
         uses: actions/upload-artifact@v4
@@ -80,10 +113,3 @@ jobs:
           name: generated-pdfs
           path: generated-pdfs/
           retention-days: 14
-
-      - name: Comment veraPDF results on PR
-        if: always() && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: verapdf-ua1
-          path: verapdf-summary.md

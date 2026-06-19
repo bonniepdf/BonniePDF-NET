@@ -97,7 +97,7 @@ public static class DataMatrixExampleFluent
                         EncodationCard(row, "0123456789012345", "Numeric", "Digit pairs");
                         EncodationCard(row, "SHIP-LABEL-A7", "Alphanumeric", "Text scheme");
                         EncodationCard(row, "ABCDEF1234", "Structured", "X12 / EDIFACT");
-                        EncodationCard(row, "café · 日本語", "Unicode", "Base-256 (UTF-8)");
+                        EncodationCard(row, "café · €uro", "Unicode", "Base-256 (UTF-8)");
                     });
 
                     col.Item().Line(1, ColorPalette.Slate[200]).Margin(0, 20, 0, 20);

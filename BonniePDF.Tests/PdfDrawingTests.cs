@@ -91,6 +91,25 @@ public class PdfDrawingTests
     }
 
     [Fact]
+    public void ClipRoundedRect_WithPositiveRadiusEmitsCurvesThenClipNoPaint()
+    {
+        string outp = Emit(s => PdfDrawing.ClipRoundedRect(s, 0, 0, 40, 30, 8));
+        Assert.Contains(" c", outp);       // Bézier corner curves
+        Assert.Contains("W n", outp);      // intersect clip, end path without painting
+        Assert.DoesNotContain(" f", outp); // a clip path never fills
+        Assert.DoesNotContain(" S", outp); // …or strokes
+    }
+
+    [Fact]
+    public void ClipRoundedRect_WithNonPositiveRadiusClipsAPlainRectangle()
+    {
+        string outp = Emit(s => PdfDrawing.ClipRoundedRect(s, 5, 5, 40, 30, 0));
+        Assert.Contains("5 5 40 30 re", outp); // plain rectangle path
+        Assert.Contains("W n", outp);
+        Assert.DoesNotContain(" c", outp);     // no corner curves
+    }
+
+    [Fact]
     public void FillPath_EmitsNothingForFewerThanThreePoints()
     {
         Assert.Equal("", Emit(s => PdfDrawing.FillPath(s, new List<Point>(), Color.Red)));
