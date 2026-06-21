@@ -9,6 +9,7 @@ using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Export;
+using BonniePDF.Typography;
 using Xunit;
 
 namespace BonniePDF.Tests;
@@ -205,5 +206,51 @@ public class SvgPageExportTests
         IReadOnlyList<string> async = await SimpleDoc().GenerateSvgPagesAsync();
         Assert.Equal(sync.Count, async.Count);
         Assert.Equal(sync[0], async[0]);
+    }
+
+    [Fact]
+    public void StandardFontBoldItalic_MapToCssWeightAndStyle()
+    {
+        // The raw PDF name ("Helvetica-Bold") is not a CSS family; emitting it
+        // would render a regular default. Standard-14 fonts are viewer-supplied,
+        // so prefer the real OS font via a generic stack plus weight/style.
+        var doc = new Document();
+        doc.Add(new TextBlock { Text = "Bold", FontName = StandardFonts.HelveticaBold });
+        doc.Add(new TextBlock { Text = "Italic", FontName = StandardFonts.HelveticaOblique });
+        string svg = doc.GenerateFirstPageSvg();
+
+        Assert.DoesNotContain("font-family=\"Helvetica-Bold\"", svg, StringComparison.Ordinal);
+        Assert.Contains("font-family=\"Helvetica, Arial, sans-serif\" font-weight=\"bold\"", svg, StringComparison.Ordinal);
+        Assert.Contains("font-family=\"Helvetica, Arial, sans-serif\" font-style=\"italic\"", svg, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void EmbeddedFont_EmitsSubsetFontFaceSmallerThanFullFont()
+    {
+        var doc = new Document();
+        doc.Add(new TextBlock
+        {
+            Text = "The quick brown fox jumps over the lazy dog 1234567890",
+            FontName = TestFonts.SansRegularPath
+        });
+
+        SvgDocumentExport export = doc.GenerateSvgDocument();
+
+        // Text references the private embedded family; an @font-face data URI binds it.
+        Assert.Contains("font-family=\"bpf-", export.Pages[0], StringComparison.Ordinal);
+        Assert.Contains("@font-face", export.FontFaceCss, StringComparison.Ordinal);
+        Assert.Contains("src:url(\"data:font/ttf;base64,", export.FontFaceCss, StringComparison.Ordinal);
+        // The subset is a fraction of the full font (performance).
+        long fullFontBytes = new System.IO.FileInfo(TestFonts.SansRegularPath).Length;
+        Assert.True(export.FontFaceCss.Length < fullFontBytes / 2,
+            $"Expected subset CSS ({export.FontFaceCss.Length}) to be far smaller than the full font ({fullFontBytes}).");
+    }
+
+    [Fact]
+    public void StandardFontsOnly_EmitNoFontFaceCss()
+    {
+        // Standard-14 fonts are viewer-supplied, not embedded.
+        SvgDocumentExport export = SimpleDoc().GenerateSvgDocument();
+        Assert.Equal(string.Empty, export.FontFaceCss);
     }
 }

@@ -96,6 +96,41 @@ public class SvgCanvas : ICanvas
     public SvgRenderOptions Options { get; set; } = SvgRenderOptions.Legacy;
 
     /// <summary>
+    /// Optional sink invoked for every (font name, embedded face, code point) the
+    /// glyph-positioned text path draws, so the page exporter can embed a minimal
+    /// subset (only used glyphs) of each font as an <c>@font-face</c>. Set by
+    /// <see cref="Rendering.RenderContext"/>.
+    /// </summary>
+    public System.Action<string, TtfFont, int> FontUsageSink { get; set; }
+
+    /// <summary>
+    /// Optional callback that registers a font (by name/path) so it can then be
+    /// resolved to an embedded face. The SVG export sets this to the render
+    /// context's font registrar; without it, embedded fonts referenced only in
+    /// SVG output would never be loaded. Set by <see cref="Rendering.RenderContext"/>.
+    /// </summary>
+    public System.Func<string, string> RegisterFontCallback { get; set; }
+
+    /// <summary>Registers (if needed) and resolves an embedded TTF for a font name.</summary>
+    private TtfFont ResolveFont(string fontFamily)
+    {
+        RegisterFontCallback?.Invoke(fontFamily);
+        return _fontResolver?.Invoke(fontFamily);
+    }
+
+    /// <summary>Records every code point of <paramref name="text"/> as used by the
+    /// embedded <paramref name="font"/>, for building a minimal subset.</summary>
+    private void RecordEmbeddedUsage(string fontFamily, TtfFont font, string text)
+    {
+        if (FontUsageSink == null) return;
+        foreach (Rune rune in text.EnumerateRunes())
+        {
+            if (Rune.IsControl(rune)) continue;
+            FontUsageSink(fontFamily, font, rune.Value);
+        }
+    }
+
+    /// <summary>
     /// Formats a coordinate. When <see cref="SvgRenderOptions.Precision"/> is set
     /// the value is rounded to that many decimals (invariant, trailing zeros
     /// trimmed) for compact, deterministic output; otherwise it is emitted
@@ -295,7 +330,7 @@ public class SvgCanvas : ICanvas
         string fill = color.ToHexString();
         float baselineY = BaselineY(sy, fontSize);
 
-        TtfFont ttfFont = _fontResolver?.Invoke(fontFamily);
+        TtfFont ttfFont = ResolveFont(fontFamily);
 
         if (ttfFont != null)
         {
@@ -308,7 +343,9 @@ public class SvgCanvas : ICanvas
 
             float scale = fontSize / ttfFont.UnitsPerEm;
 
-            _sb.Append($"<text font-family=\"{fontFamily}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" xml:space=\"preserve\">");
+            // Reference the private embedded-face name (bound by the exporter's
+            // @font-face) so the viewer renders the exact font used for layout.
+            _sb.Append($"<text font-family=\"{EmbeddedFontFamily(fontFamily)}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" xml:space=\"preserve\">");
 
             ushort prevGid = 0;
             bool hasPrev = false;
@@ -318,6 +355,7 @@ public class SvgCanvas : ICanvas
                 if (Rune.IsControl(rune)) continue;
 
                 ushort gid = ttfFont.GetGlyphId(rune.Value);
+                FontUsageSink?.Invoke(fontFamily, ttfFont, rune.Value);
 
                 if (hasPrev && ttfFont.HasKerning)
                 {
@@ -341,7 +379,7 @@ public class SvgCanvas : ICanvas
             string anchor = GetTextAnchor(align);
             string escapedText = XmlEscape.EscapeXml(text);
             _sb.AppendLf(
-                $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" font-family=\"{fontFamily}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"{anchor}\">{escapedText}</text>");
+                $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" {StandardFontCssAttrs(fontFamily)} font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"{anchor}\">{escapedText}</text>");
         }
     }
 
@@ -357,8 +395,22 @@ public class SvgCanvas : ICanvas
         string escapedText = XmlEscape.EscapeXml(text);
         float baselineY = sy + fontSize;
 
+        // An embedded font renders via the private @font-face name; a standard-14
+        // font is viewer-supplied (generic stack + weight/style).
+        TtfFont ttfFont = ResolveFont(fontFamily);
+        string fontAttrs;
+        if (ttfFont != null)
+        {
+            RecordEmbeddedUsage(fontFamily, ttfFont, text);
+            fontAttrs = $"font-family=\"{EmbeddedFontFamily(fontFamily)}\"";
+        }
+        else
+        {
+            fontAttrs = StandardFontCssAttrs(fontFamily);
+        }
+
         _sb.AppendLf(
-            $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" font-family=\"{fontFamily}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"start\" transform=\"rotate({N(angleDegrees)}, {N(sx)}, {N(baselineY)})\">{escapedText}</text>");
+            $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" {fontAttrs} font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"start\" transform=\"rotate({N(angleDegrees)}, {N(sx)}, {N(baselineY)})\">{escapedText}</text>");
     }
 
     /// <summary>
@@ -391,8 +443,22 @@ public class SvgCanvas : ICanvas
         string escapedText = XmlEscape.EscapeXml(text);
         float baselineY = sy + fontSize * 0.8f;
 
+        // An embedded font renders via the private @font-face name; a standard-14
+        // font is viewer-supplied (generic stack + weight/style).
+        TtfFont ttfFont = ResolveFont(fontFamily);
+        string fontAttrs;
+        if (ttfFont != null)
+        {
+            RecordEmbeddedUsage(fontFamily, ttfFont, text);
+            fontAttrs = $"font-family=\"{EmbeddedFontFamily(fontFamily)}\"";
+        }
+        else
+        {
+            fontAttrs = StandardFontCssAttrs(fontFamily);
+        }
+
         _sb.AppendLf(
-            $"<text x=\"{sx}\" y=\"{baselineY}\" font-family=\"{fontFamily}\" font-size=\"{fontSize}\" fill=\"{fill}\" text-anchor=\"start\" word-spacing=\"{wordSpacing:F2}\">{escapedText}</text>");
+            $"<text x=\"{sx}\" y=\"{baselineY}\" {fontAttrs} font-size=\"{fontSize}\" fill=\"{fill}\" text-anchor=\"start\" word-spacing=\"{wordSpacing:F2}\">{escapedText}</text>");
     }
 
     /// <summary>
@@ -534,6 +600,49 @@ public class SvgCanvas : ICanvas
             TextAlignment.Justify => "start",
             _ => "start"
         };
+    }
+
+    /// <summary>
+    /// Maps a non-embedded standard-14 PDF font name (e.g. "Helvetica-BoldOblique",
+    /// "Times-Italic") to the SVG attributes a viewer needs: a generic family stack
+    /// plus explicit <c>font-weight</c> / <c>font-style</c>. The raw PDF name is not
+    /// a CSS family, so emitting it verbatim makes browsers fall back to a regular
+    /// default - losing bold and italic. The real OS font is preferred and never
+    /// overridden. Unrecognised (custom) names pass through unchanged.
+    /// </summary>
+    private static string StandardFontCssAttrs(string fontFamily)
+    {
+        string lower = fontFamily.ToLowerInvariant();
+        string stack;
+        if (lower.StartsWith("times", System.StringComparison.Ordinal))
+            stack = "'Times New Roman', Times, serif";
+        else if (lower.StartsWith("courier", System.StringComparison.Ordinal))
+            stack = "'Courier New', Courier, monospace";
+        else if (lower.StartsWith("helvetica", System.StringComparison.Ordinal) || lower.StartsWith("arial", System.StringComparison.Ordinal))
+            stack = "Helvetica, Arial, sans-serif";
+        else
+            return $"font-family=\"{XmlEscape.EscapeAttr(fontFamily)}\"";
+
+        string weight = lower.Contains("bold") ? " font-weight=\"bold\"" : "";
+        string style = lower.Contains("oblique") || lower.Contains("italic") ? " font-style=\"italic\"" : "";
+        return $"font-family=\"{XmlEscape.EscapeAttr(stack)}\"{weight}{style}";
+    }
+
+    /// <summary>
+    /// Private CSS family name for an embedded font subset, namespaced ("bpf-…")
+    /// so it never collides with or overrides a real installed font. The SVG
+    /// references this name; the exporter declares an <c>@font-face</c> for it
+    /// carrying the (subsetted) font bytes.
+    /// </summary>
+    public static string EmbeddedFontFamily(string fontFamily)
+    {
+        var sb = new StringBuilder("bpf-");
+        foreach (char c in fontFamily.ToLowerInvariant())
+            sb.Append((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ? c : '-');
+        // collapse/trim dashes
+        string s = sb.ToString();
+        while (s.Contains("--")) s = s.Replace("--", "-");
+        return s.Trim('-');
     }
 
     private static string GetFillAttributes(Color color)

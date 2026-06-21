@@ -306,6 +306,26 @@ public class Document : IDisposable
     }
 
     /// <summary>
+    /// Like <see cref="GenerateSvgPages"/>, but also returns <c>@font-face</c> CSS
+    /// embedding a minimal subset of the fonts the document uses. Inject the CSS
+    /// once into the host page so the SVG renders with the exact fonts used for
+    /// layout, independent of what the viewer has installed.
+    /// </summary>
+    public SvgDocumentExport GenerateSvgDocument(SvgPageExportOptions options = null)
+    {
+        ApplyDefaultStyleToTree();
+        return SvgPageExporter.ExportDocument(this, options);
+    }
+
+    /// <summary>Asynchronous sibling of <see cref="GenerateSvgDocument"/>.</summary>
+    public Task<SvgDocumentExport> GenerateSvgDocumentAsync(SvgPageExportOptions options = null,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(GenerateSvgDocument(options));
+    }
+
+    /// <summary>
     /// Renders a single page (zero-based index) to a standalone SVG string.
     /// </summary>
     public string GenerateSvgPage(int pageIndex, SvgPageExportOptions options = null)

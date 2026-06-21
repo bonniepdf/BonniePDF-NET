@@ -194,7 +194,9 @@ public class RenderContext
             Canvas = new SvgCanvas(PageSize.Width, PageSize.Height, 0, 0, CurrentStream, !_svgContentOnly,
                 ResolveEmbeddedFont)
             {
-                Options = SvgOptions
+                Options = SvgOptions,
+                FontUsageSink = TrackSvgFontUsage,
+                RegisterFontCallback = RegisterFont
             };
         }
         else
@@ -214,7 +216,9 @@ public class RenderContext
         if (IsSvgMode)
             return new SvgCanvas(PageSize.Width, PageSize.Height, x, y, CurrentStream, false, ResolveEmbeddedFont)
             {
-                Options = SvgOptions
+                Options = SvgOptions,
+                FontUsageSink = TrackSvgFontUsage,
+                RegisterFontCallback = RegisterFont
             };
 
         var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource,
@@ -234,6 +238,25 @@ public class RenderContext
     /// or <c>null</c> if the font is not embedded (i.e. it is a standard PDF font).
     /// </summary>
     internal TtfFont ResolveEmbeddedFont(string fontIdentifier) => Resources.ResolveEmbeddedFont(fontIdentifier);
+
+    // ── SVG embedded-font usage ─────────────────────────────────────────────────
+    // Accumulated across every SvgCanvas this context creates, so the page
+    // exporter can embed a minimal subset (only used glyphs) of each font.
+    private readonly Dictionary<string, (TtfFont Font, HashSet<int> CodePoints)> _svgFontUsage = new();
+
+    internal void TrackSvgFontUsage(string fontFamily, TtfFont font, int codePoint)
+    {
+        if (!_svgFontUsage.TryGetValue(fontFamily, out var entry))
+        {
+            entry = (font, new HashSet<int>());
+            _svgFontUsage[fontFamily] = entry;
+        }
+        entry.CodePoints.Add(codePoint);
+    }
+
+    /// <summary>Per embedded font (keyed by PDF font name): the resolved face and
+    /// every code point drawn with it, for building minimal SVG font subsets.</summary>
+    public IReadOnlyDictionary<string, (TtfFont Font, HashSet<int> CodePoints)> SvgFontUsage => _svgFontUsage;
 
     /// <summary>
     /// Records the characters in <paramref name="text"/> as used by the specified font,

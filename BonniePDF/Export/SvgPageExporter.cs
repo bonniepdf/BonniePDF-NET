@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -5,8 +6,31 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Rendering;
+using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF.Export;
+
+/// <summary>
+/// A rendered SVG document: one standalone SVG string per page, plus
+/// <c>@font-face</c> CSS that embeds (as subsetted data URIs) the fonts the
+/// document used, so a host can render the pages with the exact fonts BonniePDF
+/// laid them out with.
+/// </summary>
+public sealed class SvgDocumentExport
+{
+    public SvgDocumentExport(IReadOnlyList<string> pages, string fontFaceCss)
+    {
+        Pages = pages;
+        FontFaceCss = fontFaceCss;
+    }
+
+    /// <summary>One standalone SVG string per page.</summary>
+    public IReadOnlyList<string> Pages { get; }
+
+    /// <summary><c>&lt;style&gt;</c>-ready <c>@font-face</c> rules, or <c>""</c> when the
+    /// document uses no embeddable fonts (e.g. only the viewer-supplied standard-14).</summary>
+    public string FontFaceCss { get; }
+}
 
 /// <summary>
 /// Renders the laid-out pages of a <see cref="Document"/> to standalone SVG
@@ -16,6 +40,13 @@ namespace BonniePDF.Export;
 internal static class SvgPageExporter
 {
     public static IReadOnlyList<string> Export(Document document, SvgPageExportOptions options)
+        => ExportDocument(document, options).Pages;
+
+    /// <summary>
+    /// Like <see cref="Export"/>, but also returns <c>@font-face</c> CSS embedding a
+    /// minimal subset (only the glyphs actually drawn) of each embedded font.
+    /// </summary>
+    public static SvgDocumentExport ExportDocument(Document document, SvgPageExportOptions options)
     {
         options ??= new SvgPageExportOptions();
         DocumentSettings settings = document.Settings;
@@ -46,7 +77,52 @@ internal static class SvgPageExporter
             if (options.MaxPages is int max && results.Count >= max) break;
         }
 
-        return results;
+        return new SvgDocumentExport(results, BuildFontFaceCss(ctx.SvgFontUsage));
+    }
+
+    /// <summary>
+    /// Builds <c>@font-face</c> rules that embed a minimal subset (only the used
+    /// glyphs) of each font as a base64 data URI, under its private
+    /// <see cref="SvgCanvas.EmbeddedFontFamily"/> name. Falls back to the full font
+    /// if subsetting fails, and skips fonts that yield no bytes.
+    /// </summary>
+    private static string BuildFontFaceCss(
+        IReadOnlyDictionary<string, (TtfFont Font, HashSet<int> CodePoints)> usage)
+    {
+        var sb = new StringBuilder();
+        foreach (KeyValuePair<string, (TtfFont Font, HashSet<int> CodePoints)> kvp in usage)
+        {
+            (TtfFont font, HashSet<int> codePoints) = kvp.Value;
+            if (codePoints.Count == 0) continue;
+
+            byte[] bytes;
+            try
+            {
+                var subsetter = new TtfSubsetter(font);
+                var glyphIds = new HashSet<ushort>();
+                var charToGlyph = new Dictionary<int, ushort>();
+                foreach (int cp in codePoints)
+                {
+                    ushort gid = font.GetGlyphId(cp);
+                    glyphIds.Add(gid);
+                    charToGlyph[cp] = gid;
+                }
+                bytes = subsetter.CreateSubset(glyphIds, charToGlyph);
+            }
+            catch
+            {
+                // Subsetting failed - fall back to the full font so the face still renders.
+                bytes = font.GetRawFontData();
+            }
+            if (bytes == null || bytes.Length == 0) continue;
+
+            sb.Append("@font-face{font-family:'")
+              .Append(SvgCanvas.EmbeddedFontFamily(kvp.Key))
+              .Append("';font-display:swap;src:url(\"data:font/ttf;base64,")
+              .Append(Convert.ToBase64String(bytes))
+              .Append("\") format(\"truetype\");}");
+        }
+        return sb.ToString();
     }
 
     private static string ResolveTitle(Document document, string explicitTitle)
