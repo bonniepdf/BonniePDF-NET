@@ -743,9 +743,11 @@ public class PdfResourceRegistry
         foreach (AlphaGraphicsStateInfo info in _alphaGraphicsStates.Values)
         {
             int objectId = writer.GetNewId();
-            // When PDF/A is enabled, rewrite alpha graphics states to be fully opaque
-            // (mitigated issue: the original transparency was flattened to a background).
-            float alphaValue = _conformance != PdfAConformance.None ? 1.0f : info.Alpha;
+            // info.Alpha is already conformance-aware: RegisterAlphaGraphicsState()
+            // forces it to 1.0 only for PDF/A-1 (ISO 19005-1 §6.4 forbids
+            // transparency). PDF/A-2/3/4 permit constant alpha (ISO 19005-2 §6.2.4),
+            // so they keep their real opacity - mirroring image soft-mask handling.
+            float alphaValue = info.Alpha;
             writer.WriteObject(objectId, new Dictionary<string, string>
             {
                 ["/Type"] = "/ExtGState",
@@ -912,9 +914,11 @@ public class PdfResourceRegistry
         foreach (AlphaGraphicsStateInfo info in _alphaGraphicsStates.Values)
         {
             int objectId = writer.GetNewId();
-            // When PDF/A is enabled, rewrite alpha graphics states to be fully opaque
-            // (mitigated issue: the original transparency was flattened to a background).
-            float alphaValue = _conformance != PdfAConformance.None ? 1.0f : info.Alpha;
+            // info.Alpha is already conformance-aware: RegisterAlphaGraphicsState()
+            // forces it to 1.0 only for PDF/A-1 (ISO 19005-1 §6.4 forbids
+            // transparency). PDF/A-2/3/4 permit constant alpha (ISO 19005-2 §6.2.4),
+            // so they keep their real opacity - mirroring image soft-mask handling.
+            float alphaValue = info.Alpha;
             await writer.WriteObjectAsync(objectId, new Dictionary<string, string>
             {
                 ["/Type"] = "/ExtGState",
