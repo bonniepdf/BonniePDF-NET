@@ -104,7 +104,67 @@ public class PageBreakTaggingTests
         Assert.DoesNotContain("EMC\n", pdf);
     }
 
+    [Fact]
+    public void ExplicitPageBreak_RestartsMcidCounterPerPage()
+    {
+        // Regression: the render pipeline moves between explicit input Page
+        // objects (doc.AddPage()) via RenderContext.SwitchToPage, not NewPage.
+        // SwitchToPage used to skip resetting the tagging context, so MCIDs on
+        // the second page kept counting up from the first page's last MCID and
+        // their structure /Pg pointed at the previous page. veraPDF then flagged
+        // the content as untagged real content (PDF/UA 7.1). MCIDs must restart
+        // at 0 on every physical page (ISO 32000-1 §14.7.4).
+        InternalConfiguration.EnableCompression = false;
+        try
+        {
+            using var doc = new Document();
+            doc.Settings.Version = PdfVersion.Pdf17;
+            doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+            doc.Settings.Language = "en-GB";
+
+            doc.Add(new TextBlock { Text = "Title page block one", FontSize = 12 });
+            doc.Add(new TextBlock { Text = "Title page block two", FontSize = 12 });
+            doc.AddPage();
+            doc.Add(new TextBlock { Text = "Second page block", FontSize = 12 });
+
+            using var ms = new MemoryStream();
+            doc.Save(ms, true);
+            string pdf = Encoding.ASCII.GetString(ms.ToArray());
+
+            string[] pageStreams = SplitPageContentStreams(pdf);
+            Assert.Equal(2, pageStreams.Length);
+
+            foreach (string stream in pageStreams)
+            {
+                int[] mcids = ExtractMcids(stream);
+                Assert.NotEmpty(mcids);
+                // Each page's marked content must start its MCID numbering at 0.
+                Assert.Equal(0, mcids.Min());
+            }
+        }
+        finally { InternalConfiguration.EnableCompression = true; }
+    }
+
     // ── Helpers ──────────────────────────────────────────────────
+
+    /// <summary>Extracts the /MCID values from BDC operators in a content stream.</summary>
+    private static int[] ExtractMcids(string stream)
+    {
+        const string Marker = "/MCID ";
+        var mcids = new System.Collections.Generic.List<int>();
+        int idx = 0;
+        while ((idx = stream.IndexOf(Marker, idx, System.StringComparison.Ordinal)) >= 0)
+        {
+            int start = idx + Marker.Length;
+            int end = start;
+            while (end < stream.Length && char.IsDigit(stream[end])) end++;
+            if (end > start)
+                mcids.Add(int.Parse(stream.AsSpan(start, end - start), System.Globalization.CultureInfo.InvariantCulture));
+            idx = end;
+        }
+        return mcids.ToArray();
+    }
+
 
     private static string GenerateTagged(System.Action<Document> populate)
     {
