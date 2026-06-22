@@ -383,6 +383,16 @@ public class RenderContext
         if (index < 0 || index >= Pages.Count)
             throw new ArgumentOutOfRangeException();
         CurrentPageIndex = index;
+        // Keep the tagging context's page tracking in lock-step with the
+        // physical page. NewPage() does this for automatic overflow breaks;
+        // SwitchToPage handles the boundaries between explicit input Page
+        // objects (the render pipeline switches here when it starts each new
+        // input page). Without it, MCIDs allocated on the new page keep the
+        // previous page's index and counter, so the structure tree's /Pg and
+        // /ParentTree point at the wrong page - veraPDF then reports the
+        // content as untagged real content (PDF/UA 7.1). MCIDs restart at 0
+        // per page (ISO 32000-1 §14.7.4).
+        Tagging?.ResetPage(index);
         UpdateCanvas();
     }
 
