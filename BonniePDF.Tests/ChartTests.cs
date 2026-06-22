@@ -1,6 +1,7 @@
 using BonniePDF;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
+using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Elements.Text;
@@ -292,6 +293,27 @@ public class ChartTests
         Assert.Contains("/ExtGState", pdf);
         Assert.Contains("/ca 0.4200", pdf);
         Assert.Contains("/CA 0.4200", pdf);
+    }
+
+    [Fact]
+    public void AreaChartFillOpacity_FlattenedForPdfA1ButPreservedForPdfA2()
+    {
+        // PDF/A-1 forbids transparency (ISO 19005-1 §6.4): the constant alpha is
+        // flattened to fully opaque.
+        using var docA1 = new Document();
+        docA1.Settings.Conformance = PdfAConformance.PdfA1b;
+        docA1.Add(new ChartElement(new AreaChart { FillOpacity = 0.42f }, CreateSampleData()));
+        string a1 = Encoding.ASCII.GetString(docA1.ToByteArray());
+        Assert.Contains("/ca 1.0000", a1);
+        Assert.DoesNotContain("/ca 0.4200", a1);
+
+        // PDF/A-2 permits constant alpha (ISO 19005-2 §6.2.4): the real opacity
+        // is preserved.
+        using var docA2 = new Document();
+        docA2.Settings.Conformance = PdfAConformance.PdfA2b;
+        docA2.Add(new ChartElement(new AreaChart { FillOpacity = 0.42f }, CreateSampleData()));
+        string a2 = Encoding.ASCII.GetString(docA2.ToByteArray());
+        Assert.Contains("/ca 0.4200", a2);
     }
 
     [Fact]

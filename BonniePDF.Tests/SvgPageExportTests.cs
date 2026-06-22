@@ -158,16 +158,17 @@ public class SvgPageExportTests
     }
 
     [Fact]
-    public void Watermark_RendersBehindContent()
+    public void Watermark_RendersOverContent()
     {
         var doc = SimpleDoc();
         doc.Settings.Watermark = new WatermarkSettings { Text = "DRAFT" };
         string svg = doc.GenerateFirstPageSvg();
         Assert.Contains("DRAFT", svg, StringComparison.Ordinal);
         Assert.Contains("rotate(45", svg, StringComparison.Ordinal); // default -45deg negated for SVG
+        // Watermark is appended (paints on top of the body content so it is never occluded).
         int wmIndex = svg.IndexOf("DRAFT", StringComparison.Ordinal);
         int bodyIndex = svg.IndexOf("Hello, SVG world!", StringComparison.Ordinal);
-        Assert.True(wmIndex < bodyIndex);
+        Assert.True(wmIndex > bodyIndex);
     }
 
     [Fact]

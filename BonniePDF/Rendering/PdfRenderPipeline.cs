@@ -321,19 +321,22 @@ public static class PdfRenderPipeline
             ctx.Margin = pageDimensions.TryGetValue(i, out dimensions) ? dimensions.Margin : settings.Margin;
             ctx.SwitchToPage(i);
 
-            // Render Watermark (behind all content - prepended to stream)
-            RenderWatermark(ctx, settings, i, pageSize.Width, pageSize.Height);
-
-            // full-page background slot. Painted behind everything
-            // (even the watermark), ignoring margins. Prepended last so it
-            // ends up at the very back of the painter's-model stream.
+            // full-page background slot. Painted behind everything,
+            // ignoring margins. Prepended so it ends up at the very back of
+            // the painter's-model stream.
             RenderPageSlot(ctx, settings.PageBackground, i, isBackground: true);
 
             // Render Templates (Headers/Footers)
             RenderTemplate(ctx, settings, i);
 
+            // The watermark paints on top of the body content and header/footer
+            // so a "DRAFT" / "CONFIDENTIAL" overlay is always visible and never
+            // occluded by opaque page elements. Only the explicit foreground
+            // slot sits above it.
+            RenderWatermark(ctx, settings, i, pageSize.Width, pageSize.Height);
+
             // full-page foreground slot. Painted on top of everything,
-            // ignoring margins (DRAFT / CONFIDENTIAL overlays and stamps).
+            // ignoring margins (explicit stamps / overlays).
             RenderPageSlot(ctx, settings.PageForeground, i, isBackground: false);
 
             PageRenderOutput output = new()
@@ -351,7 +354,7 @@ public static class PdfRenderPipeline
     }
 
     /// <summary>
-    /// Renders a text watermark behind page content by prepending PDF operators to the page stream.
+    /// Renders a text watermark over page content by appending PDF operators to the page stream.
     /// Uses ExtGState for opacity and the cm operator for rotation.
     /// Bypasses ICanvas because rotation is not supported by the canvas abstraction.
     /// </summary>
@@ -394,7 +397,7 @@ public static class PdfRenderPipeline
             : $"({PdfSyntax.Escape(wm.Text)})";
 
         // Build PDF operators for the watermark
-        // The operators are prepended to the page stream so they render behind all content
+        // The operators are appended to the page stream so they render on top of all content
         StringBuilder wmOps = new();
         PdfOperators.SaveState(wmOps);
         PdfOperators.SetGraphicsState(wmOps, ctx.RegisterAlphaGraphicsState(wm.Opacity));
@@ -402,9 +405,13 @@ public static class PdfRenderPipeline
         PdfOperators.BeginText(wmOps);
         PdfOperators.SetFont(wmOps, fontResourceName, wm.FontSize);
 
-        // PDF/A-1B forbids transparency - blend the color toward white to simulate opacity
+        // PDF/A-1 forbids transparency (ISO 19005-1 §6.4), so its /ca alpha is forced
+        // to 1.0 and a real transparency would render as solid text. Simulate the
+        // faint watermark by blending the colour toward white instead. PDF/A-2/3/4
+        // keep their real /ca alpha, so no blending is needed there.
         Color fillColor = wm.TextColor;
-        if (ctx.PdfAEnabled && wm.Opacity < 1.0f)
+        bool isPdfA1 = settings.Conformance is PdfAConformance.PdfA1b or PdfAConformance.PdfA1a;
+        if (isPdfA1 && wm.Opacity < 1.0f)
         {
             float o = wm.Opacity;
             fillColor = Color.FromScRgb(
@@ -426,13 +433,14 @@ public static class PdfRenderPipeline
             wmOps.AppendLf("EMC");
         }
 
-        // Prepend to page stream (painter's model: first drawn = behind)
-        ctx.Pages[pageIndex].Insert(0, wmOps);
+        // Append to page stream (painter's model: last drawn = on top), so the
+        // watermark overlays the content rather than being hidden behind it.
+        ctx.Pages[pageIndex].Append(wmOps);
     }
 
     /// <summary>
-    /// Renders the watermark as an SVG group prepended to the page body so it
-    /// paints behind content. Mirrors the PDF watermark: centred, rotated,
+    /// Renders the watermark as an SVG group appended to the page body so it
+    /// paints on top of content. Mirrors the PDF watermark: centred, rotated,
     /// semi-transparent text.
     /// </summary>
     private static void RenderWatermarkSvg(RenderContext ctx, WatermarkSettings wm, int pageIndex,
@@ -452,7 +460,7 @@ public static class PdfRenderPipeline
             $"font-family=\"{wm.FontName}\" text-anchor=\"middle\" dominant-baseline=\"central\">{text}</text>" +
             "</g>\n";
 
-        ctx.Pages[pageIndex].Insert(0, markup);
+        ctx.Pages[pageIndex].Append(markup);
     }
 
     /// <summary>

@@ -87,6 +87,21 @@ public class PageSlotsLayersTests
     }
 
     [Fact]
+    public void Watermark_RendersOverBodyButUnderForeground()
+    {
+        using Document doc = new();
+        doc.Add(Text("BODYMARKER"));
+        doc.Settings.Watermark = new WatermarkSettings { Text = "WMARK" };
+        doc.Settings.PageForeground = _ => Text("FOREGROUNDMARKER");
+
+        string stream = RenderPageStream(doc);
+        // Painter's model: body first, then the watermark on top, then the
+        // explicit foreground stamp above everything.
+        Assert.True(stream.IndexOf("BODYMARKER") < stream.IndexOf("WMARK"));
+        Assert.True(stream.IndexOf("WMARK") < stream.IndexOf("FOREGROUNDMARKER"));
+    }
+
+    [Fact]
     public void PageSlots_NoOpWhenUnset()
     {
         using Document doc = new();

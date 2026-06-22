@@ -3,7 +3,7 @@ using BonniePDF.Core;
 namespace BonniePDF.Configuration;
 
 /// <summary>
-/// Configuration for rendering a text watermark behind page content.
+/// Configuration for rendering a text watermark over page content.
 /// The watermark is rendered at the specified opacity and rotation using
 /// PDF ExtGState for transparency and the cm operator for rotation.
 /// </summary>
