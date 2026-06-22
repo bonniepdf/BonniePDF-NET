@@ -26,6 +26,7 @@ public static class ProductRoadmapExample
     private static readonly Color Ink = Color.FromHex("#0f172a");      // slate-900  headings
     private static readonly Color BodyCol = Color.FromHex("#334155");  // slate-700  body / month pills
     private static readonly Color Mute = Color.FromHex("#64748b");     // slate-500  captions
+    private static readonly Color Grid = Color.FromHex("#cbd5e1");     // slate-300  grid lines
     private static readonly Color Stripe = Color.FromHex("#f1f5f9");   // slate-100  alternating column shade
     private static readonly Color Tint = Color.FromHex("#f8fafc");     // slate-50   page tint
 
@@ -38,6 +39,7 @@ public static class ProductRoadmapExample
     private const float LabelWeight = 2.4f; // left column width, in "month units"
     private const float RowHeight = 26f;
     private const float BarHeight = 18f;
+    private const float Line = 0.6f; // hairline grid-line / bar-border width
 
     public static Document Generate()
     {
@@ -93,6 +95,7 @@ public static class ProductRoadmapExample
             }),
         };
 
+        bool firstRow = true;
         for (int ti = 0; ti < teams.Length; ti++)
         {
             var team = teams[ti];
@@ -101,7 +104,8 @@ public static class ProductRoadmapExample
             for (int ri = 0; ri < team.Rows.Length; ri++)
             {
                 IElement label = ri == 0 ? TeamLabel(team.Name, team.Sub, team.Accent) : new Container();
-                doc.Add(RoadmapRow(label, team.Rows[ri], team.Shades));
+                doc.Add(RoadmapRow(label, team.Rows[ri], team.Shades, firstRow));
+                firstRow = false;
             }
         }
 
@@ -130,38 +134,50 @@ public static class ProductRoadmapExample
         return t;
     }
 
-    // A rounded pill bar carrying a short task label, clipped to its rounded shape.
-    private static Container Bar(string label, Color color) => new()
+    // A rounded pill bar carrying a short task label, outlined in the team's darker
+    // shade and clipped to its rounded shape.
+    private static Container Bar(string label, Color fill, Color outline) => new()
     {
-        BackgroundColor = color,
+        BackgroundColor = fill,
         CornerRadius = 5,
         ClipContent = true, // ← this feature
         Height = BarHeight,
+        Border = new Border(Line),
+        BorderColors = new BorderColors(outline),
         Padding = new Thickness(8, 4, 8, 4),
         Child = Tb(label, 6.5f, Color.White, bold: true, align: TextAlignment.Center),
     };
 
-    // A fixed-height cell with an optional background, used to build the striped
-    // column grid behind the bars.
-    private static Container Cell(float height, Color? color = null)
+    // One cell of the column grid: a fixed-height box that draws crisp hairline grid
+    // lines on its right and bottom edges (and optionally its top/left for the outer
+    // frame), with an optional column shade.
+    private static Container GridCell(float height, bool shade = false, bool top = false, bool left = false)
     {
-        Container c = new() { Height = height };
-        if (color.HasValue) c.BackgroundColor = color.Value;
+        Container c = new()
+        {
+            Height = height,
+            Border = new Border(left ? Line : 0, top ? Line : 0, Line, Line),
+            BorderColors = new BorderColors(Grid),
+        };
+        if (shade) c.BackgroundColor = Stripe;
         return c;
     }
 
     // The alternating-column grid: a white label gutter, then six month columns
-    // shaded on alternate months. Used both as the per-row background (behind the
-    // bars) and as the slim band drawn between swimlanes, so the columns read as
-    // one continuous grid. Same weights as a bar row, so the stripes line up under
-    // the month header and behind every bar.
-    private static HorizontalStack StripeBand(float height)
+    // shaded on alternate months, all wired with hairline grid lines. Used both as
+    // the per-row background (behind the bars) and as the slim band drawn between
+    // swimlanes, so the columns read as one continuous grid. Same weights as a bar
+    // row, so the lines line up under the month header and behind every bar. The
+    // whole grid is wrapped in a crisp-edge region so the hairlines snap to
+    // the pixel grid on SVG export; the rounded bars (a separate Layers
+    // foreground) keep their antialiasing.
+    private static Container StripeBand(float height, bool top = false)
     {
         HorizontalStack band = new() { Spacing = 0, WidthDistribution = WidthDistribution.Weighted };
-        band.AddChild(Cell(height), LabelWeight); // label gutter stays white
+        band.AddChild(GridCell(height, top: top, left: true), LabelWeight); // label gutter stays white
         for (int m = 1; m <= Months.Length; m++)
-            band.AddChild(Cell(height, m % 2 == 0 ? Stripe : (Color?)null), 1);
-        return band;
+            band.AddChild(GridCell(height, shade: m % 2 == 0, top: top), 1);
+        return new Container { CrispEdges = true, Child = band };
     }
 
     // The bar layer of a row: a left label of weight LabelWeight, then the
@@ -183,7 +199,7 @@ public static class ProductRoadmapExample
         {
             (int s, int e, string l) = segs[i];
             if (s > cursor) row.AddChild(new Spacer(BarHeight), s - cursor);
-            row.AddChild(Bar(l, shades[i % 2]), e - s + 1);
+            row.AddChild(Bar(l, shades[i % 2], shades[0]), e - s + 1);
             cursor = e + 1;
         }
         if (cursor <= Months.Length) row.AddChild(new Spacer(BarHeight), Months.Length - cursor + 1);
@@ -193,11 +209,11 @@ public static class ProductRoadmapExample
 
     // One roadmap row: the striped column grid (background) with the bars floating
     // on top (this feature Layers). Both layers share the same weights, so the bars sit over
-    // their month columns and the stripes run continuously behind them.
-    private static Container RoadmapRow(IElement labelCell, (int S, int E, string L)[] segs, Color[] shades)
+    // their month columns and the grid runs continuously behind them.
+    private static Container RoadmapRow(IElement labelCell, (int S, int E, string L)[] segs, Color[] shades, bool top = false)
     {
         Container c = new();
-        c.Layers(l => l.Background(StripeBand(RowHeight)).PrimaryLayer(BarLayer(labelCell, segs, shades)));
+        c.Layers(l => l.Background(StripeBand(RowHeight, top)).PrimaryLayer(BarLayer(labelCell, segs, shades)));
         return c;
     }
 

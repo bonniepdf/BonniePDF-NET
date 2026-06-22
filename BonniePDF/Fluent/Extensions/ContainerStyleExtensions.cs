@@ -239,6 +239,20 @@ public static class ContainerStyleExtensions
         return container;
     }
 
+    /// <summary>
+    /// Renders the container's subtree inside a crisp-edge region: on SVG
+    /// export, thin axis-aligned strokes/rects (grid/table lines, dividers) snap to
+    /// the pixel grid instead of being antialiased. No-op on PDF output. Apply only
+    /// to axis-aligned content — rounded shapes, diagonals, and text want
+    /// antialiasing.
+    /// </summary>
+    public static IContentContainer CrispEdges(this IContentContainer c)
+    {
+        var container = GetOrCreateContainer(c);
+        container.CrispEdges = true;
+        return container;
+    }
+
     // --- Margin ---
 
     /// <summary>Sets uniform margin on all sides.</summary>
