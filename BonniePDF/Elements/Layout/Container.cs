@@ -69,6 +69,18 @@ public class Container : BorderedElementBase, IContentContainer
     public bool ClipContent { get; set; }
 
     /// <summary>
+    /// When <c>true</c>, the container's subtree renders inside a crisp-edge
+    /// region: on SVG page export it emits
+    /// <c>&lt;g shape-rendering="crispEdges"&gt;</c>, so thin axis-aligned strokes
+    /// and rectangles (grid/table lines, dividers) snap to the device pixel grid
+    /// instead of being antialiased into a soft blur. It is a no-op on PDF output
+    /// (the bytes are unchanged; crispness there is the viewer's job). Only wrap
+    /// axis-aligned content — rounded rects, circles, diagonals, and text want
+    /// antialiasing and will look jagged inside a crisp-edge region.
+    /// </summary>
+    public bool CrispEdges { get; set; }
+
+    /// <summary>
     /// Horizontal alignment of the child within the container's available width
     /// (<c>AlignCenter</c>/<c>AlignRight</c>/<c>AlignLeft</c>).
     /// When the child is narrower than the container it is positioned
@@ -111,20 +123,32 @@ public class Container : BorderedElementBase, IContentContainer
         // If not, we trigger a new page here too, to keep borders intact.
         if (ctx.CurrentY + containerHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin) ctx.NewPage();
 
-        // Rounded-corner clipping: mask the background, border, and child to
-        // the rounded outline. Opened here and closed in the finally so the early
-        // childless return still balances the clip.
-        bool clip = ClipContent && CornerRadius > 0;
-        if (clip)
-            ctx.Canvas.BeginRoundedClip(ctx.CurrentX, ctx.CurrentY, effectiveWidth, containerHeight, CornerRadius);
+        // Crisp-edge hint: render the subtree inside a crisp-edge region so
+        // axis-aligned strokes/rects snap to the pixel grid on SVG export.
+        // Outermost wrap; the clip and content render inside it. No-op on PDF.
+        if (CrispEdges) ctx.Canvas.BeginCrispEdges();
 
         try
         {
-            RenderClippedContent(ctx, effectiveWidth, containerHeight);
+            // Rounded-corner clipping: mask the background, border, and child
+            // to the rounded outline. Opened here and closed in the finally so the
+            // early childless return still balances the clip.
+            bool clip = ClipContent && CornerRadius > 0;
+            if (clip)
+                ctx.Canvas.BeginRoundedClip(ctx.CurrentX, ctx.CurrentY, effectiveWidth, containerHeight, CornerRadius);
+
+            try
+            {
+                RenderClippedContent(ctx, effectiveWidth, containerHeight);
+            }
+            finally
+            {
+                if (clip) ctx.Canvas.EndClip();
+            }
         }
         finally
         {
-            if (clip) ctx.Canvas.EndClip();
+            if (CrispEdges) ctx.Canvas.EndCrispEdges();
         }
     }
 

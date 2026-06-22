@@ -275,6 +275,28 @@ public class ContainerTests
     }
 
     [Fact]
+    public void Render_WrapsContentInCrispEdgeRegionWhenCrispEdgesSet()
+    {
+        (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
+        Container c = new() { Child = new Probe(10), BackgroundColor = ColorPalette.Amber[400], CrispEdges = true };
+        c.Render(ctx, 500);
+
+        // Exactly one balanced Begin/End crisp-edge pair around the content.
+        Assert.Equal(1, canvas.CrispBegins);
+        Assert.Equal(1, canvas.CrispEnds);
+    }
+
+    [Fact]
+    public void Render_DoesNotOpenCrispEdgeRegionByDefault()
+    {
+        (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
+        Container c = new() { Child = new Probe(10) };
+        c.Render(ctx, 500);
+
+        Assert.Equal(0, canvas.CrispBegins);
+    }
+
+    [Fact]
     public void Render_DrawsEachBorderSideAsAStroke()
     {
         (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
@@ -354,6 +376,8 @@ public class ContainerTests
         public List<(float X1, float Y1, float X2, float Y2, float Thickness)> Lines { get; } = new();
         public List<(float X, float Y, float Width, float Height, float Radius)> Clips { get; } = new();
         public int OpenClips { get; private set; }
+        public int CrispBegins { get; private set; }
+        public int CrispEnds { get; private set; }
 
         public float Width => 5000;
         public float Height => 5000;
@@ -364,6 +388,9 @@ public class ContainerTests
             OpenClips++;
         }
         public void EndClip() => OpenClips--;
+
+        public void BeginCrispEdges() => CrispBegins++;
+        public void EndCrispEdges() => CrispEnds++;
 
         public void FillRect(float x, float y, float width, float height, Color color) =>
             Rects.Add((x, y, width, height));
