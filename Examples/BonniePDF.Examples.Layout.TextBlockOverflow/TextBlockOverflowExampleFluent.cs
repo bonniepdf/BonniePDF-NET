@@ -37,8 +37,9 @@ public static class TextBlockOverflowExampleFluent
 
             doc.WithSettings(settings =>
             {
-                settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language = "en-GB";
 
                 settings.Footer((pageNumber, footer) =>
                 {
@@ -69,7 +70,7 @@ public static class TextBlockOverflowExampleFluent
 
                     column.Item()
                         .Text(longText)
-                        .TextColor(ColorPalette.Slate[700]);
+                        .TextColor(ColorPalette.Slate[600]);
                 });
             });
         }).Build();

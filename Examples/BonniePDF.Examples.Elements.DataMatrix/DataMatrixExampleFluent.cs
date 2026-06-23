@@ -36,7 +36,7 @@ public static class DataMatrixExampleFluent
             doc.WithDefaultTextStyle(style => style
                 .WithFamily(StandardFonts.Helvetica)
                 .WithSize(11)
-                .WithColor(ColorPalette.Slate[700]));
+                .WithColor(ColorPalette.Slate[600]));
 
             doc.Page(page =>
             {
@@ -68,7 +68,8 @@ public static class DataMatrixExampleFluent
                         row.ConstantItem(140)
                             .Padding(10)
                             .DataMatrix("https://www.bonniepdf.dev", size: 120)
-                            .QuietZone(2);
+                            .QuietZone(2)
+                            .AltText("Data matrix encoding https://www.bonniepdf.dev");
 
                         row.RelativeItem()
                             .Column(details =>
@@ -134,7 +135,8 @@ public static class DataMatrixExampleFluent
                             c.Item().Border(1, ColorPalette.Blue[200]).Padding(10).AlignCenter()
                                 .DataMatrix("ID-7782", size: 120)
                                 .ForegroundColor(ColorPalette.Blue[700])
-                                .QuietZone(2);
+                                .QuietZone(2)
+                                .AltText("Data matrix encoding ID-7782");
                             c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("ID-7782").FontSize(9).TextColor(ColorPalette.Slate[500]);
                         });
 
@@ -146,7 +148,8 @@ public static class DataMatrixExampleFluent
                                 .DataMatrix("BATCH-44", size: 120)
                                 .ForegroundColor(ColorPalette.Rose[900])
                                 .BackgroundColor(ColorPalette.Rose[50])
-                                .QuietZone(2);
+                                .QuietZone(2)
+                                .AltText("Data matrix encoding BATCH-44");
                             c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("BATCH-44").FontSize(9).TextColor(ColorPalette.Slate[500]);
                         });
 
@@ -162,7 +165,8 @@ public static class DataMatrixExampleFluent
                                 .DataMatrix("A-1029", size: 120)
                                 .ForegroundColor(ColorPalette.Slate[900])
                                 .DrawBackground(false)
-                                .QuietZone(2);
+                                .QuietZone(2)
+                                .AltText("Data matrix encoding A-1029");
                             c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("A-1029").FontSize(9).TextColor(ColorPalette.Slate[500]);
                         });
                     });
@@ -178,7 +182,8 @@ public static class DataMatrixExampleFluent
         {
             card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
                 .DataMatrix(data, size: 95)
-                .QuietZone(2);
+                .QuietZone(2)
+                .AltText($"Data matrix encoding {data}");
 
             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text(label).Font(StandardFonts.HelveticaBold);
             card.Item().AlignCenter().Text(detail).FontSize(9).TextColor(ColorPalette.Slate[500]);
@@ -193,7 +198,8 @@ public static class DataMatrixExampleFluent
             card.Item().Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
                 .DataMatrix(data, size: 140)
                 .Rectangular(true)
-                .QuietZone(2);
+                .QuietZone(2)
+                .AltText($"Rectangular data matrix encoding {data}");
 
             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text(label).Font(StandardFonts.HelveticaBold);
             card.Item().AlignCenter().Text(data).FontSize(9).TextColor(ColorPalette.Slate[500]);

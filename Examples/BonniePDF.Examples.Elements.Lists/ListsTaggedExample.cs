@@ -34,9 +34,10 @@ public static class ListsTaggedExample
             Settings = new DocumentSettings
             {
                 Version = PdfVersion.Pdf17,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language = "en-GB",
-                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]),
+                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]),
             },
         };
 
@@ -62,7 +63,7 @@ public static class ListsTaggedExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Indigo[600],
             Margin = new Thickness(0, 14, 0, 6),
         });
 
@@ -78,7 +79,7 @@ public static class ListsTaggedExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Indigo[600],
             Margin = new Thickness(0, 14, 0, 6),
         });
 
@@ -123,7 +124,7 @@ public static class ListsTaggedExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Indigo[600],
             Margin = new Thickness(0, 14, 0, 6),
         });
 
@@ -138,7 +139,7 @@ public static class ListsTaggedExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Indigo[600],
             Margin = new Thickness(0, 14, 0, 6),
         });
 

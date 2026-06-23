@@ -36,7 +36,7 @@ public static class HeadersFootersExample
             // Footer template - shows page number
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"Page {pageNumber} - Confidential",
+                Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken} - Confidential",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 10,
                 TextColor = ColorPalette.Slate[500],
@@ -45,8 +45,9 @@ public static class HeadersFootersExample
         };
 
         Document doc = new(settings);
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Headers and Footers Demo";
@@ -71,7 +72,7 @@ public static class HeadersFootersExample
                 Text = $"1.{section} Section Title",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 14,
-                TextColor = ColorPalette.Slate[700],
+                TextColor = ColorPalette.Slate[600],
                 Margin = new Thickness(0, 15, 0, 10)
             });
 

@@ -37,8 +37,9 @@ public static class ShapesAndBordersExampleFluent
             {
                 settings.PageSize    = PdfSize.A4;
                 settings.Margin      = 50;
-                settings.Version     = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance   = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language      = "en-GB";
             });
 
             doc.WithDefaultTextStyle(style => style
@@ -85,7 +86,7 @@ public static class ShapesAndBordersExampleFluent
                         .CornerRadius(10)
                         .Margin(0, 0, 0, 12)
                         .Text("A rounded border with no background fill. The stroke follows the curved path.")
-                        .TextColor(ColorPalette.Slate[700]);
+                        .TextColor(ColorPalette.Slate[600]);
 
                     col.Item()
                         .Padding(16)
@@ -176,7 +177,7 @@ public static class ShapesAndBordersExampleFluent
                         .Border(1, Color.FromHex("#8b5cf6"))
                         .Text("This element uses chained fluent extensions: .Padding().Background().CornerRadius().Border().Text()")
                         .FontSize(12)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 8);
 
                     col.Item()
@@ -198,7 +199,7 @@ public static class ShapesAndBordersExampleFluent
                             .Margin(0, 0, 0, 6)
                             .Text(r == 0 ? "CornerRadius = 0 (sharp corners, default)" : $"CornerRadius = {r}")
                             .FontSize(11)
-                            .TextColor(ColorPalette.Slate[700]);
+                            .TextColor(ColorPalette.Slate[600]);
                     }
 
                     // ── Section 6: Practical Examples ─────────────────────────
@@ -249,7 +250,7 @@ public static class ShapesAndBordersExampleFluent
                         .Border(1, ColorPalette.Blue[600])
                         .CornerRadius(8)
                         .Margin(0, 0, 0, 8)
-                        .Text("ℹ  Info: Rounded corners are built from four Bezier arcs using the k=0.5523 approximation constant.")
+                        .Text("ℹ  Info: Rounded corners are built from four Bezier arcs using k=0.5523.")
                         .TextColor(ColorPalette.Blue[800]);
                 });
             });

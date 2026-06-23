@@ -1,5 +1,6 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Fluent;
 using BonniePDF.Fluent.Extensions;
@@ -44,8 +45,9 @@ public static class HeadersFootersExampleFluent
                 settings.PageSize = PdfSize.A4;
                 settings.Margin = 60;
                 settings.DefaultZoom = ZoomLevel.FitPage;
-                settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language = "en-GB";
 
                 // Header/footer templates are rendered during save, outside the Page() scope,
                 // so they don't inherit the document default style - explicit font calls needed.
@@ -60,7 +62,7 @@ public static class HeadersFootersExampleFluent
 
                 settings.Footer((pageNumber, footer) =>
                 {
-                    footer.Text($"Page {pageNumber} - Confidential")
+                    footer.Text($"Page {pageNumber} of {TextElementBase.TotalPagesToken} - Confidential")
                           .FontSize(10)
                           .TextColor(ColorPalette.Slate[500])
                           .AlignCenter();
@@ -87,7 +89,7 @@ public static class HeadersFootersExampleFluent
                             .Text($"1.{section} Section Title")
                             .Bold()
                             .FontSize(14)
-                            .TextColor(ColorPalette.Slate[700])
+                            .TextColor(ColorPalette.Slate[600])
                             .Margin(0, 15, 0, 10);
 
                         for (int p = 0; p < 3; p++)

@@ -48,7 +48,7 @@ public static class TextAlignmentTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.TimesRoman)
                     .WithSize(11)
-                    .WithColor(ColorPalette.Slate[700]),
+                    .WithColor(ColorPalette.Slate[600]),
             },
         };
 

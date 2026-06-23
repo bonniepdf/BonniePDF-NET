@@ -75,7 +75,7 @@ public static class MultiPageFlowTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
-                    .WithColor(ColorPalette.Slate[700]),
+                    .WithColor(ColorPalette.Slate[600]),
             },
         };
 
@@ -165,7 +165,7 @@ public static class MultiPageFlowTaggedExample
                 Level         = 2,
                 FontName      = StandardFonts.HelveticaBold,
                 FontSize      = 14,
-                TextColor     = ColorPalette.Slate[700],
+                TextColor     = ColorPalette.Indigo[600],
                 Margin        = new Thickness(0, 14, 0, 6),
             });
 

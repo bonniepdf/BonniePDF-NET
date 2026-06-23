@@ -72,7 +72,7 @@ public static class PdfA2aCompliantExample
                    "Both claims are verified by veraPDF against profiles 2a and ua1 respectively.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -93,7 +93,7 @@ public static class PdfA2aCompliantExample
                    "PDF/A-2a is the natural target - and BonniePDF reaches it with two lines of configuration.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 12),
         });
 

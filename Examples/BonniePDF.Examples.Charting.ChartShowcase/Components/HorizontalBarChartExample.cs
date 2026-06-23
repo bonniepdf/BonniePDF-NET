@@ -5,6 +5,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
@@ -84,13 +85,13 @@ public static class HorizontalBarChartExample
             StretchToFit = true,
             BarColor = Color.FromHex(ChartColors.Indigo),
             BarWidthRatio = 0.55f,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
-        document.Add(new ChartElement(barChart, chartData));
+        document.Add(new ChartElement(barChart, chartData) { AltText = "Horizontal bar chart ranking regional sales performance across six UK regions" });
         
 
         //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");

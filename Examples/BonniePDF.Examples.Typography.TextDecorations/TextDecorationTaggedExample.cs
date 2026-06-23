@@ -41,7 +41,7 @@ public static class TextDecorationTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(12)
-                    .WithColor(ColorPalette.Slate[700]),
+                    .WithColor(ColorPalette.Slate[600]),
             },
         };
 
@@ -69,7 +69,7 @@ public static class TextDecorationTaggedExample
         {
             Text        = "This text has an underline decoration applied.",
             TextDecoration = TextDecoration.Underline,
-            TextColor   = ColorPalette.Slate[700],
+            TextColor   = ColorPalette.Slate[600],
             Margin      = new Thickness(0, 0, 0, 8),
         });
 
@@ -77,7 +77,7 @@ public static class TextDecorationTaggedExample
         {
             Text        = "Underlines can mark hyperlinks, emphasis, or headings in informal documents.",
             TextDecoration = TextDecoration.Underline,
-            TextColor   = ColorPalette.Slate[700],
+            TextColor   = ColorPalette.Slate[600],
             Margin      = new Thickness(0, 0, 0, 8),
         });
 
@@ -89,7 +89,7 @@ public static class TextDecorationTaggedExample
         {
             Text          = "This text has a strikethrough decoration, useful for showing deleted or superseded content.",
             TextDecoration = TextDecoration.Strikethrough,
-            TextColor     = ColorPalette.Slate[700],
+            TextColor     = ColorPalette.Slate[600],
             Margin        = new Thickness(0, 0, 0, 8),
         });
 
@@ -97,7 +97,7 @@ public static class TextDecorationTaggedExample
         {
             Text          = "Strikethrough visually signals content that has been withdrawn or revised.",
             TextDecoration = TextDecoration.Strikethrough,
-            TextColor     = ColorPalette.Slate[700],
+            TextColor     = ColorPalette.Slate[600],
             Margin        = new Thickness(0, 0, 0, 8),
         });
 
@@ -109,7 +109,7 @@ public static class TextDecorationTaggedExample
         {
             Text           = "This text has both underline and strikethrough applied simultaneously.",
             TextDecoration = TextDecoration.Underline | TextDecoration.Strikethrough,
-            TextColor     = ColorPalette.Slate[700],
+            TextColor     = ColorPalette.Slate[600],
             Margin        = new Thickness(0, 0, 0, 8),
         });
 
@@ -124,7 +124,7 @@ public static class TextDecorationTaggedExample
                 Text           = $"Underline at {size}pt",
                 FontSize       = size,
                 TextDecoration = TextDecoration.Underline,
-                TextColor = ColorPalette.Slate[700],
+                TextColor = ColorPalette.Slate[600],
                 Margin    = new Thickness(0, 0, 0, 4),
             });
         }

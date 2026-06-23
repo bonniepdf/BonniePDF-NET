@@ -40,12 +40,12 @@ public static class TextBlockOverflowTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
-                    .WithColor(ColorPalette.Slate[700]),
+                    .WithColor(ColorPalette.Slate[600]),
 
                 // Page numbers in the footer are /Artifact - screen readers skip them.
                 FooterTemplate = pageNum => new TextBlock
                 {
-                    Text      = $"Page {pageNum}",
+                    Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
                     FontName  = StandardFonts.Helvetica,
                     FontSize  = 9,
                     TextColor = ColorPalette.Slate[400],
@@ -81,7 +81,7 @@ public static class TextBlockOverflowTaggedExample
                 Level         = 2,
                 FontName      = StandardFonts.HelveticaBold,
                 FontSize      = 13,
-                TextColor     = ColorPalette.Slate[700],
+                TextColor     = ColorPalette.Indigo[600],
                 Margin        = new Thickness(0, 10, 0, 4),
             });
 

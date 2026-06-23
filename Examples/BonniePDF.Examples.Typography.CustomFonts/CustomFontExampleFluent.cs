@@ -41,8 +41,9 @@ public static class CustomFontExampleFluent
 
             doc.WithSettings(settings =>
             {
-                settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language = "en-GB";
             });
 
             // Set the TTF path as the document default so all text inherits it
@@ -71,7 +72,7 @@ public static class CustomFontExampleFluent
                     column.Item()
                         .Text("Unicode Symbols:")
                         .FontSize(12)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 6);
 
                     foreach (string sym in UnicodeSymbols)
@@ -98,7 +99,7 @@ public static class CustomFontExampleFluent
                     column.Item()
                         .Text("Currency Symbols:")
                         .FontSize(12)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 6);
 
                     column.Item()
@@ -110,7 +111,7 @@ public static class CustomFontExampleFluent
                     column.Item()
                         .Text("Mathematical Symbols:")
                         .FontSize(12)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 6);
 
                     column.Item()
@@ -128,7 +129,7 @@ public static class CustomFontExampleFluent
                     column.Item()
                         .Text("Greek Letters:")
                         .FontSize(12)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 6);
 
                     column.Item()
@@ -140,7 +141,7 @@ public static class CustomFontExampleFluent
                     column.Item()
                         .Text("Mixed Font Demonstration:")
                         .FontSize(12)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 6);
 
                     // Standard Helvetica (Type1 - not embedded)

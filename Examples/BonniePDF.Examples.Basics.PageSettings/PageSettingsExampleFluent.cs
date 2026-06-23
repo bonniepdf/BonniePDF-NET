@@ -1,5 +1,6 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Fluent;
 using BonniePDF.Fluent.Extensions;
@@ -33,13 +34,14 @@ public static class PageSettingsExampleFluent
 
             doc.WithSettings(settings =>
             {
-                settings.Version     = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance   = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language      = "en-GB";
 
                 // Running footer: centred page number and document name on every page
                 settings.Footer((pageNumber, footer) =>
                 {
-                    footer.Text($"Page {pageNumber} - BonniePDF Standard Formats")
+                    footer.Text($"Page {pageNumber} of {TextElementBase.TotalPagesToken} - BonniePDF Standard Formats")
                         .Font(StandardFonts.Helvetica)
                         .FontSize(9)
                         .TextColor(ColorPalette.Slate[400])

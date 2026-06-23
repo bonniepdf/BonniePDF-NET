@@ -30,8 +30,9 @@ public static class HyperlinksExampleFluent
 
             doc.WithSettings(settings =>
             {
-                settings.Version        = PdfVersion.Pdf17;
-                settings.PdfAEnabled    = true;
+                settings.Conformance    = PdfAConformance.PdfA2a;
+                settings.Accessibility  = AccessibilityMode.PdfUa1;
+                settings.Language       = "en-GB";
                 settings.DefaultZoom    = ZoomLevel.FitPage;
                 settings.DisplayDocTitle = true;
             });
@@ -122,7 +123,7 @@ public static class HyperlinksExampleFluent
             .Text(title)
             .Font(StandardFonts.HelveticaBold)
             .FontSize(14)
-            .TextColor(ColorPalette.Slate[700])
+            .TextColor(ColorPalette.Slate[600])
             .Margin(0, 0, 0, 8);
     }
 }

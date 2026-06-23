@@ -20,8 +20,9 @@ public static class HorizontalStacksExample
     {
         Document doc = new();
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
@@ -44,7 +45,7 @@ public static class HorizontalStacksExample
             Text = "Equal Width Distribution",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -91,7 +92,7 @@ public static class HorizontalStacksExample
             Text = "Weighted Width Distribution (1:2:3 ratio)",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 16, 0, 8)
         });
 
@@ -137,7 +138,7 @@ public static class HorizontalStacksExample
             Text = "Center Vertical Alignment",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 16, 0, 8)
         });
 
@@ -175,7 +176,7 @@ public static class HorizontalStacksExample
             Text = "Colored Containers",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 16, 0, 8)
         });
 
@@ -217,7 +218,7 @@ public static class HorizontalStacksExample
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
             TextColor = ColorPalette.Slate[800],
-            Margin = new Thickness(0, 0, 0, 12)
+            Margin = new Thickness(0, 24, 0, 12)
         });
 
         // Key-value pairs
@@ -226,7 +227,7 @@ public static class HorizontalStacksExample
             Text = "Key-Value Pairs",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -283,7 +284,7 @@ public static class HorizontalStacksExample
             Text = "Progress Bar Style",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 16, 0, 8)
         });
 
@@ -315,7 +316,7 @@ public static class HorizontalStacksExample
             Text = "Badge Style Layout",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 16, 0, 8)
         });
 

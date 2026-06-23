@@ -27,8 +27,9 @@ public static class MultiPageFlowExample
         };
 
         Document doc = new(settings);
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Flow Architecture Demo";
@@ -61,7 +62,7 @@ public static class MultiPageFlowExample
             Text = "Part 1: Complete Employee Directory",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 15)
         });
 
@@ -164,7 +165,7 @@ public static class MultiPageFlowExample
             Text = "Part 2: Company Overview & History",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 15)
         });
 
@@ -200,7 +201,7 @@ public static class MultiPageFlowExample
                 Text = title,
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 14,
-                TextColor = ColorPalette.Slate[700],
+                TextColor = ColorPalette.Slate[600],
                 Margin = new Thickness(0, 20, 0, 8)
             });
 
@@ -232,7 +233,7 @@ public static class MultiPageFlowExample
             Text = "Conclusion",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 15)
         });
 

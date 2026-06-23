@@ -30,8 +30,9 @@ public static class TextDecorationExampleFluent
             {
                 settings.PageSize = PdfSize.A4;
                 settings.Margin = 60;
-                settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language = "en-GB";
             });
 
             // Helvetica 12pt as document default - section headers override size only
@@ -56,13 +57,13 @@ public static class TextDecorationExampleFluent
 
                     column.Item()
                         .Text("This text has an underline decoration applied.")
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Underline()
                         .Margin(0, 0, 0, 12);
 
                     column.Item()
                         .Text("This underline was applied using the fluent .Underline() extension method.")
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Underline()
                         .Margin(0, 0, 0, 12);
 
@@ -71,13 +72,13 @@ public static class TextDecorationExampleFluent
 
                     column.Item()
                         .Text("This text has a strikethrough decoration, useful for showing deleted or superseded content.")
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Strikethrough()
                         .Margin(0, 0, 0, 12);
 
                     column.Item()
                         .Text("This strikethrough was applied using the fluent .Strikethrough() extension method.")
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Strikethrough()
                         .Margin(0, 0, 0, 12);
 
@@ -86,14 +87,14 @@ public static class TextDecorationExampleFluent
 
                     column.Item()
                         .Text("This text has both underline and strikethrough applied simultaneously.")
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Underline()
                         .Strikethrough()
                         .Margin(0, 0, 0, 12);
 
                     column.Item()
                         .Text("Chained decorations are additive: .Underline().Strikethrough() - both apply.")
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Underline()
                         .Strikethrough()
                         .Margin(0, 0, 0, 12);
@@ -104,20 +105,20 @@ public static class TextDecorationExampleFluent
 
                     column.Item()
                         .Text("Left-aligned underlined text")
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Underline()
                         .Margin(0, 0, 0, 8);
 
                     column.Item()
                         .Text("Center-aligned underlined text")
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Underline()
                         .AlignCenter()
                         .Margin(0, 0, 0, 8);
 
                     column.Item()
                         .Text("Right-aligned underlined text")
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Underline()
                         .AlignRight()
                         .Margin(0, 0, 0, 8);
@@ -131,7 +132,7 @@ public static class TextDecorationExampleFluent
                         column.Item()
                             .Text($"Underline at {size}pt")
                             .FontSize(size)
-                            .TextColor(ColorPalette.Slate[700])
+                            .TextColor(ColorPalette.Slate[600])
                             .Underline()
                             .Margin(0, 0, 0, 6);
                     }

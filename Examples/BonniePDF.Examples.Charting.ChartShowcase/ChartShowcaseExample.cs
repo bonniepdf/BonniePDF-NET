@@ -59,7 +59,7 @@ public static class ChartShowcaseExample
 
         document.Settings.Version = PdfVersion.Pdf17;
         document.Settings.PdfAEnabled = true;
-        document.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]);
+        document.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
         document.Metadata.Title = "Charting Examples";
@@ -115,7 +115,7 @@ public static class ChartShowcaseExample
 
         document.Add(new TextBlock
         {
-            Text = "Generated using new ICanvas architecture",
+            Text = "Vertical bars with grid lines and value labels",
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
@@ -140,13 +140,13 @@ public static class ChartShowcaseExample
             Height = 400,
             StretchToFit = true,
             BarColor = Color.FromHex(ChartColors.Indigo),
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
         // Add chart to document
-        document.Add(new ChartElement(barChart, chartData));
+        document.Add(new ChartElement(barChart, chartData) { AltText = "Bar chart showing monthly sales from January to December with values in pounds sterling" });
     }
 
     private static void AddGroupedBarChart(Document document)
@@ -173,7 +173,7 @@ public static class ChartShowcaseExample
         {
             Height = 400,
             StretchToFit = true,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             ShowValueLabels = true,
             BackgroundColor = Color.FromHex("#fafafa"),
         };
@@ -210,7 +210,7 @@ public static class ChartShowcaseExample
         groupedChartData.Series.Add(homeSeries);
 
         // Add chart to document
-        document.Add(new GroupedBarChartElement(groupedBarChart, groupedChartData));
+        document.Add(new GroupedBarChartElement(groupedBarChart, groupedChartData) { AltText = "Grouped bar chart comparing monthly revenue across Electronics, Clothing, and Home & Garden product lines" });
     }
 
     private static void AddLineChart(Document document)
@@ -226,7 +226,7 @@ public static class ChartShowcaseExample
 
         document.Add(new TextBlock
         {
-            Text = "Generated using new ICanvas architecture",
+            Text = "Connected data points with markers and value labels",
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
@@ -257,7 +257,7 @@ public static class ChartShowcaseExample
             StretchToFit = true,
             LineColor = Color.FromHex(ChartColors.Violet),
             LineWidth = 2.5f,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
             ShowDataPointMarkers = true,
@@ -265,7 +265,7 @@ public static class ChartShowcaseExample
         };
 
         // Add chart to document
-        document.Add(new ChartElement(lineChart, chartData));
+        document.Add(new ChartElement(lineChart, chartData) { AltText = "Line chart showing monthly revenue trends from January to December" });
     }
 
     private static void AddMultiSeriesLineChart(Document document)
@@ -352,7 +352,7 @@ public static class ChartShowcaseExample
         {
             Height = 400,
             StretchToFit = true,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
             ShowDataPointMarkers = true,
@@ -360,7 +360,7 @@ public static class ChartShowcaseExample
         };
 
         // Add chart to document
-        document.Add(new ChartElement(lineChart, chartData));
+        document.Add(new ChartElement(lineChart, chartData) { AltText = "Multi-series line chart comparing year-over-year monthly revenue" });
     }
 
     private static void AddAreaChart(Document document)
@@ -376,7 +376,7 @@ public static class ChartShowcaseExample
 
         document.Add(new TextBlock
         {
-            Text = "Generated using new ICanvas architecture",
+            Text = "Filled area under the line with configurable opacity",
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
@@ -408,14 +408,14 @@ public static class ChartShowcaseExample
             AreaColor = Color.FromHex(ChartColors.Purple),
             FillOpacity = 0.3f,
             LineWidth = 2.5f,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
         // Add chart to document
-        document.Add(new ChartElement(areaChart, chartData));
+        document.Add(new ChartElement(areaChart, chartData) { AltText = "Area chart showing monthly sales performance from January to December" });
     }
 
     private static void AddLollipopChart(Document document)
@@ -431,7 +431,7 @@ public static class ChartShowcaseExample
 
         document.Add(new TextBlock
         {
-            Text = "Generated using new ICanvas architecture",
+            Text = "Stems with circular heads - clear and minimal bar alternative",
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
@@ -463,14 +463,14 @@ public static class ChartShowcaseExample
             LollipopColor = Color.FromHex(ChartColors.Pink),
             StemWidth = 2.5f,
             HeadRadius = 10,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
         // Add chart to document
-        document.Add(new ChartElement(lollipopChart, chartData));
+        document.Add(new ChartElement(lollipopChart, chartData) { AltText = "Lollipop chart showing quarterly revenue metrics" });
     }
 
     private static void AddDotPlotChart(Document document)
@@ -486,7 +486,7 @@ public static class ChartShowcaseExample
 
         document.Add(new TextBlock
         {
-            Text = "Generated using new ICanvas architecture",
+            Text = "Circular markers positioned along a value axis",
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
@@ -517,14 +517,14 @@ public static class ChartShowcaseExample
             StretchToFit = true,
             DotColor = Color.FromHex(ChartColors.Teal),
             DotRadius = 12,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
         // Add chart to document
-        document.Add(new ChartElement(dotPlotChart, chartData));
+        document.Add(new ChartElement(dotPlotChart, chartData) { AltText = "Dot plot chart showing product sales performance across eight products" });
     }
 
     private static void AddPieChart(Document document)
@@ -540,7 +540,7 @@ public static class ChartShowcaseExample
 
         document.Add(new TextBlock
         {
-            Text = "Generated using new ICanvas architecture",
+            Text = "Donut chart with legend and total value in the centre",
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
@@ -566,7 +566,7 @@ public static class ChartShowcaseExample
         };
 
         // Add chart to document
-        document.Add(new ChartElement(pieChart, chartData));
+        document.Add(new ChartElement(pieChart, chartData) { AltText = "Pie chart showing proportional distribution of monthly sales" });
     }
 }
 

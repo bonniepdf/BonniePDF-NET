@@ -28,8 +28,9 @@ public static class TextAlignmentExampleFluent
             {
                 settings.PageSize = PdfSize.A4;
                 settings.Margin = 60;
-                settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language = "en-GB";
             });
 
             // Body text defaults to Times Roman 11pt - only headers need overrides
@@ -64,7 +65,7 @@ public static class TextAlignmentExampleFluent
 
                     column.Item()
                         .Text(sampleText)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 20);
 
                     // Center-aligned
@@ -74,7 +75,7 @@ public static class TextAlignmentExampleFluent
 
                     column.Item()
                         .Text(sampleText)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .AlignCenter()
                         .Margin(0, 0, 0, 20);
 
@@ -85,7 +86,7 @@ public static class TextAlignmentExampleFluent
 
                     column.Item()
                         .Text(sampleText)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .AlignRight()
                         .Margin(0, 0, 0, 20);
 
@@ -96,7 +97,7 @@ public static class TextAlignmentExampleFluent
 
                     column.Item()
                         .Text(sampleText)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .AlignJustify()
                         .Margin(0, 0, 0, 20);
 

@@ -35,8 +35,9 @@ public static class MarginsExampleFluent
 
             doc.WithSettings(settings =>
             {
-                settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language = "en-GB";
             });
 
             // Document-wide default: all text inherits Helvetica 11pt
@@ -75,7 +76,7 @@ public static class MarginsExampleFluent
                         .Text("Image with Margin")
                         .Bold()
                         .FontSize(16)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 20, 0, 10); // 20pt top, 10pt bottom
 
                     column.Item()
@@ -98,7 +99,7 @@ public static class MarginsExampleFluent
                         .Text("Table with Margin")
                         .Bold()
                         .FontSize(16)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 20, 0, 10);
 
                     column.Item()
@@ -139,7 +140,7 @@ public static class MarginsExampleFluent
                         .Text("VerticalStack with Margin")
                         .Bold()
                         .FontSize(16)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 20, 0, 10);
 
                     column.Item()

@@ -166,7 +166,7 @@ public static partial class DickensNovelTaggedExample
                     Text      = "    " + title,
                     FontName  = StandardFonts.TimesRoman,
                     FontSize  = 10,
-                    TextColor = ColorPalette.Slate[700],
+                    TextColor = ColorPalette.Slate[600],
                     Margin    = new Thickness(0, 2, 0, 2),
                 });
             }

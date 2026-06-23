@@ -33,8 +33,9 @@ public static class BookPageLayoutExampleFluent
             {
                 settings.PageSize = PdfSize.A4;
                 settings.Margin = 60;
-                settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language = "en-GB";
             });
 
             // Body paragraphs: Times Roman 11pt Slate800, justified
@@ -51,7 +52,7 @@ public static class BookPageLayoutExampleFluent
                         .Text("CHAPTER III")
                         .Font(StandardFonts.TimesBold)
                         .FontSize(11)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .AlignCenter();
 
                     column.Item()
@@ -78,9 +79,9 @@ public static class BookPageLayoutExampleFluent
 
                     // Paragraph 2 - italicised dialogue
                     column.Item()
-                        .Text("\"Memory,\" he began, his voice gravelly with age, \"is not a repository of facts, neatly cataloged and retrieved at will. It is something far more complex-a living, breathing architecture that shapes and is shaped by who we are.\"")
+                        .Text("\"Memory,\" he began, his voice gravelly with age, \"is not a repository of facts, neatly cataloged and retrieved at will. It is something far more complex - a living, breathing architecture that shapes and is shaped by who we are.\"")
                         .Font(StandardFonts.TimesItalic)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .AlignJustify();
 
                     // Paragraph 3

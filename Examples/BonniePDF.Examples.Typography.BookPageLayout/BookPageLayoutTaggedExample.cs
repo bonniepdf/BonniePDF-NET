@@ -51,7 +51,7 @@ public static class BookPageLayoutTaggedExample
             Text      = "CHAPTER III",
             FontName  = StandardFonts.TimesBold,
             FontSize  = 11,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
         });
 
@@ -76,7 +76,7 @@ public static class BookPageLayoutTaggedExample
 
         Body(doc,
             "“Memory,” he began, his voice gravelly with age, “is not a repository of facts, " +
-            "neatly cataloged and retrieved at will. It is something far more complex-a living, breathing " +
+            "neatly cataloged and retrieved at will. It is something far more complex - a living, breathing " +
             "architecture that shapes and is shaped by who we are.”",
             StandardFonts.TimesItalic);
 

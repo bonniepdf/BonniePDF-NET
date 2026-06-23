@@ -5,6 +5,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
@@ -109,13 +110,13 @@ public static class HorizontalGroupedBarChartExample
             StretchToFit = true,
             BarWidthRatio = 0.7f,
             GroupGapRatio = 0.25f,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             ShowValueLabels = false, // keep it uncluttered with 3 series
             ShowLegend = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
-        document.Add(new GroupedBarChartElement(groupedBarChart, chartData));
+        document.Add(new GroupedBarChartElement(groupedBarChart, chartData) { AltText = "Horizontal grouped bar chart comparing quarterly sales across Electronics, Clothing, and Home & Garden" });
         
 
         //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");

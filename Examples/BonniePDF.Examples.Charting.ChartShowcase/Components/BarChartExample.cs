@@ -3,8 +3,10 @@ using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
@@ -23,7 +25,14 @@ public static class BarChartExample
         // Create a new PDF document
         Document document = new(new DocumentSettings
         {
-            Orientation = PageOrientation.Landscape
+            Orientation = PageOrientation.Landscape,
+            FooterTemplate = pageNumber =>
+            {
+                HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
+                stack.AddChild(new TextBlock { Text = "BonniePDF - Bar Chart", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500] }, null);
+                stack.AddChild(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                return stack;
+            }
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
@@ -48,7 +57,7 @@ public static class BarChartExample
 
         document.Add(new TextBlock
         {
-            Text = "Generated using the new ICanvas architecture",
+            Text = "Vertical bars with grid lines and value labels",
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
@@ -94,7 +103,7 @@ public static class BarChartExample
             Height = 400,
             StretchToFit = true,
             BarColor = Color.FromHex("#4f46e5"),
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             BackgroundColor = Color.FromHex("#fafafa")
         };
@@ -103,7 +112,7 @@ public static class BarChartExample
         // We need to use the PdfCanvas to draw the chart
         // For this example, we'll create a custom element that wraps the chart
 
-        document.Add(new ChartElement(barChart, chartData));
+        document.Add(new ChartElement(barChart, chartData) { AltText = "Bar chart showing monthly sales report from January to December" });
 
         // Save the document
         

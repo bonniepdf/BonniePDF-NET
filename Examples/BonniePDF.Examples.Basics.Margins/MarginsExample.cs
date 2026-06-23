@@ -19,8 +19,9 @@ public static class MarginsExample
     {
         Document doc = new();
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Margin Example";
@@ -70,7 +71,7 @@ public static class MarginsExample
             Text = "Image with Margin",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 20, 0, 10) // 20pt top, 10pt bottom
         });
 
@@ -102,7 +103,7 @@ public static class MarginsExample
             Text = "Table with Margin",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 20, 0, 10)
         });
 
@@ -149,7 +150,7 @@ public static class MarginsExample
             Text = "VerticalStack with Margin",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 20, 0, 10)
         });
 

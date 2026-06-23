@@ -30,7 +30,7 @@ public static class AnnualReportExample
 
     private static readonly Color CoverBg = ColorPalette.Blue[900];   // deepest primary tint - cover field
     private static readonly Color BandBg = ColorPalette.Blue[100];    // lightest primary tint - header/footer bands
-    private static readonly Color Ink = ColorPalette.Slate[700];      // body copy
+    private static readonly Color Ink = ColorPalette.Slate[600];      // body copy
     private static readonly Color Heading = ColorPalette.Blue[800];   // section headings
 
     // A4 portrait. The generous margin doubles as the height of the full-bleed

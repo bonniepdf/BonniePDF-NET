@@ -35,6 +35,7 @@ public static class BusinessInvoiceExample
         });
 
         doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(TextMedium);
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-US";
@@ -358,7 +359,7 @@ public static class BusinessInvoiceExample
         decimal totalDue = total - 1400m;
         Table totalRow = new(1f, 1f)
         {
-            CellPadding = 8,
+            CellPadding = 6,
             Border = Border.None
         };
         totalRow.AddRow(

@@ -25,9 +25,10 @@ public static class RichTextExample
             Margin = 60
         });
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]);
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Rich Text";
         doc.Metadata.Author = "BonniePDF";
@@ -86,7 +87,7 @@ public static class RichTextExample
             .Span(" styles within a single flowing paragraph."));
 
         // --- Section 4: Colored spans ---
-        doc.Add(CreateSectionHeader("Colored Spans"));
+        doc.Add(CreateSectionHeader("Coloured Spans"));
 
         doc.Add(new RichText
             {
@@ -99,9 +100,9 @@ public static class RichTextExample
             .Span(", ")
             .Span("green", new TextStyle().WithColor(ColorPalette.Green[600]))
             .Span(", or ")
-            .Span("any color", new TextStyle().WithColor(ColorPalette.Purple[600]))
-            .Span(" you choose. Colors can be combined with ")
-            .Span("bold colored text", new TextStyle().Bold().WithColor(ColorPalette.Indigo[600]))
+            .Span("any colour", new TextStyle().WithColor(ColorPalette.Purple[600]))
+            .Span(" you choose. Colours can be combined with ")
+            .Span("bold coloured text", new TextStyle().Bold().WithColor(ColorPalette.Indigo[600]))
             .Span(" for maximum emphasis."));
 
         // --- Section 5: Text decorations ---

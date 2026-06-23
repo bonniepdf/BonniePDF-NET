@@ -27,9 +27,10 @@ public static class ShapesAndBordersExample
             Margin = 50
         });
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]);
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Rounded Rectangles";
         doc.Metadata.Author = "BonniePDF";
@@ -239,7 +240,7 @@ public static class ShapesAndBordersExample
             Margin = new Thickness(0, 0, 0, 8),
             Child = new TextBlock
             {
-                Text = "Info: Rounded corners are built from four Bezier arcs using the k=0.5523 approximation constant.",
+                Text = "Info: Rounded corners are built from four Bezier arcs using k=0.5523.",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 12,
                 TextColor = ColorPalette.Blue[800]

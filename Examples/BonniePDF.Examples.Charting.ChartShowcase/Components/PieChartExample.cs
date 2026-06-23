@@ -4,9 +4,11 @@ using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Examples.Charting.ChartShowcase.Data;
 using BonniePDF.Extensions;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
@@ -26,7 +28,14 @@ public static class PieChartExample
         // Create a new PDF document
         Document document = new(new DocumentSettings
         {
-            Orientation = PageOrientation.Landscape
+            Orientation = PageOrientation.Landscape,
+            FooterTemplate = pageNumber =>
+            {
+                HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
+                stack.AddChild(new TextBlock { Text = "BonniePDF - Pie Chart", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500] }, null);
+                stack.AddChild(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                return stack;
+            }
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
@@ -48,7 +57,7 @@ public static class PieChartExample
 
         document.Add(new TextBlock
         {
-            Text = "Generated using the PieChart component with donut style",
+            Text = "Donut chart with legend and total value in the centre",
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
@@ -74,7 +83,7 @@ public static class PieChartExample
         };
 
         // Add the chart to the document
-        document.Add(new ChartElement(pieChart, chartData));
+        document.Add(new ChartElement(pieChart, chartData) { AltText = "Donut-style pie chart showing proportional distribution of monthly sales" });
 
         // Save the document
         

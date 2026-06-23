@@ -3,8 +3,10 @@ using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
@@ -23,7 +25,14 @@ public static class LollipopChartExample
         // Create a new PDF document
         Document document = new(new DocumentSettings
         {
-            Orientation = PageOrientation.Landscape
+            Orientation = PageOrientation.Landscape,
+            FooterTemplate = pageNumber =>
+            {
+                HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
+                stack.AddChild(new TextBlock { Text = "BonniePDF - Lollipop Chart", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500] }, null);
+                stack.AddChild(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                return stack;
+            }
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
@@ -45,7 +54,7 @@ public static class LollipopChartExample
 
         document.Add(new TextBlock
         {
-            Text = "Generated using the new ICanvas architecture",
+            Text = "Stems with circular heads - clear and minimal bar alternative",
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
@@ -86,17 +95,17 @@ public static class LollipopChartExample
         {
             Height = 400,
             StretchToFit = true,
-            LollipopColor = Color.FromHex("#4f46e5"),
+            LollipopColor = Color.FromHex(ChartColors.Pink),
             StemWidth = 2.5f,
             HeadRadius = 10,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
         // Add the chart to the document
-        document.Add(new ChartElement(lollipopChart, chartData));
+        document.Add(new ChartElement(lollipopChart, chartData) { AltText = "Lollipop chart showing quarterly revenue performance" });
 
         // Save the document
         
