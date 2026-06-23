@@ -5,6 +5,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
@@ -86,13 +87,13 @@ public static class HorizontalLollipopChartExample
             LollipopColor = Color.FromHex(ChartColors.Violet),
             StemWidth = 2f,
             HeadRadius = 9,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
-        document.Add(new ChartElement(lollipopChart, chartData));
+        document.Add(new ChartElement(lollipopChart, chartData) { AltText = "Horizontal lollipop chart ranking year-to-date revenue across eight product lines" });
         
 
         //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");

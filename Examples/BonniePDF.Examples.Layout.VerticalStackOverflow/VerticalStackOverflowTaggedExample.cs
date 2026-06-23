@@ -42,7 +42,7 @@ public static class VerticalStackOverflowTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
-                    .WithColor(ColorPalette.Slate[700]),
+                    .WithColor(ColorPalette.Slate[600]),
             },
         };
 

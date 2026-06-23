@@ -28,9 +28,10 @@ public static class UserDirectoryExample
             Margin = 40
         });
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(ColorPalette.Slate[700]);
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "User Directory";
         doc.Metadata.Author = "Company HR";
@@ -97,17 +98,17 @@ public static class UserDirectoryExample
 
             TableRow row = TableRow.From(
                 new TextBlock
-                    { Text = user.Id, FontName = StandardFonts.Courier, FontSize = 9, TextColor = ColorPalette.Slate[700] },
+                    { Text = user.Id, FontName = StandardFonts.Courier, FontSize = 9, TextColor = ColorPalette.Slate[600] },
                 new TextBlock
                     { Text = user.Name, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[800] },
                 new TextBlock
                     { Text = user.Email, FontName = StandardFonts.Helvetica, FontSize = 8, TextColor = ColorPalette.Slate[600] },
                 new TextBlock
                 {
-                    Text = user.Department, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[700]
+                    Text = user.Department, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[600]
                 },
                 new TextBlock
-                    { Text = user.Role, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[700] },
+                    { Text = user.Role, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[600] },
                 new TextBlock
                 {
                     Text = user.Location, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = ColorPalette.Slate[600]

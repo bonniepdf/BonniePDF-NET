@@ -27,8 +27,9 @@ public static class HorizontalStacksExampleFluent
         {
             doc.WithSettings(settings =>
             {
-                settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language = "en-GB";
             });
 
             doc.WithMetadata(metadata =>
@@ -56,7 +57,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Equal Width Distribution")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 8);
 
                     // Wrap in container with background color, then equal-width row
@@ -76,7 +77,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Weighted Width Distribution (1:2:3 ratio)")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 16, 0, 8);
 
                     column.Item()
@@ -95,7 +96,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Center Vertical Alignment")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 16, 0, 8);
 
                     column.Item()
@@ -114,7 +115,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Colored Containers")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 16, 0, 8);
 
                     column.Item()
@@ -139,7 +140,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Key-Value Pairs")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 8);
 
                     var kvSource = Placeholders.WithSeed(300);
@@ -165,7 +166,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Progress Bar Style")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 16, 0, 8);
 
                     column.Item()
@@ -182,7 +183,7 @@ public static class HorizontalStacksExampleFluent
                         .Text("Badge Style Layout")
                         .Bold()
                         .FontSize(14)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 16, 0, 8);
 
                     // NOTE: HorizontalStack.Alignment (HorizontalAlignment.Center) has no direct

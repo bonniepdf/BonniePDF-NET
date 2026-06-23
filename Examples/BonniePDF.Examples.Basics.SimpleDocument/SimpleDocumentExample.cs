@@ -77,7 +77,7 @@ public static class SimpleDocumentExample
             Text = "Key Features:",
             FontName = File.Exists(fontPath) ? fontPath : StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
 

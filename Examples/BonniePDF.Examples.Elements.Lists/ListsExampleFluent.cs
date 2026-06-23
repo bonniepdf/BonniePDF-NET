@@ -31,8 +31,9 @@ public static class ListsExampleFluent
 
             doc.WithSettings(settings =>
             {
-                settings.Version     = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance   = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language      = "en-GB";
             });
 
             doc.WithDefaultTextStyle(style => style
@@ -231,7 +232,7 @@ public static class ListsExampleFluent
             .Text(title)
             .Font(StandardFonts.HelveticaBold)
             .FontSize(14)
-            .TextColor(ColorPalette.Slate[700])
+            .TextColor(ColorPalette.Slate[600])
             .Margin(0, topMargin, 0, 0);
     }
 }

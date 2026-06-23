@@ -52,7 +52,7 @@ public static class WebApiBasicExample
             Text = "Benefits of this approach:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
         features.AddChild(new TextBlock { Text = "• No temporary files on disk" });
@@ -105,7 +105,7 @@ public static class WebApiBasicExample
             Text = "Benefits of this approach:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
         features.AddChild(new TextBlock { Text = "• No temporary files on disk" });

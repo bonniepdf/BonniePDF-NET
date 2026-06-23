@@ -23,9 +23,10 @@ public static class WatermarkConfidentialExample
             Margin = 60
         });
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[700]);
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Confidential Report";
         doc.Metadata.Author = "BonniePDF";
@@ -105,7 +106,7 @@ public static class WatermarkConfidentialExample
                 Text = text,
                 FontName = StandardFonts.Helvetica,
                 FontSize = 11,
-                TextColor = ColorPalette.Slate[700]
+                TextColor = ColorPalette.Slate[600]
             },
             Padding = new Thickness(8, 5, 8, 5),
             Border = new Border(0.5f),

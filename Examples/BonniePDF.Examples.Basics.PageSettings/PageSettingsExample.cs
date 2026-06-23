@@ -20,7 +20,7 @@ public static class PageSettingsExample
             Margin = 40,
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"Page {pageNumber} - BonniePDF Standard Formats",
+                Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken} - BonniePDF Standard Formats",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 9,
                 TextColor = ColorPalette.Slate[400],
@@ -28,8 +28,9 @@ public static class PageSettingsExample
             }
         });
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Standard PDF Page Formats Gallery";

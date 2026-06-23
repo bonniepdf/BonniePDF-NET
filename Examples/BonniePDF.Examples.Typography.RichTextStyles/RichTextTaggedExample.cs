@@ -42,7 +42,7 @@ public static class RichTextTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
-                    .WithColor(ColorPalette.Slate[700]),
+                    .WithColor(ColorPalette.Slate[600]),
             },
         };
 
@@ -96,7 +96,7 @@ public static class RichTextTaggedExample
 
         // ── Coloured spans ─────────────────────────────────────────────────────
 
-        Section(doc, "Colored Spans", "h-colors");
+        Section(doc, "Coloured Spans", "h-colors");
 
         doc.Add(new RichText()
             .Span("Text can be ")
@@ -106,9 +106,9 @@ public static class RichTextTaggedExample
             .Span(", ")
             .Span("green", new TextStyle().WithColor(ColorPalette.Green[600]))
             .Span(", or ")
-            .Span("any color", new TextStyle().WithColor(ColorPalette.Purple[600]))
-            .Span(" you choose. Colors can be combined with ")
-            .Span("bold colored text", new TextStyle().Bold().WithColor(ColorPalette.Indigo[600]))
+            .Span("any colour", new TextStyle().WithColor(ColorPalette.Purple[600]))
+            .Span(" you choose. Colours can be combined with ")
+            .Span("bold coloured text", new TextStyle().Bold().WithColor(ColorPalette.Indigo[600]))
             .Span(" for maximum emphasis.")
         );
 

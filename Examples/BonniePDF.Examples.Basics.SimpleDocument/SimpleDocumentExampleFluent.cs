@@ -45,8 +45,9 @@ public static class SimpleDocumentFluentExample
                 settings.DefaultZoom    = ZoomLevel.FitPage;
                 settings.PageMode       = PageMode.UseNone;
                 settings.DisplayDocTitle = false;
-                settings.Version        = PdfVersion.Pdf17;
-                settings.PdfAEnabled    = true;
+                settings.Conformance    = PdfAConformance.PdfA2a;
+                settings.Accessibility  = AccessibilityMode.PdfUa1;
+                settings.Language       = "en-GB";
             });
 
             // Document-wide default: body font at 12pt
@@ -76,7 +77,7 @@ public static class SimpleDocumentFluentExample
                         .Text("Key Features:")
                         .Font(boldFont)
                         .FontSize(14)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 6);
 
                     foreach (string feature in Features)

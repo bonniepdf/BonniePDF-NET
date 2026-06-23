@@ -149,7 +149,7 @@ public static class ColorPaletteExample
             Text = name,
             FontName = StandardFonts.Helvetica,
             FontSize = 9,
-            TextColor = ColorPalette.Slate[700]
+            TextColor = ColorPalette.Slate[600]
         }
     };
 

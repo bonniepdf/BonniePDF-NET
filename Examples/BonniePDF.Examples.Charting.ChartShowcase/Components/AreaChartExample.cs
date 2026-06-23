@@ -3,8 +3,10 @@ using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
@@ -23,7 +25,14 @@ public static class AreaChartExample
         // Create a new PDF document
         Document document = new(new DocumentSettings
         {
-            Orientation = PageOrientation.Landscape
+            Orientation = PageOrientation.Landscape,
+            FooterTemplate = pageNumber =>
+            {
+                HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
+                stack.AddChild(new TextBlock { Text = "BonniePDF - Area Chart", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500] }, null);
+                stack.AddChild(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                return stack;
+            }
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
@@ -45,7 +54,7 @@ public static class AreaChartExample
 
         document.Add(new TextBlock
         {
-            Text = "Area Chart Demonstration",
+            Text = "Filled area under the line with configurable opacity",
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
@@ -95,17 +104,17 @@ public static class AreaChartExample
         {
             Height = 400,
             StretchToFit = true,
-            AreaColor = Color.FromHex("#4f46e5"),
+            AreaColor = Color.FromHex(ChartColors.Purple),
             FillOpacity = 0.3f,
             LineWidth = 2.5f,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
         // Add the chart to the document
-        document.Add(new ChartElement(areaChart, chartData));
+        document.Add(new ChartElement(areaChart, chartData) { AltText = "Area chart showing monthly sales performance from January to December" });
 
         // Save the document
         

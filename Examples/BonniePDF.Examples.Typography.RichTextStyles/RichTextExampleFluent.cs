@@ -35,8 +35,9 @@ public static class RichTextExampleFluent
             {
                 settings.PageSize = PdfSize.A4;
                 settings.Margin = 60;
-                settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language = "en-GB";
             });
 
             // Document default: Helvetica 11pt - spans that don't specify size inherit this
@@ -103,7 +104,7 @@ public static class RichTextExampleFluent
                         });
 
                     // ── 4. Colored spans ─────────────────────────────────────────
-                    SectionHeader(column, "Colored Spans");
+                    SectionHeader(column, "Coloured Spans");
 
                     column.Item()
                         .Margin(0, 0, 0, 16)
@@ -116,9 +117,9 @@ public static class RichTextExampleFluent
                             text.Span(", ");
                             text.Span("green").FontColor(ColorPalette.Green[600]);
                             text.Span(", or ");
-                            text.Span("any color").FontColor(ColorPalette.Purple[600]);
-                            text.Span(" you choose. Colors can be combined with ");
-                            text.Span("bold colored text").Bold().FontColor(ColorPalette.Indigo[600]);
+                            text.Span("any colour").FontColor(ColorPalette.Purple[600]);
+                            text.Span(" you choose. Colours can be combined with ");
+                            text.Span("bold coloured text").Bold().FontColor(ColorPalette.Indigo[600]);
                             text.Span(" for maximum emphasis.");
                         });
 

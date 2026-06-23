@@ -48,7 +48,7 @@ public static class EmojiTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(textFont)
                     .WithSize(11)
-                    .WithColor(ColorPalette.Slate[700]),
+                    .WithColor(ColorPalette.Slate[600]),
             },
         };
 
@@ -93,7 +93,7 @@ public static class EmojiTaggedExample
             TocIdentifier = "s-mixed",
             Level         = 2,
             FontSize      = 14,
-            TextColor     = ColorPalette.Slate[700],
+            TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 16, 0, 4),
         });
 
@@ -119,7 +119,7 @@ public static class EmojiTaggedExample
                 Text      = line,
                 FontName  = emojiFont,
                 FontSize  = 13,
-                TextColor = ColorPalette.Slate[700],
+                TextColor = ColorPalette.Slate[600],
                 Margin    = new Thickness(12, 0, 0, 4),
             });
         }
@@ -135,7 +135,7 @@ public static class EmojiTaggedExample
             TocIdentifier = tocId,
             Level         = 2,
             FontSize      = 14,
-            TextColor     = ColorPalette.Slate[700],
+            TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 16, 0, 4),
         });
 

@@ -39,7 +39,7 @@ public static class HeadersFootersTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
-                    .WithColor(ColorPalette.Slate[700]),
+                    .WithColor(ColorPalette.Slate[600]),
 
                 // Header/footer template content is rendered as /Artifact - screen readers skip it.
                 HeaderTemplate = pageNum => new TextBlock
@@ -52,7 +52,7 @@ public static class HeadersFootersTaggedExample
                 },
                 FooterTemplate = pageNum => new TextBlock
                 {
-                    Text      = $"Page {pageNum} · Confidential",
+                    Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken} · Confidential",
                     FontName  = StandardFonts.Helvetica,
                     FontSize  = 9,
                     TextColor = ColorPalette.Slate[500],
@@ -125,7 +125,7 @@ public static class HeadersFootersTaggedExample
                 Level         = 2,
                 FontName      = StandardFonts.HelveticaBold,
                 FontSize      = 14,
-                TextColor     = ColorPalette.Slate[700],
+                TextColor     = ColorPalette.Indigo[600],
                 Margin        = new Thickness(0, 14, 0, 6),
             });
 

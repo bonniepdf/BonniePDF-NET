@@ -18,8 +18,9 @@ public static class HyperlinksExample
         // Create a document with metadata
         Document doc = new();
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
@@ -47,7 +48,7 @@ public static class HyperlinksExample
             Text = "Basic Links:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -70,7 +71,7 @@ public static class HyperlinksExample
             Text = "Styled Links:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -110,7 +111,7 @@ public static class HyperlinksExample
             Text = "Links with Margins:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700]
+            TextColor = ColorPalette.Slate[600]
         });
 
         doc.Add(new TextBlock { Text = "Text before link.", FontSize = 10 });

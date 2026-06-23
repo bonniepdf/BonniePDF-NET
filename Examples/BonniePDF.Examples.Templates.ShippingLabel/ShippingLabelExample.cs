@@ -20,7 +20,7 @@ namespace BonniePDF.Examples.Templates.ShippingLabel;
 public static class ShippingLabelExample
 {
     private static readonly Color Ink = ColorPalette.Slate[900];
-    private static readonly Color BodyCol = ColorPalette.Slate[700];
+    private static readonly Color BodyCol = ColorPalette.Slate[600];
     private static readonly Color Mute = ColorPalette.Slate[500];
     private static readonly Color LineCol = ColorPalette.Slate[300];
 

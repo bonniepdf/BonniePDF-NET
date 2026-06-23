@@ -32,8 +32,9 @@ public static class WatermarkFluentExample
             {
                 settings.PageSize = PdfSize.A4;
                 settings.Margin = 60;
-                settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language = "en-GB";
 
                 // Fluent API: simple one-liner
                 settings.WithWatermark("SAMPLE", opacity: 0.12f, rotationDegrees: -40);

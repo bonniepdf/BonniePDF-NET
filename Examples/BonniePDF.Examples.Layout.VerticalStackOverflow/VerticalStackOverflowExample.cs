@@ -19,8 +19,9 @@ public static class VerticalStackOverflowExample
     public static Document Generate()
     {
         Document doc = new();
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "VerticalStack Overflow Demo";

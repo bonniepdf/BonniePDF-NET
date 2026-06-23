@@ -56,7 +56,7 @@ public static class CustomFontTaggedExample
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(fontPath)
                     .WithSize(11)
-                    .WithColor(ColorPalette.Slate[700]),
+                    .WithColor(ColorPalette.Slate[600]),
             },
         };
 
@@ -84,7 +84,7 @@ public static class CustomFontTaggedExample
             TocIdentifier = "unicode",
             Level         = 2,
             FontSize      = 14,
-            TextColor     = ColorPalette.Slate[700],
+            TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 0, 0, 6),
         });
 
@@ -110,7 +110,7 @@ public static class CustomFontTaggedExample
             TocIdentifier = "currency",
             Level         = 2,
             FontSize      = 14,
-            TextColor     = ColorPalette.Slate[700],
+            TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 10, 0, 6),
         });
 
@@ -127,7 +127,7 @@ public static class CustomFontTaggedExample
             TocIdentifier = "math",
             Level         = 2,
             FontSize      = 14,
-            TextColor     = ColorPalette.Slate[700],
+            TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 10, 0, 6),
         });
 
@@ -145,7 +145,7 @@ public static class CustomFontTaggedExample
             TocIdentifier = "greek",
             Level         = 2,
             FontSize      = 14,
-            TextColor     = ColorPalette.Slate[700],
+            TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 10, 0, 6),
         });
 

@@ -64,8 +64,9 @@ public static class MultiPageFlowExampleFluent
                 settings.PageSize = PdfSize.A4;
                 settings.Orientation = PageOrientation.Landscape;
                 settings.Margin = 50;
-                settings.Version = PdfVersion.Pdf17;
-                settings.PdfAEnabled = true;
+                settings.Conformance = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language = "en-GB";
             });
 
             doc.WithDefaultTextStyle(style => style.WithFamily(StandardFonts.Helvetica).WithSize(11));
@@ -95,7 +96,7 @@ public static class MultiPageFlowExampleFluent
                         .Text("Part 1: Complete Employee Directory")
                         .Bold()
                         .FontSize(18)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 15);
 
                     column.Item()
@@ -152,7 +153,7 @@ public static class MultiPageFlowExampleFluent
                         .Text("Part 2: Company Overview & History")
                         .Bold()
                         .FontSize(18)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 15);
 
                     (string, string)[] sections = new[]
@@ -185,7 +186,7 @@ public static class MultiPageFlowExampleFluent
                             .Text(title)
                             .Bold()
                             .FontSize(14)
-                            .TextColor(ColorPalette.Slate[700])
+                            .TextColor(ColorPalette.Slate[600])
                             .Margin(0, 20, 0, 8);
 
                         column.Item()
@@ -211,7 +212,7 @@ public static class MultiPageFlowExampleFluent
                         .Text("Conclusion")
                         .Bold()
                         .FontSize(18)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 0, 0, 15);
 
                     column.Item()

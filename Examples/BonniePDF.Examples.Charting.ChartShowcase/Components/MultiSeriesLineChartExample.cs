@@ -1,0 +1,141 @@
+using BonniePDF.Charts;
+using BonniePDF.Charts.Models;
+using BonniePDF.Configuration;
+using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Text;
+using BonniePDF.Extensions;
+using BonniePDF.Typography;
+
+namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
+
+/// <summary>
+/// Standalone multi-series line chart comparing year-over-year revenue.
+/// Two line series on a shared axis with data-point markers and value labels.
+/// </summary>
+[System.ComponentModel.DisplayName("Multi-Series Line Chart")]
+[System.ComponentModel.Category("Charting")]
+[System.ComponentModel.Description("Two-series line chart comparing previous and current year revenue on a shared axis with markers and value labels.")]
+public static class MultiSeriesLineChartExample
+{
+    private static readonly string[] MonthLabels =
+        ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    public static Document Generate()
+    {
+        int year = DateTime.Now.Year;
+
+        Document document = new(new DocumentSettings
+        {
+            Orientation = PageOrientation.Landscape,
+            FooterTemplate = pageNumber =>
+            {
+                HorizontalStack stack = new()
+                {
+                    WidthDistribution = WidthDistribution.Weighted
+                };
+                stack.AddChild(new TextBlock
+                {
+                    Text = "BonniePDF - Multi-Series Line Chart",
+                    FontName = StandardFonts.Helvetica,
+                    FontSize = 10,
+                    TextColor = ColorPalette.Slate[500]
+                }, null);
+                stack.AddChild(new TextBlock
+                {
+                    Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                    FontName = StandardFonts.Helvetica,
+                    FontSize = 10,
+                    TextColor = ColorPalette.Slate[500],
+                    Alignment = TextAlignment.Right
+                }, 1f);
+                return stack;
+            }
+        });
+
+        document.Settings.Conformance = PdfAConformance.PdfA2a;
+        document.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        document.Settings.Language = "en-GB";
+        document.Settings.DefaultTextStyle = new TextStyle()
+            .WithFamily("Helvetica")
+            .WithSize(12)
+            .WithColor(ColorPalette.Slate[600]);
+
+        document.Metadata.Title = "Multi-Series Line Chart";
+        document.Metadata.Author = "BonniePDF";
+        document.Metadata.Subject = $"Year-over-year revenue comparison - {year - 1} vs {year} on a shared axis";
+
+        document.Add(new TextBlock
+        {
+            Text = "Multi-Series Line Chart: Year-over-Year Comparison",
+            FontSize = 24,
+            TextColor = ColorPalette.Slate[800],
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 8)
+        });
+
+        document.Add(new TextBlock
+        {
+            Text = $"Comparing {year - 1} and {year} revenue with a shared axis",
+            FontSize = 14,
+            TextColor = ColorPalette.Slate[600],
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20)
+        });
+
+        decimal[] previousYearValues = [65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000];
+        decimal[] currentYearValues = [75000, 78000, 85000, 78000, 92000, 95000, 87000, 78000, 82000, 91000, 97000, 118000];
+
+        ChartSeries previousYear = new()
+        {
+            Name = $"{year - 1}",
+            Color = Color.FromHex("#4f46e5")
+        };
+        ChartSeries currentYear = new()
+        {
+            Name = $"{year}",
+            Color = Color.FromHex("#7c3aed")
+        };
+
+        for (int i = 0; i < MonthLabels.Length; i++)
+        {
+            previousYear.DataPoints.Add(new ChartDataPoint { Label = MonthLabels[i], Value = previousYearValues[i] });
+            currentYear.DataPoints.Add(new ChartDataPoint { Label = MonthLabels[i], Value = currentYearValues[i] });
+        }
+
+        ChartData chartData = new()
+        {
+            Title = "Year-over-Year Revenue Comparison",
+            Series = [previousYear, currentYear],
+            YAxis = new AxisOptions
+            {
+                Prefix = "£",
+                MaxValue = 150000,
+                StepCount = 5,
+                Legend = "Revenue"
+            },
+            XAxis = new AxisOptions
+            {
+                Legend = "Month"
+            }
+        };
+
+        LineChart lineChart = new()
+        {
+            Height = 380,
+            StretchToFit = true,
+            FontFamily = StandardFonts.Helvetica,
+            LabelFontSize = 9,
+            ShowValueLabels = true,
+            ShowDataPointMarkers = true,
+            BackgroundColor = Color.FromHex("#fafafa")
+        };
+
+        document.Add(new ChartElement(lineChart, chartData)
+        {
+            AltText = $"Multi-series line chart comparing monthly revenue for {year - 1} and {year}."
+        });
+
+        return document;
+    }
+}

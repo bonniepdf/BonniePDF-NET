@@ -20,7 +20,7 @@ public static class EncryptionPasswordExample
         settings.WithPassword("demo123");
 
         Document doc = new(settings);
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[700]);
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Add(new TextBlock
         {

@@ -37,7 +37,7 @@ public static class QRCodesExampleFluent
             doc.WithDefaultTextStyle(style => style
                 .WithFamily(StandardFonts.Helvetica)
                 .WithSize(11)
-                .WithColor(ColorPalette.Slate[700]));
+                .WithColor(ColorPalette.Slate[600]));
 
             doc.Page(page =>
             {
@@ -68,7 +68,8 @@ public static class QRCodesExampleFluent
                         row.ConstantItem(150)
                             .Padding(10)
                             .QRCode("https://bonniepdf.com", size: 130)
-                            .QuietZone(2);
+                            .QuietZone(2)
+                            .AltText("QR code linking to https://bonniepdf.com");
 
                         row.RelativeItem()
                             .Column(details =>
@@ -102,8 +103,9 @@ public static class QRCodesExampleFluent
                             card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.Low)
-                                .QuietZone(1);
-                                
+                                .QuietZone(1)
+                                .AltText("QR code linking to https://github.com/bonniepdf with low error correction");
+
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Low").Font(StandardFonts.HelveticaBold);
                             card.Item().AlignCenter().Text("~7% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
                             card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
@@ -115,8 +117,9 @@ public static class QRCodesExampleFluent
                             card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.Medium)
-                                .QuietZone(1);
-                                
+                                .QuietZone(1)
+                                .AltText("QR code linking to https://github.com/bonniepdf with medium error correction");
+
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Medium").Font(StandardFonts.HelveticaBold);
                             card.Item().AlignCenter().Text("~15% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
                             card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
@@ -128,8 +131,9 @@ public static class QRCodesExampleFluent
                             card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.Quartile)
-                                .QuietZone(1);
-                                
+                                .QuietZone(1)
+                                .AltText("QR code linking to https://github.com/bonniepdf with quartile error correction");
+
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Quartile").Font(StandardFonts.HelveticaBold);
                             card.Item().AlignCenter().Text("~25% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
                             card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
@@ -141,8 +145,9 @@ public static class QRCodesExampleFluent
                             card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.High)
-                                .QuietZone(1);
-                                
+                                .QuietZone(1)
+                                .AltText("QR code linking to https://github.com/bonniepdf with high error correction");
+
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("High").Font(StandardFonts.HelveticaBold);
                             card.Item().AlignCenter().Text("~30% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
                             card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
@@ -165,7 +170,8 @@ public static class QRCodesExampleFluent
                             c.Item().Border(1, ColorPalette.Blue[200]).Padding(10).AlignCenter()
                                 .QRCode("tel:+1234567890", size: 120)
                                 .ForegroundColor(ColorPalette.Blue[700])
-                                .QuietZone(2);
+                                .QuietZone(2)
+                                .AltText("QR code encoding telephone number +1234567890");
                             c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("tel:+1234567890").FontSize(9).TextColor(ColorPalette.Slate[500]);
                         });
 
@@ -177,7 +183,8 @@ public static class QRCodesExampleFluent
                                 .QRCode("mailto:hello@example.com", size: 120)
                                 .ForegroundColor(ColorPalette.Rose[900])
                                 .BackgroundColor(ColorPalette.Rose[50])
-                                .QuietZone(2);
+                                .QuietZone(2)
+                                .AltText("QR code encoding email address mailto:hello@example.com");
                             c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("mailto:hello@example.com").FontSize(9).TextColor(ColorPalette.Slate[500]);
                         });
 
@@ -193,7 +200,8 @@ public static class QRCodesExampleFluent
                                 .QRCode("WIFI:S:MyNetwork;T:WPA;P:password;;", size: 120)
                                 .ForegroundColor(ColorPalette.Amber[900])
                                 .DrawBackground(false) // Let the container's background show through
-                                .QuietZone(2);
+                                .QuietZone(2)
+                                .AltText("QR code encoding Wi-Fi network credentials for MyNetwork");
                             c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("WIFI:S:MyNetwork;...").FontSize(9).TextColor(ColorPalette.Slate[500]);
                         });
                     });

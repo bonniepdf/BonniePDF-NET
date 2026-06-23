@@ -83,7 +83,7 @@ public static class EmojiExampleFluent
                     column.Item()
                         .Text("Mixed Content")
                         .FontSize(14)
-                        .TextColor(ColorPalette.Slate[700])
+                        .TextColor(ColorPalette.Slate[600])
                         .Margin(0, 16, 0, 4);
 
                     column.Item()
@@ -97,7 +97,7 @@ public static class EmojiExampleFluent
                             .Text(line)
                             .Font(emojiFont)   // emoji font handles both text and glyphs in these lines
                             .FontSize(13)
-                            .TextColor(ColorPalette.Slate[700])
+                            .TextColor(ColorPalette.Slate[600])
                             .Margin(12, 0, 0, 4);
                     }
                 });
@@ -121,7 +121,7 @@ public static class EmojiExampleFluent
         column.Item()
             .Text(title)
             .FontSize(14)
-            .TextColor(ColorPalette.Slate[700])
+            .TextColor(ColorPalette.Slate[600])
             .Margin(0, 16, 0, 4);
 
         column.Item()

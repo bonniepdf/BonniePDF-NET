@@ -23,8 +23,9 @@ public static class BookPageLayoutExample
             Margin = 60
         });
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11).WithColor(ColorPalette.Slate[800]);
 
         doc.Metadata.Title = "The Architecture of Memory";
@@ -39,7 +40,7 @@ public static class BookPageLayoutExample
             Text = "CHAPTER III",
             FontName = StandardFonts.TimesBold,
             FontSize = 11,
-            TextColor = ColorPalette.Slate[700]
+            TextColor = ColorPalette.Slate[600]
         }.AlignCenter());
 
         // Main Title
@@ -73,10 +74,10 @@ public static class BookPageLayoutExample
         para2Stack.AddChild(new TextBlock
         {
             Text =
-                "\"Memory,\" he began, his voice gravelly with age, \"is not a repository of facts, neatly cataloged and retrieved at will. It is something far more complex-a living, breathing architecture that shapes and is shaped by who we are.\"",
+                "\"Memory,\" he began, his voice gravelly with age, \"is not a repository of facts, neatly cataloged and retrieved at will. It is something far more complex - a living, breathing architecture that shapes and is shaped by who we are.\"",
             FontName = StandardFonts.TimesItalic,
             FontSize = 11,
-            TextColor = ColorPalette.Slate[700]
+            TextColor = ColorPalette.Slate[600]
         });
         contentStack.AddChild(para2Stack);
 
@@ -109,7 +110,7 @@ public static class BookPageLayoutExample
             Text = "he continued, his voice dropping to a conspiratorial whisper-",
             FontName = StandardFonts.TimesItalic,
             FontSize = 11,
-            TextColor = ColorPalette.Slate[700]
+            TextColor = ColorPalette.Slate[600]
         });
         contentStack.AddChild(para6Stack);
 

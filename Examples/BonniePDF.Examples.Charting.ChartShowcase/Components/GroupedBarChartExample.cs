@@ -6,6 +6,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
@@ -81,13 +82,13 @@ public static class GroupedBarChartExample
         {
             Height = 400,
             StretchToFit = true,
-            FontFamily = "Arial, sans-serif",
+            FontFamily = StandardFonts.Helvetica,
             ShowValueLabels = true,
             BackgroundColor = Color.FromHex("#fafafa"),
         };
 
         // Add the chart to the document
-        document.Add(new GroupedBarChartElement(groupedBarChart, chartData));
+        document.Add(new GroupedBarChartElement(groupedBarChart, chartData) { AltText = "Grouped bar chart comparing quarterly revenue across Electronics, Clothing, and Home & Garden product lines" });
 
         // Save the document
         

@@ -21,8 +21,9 @@ public static class CustomFontExample
 
         Document doc = new();
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(fontPath).WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         // Set metadata
@@ -55,7 +56,7 @@ public static class CustomFontExample
             Text = "Unicode Symbols:",
             FontName = fontPath,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -77,7 +78,7 @@ public static class CustomFontExample
             Text = "Currency Symbols:",
             FontName = fontPath,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -89,7 +90,7 @@ public static class CustomFontExample
             Text = "Mathematical Symbols:",
             FontName = fontPath,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -103,7 +104,7 @@ public static class CustomFontExample
             Text = "Greek Letters:",
             FontName = fontPath,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -115,7 +116,7 @@ public static class CustomFontExample
             Text = "Mixed Font Demonstration:",
             FontName = fontPath,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
 

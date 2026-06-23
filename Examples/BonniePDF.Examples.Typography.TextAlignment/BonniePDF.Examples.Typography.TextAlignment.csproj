@@ -4,6 +4,10 @@
     <ProjectReference Include="..\..\BonniePDF\BonniePDF.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\assets\fonts\NotoSans-Regular.ttf" Link="fonts\NotoSans-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <PropertyGroup>
     <Version>2026.04.1</Version>
     <OutputType>Exe</OutputType>

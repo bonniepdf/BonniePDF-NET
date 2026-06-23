@@ -25,6 +25,12 @@ internal sealed class Program
             doc.Save(Path.Combine(outputDir, "justified_text_tagged.pdf"));
         }
 
+        Console.WriteLine("Generating Text Alignment (Embedded Font / NotoSans)...");
+        using (var doc = TextAlignmentLiberationExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "justified_text_liberation.pdf"));
+        }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

@@ -69,7 +69,7 @@ public static class EmojiExample
         {
             Text = "Mixed Content",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 16, 0, 4)
         });
 
@@ -96,7 +96,7 @@ public static class EmojiExample
                 Text = line,
                 FontName = emojiFont,
                 FontSize = 13,
-                TextColor = ColorPalette.Slate[700],
+                TextColor = ColorPalette.Slate[600],
                 Margin = new Thickness(12, 0, 0, 4)
             });
         }
@@ -109,7 +109,7 @@ public static class EmojiExample
         {
             Text = title,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 16, 0, 4)
         });
 

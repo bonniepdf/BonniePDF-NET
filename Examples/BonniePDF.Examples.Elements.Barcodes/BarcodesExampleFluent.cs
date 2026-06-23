@@ -38,7 +38,7 @@ public static class BarcodesExampleFluent
             doc.WithDefaultTextStyle(style => style
                 .WithFamily(StandardFonts.Helvetica)
                 .WithSize(11)
-                .WithColor(ColorPalette.Slate[700]));
+                .WithColor(ColorPalette.Slate[600]));
 
             doc.Page(page =>
             {

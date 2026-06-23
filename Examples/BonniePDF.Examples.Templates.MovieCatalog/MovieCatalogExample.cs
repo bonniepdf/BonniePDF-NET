@@ -28,11 +28,12 @@ public static class MovieCatalogExample
             Margin = 40
         });
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(ColorPalette.Slate[700]);
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(ColorPalette.Slate[600]);
 
-        doc.Metadata.Title = "Classic MoviesData Collection";
+        doc.Metadata.Title = "Classic Movies Collection";
         doc.Metadata.Author = "Classic Cinema Archive";
 
         IList<Movie> movies = MoviesData.GetMockMovies();
@@ -40,7 +41,7 @@ public static class MovieCatalogExample
         VerticalStack titleStack = new();
         titleStack.AddChild(new TextBlock
         {
-            Text = "Classic MoviesData Collection",
+            Text = "Classic Movies Collection",
             FontName = StandardFonts.TimesBold,
             FontSize = 26,
             TextColor = ColorPalette.Slate[900]
@@ -54,7 +55,7 @@ public static class MovieCatalogExample
         });
         titleStack.AddChild(new TextBlock
         {
-            Text = $"Total MoviesData: {MoviesData.GetMockMovies().Count} | Compiled: {DateTime.Now:MMMM yyyy}",
+            Text = $"Total Movies: {MoviesData.GetMockMovies().Count} | Compiled: {DateTime.Now:MMMM yyyy}",
             FontName = StandardFonts.Helvetica,
             FontSize = 10,
             TextColor = ColorPalette.Slate[500]
@@ -95,7 +96,8 @@ public static class MovieCatalogExample
                 new TextBlock
                 {
                     Text = movie.Year.ToString(), FontName = StandardFonts.CourierBold, FontSize = 10,
-                    TextColor = ColorPalette.Indigo[700]
+                    TextColor = ColorPalette.Indigo[700],
+                    Alignment = TextAlignment.Center
                 },
                 new TextBlock
                 {
@@ -104,7 +106,7 @@ public static class MovieCatalogExample
                 },
                 new TextBlock
                 {
-                    Text = movie.Director, FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[700]
+                    Text = movie.Director, FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[600]
                 },
                 new TextBlock
                 {
@@ -147,22 +149,22 @@ public static class MovieCatalogExample
         statsStack.AddChild(new TextBlock
         {
             Text = $"- Average Rating: {avgRating:F1}/10", FontName = StandardFonts.Helvetica, FontSize = 10,
-            TextColor = ColorPalette.Slate[700]
+            TextColor = ColorPalette.Slate[600]
         });
         statsStack.AddChild(new TextBlock
         {
             Text = $"- Top Rated: {topRated.Title} ({topRated.Rating:F1})", FontName = StandardFonts.Helvetica,
-            FontSize = 10, TextColor = ColorPalette.Slate[700]
+            FontSize = 10, TextColor = ColorPalette.Slate[600]
         });
         statsStack.AddChild(new TextBlock
         {
             Text = $"- Year Range: {earliest.Year} - {latest.Year}", FontName = StandardFonts.Helvetica, FontSize = 10,
-            TextColor = ColorPalette.Slate[700]
+            TextColor = ColorPalette.Slate[600]
         });
         statsStack.AddChild(new TextBlock
         {
             Text = "- Most Represented Genre: Drama", FontName = StandardFonts.Helvetica, FontSize = 10,
-            TextColor = ColorPalette.Slate[700]
+            TextColor = ColorPalette.Slate[600]
         });
 
         // Footer

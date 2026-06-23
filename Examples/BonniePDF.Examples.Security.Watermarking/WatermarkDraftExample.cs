@@ -25,9 +25,10 @@ public static class WatermarkDraftExample
             Margin = 64
         });
 
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.PdfAEnabled = true;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[700]);
+        doc.Settings.Conformance = PdfAConformance.PdfA2a;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Draft Document with Watermark";
         doc.Metadata.Author = "BonniePDF";
@@ -124,7 +125,7 @@ public static class WatermarkDraftExample
                    "budget allocation of two million dollars across engineering and operations teams.",
             FontName = StandardFonts.Helvetica,
             FontSize = 11,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify,
             Margin = new Thickness(0, 0, 0, 12)
         });
@@ -136,7 +137,7 @@ public static class WatermarkDraftExample
                    "to review progress against milestones and address any blockers or scope changes.",
             FontName = StandardFonts.Helvetica,
             FontSize = 11,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify
         });
 
@@ -159,7 +160,7 @@ public static class WatermarkDraftExample
                    "captured during the discovery phase and reported to the steering committee.",
             FontName = StandardFonts.Helvetica,
             FontSize = 11,
-            TextColor = ColorPalette.Slate[700],
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify
         });
 

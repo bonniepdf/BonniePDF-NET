@@ -41,8 +41,9 @@ public static class ImagesExampleFluent
 
             doc.WithSettings(settings =>
             {
-                settings.Version     = PdfVersion.Pdf17;
-                settings.Conformance = PdfAConformance.PdfA2b;
+                settings.Conformance   = PdfAConformance.PdfA2a;
+                settings.Accessibility = AccessibilityMode.PdfUa1;
+                settings.Language      = "en-GB";
             });
 
             doc.WithDefaultTextStyle(style => style
