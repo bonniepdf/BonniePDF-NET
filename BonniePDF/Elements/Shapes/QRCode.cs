@@ -124,6 +124,7 @@ public class QRCode : ElementBase, IRoleProvider, IAltTextProvider
         }
 
         // 3. Draw the foreground modules with Horizontal Coalescing Optimization
+        ctx.Canvas.BeginCrispEdges();
         for (int row = 0; row < moduleCount; row++)
         {
             int startCol = -1;
@@ -151,6 +152,7 @@ public class QRCode : ElementBase, IRoleProvider, IAltTextProvider
                 }
             }
         }
+        ctx.Canvas.EndCrispEdges();
 
         // 4. Advance the Y position
         ctx.CurrentY += Size;

@@ -134,14 +134,18 @@ public class Barcode : ElementBase, IRoleProvider, IAltTextProvider
 
         int quietZone = EffectiveQuietZone;
         int totalModules = modules.Length + quietZone * 2;
-        float width = totalModules * ModuleWidth;
-        float qzOffset = quietZone * ModuleWidth;
+        float naturalWidth = totalModules * ModuleWidth;
+        float effectiveModuleWidth =
+            contentWidth > 0 && naturalWidth > contentWidth ? contentWidth / totalModules : ModuleWidth;
+        float width = totalModules * effectiveModuleWidth;
+        float qzOffset = quietZone * effectiveModuleWidth;
 
         // 1. Background (covers bars + quiet zones so the quiet zone is genuinely light).
         if (DrawBackground)
             ctx.Canvas.FillRect(x, y, width, Height + LabelArea, BackgroundColor);
 
         // 2. Bars, coalescing adjacent dark modules into a single rectangle.
+        ctx.Canvas.BeginCrispEdges();
         int startCol = -1;
         for (int col = 0; col <= modules.Length; col++)
         {
@@ -152,8 +156,8 @@ public class Barcode : ElementBase, IRoleProvider, IAltTextProvider
             }
             else if (startCol != -1)
             {
-                float rectX = x + qzOffset + startCol * ModuleWidth;
-                float rectWidth = (col - startCol) * ModuleWidth;
+                float rectX = x + qzOffset + startCol * effectiveModuleWidth;
+                float rectWidth = (col - startCol) * effectiveModuleWidth;
                 ctx.Canvas.FillRect(rectX, y, rectWidth, Height, ForegroundColor);
                 startCol = -1;
             }
@@ -162,10 +166,12 @@ public class Barcode : ElementBase, IRoleProvider, IAltTextProvider
         // 3. ITF-14 bearer bars (a heavy box that frames the symbol per GS1 spec).
         if (Symbology == BarcodeSymbology.Itf14)
         {
-            float bearer = Math.Max(ModuleWidth * 2f, 2f);
+            float bearer = Math.Max(effectiveModuleWidth * 2f, 2f);
             ctx.Canvas.StrokeRect(x + bearer / 2f, y + bearer / 2f, width - bearer, Height - bearer,
                 ForegroundColor, bearer);
         }
+
+        ctx.Canvas.EndCrispEdges();
 
         // 4. Human-readable text label, centred beneath the bars.
         if (IncludeTextLabel)

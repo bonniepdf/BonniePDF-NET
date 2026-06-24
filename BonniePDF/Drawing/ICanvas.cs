@@ -223,4 +223,55 @@ public interface ICanvas
 
     /// <summary>End the clipping region opened by <see cref="BeginRoundedClip"/>.</summary>
     void EndClip() { }
+
+    // --- 6. Path building ---
+
+    /// <summary>Begin a new path, discarding any existing uncommitted path.</summary>
+    void BeginPath();
+
+    /// <summary>Move the current point to (<paramref name="x"/>, <paramref name="y"/>) without drawing.</summary>
+    void MoveTo(float x, float y);
+
+    /// <summary>Add a straight line segment from the current point to (<paramref name="x"/>, <paramref name="y"/>).</summary>
+    void LineTo(float x, float y);
+
+    /// <summary>Add a cubic Bezier curve.</summary>
+    void CubicBezierTo(float cp1x, float cp1y, float cp2x, float cp2y, float x, float y);
+
+    /// <summary>Add a quadratic Bezier curve.</summary>
+    void QuadraticBezierTo(float cpx, float cpy, float x, float y);
+
+    /// <summary>Add a rectangle sub-path.</summary>
+    void AddRect(float x, float y, float width, float height);
+
+    /// <summary>Close the current sub-path.</summary>
+    void ClosePath();
+
+    /// <summary>Fill the current path with the given paint.</summary>
+    void FillCurrentPath(Paint paint, FillRule fillRule = FillRule.NonZero);
+
+    /// <summary>Stroke the current path.</summary>
+    void StrokeCurrentPath(StrokeStyle style);
+
+    // --- 7. Transforms ---
+
+    /// <summary>Translate the coordinate system.</summary>
+    void Translate(float dx, float dy);
+
+    /// <summary>Scale the coordinate system.</summary>
+    void Scale(float sx, float sy);
+
+    /// <summary>Rotate the coordinate system by the given angle in degrees.</summary>
+    void Rotate(float angleDegrees);
+
+    /// <summary>Apply a 2D affine transform matrix [a b c d tx ty].</summary>
+    void Transform(float a, float b, float c, float d, float tx, float ty);
+
+    // --- 8. Clipping & Alpha ---
+
+    /// <summary>Clip subsequent drawing to the current path.</summary>
+    void ClipToCurrentPath(FillRule fillRule = FillRule.NonZero);
+
+    /// <summary>Set global alpha for subsequent drawing operations (0.0 to 1.0).</summary>
+    void SetGlobalAlpha(float alpha);
 }
