@@ -109,6 +109,28 @@ public class ChartTests
         public void EndMarkedContent() { }
         public void BeginArtifact() { }
         public void EndArtifact() { }
+        public void BeginPath() => Operations.Add("BeginPath()");
+        public void MoveTo(float x, float y) => Operations.Add($"MoveTo({x},{y})");
+        public void LineTo(float x, float y) => Operations.Add($"LineTo({x},{y})");
+        public void CubicBezierTo(float cp1x, float cp1y, float cp2x, float cp2y, float x, float y) =>
+            Operations.Add($"CubicBezierTo({cp1x},{cp1y},{cp2x},{cp2y},{x},{y})");
+        public void QuadraticBezierTo(float cpx, float cpy, float x, float y) =>
+            Operations.Add($"QuadraticBezierTo({cpx},{cpy},{x},{y})");
+        public void AddRect(float x, float y, float width, float height) =>
+            Operations.Add($"AddRect({x},{y},{width},{height})");
+        public void ClosePath() => Operations.Add("ClosePath()");
+        public void FillCurrentPath(Paint paint, FillRule fillRule) =>
+            Operations.Add($"FillCurrentPath({fillRule})");
+        public void StrokeCurrentPath(StrokeStyle style) =>
+            Operations.Add("StrokeCurrentPath()");
+        public void Translate(float dx, float dy) => Operations.Add($"Translate({dx},{dy})");
+        public void Scale(float sx, float sy) => Operations.Add($"Scale({sx},{sy})");
+        public void Rotate(float angleDegrees) => Operations.Add($"Rotate({angleDegrees})");
+        public void Transform(float a, float b, float c, float d, float tx, float ty) =>
+            Operations.Add($"Transform({a},{b},{c},{d},{tx},{ty})");
+        public void ClipToCurrentPath(FillRule fillRule) =>
+            Operations.Add($"ClipToCurrentPath({fillRule})");
+        public void SetGlobalAlpha(float alpha) => Operations.Add($"SetGlobalAlpha({alpha})");
     }
 
     private static ChartData CreateSampleData()

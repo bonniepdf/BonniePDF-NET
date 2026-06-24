@@ -417,5 +417,20 @@ public class ContainerTests
         public void EndMarkedContent() { }
         public void BeginArtifact() { }
         public void EndArtifact() { }
+        public void BeginPath() { }
+        public void MoveTo(float x, float y) { }
+        public void LineTo(float x, float y) { }
+        public void CubicBezierTo(float cp1x, float cp1y, float cp2x, float cp2y, float x, float y) { }
+        public void QuadraticBezierTo(float cpx, float cpy, float x, float y) { }
+        public void AddRect(float x, float y, float width, float height) { }
+        public void ClosePath() { }
+        public void FillCurrentPath(Paint paint, FillRule fillRule) { }
+        public void StrokeCurrentPath(StrokeStyle style) { }
+        public void Translate(float dx, float dy) { }
+        public void Scale(float sx, float sy) { }
+        public void Rotate(float angleDegrees) { }
+        public void Transform(float a, float b, float c, float d, float tx, float ty) { }
+        public void ClipToCurrentPath(FillRule fillRule) { }
+        public void SetGlobalAlpha(float alpha) { }
     }
 }
