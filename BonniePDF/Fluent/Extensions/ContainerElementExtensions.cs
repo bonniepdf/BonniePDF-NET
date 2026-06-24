@@ -1,6 +1,8 @@
 using System;
 using BonniePDF.Core;
+using BonniePDF.Drawing;
 using BonniePDF.Elements;
+using BonniePDF.Elements.Drawing;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Shapes;
@@ -194,6 +196,18 @@ public static class ContainerElementExtensions
     {
         var dm = new DataMatrix { Data = data, Size = size };
         return c.Element(dm);
+    }
+
+    // --- Canvas ---
+
+    /// <summary>
+    /// Adds a canvas element for freeform drawing.
+    /// The handler receives (canvas, width, height).
+    /// </summary>
+    public static CanvasElement Canvas(this IContentContainer c, float height, Action<ICanvas, float, float> handler)
+    {
+        var canvas = new CanvasElement(handler) { CanvasHeight = height };
+        return c.Element(canvas);
     }
 
     // --- Raw Element Escape Hatch ---

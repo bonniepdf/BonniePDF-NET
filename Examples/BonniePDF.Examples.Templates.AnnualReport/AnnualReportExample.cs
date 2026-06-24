@@ -3,6 +3,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 
@@ -38,6 +39,8 @@ public static class AnnualReportExample
     // edge and a hairline of breathing room between the bands and the content.
     private const float Margin = 72f;
 
+    private const string HeroImage = "images/sean-pollock-PhYq704ffdA-unsplash.jpg";
+
     private const string Company = "Horizon Ventures";
     private const int Year = 2025;
     private const string ReportTitle = "Annual Report 2025";
@@ -46,7 +49,7 @@ public static class AnnualReportExample
     private static readonly string Generated =
         "Generated " + DateTime.Now.ToString("d MMMM yyyy 'at' HH:mm", CultureInfo.InvariantCulture);
 
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
     {
         DocumentSettings settings = new()
         {
@@ -76,14 +79,33 @@ public static class AnnualReportExample
         // ══════════════════════════════════════════════════════════════════
         //  Page 1 - front cover (overlaid on the deep-blue background slot)
         // ══════════════════════════════════════════════════════════════════
-        doc.Add(new Spacer(150));
+        byte[]? heroData = null;
+        assets?.TryGetValue(HeroImage, out heroData);
+
+        if (heroData is { Length: > 0 })
+        {
+            doc.Add(new Spacer(24));
+            doc.Add(new Image
+            {
+                ImageData = heroData,
+                Width = PdfSize.A4.Width - Margin * 2,
+                Height = 220,
+                FitMode = ImageFitMode.Cover,
+                IsDecorative = true,
+            });
+            doc.Add(new Spacer(24));
+        }
+        else
+        {
+            doc.Add(new Spacer(150));
+        }
         doc.Add(BrandMark());
         doc.Add(new Spacer(26));
         doc.Add(CoverLabel("ANNUAL REPORT"));
         doc.Add(CoverTitle(Company));
         doc.Add(TriColourRule());
         doc.Add(CoverSubtitle($"Fiscal Year {Year}"));
-        doc.Add(new Spacer(210));
+        doc.Add(heroData is { Length: > 0 } ? new Spacer(40) : new Spacer(210));
         doc.Add(CoverCredit("Prepared with BonniePDF"));
         doc.Add(CoverCredit(Generated));
 

@@ -126,6 +126,7 @@ public class DataMatrix : ElementBase, IRoleProvider, IAltTextProvider
         }
 
         // 2. Dark modules, coalescing adjacent modules in a row into one rectangle.
+        ctx.Canvas.BeginCrispEdges();
         for (int row = 0; row < matrix.Height; row++)
         {
             int startCol = -1;
@@ -146,6 +147,7 @@ public class DataMatrix : ElementBase, IRoleProvider, IAltTextProvider
                 }
             }
         }
+        ctx.Canvas.EndCrispEdges();
 
         // 3. Advance the Y position.
         ctx.CurrentY += symbolHeight;

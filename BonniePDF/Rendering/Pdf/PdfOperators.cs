@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 using BonniePDF.Core;
 
@@ -281,4 +282,40 @@ internal static class PdfOperators
 
     /// <summary>Emit <c>/Artifact BMC</c> (no MCID, not in struct tree).</summary>
     internal static void BeginArtifact(StringBuilder s) => s.AppendLf("/Artifact BMC");
+
+    // ── Extended path / state operators (this feature Vector Drawing Surface) ───
+
+    /// <summary>
+    /// <c>J</c> - Set the line cap style (0=butt, 1=round, 2=square).
+    /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=216"/>
+    /// </summary>
+    internal static void SetLineCap(StringBuilder s, int style)
+        => s.AppendLf($"{style} J");
+
+    /// <summary>
+    /// <c>d</c> - Set the dash pattern and phase.
+    /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=217"/>
+    /// </summary>
+    internal static void SetDashPattern(StringBuilder s, float[] pattern, float phase)
+    {
+        if (pattern == null || pattern.Length == 0)
+        {
+            s.AppendLf("[] 0 d");
+            return;
+        }
+        var parts = string.Join(" ", pattern.Select(p => PdfSyntax.FormatDecimal(p)));
+        s.AppendLf($"[{parts}] {PdfSyntax.FormatDecimal(phase)} d");
+    }
+
+    /// <summary>
+    /// <c>W* n</c> - Intersect the current clipping path with the current path
+    /// using the even-odd rule, then end the path without painting it.
+    /// </summary>
+    internal static void ClipEvenOdd(StringBuilder s) => s.AppendLf("W* n");
+
+    /// <summary>
+    /// <c>f*</c> - Fill the path using the even-odd rule.
+    /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=230"/>
+    /// </summary>
+    internal static void FillEvenOdd(StringBuilder s) => s.AppendLf("f*");
 }
