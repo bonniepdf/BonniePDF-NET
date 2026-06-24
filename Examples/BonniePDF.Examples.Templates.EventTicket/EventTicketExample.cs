@@ -71,8 +71,8 @@ public static class EventTicketExample
             Symbology = BarcodeSymbology.Code128,
             Height = 36,
             ModuleWidth = 1.2f,
-            ForegroundColor = Cream,
-            BackgroundColor = Ink,
+            ForegroundColor = Ink,
+            BackgroundColor = Cream,
             TextLabelFontSize = 7,
             AltText = "Ticket barcode (Code 128): ASF26-4471-XK",
         };
