@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using BonniePDF.Core;
 
 namespace BonniePDF.Drawing;
 
 /// <summary>A gradient color stop at a normalized offset (0-1).</summary>
+[StructLayout(LayoutKind.Auto)]
 public readonly record struct GradientStop(float Offset, Color Color);
 
 /// <summary>Base type for paint values (solid color, linear/radial gradient).</summary>
