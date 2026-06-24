@@ -2,7 +2,6 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Typography.TextAlignment;
@@ -80,14 +79,6 @@ public static class TextAlignmentExample
             Alignment = Elements.Text.TextAlignment.Justify,
             Margin = new Thickness(0, 0, 0, 20)
         });
-
-        // Justified with fluent API
-        doc.Add(CreateSectionHeader("Justified (Fluent API)"));
-        doc.Add(new TextBlock
-        {
-            Text = sampleText,
-            Margin = new Thickness(0, 0, 0, 20)
-        }.AlignJustify());
 
         // Multi-paragraph justified text (like a book page)
         doc.Add(new Line { Color = ColorPalette.Slate[300], Thickness = 1 });

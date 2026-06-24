@@ -52,4 +52,11 @@ public static class QRCodeExtensions
         qr.QuietZone = modules;
         return qr;
     }
+
+    /// <summary>Sets the alternate text for accessibility (PDF/UA-1).</summary>
+    public static QRCode AltText(this QRCode qr, string altText)
+    {
+        qr.AltText = altText;
+        return qr;
+    }
 }
