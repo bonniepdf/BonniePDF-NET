@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
@@ -26,6 +27,7 @@ public class PdfCanvas : ICanvas
     private readonly Func<float, string> _alphaGraphicsStateResolver;
     private readonly Func<string, string, List<ResolvedTextRun>> _textRunResolver;
     private readonly Action _reportUntaggedImage;
+    private readonly Func<ShadingRequest, ShadingResources?> _shadingResolver;
     private readonly StringBuilder _stream;
     private readonly float _xOffset;
     private readonly float _yOffset;
@@ -69,7 +71,8 @@ public class PdfCanvas : ICanvas
         Action<string, string> glyphTracker = null,
         Func<float, string> alphaGraphicsStateResolver = null,
         Func<string, string, List<ResolvedTextRun>> textRunResolver = null,
-        Action reportUntaggedImage = null)
+        Action reportUntaggedImage = null,
+        Func<ShadingRequest, ShadingResources?> shadingResolver = null)
     {
         _stream = stream;
         Height = pageHeight;
@@ -84,6 +87,7 @@ public class PdfCanvas : ICanvas
         _alphaGraphicsStateResolver = alphaGraphicsStateResolver ?? (alpha => $"/GS_ALPHA_{(int)Math.Round(alpha * 10000)}");
         _textRunResolver = textRunResolver;
         _reportUntaggedImage = reportUntaggedImage;
+        _shadingResolver = shadingResolver;
     }
 
     /// <summary>
@@ -913,10 +917,119 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>
-    /// Fills the current path with a linear gradient using a strip-rendering approach:
-    /// clip to the path, then fill thin rectangles with interpolated colors.
+    /// Fills the current path with a linear gradient. Prefers a native PDF Type-2
+    /// axial shading (see <see cref="EmitShading"/>); falls back to the
+    /// perpendicular-strip approximation when shadings can't be used (a translucent
+    /// gradient under PDF/A-1, which forbids transparency).
     /// </summary>
     private void FillPathWithLinearGradient(LinearGradientPaint gradient, FillRule fillRule)
+    {
+        if (gradient.End.X == gradient.Start.X && gradient.End.Y == gradient.Start.Y)
+            return; // degenerate axis — nothing to paint
+
+        var request = new ShadingRequest
+        {
+            ShadingType = 2,
+            Coords = new[] { gradient.Start.X, gradient.Start.Y, gradient.End.X, gradient.End.Y },
+            Stops = NormalizeShadingStops(gradient.Stops),
+            Extend = (true, true),
+            Bbox = CurrentPathBBox(),
+            HasAlpha = HasAlpha(gradient.Stops)
+        };
+        ShadingResources? resolved = _shadingResolver?.Invoke(request);
+        if (resolved is { } r) EmitShading(r, fillRule);
+        else FillPathWithLinearGradientStrips(gradient, fillRule);
+    }
+
+    /// <summary>
+    /// Paints a resolved shading across the current path's clipped region. A
+    /// <c>cm</c> maps the shading's canvas-space coordinates into PDF page space —
+    /// PdfCanvas bakes its own transform into every point via <see cref="TransformPoint"/>
+    /// and runs an identity stream CTM, so the shading needs that matrix re-applied
+    /// here (it also aligns the soft-mask group, established under the same CTM).
+    /// </summary>
+    private void EmitShading(ShadingResources resolved, FillRule fillRule)
+    {
+        PdfOperators.SaveState(_stream);
+
+        EmitCurrentPath();
+        if (fillRule == FillRule.EvenOdd)
+            PdfOperators.ClipEvenOdd(_stream);
+        else
+            PdfOperators.Clip(_stream);
+
+        PdfOperators.ConcatMatrix(_stream, _ctm[0], -_ctm[1], _ctm[2], -_ctm[3],
+            _ctm[4] + _xOffset, Height - _yOffset - _ctm[5]);
+        if (resolved.SoftMaskGs != null)
+            PdfOperators.SetGraphicsState(_stream, resolved.SoftMaskGs);
+        PdfOperators.PaintShading(_stream, resolved.ShadingName);
+
+        PdfOperators.RestoreState(_stream);
+    }
+
+    private static bool HasAlpha(IReadOnlyList<GradientStop> stops)
+    {
+        foreach (GradientStop s in stops)
+            if (s.Color.ScA < 1f) return true;
+        return false;
+    }
+
+    /// <summary>Sorts/clamps stops and pads them so the run spans the full [0, 1] domain.</summary>
+    private static List<ShadingStop> NormalizeShadingStops(IReadOnlyList<GradientStop> stops)
+    {
+        List<ShadingStop> mapped = stops
+            .Select(s => new ShadingStop(Math.Clamp(s.Offset, 0f, 1f), s.Color.ScR, s.Color.ScG, s.Color.ScB, s.Color.ScA))
+            .OrderBy(s => s.Offset)
+            .ToList();
+
+        if (mapped.Count == 0)
+            return new List<ShadingStop> { new(0, 0, 0, 0, 1), new(1, 0, 0, 0, 1) };
+        if (mapped.Count == 1)
+            return new List<ShadingStop> { mapped[0] with { Offset = 0 }, mapped[0] with { Offset = 1 } };
+        if (mapped[0].Offset > 0) mapped.Insert(0, mapped[0] with { Offset = 0 });
+        if (mapped[^1].Offset < 1) mapped.Add(mapped[^1] with { Offset = 1 });
+        return mapped;
+    }
+
+    /// <summary>Bounding box of the current path in canvas space (control points included).</summary>
+    private float[] CurrentPathBBox()
+    {
+        float minX = float.PositiveInfinity, minY = float.PositiveInfinity;
+        float maxX = float.NegativeInfinity, maxY = float.NegativeInfinity;
+
+        void Add(float x, float y)
+        {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+        }
+
+        foreach ((char type, float[] args) in _currentPath)
+        {
+            if (type == 'R')
+            {
+                // Rect stores [x, y, width, height]; the bbox-relevant corners are
+                // the two opposite corners.
+                Add(args[0], args[1]);
+                Add(args[0] + args[2], args[1] + args[3]);
+            }
+            else
+            {
+                for (int i = 0; i + 1 < args.Length; i += 2) Add(args[i], args[i + 1]);
+            }
+        }
+
+        if (float.IsInfinity(minX)) return new[] { 0f, 0f, 0f, 0f };
+        return new[] { minX, minY, maxX, maxY };
+    }
+
+    /// <summary>
+    /// Fills the current path with a linear gradient using a strip-rendering approach:
+    /// clip to the path, then fill thin rectangles with interpolated colors. Fallback
+    /// for when a native shading can't be used.
+    /// </summary>
+    private void FillPathWithLinearGradientStrips(LinearGradientPaint gradient, FillRule fillRule)
     {
         const int strips = 64;
         PdfOperators.SaveState(_stream);
@@ -971,9 +1084,33 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>
-    /// Fills the current path with a radial gradient using concentric circle strips.
+    /// Fills the current path with a radial gradient. Prefers a native PDF Type-3
+    /// radial shading (see <see cref="EmitShading"/>); falls back to the concentric
+    /// disc approximation when shadings can't be used (a translucent gradient under
+    /// PDF/A-1, which forbids transparency).
     /// </summary>
     private void FillPathWithRadialGradient(RadialGradientPaint gradient, FillRule fillRule)
+    {
+        Point inner = gradient.Focal ?? gradient.Center;
+        var request = new ShadingRequest
+        {
+            ShadingType = 3,
+            Coords = new[] { inner.X, inner.Y, 0f, gradient.Center.X, gradient.Center.Y, gradient.Radius },
+            Stops = NormalizeShadingStops(gradient.Stops),
+            Extend = (true, true),
+            Bbox = CurrentPathBBox(),
+            HasAlpha = HasAlpha(gradient.Stops)
+        };
+        ShadingResources? resolved = _shadingResolver?.Invoke(request);
+        if (resolved is { } r) EmitShading(r, fillRule);
+        else FillPathWithRadialGradientRings(gradient, fillRule);
+    }
+
+    /// <summary>
+    /// Fills the current path with a radial gradient using concentric circle strips.
+    /// Fallback for when a native shading can't be used.
+    /// </summary>
+    private void FillPathWithRadialGradientRings(RadialGradientPaint gradient, FillRule fillRule)
     {
         const int rings = 64;
         PdfOperators.SaveState(_stream);

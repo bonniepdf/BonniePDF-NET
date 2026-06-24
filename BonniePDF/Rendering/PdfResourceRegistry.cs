@@ -51,6 +51,8 @@ public class PdfResourceRegistry
     private int _fontCounter;
     private int _imageCounter;
     private int _graphicsStateCounter;
+    private int _shadingCounter;
+    private int _softMaskGsCounter;
 
     private PdfAConformance _conformance = PdfAConformance.None;
 
@@ -137,6 +139,7 @@ public class PdfResourceRegistry
     public IDictionary<string, DeferredXObjectInfo> DeferredXObjects { get; } = new ConcurrentDictionary<string, DeferredXObjectInfo>();
 
     private readonly Dictionary<string, AlphaGraphicsStateInfo> _alphaGraphicsStates = new();
+    private readonly List<ShadingResourceInfo> _shadings = new();
 
     private static readonly HashSet<string> StandardFontNames = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -573,6 +576,34 @@ public class PdfResourceRegistry
     private bool RequiresPdfA1TransparencyFallback() =>
         _conformance is PdfAConformance.PdfA1b or PdfAConformance.PdfA1a;
 
+    /// <summary>
+    /// Registers a native gradient shading (axial Type-2 / radial Type-3) and, for
+    /// translucent gradients, the luminosity soft mask that carries its alpha.
+    /// Returns the resource names the content stream should reference, or <c>null</c>
+    /// when the gradient can't be represented as a shading under the active
+    /// conformance — specifically a translucent gradient under PDF/A-1, which forbids
+    /// transparency (ISO 19005-1 §6.4). The caller falls back to the strip/disc
+    /// approximation in that case.
+    ///
+    /// Opaque gradients are always emitted as shadings (smooth shadings are valid in
+    /// every PDF/A level); only the soft mask is gated on transparency support.
+    /// </summary>
+    public ShadingResources? RegisterShading(ShadingRequest request)
+    {
+        if (request.HasAlpha && RequiresPdfA1TransparencyFallback()) return null;
+
+        _shadingCounter++;
+        string shadingName = $"/Sh{_shadingCounter}";
+        string softMaskGsName = null;
+        if (request.HasAlpha)
+        {
+            _softMaskGsCounter++;
+            softMaskGsName = $"/GSsm{_softMaskGsCounter}";
+        }
+        _shadings.Add(new ShadingResourceInfo(shadingName, softMaskGsName, request));
+        return new ShadingResources(shadingName, softMaskGsName);
+    }
+
     private static string MapToStandardFontName(string fontIdentifier)
     {
         string lower = fontIdentifier.ToLowerInvariant();
@@ -757,11 +788,32 @@ public class PdfResourceRegistry
             graphicsStateRefs.Add($"{info.ResourceName} {objectId} 0 R");
         }
 
+        // Gradient shadings (native axial/radial) and their luminosity soft masks.
+        // The colour shading is an inline dict in /Shading; a translucent gradient
+        // additionally needs a form XObject carrying the grayscale alpha shading,
+        // wrapped by an /SMask ExtGState that joins the page's /ExtGState dict.
+        List<string> shadingRefs = new();
+        foreach (ShadingResourceInfo shading in _shadings)
+        {
+            shadingRefs.Add($"{shading.ShadingName} {GradientShading.BuildColorShadingDict(shading.Request)}");
+            if (shading.SoftMaskGsName == null) continue;
+
+            int formId = writer.GetNewId();
+            writer.WriteObject(formId, BuildSoftMaskFormDict(shading.Request), "/ShM sh\n");
+
+            int gsId = writer.GetNewId();
+            writer.WriteObject(gsId, BuildSoftMaskGsDict(formId));
+            graphicsStateRefs.Add($"{shading.SoftMaskGsName} {gsId} 0 R");
+        }
+        string shadingResources = shadingRefs.Count > 0
+            ? "<< /Shading << " + string.Join(' ', shadingRefs) + " >> >>"
+            : "";
+
         string graphicsStateResources = graphicsStateRefs.Count > 0
             ? "<< /ExtGState << " + string.Join(' ', graphicsStateRefs) + " >> >>"
             : "";
 
-        return CombineResources(fontResources, imageResources, graphicsStateResources);
+        return CombineResources(fontResources, imageResources, graphicsStateResources, shadingResources);
     }
 
     /// <summary>
@@ -928,12 +980,61 @@ public class PdfResourceRegistry
             graphicsStateRefs.Add($"{info.ResourceName} {objectId} 0 R");
         }
 
+        // Gradient shadings (native axial/radial) and their luminosity soft masks.
+        List<string> shadingRefs = new();
+        foreach (ShadingResourceInfo shading in _shadings)
+        {
+            shadingRefs.Add($"{shading.ShadingName} {GradientShading.BuildColorShadingDict(shading.Request)}");
+            if (shading.SoftMaskGsName == null) continue;
+
+            int formId = writer.GetNewId();
+            await writer.WriteObjectAsync(formId, BuildSoftMaskFormDict(shading.Request), "/ShM sh\n", cancellationToken)
+                .ConfigureAwait(false);
+
+            int gsId = writer.GetNewId();
+            await writer.WriteObjectAsync(gsId, BuildSoftMaskGsDict(formId), null, cancellationToken).ConfigureAwait(false);
+            graphicsStateRefs.Add($"{shading.SoftMaskGsName} {gsId} 0 R");
+        }
+        string shadingResources = shadingRefs.Count > 0
+            ? "<< /Shading << " + string.Join(' ', shadingRefs) + " >> >>"
+            : "";
+
         string graphicsStateResources = graphicsStateRefs.Count > 0
             ? "<< /ExtGState << " + string.Join(' ', graphicsStateRefs) + " >> >>"
             : "";
 
-        return CombineResources(fontResources, imageResources, graphicsStateResources);
+        return CombineResources(fontResources, imageResources, graphicsStateResources, shadingResources);
     }
+
+    /// <summary>
+    /// Builds the luminosity soft-mask form XObject dict for a translucent shading:
+    /// a transparency group (DeviceGray) whose content paints the gradient's grayscale
+    /// alpha shading across the form's bounding box.
+    /// </summary>
+    private static IDictionary<string, string> BuildSoftMaskFormDict(ShadingRequest request)
+    {
+        string Fmt(float v) => MathF.Round(v, 4).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        float[] b = request.Bbox;
+        return new Dictionary<string, string>
+        {
+            ["/Type"] = "/XObject",
+            ["/Subtype"] = "/Form",
+            ["/FormType"] = "1",
+            ["/BBox"] = $"[{Fmt(b[0])} {Fmt(b[1])} {Fmt(b[2])} {Fmt(b[3])}]",
+            ["/Group"] = "<< /Type /Group /S /Transparency /CS /DeviceGray /I true >>",
+            ["/Resources"] = $"<< /Shading << /ShM {GradientShading.BuildAlphaShadingDict(request)} >> >>"
+        };
+    }
+
+    /// <summary>Builds the <c>/SMask /S /Luminosity</c> ExtGState dict referencing a soft-mask form.</summary>
+    private static IDictionary<string, string> BuildSoftMaskGsDict(int formId) =>
+        new Dictionary<string, string>
+        {
+            ["/Type"] = "/ExtGState",
+            ["/SMask"] = $"<< /Type /Mask /S /Luminosity /G {formId} 0 R >>",
+            ["/ca"] = "1",
+            ["/CA"] = "1"
+        };
 
     private static string CombineResources(params string[] resources)
     {
@@ -956,4 +1057,12 @@ public class PdfResourceRegistry
     }
 
     private sealed record AlphaGraphicsStateInfo(string ResourceName, float Alpha);
+
+    private sealed record ShadingResourceInfo(string ShadingName, string SoftMaskGsName, ShadingRequest Request);
 }
+
+/// <summary>Resource names a content stream references to paint a registered gradient shading.</summary>
+/// <param name="ShadingName">The <c>/Shading</c> resource name (e.g. <c>/Sh1</c>) for the <c>sh</c> operator.</param>
+/// <param name="SoftMaskGs">The luminosity soft-mask <c>/ExtGState</c> name (e.g. <c>/GSsm1</c>), or <c>null</c> for an opaque gradient.</param>
+[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
+public readonly record struct ShadingResources(string ShadingName, string SoftMaskGs);
