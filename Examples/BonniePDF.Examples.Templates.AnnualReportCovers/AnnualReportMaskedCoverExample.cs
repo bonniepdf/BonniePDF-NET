@@ -3,6 +3,7 @@ using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Elements.Drawing;
 using BonniePDF.Elements.Text;
+using BonniePDF.Rendering.Images;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Templates.AnnualReportCovers;
@@ -15,23 +16,20 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 /// into a solid brand band that carries the title. The mask is an arbitrary
 /// polygon path fed to <see cref="ICanvas.ClipToCurrentPath"/>.
 ///
-/// The "image" here is a vector placeholder so the example is self-contained.
-/// To drop in a real cover photo, replace the PLACEHOLDER block with a single
-/// <c>canvas.DrawImage(image, 0, 0, w, photoBottom)</c> call - the clip mask set
-/// up immediately above still applies to it.
 /// </summary>
 [System.ComponentModel.DisplayName("Annual Report Cover - Masked Image")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("The classic photographic report cover: a full-width hero image clipped to an angled mask whose lower edge cuts diagonally into a green title band, joined by a gold seam. The image is a vector placeholder - swap in canvas.DrawImage(...) for a real photo.")]
+[System.ComponentModel.Description("The classic photographic report cover: a full-width hero image clipped to an angled mask whose lower edge cuts diagonally into a green title band, joined by a gold seam.")]
 public static class AnnualReportMaskedCoverExample
 {
+    private const string HeroImageKey = "images/sean-pollock-PhYq704ffdA-unsplash.jpg";
     private const string Company = "Meridian Group";
     private const int Year = 2025;
 
     private static readonly Color Band = ColorPalette.Emerald[900]; // brand band behind the title
     private static readonly Color Seam = ColorPalette.Amber[400];   // gold seam along the diagonal cut
 
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
     {
         DocumentSettings settings = new()
         {
@@ -45,7 +43,11 @@ public static class AnnualReportMaskedCoverExample
         doc.Metadata.Author = Company;
         doc.Metadata.Subject = $"{Company} Annual Report {Year} - masked hero-image cover (vector drawing surface)";
 
-        CanvasElement cover = new(DrawCover)
+        ImageInfo? heroImage = null;
+        if (assets != null && assets.TryGetValue(HeroImageKey, out byte[]? heroData))
+            heroImage = ImageLoader.Load(heroData);
+
+        CanvasElement cover = new((canvas, w, h) => DrawCover(canvas, w, h, heroImage))
         {
             CanvasHeight = PdfSize.A4.Height,
             AltText = $"{Company} Annual Report {Year} cover: a hero landscape image clipped to an angled mask above a green title band.",
@@ -106,13 +108,13 @@ public static class AnnualReportMaskedCoverExample
             Color.White.WithAlpha(0.85f), 11f, StandardFonts.HelveticaBold, TextAlignment.Center);
     }
 
-    private static void DrawCover(ICanvas canvas, float w, float h)
+    private static void DrawCover(ICanvas canvas, float w, float h, ImageInfo? heroImage)
     {
         // The diagonal seam: the hero image's lower edge runs from 0.52*H on the
         // left down to 0.62*H on the right. The mask polygon is everything above it.
         float cutLeft = h * 0.52f;
         float cutRight = h * 0.62f;
-        float photoBottom = h * 0.66f; // draw the placeholder a little past the seam
+        float photoBottom = h * 0.66f;
 
         // 1. Brand band fills the whole page; the masked image overpaints the top.
         canvas.BeginPath();
@@ -129,11 +131,10 @@ public static class AnnualReportMaskedCoverExample
         canvas.ClosePath();
         canvas.ClipToCurrentPath();
 
-        // -- PLACEHOLDER --------------------------------------------------------
-        // Replace this single call with `canvas.DrawImage(image, 0, 0, w, photoBottom)`
-        // to use a real cover photograph; the angled clip above still masks it.
-        DrawPlaceholderImage(canvas, w, photoBottom);
-        // -----------------------------------------------------------------------
+        if (heroImage != null)
+            canvas.DrawImage(heroImage, 0, 0, w, photoBottom);
+        else
+            DrawPlaceholderImage(canvas, w, photoBottom);
 
         canvas.RestoreState();
 
