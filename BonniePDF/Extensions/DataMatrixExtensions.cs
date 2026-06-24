@@ -52,4 +52,11 @@ public static class DataMatrixExtensions
         dm.QuietZone = modules;
         return dm;
     }
+
+    /// <summary>Sets the alternate text for accessibility (PDF/UA-1).</summary>
+    public static DataMatrix AltText(this DataMatrix dm, string altText)
+    {
+        dm.AltText = altText;
+        return dm;
+    }
 }

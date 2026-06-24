@@ -19,14 +19,12 @@ public static class SimpleDocumentFluentExample
 {
     public static Document Generate()
     {
-        // Prefer Arial; fall back to Segoe UI on systems where Arial is absent
-        string fontPath = @"C:\Windows\Fonts\Arial.ttf";
-        if (!File.Exists(fontPath))
-            fontPath = @"C:\Windows\Fonts\segoeui.ttf";
-
-        // Resolve to a usable font name: embedded TTF if found, else standard Helvetica
-        string bodyFont = File.Exists(fontPath) ? fontPath : StandardFonts.Helvetica;
-        string boldFont  = File.Exists(fontPath) ? fontPath : StandardFonts.HelveticaBold;
+        // Standard-14 names. With PDF/A enabled (below) BonniePDF auto-substitutes and
+        // embeds the bundled, metric-compatible Liberation Sans faces, so the output is
+        // identical on every platform with no system fonts involved. (See
+        // Typography.CustomFonts for embedding your own TTF.)
+        string bodyFont = StandardFonts.Helvetica;
+        string boldFont = StandardFonts.HelveticaBold;
 
         PdfSize squareCard = new(300, 300, "Square Card");
 

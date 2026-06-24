@@ -16,22 +16,12 @@ public static class SimpleDocumentExample
 {
     public static Document Generate()
     {
-        // Use Arial as the embedded font (available on Windows)
-        string fontPath = @"C:\Windows\Fonts\Arial.ttf";
-
-        // Check if Arial exists, fall back to another common font
-        if (!File.Exists(fontPath))
-        {
-            fontPath = @"C:\Windows\Fonts\segoeui.ttf";
-        }
-
-        if (!File.Exists(fontPath))
-        {
-            // If no system font is found, we can't fully demonstrate embedding,
-            // but we'll proceed. In a real scenario, you'd want to handle this.
-            // For this example, we'll just stick with what we have if nothing is found,
-            // but the goal is to use the found font.
-        }
+        // Headings use the standard-14 "Helvetica-Bold" name. With PDF/A enabled
+        // (below) BonniePDF auto-substitutes and embeds the bundled, metric-compatible
+        // Liberation Sans Bold face - so the output is identical on every platform with
+        // no system fonts or file paths involved. (See Typography.CustomFonts for
+        // embedding your own TTF.)
+        string heading = StandardFonts.HelveticaBold;
 
         // Create a document with metadata and settings
         Document doc = new();
@@ -58,7 +48,7 @@ public static class SimpleDocumentExample
         doc.Add(new TextBlock
         {
             Text = "Hello, Document API!",
-            FontName = File.Exists(fontPath) ? fontPath : StandardFonts.HelveticaBold,
+            FontName = heading,
             FontSize = 24,
             TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
@@ -75,7 +65,7 @@ public static class SimpleDocumentExample
         doc.Add(new TextBlock
         {
             Text = "Key Features:",
-            FontName = File.Exists(fontPath) ? fontPath : StandardFonts.HelveticaBold,
+            FontName = heading,
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
@@ -96,7 +86,7 @@ public static class SimpleDocumentExample
         doc.Add(new TextBlock
         {
             Text = "Page 2",
-            FontName = File.Exists(fontPath) ? fontPath : StandardFonts.HelveticaBold,
+            FontName = heading,
             FontSize = 20,
             TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
@@ -115,7 +105,7 @@ public static class SimpleDocumentExample
         doc.Add(new TextBlock
         {
             Text = $"Page 3: {customSize.Name}",
-            FontName = File.Exists(fontPath) ? fontPath : StandardFonts.HelveticaBold,
+            FontName = heading,
             FontSize = 16,
             TextColor = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center,
