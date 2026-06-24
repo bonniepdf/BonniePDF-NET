@@ -33,6 +33,18 @@ public class SvgCanvas : ICanvas
     /// </summary>
     private static int _clipIdCounter;
 
+    /// <summary>Process-wide counter for unique gradient definition ids.</summary>
+    private static int _gradientIdCounter;
+
+    /// <summary>Accumulated SVG path data segments for the current path.</summary>
+    private readonly List<string> _currentPathData = new();
+
+    /// <summary>Number of extra &lt;g&gt; groups opened by transform/clip/alpha since the last SaveState.</summary>
+    private int _extraGroupDepth;
+
+    /// <summary>Stack of extra group depths at each SaveState call.</summary>
+    private readonly Stack<int> _extraGroupStack = new();
+
     /// <summary>
     /// Creates a new SvgCanvas for generating SVG markup.
     /// </summary>
@@ -189,6 +201,8 @@ public class SvgCanvas : ICanvas
     /// </summary>
     public void SaveState()
     {
+        _extraGroupStack.Push(_extraGroupDepth);
+        _extraGroupDepth = 0;
         _sb.AppendLf("<g>");
         _stateDepth++;
     }
@@ -200,8 +214,16 @@ public class SvgCanvas : ICanvas
     {
         if (_stateDepth > 0)
         {
+            // Close any extra groups opened by transforms/clips/alpha since SaveState
+            while (_extraGroupDepth > 0)
+            {
+                _sb.AppendLf("</g>");
+                _extraGroupDepth--;
+            }
             _sb.AppendLf("</g>");
             _stateDepth--;
+            if (_extraGroupStack.Count > 0)
+                _extraGroupDepth = _extraGroupStack.Pop();
         }
     }
 
@@ -557,6 +579,230 @@ public class SvgCanvas : ICanvas
         }
     }
 
+    // --- 6. Path building ---
+
+    /// <inheritdoc />
+    public void BeginPath()
+    {
+        _currentPathData.Clear();
+    }
+
+    /// <inheritdoc />
+    public void MoveTo(float x, float y)
+    {
+        _currentPathData.Add($"M {N(x + _xOffset)} {N(y + _yOffset)}");
+    }
+
+    /// <inheritdoc />
+    public void LineTo(float x, float y)
+    {
+        _currentPathData.Add($"L {N(x + _xOffset)} {N(y + _yOffset)}");
+    }
+
+    /// <inheritdoc />
+    public void CubicBezierTo(float cp1x, float cp1y, float cp2x, float cp2y, float x, float y)
+    {
+        _currentPathData.Add(
+            $"C {N(cp1x + _xOffset)} {N(cp1y + _yOffset)} {N(cp2x + _xOffset)} {N(cp2y + _yOffset)} {N(x + _xOffset)} {N(y + _yOffset)}");
+    }
+
+    /// <inheritdoc />
+    public void QuadraticBezierTo(float cpx, float cpy, float x, float y)
+    {
+        _currentPathData.Add(
+            $"Q {N(cpx + _xOffset)} {N(cpy + _yOffset)} {N(x + _xOffset)} {N(y + _yOffset)}");
+    }
+
+    /// <inheritdoc />
+    public void AddRect(float x, float y, float width, float height)
+    {
+        float sx = x + _xOffset;
+        float sy = y + _yOffset;
+        _currentPathData.Add($"M {N(sx)} {N(sy)} L {N(sx + width)} {N(sy)} L {N(sx + width)} {N(sy + height)} L {N(sx)} {N(sy + height)} Z");
+    }
+
+    /// <inheritdoc />
+    public void ClosePath()
+    {
+        _currentPathData.Add("Z");
+    }
+
+    /// <inheritdoc />
+    public void FillCurrentPath(Paint paint, FillRule fillRule = FillRule.NonZero)
+    {
+        if (_currentPathData.Count == 0) return;
+        string d = string.Join(" ", _currentPathData);
+        string rule = fillRule == FillRule.EvenOdd ? " fill-rule=\"evenodd\"" : "";
+
+        if (paint is SolidPaint solid)
+        {
+            _sb.AppendLf($"<path d=\"{d}\" {GetFillAttributes(solid.Color)}{rule}/>");
+        }
+        else if (paint is LinearGradientPaint linear)
+        {
+            string gradId = EmitLinearGradientDef(linear);
+            _sb.AppendLf($"<path d=\"{d}\" fill=\"url(#{gradId})\"{rule}/>");
+        }
+        else if (paint is RadialGradientPaint radial)
+        {
+            string gradId = EmitRadialGradientDef(radial);
+            _sb.AppendLf($"<path d=\"{d}\" fill=\"url(#{gradId})\"{rule}/>");
+        }
+
+        _currentPathData.Clear();
+    }
+
+    /// <inheritdoc />
+    public void StrokeCurrentPath(StrokeStyle style)
+    {
+        if (_currentPathData.Count == 0) return;
+        string d = string.Join(" ", _currentPathData);
+        string strokeAttrs = GetStrokeStyleAttributes(style);
+
+        if (style.Paint is SolidPaint solid)
+        {
+            _sb.AppendLf($"<path d=\"{d}\" fill=\"none\" {GetStrokeAttributes(solid.Color)} {strokeAttrs}/>");
+        }
+        else if (style.Paint is LinearGradientPaint linear)
+        {
+            string gradId = EmitLinearGradientDef(linear);
+            _sb.AppendLf($"<path d=\"{d}\" fill=\"none\" stroke=\"url(#{gradId})\" {strokeAttrs}/>");
+        }
+        else if (style.Paint is RadialGradientPaint radial)
+        {
+            string gradId = EmitRadialGradientDef(radial);
+            _sb.AppendLf($"<path d=\"{d}\" fill=\"none\" stroke=\"url(#{gradId})\" {strokeAttrs}/>");
+        }
+
+        _currentPathData.Clear();
+    }
+
+    // --- 7. Transforms ---
+
+    /// <inheritdoc />
+    public void Translate(float dx, float dy)
+    {
+        _sb.AppendLf($"<g transform=\"translate({N(dx)}, {N(dy)})\">");
+        _extraGroupDepth++;
+    }
+
+    /// <inheritdoc />
+    public void Scale(float sx, float sy)
+    {
+        _sb.AppendLf($"<g transform=\"scale({N(sx)}, {N(sy)})\">");
+        _extraGroupDepth++;
+    }
+
+    /// <inheritdoc />
+    public void Rotate(float angleDegrees)
+    {
+        _sb.AppendLf($"<g transform=\"rotate({N(angleDegrees)})\">");
+        _extraGroupDepth++;
+    }
+
+    /// <inheritdoc />
+    public void Transform(float a, float b, float c, float d, float tx, float ty)
+    {
+        _sb.AppendLf($"<g transform=\"matrix({N(a)}, {N(b)}, {N(c)}, {N(d)}, {N(tx)}, {N(ty)})\">");
+        _extraGroupDepth++;
+    }
+
+    // --- 8. Clipping & Alpha ---
+
+    /// <inheritdoc />
+    public void ClipToCurrentPath(FillRule fillRule = FillRule.NonZero)
+    {
+        if (_currentPathData.Count == 0) return;
+        string d = string.Join(" ", _currentPathData);
+        string id = $"clip{_clipIdCounter++}";
+        string rule = fillRule == FillRule.EvenOdd ? " clip-rule=\"evenodd\"" : "";
+        _sb.AppendLf($"<clipPath id=\"{id}\"><path d=\"{d}\"{rule}/></clipPath>");
+        _sb.AppendLf($"<g clip-path=\"url(#{id})\">");
+        _extraGroupDepth++;
+        _currentPathData.Clear();
+    }
+
+    /// <inheritdoc />
+    public void SetGlobalAlpha(float alpha)
+    {
+        alpha = Math.Clamp(alpha, 0f, 1f);
+        if (alpha < 1f)
+        {
+            _sb.AppendLf($"<g opacity=\"{FormatOpacity(alpha)}\">");
+            _extraGroupDepth++;
+        }
+    }
+
+    // --- SVG gradient/stroke helpers ---
+
+    /// <summary>Emits a &lt;linearGradient&gt; definition and returns its id.</summary>
+    private string EmitLinearGradientDef(LinearGradientPaint gradient)
+    {
+        string id = $"grad{_gradientIdCounter++}";
+        _sb.Append($"<defs><linearGradient id=\"{id}\" x1=\"{N(gradient.Start.X + _xOffset)}\" y1=\"{N(gradient.Start.Y + _yOffset)}\" x2=\"{N(gradient.End.X + _xOffset)}\" y2=\"{N(gradient.End.Y + _yOffset)}\" gradientUnits=\"userSpaceOnUse\">");
+        foreach (GradientStop stop in gradient.Stops)
+        {
+            string offset = N(stop.Offset * 100f);
+            string color = stop.Color.ToHexString();
+            if (stop.Color.ScA < 1f)
+                _sb.Append($"<stop offset=\"{offset}%\" stop-color=\"{color}\" stop-opacity=\"{FormatOpacity(stop.Color.ScA)}\"/>");
+            else
+                _sb.Append($"<stop offset=\"{offset}%\" stop-color=\"{color}\"/>");
+        }
+        _sb.AppendLf("</linearGradient></defs>");
+        return id;
+    }
+
+    /// <summary>Emits a &lt;radialGradient&gt; definition and returns its id.</summary>
+    private string EmitRadialGradientDef(RadialGradientPaint gradient)
+    {
+        string id = $"grad{_gradientIdCounter++}";
+        float cx = gradient.Center.X + _xOffset;
+        float cy = gradient.Center.Y + _yOffset;
+        string focalAttrs = "";
+        if (gradient.Focal.HasValue)
+        {
+            focalAttrs = $" fx=\"{N(gradient.Focal.Value.X + _xOffset)}\" fy=\"{N(gradient.Focal.Value.Y + _yOffset)}\"";
+        }
+        _sb.Append($"<defs><radialGradient id=\"{id}\" cx=\"{N(cx)}\" cy=\"{N(cy)}\" r=\"{N(gradient.Radius)}\"{focalAttrs} gradientUnits=\"userSpaceOnUse\">");
+        foreach (GradientStop stop in gradient.Stops)
+        {
+            string offset = N(stop.Offset * 100f);
+            string color = stop.Color.ToHexString();
+            if (stop.Color.ScA < 1f)
+                _sb.Append($"<stop offset=\"{offset}%\" stop-color=\"{color}\" stop-opacity=\"{FormatOpacity(stop.Color.ScA)}\"/>");
+            else
+                _sb.Append($"<stop offset=\"{offset}%\" stop-color=\"{color}\"/>");
+        }
+        _sb.AppendLf("</radialGradient></defs>");
+        return id;
+    }
+
+    /// <summary>Builds SVG stroke attribute string from a StrokeStyle.</summary>
+    private string GetStrokeStyleAttributes(StrokeStyle style)
+    {
+        var attrs = new StringBuilder();
+        attrs.Append($"stroke-width=\"{N(style.Width)}\"");
+
+        if (style.LineCap != LineCap.Butt)
+            attrs.Append($" stroke-linecap=\"{style.LineCap.ToString().ToLowerInvariant()}\"");
+
+        if (style.LineJoin != LineJoin.Miter)
+            attrs.Append($" stroke-linejoin=\"{style.LineJoin.ToString().ToLowerInvariant()}\"");
+
+        if (style.MiterLimit != 10f)
+            attrs.Append($" stroke-miterlimit=\"{N(style.MiterLimit)}\"");
+
+        if (style.DashPattern is { Length: > 0 })
+        {
+            attrs.Append($" stroke-dasharray=\"{string.Join(" ", System.Array.ConvertAll(style.DashPattern, p => N(p)))}\"");
+            if (style.DashOffset != 0)
+                attrs.Append($" stroke-dashoffset=\"{N(style.DashOffset)}\"");
+        }
+
+        return attrs.ToString();
+    }
+
     /// <summary>
     /// Closes the page group in multipage mode.
     /// Should be called before GetSvg() or when switching pages.
@@ -571,6 +817,13 @@ public class SvgCanvas : ICanvas
     /// </summary>
     public string GetSvg()
     {
+        // Close any extra groups opened by transforms/clips/alpha
+        while (_extraGroupDepth > 0)
+        {
+            _sb.AppendLf("</g>");
+            _extraGroupDepth--;
+        }
+
         // Close any open groups
         for (int i = 0; i < _stateDepth; i++) _sb.AppendLf("</g>");
 

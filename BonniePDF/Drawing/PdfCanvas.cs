@@ -30,6 +30,12 @@ public class PdfCanvas : ICanvas
     private readonly float _xOffset;
     private readonly float _yOffset;
     private int _stateDepth;
+    private readonly List<(char type, float[] args)> _currentPath = new();
+    private (float x, float y)? _currentPoint;
+    // Local transform matrix stack for path-building coordinate transforms.
+    // Points are stored in screen coords, transformed through _ctm, then Y-flipped at emit time.
+    private float[] _ctm = { 1, 0, 0, 1, 0, 0 }; // identity [a b c d tx ty]
+    private readonly Stack<float[]> _ctmStack = new();
     private TaggingContext _tagging;
     private int _openMarkedContent;
     // Number of currently-open BDC sequences (sequences that allocated an MCID).
@@ -96,6 +102,7 @@ public class PdfCanvas : ICanvas
     public void SaveState()
     {
         PdfOperators.SaveState(_stream);
+        _ctmStack.Push((float[])_ctm.Clone());
         _stateDepth++;
     }
 
@@ -107,6 +114,7 @@ public class PdfCanvas : ICanvas
         if (_stateDepth > 0)
         {
             PdfOperators.RestoreState(_stream);
+            if (_ctmStack.Count > 0) _ctm = _ctmStack.Pop();
             _stateDepth--;
         }
     }
@@ -569,6 +577,578 @@ public class PdfCanvas : ICanvas
             var s when s.Contains("courier") || s.Contains("mono") => "/Courier",
             _ => "/Helvetica"
         };
+    }
+
+    // --- 6. Path building ---
+
+    /// <inheritdoc />
+    public void BeginPath()
+    {
+        _currentPath.Clear();
+        _currentPoint = null;
+    }
+
+    /// <inheritdoc />
+    public void MoveTo(float x, float y)
+    {
+        _currentPath.Add(('M', new[] { x, y }));
+        _currentPoint = (x, y);
+    }
+
+    /// <inheritdoc />
+    public void LineTo(float x, float y)
+    {
+        _currentPath.Add(('L', new[] { x, y }));
+        _currentPoint = (x, y);
+    }
+
+    /// <inheritdoc />
+    public void CubicBezierTo(float cp1x, float cp1y, float cp2x, float cp2y, float x, float y)
+    {
+        _currentPath.Add(('C', new[] { cp1x, cp1y, cp2x, cp2y, x, y }));
+        _currentPoint = (x, y);
+    }
+
+    /// <inheritdoc />
+    public void QuadraticBezierTo(float cpx, float cpy, float x, float y)
+    {
+        // Convert quadratic to cubic: CP1 = P0 + 2/3*(CP-P0), CP2 = P1 + 2/3*(CP-P1)
+        float x0 = _currentPoint?.x ?? 0;
+        float y0 = _currentPoint?.y ?? 0;
+        float cp1x = x0 + 2f / 3f * (cpx - x0);
+        float cp1y = y0 + 2f / 3f * (cpy - y0);
+        float cp2x = x + 2f / 3f * (cpx - x);
+        float cp2y = y + 2f / 3f * (cpy - y);
+        _currentPath.Add(('C', new[] { cp1x, cp1y, cp2x, cp2y, x, y }));
+        _currentPoint = (x, y);
+    }
+
+    /// <inheritdoc />
+    public void AddRect(float x, float y, float width, float height)
+    {
+        _currentPath.Add(('R', new[] { x, y, width, height }));
+    }
+
+    /// <inheritdoc />
+    public void ClosePath()
+    {
+        _currentPath.Add(('H', Array.Empty<float>()));
+    }
+
+    /// <inheritdoc />
+    public void FillCurrentPath(Paint paint, FillRule fillRule = FillRule.NonZero)
+    {
+        if (_currentPath.Count == 0) return;
+
+        DrawAsArtifactFallback(() =>
+        {
+            if (paint is SolidPaint solid)
+            {
+                BeginColorAlpha(solid.Color);
+                PdfOperators.SaveState(_stream);
+                PdfOperators.SetFillColor(_stream, solid.Color);
+                EmitCurrentPath();
+                if (fillRule == FillRule.EvenOdd)
+                    PdfOperators.FillEvenOdd(_stream);
+                else
+                    PdfOperators.Fill(_stream);
+                PdfOperators.RestoreState(_stream);
+                EndColorAlpha(solid.Color);
+            }
+            else if (paint is LinearGradientPaint linear)
+            {
+                FillPathWithLinearGradient(linear, fillRule);
+            }
+            else if (paint is RadialGradientPaint radial)
+            {
+                FillPathWithRadialGradient(radial, fillRule);
+            }
+        });
+
+        _currentPath.Clear();
+        _currentPoint = null;
+    }
+
+    /// <inheritdoc />
+    public void StrokeCurrentPath(StrokeStyle style)
+    {
+        if (_currentPath.Count == 0) return;
+
+        DrawAsArtifactFallback(() =>
+        {
+            if (style.Paint is SolidPaint solid)
+            {
+                BeginColorAlpha(solid.Color);
+                PdfOperators.SaveState(_stream);
+                ApplyStrokeSettings(style);
+                PdfOperators.SetStrokeColor(_stream, solid.Color);
+                EmitCurrentPath();
+                PdfOperators.Stroke(_stream);
+                PdfOperators.RestoreState(_stream);
+                EndColorAlpha(solid.Color);
+            }
+            else if (style.Paint is LinearGradientPaint linear)
+            {
+                StrokePathWithLinearGradient(linear, style);
+            }
+            else if (style.Paint is RadialGradientPaint radial)
+            {
+                StrokePathWithRadialGradient(radial, style);
+            }
+        });
+
+        _currentPath.Clear();
+        _currentPoint = null;
+    }
+
+    // --- 7. Transforms ---
+
+    /// <inheritdoc />
+    public void Translate(float dx, float dy)
+    {
+        // Concatenate translation into local CTM
+        // [1 0 0 1 dx dy] * [a b c d tx ty]
+        _ctm[4] += _ctm[0] * dx + _ctm[2] * dy;
+        _ctm[5] += _ctm[1] * dx + _ctm[3] * dy;
+    }
+
+    /// <inheritdoc />
+    public void Scale(float sx, float sy)
+    {
+        // Concatenate scaling into local CTM
+        _ctm[0] *= sx;
+        _ctm[1] *= sx;
+        _ctm[2] *= sy;
+        _ctm[3] *= sy;
+    }
+
+    /// <inheritdoc />
+    public void Rotate(float angleDegrees)
+    {
+        float radians = angleDegrees * (float)(Math.PI / 180.0);
+        float cos = (float)Math.Cos(radians);
+        float sin = (float)Math.Sin(radians);
+        float a = _ctm[0], b = _ctm[1], c = _ctm[2], d = _ctm[3];
+        _ctm[0] = a * cos + c * sin;
+        _ctm[1] = b * cos + d * sin;
+        _ctm[2] = -a * sin + c * cos;
+        _ctm[3] = -b * sin + d * cos;
+    }
+
+    /// <inheritdoc />
+    public void Transform(float a, float b, float c, float d, float tx, float ty)
+    {
+        float a0 = _ctm[0], b0 = _ctm[1], c0 = _ctm[2], d0 = _ctm[3], tx0 = _ctm[4], ty0 = _ctm[5];
+        _ctm[0] = a0 * a + c0 * b;
+        _ctm[1] = b0 * a + d0 * b;
+        _ctm[2] = a0 * c + c0 * d;
+        _ctm[3] = b0 * c + d0 * d;
+        _ctm[4] = a0 * tx + c0 * ty + tx0;
+        _ctm[5] = b0 * tx + d0 * ty + ty0;
+    }
+
+    // --- 8. Clipping & Alpha ---
+
+    /// <inheritdoc />
+    public void ClipToCurrentPath(FillRule fillRule = FillRule.NonZero)
+    {
+        if (_currentPath.Count == 0) return;
+
+        EmitCurrentPath();
+        if (fillRule == FillRule.EvenOdd)
+            PdfOperators.ClipEvenOdd(_stream);
+        else
+            PdfOperators.Clip(_stream);
+
+        _currentPath.Clear();
+        _currentPoint = null;
+    }
+
+    /// <inheritdoc />
+    public void SetGlobalAlpha(float alpha)
+    {
+        alpha = Math.Clamp(alpha, 0f, 1f);
+        if (alpha < 1f)
+            PdfOperators.SetGraphicsState(_stream, _alphaGraphicsStateResolver(alpha));
+    }
+
+    // --- Path emit and gradient helpers ---
+
+    /// <summary>
+    /// Transforms a screen-coordinate point through the local CTM, then applies
+    /// the PDF Y-flip and offsets to produce final PDF coordinates.
+    /// </summary>
+    private (float x, float y) TransformPoint(float x, float y)
+    {
+        float tx = _ctm[0] * x + _ctm[2] * y + _ctm[4];
+        float ty = _ctm[1] * x + _ctm[3] * y + _ctm[5];
+        return (tx + _xOffset, Height - (ty + _yOffset));
+    }
+
+    /// <summary>
+    /// Emits the accumulated path commands to the PDF content stream,
+    /// applying the local CTM transform and Y-flip to each point.
+    /// </summary>
+    private void EmitCurrentPath()
+    {
+        foreach (var (type, args) in _currentPath)
+        {
+            switch (type)
+            {
+                case 'M':
+                {
+                    var (px, py) = TransformPoint(args[0], args[1]);
+                    PdfOperators.MoveTo(_stream, px, py);
+                    break;
+                }
+                case 'L':
+                {
+                    var (px, py) = TransformPoint(args[0], args[1]);
+                    PdfOperators.LineTo(_stream, px, py);
+                    break;
+                }
+                case 'C':
+                {
+                    var (cp1x, cp1y) = TransformPoint(args[0], args[1]);
+                    var (cp2x, cp2y) = TransformPoint(args[2], args[3]);
+                    var (px, py) = TransformPoint(args[4], args[5]);
+                    PdfOperators.CurveTo(_stream, cp1x, cp1y, cp2x, cp2y, px, py);
+                    break;
+                }
+                case 'R':
+                {
+                    // Transform all four corners to handle rotation/skew
+                    var (x1, y1) = TransformPoint(args[0], args[1]);
+                    var (x2, y2) = TransformPoint(args[0] + args[2], args[1]);
+                    var (x3, y3) = TransformPoint(args[0] + args[2], args[1] + args[3]);
+                    var (x4, y4) = TransformPoint(args[0], args[1] + args[3]);
+
+                    // If the CTM is axis-aligned (no rotation/skew), use re operator
+                    if (IsAxisAligned())
+                    {
+                        float rx = Math.Min(x1, x3);
+                        float ry = Math.Min(y1, y3);
+                        float rw = Math.Abs(x3 - x1);
+                        float rh = Math.Abs(y3 - y1);
+                        PdfOperators.Rectangle(_stream, rx, ry, rw, rh);
+                    }
+                    else
+                    {
+                        // Emit as a general quadrilateral path
+                        PdfOperators.MoveTo(_stream, x1, y1);
+                        PdfOperators.LineTo(_stream, x2, y2);
+                        PdfOperators.LineTo(_stream, x3, y3);
+                        PdfOperators.LineTo(_stream, x4, y4);
+                        PdfOperators.ClosePath(_stream);
+                    }
+                    break;
+                }
+                case 'H':
+                    PdfOperators.ClosePath(_stream);
+                    break;
+            }
+        }
+    }
+
+    /// <summary>Returns true when the local CTM has no rotation or skew (b and c are zero).</summary>
+    private bool IsAxisAligned()
+        => Math.Abs(_ctm[1]) < 1e-6f && Math.Abs(_ctm[2]) < 1e-6f;
+
+    /// <summary>Applies stroke settings (line width, cap, join, dash, miter) to the PDF state.</summary>
+    private void ApplyStrokeSettings(StrokeStyle style)
+    {
+        PdfOperators.SetLineWidth(_stream, style.Width);
+        PdfOperators.SetLineCap(_stream, MapLineCap(style.LineCap));
+        PdfOperators.SetLineJoin(_stream, MapLineJoin(style.LineJoin));
+        if (style.MiterLimit != 10f)
+            PdfOperators.SetMiterLimit(_stream, style.MiterLimit);
+        if (style.DashPattern is { Length: > 0 })
+            PdfOperators.SetDashPattern(_stream, style.DashPattern, style.DashOffset);
+    }
+
+    private static int MapLineCap(LineCap cap) => cap switch
+    {
+        LineCap.Butt => 0,
+        LineCap.Round => 1,
+        LineCap.Square => 2,
+        _ => 0
+    };
+
+    private static int MapLineJoin(LineJoin join) => join switch
+    {
+        LineJoin.Miter => 0,
+        LineJoin.Round => 1,
+        LineJoin.Bevel => 2,
+        _ => 0
+    };
+
+    /// <summary>Interpolates between two colors at the given parameter t (0-1).</summary>
+    private static Color LerpColor(Color a, Color b, float t)
+    {
+        t = Math.Clamp(t, 0f, 1f);
+        return Color.FromScRgb(
+            a.ScR + (b.ScR - a.ScR) * t,
+            a.ScG + (b.ScG - a.ScG) * t,
+            a.ScB + (b.ScB - a.ScB) * t,
+            a.ScA + (b.ScA - a.ScA) * t);
+    }
+
+    /// <summary>Samples a color from gradient stops at the given offset (0-1).</summary>
+    private static Color SampleGradient(IReadOnlyList<GradientStop> stops, float offset)
+    {
+        if (stops.Count == 0) return Color.Black;
+        if (stops.Count == 1) return stops[0].Color;
+        offset = Math.Clamp(offset, 0f, 1f);
+
+        for (int i = 0; i < stops.Count - 1; i++)
+        {
+            if (offset <= stops[i + 1].Offset)
+            {
+                float range = stops[i + 1].Offset - stops[i].Offset;
+                float t = range > 0 ? (offset - stops[i].Offset) / range : 0;
+                return LerpColor(stops[i].Color, stops[i + 1].Color, t);
+            }
+        }
+        return stops[stops.Count - 1].Color;
+    }
+
+    /// <summary>
+    /// Fills the current path with a linear gradient using a strip-rendering approach:
+    /// clip to the path, then fill thin rectangles with interpolated colors.
+    /// </summary>
+    private void FillPathWithLinearGradient(LinearGradientPaint gradient, FillRule fillRule)
+    {
+        const int strips = 64;
+        PdfOperators.SaveState(_stream);
+
+        // Clip to the path
+        EmitCurrentPath();
+        if (fillRule == FillRule.EvenOdd)
+            PdfOperators.ClipEvenOdd(_stream);
+        else
+            PdfOperators.Clip(_stream);
+
+        // Calculate gradient direction and bounding box
+        var (sx, sy) = TransformPoint(gradient.Start.X, gradient.Start.Y);
+        var (ex, ey) = TransformPoint(gradient.End.X, gradient.End.Y);
+
+        float dx = ex - sx;
+        float dy = ey - sy;
+        float len = (float)Math.Sqrt(dx * dx + dy * dy);
+        if (len < 0.001f) len = 1f;
+
+        // Perpendicular direction for strip width
+        float px = -dy / len;
+        float py = dx / len;
+
+        // Extend strips far enough to cover the clipped area
+        float extend = len + 500f; // generous extension
+
+        for (int i = 0; i < strips; i++)
+        {
+            float t0 = (float)i / strips;
+            float t1 = (float)(i + 1) / strips;
+            float tMid = (t0 + t1) / 2f;
+
+            Color color = SampleGradient(gradient.Stops, tMid);
+            PdfOperators.SetFillColor(_stream, color);
+
+            // Strip corners along the gradient direction
+            float cx0 = sx + dx * t0;
+            float cy0 = sy + dy * t0;
+            float cx1 = sx + dx * t1;
+            float cy1 = sy + dy * t1;
+
+            PdfOperators.MoveTo(_stream, cx0 + px * extend, cy0 + py * extend);
+            PdfOperators.LineTo(_stream, cx1 + px * extend, cy1 + py * extend);
+            PdfOperators.LineTo(_stream, cx1 - px * extend, cy1 - py * extend);
+            PdfOperators.LineTo(_stream, cx0 - px * extend, cy0 - py * extend);
+            PdfOperators.ClosePath(_stream);
+            PdfOperators.Fill(_stream);
+        }
+
+        PdfOperators.RestoreState(_stream);
+    }
+
+    /// <summary>
+    /// Fills the current path with a radial gradient using concentric circle strips.
+    /// </summary>
+    private void FillPathWithRadialGradient(RadialGradientPaint gradient, FillRule fillRule)
+    {
+        const int rings = 64;
+        PdfOperators.SaveState(_stream);
+
+        // Clip to the path
+        EmitCurrentPath();
+        if (fillRule == FillRule.EvenOdd)
+            PdfOperators.ClipEvenOdd(_stream);
+        else
+            PdfOperators.Clip(_stream);
+
+        var (cx, cy) = TransformPoint(gradient.Center.X, gradient.Center.Y);
+        float radius = gradient.Radius * Math.Abs(_ctm[0]); // approximate scale
+
+        // Draw rings from outside in so inner colors overwrite outer
+        for (int i = rings - 1; i >= 0; i--)
+        {
+            float t = (float)(i + 1) / rings;
+            float r = radius * t;
+
+            Color color = SampleGradient(gradient.Stops, t);
+            PdfOperators.SetFillColor(_stream, color);
+
+            // Approximate circle with 4 bezier curves
+            const float k = 0.552284749831f;
+            float kr = k * r;
+            PdfOperators.MoveTo(_stream, cx + r, cy);
+            PdfOperators.CurveTo(_stream, cx + r, cy + kr, cx + kr, cy + r, cx, cy + r);
+            PdfOperators.CurveTo(_stream, cx - kr, cy + r, cx - r, cy + kr, cx - r, cy);
+            PdfOperators.CurveTo(_stream, cx - r, cy - kr, cx - kr, cy - r, cx, cy - r);
+            PdfOperators.CurveTo(_stream, cx + kr, cy - r, cx + r, cy - kr, cx + r, cy);
+            PdfOperators.ClosePath(_stream);
+            PdfOperators.Fill(_stream);
+        }
+
+        PdfOperators.RestoreState(_stream);
+    }
+
+    /// <summary>
+    /// Strokes the current path with a linear gradient using per-segment color approximation.
+    /// </summary>
+    private void StrokePathWithLinearGradient(LinearGradientPaint gradient, StrokeStyle style)
+    {
+        PdfOperators.SaveState(_stream);
+        ApplyStrokeSettings(style);
+
+        var (sx, sy) = TransformPoint(gradient.Start.X, gradient.Start.Y);
+        var (ex, ey) = TransformPoint(gradient.End.X, gradient.End.Y);
+        float gdx = ex - sx;
+        float gdy = ey - sy;
+        float glen = gdx * gdx + gdy * gdy;
+        if (glen < 0.001f) glen = 1f;
+
+        (float x, float y)? prev = null;
+        foreach (var (type, args) in _currentPath)
+        {
+            switch (type)
+            {
+                case 'M':
+                {
+                    prev = TransformPoint(args[0], args[1]);
+                    break;
+                }
+                case 'L':
+                {
+                    var cur = TransformPoint(args[0], args[1]);
+                    if (prev.HasValue)
+                    {
+                        float mx = (prev.Value.x + cur.x) / 2f;
+                        float my = (prev.Value.y + cur.y) / 2f;
+                        float t = ((mx - sx) * gdx + (my - sy) * gdy) / glen;
+                        Color color = SampleGradient(gradient.Stops, t);
+                        PdfOperators.SetStrokeColor(_stream, color);
+                        PdfOperators.MoveTo(_stream, prev.Value.x, prev.Value.y);
+                        PdfOperators.LineTo(_stream, cur.x, cur.y);
+                        PdfOperators.Stroke(_stream);
+                    }
+                    prev = cur;
+                    break;
+                }
+                case 'C':
+                {
+                    var cur = TransformPoint(args[4], args[5]);
+                    if (prev.HasValue)
+                    {
+                        var cp1 = TransformPoint(args[0], args[1]);
+                        var cp2 = TransformPoint(args[2], args[3]);
+                        float mx = (prev.Value.x + cur.x) / 2f;
+                        float my = (prev.Value.y + cur.y) / 2f;
+                        float t = ((mx - sx) * gdx + (my - sy) * gdy) / glen;
+                        Color color = SampleGradient(gradient.Stops, t);
+                        PdfOperators.SetStrokeColor(_stream, color);
+                        PdfOperators.MoveTo(_stream, prev.Value.x, prev.Value.y);
+                        PdfOperators.CurveTo(_stream, cp1.x, cp1.y, cp2.x, cp2.y, cur.x, cur.y);
+                        PdfOperators.Stroke(_stream);
+                    }
+                    prev = cur;
+                    break;
+                }
+                case 'H':
+                    prev = null;
+                    break;
+            }
+        }
+
+        PdfOperators.RestoreState(_stream);
+    }
+
+    /// <summary>
+    /// Strokes the current path with a radial gradient using per-segment color approximation.
+    /// </summary>
+    private void StrokePathWithRadialGradient(RadialGradientPaint gradient, StrokeStyle style)
+    {
+        PdfOperators.SaveState(_stream);
+        ApplyStrokeSettings(style);
+
+        var (cx, cy) = TransformPoint(gradient.Center.X, gradient.Center.Y);
+        float radius = gradient.Radius * Math.Abs(_ctm[0]);
+        if (radius < 0.001f) radius = 1f;
+
+        (float x, float y)? prev = null;
+        foreach (var (type, args) in _currentPath)
+        {
+            switch (type)
+            {
+                case 'M':
+                {
+                    prev = TransformPoint(args[0], args[1]);
+                    break;
+                }
+                case 'L':
+                {
+                    var cur = TransformPoint(args[0], args[1]);
+                    if (prev.HasValue)
+                    {
+                        float mx = (prev.Value.x + cur.x) / 2f;
+                        float my = (prev.Value.y + cur.y) / 2f;
+                        float dist = (float)Math.Sqrt((mx - cx) * (mx - cx) + (my - cy) * (my - cy));
+                        float t = dist / radius;
+                        Color color = SampleGradient(gradient.Stops, t);
+                        PdfOperators.SetStrokeColor(_stream, color);
+                        PdfOperators.MoveTo(_stream, prev.Value.x, prev.Value.y);
+                        PdfOperators.LineTo(_stream, cur.x, cur.y);
+                        PdfOperators.Stroke(_stream);
+                    }
+                    prev = cur;
+                    break;
+                }
+                case 'C':
+                {
+                    var cur = TransformPoint(args[4], args[5]);
+                    if (prev.HasValue)
+                    {
+                        var cp1 = TransformPoint(args[0], args[1]);
+                        var cp2 = TransformPoint(args[2], args[3]);
+                        float mx = (prev.Value.x + cur.x) / 2f;
+                        float my = (prev.Value.y + cur.y) / 2f;
+                        float dist = (float)Math.Sqrt((mx - cx) * (mx - cx) + (my - cy) * (my - cy));
+                        float t = dist / radius;
+                        Color color = SampleGradient(gradient.Stops, t);
+                        PdfOperators.SetStrokeColor(_stream, color);
+                        PdfOperators.MoveTo(_stream, prev.Value.x, prev.Value.y);
+                        PdfOperators.CurveTo(_stream, cp1.x, cp1.y, cp2.x, cp2.y, cur.x, cur.y);
+                        PdfOperators.Stroke(_stream);
+                    }
+                    prev = cur;
+                    break;
+                }
+                case 'H':
+                    prev = null;
+                    break;
+            }
+        }
+
+        PdfOperators.RestoreState(_stream);
     }
 
     private void DrawWithColorAlpha(Color color, Action draw)
