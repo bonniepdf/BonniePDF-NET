@@ -1,6 +1,7 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
@@ -19,6 +20,8 @@ namespace BonniePDF.Examples.Templates.EventTicket;
 [System.ComponentModel.Description("Event ticket / boarding-pass style card (PDF/UA-1 + PDF/A-2a) with a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.")]
 public static class EventTicketExample
 {
+    private const string BgImageKey = "images/danny-howe-bn-D2bCvpik-unsplash.jpg";
+
     private static readonly Color Ink = ColorPalette.Slate[900];
     private static readonly Color Cream = ColorPalette.Slate[100];
     private static readonly Color Mute = ColorPalette.Slate[400];
@@ -26,7 +29,7 @@ public static class EventTicketExample
     private static readonly Color Accent = ColorPalette.Violet[500];
     private static readonly Color Stub = ColorPalette.Slate[800];
 
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
     {
         // Landscape boarding-pass style ticket: 640 x 300 pt.
         Document doc = new(new DocumentSettings
@@ -39,6 +42,25 @@ public static class EventTicketExample
             Language = "en-GB",
             DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(BodyCol),
         });
+
+        byte[]? bgData = null;
+        assets?.TryGetValue(BgImageKey, out bgData);
+
+        if (bgData is { Length: > 0 })
+        {
+            doc.Settings.PageBackground = _ => new Container
+            {
+                Height = 300,
+                Child = new Image
+                {
+                    ImageData = bgData,
+                    Width = 640,
+                    Height = 300,
+                    FitMode = ImageFitMode.Cover,
+                    IsDecorative = true,
+                },
+            };
+        }
 
         doc.Metadata.Title = "Event Ticket - Aurora Sound Festival";
         doc.Metadata.Author = "Aurora Live";
@@ -80,7 +102,7 @@ public static class EventTicketExample
 
         Container body = new()
         {
-            BackgroundColor = Ink,
+            BackgroundColor = bgData is { Length: > 0 } ? Ink.WithAlpha(0.82f) : Ink,
             Height = 300,
             Padding = new Thickness(22, 18, 22, 16),
             Child = info,
