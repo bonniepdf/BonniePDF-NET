@@ -68,6 +68,12 @@ internal static class PdfOperators
     internal static void SetGraphicsState(StringBuilder s, string name)
         => s.AppendLf($"{name} gs");
 
+    /// <summary>
+    /// <c>sh</c> - Paint the named shading across the current clip region.
+    /// </summary>
+    internal static void PaintShading(StringBuilder s, string name)
+        => s.AppendLf($"{name} sh");
+
     // ── Color (PDF Ref 8.6.8) ───────────────────────────────────────────
 
     /// <summary>

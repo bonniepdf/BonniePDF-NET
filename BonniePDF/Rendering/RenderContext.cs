@@ -6,6 +6,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Rendering.Images;
+using BonniePDF.Rendering.Pdf;
 using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
@@ -202,7 +203,8 @@ public class RenderContext
         else
         {
             var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
-                ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage);
+                ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage,
+                RegisterShading);
             if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
             Canvas = pdfCanvas;
         }
@@ -222,7 +224,8 @@ public class RenderContext
             };
 
         var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource,
-            ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage);
+            ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage,
+            RegisterShading);
         if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
         return pdfCanvas;
     }
@@ -298,6 +301,13 @@ public class RenderContext
     /// Registers a reusable PDF transparency graphics state for the given alpha value.
     /// </summary>
     public string RegisterAlphaGraphicsState(float alpha) => Resources.RegisterAlphaGraphicsState(alpha);
+
+    /// <summary>
+    /// Registers a native gradient shading (and luminosity soft mask for translucent
+    /// gradients), returning the resource names to reference, or <c>null</c> to fall
+    /// back to the strip/disc approximation (translucent gradient under PDF/A-1).
+    /// </summary>
+    public ShadingResources? RegisterShading(ShadingRequest request) => Resources.RegisterShading(request);
 
     /// <summary>
     /// Returns <c>true</c> if the given font identifier refers to an embedded TrueType font
