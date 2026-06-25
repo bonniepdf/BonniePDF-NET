@@ -77,7 +77,7 @@ public class PdfCanvasMarkedContentTests
     public void WithoutTaggingContext_BeginEndAreNoOps()
     {
         var stream = new StringBuilder();
-        var canvas = new PdfCanvas(stream, pageHeight: 800, 0, 0,
+        var canvas = new PdfCanvas(stream, pageHeight: 700, 0, 0,
             fontResolver: f => "/F1",
             imageResolver: _ => "/Im1",
             embeddedFontResolver: _ => null,
@@ -138,7 +138,7 @@ public class PdfCanvasMarkedContentTests
         var stream = new StringBuilder();
         var tree = new StructureTreeBuilder();
         var ctx = new TaggingContext(tree);
-        var canvas = new PdfCanvas(stream, pageHeight: 800, 0, 0,
+        var canvas = new PdfCanvas(stream, pageHeight: 700, 0, 0,
             fontResolver: f => "/F1",
             imageResolver: _ => "/Im1",
             embeddedFontResolver: _ => null,
