@@ -813,7 +813,23 @@ public class TtfSubsetter
                 writer.Write((byte)0);
         }
 
-        return ms.ToArray();
+        byte[] fontData = ms.ToArray();
+
+        // Recalculate head.checkSumAdjustment over the whole assembled file.
+        // The field was zeroed by BuildHeadTable and written verbatim above, so the
+        // file checksum is taken with it at 0, per the OpenType spec. The magic
+        // constant 0xB1B0AFBA is fixed by the spec.
+        if (tableOffsets.TryGetValue("head", out uint headOffset))
+        {
+            uint fileChecksum = CalculateChecksum(fontData);
+            uint adjustment = unchecked(0xB1B0AFBAu - fileChecksum);
+            fontData[headOffset + 8] = (byte)(adjustment >> 24);
+            fontData[headOffset + 9] = (byte)((adjustment >> 16) & 0xFF);
+            fontData[headOffset + 10] = (byte)((adjustment >> 8) & 0xFF);
+            fontData[headOffset + 11] = (byte)(adjustment & 0xFF);
+        }
+
+        return fontData;
     }
 
     private static uint CalculateChecksum(byte[] data)
@@ -823,8 +839,11 @@ public class TtfSubsetter
 
         for (int i = 0; i < length; i += 4)
         {
+            // A trailing partial word is zero-padded on the right (the present bytes
+            // are the most-significant ones), so always shift in four bytes,
+            // substituting 0 past the end of the data.
             uint value = 0;
-            for (int j = 0; j < 4 && i + j < data.Length; j++) value = (value << 8) | data[i + j];
+            for (int j = 0; j < 4; j++) value = (value << 8) | (uint)(i + j < data.Length ? data[i + j] : 0);
             sum += value;
         }
 
