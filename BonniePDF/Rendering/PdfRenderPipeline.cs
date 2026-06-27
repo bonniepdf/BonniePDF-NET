@@ -280,7 +280,10 @@ public static class PdfRenderPipeline
             pageDimensions[currentOutputIndex] = new RenderedPageDimensions
             {
                 Size = page.Size,
-                Margin = pageMargin
+                Margin = pageMargin,
+                PageColor = page.PageColor,
+                PageBackground = page.PageBackground,
+                PageForeground = page.PageForeground
             };
 
             // Render Elements with overflow support
@@ -291,7 +294,10 @@ public static class PdfRenderPipeline
                 pageDimensions[i] = new RenderedPageDimensions
                 {
                     Size = page.Size,
-                    Margin = pageMargin
+                    Margin = pageMargin,
+                    PageColor = page.PageColor,
+                    PageBackground = page.PageBackground,
+                    PageForeground = page.PageForeground
                 };
 
             // Advance output index for next input page
@@ -323,8 +329,20 @@ public static class PdfRenderPipeline
 
             // full-page background slot. Painted behind everything,
             // ignoring margins. Prepended so it ends up at the very back of
-            // the painter's-model stream.
-            RenderPageSlot(ctx, settings.PageBackground, i, isBackground: true);
+            // the painter's-model stream. A per-page Page.PageBackground element
+            // overrides the document-level template for this page.
+            if (pageDimensions.TryGetValue(i, out var bgDims) && bgDims.PageBackground != null)
+                RenderPageSlotElement(ctx, bgDims.PageBackground, i, isBackground: true);
+            else
+                RenderPageSlot(ctx, settings.PageBackground, i, isBackground: true);
+
+            // Solid page colour: prepended last so it lands at the very front of
+            // the stream (the backmost position in the painter's model), behind
+            // the PageBackground slot, headers, body content, and footers. A
+            // per-page Page.PageColor overrides the document-level setting.
+            // Ignored when neither is set.
+            Color? pageColor = pageDimensions.TryGetValue(i, out var colorDims) ? colorDims.PageColor : null;
+            RenderPageColor(ctx, pageColor ?? settings.PageColor, i, pageSize.Width, pageSize.Height);
 
             // Render Templates (Headers/Footers)
             RenderTemplate(ctx, settings, i);
@@ -336,8 +354,12 @@ public static class PdfRenderPipeline
             RenderWatermark(ctx, settings, i, pageSize.Width, pageSize.Height);
 
             // full-page foreground slot. Painted on top of everything,
-            // ignoring margins (explicit stamps / overlays).
-            RenderPageSlot(ctx, settings.PageForeground, i, isBackground: false);
+            // ignoring margins (explicit stamps / overlays). A per-page
+            // Page.PageForeground element overrides the document-level template.
+            if (pageDimensions.TryGetValue(i, out var fgDims) && fgDims.PageForeground != null)
+                RenderPageSlotElement(ctx, fgDims.PageForeground, i, isBackground: false);
+            else
+                RenderPageSlot(ctx, settings.PageForeground, i, isBackground: false);
 
             PageRenderOutput output = new()
             {
@@ -549,6 +571,18 @@ public static class PdfRenderPipeline
         IElement? element = template(pageIndex + 1);
         if (element == null) return;
 
+        RenderPageSlotElement(ctx, element, pageIndex, isBackground);
+    }
+
+    /// <summary>
+    /// Renders a single element as a full-page background/foreground slot
+    /// (ignoring margins, origin at the top-left, full page width). Backgrounds
+    /// are prepended so they paint behind everything; foregrounds are appended
+    /// so they paint on top. Shared by the document-level template path
+    /// (<see cref="RenderPageSlot"/>) and the per-page element override path.
+    /// </summary>
+    private static void RenderPageSlotElement(RenderContext ctx, IElement element, int pageIndex, bool isBackground)
+    {
         // For the background slot we render into the freshly-emptied stream and
         // re-append the captured content afterwards, leaving the slot operators
         // at the very front. The foreground slot renders straight onto the end.
@@ -586,6 +620,48 @@ public static class PdfRenderPipeline
             ctx.CurrentY = originalY;
 
             if (isBackground && captured != null) stream.Append(captured);
+        }
+    }
+
+    /// <summary>
+    /// Paints a solid full-page background colour (ignoring margins) and
+    /// prepends it to the page stream so it lands at the very front (the
+    /// backmost position in the painter's model) — behind the
+    /// <see cref="DocumentSettings.PageBackground"/> slot, headers, body, and
+    /// footers. Call after the background slot so the colour ends up behind it.
+    /// No-op when <paramref name="color"/> is <c>null</c>.
+    /// </summary>
+    private static void RenderPageColor(RenderContext ctx, Color? color, int pageIndex, float pageWidth, float pageHeight)
+    {
+        if (color == null) return;
+
+        // Mirror RenderPageSlot's prepend: capture the current stream, clear it,
+        // draw the fill at the front, then re-append the captured content.
+        StringBuilder stream = ctx.Pages[pageIndex];
+        string captured = stream.ToString();
+        stream.Clear();
+
+        ICanvas originalCanvas = ctx.Canvas;
+        float originalX = ctx.CurrentX;
+        float originalY = ctx.CurrentY;
+
+        ctx.SetCanvas(ctx.GetFixedCanvas());
+        try
+        {
+            ctx.CurrentX = 0;
+            ctx.CurrentY = 0;
+
+            // Decorative fill - keep it out of the structure tree (PDF/UA).
+            if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
+            ctx.Canvas.FillRect(0, 0, pageWidth, pageHeight, color.Value);
+            if (ctx.Tagging != null) ctx.Canvas.EndArtifact();
+        }
+        finally
+        {
+            ctx.SetCanvas(originalCanvas);
+            ctx.CurrentX = originalX;
+            ctx.CurrentY = originalY;
+            stream.Append(captured);
         }
     }
 }
