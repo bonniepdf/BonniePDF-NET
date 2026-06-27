@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using BonniePDF.Configuration;
+using BonniePDF.Core;
+using BonniePDF.Elements;
 
 namespace BonniePDF.Elements.Layout;
 
@@ -38,6 +40,37 @@ public class Page
     /// Gets the page size
     /// </summary>
     public PdfSize Size { get; }
+
+    /// <summary>
+    /// Background colour for this page only. When set, the render pipeline
+    /// fills the entire page (ignoring margins) with this colour behind
+    /// everything else, overriding <see cref="DocumentSettings.PageColor"/> for
+    /// this page. When <c>null</c>, the document-level
+    /// <see cref="DocumentSettings.PageColor"/> (if any) is used. Leave both
+    /// <c>null</c> for a transparent (viewer-default) background.
+    /// </summary>
+    public Color? PageColor { get; set; }
+
+    /// <summary>
+    /// Full-page background element for this page only (drawn behind all
+    /// content, ignoring margins). When set, the pipeline renders this element
+    /// instead of calling <see cref="DocumentSettings.PageBackground"/> for this
+    /// page (and any continuation pages its content overflows onto). Useful for
+    /// per-page letterhead, cover images, or section dividers. Leave
+    /// <c>null</c> to fall back to the document-level
+    /// <see cref="DocumentSettings.PageBackground"/> template.
+    /// </summary>
+    public IElement? PageBackground { get; set; }
+
+    /// <summary>
+    /// Full-page foreground element for this page only (drawn on top of all
+    /// content, ignoring margins). When set, the pipeline renders this element
+    /// instead of calling <see cref="DocumentSettings.PageForeground"/> for this
+    /// page (and any continuation pages). Useful for per-page
+    /// "DRAFT"/"CONFIDENTIAL" overlays. Leave <c>null</c> to fall back to the
+    /// document-level <see cref="DocumentSettings.PageForeground"/> template.
+    /// </summary>
+    public IElement? PageForeground { get; set; }
 
     /// <summary>
     /// Gets the page width in points

@@ -90,6 +90,20 @@ public class DocumentSettings
     public PdfSize PageSize { get; set; } = PdfSize.A4;
 
     /// <summary>
+    /// Background colour painted behind every page. When set, the render
+    /// pipeline fills the entire page (origin 0,0, full width and height,
+    /// ignoring margins) with this colour before anything else is drawn, so it
+    /// sits behind the <see cref="PageBackground"/> slot, headers, body
+    /// content, and footers. Leave <c>null</c> for a transparent
+    /// (viewer-default, usually white) background.
+    ///
+    /// This is the simple "page colour" shortcut; for textured or image
+    /// backgrounds use <see cref="PageBackground"/> instead (or both —
+    /// <c>PageColor</c> fills, <c>PageBackground</c> layers on top).
+    /// </summary>
+    public Color? PageColor { get; set; }
+
+    /// <summary>
     /// The page orientation for the document (default: Portrait)
     /// </summary>
     public PageOrientation Orientation { get; set; } = PageOrientation.Portrait;
