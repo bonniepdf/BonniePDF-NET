@@ -406,6 +406,65 @@ public class SvgCanvas : ICanvas
     }
 
     /// <summary>
+    /// Emits a placeholder text node for total pages. The page SVG exporter
+    /// replaces the node content once the full document page count is known.
+    /// </summary>
+    public void DrawDeferredTotalPages(float x, float y, Color color, float fontSize, string fontFamily)
+    {
+        const string placeholder = "00";
+        float sx = x + _xOffset;
+        float sy = y + _yOffset;
+        string fill = color.ToHexString();
+        float baselineY = BaselineY(sy, fontSize);
+
+        TtfFont ttfFont = ResolveFont(fontFamily);
+        string fontAttrs;
+        if (ttfFont != null)
+        {
+            for (int cp = '0'; cp <= '9'; cp++)
+                FontUsageSink?.Invoke(fontFamily, ttfFont, cp);
+            fontAttrs = $"font-family=\"{EmbeddedFontFamily(fontFamily)}\"";
+        }
+        else
+        {
+            fontAttrs = StandardFontCssAttrs(fontFamily);
+        }
+
+        _sb.AppendLf(
+            $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" {fontAttrs} font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"start\" data-bonniepdf-total-pages=\"true\">{placeholder}</text>");
+    }
+
+    /// <summary>Resolves deferred total-page placeholders in already-rendered SVG markup.</summary>
+    public static string ResolveTotalPages(string svg, int totalPages)
+    {
+        const string marker = "data-bonniepdf-total-pages=\"true\"";
+        string value = XmlEscape.EscapeXml(totalPages.ToString(CultureInfo.InvariantCulture));
+        StringBuilder? result = null;
+        int searchStart = 0;
+
+        while (true)
+        {
+            int markerIndex = svg.IndexOf(marker, searchStart, StringComparison.Ordinal);
+            if (markerIndex < 0) break;
+
+            int contentStart = svg.IndexOf('>', markerIndex);
+            if (contentStart < 0) break;
+
+            int contentEnd = svg.IndexOf("</text>", contentStart + 1, StringComparison.Ordinal);
+            if (contentEnd < 0) break;
+
+            result ??= new StringBuilder(svg.Length);
+            result.Append(svg, searchStart, contentStart + 1 - searchStart);
+            result.Append(value);
+            searchStart = contentEnd;
+        }
+
+        if (result == null) return svg;
+        result.Append(svg, searchStart, svg.Length - searchStart);
+        return result.ToString();
+    }
+
+    /// <summary>
     /// Draws rotated text at the specified location.
     /// Uses SVG transform attribute to rotate text.
     /// </summary>

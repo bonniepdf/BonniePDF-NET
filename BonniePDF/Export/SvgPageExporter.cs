@@ -66,15 +66,19 @@ internal static class SvgPageExporter
 
         string title = ResolveTitle(document, options.Title);
 
-        var results = new List<string>();
-        int pageNumber = 1;
+        var renderedPages = new List<PageRenderOutput>();
         foreach (PageRenderOutput pageOutput in PdfRenderPipeline.RenderPagesStreaming(document.Pages, settings, ctx))
+            renderedPages.Add(pageOutput);
+
+        int totalPages = renderedPages.Count;
+        int limit = options.MaxPages is int max && max >= 0 ? Math.Min(max, totalPages) : totalPages;
+
+        var results = new List<string>(limit);
+        for (int i = 0; i < limit; i++)
         {
-            results.Add(Assemble(pageOutput.ContentStream, pageNumber, pageOutput.Size, options, title));
-            pageNumber++;
-            // Stop after the requested page count. Earlier pages are already laid
-            // out; we simply stop consuming the streaming pipeline.
-            if (options.MaxPages is int max && results.Count >= max) break;
+            PageRenderOutput pageOutput = renderedPages[i];
+            string body = SvgCanvas.ResolveTotalPages(pageOutput.ContentStream, totalPages);
+            results.Add(Assemble(body, i + 1, pageOutput.Size, options, title));
         }
 
         return new SvgDocumentExport(results, BuildFontFaceCss(ctx.SvgFontUsage));
