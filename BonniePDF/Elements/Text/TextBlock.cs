@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using BonniePDF.Drawing;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Tagging;
 
@@ -341,7 +342,10 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 
                 if (ctx.IsSvgMode)
                 {
-                    ctx.Canvas.DrawText(currentX, y, "??", TextColor, FontSize, FontName, TextAlignment.Left);
+                    if (ctx.Canvas is SvgCanvas svgCanvas)
+                        svgCanvas.DrawDeferredTotalPages(currentX, y, TextColor, FontSize, FontName);
+                    else
+                        ctx.Canvas.DrawText(currentX, y, "00", TextColor, FontSize, FontName, TextAlignment.Left);
                 }
                 else
                 {

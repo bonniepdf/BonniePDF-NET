@@ -184,6 +184,34 @@ public class SvgPageExportTests
     }
 
     [Fact]
+    public void TotalPagesToken_ResolvesInSvgOutput_WhenMaxPagesLimitsSerialization()
+    {
+        var doc = new Document();
+        for (int i = 0; i < 3; i++)
+        {
+            if (i > 0) doc.AddPage();
+            doc.Add(new TextBlock { Text = $"Body {i + 1}" });
+        }
+        doc.Settings.FooterTemplate = pageNum => new TextBlock
+        {
+            Text = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
+            FontSize = 9
+        };
+
+        IReadOnlyList<string> pages = doc.GenerateSvgPages(new SvgPageExportOptions { MaxPages = 2 });
+
+        Assert.Equal(2, pages.Count);
+        Assert.Contains("Page 1 of ", pages[0], StringComparison.Ordinal);
+        Assert.Contains("Page 2 of ", pages[1], StringComparison.Ordinal);
+        foreach (string page in pages)
+        {
+            Assert.Contains("data-bonniepdf-total-pages=\"true\">3</text>", page, StringComparison.Ordinal);
+            Assert.DoesNotContain("??", page, StringComparison.Ordinal);
+            Assert.DoesNotContain(TextElementBase.TotalPagesToken, page, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void OutOfRangePageIndex_Throws()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => SimpleDoc().GenerateSvgPage(5));
