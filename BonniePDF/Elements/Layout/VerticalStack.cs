@@ -84,8 +84,22 @@ public class VerticalStack : ElementBase, IStatefulElement
                         // If at top of page or too large for any page, fall through and render anyway
                     }
 
+                    // Layout capture: open the child node before rendering its
+                    // segment. Coalesced across page-resumptions by element identity;
+                    // closed only when the child reports Complete.
+                    ctx.LayoutRecorder?.OpenNode(
+                        child,
+                        LayoutRecorder.CaptureTypeOf(child),
+                        LayoutRecorder.CaptureNameOf(child),
+                        ctx.CurrentPageIndex,
+                        ctx.CurrentX,
+                        ctx.CurrentY,
+                        contentWidth);
+
                     // Render stateful child with overflow support
                     RenderStatus status = statefulChild.RenderStateful(ctx, contentWidth);
+
+                    ctx.LayoutRecorder?.CloseNode(child, ctx.CurrentPageIndex, ctx.CurrentY, complete: status == RenderStatus.Complete);
 
                     if (status == RenderStatus.Overflow)
                     {

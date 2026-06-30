@@ -8,7 +8,7 @@ namespace BonniePDF.Elements;
 /// Y-position tracking, and content width calculation. This reduces code duplication
 /// across elements and ensures consistent behavior.
 /// </summary>
-public abstract class ElementBase : IElement, IMargin
+public abstract class ElementBase : IElement, IMargin, ICaptureMetadata
 {
     /// <summary>
     /// The starting Y position when rendering begins (used for Y-position tracking)
@@ -49,6 +49,11 @@ public abstract class ElementBase : IElement, IMargin
         StartingY = ctx.CurrentY;
         float originalX = ctx.CurrentX;
 
+        // Layout capture (opt-in, no-op without a recorder): record this element's
+        // full margin box. The atomic render path renders in one shot, so the node
+        // opens and closes (complete) around RenderContent.
+        ctx.LayoutRecorder?.OpenNode(this, CaptureType, CaptureName, ctx.CurrentPageIndex, originalX, StartingY, width);
+
         // Apply top margin
         ctx.CurrentY += Margin.Top;
         ctx.CurrentX += Margin.Left;
@@ -68,7 +73,21 @@ public abstract class ElementBase : IElement, IMargin
 
         // Apply bottom margin
         ctx.CurrentY += Margin.Bottom;
+
+        ctx.LayoutRecorder?.CloseNode(this, ctx.CurrentPageIndex, ctx.CurrentY, complete: true);
     }
+
+    /// <summary>
+    /// Canonical element type name used for the layout snapshot tree. Defaults to
+    /// the runtime type name; subclasses may override for a stable spec name.
+    /// </summary>
+    public virtual string CaptureType => GetType().Name;
+
+    /// <summary>
+    /// Optional author-supplied name/key surfaced in the layout snapshot. Null by
+    /// default; a future capture API can populate it.
+    /// </summary>
+    public string CaptureName { get; set; }
 
     /// <summary>
     /// Margin around this element
