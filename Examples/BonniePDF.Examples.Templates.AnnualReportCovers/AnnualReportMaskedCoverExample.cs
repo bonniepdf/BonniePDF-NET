@@ -19,12 +19,13 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 /// </summary>
 [System.ComponentModel.DisplayName("Annual Report Cover - Masked Image")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("The classic photographic report cover: a full-width hero image clipped to an angled mask whose lower edge cuts diagonally into a green title band, joined by a gold seam.")]
+[System.ComponentModel.Description("A two-page annual report. Page 1 is the classic photographic cover: a full-width hero image clipped to an angled mask cutting into a green title band with a gold seam. Page 2 is the \"inside the report\" spread - KPI band, quarterly-revenue column chart, revenue-by-segment donut, and a financial-summary table.")]
 public static class AnnualReportMaskedCoverExample
 {
     private const string HeroImageKey = "images/sean-pollock-PhYq704ffdA-unsplash.jpg";
     private const string Company = "Meridian Group";
     private const int Year = 2025;
+    private static readonly string[] SegmentColors = ["#047857", "#0d9488", "#f59e0b", "#0284c7"];
 
     private static readonly Color Band = ColorPalette.Emerald[900]; // brand band behind the title
     private static readonly Color Seam = ColorPalette.Amber[400];   // gold seam along the diagonal cut
@@ -53,6 +54,12 @@ public static class AnnualReportMaskedCoverExample
             AltText = $"{Company} Annual Report {Year} cover: a hero landscape image clipped to an angled mask above a green title band.",
         };
         doc.Add(cover);
+
+        // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
+        CapabilitiesPage.Add(doc, new ReportBrand(
+            Company, Year,
+            ColorPalette.Emerald[800], ColorPalette.Amber[600], ColorPalette.Emerald[50],
+            SegmentColors));
 
         return doc;
     }
