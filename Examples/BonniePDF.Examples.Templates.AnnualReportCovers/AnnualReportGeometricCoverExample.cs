@@ -21,11 +21,12 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 /// </summary>
 [System.ComponentModel.DisplayName("Annual Report Cover - Geometric")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("A light, modern cover built from vector primitives: a radial sun bleeding off the corner, translucent rotated polygons and a star placed with affine transforms, and a circular masked image badge ringed in gold (a photo cropped to a circle - placeholder for now).")]
+[System.ComponentModel.Description("A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a circular masked image badge ringed in gold). Page 2 is the \"inside the report\" spread - KPI band, quarterly-revenue column chart, revenue-by-segment donut, and a financial-summary table.")]
 public static class AnnualReportGeometricCoverExample
 {
     private const string Company = "Northwind Capital";
     private const int Year = 2025;
+    private static readonly string[] SegmentColors = ["#0369a1", "#4f46e5", "#f59e0b", "#059669"];
 
     private static readonly Color Ink = ColorPalette.Slate[800];
     private static readonly Color Accent = ColorPalette.Amber[500];
@@ -50,6 +51,12 @@ public static class AnnualReportGeometricCoverExample
             AltText = $"{Company} Annual Report {Year} cover: a geometric layout with a circular cropped photo badge and the company name.",
         };
         doc.Add(cover);
+
+        // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
+        CapabilitiesPage.Add(doc, new ReportBrand(
+            Company, Year,
+            ColorPalette.Sky[700], ColorPalette.Amber[500], ColorPalette.Sky[50],
+            SegmentColors));
 
         return doc;
     }
