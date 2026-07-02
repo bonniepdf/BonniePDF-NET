@@ -1,0 +1,118 @@
+using System.Globalization;
+using BonniePDF.Core;
+using BonniePDF.Elements;
+using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Text;
+using BonniePDF.Typography;
+
+namespace BonniePDF.Examples.Templates.RegionalInvoices;
+
+/// <summary>
+/// Shared building blocks for the regional invoice showcases (US / UK / EU / Asia).
+///
+/// Each regional invoice differs in its tax and compliance story - US sales tax,
+/// UK VAT, EU reverse-charge / EN 16931, India GST with an IRN + QR - but they
+/// share the same visual grammar: a header band, a bill-to / details block, a
+/// line-items table, and a totals stack. This kit captures that grammar so the
+/// four files stay tight and only carry what actually makes them regional.
+/// </summary>
+internal static class InvoiceKit
+{
+    public static readonly Color Ink = ColorPalette.Slate[700];
+    public static readonly Color Muted = ColorPalette.Slate[500];
+    public static readonly Color HeaderBg = ColorPalette.Slate[100];
+    public static readonly Color Rule = ColorPalette.Slate[200];
+
+    /// <summary>A styled text cell with invoice-friendly defaults (9pt Helvetica, slate ink).</summary>
+    public static TextBlock Cell(
+        string text,
+        float size = 9f,
+        bool bold = false,
+        Color? color = null,
+        TextAlignment align = TextAlignment.Left,
+        Thickness? margin = null)
+    {
+        TextBlock b = new()
+        {
+            Text = text,
+            FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+            FontSize = size,
+            TextColor = color ?? Ink,
+            Alignment = align,
+        };
+        if (margin.HasValue)
+        {
+            b.Margin = margin.Value;
+        }
+
+        return b;
+    }
+
+    /// <summary>A monetary string using the region's symbol and culture.</summary>
+    public static string Money(decimal value, string symbol, string culture = "en-US")
+        => symbol + value.ToString("N2", CultureInfo.GetCultureInfo(culture));
+
+    /// <summary>Vertical stack of plain text lines, e.g. a postal address block.</summary>
+    public static VerticalStack Lines(Color color, params string[] items)
+    {
+        VerticalStack stack = new();
+        AddLines(stack, color, items);
+        return stack;
+    }
+
+    /// <summary>Appends plain text lines to an existing stack (e.g. after a bold company name).</summary>
+    public static void AddLines(VerticalStack stack, Color color, params string[] items)
+    {
+        foreach (string t in items)
+        {
+            stack.AddChild(Cell(t, color: color));
+        }
+    }
+
+    /// <summary>A labelled block: a bold eyebrow label over a body element.</summary>
+    public static Container Labelled(string label, IElement body, Color accent)
+    {
+        VerticalStack stack = new();
+        stack.AddChild(Cell(label, size: 8f, bold: true, color: accent, margin: new Thickness(0, 0, 0, 5)));
+        stack.AddChild(body);
+        return new Container { Child = stack };
+    }
+
+    /// <summary>A single "label ....... value" totals line, weighted so the value hugs the right edge.</summary>
+    public static HorizontalStack TotalLine(
+        string label,
+        string value,
+        bool bold = false,
+        float size = 9f,
+        Color? color = null)
+    {
+        HorizontalStack row = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Margin = new Thickness(0, 3, 0, 3),
+        };
+        row.AddChild(Cell(label, size: size, bold: bold, color: color ?? Muted), 3);
+        row.AddChild(Cell(value, size: size, bold: bold, color: color ?? Ink, align: TextAlignment.Right), 2);
+        return row;
+    }
+
+    /// <summary>A thin horizontal divider used between totals and the grand total.</summary>
+    public static Container Divider(Color color, float thickness = 0.6f) => new()
+    {
+        BackgroundColor = color,
+        Padding = new Thickness(0, thickness, 0, 0),
+        Margin = new Thickness(0, 5, 0, 5),
+        Child = new TextBlock { Text = " ", FontSize = 1 },
+    };
+
+    /// <summary>A full-width coloured accent bar - the top rule that anchors each invoice.</summary>
+    public static Container AccentBar(Color color, float height = 5f) => new()
+    {
+        BackgroundColor = color,
+        Padding = new Thickness(0, height / 2f, 0, height / 2f),
+        Child = new TextBlock { Text = " ", FontSize = 1 },
+    };
+}
+
+/// <summary>A single invoice line item shared by the regional invoice showcases.</summary>
+internal sealed record InvoiceItem(string Description, int Qty, decimal UnitPrice, string? Detail = null);
