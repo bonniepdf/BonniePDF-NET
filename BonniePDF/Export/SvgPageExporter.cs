@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
@@ -18,10 +19,11 @@ namespace BonniePDF.Export;
 /// </summary>
 public sealed class SvgDocumentExport
 {
-    public SvgDocumentExport(IReadOnlyList<string> pages, string fontFaceCss)
+    public SvgDocumentExport(IReadOnlyList<string> pages, string fontFaceCss, Rendering.LayoutSnapshot snapshot = null)
     {
         Pages = pages;
         FontFaceCss = fontFaceCss;
+        Snapshot = snapshot;
     }
 
     /// <summary>One standalone SVG string per page.</summary>
@@ -30,6 +32,14 @@ public sealed class SvgDocumentExport
     /// <summary><c>&lt;style&gt;</c>-ready <c>@font-face</c> rules, or <c>""</c> when the
     /// document uses no embeddable fonts (e.g. only the viewer-supplied standard-14).</summary>
     public string FontFaceCss { get; }
+
+    /// <summary>
+    /// The captured layout tree, present only when
+    /// <see cref="SvgPageExportOptions.CaptureLayout"/> was set. Its pages and
+    /// rectangles are index-aligned with <see cref="Pages"/> and use the same
+    /// top-left, points coordinate space as the SVG.
+    /// </summary>
+    public Rendering.LayoutSnapshot Snapshot { get; }
 }
 
 /// <summary>
@@ -64,6 +74,12 @@ internal static class SvgPageExporter
             Conformance = settings.Conformance
         };
 
+        // Opt-in layout capture. Attached before rendering so the pipeline's
+        // OpenNode/CloseNode/PageBreak hooks populate it; left null otherwise so
+        // capture is a guarded no-op and output is unchanged.
+        LayoutRecorder recorder = options.CaptureLayout ? new LayoutRecorder() : null;
+        if (recorder != null) ctx.LayoutRecorder = recorder;
+
         string title = ResolveTitle(document, options.Title);
 
         var renderedPages = new List<PageRenderOutput>();
@@ -81,7 +97,15 @@ internal static class SvgPageExporter
             results.Add(Assemble(body, i + 1, pageOutput.Size, options, title));
         }
 
-        return new SvgDocumentExport(results, BuildFontFaceCss(ctx.SvgFontUsage));
+        LayoutSnapshot snapshot = null;
+        if (recorder != null)
+        {
+            // Page sizes align with the emitted SVG pages.
+            recorder.SetPages(renderedPages.Take(limit).Select(p => (p.Size.Width, p.Size.Height)));
+            snapshot = recorder.Snapshot();
+        }
+
+        return new SvgDocumentExport(results, BuildFontFaceCss(ctx.SvgFontUsage), snapshot);
     }
 
     /// <summary>

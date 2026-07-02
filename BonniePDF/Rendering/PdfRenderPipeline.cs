@@ -173,6 +173,17 @@ public static class PdfRenderPipeline
 
             int wrapAttempts = 0;
 
+            // Layout capture: open one node around the whole element; the overflow
+            // loop drives it to completion and ctx.NewPage() splits its rect per page.
+            ctx.LayoutRecorder?.OpenNode(
+                element,
+                LayoutRecorder.CaptureTypeOf(element),
+                LayoutRecorder.CaptureNameOf(element),
+                ctx.CurrentPageIndex,
+                ctx.CurrentX,
+                ctx.CurrentY,
+                contentWidth);
+
             // Wrap in SaveState/RestoreState to isolate graphics state.
             // try/finally ensures RestoreState is always called even if Render throws,
             // preventing graphics state corruption on subsequent elements.
@@ -189,6 +200,7 @@ public static class PdfRenderPipeline
                         if (wrapAttempts > MaxWrapAttempts)
                         {
                             // Element cannot fit even on a fresh page - skip it to avoid infinite loop
+                            ctx.LayoutRecorder?.CloseNode(element, ctx.CurrentPageIndex, ctx.CurrentY, complete: true);
                             statefulElement.ResetState();
                             return;
                         }
@@ -217,6 +229,7 @@ public static class PdfRenderPipeline
                 ctx.Canvas.RestoreState();
             }
 
+            ctx.LayoutRecorder?.CloseNode(element, ctx.CurrentPageIndex, ctx.CurrentY, complete: true);
             statefulElement.ResetState();
         }
         else
@@ -286,8 +299,15 @@ public static class PdfRenderPipeline
                 PageForeground = page.PageForeground
             };
 
+            // Layout capture: wrap each input page's body content in a Page node so
+            // the snapshot tree reads Document → Page → content. Overflow onto further
+            // physical pages splits the Page node's rect via ctx.NewPage().
+            ctx.LayoutRecorder?.OpenNode(page, "Page", null, currentOutputIndex, pageMargin, pageMargin, contentWidth);
+
             // Render Elements with overflow support
             RenderElementsWithOverflow(page.Elements, ctx, contentWidth);
+
+            ctx.LayoutRecorder?.CloseNode(page, ctx.CurrentPageIndex, ctx.CurrentY, complete: true);
 
             // Propagate dimensions to any overflow pages created
             for (int i = currentOutputIndex + 1; i <= ctx.CurrentPageIndex; i++)
@@ -310,6 +330,10 @@ public static class PdfRenderPipeline
         // pagination check fires when CurrentY is near MaxY during footer rendering.
         // If we evaluated ctx.Pages.Count on each iteration, new pages would be added
         // endlessly, causing an infinite loop.
+        // Page chrome (watermarks, headers/footers, slots) is not body content, so
+        // stop recording the layout tree before the finishing pass below.
+        if (ctx.LayoutRecorder != null) ctx.LayoutRecorder.Capturing = false;
+
         int totalPages = ctx.Pages.Count;
         for (int i = 0; i < totalPages; i++)
         {
