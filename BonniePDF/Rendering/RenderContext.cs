@@ -137,6 +137,13 @@ public class RenderContext
     public TaggingContext Tagging { get; set; }
 
     /// <summary>
+    /// Optional layout-snapshot recorder. Attached only when a caller opted into
+    /// <c>CaptureLayout</c> (currently the SVG exporter). When null, all capture
+    /// is a guarded no-op and output is byte-identical to the un-instrumented path.
+    /// </summary>
+    public LayoutRecorder LayoutRecorder { get; set; }
+
+    /// <summary>
     /// Gets whether the context is in SVG rendering mode.
     /// </summary>
     public bool IsSvgMode { get; }
@@ -326,6 +333,10 @@ public class RenderContext
     /// </summary>
     public void NewPage()
     {
+        // Layout capture: the Y where content stopped on the outgoing page, taken
+        // before the reset below so open nodes can close their rect at the boundary.
+        float outgoingBottomY = CurrentY;
+
         // this feature page-break-aware tagging: marked-content scopes (BDC/EMC)
         // cannot cross a page boundary per PDF spec, but structure
         // elements can. Snapshot any marked-content currently open,
@@ -350,6 +361,9 @@ public class RenderContext
         // with its page for /Pg + /ParentTree emission later.
         Tagging?.ResetPage(CurrentPageIndex);
         UpdateCanvas();
+
+        // Layout capture: split every open node's rect across the page boundary.
+        LayoutRecorder?.PageBreak(outgoingBottomY, CurrentPageIndex, CurrentY);
 
         if (reopenRoles != null)
         {

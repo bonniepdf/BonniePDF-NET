@@ -69,4 +69,13 @@ public sealed class SvgPageExportOptions
     /// preview/thumbnail pipelines that only need the first few pages.
     /// </summary>
     public int? MaxPages { get; init; }
+
+    /// <summary>
+    /// Capture a <see cref="BonniePDF.Rendering.LayoutSnapshot"/> of the rendered
+    /// element tree (types, parent relationships, and per-page rectangles) and
+    /// return it on the export result. Off by default and zero-cost when off: with
+    /// no recorder attached, the layout pass is byte-identical to normal output.
+    /// Used by the previewer's structure view to highlight where each element landed.
+    /// </summary>
+    public bool CaptureLayout { get; init; }
 }
