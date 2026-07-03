@@ -13,10 +13,8 @@ namespace BonniePDF.Tests;
 
 /// <summary>
 /// stage-0 closeout. Builds a representative tagged document
-/// (mirrors the public <c>SimpleDocumentTaggedExample</c> in the
-/// Examples project - inline here so the test project doesn't take a
-/// cross-project reference) and asserts the byte-level shape VeraPDF
-/// profile <c>ua1</c> verifies:
+/// inline (so the test project doesn't take a cross-project reference)
+/// and asserts the byte-level shape VeraPDF profile <c>ua1</c> verifies:
 ///
 /// - <c>/Catalog</c> references <c>/StructTreeRoot</c>, <c>/MarkInfo</c>
 ///   <c>/Marked true</c>, and <c>/Lang</c>.

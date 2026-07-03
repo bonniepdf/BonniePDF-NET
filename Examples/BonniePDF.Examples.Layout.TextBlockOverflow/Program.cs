@@ -19,12 +19,6 @@ internal sealed class Program
             doc.Save(Path.Combine(outputDir, "textblock_overflow_fluent.pdf"));
         }
 
-        Console.WriteLine("Generating TextBlock Overflow (Tagged / PDF/UA-1)...");
-        using (var doc = TextBlockOverflowTaggedExample.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "textblock_overflow_tagged.pdf"));
-        }
-
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

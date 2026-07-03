@@ -28,10 +28,10 @@ namespace BonniePDF.Examples.Basics.SimpleDocument;
 ///
 /// Verified against veraPDF profile <c>2a</c>.
 /// </summary>
-[System.ComponentModel.DisplayName("PDF/A-2a + PDF/UA-1")]
+[System.ComponentModel.DisplayName("PDF/A + PDF/UA")]
 [System.ComponentModel.Category("Basics")]
 [System.ComponentModel.Description("The modern archival + accessible baseline. Uses Conformance = PdfA2a alongside PdfUa1.")]
-public static class PdfA2aCompliantExample
+public static class PdfComplianceExample
 {
     public static Document Generate()
     {
