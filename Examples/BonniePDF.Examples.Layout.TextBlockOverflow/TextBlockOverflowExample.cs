@@ -7,54 +7,113 @@ using BonniePDF.Typography;
 namespace BonniePDF.Examples.Layout.TextBlockOverflow;
 
 /// <summary>
-/// Generates a document with a long TextBlock that flows across multiple pages.
+/// Automatic pagination for long-form text in an accessible, archival document
+/// (PDF/A-2a + PDF/UA-1). Three self-documenting sections describe what the
+/// reader is seeing; the body is long enough to flow across several pages.
+/// Headings stay semantic (H1, H2), paragraphs stay P, and the running
+/// "Page N of M" footer is an Artifact.
+///
+/// Acceptance: VeraPDF profile ua1 reports zero failures.
 /// </summary>
 [System.ComponentModel.DisplayName("TextBlock Overflow")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("TextBlock overflow flow architecture.")]
+[System.ComponentModel.Description("Long-form text flowing across multiple pages - self-documenting /H2 sections stay tagged, with an Artifact page-number footer.")]
 public static class TextBlockOverflowExample
 {
-    
+    private static readonly (string Title, string Intro)[] Sections =
+    {
+        ("Continuous Text Flow",
+            "The paragraphs in this section are ordinary TextBlock elements added one after another. When a page runs out of vertical space, BonniePDF breaks to a new page and continues the flow automatically - you never position text or insert page breaks by hand."),
+
+        ("Structure Survives the Page Break",
+            "Automatic pagination does not flatten the document. Each section heading stays a semantic H2 in the structure tree and every paragraph a P, so a screen reader can navigate heading-to-heading even though the text spans several pages."),
+
+        ("The Footer Is an Artifact",
+            "The \"Page N of M\" line at the foot of every page comes from a footer template. It is tagged as an Artifact, so assistive technology skips it; the total page count is resolved after layout, once the number of pages is known."),
+    };
+
     public static Document Generate()
     {
-        Document doc = new();
-        doc.Settings.Conformance = PdfAConformance.PdfA2a;
-        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
-        doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
-        doc.Settings.FooterTemplate = pageNumber => new TextBlock
+        Document doc = new()
         {
-            Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 10,
-            TextColor = ColorPalette.Slate[500],
-            Alignment = TextAlignment.Right
+            Metadata = new DocumentMetadata
+            {
+                Title    = "TextBlock Overflow Demo",
+                Author   = "BonniePDF",
+                Subject  = "Demonstrates long-form text flowing across page boundaries in an accessible PDF/A-2a + PDF/UA-1 document.",
+                Keywords = "pdf, accessibility, text, overflow, pagination, BonniePDF",
+            },
+            Settings = new DocumentSettings
+            {
+                Conformance   = PdfAConformance.PdfA2a,
+                Accessibility = AccessibilityMode.PdfUa1,
+                Language      = "en-GB",
+                DefaultTextStyle = new TextStyle()
+                    .WithFamily(StandardFonts.Helvetica)
+                    .WithSize(11)
+                    .WithColor(ColorPalette.Slate[700]),
+
+                // Page numbers in the footer are /Artifact - screen readers skip them.
+                FooterTemplate = pageNum => new TextBlock
+                {
+                    Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
+                    FontName  = StandardFonts.Helvetica,
+                    FontSize  = 9,
+                    TextColor = ColorPalette.Slate[400],
+                    Alignment = TextAlignment.Right,
+                },
+            },
         };
 
-        doc.Metadata.Title = "TextBlock Overflow Demo";
-        doc.Metadata.Author = "BonniePDF";
-        doc.Metadata.Subject = "Demonstrates text flowing across page boundaries";
-
-        // Add a title
-        doc.Add(new TextBlock
+        doc.Add(new Heading("Long-Form Text & Automatic Pagination")
         {
-            Text = "Long Text Document",
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
-            Margin = new Thickness(0, 0, 0, 20)
+            TocIdentifier = "intro",
+            Level         = 1,
+            FontName      = StandardFonts.HelveticaBold,
+            FontSize      = 24,
+            TextColor     = ColorPalette.Slate[800],
+            Margin        = new Thickness(0, 0, 0, 12),
         });
 
-        var source = Placeholders.WithSeed(500);
-        string longText = string.Join("\n\n", Enumerable.Range(1, 20).Select(i =>
-            $"Section {i}\n\n{source.Paragraph()}\n\n{source.Paragraph()}"));
-
-        // Uses DefaultTextStyle: Helvetica, 11, Slate700
         doc.Add(new TextBlock
         {
-            Text = longText
+            Text   = "This document shows how BonniePDF flows long-form text across page boundaries while keeping it fully tagged. The three sections below describe what to look for; the body text is intentionally long enough to span several pages.",
+            Margin = new Thickness(0, 0, 0, 16),
         });
+
+        var source = Placeholders.WithSeed(502);
+
+        for (int i = 0; i < Sections.Length; i++)
+        {
+            (string title, string intro) = Sections[i];
+
+            doc.Add(new Heading(title)
+            {
+                TocIdentifier = $"section-{i + 1}",
+                Level         = 2,
+                FontName      = StandardFonts.HelveticaBold,
+                FontSize      = 14,
+                TextColor     = ColorPalette.Indigo[600],
+                Margin        = new Thickness(0, 16, 0, 6),
+            });
+
+            doc.Add(new TextBlock
+            {
+                Text   = intro,
+                Margin = new Thickness(0, 0, 0, 8),
+            });
+
+            // Filler paragraphs to give the document enough length to paginate.
+            for (int p = 0; p < 3; p++)
+            {
+                doc.Add(new TextBlock
+                {
+                    Text   = source.Paragraph(),
+                    Margin = new Thickness(0, 0, 0, 8),
+                });
+            }
+        }
+
         return doc;
     }
 }
-

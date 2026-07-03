@@ -1,53 +1,61 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Basics.SimpleDocument;
 
 /// <summary>
-/// Demonstrates the new high-level Document API for creating PDFs
+/// The core high-level Document API - three pages of text, spacers, and a
+/// custom square page - authored as an accessible, archival PDF by default:
+/// <c>Conformance = PdfA2a</c> + <c>Accessibility = PdfUa1</c>. Headings use
+/// the semantic <see cref="Heading"/> element so they surface as
+/// <c>H1</c>..<c>H2</c> in the structure tree; body copy picks up implicit
+/// <c>P</c> tagging from <see cref="TextBlock"/>; the <see cref="QRCode"/>
+/// becomes a <c>Figure</c> with alt-text.
 /// </summary>
 [System.ComponentModel.DisplayName("Simple Document")]
 [System.ComponentModel.Category("Basics")]
-[System.ComponentModel.Description("A basic text-only PDF generation example.")]
+[System.ComponentModel.Description("A 3-page PDF/UA-1 tagged text document using the core Document API.")]
 public static class SimpleDocumentExample
 {
     public static Document Generate()
     {
-        // Headings use the standard-14 "Helvetica-Bold" name. With PDF/A enabled
-        // (below) BonniePDF auto-substitutes and embeds the bundled, metric-compatible
-        // Liberation Sans Bold face - so the output is identical on every platform with
-        // no system fonts or file paths involved. (See Typography.CustomFonts for
-        // embedding your own TTF.)
+        // Headings use the standard-14 "Helvetica-Bold" name. Under PDF/A
+        // (and PDF/UA-1) BonniePDF auto-substitutes and embeds the bundled,
+        // metric-compatible Liberation Sans Bold face - so the output is
+        // identical on every platform with no system fonts or file paths
+        // involved. (See Typography.CustomFonts for embedding your own TTF.)
         string heading = StandardFonts.HelveticaBold;
 
-        // Create a document with metadata and settings
         Document doc = new();
 
         doc.Metadata = new DocumentMetadata
         {
             Title = "Simple Document Example",
             Author = "BonniePDF",
-            Subject = "Demonstrating the new Document API",
-            Keywords = "pdf, document, example, BonniePDF"
+            Subject = "Demonstrating the Document API",
+            Keywords = "pdf, document, example, accessibility, BonniePDF"
         };
 
         doc.Settings = new DocumentSettings
         {
+            Conformance = PdfAConformance.PdfA2a,
+            Accessibility = AccessibilityMode.PdfUa1,
+            Language = "en-GB",
             DefaultZoom = ZoomLevel.FitPage,
             PageMode = PageMode.UseNone,
-            DisplayDocTitle = false,
-            Version = PdfVersion.Pdf17,
-            PdfAEnabled = true,
+            DisplayDocTitle = true,
             DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600])
         };
 
-        // Add content to the first page
-        doc.Add(new TextBlock
+        // ── Page 1 ──
+        doc.Add(new Heading("Hello, Document API!")
         {
-            Text = "Hello, Document API!",
+            TocIdentifier = "intro",
+            Level = 1,
             FontName = heading,
             FontSize = 24,
             TextColor = ColorPalette.Slate[800],
@@ -57,17 +65,18 @@ public static class SimpleDocumentExample
         // Body text uses DefaultTextStyle (family=Helvetica, size=12, color=Slate600)
         doc.Add(new TextBlock
         {
-            Text = "This PDF was created using the new high-level Document API."
+            Text = "This PDF was created using the high-level Document API."
         });
 
         doc.Add(new Spacer(16));
 
-        doc.Add(new TextBlock
+        doc.Add(new Heading("Key Features")
         {
-            Text = "Key Features:",
+            TocIdentifier = "features",
+            Level = 2,
             FontName = heading,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            TextColor = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -80,31 +89,61 @@ public static class SimpleDocumentExample
 
         doc.Add(features);
 
-        // Add a second page
-        doc.AddPage();
+        // ── Divider, then the accessibility note ──
+        doc.Add(new Spacer(16));
+        doc.Add(new Line { Thickness = 1, Color = ColorPalette.Slate[300] });
+        doc.Add(new Spacer(16));
 
         doc.Add(new TextBlock
         {
-            Text = "Page 2",
+            Text = "Existing elements (Heading, TextBlock, Image, QRCode) tag themselves automatically - no semantic verbs required."
+        });
+
+        doc.Add(new Spacer(16));
+
+        doc.Add(new Heading("Scan to verify")
+        {
+            TocIdentifier = "verify",
+            Level = 2,
+            FontName = heading,
+            FontSize = 14,
+            TextColor = ColorPalette.Slate[700],
+            Margin = new Thickness(0, 0, 0, 6)
+        });
+
+        doc.Add(new QRCode
+        {
+            Data = "https://bonniepdf.dev",
+            Size = 100,
+            AltText = "QR code linking to https://bonniepdf.dev"
+        });
+
+        // ── Page 2 ──
+        doc.AddPage();
+
+        doc.Add(new Heading("Page 2")
+        {
+            TocIdentifier = "page2",
+            Level = 1,
             FontName = heading,
             FontSize = 20,
             TextColor = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
-        // Body text inherits DefaultTextStyle
         doc.Add(new TextBlock
         {
             Text = "This demonstrates multipage support with automatic page management."
         });
 
-        // Add a custom size page (Square)
+        // ── Page 3 - custom square ──
         PdfSize customSize = new PdfSize(300, 300, "Square Card");
 
         doc.AddPage(customSize);
-        doc.Add(new TextBlock
+        doc.Add(new Heading($"Page 3: {customSize.Name}")
         {
-            Text = $"Page 3: {customSize.Name}",
+            TocIdentifier = "square",
+            Level = 1,
             FontName = heading,
             FontSize = 16,
             TextColor = ColorPalette.Slate[800],
@@ -118,16 +157,6 @@ public static class SimpleDocumentExample
             Alignment = TextAlignment.Center
         });
 
-        // Save the document
-
-        //// Export all pages to SVG
-        //for (int i = 0; i < doc.Pages.Count; i++)
-        //{
-        //    string svgPagePath = outputPath.Replace(".pdf", $"_page{i + 1}.svg");
-        //    string svgPage = doc.Pages[i].ToSvg();
-        //    File.WriteAllText(svgPagePath, svgPage);
-        //}
         return doc;
     }
 }
-
