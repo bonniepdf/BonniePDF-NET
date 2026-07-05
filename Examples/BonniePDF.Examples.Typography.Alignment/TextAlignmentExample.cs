@@ -1,25 +1,23 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
 using BonniePDF.Typography;
 using Align = BonniePDF.Elements.Text.TextAlignment;
 
-namespace BonniePDF.Examples.Typography.TextAlignment;
+namespace BonniePDF.Examples.Typography.Alignment;
 
 /// <summary>
-/// PDF/UA-1 tagged text-alignment example.
+/// Left, centre, right, and justified text alignment. PDF/A-2a + PDF/UA-1: the
+/// heading is /H1, section titles /H2, and every aligned paragraph is a /P —
+/// alignment is purely presentational and does not change the structure-tree role.
 ///
-/// Demonstrates left, centre, right, and justified alignment. Section headers are /H2
-/// structure elements; each aligned paragraph is a /P. Alignment is purely presentational
-/// and does not affect the structure-tree type - all four paragraphs are /P.
-///
-/// Acceptance: VeraPDF profile ua1 reports zero failures.
+/// All text is set in standard-14 Times Roman. For a demonstration of why an
+/// embedded font makes right/centre/justified edges exact, see EmbeddedFontMetricsExample.
 /// </summary>
-[System.ComponentModel.DisplayName("Text Alignment (PDF/UA-1)")]
+[System.ComponentModel.DisplayName("Text Alignment")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("PDF/UA-1 tagged text showing left, centre, right, and justified alignment - each paragraph tagged as /P.")]
-public static class TextAlignmentTaggedExample
+[System.ComponentModel.Description("Left, centre, right, and justified text alignment including book-style paragraphs, tagged as /H2 headings and /P paragraphs. PDF/A-2a + PDF/UA-1.")]
+public static class TextAlignmentExample
 {
     private const string SampleText =
         "The quick brown fox jumps over the lazy dog. This sentence demonstrates how text " +
@@ -33,16 +31,16 @@ public static class TextAlignmentTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Text Alignment - Tagged (PDF/UA-1)",
+                Title    = "Text Alignment",
                 Author   = "BonniePDF",
-                Subject  = "Demonstrates all four text alignments in a PDF/UA-1 accessible document.",
-                Keywords = "pdf, pdf/ua, accessibility, text, alignment, justified",
+                Subject  = "Left, centre, right, and justified text alignment. PDF/A-2a + PDF/UA-1.",
+                Keywords = "pdf, pdf/ua, pdf/a, accessibility, text, alignment, justified",
             },
             Settings = new DocumentSettings
             {
                 PageSize      = PdfSize.A4,
                 Margin        = 60,
-                Version       = PdfVersion.Pdf17,
+                Conformance   = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language      = "en-GB",
                 DefaultTextStyle = new TextStyle()
@@ -64,36 +62,18 @@ public static class TextAlignmentTaggedExample
 
         doc.Add(new TextBlock
         {
-            Text   = "The four standard alignments are shown below. Each paragraph carries the same text and the same /P structure-tree role - alignment is a purely visual property.",
+            Text   = "The four standard alignments are shown below. Each paragraph carries the same text and the " +
+                     "same /P structure-tree role — alignment is a purely visual property.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 
-        // Left-aligned (default)
-        Section(doc, "Left Aligned (Default)", "s-left");
-        doc.Add(new TextBlock { Text = SampleText, Alignment = Align.Left,    Margin = new Thickness(0, 0, 0, 14) });
+        AlignedSample(doc, "Left Aligned (Default)", "s-left", Align.Left);
+        AlignedSample(doc, "Centre Aligned", "s-centre", Align.Center);
+        AlignedSample(doc, "Right Aligned", "s-right", Align.Right);
+        AlignedSample(doc, "Justified", "s-justify", Align.Justify);
 
-        // Centre
-        Section(doc, "Centre Aligned", "s-centre");
-        doc.Add(new TextBlock { Text = SampleText, Alignment = Align.Center,  Margin = new Thickness(0, 0, 0, 14) });
-
-        // Right
-        Section(doc, "Right Aligned", "s-right");
-        doc.Add(new TextBlock { Text = SampleText, Alignment = Align.Right,   Margin = new Thickness(0, 0, 0, 14) });
-
-        // Justified
-        Section(doc, "Justified", "s-justify");
-        doc.Add(new TextBlock { Text = SampleText, Alignment = Align.Justify, Margin = new Thickness(0, 0, 0, 14) });
-
-        // Book-style section
-        doc.Add(new Heading("Book-Style Justified Paragraphs")
-        {
-            TocIdentifier = "book",
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 13,
-            TextColor     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 6, 0, 6),
-        });
+        // ── Book-style justified paragraphs ────────────────────────────────────
+        Section(doc, "Book-Style Justified Paragraphs", "book");
 
         string[] paragraphs =
         {
@@ -137,5 +117,11 @@ public static class TextAlignmentTaggedExample
             TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 0, 0, 6),
         });
+    }
+
+    private static void AlignedSample(Document doc, string title, string tocId, Align alignment)
+    {
+        Section(doc, title, tocId);
+        doc.Add(new TextBlock { Text = SampleText, Alignment = alignment, Margin = new Thickness(0, 0, 0, 14) });
     }
 }

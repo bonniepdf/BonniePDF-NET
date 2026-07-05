@@ -13,20 +13,6 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "emoji_example.pdf"));
         }
-        Console.WriteLine("Generating Emojis & Unicode (Fluent API)...");
-        using (var doc = EmojiExampleFluent.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "emoji_example_fluent.pdf"));
-        }
-
-        Console.WriteLine("Generating Emojis & Unicode (Tagged / PDF/UA-1)...");
-        var taggedEmoji = EmojiTaggedExample.Generate();
-        if (taggedEmoji is not null)
-        {
-            using (taggedEmoji)
-                taggedEmoji.Save(Path.Combine(outputDir, "emoji_tagged.pdf"));
-        }
-
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

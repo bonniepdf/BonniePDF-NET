@@ -1,7 +1,7 @@
-using System.IO.Compression;
-using System.Text;
+using System.Collections.Generic;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Text;
@@ -10,457 +10,286 @@ using BonniePDF.Typography;
 namespace BonniePDF.Examples.Elements.Images;
 
 /// <summary>
-/// Demonstrates Image support (JPEG and PNG) in BonniePDF
+/// Raster images — fit modes, containers, alpha transparency, and accessible
+/// tagging. PDF/A-2a + PDF/UA-1: every informative image carries alt text so it
+/// becomes a Figure with /Alt, and the decorative divider is marked as an
+/// artifact so assistive technology skips it.
+///
+/// The PNGs are generated in-memory (a single stored zlib block keeps this
+/// dependency-free), so the example needs no external assets.
 /// </summary>
 [System.ComponentModel.DisplayName("Images")]
 [System.ComponentModel.Category("Elements")]
-[System.ComponentModel.Description("Embedding and sizing raster and SVG images.")]
+[System.ComponentModel.Description("Raster image embedding — fit modes, containers, alpha transparency, and accessible Figure/Artifact tagging. PDF/A-2a + PDF/UA-1.")]
 public static class ImagesExample
 {
     public static Document Generate()
     {
-        // Setup paths
-        string jpgPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "owl.jpg");
-        string pngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "test.png");
-        string alphaPngPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "alpha_test.png");
+        byte[] gradientPng = BuildRgbPng(100, (x, y) =>
+            ((byte)(x * 255 / 99), (byte)(y * 255 / 99), (byte)((x + y) * 255 / 198)));
 
-        // Create test PNGs if needed
-        if (!File.Exists(pngPath)) CreateTestPng(pngPath);
-        if (!File.Exists(alphaPngPath)) CreateAlphaTestPng(alphaPngPath);
-
-        Document doc = new();
-        doc.Settings.Version = PdfVersion.Pdf17;
-        doc.Settings.Conformance = PdfAConformance.PdfA2b;
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(new Color(128, 128, 128));
-        doc.Metadata.Title = "Image Support Demo";
-        doc.Metadata.Author = "BonniePDF";
-
-        // --- Page 1: JPEG Support ---
-        doc.Add(new TextBlock
+        byte[] alphaPng = BuildRgbaPng(100, (x, y) =>
         {
-            Text = "JPEG Image Support",
-            FontSize = 24,
-            FontName = StandardFonts.HelveticaBold,
-            TextColor = new Color(51, 102, 204)
+            float dx = x - 50;
+            float dy = y - 50;
+            float t = System.Math.Min(1f, (float)System.Math.Sqrt(dx * dx + dy * dy) / 50f);
+            return ((byte)(t * 255), (byte)((1 - t) * 100), (byte)((1 - t) * 255), (byte)((1 - t) * 255));
+        });
+
+        byte[] dividerPng = BuildRgbPng(48, (x, y) => ((byte)220, (byte)224, (byte)230));
+
+        Document doc = new()
+        {
+            Metadata = new DocumentMetadata
+            {
+                Title    = "Images",
+                Author   = "BonniePDF",
+                Subject  = "Raster image embedding — fit modes, containers, alpha transparency, and accessible Figure/Artifact tagging. PDF/A-2a + PDF/UA-1.",
+                Keywords = "pdf, pdf/ua, pdf/a, accessibility, image, png, figure, alt-text, transparency, fit-mode",
+            },
+            Settings = new DocumentSettings
+            {
+                Conformance   = PdfAConformance.PdfA2a,
+                Accessibility = AccessibilityMode.PdfUa1,
+                Language      = "en-GB",
+                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]),
+            },
+        };
+
+        // ── Title ──────────────────────────────────────────────────────────────
+
+        doc.Add(new Heading("Images")
+        {
+            TocIdentifier = "intro",
+            Level         = 1,
+            FontName      = StandardFonts.HelveticaBold,
+            FontSize      = 24,
+            TextColor     = ColorPalette.Slate[800],
+            Margin        = new Thickness(0, 0, 0, 8),
         });
 
         doc.Add(new TextBlock
         {
-            Text = "This section demonstrates JPEG image embedding capabilities."
+            Text   = "BonniePDF embeds PNG images as PDF image XObjects. Under PDF/UA-1 every image must be either a " +
+                     "Figure carrying alternative text (informative) or an Artifact (decorative). Each informative image " +
+                     "below carries alt text; the divider at the end is marked decorative.",
+            Margin = new Thickness(0, 0, 0, 12),
         });
 
-        if (File.Exists(jpgPath))
-        {
-            // Example 1: Contain mode (default)
-            doc.Add(new TextBlock
+        // ── Fit modes ────────────────────────────────────────────────────────────
+
+        Section(doc, "Fit Modes", "s-fit");
+        FitModeSample(doc, gradientPng, ImageFitMode.Contain, "Contain", "scaled to fit within the box, preserving aspect ratio");
+        FitModeSample(doc, gradientPng, ImageFitMode.Cover, "Cover", "scaled to fill the box, preserving aspect ratio (may crop)");
+        FitModeSample(doc, gradientPng, ImageFitMode.Fill, "Fill", "stretched to fill the box, ignoring aspect ratio");
+
+        // ── Alpha transparency ───────────────────────────────────────────────────
+
+        Section(doc, "Alpha Transparency", "s-alpha");
+
+        KeepTogether(doc,
+            Caption("PNG images can carry an alpha channel (a PDF soft mask), letting the background show through."),
+            new Image
             {
-                Text = "\n1. Contain Mode (Default)",
-                FontSize = 16,
-                FontName = StandardFonts.HelveticaBold,
-                TextColor = new Color(51, 102, 204)
+                ImageData = alphaPng,
+                Width     = 200,
+                FitMode   = ImageFitMode.Contain,
+                AltText   = "A circular blue-to-red gradient fading to transparent at the edges, on the page background.",
+                Margin    = new Thickness(0, 0, 0, 10),
             });
 
-            doc.Add(new TextBlock
+        KeepTogether(doc,
+            Caption("The same image inside a tinted container — the alpha reveals the container colour."),
+            new Container
             {
-                Text = "Image scaled to fit within 300x200 bounds while maintaining aspect ratio.",
-                FontSize = 10
-            });
-
-            doc.Add(new Image
-            {
-                FilePath = jpgPath,
-                Width = 300,
-                Height = 200,
-                FitMode = ImageFitMode.Contain
-            });
-
-            // Example 2: Cover mode
-            doc.Add(new TextBlock
-            {
-                Text = "\n2. Cover Mode",
-                FontSize = 16,
-                FontName = StandardFonts.HelveticaBold,
-                TextColor = new Color(51, 102, 204)
-            });
-
-            doc.Add(new TextBlock
-            {
-                Text = "Image scaled to fill 300x200 bounds, maintaining aspect ratio (may crop).",
-                FontSize = 10
-            });
-
-            doc.Add(new Image
-            {
-                FilePath = jpgPath,
-                Width = 300,
-                Height = 200,
-                FitMode = ImageFitMode.Cover
-            });
-
-            // Example 3: Fill mode
-            doc.Add(new TextBlock
-            {
-                Text = "\n3. Fill Mode",
-                FontSize = 16,
-                FontName = StandardFonts.HelveticaBold,
-                TextColor = new Color(51, 102, 204)
-            });
-
-            doc.Add(new TextBlock
-            {
-                Text = "Image stretched to fill 300x200 bounds, ignoring aspect ratio.",
-                FontSize = 10
-            });
-
-            doc.Add(new Image
-            {
-                FilePath = jpgPath,
-                Width = 300,
-                Height = 200,
-                FitMode = ImageFitMode.Fill
-            });
-
-            // Example 4: Image in container with border
-            // Moved to next page if running out of space, but let's see.
-            // Just add it here.
-            doc.Add(new TextBlock
-            {
-                Text = "\n4. Image in Container",
-                FontSize = 16,
-                FontName = StandardFonts.HelveticaBold,
-                TextColor = new Color(51, 102, 204)
-            });
-
-            doc.Add(new Container
-            {
-                Padding = new Thickness(15),
-                Border = new Border(2),
-                BorderColors = new BorderColors(new Color(77, 77, 77)),
+                BackgroundColor = ColorPalette.Emerald[100],
+                Padding         = new Thickness(10),
                 Child = new Image
                 {
-                    FilePath = jpgPath,
-                    Width = 250,
-                    FitMode = ImageFitMode.Contain
-                }
+                    ImageData = alphaPng,
+                    Width     = 200,
+                    FitMode   = ImageFitMode.Contain,
+                    AltText   = "The circular gradient over a green container, whose colour shows through the transparent edges.",
+                },
             });
-        }
-        else
-        {
-            doc.Add(new TextBlock { Text = "JPEG image (owl.jpg) not found in img folder.", TextColor = Color.Red });
-        }
 
-        // --- Page 2: PNG Support ---
-        doc.AddPage();
+        // ── Image in a bordered container ────────────────────────────────────────
 
-        doc.Add(new TextBlock
-        {
-            Text = "PNG Image Support",
-            FontSize = 24,
-            FontName = StandardFonts.HelveticaBold,
-            TextColor = new Color(51, 153, 102)
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = "This section demonstrates PNG image embedding with transparency support."
-        });
-
-        // Example 1: Basic PNG
-        doc.Add(new TextBlock
-        {
-            Text = "\n1. Basic PNG Image",
-            FontSize = 16,
-            FontName = StandardFonts.HelveticaBold,
-            TextColor = new Color(51, 153, 102)
-        });
-
-        doc.Add(new Image
-        {
-            FilePath = pngPath,
-            Width = 200,
-            FitMode = ImageFitMode.Contain
-        });
-
-        // Example 2: PNG in container
-        doc.Add(new TextBlock
-        {
-            Text = "\n2. PNG in Container with Border",
-            FontSize = 16,
-            FontName = StandardFonts.HelveticaBold,
-            TextColor = new Color(51, 153, 102)
-        });
-
-        doc.Add(new Container
-        {
-            Padding = new Thickness(15),
-            Border = new Border(2),
-            BorderColors = new BorderColors(new Color(77, 77, 77)),
-            BackgroundColor = new Color(242, 242, 242),
-            Child = new Image
+        Section(doc, "Image in a Bordered Container", "s-container");
+        KeepTogether(doc,
+            Caption("A bordered, padded container wraps the image."),
+            new Container
             {
-                FilePath = pngPath,
-                Width = 150,
-                FitMode = ImageFitMode.Contain
-            }
-        });
+                Padding      = new Thickness(15),
+                Border       = new Border(2),
+                BorderColors = new BorderColors(ColorPalette.Slate[600]),
+                Child = new Image
+                {
+                    ImageData = gradientPng,
+                    Width     = 250,
+                    FitMode   = ImageFitMode.Contain,
+                    AltText   = "Colour gradient inside a bordered container.",
+                },
+            });
 
-        // Example 3: PNG with Alpha Transparency
-        doc.Add(new TextBlock
-        {
-            Text = "\n3. PNG with Alpha Transparency",
-            FontSize = 16,
-            FontName = StandardFonts.HelveticaBold,
-            TextColor = new Color(51, 153, 102)
-        });
+        // ── Decorative image ──────────────────────────────────────────────────────
 
-        doc.Add(new TextBlock
-        {
-            Text = "PNG images can have alpha transparency (soft mask in PDF).",
-            FontSize = 10
-        });
-
-        doc.Add(new Container
-        {
-            Padding = new Thickness(10),
-            BackgroundColor = new Color(204, 230, 217), // Light green background
-            Child = new Image
+        Section(doc, "Decorative Images", "s-decorative");
+        KeepTogether(doc,
+            Caption("The light grey bar below is decorative; it is tagged as an artifact and carries no alt text."),
+            new Image
             {
-                FilePath = alphaPngPath,
-                Width = 200,
-                FitMode = ImageFitMode.Contain
-            }
-        });
+                ImageData    = dividerPng,
+                Width        = 360,
+                Height       = 12,
+                FitMode      = ImageFitMode.Fill,
+                IsDecorative = true,
+            });
+
         return doc;
     }
 
     /// <summary>
-    /// Creates a simple test PNG (RGB, no alpha)
+    /// Adds a caption + content pair wrapped in a Container so they page-break as
+    /// one unit. A bare Image (or TextBlock) added directly to the document has no
+    /// pagination of its own and would be clipped at the page edge; a Container
+    /// measures its full height first and moves to the next page when it does not
+    /// fit (keeping the caption with its image).
     /// </summary>
-    private static void CreateTestPng(string path)
+    private static void KeepTogether(Document doc, params IElement[] elements)
     {
-        // Create a simple 100x100 gradient PNG
-        int width = 100;
-        int height = 100;
+        var stack = new VerticalStack();
+        foreach (IElement el in elements) stack.AddChild(el);
+        doc.Add(new Container { Child = stack });
+    }
 
-        using MemoryStream ms = new();
-        using BinaryWriter writer = new(ms);
+    private static void Section(Document doc, string title, string tocId)
+    {
+        doc.Add(new Heading(title)
+        {
+            TocIdentifier = tocId,
+            Level         = 2,
+            FontName      = StandardFonts.HelveticaBold,
+            FontSize      = 15,
+            TextColor     = ColorPalette.Indigo[600],
+            Margin        = new Thickness(0, 14, 0, 6),
+        });
+    }
 
-        // PNG signature
-        writer.Write(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
+    private static TextBlock Caption(string text) => new()
+    {
+        Text      = text,
+        FontSize  = 10,
+        TextColor = ColorPalette.Slate[500],
+        Margin    = new Thickness(0, 0, 0, 6),
+    };
 
-        // IHDR chunk
-        WriteChunk(writer, "IHDR", BitConverter.IsLittleEndian
-            ? new byte[]
+    private static void FitModeSample(Document doc, byte[] png, ImageFitMode fitMode, string label, string description)
+    {
+        KeepTogether(doc,
+            Caption($"{label}: {description}."),
+            new Image
             {
-                0, 0, 0, (byte)width, // width (big endian)
-                0, 0, 0, (byte)height, // height (big endian)
-                8, // bit depth
-                2, // color type (RGB)
-                0, // compression
-                0, // filter method
-                0 // interlace
-            }
-            : new byte[]
-            {
-                (byte)(width >> 24), (byte)(width >> 16), (byte)(width >> 8), (byte)width,
-                (byte)(height >> 24), (byte)(height >> 16), (byte)(height >> 8), (byte)height,
-                8, 2, 0, 0, 0
+                ImageData = png,
+                Width     = 300,
+                Height    = 150,
+                FitMode   = fitMode,
+                AltText   = $"Colour gradient shown in {label.ToLowerInvariant()} fit mode.",
+                Margin    = new Thickness(0, 0, 0, 10),
             });
+    }
 
-        // Create pixel data with filter bytes
-        MemoryStream rawData = new();
-        for (int y = 0; y < height; y++)
+    // ── In-memory PNG builder (single stored zlib block; no external deps) ──────
+
+    private static byte[] BuildRgbPng(int size, System.Func<int, int, (byte R, byte G, byte B)> pixel) =>
+        BuildPng(size, false, (x, y) =>
         {
-            rawData.WriteByte(0); // Filter type: None
-            for (int x = 0; x < width; x++)
+            (byte r, byte g, byte b) = pixel(x, y);
+            return (r, g, b, 255);
+        });
+
+    private static byte[] BuildRgbaPng(int size, System.Func<int, int, (byte R, byte G, byte B, byte A)> pixel) =>
+        BuildPng(size, true, pixel);
+
+    private static byte[] BuildPng(int size, bool rgba, System.Func<int, int, (byte R, byte G, byte B, byte A)> pixel)
+    {
+        int bpp = rgba ? 4 : 3;
+        int stride = 1 + size * bpp;
+        byte[] raw = new byte[stride * size];
+        for (int y = 0; y < size; y++)
+        {
+            raw[y * stride] = 0; // filter = None
+            for (int x = 0; x < size; x++)
             {
-                // Create a gradient pattern
-                byte r = (byte)(x * 255 / width);
-                byte g = (byte)(y * 255 / height);
-                byte b = (byte)((x + y) * 255 / (width + height));
-                rawData.WriteByte(r);
-                rawData.WriteByte(g);
-                rawData.WriteByte(b);
+                (byte r, byte g, byte b, byte a) = pixel(x, y);
+                int off = y * stride + 1 + x * bpp;
+                raw[off] = r;
+                raw[off + 1] = g;
+                raw[off + 2] = b;
+                if (rgba) raw[off + 3] = a;
             }
         }
 
-        // Compress pixel data
-        byte[] compressedData = CompressZlib(rawData.ToArray());
-
-        // IDAT chunk
-        WriteChunk(writer, "IDAT", compressedData);
-
-        // IEND chunk
-        WriteChunk(writer, "IEND", Array.Empty<byte>());
-
-        var dir = Path.GetDirectoryName(path);
-        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-            Directory.CreateDirectory(dir);
-
-        File.WriteAllBytes(path, ms.ToArray());
-    }
-
-    /// <summary>
-    /// Creates a PNG with alpha transparency (RGBA)
-    /// </summary>
-    private static void CreateAlphaTestPng(string path)
-    {
-        // Create a 100x100 PNG with a circular gradient and alpha
-        int width = 100;
-        int height = 100;
-
-        using MemoryStream ms = new();
-        using BinaryWriter writer = new(ms);
-
-        // PNG signature
-        writer.Write(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
-
-        // IHDR chunk - note we need big-endian width/height
-        byte[] ihdrData = new byte[13];
-        ihdrData[0] = 0;
-        ihdrData[1] = 0;
-        ihdrData[2] = 0;
-        ihdrData[3] = (byte)width; // width
-        ihdrData[4] = 0;
-        ihdrData[5] = 0;
-        ihdrData[6] = 0;
-        ihdrData[7] = (byte)height; // height
-        ihdrData[8] = 8; // bit depth
-        ihdrData[9] = 6; // color type (RGBA)
-        ihdrData[10] = 0; // compression
-        ihdrData[11] = 0; // filter method
-        ihdrData[12] = 0; // interlace
-
-        WriteChunk(writer, "IHDR", ihdrData);
-
-        // Create RGBA pixel data
-        MemoryStream rawData = new();
-        float centerX = width / 2f;
-        float centerY = height / 2f;
-        float maxRadius = Math.Min(width, height) / 2f;
-
-        for (int y = 0; y < height; y++)
+        int nlen = (raw.Length ^ 0xFFFF) & 0xFFFF;
+        var idat = new List<byte>
         {
-            rawData.WriteByte(0); // Filter type: None
-            for (int x = 0; x < width; x++)
-            {
-                float dx = x - centerX;
-                float dy = y - centerY;
-                float distance = (float)Math.Sqrt(dx * dx + dy * dy);
+            0x78, 0x01, // zlib header
+            0x01,       // BFINAL=1, BTYPE=00 (stored)
+            (byte)(raw.Length & 0xFF), (byte)((raw.Length >> 8) & 0xFF),
+            (byte)(nlen & 0xFF), (byte)((nlen >> 8) & 0xFF),
+        };
+        idat.AddRange(raw);
+        idat.AddRange(U32Be(Adler32(raw)));
 
-                // Radial gradient from blue (center) to red (edge)
-                float t = Math.Min(1f, distance / maxRadius);
+        var ihdr = new List<byte>();
+        ihdr.AddRange(U32Be((uint)size));
+        ihdr.AddRange(U32Be((uint)size));
+        ihdr.AddRange(new byte[] { 8, (byte)(rgba ? 6 : 2), 0, 0, 0 });
 
-                byte r = (byte)(t * 255);
-                byte g = (byte)((1 - t) * 100);
-                byte b = (byte)((1 - t) * 255);
-
-                // Alpha: full opacity in center, fading to transparent at edge
-                byte a = (byte)((1 - t) * 255);
-
-                rawData.WriteByte(r);
-                rawData.WriteByte(g);
-                rawData.WriteByte(b);
-                rawData.WriteByte(a);
-            }
-        }
-
-        // Compress pixel data
-        byte[] compressedData = CompressZlib(rawData.ToArray());
-
-        // IDAT chunk
-        WriteChunk(writer, "IDAT", compressedData);
-
-        // IEND chunk
-        WriteChunk(writer, "IEND", Array.Empty<byte>());
-
-        var dir = Path.GetDirectoryName(path);
-        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-            Directory.CreateDirectory(dir);
-
-        File.WriteAllBytes(path, ms.ToArray());
+        var png = new List<byte> { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+        png.AddRange(PngChunk("IHDR", ihdr));
+        png.AddRange(PngChunk("IDAT", idat));
+        png.AddRange(PngChunk("IEND", new List<byte>()));
+        return png.ToArray();
     }
 
-    private static void WriteChunk(BinaryWriter writer, string type, byte[] data)
+    private static List<byte> PngChunk(string type, List<byte> data)
     {
-        // Length (big-endian)
-        int len = data.Length;
-        writer.Write((byte)(len >> 24));
-        writer.Write((byte)(len >> 16));
-        writer.Write((byte)(len >> 8));
-        writer.Write((byte)len);
-
-        // Type
-        byte[] typeBytes = Encoding.ASCII.GetBytes(type);
-        writer.Write(typeBytes);
-
-        // Data
-        if (data.Length > 0)
-            writer.Write(data);
-
-        // CRC (of type + data)
-        byte[] crcInput = new byte[4 + data.Length];
-        Array.Copy(typeBytes, 0, crcInput, 0, 4);
-        Array.Copy(data, 0, crcInput, 4, data.Length);
-        uint crc = Crc32(crcInput);
-
-        writer.Write((byte)(crc >> 24));
-        writer.Write((byte)(crc >> 16));
-        writer.Write((byte)(crc >> 8));
-        writer.Write((byte)crc);
+        var typeBytes = new byte[] { (byte)type[0], (byte)type[1], (byte)type[2], (byte)type[3] };
+        var forCrc = new List<byte>(typeBytes);
+        forCrc.AddRange(data);
+        var chunk = new List<byte>();
+        chunk.AddRange(U32Be((uint)data.Count));
+        chunk.AddRange(typeBytes);
+        chunk.AddRange(data);
+        chunk.AddRange(U32Be(Crc32(forCrc.ToArray())));
+        return chunk;
     }
 
-    private static byte[] CompressZlib(byte[] data)
-    {
-        using MemoryStream output = new();
-
-        // Zlib header
-        output.WriteByte(0x78);
-        output.WriteByte(0x9C);
-
-        // Deflate compressed data
-        using (DeflateStream deflate = new(output, CompressionLevel.Optimal, true))
-        {
-            deflate.Write(data, 0, data.Length);
-        }
-
-        // Adler-32 checksum
-        uint adler = Adler32(data);
-        output.WriteByte((byte)(adler >> 24));
-        output.WriteByte((byte)(adler >> 16));
-        output.WriteByte((byte)(adler >> 8));
-        output.WriteByte((byte)adler);
-
-        return output.ToArray();
-    }
+    private static byte[] U32Be(uint n) =>
+        new[] { (byte)((n >> 24) & 0xFF), (byte)((n >> 16) & 0xFF), (byte)((n >> 8) & 0xFF), (byte)(n & 0xFF) };
 
     private static uint Adler32(byte[] data)
     {
-        const uint MOD = 65521;
+        const uint mod = 65521;
         uint a = 1, b = 0;
         foreach (byte d in data)
         {
-            a = (a + d) % MOD;
-            b = (b + a) % MOD;
+            a = (a + d) % mod;
+            b = (b + a) % mod;
         }
-
         return (b << 16) | a;
     }
 
     private static uint Crc32(byte[] data)
     {
         uint crc = 0xFFFFFFFF;
-        foreach (byte b in data)
+        foreach (byte v in data)
         {
-            crc ^= b;
+            crc ^= v;
             for (int i = 0; i < 8; i++)
-                if ((crc & 1) != 0)
-                    crc = (crc >> 1) ^ 0xEDB88320;
-                else
-                    crc >>= 1;
+                crc = (crc & 1) != 0 ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
         }
-
         return crc ^ 0xFFFFFFFF;
     }
 }
-

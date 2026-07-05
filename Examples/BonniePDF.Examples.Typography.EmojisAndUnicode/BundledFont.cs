@@ -17,5 +17,7 @@ internal static class BundledFont
         Path.Combine(AppContext.BaseDirectory, "fonts", file);
 
     public static string SansPath { get; } = Resolve("NotoSans-Regular.ttf");
+    public static string MathPath { get; } = Resolve("NotoSansMath-Regular.ttf");
+    public static string SymbolsPath { get; } = Resolve("NotoSansSymbols2-Regular.ttf");
     public static string EmojiPath { get; } = Resolve("NotoEmoji-Regular.ttf");
 }

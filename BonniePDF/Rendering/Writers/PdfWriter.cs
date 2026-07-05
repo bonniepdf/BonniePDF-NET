@@ -403,6 +403,10 @@ public class PdfWriter : IPdfWriter, IDisposable
         if (options?.DestsId > 0)
             dict["/Dests"] = $"{options.DestsId} 0 R";
 
+        // Add PageLabels if configured
+        if (options?.PageLabelsId > 0)
+            dict["/PageLabels"] = $"{options.PageLabelsId} 0 R";
+
         WriteObject(id, dict);
     }
 

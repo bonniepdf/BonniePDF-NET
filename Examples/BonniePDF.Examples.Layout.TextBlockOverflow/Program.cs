@@ -13,12 +13,6 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "textblock_overflow.pdf"));
         }
-        Console.WriteLine("Generating TextBlock Overflow (Fluent API)...");
-        using (var doc = TextBlockOverflowExampleFluent.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "textblock_overflow_fluent.pdf"));
-        }
-
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

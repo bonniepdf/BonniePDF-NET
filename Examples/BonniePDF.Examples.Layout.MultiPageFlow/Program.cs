@@ -8,21 +8,10 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating Multi-Page Flow...");
-        using (var doc = MultiPageFlowExample.Generate())
+        Console.WriteLine("Generating Tables...");
+        using (var doc = TablesExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "flow_demo.pdf"));
-        }
-        Console.WriteLine("Generating Multi-Page Flow (Fluent API)...");
-        using (var doc = MultiPageFlowExampleFluent.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "flow_demo_fluent.pdf"));
-        }
-
-        Console.WriteLine("Generating Multi-Page Flow (Tagged / PDF/UA-1)...");
-        using (var doc = MultiPageFlowTaggedExample.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "flow_demo_tagged.pdf"));
+            doc.Save(Path.Combine(outputDir, "tables.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

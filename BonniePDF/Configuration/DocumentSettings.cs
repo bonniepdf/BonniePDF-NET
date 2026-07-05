@@ -275,6 +275,33 @@ public class DocumentSettings
     public bool IsEncrypted => Encryption != null;
 
     /// <summary>
+    /// Page labelling configuration written as <c>/PageLabels</c> in the
+    /// document catalog (PDF §12.4.2). Controls the number shown in the
+    /// viewer's page counter and "go to page" dialog — not the printed text
+    /// on the page itself.
+    /// <para>
+    /// Use when the document represents a subset of a larger work and the
+    /// viewer counter should reflect the logical page numbering rather than
+    /// the physical 1-based sheet count.
+    /// </para>
+    /// <example>
+    /// <code>
+    /// Settings = new DocumentSettings
+    /// {
+    ///     PageLabel = new PageLabel { StartAt = 42 }
+    /// }
+    /// // → viewer shows "42" on page 1, "43" on page 2, etc.
+    /// </code>
+    /// </example>
+    /// <para>
+    /// Note: the footer template still receives the physical page number.
+    /// Offset it manually if you want the printed number to match:
+    /// <c>FooterTemplate = n => new TextBlock { Text = (n + 41).ToString() }</c>
+    /// </para>
+    /// </summary>
+    public PageLabel? PageLabel { get; set; }
+
+    /// <summary>
     /// Gets the actual page size with orientation applied
     /// </summary>
     public PdfSize GetOrientedPageSize()

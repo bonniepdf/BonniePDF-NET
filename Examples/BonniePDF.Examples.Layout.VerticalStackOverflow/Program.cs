@@ -13,18 +13,6 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "verticalstack_overflow.pdf"));
         }
-        Console.WriteLine("Generating VerticalStack Overflow (Fluent API)...");
-        using (var doc = VerticalStackOverflowExampleFluent.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "verticalstack_overflow_fluent.pdf"));
-        }
-
-        Console.WriteLine("Generating VerticalStack Overflow (Tagged / PDF/UA-1)...");
-        using (var doc = VerticalStackOverflowTaggedExample.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "verticalstack_overflow_tagged.pdf"));
-        }
-
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

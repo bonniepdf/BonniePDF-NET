@@ -1,149 +1,164 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
+using BonniePDF.Extensions;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Typography.CustomFonts;
 
 /// <summary>
-/// Demonstrates TrueType font embedding with full Unicode support
+/// TrueType font embedding with Unicode coverage.
+/// Symbols, currency, arrows, maths, dingbats, and Greek across three Noto fonts.
+/// PDF/A-2a + PDF/UA-1.
 /// </summary>
 [System.ComponentModel.DisplayName("Custom Fonts")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("Embedding and using custom TTF fonts.")]
+[System.ComponentModel.Description("TrueType font embedding with Unicode coverage — symbols, currency, arrows, maths, dingbats, and Greek. PDF/A-2a + PDF/UA-1.")]
 public static class CustomFontExample
 {
     public static Document Generate()
     {
-        // Embed the bundled Noto fonts (see BundledFont): NotoSans for text, with
-        // arrows/maths routed through NotoSansMath and dingbats through NotoSansSymbols2.
-        string fontPath = BundledFont.SansPath;
+        string font = BundledFont.SansPath;
 
-        Document doc = new();
-
-        doc.Settings.Conformance = PdfAConformance.PdfA2a;
-        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
-        doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(fontPath).WithSize(11).WithColor(ColorPalette.Slate[600]);
-
-        // Set metadata
-        doc.Metadata.Title = "Embedded Font Example";
-        doc.Metadata.Author = "BonniePDF";
-
-        // Title using embedded font
-        doc.Add(new TextBlock
+        Document doc = new()
         {
-            Text = "TrueType Font Embedding Demo",
-            FontName = fontPath,
-            FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
-            Margin = new Thickness(0, 0, 0, 12)
+            Metadata = new DocumentMetadata
+            {
+                Title    = "Custom Fonts",
+                Author   = "BonniePDF",
+                Subject  = "TrueType font embedding with Unicode coverage. PDF/A-2a + PDF/UA-1.",
+                Keywords = "pdf, pdf/ua, pdf/a, accessibility, fonts, unicode, truetype",
+            },
+            Settings = new DocumentSettings
+            {
+                Conformance   = PdfAConformance.PdfA2a,
+                Accessibility = AccessibilityMode.PdfUa1,
+                Language      = "en-GB",
+                DefaultTextStyle = new TextStyle()
+                    .WithFamily(font)
+                    .WithSize(11)
+                    .WithColor(ColorPalette.Slate[600]),
+            },
+        };
+
+        // ── Title ──────────────────────────────────────────────────────────────
+
+        doc.Add(new Heading("Custom Fonts — TrueType Embedding")
+        {
+            TocIdentifier = "intro",
+            Level         = 1,
+            FontName      = font,
+            FontSize      = 22,
+            TextColor     = ColorPalette.Slate[800],
+            Margin        = new Thickness(0, 0, 0, 10),
         });
 
-        // Subtitle
         doc.Add(new TextBlock
         {
-            Text = "Full Unicode Support with Embedded Fonts",
-            FontName = fontPath,
-            FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
-            Margin = new Thickness(0, 0, 0, 16)
+            Text   = "BonniePDF embeds compact glyph subsets of TrueType fonts directly in the PDF — " +
+                     "only the characters actually used are stored. Fonts with different Unicode coverage " +
+                     "can be mixed within a single document by setting FontName per block.",
+            Margin = new Thickness(0, 0, 0, 16),
         });
 
-        // Unicode symbols section
+        // ── 1. Unicode Symbols ────────────────────────────────────────────────
+
+        Section(doc, "Unicode Symbols", "s-symbols");
+
+        foreach (string text in new[]
+        {
+            "• Bullet (U+2022)  © Copyright (U+00A9)  ® Registered (U+00AE)  ™ Trademark (U+2122)",
+            "– En-dash (U+2013)  — Em-dash (U+2014)",
+            "± Plus-minus  × Multiply  ÷ Divide",
+        })
+        {
+            doc.Add(new TextBlock { Text = text, Margin = new Thickness(0, 0, 0, 4) });
+        }
+
+        // ── 2. Currency Symbols ───────────────────────────────────────────────
+
+        Section(doc, "Currency Symbols", "s-currency");
+
         doc.Add(new TextBlock
         {
-            Text = "Unicode Symbols:",
-            FontName = fontPath,
-            FontSize = 12,
-            TextColor = ColorPalette.Slate[600],
-            Margin = new Thickness(0, 0, 0, 6)
+            Text   = "€ Euro  £ Pound  ¥ Yen  ₹ Rupee  ₿ Bitcoin",
+            Margin = new Thickness(0, 0, 0, 4),
         });
 
-        // Bullets and common symbols
-        doc.Add(new TextBlock { Text = "\u2022 Bullet point (U+2022)" });
-        doc.Add(new TextBlock { Text = "\u00A9 Copyright symbol (U+00A9)" });
-        doc.Add(new TextBlock { Text = "\u00AE Registered trademark (U+00AE)" });
-        doc.Add(new TextBlock { Text = "\u2122 Trademark (U+2122)" });
-        doc.Add(new TextBlock { Text = "\u2013 En-dash (U+2013) \u2014 Em-dash (U+2014)" });
-        // Arrows (U+2190..) live in NotoSansMath, not NotoSans.
-        doc.Add(new TextBlock { Text = "\u2190 \u2191 \u2192 \u2193 Arrows", FontName = BundledFont.MathPath });
+        // ── 3. Arrows ─────────────────────────────────────────────────────────
 
-        // The check mark (U+2713) is a dingbat - NotoSansSymbols2.
-        doc.Add(new TextBlock { Text = "\u2713 Check mark (U+2713)", FontName = BundledFont.SymbolsPath, Margin = new Thickness(0, 0, 0, 12) });
+        Section(doc, "Arrows (via NotoSansMath)", "s-arrows");
 
-        // Currency symbols
         doc.Add(new TextBlock
         {
-            Text = "Currency Symbols:",
-            FontName = fontPath,
-            FontSize = 12,
-            TextColor = ColorPalette.Slate[600],
-            Margin = new Thickness(0, 0, 0, 6)
+            Text     = "← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪",
+            FontName = BundledFont.MathPath,
+            Margin   = new Thickness(0, 0, 0, 4),
         });
 
-        doc.Add(new TextBlock { Text = "\u20AC Euro \u00A3 Pound \u00A5 Yen \u20B9 Rupee", Margin = new Thickness(0, 0, 0, 12) });
+        // ── 4. Mathematical Operators ─────────────────────────────────────────
 
-        // Math symbols
+        Section(doc, "Mathematical Operators (via NotoSansMath)", "s-math");
+
+        foreach (string text in new[]
+        {
+            "≠ Not equal  ≤ Less-equal  ≥ Greater-equal  ∞ Infinity",
+            "∑ Sum  ∏ Product  √ Root  ∫ Integral",
+        })
+        {
+            doc.Add(new TextBlock { Text = text, FontName = BundledFont.MathPath, Margin = new Thickness(0, 0, 0, 4) });
+        }
+
+        // ── 5. Dingbats ───────────────────────────────────────────────────────
+
+        Section(doc, "Dingbats (via NotoSansSymbols2)", "s-dingbats");
+
         doc.Add(new TextBlock
         {
-            Text = "Mathematical Symbols:",
-            FontName = fontPath,
-            FontSize = 12,
-            TextColor = ColorPalette.Slate[600],
-            Margin = new Thickness(0, 0, 0, 6)
+            Text     = "✓ Check  ✗ Cross  ★ Star  ♠ Spade  ♥ Heart  ♦ Diamond  ♣ Club",
+            FontName = BundledFont.SymbolsPath,
+            Margin   = new Thickness(0, 0, 0, 4),
         });
 
-        // Mathematical operators (U+2200..) live in NotoSansMath.
-        doc.Add(new TextBlock { Text = "\u00B1 Plus-minus \u00D7 Multiply \u00F7 Divide \u2260 Not equal", FontName = BundledFont.MathPath });
-        doc.Add(new TextBlock { Text = "\u2264 Less-equal \u2265 Greater-equal \u221E Infinity", FontName = BundledFont.MathPath, Margin = new Thickness(0, 0, 0, 12) });
+        // ── 6. Greek Letters ──────────────────────────────────────────────────
 
-        // Greek letters
+        Section(doc, "Greek Letters", "s-greek");
+
         doc.Add(new TextBlock
         {
-            Text = "Greek Letters:",
-            FontName = fontPath,
-            FontSize = 12,
-            TextColor = ColorPalette.Slate[600],
-            Margin = new Thickness(0, 0, 0, 6)
+            Text   = "α Alpha  β Beta  γ Gamma  δ Delta  π Pi  Ω Omega",
+            Margin = new Thickness(0, 0, 0, 4),
         });
 
-        doc.Add(new TextBlock { Text = "\u03B1 Alpha \u03B2 Beta \u03B3 Gamma \u03B4 Delta \u03C0 Pi \u03A9 Omega", Margin = new Thickness(0, 0, 0, 16) });
+        // ── 7. Standard vs Embedded ───────────────────────────────────────────
 
-        // Mixed fonts demonstration
+        Section(doc, "Standard vs Embedded", "s-comparison");
+
         doc.Add(new TextBlock
         {
-            Text = "Mixed Font Demonstration:",
-            FontName = fontPath,
-            FontSize = 12,
-            TextColor = ColorPalette.Slate[600],
-            Margin = new Thickness(0, 0, 0, 6)
-        });
-
-        // Standard font (Helvetica)
-        doc.Add(new TextBlock
-        {
-            Text = "This line uses standard Helvetica (Type1, not embedded)",
+            Text     = "Standard Helvetica (Type 1) — limited to the WinAnsi charset.",
             FontName = StandardFonts.Helvetica,
-            FontSize = 11,
-            TextColor = ColorPalette.Slate[600]
+            Margin   = new Thickness(0, 0, 0, 4),
         });
 
-        // Embedded font
         doc.Add(new TextBlock
         {
-            Text = "This line uses embedded Noto Sans (TrueType, full Unicode)",
-            Margin = new Thickness(0, 0, 0, 16)
+            Text = "Embedded Noto Sans (TrueType) — full Unicode range, subsetting keeps file size compact.",
         });
 
-        // Footer
-        doc.Add(new TextBlock
-        {
-            Text = $"\u00A9 {DateTime.Now.Year} BonniePDF \u2022 TrueType Font Embedding",
-            FontSize = 10,
-            TextColor = ColorPalette.Slate[400]
-        });
         return doc;
     }
-}
 
+    private static void Section(Document doc, string title, string tocId)
+    {
+        doc.Add(new Heading(title)
+        {
+            TocIdentifier = tocId,
+            Level         = 2,
+            FontName      = BundledFont.SansPath,
+            FontSize      = 13,
+            TextColor     = ColorPalette.Indigo[600],
+            Margin        = new Thickness(0, 12, 0, 6),
+        });
+    }
+}

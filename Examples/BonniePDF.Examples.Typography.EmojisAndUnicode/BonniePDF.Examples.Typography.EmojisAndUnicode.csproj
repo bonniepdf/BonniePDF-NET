@@ -9,6 +9,8 @@
          fonts/ in the output. Example-only assets - NOT part of the published
          BonniePDF library/NuGet package. -->
     <None Include="..\assets\fonts\NotoSans-Regular.ttf" Link="fonts\NotoSans-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\assets\fonts\NotoSansMath-Regular.ttf" Link="fonts\NotoSansMath-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\assets\fonts\NotoSansSymbols2-Regular.ttf" Link="fonts\NotoSansSymbols2-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\assets\fonts\NotoEmoji-Regular.ttf" Link="fonts\NotoEmoji-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
