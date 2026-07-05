@@ -37,7 +37,8 @@ public static class FinancialDashboardExample
         {
             PageSize = PdfSize.A4,
             Orientation = PageOrientation.Landscape,
-            Margin = 0
+            Margin = 0,
+            PageColor = Cream
         });
 
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
@@ -143,12 +144,12 @@ public static class FinancialDashboardExample
         });
 
         // ════════════════════════════════════════════════════════════════════════
-        // 3.  Monthly revenue bar chart
+        // 3.  Monthly revenue bar chart - ChartElement must be a direct doc.Add() call;
+        //     nesting it inside a Container or Table prevents width resolution.
         // ════════════════════════════════════════════════════════════════════════
 
         doc.Add(new Container
         {
-            BackgroundColor = Cream,
             Padding = new Thickness(24, 14, 24, 6),
             Child = new TextBlock
             {
@@ -185,10 +186,10 @@ public static class FinancialDashboardExample
             StretchToFit = true,
             BarColor = Terra,
             FontFamily = StandardFonts.Helvetica,
-            LabelFontSize = 8,
-            BackgroundColor = Cream
+            LabelFontSize = 8
         };
 
+        // Direct doc.Add - the only way ChartElement resolves its available width
         doc.Add(new ChartElement(barChart, chartData)
         {
             AltText = "Bar chart of monthly revenue in thousands, ranging from 125 in January to 233 in December."
@@ -208,7 +209,6 @@ public static class FinancialDashboardExample
 
         doc.Add(new Container
         {
-            BackgroundColor = Cream,
             Padding = new Thickness(24, 14, 24, 6),
             Child = new TextBlock
             {
@@ -255,16 +255,8 @@ public static class FinancialDashboardExample
 
         doc.Add(new Container
         {
-            BackgroundColor = Cream,
             Padding = new Thickness(24, 0, 24, 20),
             Child = productTable
-        });
-
-        // CREAM background flood-fill to the page bottom
-        doc.Add(new Container
-        {
-            BackgroundColor = Cream,
-            Child = new Spacer(500)
         });
 
         return doc;
@@ -300,7 +292,6 @@ public static class FinancialDashboardExample
         Container cell = new()
         {
             Child = stack,
-            BackgroundColor = Cream,
             Padding = new Thickness(20, 16, 20, 16)
         };
 

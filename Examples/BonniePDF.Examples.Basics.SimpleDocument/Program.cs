@@ -13,11 +13,6 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "simple_document.pdf"));
         }
-        Console.WriteLine("Generating Simple Document (Fluent API)...");
-        using (var doc = SimpleDocumentFluentExample.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "simple_document_fluent.pdf"));
-        }
         Console.WriteLine("Generating PDF/A + PDF/UA...");
         using (var doc = PdfComplianceExample.Generate())
         {

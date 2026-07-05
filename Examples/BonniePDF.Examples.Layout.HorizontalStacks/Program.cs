@@ -13,12 +13,6 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "horizontal_stack_example.pdf"));
         }
-        Console.WriteLine("Generating Horizontal Stacks (Fluent API)...");
-        using (var doc = HorizontalStacksExampleFluent.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "horizontal_stack_example_fluent.pdf"));
-        }
-
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

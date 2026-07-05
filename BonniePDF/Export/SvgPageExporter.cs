@@ -94,6 +94,9 @@ internal static class SvgPageExporter
         {
             PageRenderOutput pageOutput = renderedPages[i];
             string body = SvgCanvas.ResolveTotalPages(pageOutput.ContentStream, totalPages);
+            // Link overlays go last so they sit above every painted layer and
+            // stay clickable in an SVG host (e.g. @bonniepdf/previewer).
+            body += BuildLinkOverlays(pageOutput.Hyperlinks, pageOutput.Size.Height);
             results.Add(Assemble(body, i + 1, pageOutput.Size, options, title));
         }
 
@@ -151,6 +154,51 @@ internal static class SvgPageExporter
               .Append("\") format(\"truetype\");}");
         }
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Emits clickable link overlays for the hyperlinks registered on a page,
+    /// mirroring the /Link annotations the PDF serializer writes. External links
+    /// (<see cref="Hyperlink.Uri"/>) become SVG <c>&lt;a&gt;</c> elements, so they
+    /// are live links in any SVG host; internal links
+    /// (<see cref="Hyperlink.TargetPageIndex"/>, e.g. VisualToc entries) become
+    /// rects carrying <c>data-bp-link-page="N"</c> (1-based) that a host such as
+    /// @bonniepdf/previewer wires to page navigation. The rects paint nothing
+    /// (<c>fill="none"</c>) but hit-test (<c>pointer-events="all"</c>). Hyperlink
+    /// render bounds are PDF coordinates (bottom-left origin), so Y is flipped.
+    /// </summary>
+    private static string BuildLinkOverlays(IList<Hyperlink> links, float pageHeight)
+    {
+        if (links == null || links.Count == 0) return "";
+
+        StringBuilder sb = new();
+        foreach (Hyperlink link in links)
+        {
+            float w = link.RenderWidth;
+            float h = link.RenderHeight;
+            if (w <= 0 || h <= 0) continue;
+
+            string rect =
+                $"x=\"{FmtNum(link.RenderX)}\" y=\"{FmtNum(pageHeight - link.RenderY - h)}\" " +
+                $"width=\"{FmtNum(w)}\" height=\"{FmtNum(h)}\" fill=\"none\" pointer-events=\"all\"";
+
+            if (!string.IsNullOrEmpty(link.Uri))
+            {
+                sb.Append($"<a href=\"{XmlEscape.EscapeAttr(link.Uri)}\" target=\"_blank\" rel=\"noopener\"><rect {rect}/></a>");
+            }
+            else if (link.TargetPageIndex is int page && page >= 0)
+            {
+                sb.Append($"<rect {rect} data-bp-link-page=\"{page + 1}\" style=\"cursor:pointer\"/>");
+            }
+        }
+        return sb.ToString();
+    }
+
+    /// <summary>Formats a coordinate for link-overlay markup (2 dp, no trailing zeros).</summary>
+    private static string FmtNum(float value)
+    {
+        if (float.IsNaN(value) || float.IsInfinity(value)) return "0";
+        return ((double)Math.Round(value, 2)).ToString(CultureInfo.InvariantCulture);
     }
 
     private static string ResolveTitle(Document document, string explicitTitle)

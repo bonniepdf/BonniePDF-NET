@@ -18,12 +18,6 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "watermark_draft.pdf"));
         }
-        Console.WriteLine("Generating Watermark - Fluent API...");
-        using (var doc = WatermarkFluentExample.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "watermark_fluent.pdf"));
-        }
-
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

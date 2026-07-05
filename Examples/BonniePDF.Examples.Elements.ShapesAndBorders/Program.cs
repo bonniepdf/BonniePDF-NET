@@ -13,12 +13,6 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "rounded_rectangles.pdf"));
         }
-        Console.WriteLine("Generating Shapes & Borders (Fluent API)...");
-        using (var doc = ShapesAndBordersExampleFluent.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "rounded_rectangles_fluent.pdf"));
-        }
-
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

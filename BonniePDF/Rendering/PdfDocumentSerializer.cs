@@ -295,6 +295,17 @@ public class PdfDocumentSerializer
             catalogOptions.Language = _document.Settings.Language;
         }
 
+        // Write /PageLabels number tree if configured (PDF §12.4.2).
+        if (_document.Settings.PageLabel is { } syncPageLabel)
+        {
+            int pageLabelsId = writer.GetNewId();
+            writer.WriteObject(pageLabelsId, new Dictionary<string, string>
+            {
+                ["/Nums"] = $"[ 0 << {BuildPageLabelEntry(syncPageLabel)} >> ]"
+            });
+            catalogOptions.PageLabelsId = pageLabelsId;
+        }
+
         // Write Catalog
         writer.WriteCatalog(catalogId, pagesId, pageIds[0], _document.Settings, catalogOptions);
 
@@ -536,6 +547,17 @@ public class PdfDocumentSerializer
             catalogOptions.Language = _document.Settings.Language;
         }
 
+        // Write /PageLabels number tree if configured (PDF §12.4.2).
+        if (_document.Settings.PageLabel is { } asyncPageLabel)
+        {
+            int pageLabelsId = writer.GetNewId();
+            await writer.WriteObjectAsync(pageLabelsId, new Dictionary<string, string>
+            {
+                ["/Nums"] = $"[ 0 << {BuildPageLabelEntry(asyncPageLabel)} >> ]"
+            }, cancellationToken: cancellationToken).ConfigureAwait(false);
+            catalogOptions.PageLabelsId = pageLabelsId;
+        }
+
         // Write Catalog
         await writer.WriteCatalogAsync(catalogId, pagesId, pageIds[0], _document.Settings, catalogOptions, cancellationToken)
             .ConfigureAwait(false);
@@ -544,6 +566,27 @@ public class PdfDocumentSerializer
         if (encryptId > 0) await writer.WriteEncryptDictionaryAsync(encryptId, cancellationToken).ConfigureAwait(false);
 
         await writer.CloseAsync(catalogId, documentInfoId, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Builds the inner PDF dictionary string for a single <see cref="PageLabel"/> entry
+    /// in the /PageLabels number tree (PDF §12.4.2).
+    /// Returns the raw PDF tokens between &lt;&lt; and &gt;&gt;, e.g. <c>/S /D /St 42</c>.
+    /// </summary>
+    private static string BuildPageLabelEntry(PageLabel label)
+    {
+        string s = label.Style switch
+        {
+            PageLabelStyle.LowercaseRoman => "/r",
+            PageLabelStyle.UppercaseRoman => "/R",
+            PageLabelStyle.LowercaseAlpha => "/a",
+            PageLabelStyle.UppercaseAlpha => "/A",
+            _ => "/D",
+        };
+        List<string> parts = [$"/S {s}"];
+        if (!string.IsNullOrEmpty(label.Prefix)) parts.Add($"/P ({label.Prefix})");
+        if (label.StartAt != 1) parts.Add($"/St {label.StartAt}");
+        return string.Join(' ', parts);
     }
 
     /// <summary>

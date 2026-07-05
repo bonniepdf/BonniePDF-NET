@@ -5,25 +5,23 @@ using BonniePDF.Extensions;
 using BonniePDF.Typography;
 using Align = BonniePDF.Elements.Text.TextAlignment;
 
-namespace BonniePDF.Examples.Typography.TextAlignment;
+namespace BonniePDF.Examples.Typography.Alignment;
 
 /// <summary>
-/// Text alignment example using an embedded NotoSans TrueType font.
+/// Embedded-font metrics — why an embedded font makes alignment edges exact.
 ///
-/// Identical in content to <see cref="TextAlignmentTaggedExample"/>, but every text
-/// element is rendered with the bundled NotoSans-Regular.ttf instead of the
-/// standard-14 Type1 fonts. Because the font is embedded, both layout measurement
-/// and glyph placement use the font's own hmtx advance widths - so right/centre/
-/// justified alignment is exact, with no reliance on the approximate standard-font
-/// width tables.
+/// The standard-14 Type1 fonts are measured from approximate AFM width tables. An
+/// embedded TrueType font instead carries its own <c>hmtx</c> advance widths, so
+/// BonniePDF measures and places every glyph from the real metrics. That precision
+/// is what makes right, centre, and justified edges land exactly on the margin.
 ///
-/// Mirror of the TypeScript examples/src/typography/text-alignment-liberation.ts.
-/// Acceptance: VeraPDF profile ua1 reports zero failures.
+/// This example renders the four alignments entirely in the bundled NotoSans TTF
+/// (embedded as a compact glyph subset). PDF/A-2a + PDF/UA-1.
 /// </summary>
-[System.ComponentModel.DisplayName("Text Alignment (Embedded Font)")]
+[System.ComponentModel.DisplayName("Embedded-Font Metrics")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("All four text alignments rendered with an embedded NotoSans TrueType font for precise layout.")]
-public static class TextAlignmentLiberationExample
+[System.ComponentModel.Description("How an embedded TrueType font makes alignment edges exact, using its own hmtx advance widths rather than the approximate standard-14 width tables. PDF/A-2a + PDF/UA-1.")]
+public static class EmbeddedFontMetricsExample
 {
     private const string SampleText =
         "The quick brown fox jumps over the lazy dog. This sentence demonstrates how text " +
@@ -39,13 +37,15 @@ public static class TextAlignmentLiberationExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Text Alignment - NotoSans (PDF/UA-1)",
+                Title    = "Embedded-Font Metrics",
                 Author   = "BonniePDF",
-                Subject  = "All four text alignments rendered with an embedded NotoSans TrueType font.",
-                Keywords = "pdf, pdf/ua, accessibility, text, alignment, justified, truetype, notosans",
+                Subject  = "How an embedded TrueType font makes alignment edges exact, using its own hmtx advance widths.",
+                Keywords = "pdf, pdf/ua, pdf/a, fonts, embedding, metrics, hmtx, alignment, truetype, notosans",
             },
             Settings = new DocumentSettings
             {
+                PageSize      = PdfSize.A4,
+                Margin        = 60,
                 Conformance   = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language      = "en-GB",
@@ -56,7 +56,7 @@ public static class TextAlignmentLiberationExample
             },
         };
 
-        doc.Add(new Heading("Text Alignment Comparison")
+        doc.Add(new Heading("Embedded-Font Metrics")
         {
             TocIdentifier = "intro",
             Level         = 1,
@@ -68,37 +68,19 @@ public static class TextAlignmentLiberationExample
 
         doc.Add(new TextBlock
         {
-            Text   = "The four standard alignments are shown below, all set in embedded NotoSans. Each paragraph " +
-                     "carries the same text and the same /P structure-tree role - alignment is a purely visual property.",
+            Text   = "The standard-14 fonts are measured from approximate width tables. An embedded TrueType font carries " +
+                     "its own hmtx advance widths, so glyph placement is exact — which is what makes the right, centre, and " +
+                     "justified edges below land precisely on the margin. Every element here is set in embedded NotoSans.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 
-        // Left-aligned (default)
-        Section(doc, "Left Aligned (Default)", "s-left", sansPath);
-        doc.Add(new TextBlock { Text = SampleText, Alignment = Align.Left, Margin = new Thickness(0, 0, 0, 14) });
+        AlignedSample(doc, "Left Aligned (Default)", "s-left", Align.Left, sansPath);
+        AlignedSample(doc, "Centre Aligned", "s-centre", Align.Center, sansPath);
+        AlignedSample(doc, "Right Aligned", "s-right", Align.Right, sansPath);
+        AlignedSample(doc, "Justified", "s-justify", Align.Justify, sansPath);
 
-        // Centre
-        Section(doc, "Centre Aligned", "s-centre", sansPath);
-        doc.Add(new TextBlock { Text = SampleText, Alignment = Align.Center, Margin = new Thickness(0, 0, 0, 14) });
-
-        // Right
-        Section(doc, "Right Aligned", "s-right", sansPath);
-        doc.Add(new TextBlock { Text = SampleText, Alignment = Align.Right, Margin = new Thickness(0, 0, 0, 14) });
-
-        // Justified
-        Section(doc, "Justified", "s-justify", sansPath);
-        doc.Add(new TextBlock { Text = SampleText, Alignment = Align.Justify, Margin = new Thickness(0, 0, 0, 14) });
-
-        // Book-style section
-        doc.Add(new Heading("Book-Style Justified Paragraphs")
-        {
-            TocIdentifier = "book",
-            Level         = 2,
-            FontName      = sansPath,
-            FontSize      = 13,
-            TextColor     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 6, 0, 6),
-        });
+        // ── Book-style justified paragraphs ────────────────────────────────────
+        Section(doc, "Book-Style Justified Paragraphs", "book", sansPath);
 
         string[] paragraphs =
         {
@@ -142,5 +124,11 @@ public static class TextAlignmentLiberationExample
             TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 0, 0, 6),
         });
+    }
+
+    private static void AlignedSample(Document doc, string title, string tocId, Align alignment, string fontPath)
+    {
+        Section(doc, title, tocId, fontPath);
+        doc.Add(new TextBlock { Text = SampleText, Alignment = alignment, Margin = new Thickness(0, 0, 0, 14) });
     }
 }

@@ -282,4 +282,41 @@ public class SvgPageExportTests
         SvgDocumentExport export = SimpleDoc().GenerateSvgDocument();
         Assert.Equal(string.Empty, export.FontFaceCss);
     }
+
+    [Fact]
+    public void ExternalHyperlink_EmitsSvgAnchorOverlay()
+    {
+        // Mirrors the PDF /Link annotation: external links become live SVG <a>
+        // elements so hosts like @bonniepdf/previewer render clickable links.
+        var doc = new Document();
+        doc.Add(new Hyperlink("https://www.bonniepdf.dev/docs", "Visit the docs"));
+
+        string svg = doc.GenerateSvgPages()[0];
+        Assert.Contains("<a href=\"https://www.bonniepdf.dev/docs\" target=\"_blank\" rel=\"noopener\">", svg, StringComparison.Ordinal);
+        // The clickable area paints nothing but hit-tests across the link's bounds.
+        Assert.Matches("<a [^>]*><rect [^>]*fill=\"none\" pointer-events=\"all\"/></a>", svg);
+    }
+
+    [Fact]
+    public void HyperlinkUri_IsEscapedInOverlayMarkup()
+    {
+        var doc = new Document();
+        doc.Add(new Hyperlink("https://example.com/?a=1&b=\"two\"", "Search"));
+
+        string svg = doc.GenerateSvgPages()[0];
+        Assert.Contains("href=\"https://example.com/?a=1&amp;b=&quot;two&quot;\"", svg, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void InternalLink_EmitsPageMarkerRectInsteadOfAnchor()
+    {
+        var doc = new Document();
+        doc.Add(new Hyperlink("Go to appendix") { TargetPageIndex = 1 }); // 0-based target -> 1-based marker
+        doc.AddPage();
+        doc.Add(new TextBlock { Text = "Appendix", FontSize = 11 });
+
+        string svg = doc.GenerateSvgPages()[0];
+        Assert.Contains("data-bp-link-page=\"2\"", svg, StringComparison.Ordinal);
+        Assert.DoesNotContain("<a href", svg, StringComparison.Ordinal);
+    }
 }

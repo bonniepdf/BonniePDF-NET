@@ -1,250 +1,230 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Text;
+using BonniePDF.Extensions;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Typography.RichTextStyles;
 
 /// <summary>
-/// Demonstrates the RichText element with mixed styling within flowing paragraphs.
-/// Shows bold, italic, colored, underlined, and multi-size text all within a single
-/// paragraph that word-wraps correctly across span boundaries.
+/// Bold, italic, coloured, highlighted, and mixed-size spans within flowing paragraphs.
+/// Reusable style objects, justified alignment, and a practical legal disclaimer.
+/// PDF/A-2a + PDF/UA-1.
 /// </summary>
 [System.ComponentModel.DisplayName("Rich Text Styles")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("Mixed formatting within paragraphs.")]
+[System.ComponentModel.Description("Bold, italic, coloured, highlighted, and mixed-size spans within flowing paragraphs. Reusable style objects, justified alignment, and a practical legal disclaimer. PDF/A-2a + PDF/UA-1.")]
 public static class RichTextExample
 {
     public static Document Generate()
     {
-        Document doc = new(new DocumentSettings
+        Document doc = new()
         {
-            PageSize = PdfSize.A4,
-            Margin = 60
+            Metadata = new DocumentMetadata
+            {
+                Title    = "Rich Text Styles",
+                Author   = "BonniePDF",
+                Subject  = "Inline mixed-style text using RichText spans. PDF/A-2a + PDF/UA-1.",
+                Keywords = "pdf, rich text, inline styles, bold, italic, underline, highlights, pdf/ua, pdf/a, BonniePDF",
+            },
+            Settings = new DocumentSettings
+            {
+                PageSize      = PdfSize.A4,
+                Margin        = 60,
+                Conformance   = PdfAConformance.PdfA2a,
+                Accessibility = AccessibilityMode.PdfUa1,
+                Language      = "en-GB",
+                DefaultTextStyle = new TextStyle()
+                    .WithFamily(StandardFonts.Helvetica)
+                    .WithSize(11)
+                    .WithColor(ColorPalette.Slate[700]),
+            },
+        };
+
+        // ── Title ──────────────────────────────────────────────────────────────
+
+        doc.Add(new Heading("Rich Text Styles")
+        {
+            TocIdentifier = "intro",
+            Level         = 1,
+            FontName      = StandardFonts.HelveticaBold,
+            FontSize      = 22,
+            TextColor     = ColorPalette.Slate[800],
+            Margin        = new Thickness(0, 0, 0, 10),
         });
 
-        doc.Settings.Conformance = PdfAConformance.PdfA2a;
-        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
-        doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
-
-        doc.Metadata.Title = "Rich Text";
-        doc.Metadata.Author = "BonniePDF";
-
-        // Title
         doc.Add(new TextBlock
         {
-            Text = "Rich Text (Mixed Styling)",
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
-            Margin = new Thickness(0, 0, 0, 20)
+            Text   = "RichText lets you mix bold, italic, coloured, highlighted, and differently-sized spans within a single " +
+                     "flowing paragraph. All formatting is per-span while the text wraps and aligns as a unit. " +
+                     "Every RichText is tagged as a /P element in the structure tree.",
+            Margin = new Thickness(0, 0, 0, 16),
         });
 
-        // --- Section 1: Bold words in a paragraph ---
-        doc.Add(CreateSectionHeader("Bold Words in a Paragraph"));
+        // ── 1. Weight & Style ──────────────────────────────────────────────────
 
-        doc.Add(new RichText
-            {
-                Margin = new Thickness(0, 0, 0, 16)
-            }
-            .Span("This paragraph contains ")
-            .Span("bold text", new TextStyle().Bold())
-            .Span(" mixed with regular text. The ")
-            .Span("bold words", new TextStyle().Bold())
-            .Span(" stand out while the text flows naturally as a single paragraph with automatic word wrapping."));
+        Section(doc, "Weight & Style", "s-weight");
 
-        // --- Section 2: Italic text ---
-        doc.Add(CreateSectionHeader("Italic Text"));
-
-        doc.Add(new RichText
-            {
-                Margin = new Thickness(0, 0, 0, 16)
-            }
-            .Span("Scientific names are typically written in ")
-            .Span("italic", new TextStyle().WithItalic())
-            .Span(", such as ")
-            .Span("Homo sapiens", new TextStyle().WithItalic())
-            .Span(" or ")
-            .Span("Escherichia coli", new TextStyle().WithItalic())
-            .Span(". This convention helps distinguish taxonomic nomenclature from surrounding text."));
-
-        // --- Section 3: Bold + Italic combined ---
-        doc.Add(CreateSectionHeader("Bold and Italic Combined"));
-
-        doc.Add(new RichText
-            {
-                Margin = new Thickness(0, 0, 0, 16)
-            }
-            .Span("You can combine ")
+        doc.Add(new RichText()
+            .Span("Inline text can be ")
             .Span("bold", new TextStyle().Bold())
             .Span(", ")
             .Span("italic", new TextStyle().WithItalic())
-            .Span(", and ")
-            .Span("bold italic", new TextStyle { Weight = FontWeight.Bold, Italic = true })
-            .Span(" styles within a single flowing paragraph."));
+            .Span(", or ")
+            .Span("bold italic", new TextStyle().Bold().WithItalic())
+            .Span(" — all within the same flowing paragraph. Scientific names like ")
+            .Span("Homo sapiens", new TextStyle().WithItalic())
+            .Span(" are a classic use of italic, while ")
+            .Span("key terms", new TextStyle().Bold())
+            .Span(" benefit from bold emphasis.")
+        );
 
-        // --- Section 4: Colored spans ---
-        doc.Add(CreateSectionHeader("Coloured Spans"));
+        // ── 2. Coloured Spans ──────────────────────────────────────────────────
 
-        doc.Add(new RichText
-            {
-                Margin = new Thickness(0, 0, 0, 16)
-            }
+        Section(doc, "Coloured Spans", "s-colors");
+
+        doc.Add(new RichText()
             .Span("Text can be ")
-            .Span("red", new TextStyle().WithColor(Color.Red))
+            .Span("red",       new TextStyle().WithColor(Color.Red))
             .Span(", ")
-            .Span("blue", new TextStyle().WithColor(ColorPalette.Blue[600]))
+            .Span("blue",      new TextStyle().WithColor(ColorPalette.Blue[600]))
             .Span(", ")
-            .Span("green", new TextStyle().WithColor(ColorPalette.Green[600]))
+            .Span("green",     new TextStyle().WithColor(ColorPalette.Green[600]))
             .Span(", or ")
             .Span("any colour", new TextStyle().WithColor(ColorPalette.Purple[600]))
-            .Span(" you choose. Colours can be combined with ")
-            .Span("bold coloured text", new TextStyle().Bold().WithColor(ColorPalette.Indigo[600]))
-            .Span(" for maximum emphasis."));
+            .Span(" you choose. Colour combines freely with weight: ")
+            .Span("bold indigo", new TextStyle().Bold().WithColor(ColorPalette.Indigo[600]))
+            .Span(" is a common choice for strong inline emphasis.")
+        );
 
-        // --- Section 5: Text decorations ---
-        doc.Add(CreateSectionHeader("Inline Decorations"));
+        // ── 3. Inline Decorations ──────────────────────────────────────────────
 
-        doc.Add(new RichText
-            {
-                Margin = new Thickness(0, 0, 0, 16)
-            }
-            .Span("Decorations work per-span: ")
-            .Span("underlined words", new TextStyle().Underline())
-            .Span(" and ")
-            .Span("strikethrough words", new TextStyle().Strikethrough())
-            .Span(" can appear anywhere in the paragraph, including ")
-            .Span("bold underlined", new TextStyle().Bold().Underline())
-            .Span(" combinations."));
+        Section(doc, "Inline Decorations", "s-decorations");
 
-        // --- Section 6: Mixed font sizes ---
-        doc.Add(CreateSectionHeader("Mixed Font Sizes"));
+        doc.Add(new RichText()
+            .Span("Decorations are per-span: ")
+            .Span("underlined words",     new TextStyle().Underline())
+            .Span(", ")
+            .Span("strikethrough text",   new TextStyle().Strikethrough())
+            .Span(", and combinations like ")
+            .Span("bold underlined",      new TextStyle().Bold().Underline())
+            .Span(" or ")
+            .Span("italic strikethrough", new TextStyle().WithItalic().Strikethrough())
+            .Span(" all flow naturally within a single paragraph.")
+        );
 
-        doc.Add(new RichText
-            {
-                Margin = new Thickness(0, 0, 0, 16)
-            }
-            .Span("Normal text can include ")
+        // ── 4. Background Highlights ───────────────────────────────────────────
+
+        Section(doc, "Background Highlights", "s-highlights");
+
+        doc.Add(new RichText()
+            .Span("Background colours create a ")
+            .Span("highlighter pen effect", new TextStyle().WithBackground(Color.FromHex("#fef08a")))
+            .Span(" across any span. Combine with colour for ")
+            .Span("bold red alert text", new TextStyle().Bold().WithColor(Color.FromHex("#991b1b")).WithBackground(Color.FromHex("#fecaca")))
+            .Span(" or a ")
+            .Span("green success note", new TextStyle().WithColor(Color.FromHex("#166534")).WithBackground(Color.FromHex("#bbf7d0")))
+            .Span(" without breaking the paragraph flow.")
+        );
+
+        // ── 5. Mixed Font Sizes ────────────────────────────────────────────────
+
+        Section(doc, "Mixed Font Sizes", "s-sizes");
+
+        doc.Add(new RichText()
+            .Span("The same paragraph can carry ")
             .Span("larger text", new TextStyle().WithSize(18))
-            .Span(" and ")
+            .Span(" alongside ")
             .Span("smaller text", new TextStyle().WithSize(8))
-            .Span(" within the same paragraph. The line height adjusts to accommodate the tallest text on each line."));
+            .Span(" — useful for superscript markers, footnote labels, or legal fine print. ")
+            .Span("Line height adapts automatically to the tallest span on each line.")
+        );
 
-        // --- Section 7: Background highlights ---
-        doc.Add(CreateSectionHeader("Background Highlights"));
+        // ── 6. Justified Alignment ─────────────────────────────────────────────
 
-        doc.Add(new RichText
-            {
-                Margin = new Thickness(0, 0, 0, 16)
-            }
-            .Span("You can ")
-            .Span("highlight important text", new TextStyle().WithBackground(Color.FromHex("#fef08a")))
-            .Span(" with background colors, similar to a ")
-            .Span("marker pen", new TextStyle().WithBackground(Color.FromHex("#bbf7d0")).Bold())
-            .Span(" effect. Great for ")
-            .Span("drawing attention", new TextStyle().WithBackground(Color.FromHex("#fecaca")).WithColor(Color.FromHex("#991b1b")))
-            .Span(" to key information."));
-
-        // --- Section 8: Reusable styles ---
-        doc.Add(CreateSectionHeader("Reusable TextStyle Objects"));
-
-        TextStyle label = new() { FontFamily = "Helvetica", Weight = FontWeight.Bold, Color = ColorPalette.Slate[800] };
-        TextStyle value = new() { FontFamily = "Helvetica", Color = ColorPalette.Blue[600] };
-        TextStyle unit = new() { FontFamily = "Helvetica", FontSize = 9, Color = ColorPalette.Slate[500] };
-
-        doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 4) }
-            .Span("Temperature: ", label)
-            .Span("23.5", value)
-            .Span(" degrees Celsius", unit));
-
-        doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 4) }
-            .Span("Pressure: ", label)
-            .Span("1013.25", value)
-            .Span(" hPa", unit));
-
-        doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 16) }
-            .Span("Humidity: ", label)
-            .Span("65", value)
-            .Span(" %", unit));
-
-        // --- Section 9: Font weight variants ---
-        doc.Add(CreateSectionHeader("Font Weight Variants"));
+        Section(doc, "Justified Alignment", "s-justified");
 
         doc.Add(new RichText
-            {
-                Margin = new Thickness(0, 0, 0, 16)
-            }
-            .Span("Normal (400) ", new TextStyle { Weight = FontWeight.Normal })
-            .Span("Bold (700) ", new TextStyle { Weight = FontWeight.Bold })
-            .Span("Normal again. ", new TextStyle { Weight = FontWeight.Normal })
-            .Span("Standard PDF fonts support Normal and Bold weights. Custom TTF fonts can support the full 100-900 range."));
+        {
+            Alignment = TextAlignment.Justify,
+            Margin    = new Thickness(0, 0, 0, 10),
+        }
+        .Span("Rich text supports ")
+        .Span("full justification", new TextStyle().Bold())
+        .Span(" — text is evenly distributed across the line width even when spans carry ")
+        .Span("mixed styles", new TextStyle().WithItalic())
+        .Span(". Each span maintains its own formatting while word-spacing is adjusted to fill the available width. " +
+              "The final line remains left-aligned per typographic convention.")
+        );
 
-        // --- Section 10: Justified rich text ---
-        doc.Add(CreateSectionHeader("Justified Alignment"));
+        // ── 7. Reusable Styles ─────────────────────────────────────────────────
+
+        Section(doc, "Reusable Styles", "s-reusable");
+
+        TextStyle labelStyle = new() { FontFamily = StandardFonts.Helvetica, Weight = FontWeight.Bold, Color = ColorPalette.Slate[800]  };
+        TextStyle valueStyle = new() { FontFamily = StandardFonts.Helvetica,                               Color = ColorPalette.Indigo[600] };
+        TextStyle unitStyle  = new() { FontFamily = StandardFonts.Helvetica, FontSize   = 9,               Color = ColorPalette.Slate[400]  };
+
+        (string Label, string Value, string Unit)[] rows =
+        [
+            ("Temperature:", "23.5",    " °C"),
+            ("Pressure:",    "1013.25", " hPa"),
+            ("Humidity:",    "65",      " %"),
+        ];
+
+        foreach (var row in rows)
+        {
+            doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 4) }
+                .Span(row.Label, labelStyle)
+                .Span(row.Value, valueStyle)
+                .Span(row.Unit,  unitStyle));
+        }
+
+        // ── Practical Example ──────────────────────────────────────────────────
+
+        doc.Add(new Line
+        {
+            Color     = ColorPalette.Slate[300],
+            Thickness = 1,
+            Margin    = new Thickness(0, 12, 0, 0),
+        });
+
+        Section(doc, "Practical Example: Legal Disclaimer", "s-legal");
+
+        TextStyle disclaimerBase = new() { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[600] };
 
         doc.Add(new RichText
-            {
-                Alignment = TextAlignment.Justify,
-                Margin = new Thickness(0, 0, 0, 16)
-            }
-            .Span("Rich text supports ")
-            .Span("full justification", new TextStyle().Bold())
-            .Span(" where the text is evenly distributed across the line width. This works with ")
-            .Span("mixed styles", new TextStyle().WithItalic())
-            .Span(" - each span maintains its own formatting while the spacing between words is adjusted to fill the available width. The last line remains left-aligned as per standard typographic convention."));
+        {
+            DefaultStyle = disclaimerBase,
+            Alignment    = TextAlignment.Justify,
+            Margin       = new Thickness(0, 0, 0, 10),
+        }
+        .Span("IMPORTANT: ", new TextStyle().Bold().WithColor(Color.Red))
+        .Span("By using this software, you agree to the ")
+        .Span("Terms of Service", new TextStyle().Bold().Underline())
+        .Span(" and ")
+        .Span("Privacy Policy", new TextStyle().Bold().Underline())
+        .Span(". All data is processed in accordance with ")
+        .Span("GDPR", new TextStyle().Bold())
+        .Span(" regulations. For questions, contact ")
+        .Span("support@example.com", new TextStyle { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Blue[600] })
+        .Span(".")
+        );
 
-        // --- Section 11: Practical example - legal disclaimer ---
-        doc.Add(new Spacer(12));
-        doc.Add(new Line { Color = ColorPalette.Slate[300], Thickness = 1 });
-        doc.Add(CreateSectionHeader("Practical Example: Legal Disclaimer"));
-
-        doc.Add(new RichText
-            {
-                DefaultStyle = new TextStyle { FontFamily = "Helvetica", FontSize = 10, Color = ColorPalette.Slate[600] },
-                Alignment = TextAlignment.Justify,
-                Margin = new Thickness(0, 0, 0, 16)
-            }
-            .Span("IMPORTANT: ", new TextStyle().Bold().WithColor(Color.Red))
-            .Span("By using this software, you agree to the ")
-            .Span("Terms of Service", new TextStyle().Bold().Underline())
-            .Span(" and ")
-            .Span("Privacy Policy", new TextStyle().Bold().Underline())
-            .Span(". All data is processed in accordance with ")
-            .Span("GDPR", new TextStyle().Bold())
-            .Span(" regulations. For questions, contact ")
-            .Span("support@example.com", new TextStyle().WithColor(ColorPalette.Blue[600]))
-            .Span("."));
-
-        // --- Section 12: Callback-based styling ---
-        doc.Add(CreateSectionHeader("Callback-based Styling"));
-
-        doc.Add(new RichText
-            {
-                Margin = new Thickness(0, 0, 0, 16)
-            }
-            .Span("The callback API lets you configure styles inline: ")
-            .Span("bold blue", s => s.Bold().WithColor(ColorPalette.Blue[600]))
-            .Span(", ")
-            .Span("italic green", s => s.WithItalic().WithColor(ColorPalette.Green[600]))
-            .Span(", ")
-            .Span("underlined red", s => s.Underline().WithColor(Color.Red))
-            .Span(". Useful for one-off styles."));
         return doc;
     }
 
-    private static TextBlock CreateSectionHeader(string title)
+    private static void Section(Document doc, string title, string tocId)
     {
-        return new TextBlock
+        doc.Add(new Heading(title)
         {
-            Text = title,
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 14,
-            TextColor = ColorPalette.Indigo[600],
-            Margin = new Thickness(0, 12, 0, 6)
-        };
+            TocIdentifier = tocId,
+            Level         = 2,
+            FontName      = StandardFonts.HelveticaBold,
+            FontSize      = 13,
+            TextColor     = ColorPalette.Indigo[600],
+            Margin        = new Thickness(0, 14, 0, 6),
+        });
     }
 }
-

@@ -58,4 +58,10 @@ public class CatalogOptions
     /// Required by PDF/UA-1.
     /// </summary>
     public string Language { get; set; }
+
+    /// <summary>
+    /// The /PageLabels number-tree object ID (0 if none).
+    /// When non-zero, the catalog emits <c>/PageLabels N 0 R</c>.
+    /// </summary>
+    public int PageLabelsId { get; set; }
 }

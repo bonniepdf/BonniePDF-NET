@@ -12,12 +12,6 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "margins.pdf"));
         }
-        Console.WriteLine("Generating Margins (Fluent API)...");
-        using (var doc = MarginsExampleFluent.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "margins_fluent.pdf"));
-        }
-
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

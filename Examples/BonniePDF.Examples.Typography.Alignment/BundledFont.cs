@@ -1,4 +1,4 @@
-namespace BonniePDF.Examples.Typography.TextAlignment;
+namespace BonniePDF.Examples.Typography.Alignment;
 
 /// <summary>
 /// Resolves the NotoSans TrueType font bundled next to this example. The project

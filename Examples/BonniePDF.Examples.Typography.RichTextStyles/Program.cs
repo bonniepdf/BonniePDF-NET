@@ -13,17 +13,6 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "rich_text.pdf"));
         }
-        Console.WriteLine("Generating Rich Text Styles (Fluent API)...");
-        using (var doc = RichTextExampleFluent.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "rich_text_fluent.pdf"));
-        }
-
-        Console.WriteLine("Generating Rich Text Styles (Tagged / PDF/UA-1)...");
-        using (var doc = RichTextTaggedExample.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "rich_text_tagged.pdf"));
-        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
