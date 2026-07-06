@@ -112,7 +112,7 @@ public class PieChart : ChartBase
         decimal total = dataPoints.Sum(dp => dp.Value);
 
         // Calculate dynamic layout
-        var layout = CalculateLayout(dataPoints.Count);
+        var layout = CalculateLayout(dataPoints.Count, !string.IsNullOrEmpty(data.Title));
 
         // Calculate start angle for each slice
         List<(float startAngle, float endAngle)> angles = CalculateSliceAngles(dataPoints, total);
@@ -129,11 +129,17 @@ public class PieChart : ChartBase
 
     /// <summary>
     /// Computes all layout metrics from the current Width and Height.
+    ///
+    /// The title band is only reserved when a title is actually drawn; a titleless
+    /// pie centres symmetrically in the box instead of being pushed down by the
+    /// empty title gap.
     /// </summary>
-    private PieLayout CalculateLayout(int dataPointCount)
+    private PieLayout CalculateLayout(int dataPointCount, bool hasTitle)
     {
+        float titleBand = hasTitle ? TitleAreaHeight : 0;
+
         // Available vertical space for the pie (between title and bottom padding)
-        float availableHeight = Height - TitleAreaHeight - TopPadding - BottomPadding;
+        float availableHeight = Height - titleBand - TopPadding - BottomPadding;
 
         // Estimate legend width when legend is shown
         float legendWidth = 0;
@@ -156,7 +162,7 @@ public class PieChart : ChartBase
         pieRadius = Math.Max(pieRadius, 20); // minimum viable radius
 
         // Center the pie vertically in the available area
-        float pieCenterY = TitleAreaHeight + TopPadding + availableHeight / 2;
+        float pieCenterY = titleBand + TopPadding + availableHeight / 2;
 
         // Center the pie horizontally in its allocated space
         float pieAreaWidth = Width - (ShowLegend ? legendWidth + LegendGapFromPie + RightPadding : RightPadding) - LeftPadding;

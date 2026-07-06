@@ -16,6 +16,23 @@ public abstract class CartesianChartBase : ChartBase
     // Layout constants (relative to chart height)
     protected const float TitleAreaHeight = 60; // Space for title at top
     protected const float BottomPadding = 70; // Space for x-axis labels and legend
+
+    /// <summary>
+    /// Top band reserved when <see cref="ChartData.Title"/> is empty. Just enough
+    /// headroom for value labels sitting above the tallest data point, so a
+    /// titleless chart's plot area stretches up instead of leaving the title gap empty.
+    /// </summary>
+    protected const float TopPadding = 20;
+
+    /// <summary>
+    /// Bottom band reserved when no legend is drawn there. Holds only the
+    /// category/value tick labels (<see cref="DrawXAxisLabels"/> at
+    /// <c>baselineY + 15</c>, font <see cref="AxisLabelFontSize"/>), so a
+    /// legend-free chart's plot area stretches down instead of reserving the full
+    /// <see cref="BottomPadding"/> band.
+    /// </summary>
+    protected const float AxisLabelBand = 30;
+
     protected const float LeftPadding = 80; // Space for y-axis labels and legend
     protected const float RightPadding = 40; // Right margin
     protected const float AxisLineWidth = 1f;
@@ -69,7 +86,7 @@ public abstract class CartesianChartBase : ChartBase
     {
         if (data.Series.Count == 0) return;
 
-        (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) = CalculateLayout();
+        (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) = CalculateLayout(data);
 
         // 1. Draw grid lines first (behind everything)
         if (data.YAxis.ShowGridLines)
@@ -442,14 +459,40 @@ public abstract class CartesianChartBase : ChartBase
     protected virtual Color GetDefaultSeriesColor() => ColorPalette.Blue[600];
 
     /// <summary>
-    /// Calculates the chart layout dimensions.
+    /// Reports whether a legend occupies the bottom band for this chart+data, which
+    /// requires reserving the full <see cref="BottomPadding"/>. Mirrors where each
+    /// legend is actually drawn: the multi-series legend sits at <c>Height - 40</c>;
+    /// in horizontal mode the value-axis legend runs along the bottom; in vertical
+    /// mode the category-axis legend sits below the tick labels. (A vertical-mode
+    /// value-axis legend is drawn on the left, so it does not reserve bottom space.)
     /// </summary>
-    protected (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) CalculateLayout()
+    protected virtual bool ReservesBottomLegendBand(ChartData data)
     {
+        if (ShowLegend && data.Series.Count > 1) return true;
+        if (Orientation == ChartOrientation.Horizontal) return !string.IsNullOrEmpty(data.YAxis.Legend);
+        return !string.IsNullOrEmpty(data.XAxis.Legend);
+    }
+
+    /// <summary>
+    /// Calculates the chart layout dimensions.
+    ///
+    /// The top and bottom bands are content-aware so a chart's plot area fills the
+    /// available box instead of reserving space for absent decorations. The title
+    /// band collapses to <see cref="TopPadding"/> when there is no title, and the
+    /// bottom band collapses to <see cref="AxisLabelBand"/> when no legend is drawn
+    /// there. <c>baselineY</c> (and therefore the axis, tick labels, and legends)
+    /// depends only on the bottom band, so collapsing the title band shifts nothing
+    /// below it — it only lets the bars/series grow taller.
+    /// </summary>
+    protected (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) CalculateLayout(ChartData data)
+    {
+        float topBand = string.IsNullOrEmpty(data.Title) ? TopPadding : TitleAreaHeight;
+        float bottomBand = ReservesBottomLegendBand(data) ? BottomPadding : AxisLabelBand;
+
         float chartAreaWidth = Width - LeftPadding - RightPadding;
-        float chartAreaHeight = Height - TitleAreaHeight - BottomPadding;
-        float baselineY = TitleAreaHeight + chartAreaHeight;
-        float topY = TitleAreaHeight;
+        float chartAreaHeight = Height - topBand - bottomBand;
+        float baselineY = topBand + chartAreaHeight;
+        float topY = topBand;
 
         return (chartAreaWidth, chartAreaHeight, baselineY, topY);
     }
