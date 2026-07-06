@@ -5,7 +5,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\assets\fonts\NotoSans-Regular.ttf" Link="fonts\NotoSans-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\BonniePDF\Typography\Fonts\LiberationSans-Regular.ttf" Link="fonts\LiberationSans-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\BonniePDF\Typography\Fonts\LiberationSans-Bold.ttf" Link="fonts\LiberationSans-Bold.ttf" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <PropertyGroup>

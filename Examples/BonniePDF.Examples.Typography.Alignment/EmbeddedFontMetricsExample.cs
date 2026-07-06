@@ -1,7 +1,6 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
 using BonniePDF.Typography;
 using Align = BonniePDF.Elements.Text.TextAlignment;
 
@@ -15,8 +14,8 @@ namespace BonniePDF.Examples.Typography.Alignment;
 /// BonniePDF measures and places every glyph from the real metrics. That precision
 /// is what makes right, centre, and justified edges land exactly on the margin.
 ///
-/// This example renders the four alignments entirely in the bundled NotoSans TTF
-/// (embedded as a compact glyph subset). PDF/A-2a + PDF/UA-1.
+/// This example renders the four alignments entirely in embedded Liberation Sans
+/// (embedded as compact glyph subsets). PDF/A-2a + PDF/UA-1.
 /// </summary>
 [System.ComponentModel.DisplayName("Embedded-Font Metrics")]
 [System.ComponentModel.Category("Typography")]
@@ -32,6 +31,7 @@ public static class EmbeddedFontMetricsExample
     public static Document Generate()
     {
         string sansPath = BundledFont.SansPath;
+        string sansBoldPath = BundledFont.SansBoldPath;
 
         Document doc = new()
         {
@@ -40,7 +40,7 @@ public static class EmbeddedFontMetricsExample
                 Title    = "Embedded-Font Metrics",
                 Author   = "BonniePDF",
                 Subject  = "How an embedded TrueType font makes alignment edges exact, using its own hmtx advance widths.",
-                Keywords = "pdf, pdf/ua, pdf/a, fonts, embedding, metrics, hmtx, alignment, truetype, notosans",
+                Keywords = "pdf, pdf/ua, pdf/a, fonts, embedding, metrics, hmtx, alignment, truetype, liberation",
             },
             Settings = new DocumentSettings
             {
@@ -60,7 +60,7 @@ public static class EmbeddedFontMetricsExample
         {
             TocIdentifier = "intro",
             Level         = 1,
-            FontName      = sansPath,
+            FontName      = sansBoldPath,
             FontSize      = 22,
             TextColor     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 16),
@@ -70,17 +70,17 @@ public static class EmbeddedFontMetricsExample
         {
             Text   = "The standard-14 fonts are measured from approximate width tables. An embedded TrueType font carries " +
                      "its own hmtx advance widths, so glyph placement is exact — which is what makes the right, centre, and " +
-                     "justified edges below land precisely on the margin. Every element here is set in embedded NotoSans.",
+                     "justified edges below land precisely on the margin. Every element here is set in embedded Liberation Sans.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 
-        AlignedSample(doc, "Left Aligned (Default)", "s-left", Align.Left, sansPath);
-        AlignedSample(doc, "Centre Aligned", "s-centre", Align.Center, sansPath);
-        AlignedSample(doc, "Right Aligned", "s-right", Align.Right, sansPath);
-        AlignedSample(doc, "Justified", "s-justify", Align.Justify, sansPath);
+        AlignedSample(doc, "Left Aligned (Default)", "s-left", Align.Left, sansBoldPath);
+        AlignedSample(doc, "Centre Aligned", "s-centre", Align.Center, sansBoldPath);
+        AlignedSample(doc, "Right Aligned", "s-right", Align.Right, sansBoldPath);
+        AlignedSample(doc, "Justified", "s-justify", Align.Justify, sansBoldPath);
 
         // ── Book-style justified paragraphs ────────────────────────────────────
-        Section(doc, "Book-Style Justified Paragraphs", "book", sansPath);
+        Section(doc, "Book-Style Justified Paragraphs", "book", sansBoldPath);
 
         string[] paragraphs =
         {
@@ -103,8 +103,6 @@ public static class EmbeddedFontMetricsExample
             {
                 Text      = p,
                 FontName  = sansPath,
-                FontSize  = 11,
-                TextColor = ColorPalette.Slate[800],
                 Alignment = Align.Justify,
                 Margin    = new Thickness(0, 0, 0, 8),
             });
@@ -113,7 +111,7 @@ public static class EmbeddedFontMetricsExample
         return doc;
     }
 
-    private static void Section(Document doc, string title, string tocId, string fontPath)
+    private static void Section(Document doc, string title, string tocId, string fontPath, Align alignment = Align.Left)
     {
         doc.Add(new Heading(title)
         {
@@ -123,12 +121,13 @@ public static class EmbeddedFontMetricsExample
             FontSize      = 13,
             TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 0, 0, 6),
+            Alignment     = alignment,
         });
     }
 
     private static void AlignedSample(Document doc, string title, string tocId, Align alignment, string fontPath)
     {
-        Section(doc, title, tocId, fontPath);
+        Section(doc, title, tocId, fontPath, alignment);
         doc.Add(new TextBlock { Text = SampleText, Alignment = alignment, Margin = new Thickness(0, 0, 0, 14) });
     }
 }

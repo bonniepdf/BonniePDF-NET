@@ -96,8 +96,6 @@ public static class TextAlignmentExample
             {
                 Text      = p,
                 FontName  = StandardFonts.TimesRoman,
-                FontSize  = 11,
-                TextColor = ColorPalette.Slate[800],
                 Alignment = Align.Justify,
                 Margin    = new Thickness(0, 0, 0, 8),
             });
@@ -106,7 +104,7 @@ public static class TextAlignmentExample
         return doc;
     }
 
-    private static void Section(Document doc, string title, string tocId)
+    private static void Section(Document doc, string title, string tocId, Align alignment = Align.Left)
     {
         doc.Add(new Heading(title)
         {
@@ -116,12 +114,13 @@ public static class TextAlignmentExample
             FontSize      = 13,
             TextColor     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 0, 0, 6),
+            Alignment     = alignment,
         });
     }
 
     private static void AlignedSample(Document doc, string title, string tocId, Align alignment)
     {
-        Section(doc, title, tocId);
+        Section(doc, title, tocId, alignment);
         doc.Add(new TextBlock { Text = SampleText, Alignment = alignment, Margin = new Thickness(0, 0, 0, 14) });
     }
 }
