@@ -78,103 +78,125 @@ public static class ImagesExample
 
         // ── Fit modes ────────────────────────────────────────────────────────────
 
-        Section(doc, "Fit Modes", "s-fit");
-        FitModeSample(doc, gradientPng, ImageFitMode.Contain, "Contain", "scaled to fit within the box, preserving aspect ratio");
-        FitModeSample(doc, gradientPng, ImageFitMode.Cover, "Cover", "scaled to fill the box, preserving aspect ratio (may crop)");
-        FitModeSample(doc, gradientPng, ImageFitMode.Fill, "Fill", "stretched to fill the box, ignoring aspect ratio");
+        RenderSection(doc, "Fit Modes", "s-fit",
+            FitModeBlock(gradientPng, ImageFitMode.Contain, "Contain", "scaled to fit within the box, preserving aspect ratio"),
+            FitModeBlock(gradientPng, ImageFitMode.Cover, "Cover", "scaled to fill the box, preserving aspect ratio (may crop)"),
+            FitModeBlock(gradientPng, ImageFitMode.Fill, "Fill", "stretched to fill the box, ignoring aspect ratio"));
 
         // ── Alpha transparency ───────────────────────────────────────────────────
 
-        Section(doc, "Alpha Transparency", "s-alpha");
-
-        KeepTogether(doc,
-            Caption("PNG images can carry an alpha channel (a PDF soft mask), letting the background show through."),
-            new Image
+        RenderSection(doc, "Alpha Transparency", "s-alpha",
+            new IElement[]
             {
-                ImageData = alphaPng,
-                Width     = 200,
-                FitMode   = ImageFitMode.Contain,
-                AltText   = "A circular blue-to-red gradient fading to transparent at the edges, on the page background.",
-                Margin    = new Thickness(0, 0, 0, 10),
-            });
-
-        KeepTogether(doc,
-            Caption("The same image inside a tinted container — the alpha reveals the container colour."),
-            new Container
-            {
-                BackgroundColor = ColorPalette.Emerald[100],
-                Padding         = new Thickness(10),
-                Child = new Image
+                Caption("PNG images can carry an alpha channel (a PDF soft mask), letting the background show through."),
+                new Image
                 {
                     ImageData = alphaPng,
                     Width     = 200,
                     FitMode   = ImageFitMode.Contain,
-                    AltText   = "The circular gradient over a green container, whose colour shows through the transparent edges.",
+                    AltText   = "A circular blue-to-red gradient fading to transparent at the edges, on the page background.",
+                    Margin    = new Thickness(0, 0, 0, 10),
+                },
+            },
+            new IElement[]
+            {
+                Caption("The same image inside a tinted container — the alpha reveals the container colour."),
+                new Container
+                {
+                    BackgroundColor = ColorPalette.Emerald[100],
+                    Padding         = new Thickness(10),
+                    Child = new Image
+                    {
+                        ImageData = alphaPng,
+                        Width     = 200,
+                        FitMode   = ImageFitMode.Contain,
+                        AltText   = "The circular gradient over a green container, whose colour shows through the transparent edges.",
+                    },
                 },
             });
 
         // ── Image in a bordered container ────────────────────────────────────────
 
-        Section(doc, "Image in a Bordered Container", "s-container");
-        KeepTogether(doc,
-            Caption("A bordered, padded container wraps the image."),
-            new Container
+        RenderSection(doc, "Image in a Bordered Container", "s-container",
+            new IElement[]
             {
-                Padding      = new Thickness(15),
-                Border       = new Border(2),
-                BorderColors = new BorderColors(ColorPalette.Slate[600]),
-                Child = new Image
+                Caption("A bordered, padded container wraps the image."),
+                new Container
                 {
-                    ImageData = gradientPng,
-                    Width     = 250,
-                    FitMode   = ImageFitMode.Contain,
-                    AltText   = "Colour gradient inside a bordered container.",
+                    Padding      = new Thickness(15),
+                    Border       = new Border(2),
+                    BorderColors = new BorderColors(ColorPalette.Slate[600]),
+                    Child = new Image
+                    {
+                        ImageData = gradientPng,
+                        Width     = 250,
+                        FitMode   = ImageFitMode.Contain,
+                        AltText   = "Colour gradient inside a bordered container.",
+                    },
                 },
             });
 
         // ── Decorative image ──────────────────────────────────────────────────────
 
-        Section(doc, "Decorative Images", "s-decorative");
-        KeepTogether(doc,
-            Caption("The light grey bar below is decorative; it is tagged as an artifact and carries no alt text."),
-            new Image
+        RenderSection(doc, "Decorative Images", "s-decorative",
+            new IElement[]
             {
-                ImageData    = dividerPng,
-                Width        = 360,
-                Height       = 12,
-                FitMode      = ImageFitMode.Fill,
-                IsDecorative = true,
+                Caption("The light grey bar below is decorative; it is tagged as an artifact and carries no alt text."),
+                new Image
+                {
+                    ImageData    = dividerPng,
+                    Width        = 360,
+                    Height       = 12,
+                    FitMode      = ImageFitMode.Fill,
+                    IsDecorative = true,
+                },
             });
 
         return doc;
     }
 
     /// <summary>
-    /// Adds a caption + content pair wrapped in a Container so they page-break as
-    /// one unit. A bare Image (or TextBlock) added directly to the document has no
-    /// pagination of its own and would be clipped at the page edge; a Container
-    /// measures its full height first and moves to the next page when it does not
-    /// fit (keeping the caption with its image).
+    /// Renders a section as a heading followed by one or more blocks. Each block is
+    /// wrapped in a Container so a bare Image (which has no pagination of its own and
+    /// would be clipped at the page edge) breaks to the next page as a whole unit
+    /// with its caption. The heading is grouped with the first block so it never
+    /// dangles alone at the bottom of a page while its content flows over.
     /// </summary>
-    private static void KeepTogether(Document doc, params IElement[] elements)
+    private static void RenderSection(Document doc, string title, string tocId, params IElement[][] blocks)
+    {
+        Heading heading = SectionHeading(title, tocId);
+        for (int i = 0; i < blocks.Length; i++)
+        {
+            if (i == 0)
+            {
+                var withHeading = new List<IElement> { heading };
+                withHeading.AddRange(blocks[i]);
+                Group(doc, withHeading.ToArray());
+            }
+            else
+            {
+                Group(doc, blocks[i]);
+            }
+        }
+    }
+
+    /// <summary>Wraps elements in a Container so they measure and page-break as one unit.</summary>
+    private static void Group(Document doc, params IElement[] elements)
     {
         var stack = new VerticalStack();
         foreach (IElement el in elements) stack.AddChild(el);
         doc.Add(new Container { Child = stack });
     }
 
-    private static void Section(Document doc, string title, string tocId)
+    private static Heading SectionHeading(string title, string tocId) => new(title)
     {
-        doc.Add(new Heading(title)
-        {
-            TocIdentifier = tocId,
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 15,
-            TextColor     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 14, 0, 6),
-        });
-    }
+        TocIdentifier = tocId,
+        Level         = 2,
+        FontName      = StandardFonts.HelveticaBold,
+        FontSize      = 15,
+        TextColor     = ColorPalette.Indigo[600],
+        Margin        = new Thickness(0, 14, 0, 6),
+    };
 
     private static TextBlock Caption(string text) => new()
     {
@@ -184,9 +206,9 @@ public static class ImagesExample
         Margin    = new Thickness(0, 0, 0, 6),
     };
 
-    private static void FitModeSample(Document doc, byte[] png, ImageFitMode fitMode, string label, string description)
-    {
-        KeepTogether(doc,
+    private static IElement[] FitModeBlock(byte[] png, ImageFitMode fitMode, string label, string description) =>
+        new IElement[]
+        {
             Caption($"{label}: {description}."),
             new Image
             {
@@ -196,8 +218,8 @@ public static class ImagesExample
                 FitMode   = fitMode,
                 AltText   = $"Colour gradient shown in {label.ToLowerInvariant()} fit mode.",
                 Margin    = new Thickness(0, 0, 0, 10),
-            });
-    }
+            },
+        };
 
     // ── In-memory PNG builder (single stored zlib block; no external deps) ──────
 
