@@ -12,7 +12,6 @@ internal sealed class Program
         [
             ("us-sales-invoice.pdf", UsSalesInvoiceExample.Generate),
             ("uk-vat-invoice.pdf", UkVatInvoiceExample.Generate),
-            ("eu-einvoice.pdf", EuEInvoiceExample.Generate),
             ("india-gst-invoice.pdf", IndiaGstInvoiceExample.Generate),
         ];
 

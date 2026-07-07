@@ -78,13 +78,17 @@ jobs:
             echo "::endgroup::"
           done
 
-      - name: Collect tagged PDFs
+      - name: Collect conformance-claiming PDFs
         run: |
           mkdir -p generated-pdfs
           # PDF/UA-1 examples write their tagged output as *_tagged.pdf into
           # GeneratedPdfs/. Collect every one — any new tagged example is
           # included automatically, with no change to this workflow.
           find Examples -path '*/GeneratedPdfs/*_tagged.pdf' -exec cp {} generated-pdfs/ \;
+          # PDF/A-3 examples (attachments / Factur-X) are not tagged, so collect
+          # them by name. Add new PDF/A example outputs here.
+          find Examples -path '*/GeneratedPdfs/factur-x_invoice.pdf' -exec cp {} generated-pdfs/ \;
+          find Examples -path '*/GeneratedPdfs/attached-data.pdf' -exec cp {} generated-pdfs/ \;
           ls -l generated-pdfs
 
       # `auto` reads each PDF's XMP conformance claims (pdfaid + pdfuaid) and
@@ -105,6 +109,27 @@ jobs:
 
       - name: Validate with veraPDF (auto-detected claims)
         run: tools/verapdf/validate.sh generated-pdfs auto
+
+      # ── ZUGFeRD / Factur-X gate (Mustang) ────────────────────────────────
+      # veraPDF proves PDF/A-3b; Mustang additionally validates the embedded
+      # CII XML against the EN 16931 schematron. PDF/A passing alone is not a
+      # valid e-invoice claim.
+      - name: Cache Mustang CLI
+        uses: actions/cache@v4
+        with:
+          path: tools/mustang/*.jar
+          key: mustang-${{ runner.os }}-${{ hashFiles('tools/mustang/validate.sh') }}
+
+      - name: Verify mustang validate.sh is executable
+        run: |
+          mode=$(git ls-files -s tools/mustang/validate.sh | cut -d' ' -f1)
+          if [ "$mode" != "100755" ]; then
+            echo "::error::tools/mustang/validate.sh has mode $mode, expected 100755. Fix with: git update-index --chmod=+x tools/mustang/validate.sh"
+            exit 1
+          fi
+
+      - name: Validate ZUGFeRD / Factur-X with Mustang
+        run: tools/mustang/validate.sh generated-pdfs/factur-x_invoice.pdf
 
       - name: Upload generated PDFs
         uses: actions/upload-artifact@v4
