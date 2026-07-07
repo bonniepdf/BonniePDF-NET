@@ -84,7 +84,7 @@ public static class PatientSummaryExample
         detailsLeft.AddChild(DetailRow("Phone", "+44 7700 900482"));
 
         VerticalStack detailsRight = new();
-        detailsRight.AddChild(DetailRow("NHS number", "943 476 5919"));
+        detailsRight.AddChild(DetailRow("Patient ID", "ACME-9434765919"));
         detailsRight.AddChild(DetailRow("Ward", "Cardiology - 4B"));
         detailsRight.AddChild(DetailRow("Admitted", "16 Jun 2026"));
 

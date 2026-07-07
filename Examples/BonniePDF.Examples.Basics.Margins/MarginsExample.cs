@@ -24,14 +24,14 @@ public static class MarginsExample
         doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
-        doc.Metadata.Title = "Margin Example";
+        doc.Metadata.Title = "Margins & Units";
         doc.Metadata.Author = "BonniePDF";
         doc.Metadata.Subject = "Demonstrating margin support for elements";
 
         // Title with bottom margin
         doc.Add(new TextBlock
         {
-            Text = "Margin Example",
+            Text = "Margins & Units",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
             TextColor = ColorPalette.Slate[800],
