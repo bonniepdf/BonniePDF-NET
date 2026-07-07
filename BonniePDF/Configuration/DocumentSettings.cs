@@ -221,6 +221,15 @@ public class DocumentSettings
     public AccessibilityMode Accessibility { get; set; } = AccessibilityMode.None;
 
     /// <summary>
+    /// ZUGFeRD / Factur-X e-invoice metadata. When non-<c>null</c> (and the
+    /// document is a PDF/A-3 level), the XMP writer emits the <c>fx:*</c>
+    /// conformance block. Normally set via <see cref="EInvoice.FacturX"/>
+    /// rather than directly — that helper also attaches the XML and forces
+    /// PDF/A-3. Default <c>null</c> (not an e-invoice).
+    /// </summary>
+    public EInvoice.FacturXMetadata FacturX { get; set; }
+
+    /// <summary>
     /// Document natural language as a BCP-47 tag (e.g. <c>"en-GB"</c>,
     /// <c>"de-DE"</c>, <c>"fr"</c>). Written to the catalog as
     /// <c>/Lang</c> when set; required for PDF/UA-1 conformance, where

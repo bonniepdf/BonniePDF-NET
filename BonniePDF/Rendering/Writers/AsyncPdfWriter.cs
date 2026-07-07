@@ -408,6 +408,19 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         if (options?.DestsId > 0)
             dict["/Dests"] = $"{options.DestsId} 0 R";
 
+        // Add PageLabels if configured
+        if (options?.PageLabelsId > 0)
+            dict["/PageLabels"] = $"{options.PageLabelsId} 0 R";
+
+        // Add /Names /EmbeddedFiles and /AF for document attachments (PDF/A-3).
+        if (options?.NamesEmbeddedFilesId > 0)
+            dict["/Names"] = $"<< /EmbeddedFiles {options.NamesEmbeddedFilesId} 0 R >>";
+        if (options?.AssociatedFileIds is { Count: > 0 })
+        {
+            string afRefs = string.Join(' ', options.AssociatedFileIds.ToList().ConvertAll(fid => $"{fid} 0 R"));
+            dict["/AF"] = $"[ {afRefs} ]";
+        }
+
         await WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
     }
 

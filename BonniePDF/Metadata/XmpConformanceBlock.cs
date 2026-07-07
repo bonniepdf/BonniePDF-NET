@@ -131,4 +131,38 @@ internal sealed class XmpConformanceBlock
                     category: "internal",
                     description: "Indicates, which part of ISO 14289 standard is followed"),
             }));
+
+    /// <summary>
+    /// ZUGFeRD / Factur-X 2.x conformance claim. Emits the four
+    /// <c>fx:*</c> properties (DocumentType, DocumentFileName, Version,
+    /// ConformanceLevel) the Factur-X technical specification requires in the
+    /// XMP, plus the <c>pdfaExtension:schemas</c> descriptor for the
+    /// non-predefined <c>fx</c> namespace (ISO 19005-3 §6.6.2.3).
+    ///
+    /// <para>Factur-X is only meaningful on a PDF/A-3 document; the caller
+    /// (<see cref="EInvoice.FacturX"/>) enforces that, and the XMP writer only
+    /// includes this block when a PDF/A claim survives the honest-claim
+    /// guard.</para>
+    /// </summary>
+    public static XmpConformanceBlock FacturX(EInvoice.FacturXMetadata meta) => new(
+        prefix: EInvoice.FacturXMetadata.Prefix,
+        namespaceUri: EInvoice.FacturXMetadata.NamespaceUri,
+        elements: new[]
+        {
+            new KeyValuePair<string, string>("DocumentType", meta.DocumentType),
+            new KeyValuePair<string, string>("DocumentFileName", meta.DocumentFileName),
+            new KeyValuePair<string, string>("Version", meta.Version),
+            new KeyValuePair<string, string>("ConformanceLevel", meta.ConformanceLevel),
+        },
+        extensionSchema: new XmpExtensionSchema(
+            namespaceUri: EInvoice.FacturXMetadata.NamespaceUri,
+            prefix: EInvoice.FacturXMetadata.Prefix,
+            schemaName: "Factur-X PDFA Extension Schema",
+            properties: new[]
+            {
+                new XmpExtensionSchemaProperty("DocumentType", "Text", "external", "INVOICE"),
+                new XmpExtensionSchemaProperty("DocumentFileName", "Text", "external", "Factur-X, ZUGFeRD"),
+                new XmpExtensionSchemaProperty("Version", "Text", "external", "The actual version of the Factur-X XML schema"),
+                new XmpExtensionSchemaProperty("ConformanceLevel", "Text", "external", "The conformance level of the embedded Factur-X data"),
+            }));
 }

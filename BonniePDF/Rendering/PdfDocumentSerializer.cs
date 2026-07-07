@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BonniePDF.Attachments;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements;
@@ -306,6 +307,17 @@ public class PdfDocumentSerializer
             catalogOptions.PageLabelsId = pageLabelsId;
         }
 
+        // Write document attachments (embedded files) subject to the
+        // conformance guard. Populates /Names /EmbeddedFiles and /AF.
+        IList<FileAttachment> attachmentsToWrite = ResolveAttachments();
+        if (attachmentsToWrite != null)
+        {
+            AttachmentWriter attachmentWriter = new(writer);
+            AttachmentWriter.Result attachmentResult = attachmentWriter.WriteAttachments(attachmentsToWrite);
+            catalogOptions.NamesEmbeddedFilesId = attachmentResult.NamesEmbeddedFilesId;
+            catalogOptions.AssociatedFileIds = attachmentResult.AssociatedFileIds;
+        }
+
         // Write Catalog
         writer.WriteCatalog(catalogId, pagesId, pageIds[0], _document.Settings, catalogOptions);
 
@@ -558,6 +570,18 @@ public class PdfDocumentSerializer
             catalogOptions.PageLabelsId = pageLabelsId;
         }
 
+        // Write document attachments (embedded files) subject to the
+        // conformance guard. Populates /Names /EmbeddedFiles and /AF.
+        IList<FileAttachment> attachmentsToWrite = ResolveAttachments();
+        if (attachmentsToWrite != null)
+        {
+            AttachmentWriter attachmentWriter = new(writer);
+            AttachmentWriter.Result attachmentResult = await attachmentWriter
+                .WriteAttachmentsAsync(attachmentsToWrite, cancellationToken).ConfigureAwait(false);
+            catalogOptions.NamesEmbeddedFilesId = attachmentResult.NamesEmbeddedFilesId;
+            catalogOptions.AssociatedFileIds = attachmentResult.AssociatedFileIds;
+        }
+
         // Write Catalog
         await writer.WriteCatalogAsync(catalogId, pagesId, pageIds[0], _document.Settings, catalogOptions, cancellationToken)
             .ConfigureAwait(false);
@@ -566,6 +590,31 @@ public class PdfDocumentSerializer
         if (encryptId > 0) await writer.WriteEncryptDictionaryAsync(encryptId, cancellationToken).ConfigureAwait(false);
 
         await writer.CloseAsync(catalogId, documentInfoId, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Applies the embedded-file conformance guard (<see cref="AttachmentRules"/>)
+    /// and returns the attachments to write, or <c>null</c> when there is
+    /// nothing to embed. Under a PDF/A level that forbids embedded files the
+    /// attachments are dropped and a warning diagnostic recorded, keeping the
+    /// emitted PDF's conformance claim honest.
+    /// </summary>
+    private IList<FileAttachment> ResolveAttachments()
+    {
+        IList<FileAttachment> attachments = _document.Attachments;
+        if (attachments == null || attachments.Count == 0)
+            return null;
+
+        if (!AttachmentRules.AllowsEmbeddedFiles(_document.Settings.Conformance))
+        {
+            _diagnostics.AddWarning(DiagnosticCategory.Attachment,
+                $"{_document.Settings.Conformance} does not permit embedded files; " +
+                $"{attachments.Count} attachment(s) were dropped. Use PdfAConformance.PdfA3b " +
+                "for e-invoicing (ZUGFeRD / Factur-X).");
+            return null;
+        }
+
+        return attachments;
     }
 
     /// <summary>

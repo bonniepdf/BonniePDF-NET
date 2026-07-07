@@ -147,10 +147,21 @@ public class MetadataWriter
     /// </summary>
     private static IReadOnlyList<XmpConformanceBlock> BuildConformanceBlocks(DocumentSettings settings)
     {
-        var blocks = new List<XmpConformanceBlock>(2);
+        var blocks = new List<XmpConformanceBlock>(3);
         var pdfA = XmpConformanceBlock.ForPdfA(settings.Conformance);
         if (pdfA != null) blocks.Add(pdfA);
         if (settings.Accessibility == AccessibilityMode.PdfUa1) blocks.Add(XmpConformanceBlock.PdfUa1());
+
+        // ZUGFeRD / Factur-X: only claim it on a PDF/A-3 document. Gating on
+        // the (possibly guard-reset) Conformance means a suppressed PDF/A
+        // claim also suppresses the fx block - Factur-X without PDF/A-3 is
+        // meaningless, so the honest-claim guard cascades for free.
+        if (settings.FacturX != null &&
+            settings.Conformance is PdfAConformance.PdfA3b or PdfAConformance.PdfA3a)
+        {
+            blocks.Add(XmpConformanceBlock.FacturX(settings.FacturX));
+        }
+
         return blocks;
     }
 }
