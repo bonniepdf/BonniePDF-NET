@@ -407,6 +407,15 @@ public class PdfWriter : IPdfWriter, IDisposable
         if (options?.PageLabelsId > 0)
             dict["/PageLabels"] = $"{options.PageLabelsId} 0 R";
 
+        // Add /Names /EmbeddedFiles and /AF for document attachments (PDF/A-3).
+        if (options?.NamesEmbeddedFilesId > 0)
+            dict["/Names"] = $"<< /EmbeddedFiles {options.NamesEmbeddedFilesId} 0 R >>";
+        if (options?.AssociatedFileIds is { Count: > 0 })
+        {
+            string afRefs = string.Join(' ', options.AssociatedFileIds.ToList().ConvertAll(fid => $"{fid} 0 R"));
+            dict["/AF"] = $"[ {afRefs} ]";
+        }
+
         WriteObject(id, dict);
     }
 

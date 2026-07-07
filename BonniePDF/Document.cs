@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using BonniePDF.Attachments;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements;
@@ -23,6 +24,7 @@ namespace BonniePDF;
 public class Document : IDisposable
 {
     private readonly List<Page> _pages = [];
+    private readonly List<FileAttachment> _attachments = [];
     private readonly DiagnosticsCollector _diagnostics = new();
     private bool _disposed;
 
@@ -88,6 +90,37 @@ public class Document : IDisposable
     /// Gets the pages in this document
     /// </summary>
     public IReadOnlyList<Page> Pages => _pages.AsReadOnly();
+
+    /// <summary>
+    /// Files embedded into the generated PDF as associated files (PDF/A-3 /
+    /// ZUGFeRD). Add to this collection directly, or use the
+    /// <see cref="Attach(FileAttachment)"/> / <see cref="Attach(string, byte[], AttachmentRelationship, string)"/>
+    /// helpers. Embedded files are honoured under <c>None</c>, PDF/A-3, and
+    /// PDF/A-4; under levels that forbid them (PDF/A-1, PDF/A-2) they are
+    /// dropped at save time with a diagnostic, keeping the conformance claim
+    /// honest.
+    /// </summary>
+    public IList<FileAttachment> Attachments => _attachments;
+
+    /// <summary>
+    /// Embeds a file into the document. Returns this document for chaining.
+    /// </summary>
+    public Document Attach(FileAttachment attachment)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(attachment);
+        _attachments.Add(attachment);
+        return this;
+    }
+
+    /// <summary>
+    /// Embeds a file into the document from a name and bytes. Returns this
+    /// document for chaining.
+    /// </summary>
+    public Document Attach(string fileName, byte[] content,
+        AttachmentRelationship relationship = AttachmentRelationship.Unspecified,
+        string mediaType = null)
+        => Attach(new FileAttachment(fileName, content, relationship, mediaType));
 
     /// <summary>
     /// Disposes of the document and releases any resources

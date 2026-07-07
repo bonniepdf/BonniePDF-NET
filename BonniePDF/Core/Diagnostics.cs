@@ -22,6 +22,7 @@ public enum DiagnosticCategory
     Tagging,
     Platform,
     Render,
+    Attachment,
 }
 
 /// <summary>

@@ -64,4 +64,19 @@ public class CatalogOptions
     /// When non-zero, the catalog emits <c>/PageLabels N 0 R</c>.
     /// </summary>
     public int PageLabelsId { get; set; }
+
+    /// <summary>
+    /// The object ID of the <c>/EmbeddedFiles</c> name-tree dictionary for
+    /// document attachments (0 if none). When non-zero, the catalog emits
+    /// <c>/Names &lt;&lt; /EmbeddedFiles N 0 R &gt;&gt;</c>.
+    /// </summary>
+    public int NamesEmbeddedFilesId { get; set; }
+
+    /// <summary>
+    /// The filespec object IDs of the document's associated files (null or
+    /// empty if none). When present, the catalog emits an <c>/AF</c> array -
+    /// required for PDF/A-3 so conforming readers treat the attachments as
+    /// associated files.
+    /// </summary>
+    public IList<int> AssociatedFileIds { get; set; }
 }

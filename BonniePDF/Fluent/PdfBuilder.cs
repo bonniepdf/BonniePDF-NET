@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using BonniePDF.Attachments;
 using BonniePDF.Configuration;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
@@ -18,6 +19,7 @@ namespace BonniePDF.Fluent;
 public sealed class PdfBuilder
 {
     private readonly List<PageDescriptor> _pageDescriptors = [];
+    private readonly List<FileAttachment> _attachments = [];
     private Action<DocumentMetadata>? _metadataAction;
     private Action<DocumentSettings>? _settingsAction;
     private TextStyle? _documentDefaultStyle;
@@ -77,6 +79,26 @@ public sealed class PdfBuilder
         _settingsAction = configure;
         return this;
     }
+
+    /// <summary>
+    /// Embeds a file into the document as an associated file (PDF/A-3 /
+    /// ZUGFeRD). See <see cref="Document.Attachments"/> for the conformance
+    /// rules that govern when the file is actually written.
+    /// </summary>
+    public PdfBuilder Attach(FileAttachment attachment)
+    {
+        ArgumentNullException.ThrowIfNull(attachment);
+        _attachments.Add(attachment);
+        return this;
+    }
+
+    /// <summary>
+    /// Embeds a file into the document from a name and bytes.
+    /// </summary>
+    public PdfBuilder Attach(string fileName, byte[] content,
+        AttachmentRelationship relationship = AttachmentRelationship.Unspecified,
+        string mediaType = null)
+        => Attach(new FileAttachment(fileName, content, relationship, mediaType));
 
     /// <summary>
     /// Saves the document to the specified file path.
@@ -176,6 +198,10 @@ public sealed class PdfBuilder
 
         // Apply metadata
         _metadataAction?.Invoke(doc.Metadata);
+
+        // Apply attachments
+        foreach (FileAttachment attachment in _attachments)
+            doc.Attach(attachment);
 
         // Build content for the first page
         if (firstPage.ContentSlot.Child != null)
