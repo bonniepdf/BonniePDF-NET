@@ -70,7 +70,7 @@ internal sealed class QrCodeEncoder
         int mask = -1, bool boostEcl = true)
     {
         if (minVersion < MinVersion || minVersion > maxVersion || maxVersion > MaxVersion || mask < -1 || mask > 7)
-            throw new ArgumentOutOfRangeException();
+            throw new ArgumentOutOfRangeException(nameof(minVersion), "Invalid version range or mask value.");
 
         // Find the minimal version number to use
         int version, dataUsedBits;
@@ -302,7 +302,7 @@ internal sealed class QrCodeEncoder
         int ver = Version;
         QrEcc ecl = ErrorCorrectionLevel;
         if (data.Length != GetNumDataCodewords(ver, ecl))
-            throw new ArgumentException("Invalid data length");
+            throw new ArgumentException("Invalid data length", nameof(data));
 
         int numBlocks = NumErrorCorrectionBlocks[ecl.Ordinal][ver];
         int blockEccLen = EccCodewordsPerBlock[ecl.Ordinal][ver];
@@ -357,7 +357,7 @@ internal sealed class QrCodeEncoder
     private void DrawCodewords(byte[] data)
     {
         if (data.Length != GetNumRawDataModules(Version) / 8)
-            throw new ArgumentException("Invalid data length");
+            throw new ArgumentException("Invalid data length", nameof(data));
 
         int i = 0;
         // Zigzag scan

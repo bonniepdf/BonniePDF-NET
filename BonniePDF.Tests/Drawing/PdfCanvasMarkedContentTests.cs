@@ -1,13 +1,9 @@
-using System;
 using System.Text;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Tagging;
-using BonniePDF.Typography.TrueType;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Drawing;
 
 /// <summary>
 /// marked-content emission tests for <see cref="PdfCanvas"/>.

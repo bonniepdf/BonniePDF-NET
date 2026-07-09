@@ -1,4 +1,3 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
@@ -6,7 +5,7 @@ using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Security;
 
 /// <summary>this feature Stage 2 and this feature tests.</summary>
 [Collection("Serial")]
@@ -179,9 +178,9 @@ public class FontEmbeddingAndTextStyleTests
 
     // ── Helpers ──────────────────────────────────────────────────────
 
-    private static byte[] Generate(Action<Document> populate)
+    private static byte[] Generate(Action<BonniePDF.Document> populate)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         populate(doc);
         using var ms = new MemoryStream();
         doc.Save(ms, true);

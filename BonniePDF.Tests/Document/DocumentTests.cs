@@ -1,13 +1,13 @@
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Document;
 
 public class DocumentTests
 {
     [Fact]
     public void CanCreateDocument()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         Assert.NotNull(doc);
         Assert.Single(doc.Pages);
     }
@@ -15,7 +15,7 @@ public class DocumentTests
     [Fact]
     public void CanAddPage()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.AddPage();
         Assert.Equal(2, doc.Pages.Count);
     }
@@ -23,7 +23,7 @@ public class DocumentTests
     [Fact]
     public void CanSaveToStream()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         using MemoryStream ms = new();
 
         doc.Save(ms, true);

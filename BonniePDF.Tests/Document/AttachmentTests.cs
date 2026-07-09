@@ -1,5 +1,3 @@
-using System.IO;
-using System.Linq;
 using System.Text;
 using BonniePDF.Attachments;
 using BonniePDF.Configuration;
@@ -7,7 +5,7 @@ using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Document;
 
 /// <summary>
 /// file attachments (embedded / associated files). Parity peer of the
@@ -20,9 +18,9 @@ public class AttachmentTests
 {
     private static byte[] Xml() => Encoding.UTF8.GetBytes("<invoice><total>42.00</total></invoice>");
 
-    private static (string Pdf, Document Doc) Generate(System.Action<Document> populate)
+    private static (string Pdf, BonniePDF.Document Doc) Generate(System.Action<BonniePDF.Document> populate)
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         populate(doc);
         using var ms = new MemoryStream();
         doc.Save(ms, true);

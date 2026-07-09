@@ -1,7 +1,7 @@
 using BonniePDF.Configuration;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 /// <summary>
 /// Round-trip tests for the new accessibility-related properties on

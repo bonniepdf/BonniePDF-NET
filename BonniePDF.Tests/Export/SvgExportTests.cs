@@ -1,14 +1,13 @@
-using System;
+using System.Globalization;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
-using System.Globalization;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Export;
 
 public class SvgExportTests
 {

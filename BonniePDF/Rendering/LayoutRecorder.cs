@@ -51,10 +51,10 @@ public sealed class LayoutNode
     /// <summary>Canonical element type name, e.g. "TextBlock", "Table", "Page".</summary>
     public string Type { get; init; } = "";
     /// <summary>Optional author-supplied name/key; null when unset.</summary>
-    public string Name { get; init; }
+    public string? Name { get; init; }
     /// <summary>The rectangles this node occupied — one per page it touched (may be empty).</summary>
-    public List<LayoutRect> Rects { get; } = new();
-    public List<LayoutNode> Children { get; } = new();
+    public IList<LayoutRect> Rects { get; } = new List<LayoutRect>();
+    public IList<LayoutNode> Children { get; } = new List<LayoutNode>();
 }
 
 /// <summary>The captured layout of a whole document.</summary>
@@ -82,7 +82,7 @@ public sealed class LayoutRecorder
 {
     private sealed class OpenFrame
     {
-        public LayoutNode Node;
+        public required LayoutNode Node;
         public float X;
         public float Width;
         public int Page;
@@ -114,7 +114,7 @@ public sealed class LayoutRecorder
     }
 
     /// <summary>Opens (or resumes) a node for <paramref name="element"/>.</summary>
-    public void OpenNode(object element, string type, string name, int page, float x, float y, float width)
+    public void OpenNode(object element, string type, string? name, int page, float x, float y, float width)
     {
         if (!Capturing) return;
         if (_open.ContainsKey(element)) return; // resumed segment of an open element
@@ -131,7 +131,7 @@ public sealed class LayoutRecorder
     public void CloseNode(object element, int page, float endY, bool complete)
     {
         if (!Capturing) return;
-        if (!_open.TryGetValue(element, out OpenFrame frame)) return;
+        if (!_open.TryGetValue(element, out OpenFrame? frame)) return;
         if (!complete) return; // overflowed; PageBreak finalises the open rect, resume later
 
         PushRect(frame, endY);
@@ -184,7 +184,7 @@ public sealed class LayoutRecorder
     }
 
     /// <summary>Reads an element's optional author capture name.</summary>
-    public static string CaptureNameOf(object element)
+    public static string? CaptureNameOf(object element)
     {
         return element is Elements.ICaptureMetadata meta ? meta.CaptureName : null;
     }

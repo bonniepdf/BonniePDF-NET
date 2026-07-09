@@ -11,7 +11,7 @@ public class BookmarkItem
     /// <summary>
     /// The display title of the bookmark.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// The 0-based page index this bookmark navigates to.

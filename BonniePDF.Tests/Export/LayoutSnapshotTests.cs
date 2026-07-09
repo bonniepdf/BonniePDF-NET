@@ -1,13 +1,10 @@
-using System.Collections.Generic;
-using System.Linq;
-using BonniePDF;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Export;
 using BonniePDF.Rendering;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Export;
 
 // Mirrors the TypeScript suite tests/export/layout-snapshot.test.ts and the
 // shared fixture spec/fixtures/layout-snapshot/vertical-stack.json. Verifies the
@@ -28,7 +25,7 @@ public class LayoutSnapshotTests
     [Fact]
     public void NoSnapshot_WhenCaptureLayoutNotRequested()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "Hello", FontSize = 14 });
         SvgDocumentExport export = doc.GenerateSvgDocument();
         Assert.Null(export.Snapshot);
@@ -37,7 +34,7 @@ public class LayoutSnapshotTests
     [Fact]
     public void Captures_Document_Page_Content_Tree()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "First", FontSize = 14 });
         doc.Add(new TextBlock { Text = "Second", FontSize = 11 });
 
@@ -59,7 +56,7 @@ public class LayoutSnapshotTests
     [Fact]
     public void Rectangles_AreTopLeft_InBounds_Points()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "Measure me", FontSize = 14 });
 
         LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
@@ -78,7 +75,7 @@ public class LayoutSnapshotTests
     [Fact]
     public void Nests_Children_UnderVerticalStack()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         var stack = new VerticalStack();
         stack.AddChild(new TextBlock { Text = "A", FontSize = 12 });
         stack.AddChild(new TextBlock { Text = "B", FontSize = 12 });
@@ -92,7 +89,7 @@ public class LayoutSnapshotTests
     [Fact]
     public void Splits_PaginatingElement_OneRectPerPage()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         for (int i = 0; i < 120; i++)
             doc.Add(new TextBlock { Text = $"Line {i + 1}", FontSize = 14 });
 
@@ -113,9 +110,9 @@ public class LayoutSnapshotTests
     [Fact]
     public void NodeIds_AreUnique_AndDeterministic()
     {
-        Document Build()
+        BonniePDF.Document Build()
         {
-            var d = new Document();
+            var d = new BonniePDF.Document();
             d.Add(new TextBlock { Text = "X", FontSize = 12 });
             d.Add(new TextBlock { Text = "Y", FontSize = 12 });
             return d;
@@ -133,9 +130,9 @@ public class LayoutSnapshotTests
     [Fact]
     public void ByteUnchangedGuard_CaptureLayoutDoesNotAlterSvg()
     {
-        Document Build()
+        BonniePDF.Document Build()
         {
-            var d = new Document();
+            var d = new BonniePDF.Document();
             var stack = new VerticalStack();
             stack.AddChild(new TextBlock { Text = "Alpha", FontSize = 14 });
             stack.AddChild(new TextBlock { Text = "Beta", FontSize = 11 });

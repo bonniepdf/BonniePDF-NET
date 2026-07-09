@@ -87,7 +87,7 @@ internal sealed class RC4Cipher
     /// <returns>Transformed data</returns>
     public byte[] TransformCopy(byte[] data)
     {
-        if (data == null) return null;
+        if (data == null) return data!;
 
         byte[] result = new byte[data.Length];
         Buffer.BlockCopy(data, 0, result, 0, data.Length);

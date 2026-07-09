@@ -132,10 +132,13 @@ internal sealed partial class QrSegment
 
     // ---- Constants ----
 
-    [GeneratedRegex(@"^[0-9]*$", RegexOptions.Compiled)]
+    // Both patterns are anchored, unambiguous character classes with no nested
+    // quantifiers, so they aren't ReDoS-susceptible - the timeout is defensive
+    // policy, not a fix for a known catastrophic-backtracking pattern.
+    [GeneratedRegex(@"^[0-9]*$", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
     private static partial Regex NumericRegex();
 
-    [GeneratedRegex(@"^[0-9A-Z $%*+./:-]*$", RegexOptions.Compiled)]
+    [GeneratedRegex(@"^[0-9A-Z $%*+./:-]*$", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
     private static partial Regex AlphanumericRegex();
     private const string AlphanumericCharset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 

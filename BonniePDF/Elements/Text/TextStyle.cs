@@ -15,7 +15,7 @@ public class TextStyle
     /// to the correct variant (e.g. "Helvetica-Bold").
     /// Null = inherit from parent.
     /// </summary>
-    public string FontFamily { get; set; }
+    public string? FontFamily { get; set; }
 
     /// <summary>
     /// Font weight (100-900). Normal = 400, Bold = 700.
@@ -57,7 +57,7 @@ public class TextStyle
     /// Resolves the actual PDF font name by combining FontFamily + Weight + Italic
     /// through the FontFamilyResolver.
     /// </summary>
-    public string ResolvedFontName =>
+    public string? ResolvedFontName =>
         FontFamily != null
             ? FontFamilyResolver.Resolve(FontFamily, Weight, Italic)
             : null;
@@ -66,7 +66,7 @@ public class TextStyle
     /// Creates a merged style where this style's non-null values override the base style's values.
     /// Used to combine a span's local style with the RichText element's default style.
     /// </summary>
-    public TextStyle MergeWith(TextStyle baseStyle)
+    public TextStyle MergeWith(TextStyle? baseStyle)
     {
         if (baseStyle == null) return this;
 

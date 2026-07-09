@@ -24,7 +24,7 @@ public class EncryptionIntegrationTests : IntegrationTestBase
         string userPassword = "test123";
 
         // Act
-        using (Document doc = new(new DocumentSettings().WithPassword(userPassword)))
+        using (BonniePDF.Document doc = new(new DocumentSettings().WithPassword(userPassword)))
         {
             doc.Add(new TextBlock
             {
@@ -58,7 +58,7 @@ public class EncryptionIntegrationTests : IntegrationTestBase
         string ownerPassword = "owner456";
 
         // Act
-        using (Document doc = new(new DocumentSettings().WithPasswords(userPassword, ownerPassword)))
+        using (BonniePDF.Document doc = new(new DocumentSettings().WithPasswords(userPassword, ownerPassword)))
         {
             doc.Add(new TextBlock
             {
@@ -92,7 +92,7 @@ public class EncryptionIntegrationTests : IntegrationTestBase
         // Act - No printing, no modification allowed
         var permissions = PdfPermissions.Copy | PdfPermissions.ExtractForAccessibility;
 
-        using (Document doc = new(new DocumentSettings().WithPasswords(null, ownerPassword, permissions)))
+        using (BonniePDF.Document doc = new(new DocumentSettings().WithPasswords(null, ownerPassword, permissions)))
         {
             doc.Add(new TextBlock
             {
@@ -124,7 +124,7 @@ public class EncryptionIntegrationTests : IntegrationTestBase
         string password = "secure128";
 
         // Act
-        using (Document doc = new(new DocumentSettings().WithEncryption128(opts =>
+        using (BonniePDF.Document doc = new(new DocumentSettings().WithEncryption128(opts =>
         {
             opts.WithUserPassword(password);
             opts.WithOwnerPassword(password);
@@ -154,7 +154,7 @@ public class EncryptionIntegrationTests : IntegrationTestBase
         string password = "secure256";
 
         // Act
-        using (Document doc = new(new DocumentSettings().WithEncryptionAes256(opts =>
+        using (BonniePDF.Document doc = new(new DocumentSettings().WithEncryptionAes256(opts =>
         {
             opts.WithUserPassword(password);
             opts.WithOwnerPassword(password);
@@ -192,7 +192,7 @@ public class EncryptionIntegrationTests : IntegrationTestBase
         byte[] imageData = LoadTestImage();
 
         // Act
-        using (Document doc = new(new DocumentSettings().WithPassword(password)))
+        using (BonniePDF.Document doc = new(new DocumentSettings().WithPassword(password)))
         {
             doc.Add(new TextBlock
             {
@@ -238,7 +238,7 @@ public class EncryptionIntegrationTests : IntegrationTestBase
         string password = "multipage123";
 
         // Act
-        using (Document doc = new(new DocumentSettings().WithPassword(password)))
+        using (BonniePDF.Document doc = new(new DocumentSettings().WithPassword(password)))
         {
             for (int i = 1; i <= 5; i++)
             {
@@ -274,7 +274,7 @@ public class EncryptionIntegrationTests : IntegrationTestBase
         string password = "meta123";
 
         // Act
-        using (Document doc = new(new DocumentSettings().WithPassword(password)))
+        using (BonniePDF.Document doc = new(new DocumentSettings().WithPassword(password)))
         {
             doc.Metadata.Title = "Confidential Report";
             doc.Metadata.Author = "Security Department";
@@ -306,7 +306,7 @@ public class EncryptionIntegrationTests : IntegrationTestBase
         // Act
         var permissions = PdfPermissions.Copy | PdfPermissions.ExtractForAccessibility;
 
-        using (Document doc = new(new DocumentSettings().WithPasswords(null, ownerPassword, permissions)))
+        using (BonniePDF.Document doc = new(new DocumentSettings().WithPasswords(null, ownerPassword, permissions)))
         {
             doc.Add(new TextBlock
             {
@@ -338,7 +338,7 @@ public class EncryptionIntegrationTests : IntegrationTestBase
         string password = "table123";
 
         // Act
-        using (Document doc = new(new DocumentSettings().WithPassword(password)))
+        using (BonniePDF.Document doc = new(new DocumentSettings().WithPassword(password)))
         {
             doc.Add(new TextBlock
             {

@@ -51,14 +51,9 @@ public static class Placeholders
 
 public record InvoiceLineItem(string Service, string Description, int Quantity, decimal UnitPrice, decimal Total);
 
-public class PlaceholderSource
+public class PlaceholderSource(int seed)
 {
-    private int _index;
-
-    public PlaceholderSource(int seed)
-    {
-        _index = Math.Abs(seed) % 1000;
-    }
+    private int _index = Math.Abs(seed) % 1000;
 
     private int Next(int max)
     {
@@ -72,7 +67,7 @@ public class PlaceholderSource
         "Kate", "Leo", "Mia", "Nate", "Olivia", "Pete", "Quinn", "Rose", "Sam", "Tina",
         "Uma", "Victor", "Wendy", "Xander", "Yara", "Zach", "Amy", "Brian", "Chloe", "David",
         "Emma", "Felix", "Gina", "Hugo", "Isabel", "James", "Karen", "Liam", "Mona", "Neil",
-        "Ophelia", "Paul", "Rachel", "Steven", "Theresa", "Ulrich", "Violet", "Will", "Xena", "Yvonne"
+        "Ophelia", "Paul", "Rachel", "Steven", "Theresa", "Ulrich", "Violet", "Will", "Xena", "Yvonne",
     ];
 
     private static readonly string[] LastNames =
@@ -81,7 +76,7 @@ public class PlaceholderSource
         "White", "Harris", "Martin", "Garcia", "Martinez", "Lee", "Perez", "Thompson", "Walker", "Hall",
         "Allen", "Young", "Hernandez", "King", "Wright", "Lopez", "Hill", "Scott", "Green", "Adams",
         "Baker", "Nelson", "Carter", "Mitchell", "Roberts", "Turner", "Phillips", "Campbell", "Parker", "Evans",
-        "Edwards", "Collins", "Stewart", "Sanchez", "Morris", "Rogers", "Reed", "Cook", "Morgan", "Bell"
+        "Edwards", "Collins", "Stewart", "Sanchez", "Morris", "Rogers", "Reed", "Cook", "Morgan", "Bell",
     ];
 
     private static readonly string[] Departments = ["Engineering", "Marketing", "Sales", "HR", "Finance", "Design", "Operations"];
@@ -92,7 +87,7 @@ public class PlaceholderSource
     [
         "Meridian Labs", "Studio Eleven", "Acme Corporation", "Northwind Traders",
         "Contoso Ltd", "Alpine Software", "Lunar Industries", "Verdant Solutions",
-        "Pinnacle Systems", "Cobalt Dynamics"
+        "Pinnacle Systems", "Cobalt Dynamics",
     ];
 
     private static readonly string[] LoremSentences =
@@ -111,7 +106,7 @@ public class PlaceholderSource
         "Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus.",
         "Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis.",
         "Nulla facilisi cras fermentum odio eu feugiat pretium nibh ipsum consequat.",
-        "Viverra justo nec ultrices dui sapien eget mi proin sed libero enim."
+        "Viverra justo nec ultrices dui sapien eget mi proin sed libero enim.",
     ];
 
     private static readonly string[] MonthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -120,7 +115,7 @@ public class PlaceholderSource
     [
         "Strategy Workshop", "Identity Design", "Website Design", "Development",
         "Motion Graphics", "Content Strategy", "SEO Audit", "Brand Guidelines",
-        "UX Research", "Copywriting"
+        "UX Research", "Copywriting",
     ];
 
     private static readonly string[] ServiceDescriptions =
@@ -129,19 +124,19 @@ public class PlaceholderSource
         "Responsive website with animations", "Next.js with CMS integration",
         "Hero animations, micro-interactions", "Content calendar and editorial plan",
         "Technical SEO and keyword analysis", "Comprehensive style guide document",
-        "User interviews and usability testing", "Website and marketing copy"
+        "User interviews and usability testing", "Website and marketing copy",
     ];
 
     private static readonly Color[] BackgroundColors =
     [
         Core.ColorPalette.Blue[50], Core.ColorPalette.Green[50], Core.ColorPalette.Amber[50], Core.ColorPalette.Rose[50],
-        Core.ColorPalette.Indigo[50], Core.ColorPalette.Slate[50], Core.ColorPalette.Purple[50], Core.ColorPalette.Cyan[50]
+        Core.ColorPalette.Indigo[50], Core.ColorPalette.Slate[50], Core.ColorPalette.Purple[50], Core.ColorPalette.Cyan[50],
     ];
 
     private static readonly Color[] AccentColors =
     [
         Core.ColorPalette.Indigo[600], Core.ColorPalette.Blue[600], Core.ColorPalette.Green[600], Core.ColorPalette.Amber[600],
-        Core.ColorPalette.Rose[600], Core.ColorPalette.Purple[600], Core.ColorPalette.Cyan[600], Core.ColorPalette.Slate[600]
+        Core.ColorPalette.Rose[600], Core.ColorPalette.Purple[600], Core.ColorPalette.Cyan[600], Core.ColorPalette.Slate[600],
     ];
 
     public string Word()
@@ -190,7 +185,7 @@ public class PlaceholderSource
         int area = 200 + Next(800);
         int mid = 100 + Next(900);
         int end = 1000 + Next(9000);
-        return $"({area}) {mid}-{end}";
+        return string.Create(CultureInfo.InvariantCulture, $"({area}) {mid}-{end}");
     }
 
     public string CompanyName() => CompanyNames[Next(CompanyNames.Length)];
@@ -206,27 +201,27 @@ public class PlaceholderSource
         return Math.Round(raw, decimals);
     }
 
-    public string Percent(int min = 0, int max = 100) => $"{Integer(min, max)}%";
+    public string Percent(int min = 0, int max = 100) => string.Create(CultureInfo.InvariantCulture, $"{Integer(min, max)}%");
 
     public string Currency(decimal min = 1, decimal max = 10000, string symbol = "$")
-        => $"{symbol}{Decimal(min, max, 2):N2}";
+        => string.Create(CultureInfo.InvariantCulture, $"{symbol}{Decimal(min, max, 2):N2}");
 
     public string ShortDate()
     {
         int m = 1 + Next(12);
         int d = 1 + Next(28);
         int y = 2020 + Next(7);
-        return $"{m:D2}/{d:D2}/{y}";
+        return string.Create(CultureInfo.InvariantCulture, $"{m:D2}/{d:D2}/{y}");
     }
 
     public string LongDate()
     {
         string[] months = ["January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"];
+            "July", "August", "September", "October", "November", "December",];
         int m = Next(12);
         int d = 1 + Next(28);
         int y = 2020 + Next(7);
-        return $"{d} {months[m]} {y}";
+        return string.Create(CultureInfo.InvariantCulture, $"{d} {months[m]} {y}");
     }
 
     public string MonthLabel() => MonthLabels[Next(MonthLabels.Length)];
@@ -260,7 +255,7 @@ public class PlaceholderSource
                     0 => Name(),
                     1 => Department(),
                     2 => Location(),
-                    _ => Percent()
+                    _ => Percent(),
                 };
             }
             result.Add(row);
@@ -298,7 +293,7 @@ public class PlaceholderSource
 
         using var ms = new MemoryStream();
         // PNG signature
-        ms.Write(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 });
+        ms.Write([137, 80, 78, 71, 13, 10, 26, 10]);
 
         // IHDR
         byte[] ihdr = new byte[13];

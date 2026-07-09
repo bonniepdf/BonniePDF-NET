@@ -1,13 +1,11 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Shapes;
 using BonniePDF.Rendering.Tagging;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 /// <summary>
 /// alt-text on media + implicit Figure / Artifact tagging.
@@ -111,7 +109,7 @@ public class MediaAltTextTests
     public void UntaggedDocument_DoesNotEmitFigureOrAlt()
     {
         // Back-compat: accessibility off => no struct elements at all.
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.None;
         doc.Add(new QRCode { Data = "https://example.com", Size = 60, AltText = "ignored when tagging off" });
@@ -124,9 +122,9 @@ public class MediaAltTextTests
         Assert.DoesNotContain("/Alt (", pdf);
     }
 
-    private static string GenerateTagged(System.Action<Document> populate)
+    private static string GenerateTagged(System.Action<BonniePDF.Document> populate)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";

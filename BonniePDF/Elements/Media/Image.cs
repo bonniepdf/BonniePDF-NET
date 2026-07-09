@@ -10,7 +10,7 @@ namespace BonniePDF.Elements.Media;
 /// </summary>
 public class Image : ElementBase, IRoleProvider, IAltTextProvider
 {
-    private ImageInfo _cachedInfo;
+    private ImageInfo? _cachedInfo;
 
     /// <summary>Path to image file (mutually exclusive with ImageData)</summary>
     public string FilePath { get; set; } = string.Empty;

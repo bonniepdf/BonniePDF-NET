@@ -33,7 +33,7 @@ public class TableCell : BorderedElementBase, IRoleProvider
     /// <summary>
     /// Whether this cell is a header cell (renders as <c>/TH</c> in
     /// PDF/UA tagged output instead of <c>/TD</c>). Set automatically
-    /// by <see cref="Table.AddHeader"/> on each cell in a header row,
+    /// by <see cref="Table.AddHeader(BonniePDF.Elements.IElement[])"/> on each cell in a header row,
     /// and at render time from the owning row's <c>IsHeader</c> flag
     /// for cells added directly to a row. May also be set explicitly
     /// for individual cells that act as headers (e.g. row headers in

@@ -3,21 +3,21 @@ using BonniePDF.Extensions;
 using BonniePDF.Security.Models;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Export;
 
 public class PdfVersionTests
 {
     [Fact]
     public void DefaultVersionIsPdf14()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         Assert.Equal(PdfVersion.Pdf14, doc.Settings.Version);
     }
 
     [Fact]
     public void Pdf14_OutputStartsWithCorrectHeader()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         using MemoryStream ms = new();
 
         doc.Save(ms, true);
@@ -31,7 +31,7 @@ public class PdfVersionTests
     [Fact]
     public void Pdf17_OutputStartsWithCorrectHeader()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf17;
         using MemoryStream ms = new();
 
@@ -46,7 +46,7 @@ public class PdfVersionTests
     [Fact]
     public void AsPdf17_SetsVersion()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdf17();
         Assert.Equal(PdfVersion.Pdf17, doc.Settings.Version);
     }
@@ -54,7 +54,7 @@ public class PdfVersionTests
     [Fact]
     public void AsPdfA_SetsVersionAndFlag()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdfA();
         Assert.Equal(PdfVersion.Pdf17, doc.Settings.Version);
         Assert.True(doc.Settings.PdfAEnabled);
@@ -63,7 +63,7 @@ public class PdfVersionTests
     [Fact]
     public void PdfA_CanSaveToStream()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdfA();
         using MemoryStream ms = new();
 
@@ -80,7 +80,7 @@ public class PdfVersionTests
     [Fact]
     public void PdfA_WithEncryption_ThrowsInvalidOperation()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdfA();
         doc.Settings.Encryption = new EncryptionSettings
         {
@@ -96,7 +96,7 @@ public class PdfVersionTests
     [Fact]
     public void AsPdf20_SetsVersionWithoutConformanceClaims()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdf20();
         Assert.Equal(PdfVersion.Pdf20, doc.Settings.Version);
         Assert.False(doc.Settings.PdfAEnabled);
@@ -105,7 +105,7 @@ public class PdfVersionTests
     [Fact]
     public void AsPdfA4_SetsConformanceAndVersion()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdfA4();
         Assert.Equal(PdfVersion.Pdf20, doc.Settings.Version);
         Assert.Equal(PdfAConformance.PdfA4, doc.Settings.Conformance);
@@ -115,7 +115,7 @@ public class PdfVersionTests
     [Fact]
     public void Pdf20_OutputStartsWithCorrectHeader()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdf20();
         using MemoryStream ms = new();
 
@@ -130,7 +130,7 @@ public class PdfVersionTests
     [Fact]
     public void Pdf20_IncludesMetadataWithoutConformanceClaims()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdf20();
         using MemoryStream ms = new();
 
@@ -147,7 +147,7 @@ public class PdfVersionTests
     [Fact]
     public void Pdf20_WithPdfUa1_Throws()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdf20();
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         using MemoryStream ms = new();
@@ -158,7 +158,7 @@ public class PdfVersionTests
     [Fact]
     public void PdfA4_DirectConformanceAutoUpgradesToPdf20()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.Conformance = PdfAConformance.PdfA4;
         using MemoryStream ms = new();
 
@@ -174,7 +174,7 @@ public class PdfVersionTests
     [Fact]
     public void PdfA4_WithEncryption_ThrowsInvalidOperation()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdfA4();
         doc.Settings.Encryption = new EncryptionSettings
         {

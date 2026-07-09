@@ -28,10 +28,10 @@ public sealed class ShapedRun
 public sealed class ShapeResult
 {
     /// <summary>The runs, in source order, each renderable by a single font.</summary>
-    public List<ShapedRun> Runs { get; } = new();
+    public IList<ShapedRun> Runs { get; } = new List<ShapedRun>();
 
     /// <summary>Code points no candidate font could render (dropped from output).</summary>
-    public List<int> Unsupported { get; } = new();
+    public IList<int> Unsupported { get; } = new List<int>();
 }
 
 /// <summary>
@@ -62,8 +62,8 @@ public static class TextRunShaper
         var result = new ShapeResult();
         if (string.IsNullOrEmpty(text) || candidates.Count == 0) return result;
 
-        ShapedRun current = null;
-        StringBuilder currentText = null;
+        ShapedRun? current = null;
+        StringBuilder? currentText = null;
 
         foreach (System.Text.Rune rune in text.EnumerateRunes())
         {

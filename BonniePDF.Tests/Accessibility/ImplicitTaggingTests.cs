@@ -1,11 +1,9 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 [Collection("Serial")]
 
@@ -94,7 +92,7 @@ public class ImplicitTaggingTests
 
     // ── Helpers ──────────────────────────────────────────────────
 
-    private static string GenerateTagged(System.Action<Document> populate)
+    private static string GenerateTagged(System.Action<BonniePDF.Document> populate)
     {
         return GeneratePdf(doc =>
         {
@@ -105,9 +103,9 @@ public class ImplicitTaggingTests
         });
     }
 
-    private static string GeneratePdf(System.Action<Document> populate)
+    private static string GeneratePdf(System.Action<BonniePDF.Document> populate)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         populate(doc);
         using var ms = new MemoryStream();
         doc.Save(ms, true);

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BonniePDF.Rendering;
 
 namespace BonniePDF.Elements;
@@ -23,6 +24,16 @@ public interface IElement
     /// Renders this element to the PDF context
     /// </summary>
     void Render(RenderContext ctx, float width);
+
+    /// <summary>
+    /// Canonical child traversal for engine tree walks (the default-style
+    /// cascade, font/image discovery). Container elements should override
+    /// this to return their direct renderable children; leaf elements use
+    /// the default empty implementation. A default interface method so
+    /// existing <see cref="IElement"/> implementers outside this assembly
+    /// remain source- and binary-compatible.
+    /// </summary>
+    IEnumerable<IElement> GetChildren() => [];
 }
 
 /// <summary>

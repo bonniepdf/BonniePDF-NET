@@ -12,7 +12,7 @@ public class WatermarkSettings
     /// <summary>
     /// The watermark text to display (e.g. "DRAFT", "CONFIDENTIAL").
     /// </summary>
-    public string Text { get; set; }
+    public required string Text { get; set; }
 
     /// <summary>
     /// Font family name for the watermark text (default: "Helvetica").

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using BonniePDF;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
@@ -9,10 +6,11 @@ using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Export;
+using BonniePDF.Tests.Support;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Export;
 
 public class SvgPageExportTests
 {
@@ -22,9 +20,9 @@ public class SvgPageExportTests
         0x01, 0x11, 0x00, 0x02, 0x11, 0x00, 0x03, 0x11, 0x00, 0xFF, 0xD9
     ];
 
-    private static Document SimpleDoc()
+    private static BonniePDF.Document SimpleDoc()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "Hello, SVG world!", FontSize = 14 });
         doc.Add(new TextBlock { Text = "Second line of text.", FontSize = 11 });
         return doc;
@@ -85,7 +83,7 @@ public class SvgPageExportTests
     [Fact]
     public void MultiPageDocument_ExportsEveryPage()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         for (int i = 0; i < 3; i++)
         {
             if (i > 0) doc.AddPage();
@@ -100,7 +98,7 @@ public class SvgPageExportTests
     [Fact]
     public void MaxPages_LimitsOutput()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         for (int i = 0; i < 4; i++)
         {
             if (i > 0) doc.AddPage();
@@ -115,7 +113,7 @@ public class SvgPageExportTests
     [Fact]
     public void Images_EmbeddedAsDataUri()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new Image { ImageData = CreateMinimalJpeg(), Width = 64, AltText = "sample" });
         string svg = doc.GenerateFirstPageSvg();
         Assert.Contains("<image", svg, StringComparison.Ordinal);
@@ -125,7 +123,7 @@ public class SvgPageExportTests
     [Fact]
     public void Images_OmittedWhenRequested()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new Image { ImageData = CreateMinimalJpeg(), Width = 64, AltText = "sample" });
         string svg = doc.GenerateFirstPageSvg(new SvgPageExportOptions { EmbedImages = SvgImageEmbedding.Omit });
         Assert.DoesNotContain("<image", svg, StringComparison.Ordinal);
@@ -134,7 +132,7 @@ public class SvgPageExportTests
     [Fact]
     public void Charts_RenderIntoPage()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         var chart = new BarChart { Width = 400, Height = 250 };
         var data = new ChartData
         {
@@ -148,7 +146,7 @@ public class SvgPageExportTests
     [Fact]
     public void Tables_Render()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         var table = new Table(80, 80);
         table.AddRow(new TextBlock { Text = "Cell A" }, new TextBlock { Text = "Cell B" });
         doc.Add(table);
@@ -174,7 +172,7 @@ public class SvgPageExportTests
     [Fact]
     public void HeaderAndFooter_RenderOnPage()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "Body" });
         doc.Settings.HeaderTemplate = pageNum => new TextBlock { Text = $"Header {pageNum}", FontSize = 9, TextColor = ColorPalette.Slate[500] };
         doc.Settings.FooterTemplate = pageNum => new TextBlock { Text = $"Footer {pageNum}", FontSize = 9, TextColor = ColorPalette.Slate[500] };
@@ -186,7 +184,7 @@ public class SvgPageExportTests
     [Fact]
     public void TotalPagesToken_ResolvesInSvgOutput_WhenMaxPagesLimitsSerialization()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         for (int i = 0; i < 3; i++)
         {
             if (i > 0) doc.AddPage();
@@ -220,7 +218,7 @@ public class SvgPageExportTests
     [Fact]
     public void SpecialCharacters_AreEscaped()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "a < b & c > d" });
         string svg = doc.GenerateFirstPageSvg();
         Assert.Contains("&lt;", svg, StringComparison.Ordinal);
@@ -243,7 +241,7 @@ public class SvgPageExportTests
         // The raw PDF name ("Helvetica-Bold") is not a CSS family; emitting it
         // would render a regular default. Standard-14 fonts are viewer-supplied,
         // so prefer the real OS font via a generic stack plus weight/style.
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "Bold", FontName = StandardFonts.HelveticaBold });
         doc.Add(new TextBlock { Text = "Italic", FontName = StandardFonts.HelveticaOblique });
         string svg = doc.GenerateFirstPageSvg();
@@ -256,7 +254,7 @@ public class SvgPageExportTests
     [Fact]
     public void EmbeddedFont_EmitsSubsetFontFaceSmallerThanFullFont()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new TextBlock
         {
             Text = "The quick brown fox jumps over the lazy dog 1234567890",
@@ -288,7 +286,7 @@ public class SvgPageExportTests
     {
         // Mirrors the PDF /Link annotation: external links become live SVG <a>
         // elements so hosts like @bonniepdf/previewer render clickable links.
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new Hyperlink("https://www.bonniepdf.dev/docs", "Visit the docs"));
 
         string svg = doc.GenerateSvgPages()[0];
@@ -300,7 +298,7 @@ public class SvgPageExportTests
     [Fact]
     public void HyperlinkUri_IsEscapedInOverlayMarkup()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new Hyperlink("https://example.com/?a=1&b=\"two\"", "Search"));
 
         string svg = doc.GenerateSvgPages()[0];
@@ -310,7 +308,7 @@ public class SvgPageExportTests
     [Fact]
     public void InternalLink_EmitsPageMarkerRectInsteadOfAnchor()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Add(new Hyperlink("Go to appendix") { TargetPageIndex = 1 }); // 0-based target -> 1-based marker
         doc.AddPage();
         doc.Add(new TextBlock { Text = "Appendix", FontSize = 11 });

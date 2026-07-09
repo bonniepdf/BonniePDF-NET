@@ -16,7 +16,7 @@ public interface IAsyncPdfWriter : IAsyncDisposable
     /// <summary>
     /// Gets or sets the encryptor for this writer. When set, streams are encrypted.
     /// </summary>
-    PdfEncryptor Encryptor { get; set; }
+    PdfEncryptor? Encryptor { get; set; }
 
     /// <summary>
     /// Gets a new unique object ID for the PDF
@@ -26,7 +26,7 @@ public interface IAsyncPdfWriter : IAsyncDisposable
     /// <summary>
     /// Writes a PDF object with the specified ID and dictionary
     /// </summary>
-    Task WriteObjectAsync(int id, IDictionary<string, string> dict, string streamContent = null,
+    Task WriteObjectAsync(int id, IDictionary<string, string> dict, string? streamContent = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -56,7 +56,7 @@ public interface IAsyncPdfWriter : IAsyncDisposable
     /// <summary>
     /// Writes a link annotation object for a hyperlink
     /// </summary>
-    Task<int> WriteLinkAnnotationAsync(int id, Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null, CancellationToken cancellationToken = default);
+    Task<int> WriteLinkAnnotationAsync(int id, Hyperlink hyperlink, IList<int>? pageIds = null, int? structParentKey = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Writes viewer preferences to the document catalog asynchronously.

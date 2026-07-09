@@ -31,6 +31,9 @@ public abstract class ListElementBase : TextElementBase
         return [];
     }
 
+    /// <inheritdoc />
+    public IEnumerable<IElement> GetChildren() => GetNestedLists();
+
     /// <summary>
     /// Wraps the subclass item rendering in an <c>L</c> structure element when tagging is
     /// active, so the outer container is present in the structure tree for both top-level

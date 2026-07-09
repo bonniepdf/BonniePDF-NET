@@ -41,6 +41,9 @@ public class HorizontalStack : ElementBase, IStatefulElement
     /// </summary>
     public IList<IElement> Children => _children;
 
+    /// <inheritdoc />
+    public IEnumerable<IElement> GetChildren() => _children;
+
     /// <summary>
     /// Adds a child element to this stack with auto width
     /// </summary>
@@ -223,7 +226,7 @@ public class HorizontalStack : ElementBase, IStatefulElement
                 for (int i = 0; i < _children.Count; i++)
                     if (isWeighted[i])
                     {
-                        float weight = _widths[i].Value;
+                        float weight = _widths[i]!.Value;
                         // Use ratio of total weight
                         calculatedWidths[i] = weight / totalWeight * remainingSpace;
                     }

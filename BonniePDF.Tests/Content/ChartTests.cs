@@ -1,4 +1,4 @@
-using BonniePDF;
+using System.Text;
 using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
@@ -6,10 +6,9 @@ using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Images;
-using System.Text;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Content;
 
 public class ChartTests
 {
@@ -306,12 +305,12 @@ public class ChartTests
     [Fact]
     public void AreaChart_Pdf_RegistersAlphaGraphicsStateForFillOpacity()
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         var chart = new AreaChart { FillOpacity = 0.42f };
 
         doc.Add(new ChartElement(chart, CreateSampleData()));
 
-        string pdf = Encoding.ASCII.GetString(doc.ToByteArray());
+        string pdf = Encoding.ASCII.GetString(doc.GenerateBytes());
         Assert.Contains("/ExtGState", pdf);
         Assert.Contains("/ca 0.4200", pdf);
         Assert.Contains("/CA 0.4200", pdf);
@@ -322,19 +321,19 @@ public class ChartTests
     {
         // PDF/A-1 forbids transparency (ISO 19005-1 §6.4): the constant alpha is
         // flattened to fully opaque.
-        using var docA1 = new Document();
+        using var docA1 = new BonniePDF.Document();
         docA1.Settings.Conformance = PdfAConformance.PdfA1b;
         docA1.Add(new ChartElement(new AreaChart { FillOpacity = 0.42f }, CreateSampleData()));
-        string a1 = Encoding.ASCII.GetString(docA1.ToByteArray());
+        string a1 = Encoding.ASCII.GetString(docA1.GenerateBytes());
         Assert.Contains("/ca 1.0000", a1);
         Assert.DoesNotContain("/ca 0.4200", a1);
 
         // PDF/A-2 permits constant alpha (ISO 19005-2 §6.2.4): the real opacity
         // is preserved.
-        using var docA2 = new Document();
+        using var docA2 = new BonniePDF.Document();
         docA2.Settings.Conformance = PdfAConformance.PdfA2b;
         docA2.Add(new ChartElement(new AreaChart { FillOpacity = 0.42f }, CreateSampleData()));
-        string a2 = Encoding.ASCII.GetString(docA2.ToByteArray());
+        string a2 = Encoding.ASCII.GetString(docA2.GenerateBytes());
         Assert.Contains("/ca 0.4200", a2);
     }
 

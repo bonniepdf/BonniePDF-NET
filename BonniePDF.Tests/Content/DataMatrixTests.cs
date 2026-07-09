@@ -1,14 +1,10 @@
-using System;
-using System.IO;
-using System.Linq;
 using System.Text;
-using Xunit;
-using BonniePDF;
 using BonniePDF.Configuration;
 using BonniePDF.Elements.Shapes;
 using BonniePDF.Rendering.Tagging;
+using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Content;
 
 /// <summary>
 /// Tests for the native Data Matrix (ECC200) encoder and element. Mirrors the
@@ -176,7 +172,7 @@ public class DataMatrixTests
     [Fact]
     public void Document_DataMatrixRendersValidPdf()
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Add(new DataMatrix { Data = "https://www.bonniepdf.dev" });
         using var ms = new MemoryStream();
         doc.Save(ms, true);
@@ -216,7 +212,7 @@ public class DataMatrixTests
     [Fact]
     public void TaggedDocument_DataMatrixWithAltText_EmitsFigureWithAlt()
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";

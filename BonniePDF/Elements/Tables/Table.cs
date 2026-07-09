@@ -84,6 +84,10 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     public IReadOnlyList<TableRow> GetAllRows() =>
         _headers.Concat(_rows).Concat(_footers).ToList().AsReadOnly();
 
+    /// <inheritdoc /> - every cell's content across headers, body rows, and footers.
+    public IEnumerable<IElement> GetChildren() =>
+        GetAllRows().SelectMany(row => row.Cells).Where(cell => cell.Content is not null).Select(cell => cell.Content);
+
     /// <summary>
     /// Adds a header row to the table
     /// </summary>
@@ -172,7 +176,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         float originalX = ctx.CurrentX;
         ctx.CurrentX += Margin.Left;
 
-        TaggingContext tagging = ctx.Tagging;
+        TaggingContext? tagging = ctx.Tagging;
         // Guarantee a Table ancestor for the row-groups. The pipeline/stack opens
         // the Table for the first fragment, but a continuation fragment after a
         // page break re-enters with only the page/Document open - so open a Table
@@ -180,7 +184,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         // double-wrapping the common (already-wrapped) case. A paginated table can
         // yield one Table per page fragment, which is structurally valid.
         bool ownTable = tagging != null && tagging.Tree.Current.Role != SemanticRole.Table;
-        if (ownTable) tagging.Tree.Begin(SemanticRole.Table);
+        if (ownTable) tagging!.Tree.Begin(SemanticRole.Table);
         try
         {
             return RenderStatefulRows(ctx, width, tagging);
@@ -188,11 +192,11 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         finally
         {
             ctx.CurrentX = originalX;
-            if (ownTable) tagging.Tree.End();
+            if (ownTable) tagging!.Tree.End();
         }
     }
 
-    private RenderStatus RenderStatefulRows(RenderContext ctx, float width, TaggingContext tagging)
+    private RenderStatus RenderStatefulRows(RenderContext ctx, float width, TaggingContext? tagging)
     {
         float contentWidth = GetContentWidth(width);
         float[] widths = CalculateColumnWidths(contentWidth);
@@ -217,7 +221,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
                 if (ctx.CurrentY + headerHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
                 {
-                    if (theadOpen && tagging != null) tagging.Tree.End();
+                    if (theadOpen && tagging != null) tagging!.Tree.End();
                     if (artifactOpen) ctx.Canvas.EndArtifact();
                     return _lastRowRendered < 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
                 }
@@ -239,7 +243,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 RenderRowDirect(ctx, headerRow, widths);
             }
 
-            if (theadOpen && tagging != null) tagging.Tree.End();
+            if (theadOpen && tagging != null) tagging!.Tree.End();
             if (artifactOpen) ctx.Canvas.EndArtifact();
             _headersPending = false;
         }
@@ -264,7 +268,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             // Pagination check
             if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
             {
-                if (tbodyOpen && tagging != null) tagging.Tree.End();
+                if (tbodyOpen && tagging != null) tagging!.Tree.End();
                 _lastRowRendered = i - 1;
                 _headersPending = RepeatHeadersOnNewPage && _headers.Count > 0;
                 return i == startRow ? RenderStatus.WrapRequired : RenderStatus.Overflow;
@@ -274,7 +278,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             RenderRowDirect(ctx, row, widths);
             _lastRowRendered = i;
         }
-        if (tbodyOpen && tagging != null) tagging.Tree.End();
+        if (tbodyOpen && tagging != null) tagging!.Tree.End();
 
         RenderFootersGrouped(ctx, widths, tagging);
         ctx.CurrentY += Margin.Bottom;
@@ -283,13 +287,13 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     }
 
     /// <summary>Renders footer rows wrapped in a TFoot row-group (PDF/UA 7.2).</summary>
-    private void RenderFootersGrouped(RenderContext ctx, float[] widths, TaggingContext tagging)
+    private void RenderFootersGrouped(RenderContext ctx, float[] widths, TaggingContext? tagging)
     {
         if (_footers.Count == 0) return;
         if (tagging != null) tagging.Tree.Begin(SemanticRole.TFoot);
         foreach (TableRow footerRow in _footers)
             RenderRowDirect(ctx, footerRow, widths);
-        if (tagging != null) tagging.Tree.End();
+        if (tagging != null) tagging!.Tree.End();
     }
 
     /// <summary>
@@ -320,7 +324,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         bool tagThisRow = tagging != null;
         if (tagThisRow)
         {
-            tagging.Tree.Begin(SemanticRole.TR);
+            tagging!.Tree.Begin(SemanticRole.TR);
             ctx.Canvas.BeginContainerContent("TR");
         }
 
@@ -347,13 +351,13 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 bool tagThisCell = tagThisRow;
                 if (tagThisCell)
                 {
-                    tagging.Tree.Begin(cellRole);
+                    tagging!.Tree.Begin(cellRole);
                     var cellAttrs = new List<string>();
                     if (cell.ColumnSpan > 1) cellAttrs.Add($"/ColSpan {cell.ColumnSpan}");
                     // PDF/UA 7.5: TH cells need a Scope. Header rows are column headers.
                     if (cellRole == SemanticRole.TH) cellAttrs.Add("/Scope /Column");
                     if (cellAttrs.Count > 0)
-                        tagging.Tree.SetAttributes($"<< /O /Table {string.Join(" ", cellAttrs)} >>");
+                        tagging!.Tree.SetAttributes($"<< /O /Table {string.Join(" ", cellAttrs)} >>");
                     ctx.Canvas.BeginMarkedContent(cellRole.ToPdfTag());
                 }
 
@@ -366,7 +370,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                     if (tagThisCell)
                     {
                         ctx.Canvas.EndMarkedContent();
-                        tagging.Tree.End();
+                        tagging!.Tree.End();
                     }
                 }
 
@@ -381,7 +385,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             if (tagThisRow)
             {
                 ctx.Canvas.EndMarkedContent();
-                tagging.Tree.End();
+                tagging!.Tree.End();
             }
         }
     }
@@ -405,24 +409,24 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
-        TaggingContext tagging = ctx.Tagging;
+        TaggingContext? tagging = ctx.Tagging;
         // Some hosts (e.g. VerticalStack) already open a Table struct element for
         // IRoleProvider children before calling Render. Only open our own when one
         // isn't already current, so the THead/TBody/TFoot groups get exactly one
         // Table ancestor (PDF/UA 7.2) instead of Table-in-Table.
         bool ownTable = tagging != null && tagging.Tree.Current.Role != SemanticRole.Table;
-        if (ownTable) tagging.Tree.Begin(SemanticRole.Table);
+        if (ownTable) tagging!.Tree.Begin(SemanticRole.Table);
         try
         {
             RenderContentRows(ctx, contentWidth, tagging);
         }
         finally
         {
-            if (ownTable) tagging.Tree.End();
+            if (ownTable) tagging!.Tree.End();
         }
     }
 
-    private void RenderContentRows(RenderContext ctx, float contentWidth, TaggingContext tagging)
+    private void RenderContentRows(RenderContext ctx, float contentWidth, TaggingContext? tagging)
     {
         float[] widths = CalculateColumnWidths(contentWidth);
         bool isFirstPage = true;
@@ -437,7 +441,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             }
             finally
             {
-                if (tagging != null) tagging.Tree.End();
+                if (tagging != null) tagging!.Tree.End();
             }
         }
 
@@ -473,7 +477,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             }
             finally
             {
-                if (tagging != null) tagging.Tree.End();
+                if (tagging != null) tagging!.Tree.End();
             }
         }
 
@@ -487,7 +491,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             }
             finally
             {
-                if (tagging != null) tagging.Tree.End();
+                if (tagging != null) tagging!.Tree.End();
             }
         }
     }
@@ -512,7 +516,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         bool tagThisRow = tagging != null;
         if (tagThisRow)
         {
-            tagging.Tree.Begin(SemanticRole.TR);
+            tagging!.Tree.Begin(SemanticRole.TR);
             ctx.Canvas.BeginContainerContent("TR");
         }
 
@@ -541,13 +545,13 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 bool tagThisCell = tagThisRow;
                 if (tagThisCell)
                 {
-                    tagging.Tree.Begin(cellRole);
+                    tagging!.Tree.Begin(cellRole);
                     var cellAttrs = new List<string>();
                     if (cell.ColumnSpan > 1) cellAttrs.Add($"/ColSpan {cell.ColumnSpan}");
                     // PDF/UA 7.5: TH cells need a Scope. Header rows are column headers.
                     if (cellRole == SemanticRole.TH) cellAttrs.Add("/Scope /Column");
                     if (cellAttrs.Count > 0)
-                        tagging.Tree.SetAttributes($"<< /O /Table {string.Join(" ", cellAttrs)} >>");
+                        tagging!.Tree.SetAttributes($"<< /O /Table {string.Join(" ", cellAttrs)} >>");
                     ctx.Canvas.BeginMarkedContent(cellRole.ToPdfTag());
                 }
 
@@ -561,7 +565,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                     if (tagThisCell)
                     {
                         ctx.Canvas.EndMarkedContent();
-                        tagging.Tree.End();
+                        tagging!.Tree.End();
                     }
                 }
 
@@ -577,7 +581,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             if (tagThisRow)
             {
                 ctx.Canvas.EndMarkedContent();
-                tagging.Tree.End();
+                tagging!.Tree.End();
             }
         }
     }

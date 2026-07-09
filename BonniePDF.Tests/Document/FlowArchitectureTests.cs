@@ -8,7 +8,7 @@ using BonniePDF.Elements.Text;
 using BonniePDF.Rendering;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Document;
 
 /// <summary>
 /// Tests for the Unified Flow & Pagination architecture.
@@ -326,7 +326,7 @@ public class FlowArchitectureTests
     [Fact]
     public void Document_WithOverflowingTextCreatesMultiplePages()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
 
         // Add enough text to overflow onto multiple pages
         string longText = string.Join("\n\n", Enumerable.Range(1, 100).Select(i =>
@@ -345,7 +345,7 @@ public class FlowArchitectureTests
     [Fact]
     public void Document_WithVerticalStackOverflowCreatesMultiplePages()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
 
         VerticalStack stack = new();
         for (int i = 0; i < 100; i++)
@@ -366,7 +366,7 @@ public class FlowArchitectureTests
     [Fact]
     public void Document_TablesStillPaginateCorrectly()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
 
         Table table = new(1f, 1f, 1f);
         table.AddHeader(
@@ -459,7 +459,7 @@ public class FlowArchitectureTests
     [Fact]
     public void Pipeline_HandlesWrapRequired_ByCreatingNewPage()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
 
         // Add a large stack that fills most of the page, then a large circle
         VerticalStack stack = new();
@@ -483,7 +483,7 @@ public class FlowArchitectureTests
     [Fact]
     public void Pipeline_WrapRequired_AtTopOfPage_DoesNotInfiniteLoop()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
 
         // A circle taller than the entire content area
         // On A4 with 50pt margins: content area = 842 - 100 = 742pt
@@ -571,7 +571,7 @@ public class FlowArchitectureTests
         VerticalStack stack = new() { BreakAllowed = false };
         stack.AddChild(new TextBlock { Text = hugeText });
 
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(stack);
 
         using MemoryStream ms = new();
@@ -587,7 +587,7 @@ public class FlowArchitectureTests
         string text = string.Join('\n', Enumerable.Range(1, 10).Select(i => $"Line {i}"));
         TextBlock block = new() { Text = text, BreakAllowed = false };
 
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         // Add filler first
         doc.Add(new TextBlock
         {
@@ -700,7 +700,7 @@ public class FlowArchitectureTests
         for (int i = 0; i < 100; i++)
             table.AddRow(new TextBlock { Text = $"Row {i}" }, new TextBlock { Text = $"Data {i}" });
 
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(table);
 
         using MemoryStream ms = new();
@@ -802,7 +802,7 @@ public class FlowArchitectureTests
         hStack.AddChild(new TextBlock { Text = "Right column\nLine 2\nLine 3" });
         vStack.AddChild(hStack);
 
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(vStack);
 
         using MemoryStream ms = new();
@@ -944,7 +944,7 @@ public class FlowArchitectureTests
             MinLinesAfterBreak = 3
         };
 
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(textBlock);
 
         using MemoryStream ms = new();

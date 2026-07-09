@@ -3,14 +3,14 @@ using BonniePDF.Extensions;
 using BonniePDF.Metadata;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Metadata;
 
 public class XmpMetadataTests
 {
     [Fact]
     public void Pdf17_ContainsXmpMetadata()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Metadata.Title = "Test Document";
         doc.Metadata.Author = "Test Author";
@@ -28,7 +28,7 @@ public class XmpMetadataTests
     [Fact]
     public void Pdf14_DoesNotContainXmpMetadata()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf14;
 
         using MemoryStream ms = new();
@@ -43,7 +43,7 @@ public class XmpMetadataTests
     [Fact]
     public void PdfA_ContainsPdfAIdentification()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdfA();
         doc.Metadata.Title = "Archival Document";
 
@@ -60,7 +60,7 @@ public class XmpMetadataTests
     [Fact]
     public void PdfA4_ContainsBaselineIdentificationWithoutConformanceSuffix()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AsPdfA4();
         doc.Metadata.Title = "PDF/A-4 Document";
 

@@ -26,7 +26,7 @@ public class CatalogOptions
     /// <summary>
     /// Output intent object IDs for PDF/A compliance (null or empty if none).
     /// </summary>
-    public IList<int> OutputIntentIds { get; set; }
+    public IList<int>? OutputIntentIds { get; set; }
 
     /// <summary>
     /// Whether PDF/A mode is enabled (adds /MarkInfo to catalog).
@@ -57,7 +57,7 @@ public class CatalogOptions
     /// When non-null/empty, emitted as <c>/Lang</c> on the catalog.
     /// Required by PDF/UA-1.
     /// </summary>
-    public string Language { get; set; }
+    public string? Language { get; set; }
 
     /// <summary>
     /// The /PageLabels number-tree object ID (0 if none).
@@ -78,5 +78,5 @@ public class CatalogOptions
     /// required for PDF/A-3 so conforming readers treat the attachments as
     /// associated files.
     /// </summary>
-    public IList<int> AssociatedFileIds { get; set; }
+    public IList<int>? AssociatedFileIds { get; set; }
 }

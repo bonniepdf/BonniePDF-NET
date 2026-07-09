@@ -79,14 +79,14 @@ public static class FontFamilyResolver
         bool isBold = weight >= FontWeight.SemiBold;
 
         // Check custom registered families
-        if (CustomFamilies.TryGetValue(family, out FontFamilyDefinition definition))
+        if (CustomFamilies.TryGetValue(family, out FontFamilyDefinition? definition))
             return definition.GetVariant(isBold, italic);
 
         // Resolve alias to canonical family name
         string canonicalFamily = ResolveAlias(family);
 
         // Look up standard font
-        if (StandardFonts.TryGetValue((canonicalFamily, isBold, italic), out string fontName))
+        if (StandardFonts.TryGetValue((canonicalFamily, isBold, italic), out string? fontName))
             return fontName;
 
         // Fallback: return Helvetica variant
@@ -116,7 +116,7 @@ public static class FontFamilyResolver
     private static string ResolveAlias(string family)
     {
         string lower = family.ToLowerInvariant().Trim();
-        return FamilyAliases.TryGetValue(lower, out string canonical) ? canonical : family;
+        return FamilyAliases.TryGetValue(lower, out string? canonical) ? canonical : family;
     }
 
     /// <summary>
@@ -155,16 +155,16 @@ public static class FontFamilyResolver
 public class FontFamilyDefinition
 {
     /// <summary>Regular (Normal weight, non-italic) variant path</summary>
-    public string Regular { get; set; }
+    public required string Regular { get; set; }
 
     /// <summary>Bold variant path. Falls back to Regular if not set.</summary>
-    public string Bold { get; set; }
+    public string? Bold { get; set; }
 
     /// <summary>Italic variant path. Falls back to Regular if not set.</summary>
-    public string Italic { get; set; }
+    public string? Italic { get; set; }
 
     /// <summary>Bold Italic variant path. Falls back to Bold, then Italic, then Regular.</summary>
-    public string BoldItalic { get; set; }
+    public string? BoldItalic { get; set; }
 
     /// <summary>
     /// Gets the best matching variant path for the requested style.

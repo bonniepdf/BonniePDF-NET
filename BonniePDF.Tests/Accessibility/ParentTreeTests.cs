@@ -1,11 +1,9 @@
-using System.Collections.Generic;
-using System.Linq;
 using BonniePDF.Rendering.Tagging;
 using BonniePDF.Rendering.Writers;
 using BonniePDF.Security.Encryption;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 /// <summary>
 /// Stage-1 prep - /Pg + /ParentTree foundational fix. Drives
@@ -142,7 +140,7 @@ public class ParentTreeTests
         public void WriteCompressedObject(int id, IDictionary<string, string> dict, string content) => WriteObject(id, dict, content);
         public void WriteBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) => WriteObject(id, dict);
         public void WriteCompressedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) => WriteObject(id, dict);
-        public int WriteLinkAnnotation(int id, Core.Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null) => id;
+        public int WriteLinkAnnotation(int id, BonniePDF.Core.Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null) => id;
         public int WriteViewerPreferences(int id, Configuration.DocumentSettings settings) => id;
         public void WriteCatalog(int id, int pagesId, int firstPageId, Configuration.DocumentSettings settings, CatalogOptions options) { }
         public void WriteUnencryptedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) { }

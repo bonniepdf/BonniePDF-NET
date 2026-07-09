@@ -26,8 +26,8 @@ internal sealed class AesCipher
     /// </summary>
     public byte[] Encrypt(byte[] data)
     {
-        if (data == null || data.Length == 0)
-            return data;
+        if (data == null) return data!;
+        if (data.Length == 0) return data;
 
         using Aes aes = Aes.Create();
         aes.Key = _key;

@@ -1,4 +1,3 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
@@ -6,7 +5,7 @@ using BonniePDF.Elements.Lists;
 using BonniePDF.Elements.Text;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 [Collection("Serial")]
 
@@ -17,9 +16,9 @@ namespace BonniePDF.Tests;
 /// </summary>
 public class ListTaggingTests
 {
-    private static string GenerateTagged(System.Action<Document> populate)
+    private static string GenerateTagged(System.Action<BonniePDF.Document> populate)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
@@ -94,7 +93,7 @@ public class ListTaggingTests
     [Fact]
     public void UntaggedOrderedList_EmitsNoStructElems()
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.None;
         doc.Add(MakeOrdered("A", "B"));
@@ -112,7 +111,7 @@ public class ListTaggingTests
     [Fact]
     public void UntaggedUnorderedList_EmitsNoStructElems()
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.None;
         doc.Add(MakeUnordered("X", "Y"));
@@ -158,7 +157,7 @@ public class ListTaggingTests
     [Fact]
     public void DefaultTextStyle_CascadesIntoNestedOrderedAndUnorderedLists()
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.DefaultTextStyle = new TextStyle().WithColor(ColorPalette.Slate[700]);
 
         var orderedOuter = MakeOrdered("Parent");
@@ -182,7 +181,7 @@ public class ListTaggingTests
     [Fact]
     public void ExplicitUnorderedBulletColor_IsPreservedWhenTextStyleCascades()
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.DefaultTextStyle = new TextStyle().WithColor(ColorPalette.Slate[700]);
 
         var outer = MakeUnordered("Parent");

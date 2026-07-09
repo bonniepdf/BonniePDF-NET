@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Support;
 
 /// <summary>
 /// Marks a collection whose test classes run sequentially (not in parallel).

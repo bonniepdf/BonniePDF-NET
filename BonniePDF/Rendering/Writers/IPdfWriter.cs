@@ -13,7 +13,7 @@ public interface IPdfWriter
     /// <summary>
     /// Gets or sets the encryptor for this writer. When set, streams are encrypted.
     /// </summary>
-    PdfEncryptor Encryptor { get; set; }
+    PdfEncryptor? Encryptor { get; set; }
 
     /// <summary>
     /// Gets a new unique object ID for the PDF
@@ -23,7 +23,7 @@ public interface IPdfWriter
     /// <summary>
     /// Writes a PDF object with the specified ID and dictionary
     /// </summary>
-    void WriteObject(int id, IDictionary<string, string> dict, string streamContent = null);
+    void WriteObject(int id, IDictionary<string, string> dict, string? streamContent = null);
 
     /// <summary>
     /// Writes a PDF object whose body is already a pre-formatted PDF
@@ -53,7 +53,7 @@ public interface IPdfWriter
     /// <summary>
     /// Writes a link annotation object for a hyperlink
     /// </summary>
-    int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null);
+    int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int>? pageIds = null, int? structParentKey = null);
 
     /// <summary>
     /// Writes viewer preferences to the document catalog.

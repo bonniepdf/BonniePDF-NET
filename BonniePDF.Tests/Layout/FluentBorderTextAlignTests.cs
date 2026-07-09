@@ -1,12 +1,11 @@
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
-using BonniePDF.Fluent;
 using BonniePDF.Fluent.Descriptors;
 using BonniePDF.Fluent.Extensions;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Layout;
 
 public class FluentBorderTextAlignTests
 {

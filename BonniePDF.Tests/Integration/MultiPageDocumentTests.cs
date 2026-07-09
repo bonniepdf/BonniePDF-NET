@@ -24,7 +24,7 @@ public class MultiPageDocumentTests : IntegrationTestBase
         byte[] imageData = LoadTestImage();
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             // Page 1: Title and text
             doc.Add(new TextBlock
@@ -139,7 +139,7 @@ public class MultiPageDocumentTests : IntegrationTestBase
         string outputPath = GetTestFilePath("multipage_tables.pdf");
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             // Page 1: Introduction
             doc.Add(new TextBlock
@@ -193,7 +193,7 @@ public class MultiPageDocumentTests : IntegrationTestBase
         string outputPath = GetTestFilePath("multipage_vertical_stack.pdf");
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             VerticalStack stack = new();
 
@@ -251,7 +251,7 @@ public class MultiPageDocumentTests : IntegrationTestBase
         string outputPath = GetTestFilePath("multipage_headers_footers.pdf");
 
         // Act
-        using (Document doc = new(new DocumentSettings
+        using (BonniePDF.Document doc = new(new DocumentSettings
         {
             HeaderTemplate = pageNumber => new TextBlock
             {
@@ -303,7 +303,7 @@ public class MultiPageDocumentTests : IntegrationTestBase
         string outputPath = GetTestFilePath("multipage_mixed_orientations.pdf");
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             // Portrait page
             doc.Add(new TextBlock

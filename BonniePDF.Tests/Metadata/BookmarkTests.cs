@@ -2,14 +2,14 @@ using BonniePDF.Configuration;
 using BonniePDF.Extensions;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Metadata;
 
 public class BookmarkTests
 {
     [Fact]
     public void AddBookmark_SetsVersionAndAddsBookmark()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.AddBookmark("Chapter 1", 0);
 
         Assert.Equal(PdfVersion.Pdf17, doc.Settings.Version);
@@ -21,7 +21,7 @@ public class BookmarkTests
     [Fact]
     public void HasBookmarks_ReturnsTrueWhenBookmarksExist()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         Assert.False(doc.Settings.HasBookmarks);
 
         doc.Settings.AddBookmark("Test", 0);
@@ -31,7 +31,7 @@ public class BookmarkTests
     [Fact]
     public void Bookmarks_RequirePdf17()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf14;
         doc.Settings.Bookmarks.Add(new BookmarkItem { Title = "Test", PageIndex = 0 });
 
@@ -42,7 +42,7 @@ public class BookmarkTests
     [Fact]
     public void Bookmarks_SavesSuccessfully()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.AddPage();
         doc.Settings.AddBookmark("Page 1", 0);
         doc.Settings.AddBookmark("Page 2", 1);
@@ -62,7 +62,7 @@ public class BookmarkTests
     [Fact]
     public void Bookmarks_WithNestedChildren_SavesSuccessfully()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.AddPage();
         doc.AddPage();
 

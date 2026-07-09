@@ -28,7 +28,7 @@ public sealed class ResolvedTextRun
     public required string ResourceName { get; init; }
 
     /// <summary>The embedded font, or <c>null</c> for a non-embedded standard Type1 font.</summary>
-    public TtfFont EmbeddedFont { get; init; }
+    public TtfFont? EmbeddedFont { get; init; }
 
     /// <summary>The font identifier used to track glyph usage on this run.</summary>
     public required string FontIdentifier { get; init; }
@@ -194,7 +194,7 @@ public class PdfResourceRegistry
         }
 
         // (D) Standard type-1 font
-        if (!FontNameMap.TryGetValue(fontIdentifier, out string value))
+        if (!FontNameMap.TryGetValue(fontIdentifier, out string? value))
         {
             _fontCounter++;
             value = $"/F{_fontCounter}";
@@ -217,9 +217,9 @@ public class PdfResourceRegistry
     /// <summary>
     /// Gets embedded font info by file path.
     /// </summary>
-    public EmbeddedFontInfo GetEmbeddedFont(string filePath)
+    public EmbeddedFontInfo? GetEmbeddedFont(string filePath)
     {
-        return EmbeddedFonts.TryGetValue(filePath, out EmbeddedFontInfo info) ? info : null;
+        return EmbeddedFonts.TryGetValue(filePath, out EmbeddedFontInfo? info) ? info : null;
     }
 
     /// <summary>
@@ -272,7 +272,7 @@ public class PdfResourceRegistry
 
     private string RegisterEmbeddedFont(string filePath)
     {
-        if (!EmbeddedFonts.TryGetValue(filePath, out EmbeddedFontInfo existingFont))
+        if (!EmbeddedFonts.TryGetValue(filePath, out EmbeddedFontInfo? existingFont))
         {
             TtfFont font = new(filePath);
             GlyphUsageTracker tracker = new(font);
@@ -295,7 +295,7 @@ public class PdfResourceRegistry
         return FontNameMap[filePath];
     }
 
-    private static string ResolveStandardFontToTtf(string fontIdentifier)
+    private static string? ResolveStandardFontToTtf(string fontIdentifier)
     {
         string lower = fontIdentifier.ToLowerInvariant();
         bool isBold = lower.Contains("bold");
@@ -352,22 +352,22 @@ public class PdfResourceRegistry
             .ToArray());
     }
 
-    internal TtfFont ResolveEmbeddedFont(string fontIdentifier)
+    internal TtfFont? ResolveEmbeddedFont(string fontIdentifier)
     {
         if (IsEmbeddedFont(fontIdentifier))
         {
-            EmbeddedFontInfo fontInfo = GetEmbeddedFont(fontIdentifier);
+            EmbeddedFontInfo? fontInfo = GetEmbeddedFont(fontIdentifier);
             return fontInfo?.Font;
         }
 
         // Check virtual (bytes-based) font
         string virtualKey = $"virtual:{fontIdentifier}";
-        if (EmbeddedFonts.TryGetValue(virtualKey, out EmbeddedFontInfo virtualFontInfo))
+        if (EmbeddedFonts.TryGetValue(virtualKey, out EmbeddedFontInfo? virtualFontInfo))
             return virtualFontInfo?.Font;
 
-        if (FontAliasMap.TryGetValue(fontIdentifier, out string ttfPath))
+        if (FontAliasMap.TryGetValue(fontIdentifier, out string? ttfPath))
         {
-            EmbeddedFontInfo fontInfo = GetEmbeddedFont(ttfPath);
+            EmbeddedFontInfo? fontInfo = GetEmbeddedFont(ttfPath);
             return fontInfo?.Font;
         }
 
@@ -378,22 +378,22 @@ public class PdfResourceRegistry
     {
         if (IsEmbeddedFont(fontIdentifier))
         {
-            EmbeddedFontInfo fontInfo = GetEmbeddedFont(fontIdentifier);
+            EmbeddedFontInfo? fontInfo = GetEmbeddedFont(fontIdentifier);
             fontInfo?.Tracker.MarkUsed(text);
             return;
         }
 
         // Check virtual (bytes-based) font
         string virtualKey = $"virtual:{fontIdentifier}";
-        if (EmbeddedFonts.TryGetValue(virtualKey, out EmbeddedFontInfo virtualFontInfo))
+        if (EmbeddedFonts.TryGetValue(virtualKey, out EmbeddedFontInfo? virtualFontInfo))
         {
             virtualFontInfo?.Tracker.MarkUsed(text);
             return;
         }
 
-        if (FontAliasMap.TryGetValue(fontIdentifier, out string ttfPath))
+        if (FontAliasMap.TryGetValue(fontIdentifier, out string? ttfPath))
         {
-            EmbeddedFontInfo fontInfo = GetEmbeddedFont(ttfPath);
+            EmbeddedFontInfo? fontInfo = GetEmbeddedFont(ttfPath);
             fontInfo?.Tracker.MarkUsed(text);
         }
     }
@@ -411,10 +411,10 @@ public class PdfResourceRegistry
     /// When the primary font covers the whole string (or is a non-embedded
     /// Type1 font) the result is a single run identical to the legacy path.
     /// </remarks>
-    public List<ResolvedTextRun> ResolveTextRuns(string primaryFontIdentifier, string text)
+    public IList<ResolvedTextRun> ResolveTextRuns(string primaryFontIdentifier, string text)
     {
         string resourceName = RegisterFont(primaryFontIdentifier);
-        TtfFont primaryFont = ResolveEmbeddedFont(primaryFontIdentifier);
+        TtfFont? primaryFont = ResolveEmbeddedFont(primaryFontIdentifier);
 
         // Non-embedded standard Type1 fonts can't be shaped (no cmap/glyph IDs);
         // preserve the literal-string emission path unchanged.
@@ -429,7 +429,7 @@ public class PdfResourceRegistry
         // candidates[0] is the primary font; fallbackByIndex is aligned to
         // candidates (index 0 is the primary and has no FallbackFont entry).
         var candidates = new List<ShaperFont> { new() { FontIdentifier = primaryFontIdentifier, Font = primaryFont } };
-        var fallbackByIndex = new List<FallbackFont> { null };
+        var fallbackByIndex = new List<FallbackFont?> { null };
         foreach (FallbackFont fb in FontManager.GetFallbackFonts())
         {
             if (fb.Font == primaryFont) continue;
@@ -466,10 +466,10 @@ public class PdfResourceRegistry
                 continue;
             }
 
-            FallbackFont fb = fallbackByIndex[run.FontIndex];
+            FallbackFont fb = fallbackByIndex[run.FontIndex]!;
             string fbIdentifier = candidates[run.FontIndex].FontIdentifier;
             string fbResource = RegisterEmbeddedFontFromBytes(fb.Bytes, fbIdentifier);
-            TtfFont fbFont = ResolveEmbeddedFont(fbIdentifier);
+            TtfFont? fbFont = ResolveEmbeddedFont(fbIdentifier);
             result.Add(new ResolvedTextRun
             {
                 ResourceName = fbResource,
@@ -520,7 +520,7 @@ public class PdfResourceRegistry
     /// </summary>
     public string GetImageResourceName(int imageId)
     {
-        if (!ImageResourceNames.TryGetValue(imageId, out string existingResourceName))
+        if (!ImageResourceNames.TryGetValue(imageId, out string? existingResourceName))
         {
             string resourceName = $"/I{imageId}";
             ImageResourceNames[imageId] = resourceName;
@@ -537,7 +537,7 @@ public class PdfResourceRegistry
         string fontResName = RegisterFont(fontFamily);
         string signature = $"{fontResName}_{fontSize}_{color.ToHexString()}";
 
-        if (!DeferredXObjects.TryGetValue(signature, out DeferredXObjectInfo info))
+        if (!DeferredXObjects.TryGetValue(signature, out DeferredXObjectInfo? info))
         {
             string resName = $"/DXO{DeferredXObjects.Count + 1}";
             info = new DeferredXObjectInfo
@@ -563,7 +563,7 @@ public class PdfResourceRegistry
         float effectiveAlpha = RequiresPdfA1TransparencyFallback() ? 1f : clamped;
         string key = effectiveAlpha.ToString("F4", System.Globalization.CultureInfo.InvariantCulture);
 
-        if (!_alphaGraphicsStates.TryGetValue(key, out AlphaGraphicsStateInfo info))
+        if (!_alphaGraphicsStates.TryGetValue(key, out AlphaGraphicsStateInfo? info))
         {
             _graphicsStateCounter++;
             info = new AlphaGraphicsStateInfo($"/GS_ALPHA_{_graphicsStateCounter}", effectiveAlpha);
@@ -594,7 +594,7 @@ public class PdfResourceRegistry
 
         _shadingCounter++;
         string shadingName = $"/Sh{_shadingCounter}";
-        string softMaskGsName = null;
+        string? softMaskGsName = null;
         if (request.HasAlpha)
         {
             _softMaskGsCounter++;
@@ -618,7 +618,7 @@ public class PdfResourceRegistry
 
     private int ResolveFontObjectId(string fontIdentifier)
     {
-        if (FontAliasMap.TryGetValue(fontIdentifier, out string ttfPath) &&
+        if (FontAliasMap.TryGetValue(fontIdentifier, out string? ttfPath) &&
             FontIdMap.TryGetValue(ttfPath, out int ttfFontId))
             return ttfFontId;
         return FontIdMap.TryGetValue(fontIdentifier, out int fontId) ? fontId : 0;
@@ -647,7 +647,7 @@ public class PdfResourceRegistry
 
             if (IsEmbeddedFont(fontIdentifier))
             {
-                if (EmbeddedFonts.TryGetValue(fontIdentifier, out EmbeddedFontInfo fontInfo))
+                if (EmbeddedFonts.TryGetValue(fontIdentifier, out EmbeddedFontInfo? fontInfo))
                 {
                     int type0Id = writer.GetNewId();
                     fontInfo.Type0ObjectId = type0Id;
@@ -690,7 +690,7 @@ public class PdfResourceRegistry
             string text = totalPages.ToString();
             string colorCmd = $"{info.Color.ScR:F3} {info.Color.ScG:F3} {info.Color.ScB:F3} rg";
 
-            TtfFont embeddedFont = ResolveEmbeddedFont(info.FontIdentifier);
+            TtfFont? embeddedFont = ResolveEmbeddedFont(info.FontIdentifier);
             string textOperand;
             if (embeddedFont != null)
             {
@@ -764,7 +764,7 @@ public class PdfResourceRegistry
                 string signature = kvp.Key;
                 int objectId = kvp.Value;
 
-                if (DeferredXObjects.TryGetValue(signature, out DeferredXObjectInfo info))
+                if (DeferredXObjects.TryGetValue(signature, out DeferredXObjectInfo? info))
                     xobjRefs.Add($"{info.ResourceName} {objectId} 0 R");
             }
 
@@ -839,7 +839,7 @@ public class PdfResourceRegistry
 
             if (IsEmbeddedFont(fontIdentifier))
             {
-                if (EmbeddedFonts.TryGetValue(fontIdentifier, out EmbeddedFontInfo fontInfo))
+                if (EmbeddedFonts.TryGetValue(fontIdentifier, out EmbeddedFontInfo? fontInfo))
                 {
                     int type0Id = writer.GetNewId();
                     fontInfo.Type0ObjectId = type0Id;
@@ -882,7 +882,7 @@ public class PdfResourceRegistry
             string text = totalPages.ToString();
             string colorCmd = $"{info.Color.ScR:F3} {info.Color.ScG:F3} {info.Color.ScB:F3} rg";
 
-            TtfFont embeddedFont = ResolveEmbeddedFont(info.FontIdentifier);
+            TtfFont? embeddedFont = ResolveEmbeddedFont(info.FontIdentifier);
             string textOperand;
             if (embeddedFont != null)
             {
@@ -956,7 +956,7 @@ public class PdfResourceRegistry
                 string signature = kvp.Key;
                 int objectId = kvp.Value;
 
-                if (DeferredXObjects.TryGetValue(signature, out DeferredXObjectInfo info))
+                if (DeferredXObjects.TryGetValue(signature, out DeferredXObjectInfo? info))
                     xobjRefs.Add($"{info.ResourceName} {objectId} 0 R");
             }
 
@@ -1058,11 +1058,11 @@ public class PdfResourceRegistry
 
     private sealed record AlphaGraphicsStateInfo(string ResourceName, float Alpha);
 
-    private sealed record ShadingResourceInfo(string ShadingName, string SoftMaskGsName, ShadingRequest Request);
+    private sealed record ShadingResourceInfo(string ShadingName, string? SoftMaskGsName, ShadingRequest Request);
 }
 
 /// <summary>Resource names a content stream references to paint a registered gradient shading.</summary>
 /// <param name="ShadingName">The <c>/Shading</c> resource name (e.g. <c>/Sh1</c>) for the <c>sh</c> operator.</param>
 /// <param name="SoftMaskGs">The luminosity soft-mask <c>/ExtGState</c> name (e.g. <c>/GSsm1</c>), or <c>null</c> for an opaque gradient.</param>
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
-public readonly record struct ShadingResources(string ShadingName, string SoftMaskGs);
+public readonly record struct ShadingResources(string ShadingName, string? SoftMaskGs);

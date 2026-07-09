@@ -1,10 +1,24 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF.Typography;
+
+/// <summary>A registered font available to the glyph-fallback chain.</summary>
+public sealed class FallbackFont
+{
+    /// <summary>Registry key (<c>family:weight</c>), stable across the document.</summary>
+    public required string Key { get; init; }
+
+    /// <summary>Raw TTF bytes, for embedding the fallback font on demand.</summary>
+    public required byte[] Bytes { get; init; }
+
+    /// <summary>Parsed font, for glyph-coverage probing.</summary>
+    public required TtfFont Font { get; init; }
+}
 
 /// <summary>
 /// Global font registry for BonniePDF.
@@ -25,27 +39,18 @@ namespace BonniePDF.Typography;
 /// or <see cref="RegisterFont(Stream, string?, string?)"/> to register additional or
 /// replacement fonts before generating any document.</para>
 /// </remarks>
-/// <summary>A registered font available to the glyph-fallback chain.</summary>
-public sealed class FallbackFont
-{
-    /// <summary>Registry key (<c>family:weight</c>), stable across the document.</summary>
-    public required string Key { get; init; }
-
-    /// <summary>Raw TTF bytes, for embedding the fallback font on demand.</summary>
-    public required byte[] Bytes { get; init; }
-
-    /// <summary>Parsed font, for glyph-coverage probing.</summary>
-    public required TtfFont Font { get; init; }
-}
-
 public static class FontManager
 {
     // Keys: $"{family.ToLower()}:{normalizedWeight}"
-    private static readonly Dictionary<string, byte[]> _registry = new(StringComparer.OrdinalIgnoreCase);
+    // ConcurrentDictionary: this is a process-wide static registry, and concurrent
+    // document generation (a common server workload - see ConcurrencyTests) can
+    // register or read fonts from multiple threads at once. A plain Dictionary is
+    // not safe under concurrent writes.
+    private static readonly ConcurrentDictionary<string, byte[]> _registry = new(StringComparer.OrdinalIgnoreCase);
 
     // Parsed-font cache for the fallback chain, keyed like _registry. Entries are
     // null when the bytes failed to parse, so we don't re-attempt on every call.
-    private static readonly Dictionary<string, TtfFont?> _fallbackCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<string, TtfFont?> _fallbackCache = new(StringComparer.OrdinalIgnoreCase);
 
     // Standard PDF font → Liberation family+weight mapping
     private static readonly Dictionary<string, (string family, string weight)> StandardFontMap =
@@ -128,7 +133,7 @@ public static class FontManager
     }
 
     /// <summary>Returns <c>true</c> if at least one substitution font is registered.</summary>
-    public static bool HasBundledFonts() => _registry.Count > 0;
+    public static bool HasBundledFonts() => !_registry.IsEmpty;
 
     /// <summary>
     /// Returns every registered font (in registration order) parsed for
@@ -141,7 +146,7 @@ public static class FontManager
     /// registered font that covers it, rather than emitting a forbidden
     /// <c>.notdef</c> glyph.
     /// </remarks>
-    public static List<FallbackFont> GetFallbackFonts()
+    public static IList<FallbackFont> GetFallbackFonts()
     {
         var result = new List<FallbackFont>();
         foreach (var entry in _registry)
@@ -149,18 +154,26 @@ public static class FontManager
             string key = entry.Key;
             byte[] bytes = entry.Value;
 
-            if (!_fallbackCache.TryGetValue(key, out TtfFont? font))
-            {
-                try
+            // GetOrAdd (rather than TryGetValue-then-set) so two threads racing on
+            // the same uncached font can't both win the write - the second parse's
+            // result would simply be discarded, but GetOrAdd avoids the duplicate
+            // work and guarantees every caller observes the same cached instance.
+            // The factoryArgument overload passes `bytes` in rather than closing
+            // over it, avoiding a per-call closure allocation.
+            TtfFont? font = _fallbackCache.GetOrAdd(
+                key,
+                static (_, fontBytes) =>
                 {
-                    font = TtfFont.LoadFromBytes(bytes);
-                }
-                catch
-                {
-                    font = null;
-                }
-                _fallbackCache[key] = font;
-            }
+                    try
+                    {
+                        return TtfFont.LoadFromBytes(fontBytes);
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                },
+                bytes);
 
             if (font != null)
                 result.Add(new FallbackFont { Key = key, Bytes = bytes, Font = font });
@@ -186,7 +199,7 @@ public static class FontManager
         TryRegisterFromResources();
 
         // 2. Fall back to font files next to the assembly (e.g. after publish)
-        if (_registry.Count == 0)
+        if (_registry.IsEmpty)
             TryRegisterFromAssemblyDirectory();
     }
 

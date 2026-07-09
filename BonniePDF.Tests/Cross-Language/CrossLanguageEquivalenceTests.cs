@@ -1,11 +1,9 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
-using BonniePDF.Core;
+using BonniePDF.Tests.Accessibility;
+using BonniePDF.Tests.Compliance;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Cross_Language;
 
 /// <summary>
 /// cross-language equivalence. The .NET and TS implementations
@@ -110,7 +108,7 @@ public class CrossLanguageEquivalenceTests
 
     // ── Helpers ──────────────────────────────────────────────────
 
-    private static string Generate(Document doc)
+    private static string Generate(BonniePDF.Document doc)
     {
         using (doc)
         using (var ms = new MemoryStream())

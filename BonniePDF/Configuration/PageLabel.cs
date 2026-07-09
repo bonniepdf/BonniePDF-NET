@@ -23,9 +23,7 @@ public enum PageLabelStyle
 /// catalog (PDF §12.4.2).
 /// <para>
 /// Setting <see cref="DocumentSettings.PageLabel"/> applies the labelling from the
-/// first page of the document. For multi-range labelling (e.g. front matter in
-/// Roman numerals followed by decimal body pages) use
-/// <see cref="DocumentSettings.PageLabels"/> instead.
+/// first page of the document.
 /// </para>
 /// <example>
 /// <code>

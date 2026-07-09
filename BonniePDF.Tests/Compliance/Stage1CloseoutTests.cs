@@ -1,13 +1,13 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
+using BonniePDF.Tests.Accessibility;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Compliance;
 
 [Collection("Serial")]
 
@@ -32,9 +32,9 @@ public class Stage1CloseoutTests
 
     // ── Document builders (also used by the opt-in VeraPDF tests) ───
 
-    internal static Document BuildBusinessInvoiceDocument()
+    internal static BonniePDF.Document BuildBusinessInvoiceDocument()
     {
-        Document doc = new()
+        BonniePDF.Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
@@ -84,9 +84,9 @@ public class Stage1CloseoutTests
         return doc;
     }
 
-    internal static Document BuildMultiPageFlowDocument()
+    internal static BonniePDF.Document BuildMultiPageFlowDocument()
     {
-        Document doc = new()
+        BonniePDF.Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
@@ -119,9 +119,9 @@ public class Stage1CloseoutTests
         return doc;
     }
 
-    internal static Document BuildDickensNovelDocument()
+    internal static BonniePDF.Document BuildDickensNovelDocument()
     {
-        Document doc = new()
+        BonniePDF.Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
@@ -157,7 +157,7 @@ public class Stage1CloseoutTests
         return doc;
     }
 
-    private static string Generate(Document doc)
+    private static string Generate(BonniePDF.Document doc)
     {
         using (doc)
         using (var ms = new MemoryStream())

@@ -12,5 +12,5 @@ public interface ICaptureMetadata
     string CaptureType { get; }
 
     /// <summary>Optional author-supplied name/key surfaced in the snapshot; null when unset.</summary>
-    string CaptureName { get; }
+    string? CaptureName { get; }
 }

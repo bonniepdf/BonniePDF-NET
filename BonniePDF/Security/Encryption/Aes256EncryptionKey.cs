@@ -48,27 +48,27 @@ internal sealed class Aes256EncryptionKey
     /// <summary>
     /// The /U entry (48 bytes): SHA-256(password + validation_salt) + validation_salt + key_salt.
     /// </summary>
-    public byte[] UserEntry { get; private set; }
+    public byte[] UserEntry { get; private set; } = null!;
 
     /// <summary>
     /// The /UE entry (32 bytes): AES-CBC encrypt of file key using SHA-256(password + key_salt).
     /// </summary>
-    public byte[] UserEncryptionEntry { get; private set; }
+    public byte[] UserEncryptionEntry { get; private set; } = null!;
 
     /// <summary>
     /// The /O entry (48 bytes): SHA-256(password + validation_salt + /U) + validation_salt + key_salt.
     /// </summary>
-    public byte[] OwnerEntry { get; private set; }
+    public byte[] OwnerEntry { get; private set; } = null!;
 
     /// <summary>
     /// The /OE entry (32 bytes): AES-CBC encrypt of file key using SHA-256(password + key_salt + /U).
     /// </summary>
-    public byte[] OwnerEncryptionEntry { get; private set; }
+    public byte[] OwnerEncryptionEntry { get; private set; } = null!;
 
     /// <summary>
     /// The /Perms entry (16 bytes): AES-ECB encrypt of permissions block using file key.
     /// </summary>
-    public byte[] PermsEntry { get; private set; }
+    public byte[] PermsEntry { get; private set; } = null!;
 
     /// <summary>
     /// The document ID.

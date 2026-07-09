@@ -13,8 +13,8 @@ namespace BonniePDF.Rendering.Writers;
 /// </summary>
 public class ComplianceWriter
 {
-    private readonly IPdfWriter _writer;
-    private readonly IAsyncPdfWriter _asyncWriter;
+    private readonly IPdfWriter? _writer;
+    private readonly IAsyncPdfWriter? _asyncWriter;
 
     public ComplianceWriter(IPdfWriter writer)
     {
@@ -52,7 +52,7 @@ public class ComplianceWriter
             ["/Length1"] = iccData.Length.ToString()
         };
 
-        _writer.WriteBinaryObject(id, dict, compressed);
+        _writer!.WriteBinaryObject(id, dict, compressed);
     }
 
     /// <summary>
@@ -79,7 +79,7 @@ public class ComplianceWriter
             ["/Length1"] = iccData.Length.ToString()
         };
 
-        await _asyncWriter.WriteBinaryObjectAsync(id, dict, compressed, compressed.Length, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteBinaryObjectAsync(id, dict, compressed, compressed.Length, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -99,7 +99,7 @@ public class ComplianceWriter
             ["/DestOutputProfile"] = $"{iccProfileId} 0 R"
         };
 
-        _writer.WriteObject(id, dict);
+        _writer!.WriteObject(id, dict);
     }
 
     /// <summary>
@@ -120,6 +120,6 @@ public class ComplianceWriter
             ["/DestOutputProfile"] = $"{iccProfileId} 0 R"
         };
 
-        await _asyncWriter.WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
     }
 }

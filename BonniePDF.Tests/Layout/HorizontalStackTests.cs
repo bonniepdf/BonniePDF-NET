@@ -6,7 +6,7 @@ using BonniePDF.Rendering;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Layout;
 
 public class HorizontalStackTests
 {

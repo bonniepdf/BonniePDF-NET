@@ -1,12 +1,9 @@
-using System;
-using System.IO;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Threading.Tasks;
+using BonniePDF.Tests.Accessibility;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Compliance;
 
 /// <summary>
 /// this feature stage-0 closeout - opt-in VeraPDF integration test. Runs the

@@ -34,7 +34,7 @@ public sealed class StructureElement
     /// The parent structure element. <c>null</c> only on the document
     /// root.
     /// </summary>
-    public StructureElement Parent { get; internal set; }
+    public StructureElement? Parent { get; internal set; }
 
     /// <summary>Child structure elements in document order.</summary>
     public IList<StructureElement> Children { get; }
@@ -70,26 +70,26 @@ public sealed class StructureElement
     /// the visible content. Required by PDF/UA on <see cref="SemanticRole.Figure"/>
     /// elements that aren't <see cref="SemanticRole.Artifact"/>.
     /// </summary>
-    public string Alt { get; set; }
+    public string? Alt { get; set; }
 
     /// <summary>
     /// <c>/ActualText</c> - the literal text equivalent of the
     /// rendered content. Used for ligatures, decorative letterforms, and
     /// figures whose visible content is itself words (e.g. a logo).
     /// </summary>
-    public string ActualText { get; set; }
+    public string? ActualText { get; set; }
 
     /// <summary>
     /// <c>/Lang</c> - BCP-47 language tag for this subtree.
     /// Overrides the document-level language for content underneath.
     /// </summary>
-    public string Lang { get; set; }
+    public string? Lang { get; set; }
 
     /// <summary>
     /// <c>/T</c> - a short title for the structure element. Used by
     /// some viewers' navigation panes.
     /// </summary>
-    public string Title { get; set; }
+    public string? Title { get; set; }
 
     /// <summary>
     /// <c>/A</c> - raw structure-element attributes dictionary as PDF
@@ -98,7 +98,7 @@ public sealed class StructureElement
     /// and other attribute-owner-namespaced metadata per ISO 32000-1
     /// §14.7.5. Emitted verbatim by the structure-tree writer.
     /// </summary>
-    public string Attributes { get; set; }
+    public string? Attributes { get; set; }
 
     /// <summary>
     /// Visit this element and (recursively) all of its descendants in

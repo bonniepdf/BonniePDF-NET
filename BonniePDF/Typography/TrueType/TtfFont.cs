@@ -479,7 +479,7 @@ public class TtfFont
         }
 
         // Fallback: generate PostScript name if not found
-        if (PostScriptName == "Unknown")
+        if (string.Equals(PostScriptName, "Unknown", StringComparison.Ordinal))
             PostScriptName = FontFamily.Replace(" ", "") + "-" + FontSubfamily.Replace(" ", "");
     }
 

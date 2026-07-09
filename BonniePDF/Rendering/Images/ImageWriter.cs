@@ -16,8 +16,8 @@ namespace BonniePDF.Rendering.Images;
 /// </summary>
 public class ImageWriter
 {
-    private readonly IAsyncPdfWriter _asyncWriter;
-    private readonly IPdfWriter _writer;
+    private readonly IAsyncPdfWriter? _asyncWriter;
+    private readonly IPdfWriter? _writer;
     private PdfAConformance _conformance = PdfAConformance.None;
 
     /// <summary>
@@ -88,7 +88,7 @@ public class ImageWriter
         };
 
         // Write binary image data
-        _writer.WriteBinaryObject(id, dict, image.Data);
+        _writer!.WriteBinaryObject(id, dict, image.Data);
         return id;
     }
 
@@ -136,12 +136,12 @@ public class ImageWriter
         // Handle alpha channel (soft mask)
         if (writeSmask)
         {
-            int smaskId = _writer.GetNewId();
+            int smaskId = _writer!.GetNewId();
             WriteSoftMask(smaskId, image);
             dict["/SMask"] = $"{smaskId} 0 R";
         }
 
-        _writer.WriteBinaryObject(id, dict, compressedData);
+        _writer!.WriteBinaryObject(id, dict, compressedData);
         return id;
     }
 
@@ -163,7 +163,7 @@ public class ImageWriter
             ["/Filter"] = "/FlateDecode"
         };
 
-        _writer.WriteBinaryObject(id, dict, compressedAlpha);
+        _writer!.WriteBinaryObject(id, dict, compressedAlpha);
     }
 
     /// <summary>
@@ -294,7 +294,7 @@ public class ImageWriter
         };
 
         // Pass explicit length of the data
-        await _asyncWriter.WriteBinaryObjectAsync(id, dict, image.Data, image.Data.Length, cancellationToken)
+        await _asyncWriter!.WriteBinaryObjectAsync(id, dict, image.Data, image.Data.Length, cancellationToken)
             .ConfigureAwait(false);
         return id;
     }
@@ -345,13 +345,13 @@ public class ImageWriter
             // Handle alpha channel (soft mask)
             if (writeSmask)
             {
-                int smaskId = _asyncWriter.GetNewId();
+                int smaskId = _asyncWriter!.GetNewId();
                 await WriteSoftMaskAsync(smaskId, image, cancellationToken).ConfigureAwait(false);
                 dict["/SMask"] = $"{smaskId} 0 R";
             }
 
             // Write using explicit length
-            await _asyncWriter.WriteBinaryObjectAsync(id, dict, compressedBuffer, compressedLength, cancellationToken)
+            await _asyncWriter!.WriteBinaryObjectAsync(id, dict, compressedBuffer, compressedLength, cancellationToken)
                 .ConfigureAwait(false);
             return id;
         }
@@ -383,7 +383,7 @@ public class ImageWriter
                 ["/Filter"] = "/FlateDecode"
             };
 
-            await _asyncWriter.WriteBinaryObjectAsync(id, dict, compressedBuffer, compressedLength, cancellationToken)
+            await _asyncWriter!.WriteBinaryObjectAsync(id, dict, compressedBuffer, compressedLength, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -402,7 +402,7 @@ public class ImageWriter
 
         // Validation
         if (data.Length != alphaData.Length * components)
-            throw new ArgumentException("Data length does not match alpha length and component count.");
+            throw new ArgumentException("Data length does not match alpha length and component count.", nameof(data));
 
         byte[] result = new byte[data.Length];
         int pixelCount = alphaData.Length;

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BonniePDF.Elements;
 using BonniePDF.Rendering;
 
@@ -11,6 +12,9 @@ namespace BonniePDF.Fluent;
 internal class ContentSlot : ElementBase, IContentContainer, IStatefulElement
 {
     public IElement? Child { get; set; }
+
+    /// <inheritdoc />
+    public IEnumerable<IElement> GetChildren() => Child is null ? [] : [Child];
 
     protected override float MeasureContentHeight(float contentWidth)
     {

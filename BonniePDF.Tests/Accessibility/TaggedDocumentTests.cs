@@ -1,10 +1,8 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
-using BonniePDF.Core;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 /// <summary>
 /// this feature / this feature integration smoke tests. Builds a Document, opts into
@@ -56,7 +54,7 @@ public class TaggedDocumentTests
 
     private static string GeneratePdf(AccessibilityMode accessibility, string language, bool pdfA = false)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = accessibility;
         doc.Settings.Language = language;

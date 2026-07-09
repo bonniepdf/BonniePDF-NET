@@ -1,13 +1,11 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
-using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 [Collection("Serial")]
 
@@ -25,9 +23,9 @@ namespace BonniePDF.Tests;
 /// </summary>
 public class HyperlinkTaggingTests
 {
-    private static byte[] GenerateBytes(System.Action<Document> populate)
+    private static byte[] GenerateBytes(System.Action<BonniePDF.Document> populate)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
@@ -103,7 +101,7 @@ public class HyperlinkTaggingTests
     {
         // /Contents is emitted regardless of tagging. /Link struct elem
         // is gated on tagging.
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.None;
         doc.Add(new Hyperlink("https://example.com", "x")

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BonniePDF.Core;
 using BonniePDF.Fluent;
 using BonniePDF.Fluent.Descriptors;
@@ -13,7 +14,10 @@ namespace BonniePDF.Elements.Layout;
 /// </summary>
 public class Container : BorderedElementBase, IContentContainer
 {
-    public IElement Child { get; set; }
+    public IElement? Child { get; set; }
+
+    /// <inheritdoc />
+    public IEnumerable<IElement> GetChildren() => Child is null ? [] : [Child];
 
     /// <summary>
     /// Explicit interface implementation for IContentContainer.
@@ -22,7 +26,7 @@ public class Container : BorderedElementBase, IContentContainer
     IElement? IContentContainer.Child
     {
         get => Child;
-        set => Child = value!;
+        set => Child = value;
     }
     public Thickness Padding { get; set; }
 
