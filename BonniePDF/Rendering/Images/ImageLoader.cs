@@ -185,7 +185,7 @@ public static class ImageLoader
 
         ImageInfo info = new() { Format = ImageFormat.Png, OriginalData = data };
         List<byte[]> idatChunks = new();
-        byte[] palette = null;
+        byte[]? palette = null;
         int colorType = 0;
         int bitDepth = 8;
 
@@ -308,7 +308,7 @@ public static class ImageLoader
         int rawDataLength = info.Width * info.Height * bytesPerPixel;
 
         byte[] pixelData;
-        byte[] alphaData = null;
+        byte[]? alphaData = null;
 
         if (info.HasAlpha)
         {

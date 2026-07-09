@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using BonniePDF.Configuration;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
@@ -8,7 +6,7 @@ using BonniePDF.Fluent;
 using BonniePDF.Rendering;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Layout;
 
 /// <summary>
 /// Page slots (Background / Foreground) and the Layers primitive.
@@ -19,7 +17,7 @@ public class PageSlotsLayersTests
     private static TextBlock Text(string content) => new() { Text = content, FontSize = 12 };
 
     /// <summary>Renders one page's stream through the streaming pipeline.</summary>
-    private static string RenderPageStream(Document doc, int index = 0)
+    private static string RenderPageStream(BonniePDF.Document doc, int index = 0)
     {
         RenderContext ctx = new(doc.Settings.GetOrientedPageSize(), doc.Settings.Margin);
         List<PageRenderOutput> outputs =
@@ -32,7 +30,7 @@ public class PageSlotsLayersTests
     [Fact]
     public void PageBackground_RendersBehindContent()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(Text("BODYMARKER"));
         doc.Settings.PageBackground = _ => Text("BACKGROUNDMARKER");
 
@@ -47,7 +45,7 @@ public class PageSlotsLayersTests
     [Fact]
     public void PageForeground_RendersOnTopOfContent()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(Text("BODYMARKER"));
         doc.Settings.PageForeground = _ => Text("FOREGROUNDMARKER");
 
@@ -60,7 +58,7 @@ public class PageSlotsLayersTests
     [Fact]
     public void PageSlots_OrderBackgroundContentForeground()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(Text("BODYMARKER"));
         doc.Settings.PageBackground = _ => Text("BACKGROUNDMARKER");
         doc.Settings.PageForeground = _ => Text("FOREGROUNDMARKER");
@@ -77,7 +75,7 @@ public class PageSlotsLayersTests
     [Fact]
     public void PageBackground_RendersBehindWatermark()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(Text("BODYMARKER"));
         doc.Settings.PageBackground = _ => Text("BACKGROUNDMARKER");
         doc.Settings.Watermark = new WatermarkSettings { Text = "WMARK" };
@@ -89,7 +87,7 @@ public class PageSlotsLayersTests
     [Fact]
     public void Watermark_RendersOverBodyButUnderForeground()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(Text("BODYMARKER"));
         doc.Settings.Watermark = new WatermarkSettings { Text = "WMARK" };
         doc.Settings.PageForeground = _ => Text("FOREGROUNDMARKER");
@@ -104,7 +102,7 @@ public class PageSlotsLayersTests
     [Fact]
     public void PageSlots_NoOpWhenUnset()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(Text("BODYMARKER"));
         string stream = RenderPageStream(doc);
         Assert.Contains("BODYMARKER", stream);
@@ -113,7 +111,7 @@ public class PageSlotsLayersTests
     [Fact]
     public void PageSlot_TemplateReturningNull_RendersNothingExtra()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(Text("BODYMARKER"));
         doc.Settings.PageBackground = _ => null;
         string stream = RenderPageStream(doc);
@@ -123,7 +121,7 @@ public class PageSlotsLayersTests
     [Fact]
     public void PageSlot_ReceivesOneBasedPageNumber()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Add(Text("BODYMARKER"));
         List<int> seen = new();
         doc.Settings.PageForeground = n =>
@@ -143,7 +141,7 @@ public class PageSlotsLayersTests
     [Fact]
     public void Fluent_WiresBackgroundAndForeground()
     {
-        Document doc = Pdf.Create(b => b
+        BonniePDF.Document doc = Pdf.Create(b => b
             .Page(p =>
             {
                 p.Background().Child = Text("BACKGROUNDMARKER");

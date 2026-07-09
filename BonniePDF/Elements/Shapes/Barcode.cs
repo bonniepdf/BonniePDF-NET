@@ -31,7 +31,7 @@ public enum BarcodeSymbology
 /// Raised when a value cannot be encoded in the requested
 /// <see cref="BarcodeSymbology"/> (wrong length, invalid characters, etc.).
 /// </summary>
-public sealed class BarcodeContentException : Exception
+public sealed class BarcodeContentException : BonniePdfException
 {
     /// <summary>The symbology that rejected the value.</summary>
     public BarcodeSymbology Symbology { get; }

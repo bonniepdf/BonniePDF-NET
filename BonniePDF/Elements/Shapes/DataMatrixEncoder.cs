@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using BonniePDF.Core;
 
 namespace BonniePDF.Elements.Shapes;
 
 /// <summary>
 /// Thrown when a message cannot fit in the largest Data Matrix symbol.
 /// </summary>
-public sealed class DataMatrixContentException : Exception
+public sealed class DataMatrixContentException : BonniePdfException
 {
     public DataMatrixContentException(string message) : base(message) { }
 }

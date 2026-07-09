@@ -17,7 +17,7 @@ public class FontEmbeddingTests : IntegrationTestBase
         string outputPath = GetTestFilePath("standard_fonts.pdf");
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             // Test all standard fonts
             string[] standardFonts = new[]
@@ -63,7 +63,7 @@ public class FontEmbeddingTests : IntegrationTestBase
         string outputPath = GetTestFilePath("text_sizes.pdf");
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             doc.Add(new TextBlock
             {
@@ -101,7 +101,7 @@ public class FontEmbeddingTests : IntegrationTestBase
         string outputPath = GetTestFilePath("unicode_text.pdf");
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             doc.Add(new TextBlock
             {
@@ -159,7 +159,7 @@ public class FontEmbeddingTests : IntegrationTestBase
             20));
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             doc.Add(new TextBlock
             {
@@ -192,7 +192,7 @@ public class FontEmbeddingTests : IntegrationTestBase
         string outputPath = GetTestFilePath("text_alignments.pdf");
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             doc.Add(new TextBlock
             {
@@ -252,7 +252,7 @@ public class FontEmbeddingTests : IntegrationTestBase
         string outputPath = GetTestFilePath("colored_text.pdf");
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             doc.Add(new TextBlock
             {
@@ -302,7 +302,7 @@ public class FontEmbeddingTests : IntegrationTestBase
         string outputPath = GetTestFilePath("special_characters.pdf");
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             doc.Add(new TextBlock
             {

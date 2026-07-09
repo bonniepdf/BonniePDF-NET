@@ -1,3 +1,4 @@
+using System;
 using BonniePDF.Core;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Tagging;
@@ -79,7 +80,7 @@ public class DataMatrix : ElementBase, IRoleProvider, IAltTextProvider
     private EncodedDataMatrix EncodeMatrix()
     {
         string key = (Rectangular ? "r:" : "s:") + Data;
-        if (_memoKey != key || _memo is null)
+        if (!string.Equals(_memoKey, key, StringComparison.Ordinal) || _memo is null)
         {
             _memo = DataMatrixEncoder.Encode(Data, Rectangular);
             _memoKey = key;

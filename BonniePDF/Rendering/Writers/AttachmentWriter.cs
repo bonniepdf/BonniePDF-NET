@@ -16,12 +16,12 @@ namespace BonniePDF.Rendering.Writers;
 /// <c>/EmbeddedFile</c> stream and one <c>/Filespec</c> per attachment, plus
 /// the shared <c>/EmbeddedFiles</c> name tree the catalog references from
 /// <c>/Names</c>. The filespec object IDs are returned so the caller can list
-/// them in the catalog's <c>/AF</c> associated-files array (PDF/A-3 §6.8).
+/// them in the catalog's <c>/AF</c> associated-files array (PDF/A-3 Â§6.8).
 /// </summary>
 public class AttachmentWriter
 {
-    private readonly IPdfWriter _writer;
-    private readonly IAsyncPdfWriter _asyncWriter;
+    private readonly IPdfWriter? _writer;
+    private readonly IAsyncPdfWriter? _asyncWriter;
 
     public AttachmentWriter(IPdfWriter writer)
     {
@@ -59,18 +59,18 @@ public class AttachmentWriter
 
         foreach (FileAttachment a in ordered)
         {
-            int streamId = _writer.GetNewId();
-            _writer.WriteBinaryObject(streamId, BuildEmbeddedFileDict(a), a.Content);
+            int streamId = _writer!.GetNewId();
+            _writer!.WriteBinaryObject(streamId, BuildEmbeddedFileDict(a), a.Content);
 
-            int filespecId = _writer.GetNewId();
-            _writer.WriteObject(filespecId, BuildFilespecDict(a, streamId));
+            int filespecId = _writer!.GetNewId();
+            _writer!.WriteObject(filespecId, BuildFilespecDict(a, streamId));
 
             afIds.Add(filespecId);
             nameEntries.Add((a.FileName, filespecId));
         }
 
-        int namesId = _writer.GetNewId();
-        _writer.WriteObject(namesId, BuildNameTreeDict(nameEntries));
+        int namesId = _writer!.GetNewId();
+        _writer!.WriteObject(namesId, BuildNameTreeDict(nameEntries));
 
         return new Result(namesId, afIds);
     }
@@ -88,20 +88,20 @@ public class AttachmentWriter
 
         foreach (FileAttachment a in ordered)
         {
-            int streamId = _asyncWriter.GetNewId();
-            await _asyncWriter.WriteBinaryObjectAsync(streamId, BuildEmbeddedFileDict(a), a.Content, a.Content.Length, cancellationToken)
+            int streamId = _asyncWriter!.GetNewId();
+            await _asyncWriter!.WriteBinaryObjectAsync(streamId, BuildEmbeddedFileDict(a), a.Content, a.Content.Length, cancellationToken)
                 .ConfigureAwait(false);
 
-            int filespecId = _asyncWriter.GetNewId();
-            await _asyncWriter.WriteObjectAsync(filespecId, BuildFilespecDict(a, streamId), null, cancellationToken)
+            int filespecId = _asyncWriter!.GetNewId();
+            await _asyncWriter!.WriteObjectAsync(filespecId, BuildFilespecDict(a, streamId), null, cancellationToken)
                 .ConfigureAwait(false);
 
             afIds.Add(filespecId);
             nameEntries.Add((a.FileName, filespecId));
         }
 
-        int namesId = _asyncWriter.GetNewId();
-        await _asyncWriter.WriteObjectAsync(namesId, BuildNameTreeDict(nameEntries), null, cancellationToken)
+        int namesId = _asyncWriter!.GetNewId();
+        await _asyncWriter!.WriteObjectAsync(namesId, BuildNameTreeDict(nameEntries), null, cancellationToken)
             .ConfigureAwait(false);
 
         return new Result(namesId, afIds);
@@ -110,7 +110,7 @@ public class AttachmentWriter
     /// <summary>
     /// Drops attachments with no name or empty content, then orders the
     /// survivors by file name. The name tree's <c>/Names</c> array must be
-    /// sorted by key (PDF §7.9.6), and a stable order also keeps output
+    /// sorted by key (PDF Â§7.9.6), and a stable order also keeps output
     /// deterministic across the two implementations.
     /// </summary>
     private static List<FileAttachment> OrderAndValidate(IList<FileAttachment> attachments)
@@ -187,7 +187,7 @@ public class AttachmentWriter
     /// <summary>
     /// Encodes an arbitrary string as a PDF name body, escaping any character
     /// outside the regular name set as <c>#XX</c> over its UTF-8 bytes
-    /// (PDF §7.3.5). E.g. <c>"text/xml"</c> becomes <c>text#2Fxml</c>.
+    /// (PDF Â§7.3.5). E.g. <c>"text/xml"</c> becomes <c>text#2Fxml</c>.
     /// </summary>
     private static string EncodeName(string value)
     {

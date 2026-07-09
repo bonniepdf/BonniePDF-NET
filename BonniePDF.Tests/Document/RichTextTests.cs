@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
@@ -11,7 +8,7 @@ using BonniePDF.Rendering.Images;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Document;
 
 public class RichTextTests
 {

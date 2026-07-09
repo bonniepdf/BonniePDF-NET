@@ -9,12 +9,12 @@ public class TextSpan
     /// <summary>
     /// The text content of this span.
     /// </summary>
-    public string Text { get; set; }
+    public string Text { get; set; } = string.Empty;
 
     /// <summary>
     /// The style for this span. Properties set to null inherit from the parent RichText's DefaultStyle.
     /// </summary>
-    public TextStyle Style { get; set; }
+    public TextStyle? Style { get; set; }
 
     /// <summary>
     /// When true, a line break is inserted after this span's text.

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -11,27 +12,36 @@ namespace BonniePDF.Typography;
 /// Provides font metrics for calculating text width in PDF documents.
 /// Supports both standard PDF fonts and custom TTF fonts.
 /// </summary>
+/// <remarks>
+/// All caches below are process-wide statics read and written during layout, so
+/// concurrent document generation (a common server workload) can hit them from
+/// multiple threads at once. They use <see cref="ConcurrentDictionary{TKey,TValue}"/>
+/// rather than plain <see cref="Dictionary{TKey,TValue}"/>/<see cref="HashSet{T}"/>
+/// for that reason.
+/// </remarks>
 public static class FontMetrics
 {
     // Cache for parsed TTF widths: "C:/Fonts/arial.ttf" -> int[95]
-    private static readonly Dictionary<string, int[]> TtfCache = [];
+    private static readonly ConcurrentDictionary<string, int[]> TtfCache = new();
 
     // Cache for full TtfFont instances loaded by file path. Used to measure text
     // with accurate per-glyph advances (including supplementary-plane characters
     // such as emoji), instead of the ASCII-only widths in TtfCache.
-    private static readonly Dictionary<string, TtfFont> TtfFontCache = [];
+    private static readonly ConcurrentDictionary<string, TtfFont?> TtfFontCache = new();
 
     // Marks file paths that failed to load as a full TtfFont, so we fall back to
     // the ASCII-only measurement path without re-attempting on every call.
-    private static readonly HashSet<string> TtfFontLoadFailed = new(StringComparer.OrdinalIgnoreCase);
+    // ConcurrentDictionary used as a set (value is unused) - there is no
+    // ConcurrentHashSet in the BCL.
+    private static readonly ConcurrentDictionary<string, byte> TtfFontLoadFailed = new(StringComparer.OrdinalIgnoreCase);
 
     // Alias map: logical font name (e.g. "Helvetica-Bold") → physical TTF path (e.g. "C:/Windows/Fonts/arialbd.ttf")
     // Populated by PdfResourceRegistry when PDF/A mode resolves a standard font to an embedded TTF file.
     // This ensures measurement uses actual TTF metrics to match rendering exactly.
-    private static readonly Dictionary<string, string> FontPathAliases = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<string, string> FontPathAliases = new(StringComparer.OrdinalIgnoreCase);
 
     // Instance map: logical font name → already-parsed TtfFont (for bytes-based fonts with no file path).
-    private static readonly Dictionary<string, TtfFont> FontInstanceAliases = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<string, TtfFont> FontInstanceAliases = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Registers a logical font name alias pointing to a specific TTF file path.
@@ -200,15 +210,15 @@ public static class FontMetrics
             return GetTtfWidth(text, fontIdentifier, fontSize);
 
         // B1. IS IT A BYTES-LOADED FONT INSTANCE (from FontManager)?
-        if (FontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont instanceFont))
-            return GetKernedStringWidth(text, instanceFont, fontSize);
+        if (FontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont? instanceFont))
+            return GetKernedStringWidth(text, instanceFont!, fontSize);
 
         // B2. IS IT A REGISTERED ALIAS TO A TTF FILE?
         // When PDF/A mode embeds a real TTF for a logical name (e.g. "Helvetica-Bold" → arialbd.ttf),
         // measure using the actual TTF metrics so layout matches rendering.
         // B1. IS IT A REGISTERED ALIAS TO A TtfFont INSTANCE (bytes-based)?
-        if (FontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont fontInstance))
-            return GetKernedStringWidth(text, fontInstance, fontSize);
+        if (FontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont? fontInstance))
+            return GetKernedStringWidth(text, fontInstance!, fontSize);
 
         // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
         return GetStandardFontWidth(text, fontIdentifier, fontSize);
@@ -262,38 +272,39 @@ public static class FontMetrics
         // unknown char and assigns the 500-unit fallback, badly under-measuring
         // wide emoji glyphs - wrapping then fails to trigger and content runs
         // off the page.
-        if (!TtfFontLoadFailed.Contains(filepath))
+        if (!TtfFontLoadFailed.ContainsKey(filepath))
         {
-            if (!TtfFontCache.TryGetValue(filepath, out TtfFont fullFont))
+            // GetOrAdd (rather than TryGetValue-then-set) so two threads racing on
+            // the same uncached path can't both win the write; a racing failure
+            // still records itself in TtfFontLoadFailed exactly as before.
+            TtfFont? fullFont = TtfFontCache.GetOrAdd(filepath, path =>
             {
                 try
                 {
-                    fullFont = new TtfFont(filepath);
-                    TtfFontCache[filepath] = fullFont;
+                    return new TtfFont(path);
                 }
                 catch
                 {
-                    TtfFontLoadFailed.Add(filepath);
-                    fullFont = null;
+                    TtfFontLoadFailed.TryAdd(path, 0);
+                    return null;
                 }
-            }
+            });
             if (fullFont != null)
                 return GetKernedStringWidth(text, fullFont, fontSize);
         }
 
         // Legacy fallback: ASCII-only width table for fonts that fail to parse
         // as a full TtfFont. Kept for robustness; not exercised in the common case.
-        if (!TtfCache.TryGetValue(filepath, out int[] widths))
-            try
-            {
-                widths = SimpleTtfReader.GetWidths(filepath);
-                TtfCache[filepath] = widths;
-            }
-            catch
-            {
-                // Fallback if file not found or corrupted
-                return text.Length * (fontSize * 0.5f);
-            }
+        int[] widths;
+        try
+        {
+            widths = TtfCache.GetOrAdd(filepath, SimpleTtfReader.GetWidths);
+        }
+        catch
+        {
+            // Fallback if file not found or corrupted
+            return text.Length * (fontSize * 0.5f);
+        }
         float totalWidth = 0;
 
         foreach (char c in text)
@@ -312,7 +323,7 @@ public static class FontMetrics
     // =====================================================
     // 3. STANDARD FONT LOGIC (Hardcoded Tables)
     // =====================================================
-    private static int[] GetStandardFontTable(string fontName) => fontName switch
+    private static int[]? GetStandardFontTable(string fontName) => fontName switch
     {
         "Helvetica"             => HelveticaWidths,
         "Helvetica-Oblique"     => HelveticaWidths,
@@ -332,7 +343,7 @@ public static class FontMetrics
         // Courier variants: all use a fixed 600-unit advance (monospace)
         if (fontName.Contains("Courier")) return text.Length * (fontSize * 0.6f);
 
-        int[] table = GetStandardFontTable(fontName);
+        int[]? table = GetStandardFontTable(fontName);
         float totalWidth = 0;
         foreach (char c in text)
         {

@@ -36,7 +36,7 @@ public class ConcurrencyTests : IntegrationTestBase
                 {
                     string outputPath = GetTestFilePath($"concurrent_{docNum}.pdf");
 
-                    using Document doc = new();
+                    using BonniePDF.Document doc = new();
                     doc.Add(new TextBlock
                     {
                         Text = $"Concurrent Document {docNum}",
@@ -89,7 +89,7 @@ public class ConcurrencyTests : IntegrationTestBase
             {
                 string outputPath = GetTestFilePath($"concurrent_charts_{docNum}.pdf");
 
-                using Document doc = new();
+                using BonniePDF.Document doc = new();
                 doc.Add(new TextBlock
                 {
                     Text = $"Chart Document {docNum}",
@@ -140,7 +140,7 @@ public class ConcurrencyTests : IntegrationTestBase
             {
                 string outputPath = GetTestFilePath($"concurrent_images_{docNum}.pdf");
 
-                using Document doc = new();
+                using BonniePDF.Document doc = new();
                 doc.Add(new TextBlock
                 {
                     Text = $"Image Document {docNum}",
@@ -189,7 +189,7 @@ public class ConcurrencyTests : IntegrationTestBase
             {
                 string outputPath = GetTestFilePath($"concurrent_encrypted_{docNum}.pdf");
 
-                using Document doc = new(new DocumentSettings().WithPassword($"password{docNum}"));
+                using BonniePDF.Document doc = new(new DocumentSettings().WithPassword($"password{docNum}"));
                 doc.Add(new TextBlock
                 {
                     Text = $"Encrypted Document {docNum}",
@@ -234,7 +234,7 @@ public class ConcurrencyTests : IntegrationTestBase
                 {
                     string outputPath = GetTestFilePath($"stress_test_{docNum}.pdf");
 
-                    using Document doc = new();
+                    using BonniePDF.Document doc = new();
                     doc.Add(new TextBlock
                     {
                         Text = $"Stress Test Document {docNum}",
@@ -285,7 +285,7 @@ public class ConcurrencyTests : IntegrationTestBase
             tasks.Add(Task.Run(() =>
             {
                 using MemoryStream stream = new();
-                using Document doc = new();
+                using BonniePDF.Document doc = new();
 
                 doc.Add(new TextBlock
                 {
@@ -329,7 +329,7 @@ public class ConcurrencyTests : IntegrationTestBase
             {
                 string outputPath = GetTestFilePath($"concurrent_shared_{docNum}.pdf");
 
-                using Document doc = new();
+                using BonniePDF.Document doc = new();
                 doc.Add(new TextBlock
                 {
                     Text = $"Shared Resources Document {docNum}",
@@ -388,7 +388,7 @@ public class ConcurrencyTests : IntegrationTestBase
             {
                 string outputPath = GetTestFilePath($"concurrent_multipage_{docNum}.pdf");
 
-                using Document doc = new();
+                using BonniePDF.Document doc = new();
 
                 // Add 10 pages to each document
                 for (int p = 0; p < 10; p++)
@@ -435,7 +435,7 @@ public class ConcurrencyTests : IntegrationTestBase
             {
                 string outputPath = GetTestFilePath($"concurrent_settings_{docNum}.pdf");
 
-                using Document doc = new(new DocumentSettings
+                using BonniePDF.Document doc = new(new DocumentSettings
                 {
                     Orientation = orientations[docNum % 2]
                 });

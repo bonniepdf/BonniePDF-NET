@@ -25,7 +25,7 @@ public class LargeDocumentTests : IntegrationTestBase
         Stopwatch sw = Stopwatch.StartNew();
 
         // Act
-        using (Document doc = new(new DocumentSettings
+        using (BonniePDF.Document doc = new(new DocumentSettings
         {
             FooterTemplate = pageNumber => new TextBlock
             {
@@ -95,7 +95,7 @@ public class LargeDocumentTests : IntegrationTestBase
         Stopwatch sw = Stopwatch.StartNew();
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             VerticalStack stack = new();
 
@@ -131,7 +131,7 @@ public class LargeDocumentTests : IntegrationTestBase
         Stopwatch sw = Stopwatch.StartNew();
 
         // Act
-        using (Document doc = new(new DocumentSettings
+        using (BonniePDF.Document doc = new(new DocumentSettings
         {
             Orientation = PageOrientation.Landscape
         }))
@@ -182,7 +182,7 @@ public class LargeDocumentTests : IntegrationTestBase
         Stopwatch sw = Stopwatch.StartNew();
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             // Add 20 images (4 per page, 5 pages)
             for (int page = 0; page < 5; page++)
@@ -233,7 +233,7 @@ public class LargeDocumentTests : IntegrationTestBase
         Stopwatch sw = Stopwatch.StartNew();
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             doc.Add(new TextBlock
             {
@@ -295,7 +295,7 @@ public class LargeDocumentTests : IntegrationTestBase
         Stopwatch sw = Stopwatch.StartNew();
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             for (int i = 0; i < 50; i++)
             {
@@ -337,7 +337,7 @@ public class LargeDocumentTests : IntegrationTestBase
         long startMemory = GC.GetTotalMemory(forceFullCollection: true);
 
         // Act
-        using (Document doc = new())
+        using (BonniePDF.Document doc = new())
         {
             // Generate 50 pages with mixed content
             for (int i = 0; i < 50; i++)

@@ -1,8 +1,7 @@
-using System;
 using BonniePDF.Core;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Core;
 
 // ColorPalette is the single home for the Tailwind v4 tokens (Color is just the RGBA primitive).
 // These tests pin the indexer against the exact published swatch values and check shade handling.

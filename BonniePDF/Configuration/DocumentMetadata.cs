@@ -18,7 +18,7 @@ public class DocumentMetadata
     /// <summary>
     /// Creates a new instance of DocumentMetadata with the specified title
     /// </summary>
-    public DocumentMetadata(string title)
+    public DocumentMetadata(string? title)
     {
         Title = title;
     }
@@ -26,7 +26,7 @@ public class DocumentMetadata
     /// <summary>
     /// Creates a new instance of DocumentMetadata with the specified title and author
     /// </summary>
-    public DocumentMetadata(string title, string author)
+    public DocumentMetadata(string? title, string? author)
     {
         Title = title;
         Author = author;
@@ -35,23 +35,23 @@ public class DocumentMetadata
     /// <summary>
     /// The document title
     /// </summary>
-    public string Title { get; set; }
+    public string? Title { get; set; }
 
     /// <summary>
     /// The name of the person who created the document
     /// </summary>
-    public string Author { get; set; }
+    public string? Author { get; set; }
 
     /// <summary>
     /// The subject of the document
     /// </summary>
-    public string Subject { get; set; }
+    public string? Subject { get; set; }
 
     /// <summary>
     /// Keywords associated with the document. For PDF generation, these are stored as a
     /// comma-separated string. Use <see cref="SetKeywords"/> to set from a collection.
     /// </summary>
-    public string Keywords { get; set; }
+    public string? Keywords { get; set; }
 
     /// <summary>
     /// The application that created the original content

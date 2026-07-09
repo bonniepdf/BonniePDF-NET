@@ -21,7 +21,7 @@ public class Layers : ElementBase
     /// The layer that determines the flow height of the stack. When null, the
     /// tallest declared layer defines the height instead.
     /// </summary>
-    public IElement PrimaryLayer { get; set; }
+    public IElement? PrimaryLayer { get; set; }
 
     /// <summary>Layers painted behind the primary layer, in declaration order.</summary>
     public IReadOnlyList<IElement> BackgroundLayers => _background.AsReadOnly();

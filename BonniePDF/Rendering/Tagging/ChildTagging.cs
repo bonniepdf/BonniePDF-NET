@@ -41,12 +41,12 @@ public static class ChildTagging
     /// </remarks>
     public static ChildTagToken BeginChildTag(RenderContext ctx, IElement child)
     {
-        TaggingContext tagging = ctx.Tagging;
+        TaggingContext? tagging = ctx.Tagging;
 
         // Inside an /Artifact region (header/footer/slot/decorative subtree) nothing
         // may be tagged as real content - PDF/UA 7.1-2. The child renders as part of
         // the enclosing artifact, so open no structure scope.
-        if (tagging != null && ctx.Canvas != null && ctx.Canvas.IsInsideArtifact())
+        if (tagging != null && ctx.Canvas != null && ctx.Canvas!.IsInsideArtifact())
             return new ChildTagToken { IsArtifact = false, TagThis = false };
 
         SemanticRole? role = tagging != null && child is IRoleProvider rp ? rp.SemanticRole : (SemanticRole?)null;
@@ -57,7 +57,7 @@ public static class ChildTagging
 
         if (isArtifact)
         {
-            ctx.Canvas.BeginArtifact();
+            ctx.Canvas!.BeginArtifact();
         }
         else if (tagThis)
         {
@@ -69,9 +69,9 @@ public static class ChildTagging
             if (child is Core.Hyperlink hyperlink)
                 hyperlink.LinkedStructElement = elem;
             if (role.Value.IsContainerRole())
-                ctx.Canvas.BeginContainerContent(role.Value.ToPdfTag());
+                ctx.Canvas!.BeginContainerContent(role.Value.ToPdfTag());
             else
-                ctx.Canvas.BeginMarkedContent(role.Value.ToPdfTag());
+                ctx.Canvas!.BeginMarkedContent(role.Value.ToPdfTag());
         }
 
         return new ChildTagToken { IsArtifact = isArtifact, TagThis = tagThis };
@@ -82,11 +82,11 @@ public static class ChildTagging
     {
         if (token.IsArtifact)
         {
-            ctx.Canvas.EndArtifact();
+            ctx.Canvas!.EndArtifact();
         }
         else if (token.TagThis)
         {
-            ctx.Canvas.EndMarkedContent();
+            ctx.Canvas!.EndMarkedContent();
             ctx.Tagging!.Tree.End();
         }
     }
@@ -100,9 +100,9 @@ public static class ChildTagging
     public static void PauseChildTag(RenderContext ctx, ChildTagToken token)
     {
         if (token.IsArtifact)
-            ctx.Canvas.EndArtifact();
+            ctx.Canvas!.EndArtifact();
         else if (token.TagThis)
-            ctx.Canvas.EndMarkedContent();
+            ctx.Canvas!.EndMarkedContent();
     }
 
     /// <summary>
@@ -114,15 +114,15 @@ public static class ChildTagging
     {
         if (token.IsArtifact)
         {
-            ctx.Canvas.BeginArtifact();
+            ctx.Canvas!.BeginArtifact();
         }
         else if (token.TagThis && element is IRoleProvider rp && ctx.Tagging != null)
         {
             SemanticRole role = rp.SemanticRole;
             if (role.IsContainerRole())
-                ctx.Canvas.BeginContainerContent(role.ToPdfTag());
+                ctx.Canvas!.BeginContainerContent(role.ToPdfTag());
             else
-                ctx.Canvas.BeginMarkedContent(role.ToPdfTag());
+                ctx.Canvas!.BeginMarkedContent(role.ToPdfTag());
         }
     }
 }

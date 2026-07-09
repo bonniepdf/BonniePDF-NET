@@ -9,7 +9,7 @@ namespace BonniePDF.Rendering;
 /// </summary>
 public class PageRenderOutput
 {
-    public string ContentStream { get; set; }
+    public required string ContentStream { get; set; }
     public PdfSize Size { get; set; }
-    public IList<Hyperlink> Hyperlinks { get; set; }
+    public required IList<Hyperlink> Hyperlinks { get; set; }
 }

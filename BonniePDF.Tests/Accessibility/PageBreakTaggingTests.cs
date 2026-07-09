@@ -1,13 +1,10 @@
-using System.IO;
-using System.Linq;
 using System.Text;
 using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Tagging;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 [Collection("Serial")]
 
@@ -88,7 +85,7 @@ public class PageBreakTaggingTests
     {
         // Back-compat: without tagging on, NewPage must produce no
         // BDC/EMC at all on any page.
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.None;
         var sb = new StringBuilder();
@@ -117,7 +114,7 @@ public class PageBreakTaggingTests
         InternalConfiguration.EnableCompression = false;
         try
         {
-            using var doc = new Document();
+            using var doc = new BonniePDF.Document();
             doc.Settings.Version = PdfVersion.Pdf17;
             doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
             doc.Settings.Language = "en-GB";
@@ -166,9 +163,9 @@ public class PageBreakTaggingTests
     }
 
 
-    private static string GenerateTagged(System.Action<Document> populate)
+    private static string GenerateTagged(System.Action<BonniePDF.Document> populate)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";

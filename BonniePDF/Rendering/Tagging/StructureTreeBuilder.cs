@@ -32,7 +32,7 @@ public sealed class StructureTreeBuilder
 
     /// <summary>
     /// The element currently at the top of the open-element stack -
-    /// the element that <see cref="AddMcid"/> attaches to and that new
+    /// the element that <see cref="AddMcid(int, int)"/> attaches to and that new
     /// <see cref="Begin"/> calls nest under.
     /// </summary>
     public StructureElement Current => _stack.Peek();

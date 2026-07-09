@@ -24,7 +24,7 @@ public class PdfRenderResult
     /// <summary>
     /// The render context containing font mappings, image mappings, and hyperlinks
     /// </summary>
-    public RenderContext RenderContext { get; set; }
+    public required RenderContext RenderContext { get; set; }
 
     /// <summary>
     /// The oriented page size from document settings

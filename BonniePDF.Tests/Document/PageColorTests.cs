@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
 using System.Text;
 using BonniePDF.Configuration;
@@ -8,12 +6,12 @@ using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Document;
 
 public class PageColorTests
 {
     /// <summary>Generates the document and extracts its (decompressed) first content stream.</summary>
-    private static string FirstPageStream(Document doc)
+    private static string FirstPageStream(BonniePDF.Document doc)
     {
         using MemoryStream ms = new();
         doc.Save(ms, leaveOpen: true);
@@ -34,7 +32,7 @@ public class PageColorTests
     }
 
     /// <summary>Returns every decompressed content stream that contains a fill-rectangle, in file order.</summary>
-    private static List<string> FillStreams(Document doc)
+    private static List<string> FillStreams(BonniePDF.Document doc)
     {
         using MemoryStream ms = new();
         doc.Save(ms, leaveOpen: true);
@@ -81,7 +79,7 @@ public class PageColorTests
     public void PageColor_FillsPageWhenSet()
     {
         DocumentSettings settings = new() { PageColor = ColorPalette.Indigo[50] };
-        using Document doc = new(settings);
+        using BonniePDF.Document doc = new(settings);
         string stream = FirstPageStream(doc);
 
         // The page colour fill is a filled rectangle covering the full page:
@@ -94,7 +92,7 @@ public class PageColorTests
     [Fact]
     public void PageColor_OmittedWhenUnset()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         string stream = FirstPageStream(doc);
 
         // An empty document with no page colour produces no fill-rectangle ops.
@@ -106,7 +104,7 @@ public class PageColorTests
     public void PageColor_PaintsBehindBodyContent()
     {
         DocumentSettings settings = new() { PageColor = Color.FromHex("#e2e8f0") };
-        using Document doc = new(settings);
+        using BonniePDF.Document doc = new(settings);
         doc.Add(new TextBlock("on top of the background"));
         string stream = FirstPageStream(doc);
 
@@ -122,7 +120,7 @@ public class PageColorTests
     [Fact]
     public void PageColor_AppliesPerPageWithNoDocumentLevelColor()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Pages[0].PageColor = Color.FromHex("#00ff00"); // green, per-page only
         doc.Add(new TextBlock("green page"));
 
@@ -135,7 +133,7 @@ public class PageColorTests
     public void PageColor_PerPageOverridesDocumentLevelColor()
     {
         DocumentSettings settings = new() { PageColor = Color.FromHex("#ff0000") }; // red default
-        using Document doc = new(settings);
+        using BonniePDF.Document doc = new(settings);
         doc.Add(new TextBlock("page 0: default red"));
 
         Page page1 = doc.AddPage();
@@ -155,7 +153,7 @@ public class PageColorTests
     {
         // Document-level template draws a RED fill on every page; page 1 overrides
         // it with its own GREEN background element.
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.PageBackground = _ =>
         {
             Container c = new() { BackgroundColor = Color.FromHex("#ff0000"), Height = 9999f };

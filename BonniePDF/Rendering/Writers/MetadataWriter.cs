@@ -14,8 +14,8 @@ namespace BonniePDF.Rendering.Writers;
 /// </summary>
 public class MetadataWriter
 {
-    private readonly IPdfWriter _writer;
-    private readonly IAsyncPdfWriter _asyncWriter;
+    private readonly IPdfWriter? _writer;
+    private readonly IAsyncPdfWriter? _asyncWriter;
 
     /// <summary>
     /// Initializes a <see cref="MetadataWriter"/> for synchronous PDF writing.
@@ -42,7 +42,7 @@ public class MetadataWriter
     /// </summary>
     public int WriteDocumentInfo(int id, DocumentMetadata metadata)
     {
-        _writer.WriteObject(id, BuildDocumentInfoDict(metadata));
+        _writer!.WriteObject(id, BuildDocumentInfoDict(metadata));
         return id;
     }
 
@@ -51,7 +51,7 @@ public class MetadataWriter
     /// </summary>
     public async Task<int> WriteDocumentInfoAsync(int id, DocumentMetadata metadata, CancellationToken cancellationToken = default)
     {
-        await _asyncWriter.WriteObjectAsync(id, BuildDocumentInfoDict(metadata), null, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteObjectAsync(id, BuildDocumentInfoDict(metadata), null, cancellationToken).ConfigureAwait(false);
         return id;
     }
 
@@ -98,7 +98,7 @@ public class MetadataWriter
     /// <summary>
     /// Writes XMP metadata to the PDF document.
     /// XMP (Extensible Metadata Platform) provides standardized metadata
-    /// plus any conformance claims the document makes (PDF/A, PDF/UA, …).
+    /// plus any conformance claims the document makes (PDF/A, PDF/UA, â€¦).
     /// The conformance blocks are derived from <paramref name="settings"/>
     /// via the additive-hook design - see <c>XmpConformanceBlock</c>.
     /// </summary>
@@ -118,7 +118,7 @@ public class MetadataWriter
         };
 
         // XMP metadata must NOT be encrypted and must NOT be compressed
-        _writer.WriteUnencryptedBinaryObject(id, dict, xmpBytes);
+        _writer!.WriteUnencryptedBinaryObject(id, dict, xmpBytes);
     }
 
     /// <summary>
@@ -136,7 +136,7 @@ public class MetadataWriter
             ["/Subtype"] = "/XML"
         };
 
-        await _asyncWriter.WriteUnencryptedBinaryObjectAsync(id, dict, xmpBytes, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteUnencryptedBinaryObjectAsync(id, dict, xmpBytes, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

@@ -97,7 +97,7 @@ public sealed class PdfBuilder
     /// </summary>
     public PdfBuilder Attach(string fileName, byte[] content,
         AttachmentRelationship relationship = AttachmentRelationship.Unspecified,
-        string mediaType = null)
+        string? mediaType = null)
         => Attach(new FileAttachment(fileName, content, relationship, mediaType));
 
     /// <summary>
@@ -124,7 +124,7 @@ public sealed class PdfBuilder
     public async Task SaveAsync(string path, CancellationToken cancellationToken = default)
     {
         using var doc = Build();
-        await doc.SaveAsync(path, cancellationToken);
+        await doc.SaveAsync(path, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -134,7 +134,7 @@ public sealed class PdfBuilder
         CancellationToken cancellationToken = default)
     {
         using var doc = Build();
-        await doc.SaveAsync(stream, leaveOpen, cancellationToken);
+        await doc.SaveAsync(stream, leaveOpen, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

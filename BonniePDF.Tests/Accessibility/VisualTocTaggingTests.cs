@@ -1,13 +1,11 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 [Collection("Serial")]
 
@@ -86,7 +84,7 @@ public class VisualTocTaggingTests
 
     private static string GenerateTocPdf(AccessibilityMode accessibility)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = accessibility;
         doc.Settings.Language = "en-GB";

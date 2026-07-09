@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
+    <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <RootNamespace>BonniePDF</RootNamespace>
     <AssemblyName>BonniePDF</AssemblyName>
@@ -13,17 +13,47 @@
     <!-- source-available: BonniePDF Community License 1.0 for free use, Commercial License at >= $1M revenue.
          Not a single SPDX expression, so the full dual-license text is packed as a file. -->
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <RepositoryUrl></RepositoryUrl>
+    <RepositoryUrl>https://github.com/bonniepdf/BonniePDF-NET</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>pdf;generation;charting;report</PackageTags>
-    <PackageReadmeFile></PackageReadmeFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <!-- Suppress analyzer/doc warnings that are not relevant for a library consumed by the demo -->
-    <NoWarn>$(NoWarn);CS1591;CS1573;CS8632;MA0002;MA0004;MA0006;MA0009;MA0011;MA0015;MA0046;MA0048;MA0051;MA0074;MA0089;MA0140;CA1854;CA1859</NoWarn>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <!-- Deliberate, individually-justified suppressions only (audited 2026-07 - see comments below).
+         MA0004/MA0006/MA0009/MA0015/MA0074/MA0140 were removed from this list: each had its violations
+         fixed, so re-enabling them costs nothing further and catches regressions. -->
+    <NoWarn>$(NoWarn);CS1591;CS1573;MA0002;MA0011;MA0046;MA0048;MA0051;MA0089;CA1854;CA1859</NoWarn>
+    <!-- CS1591/CS1573: missing/incomplete XML doc comments (~540 combined). Real doc-coverage gaps,
+         not correctness issues; fixing needs a dedicated documentation pass, not a drive-by. -->
+    <!-- MA0002: Dictionary/HashSet<string> without an explicit IEqualityComparer (~170 sites). Some are
+         intentionally case-insensitive (font family lookups), others ordinal; auto-fixing risks silently
+         changing lookup semantics. Needs a deliberate audit, not a bulk fix. -->
+    <!-- MA0011: missing IFormatProvider on ToString/Parse calls (~124 sites). PDF syntax requires
+         invariant-culture number formatting; this is worth a dedicated correctness pass under
+         non-invariant-culture test runs, not a blind bulk fix here. -->
+    <!-- MA0046: RenderContext.OnPageCreated is a public Action<int> event; the analyzer wants the
+         EventHandler<T> shape, but changing the delegate type would break every subscriber. Intentional. -->
+    <!-- MA0048: file name must match the single type it declares. This codebase deliberately groups
+         small, closely-related types per file (see Rendering/Writers/ in AGENTS.md); ~94 sites, a
+         mechanical rename churn with no behavioural benefit. -->
+    <!-- MA0051: method-length code-smell metric (~96 sites). Valid signal for a future refactor pass,
+         not something to silence by breaking up methods without also improving their structure. -->
+    <!-- MA0089/CA1854/CA1859 (~40 sites, error severity): char-overload / TryGetValue / concrete-type
+         perf suggestions. Several targets are public method signatures (e.g. returning List<T> instead
+         of IReadOnlyList<T>); narrowing a public return type is a breaking API change, so this needs
+         the same per-site audit as the public-surface items above, not a bulk fix. -->
+    <!-- Packing on every dev build is slow and noisy; run `dotnet pack` explicitly (CI does this on release). -->
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>BonniePDF</Title>
     <PackageProjectUrl>https://bonniepdf.dev</PackageProjectUrl>
+    <!-- Symbol package (.snupkg) + deterministic, CI-verifiable builds so consumers can step into
+         BonniePDF source from a debugger without a local checkout. -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true' Or '$(CI)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,8 +61,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Pack the dual-license text (BonniePDF Community License 1.0 + Commercial) referenced by PackageLicenseFile. -->
     <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <!-- Pack the README so it renders on the NuGet.org listing page. -->
+    <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

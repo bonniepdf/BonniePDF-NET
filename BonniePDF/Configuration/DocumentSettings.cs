@@ -227,7 +227,7 @@ public class DocumentSettings
     /// rather than directly — that helper also attaches the XML and forces
     /// PDF/A-3. Default <c>null</c> (not an e-invoice).
     /// </summary>
-    public EInvoice.FacturXMetadata FacturX { get; set; }
+    public EInvoice.FacturXMetadata? FacturX { get; set; }
 
     /// <summary>
     /// Document natural language as a BCP-47 tag (e.g. <c>"en-GB"</c>,
@@ -236,7 +236,7 @@ public class DocumentSettings
     /// it tells assistive tech the language of unmarked content.
     /// Default <c>null</c> (no language declared).
     /// </summary>
-    public string Language { get; set; }
+    public string? Language { get; set; }
 
     /// <summary>
     /// Gets or sets the bookmark items for the document outline tree.
@@ -264,19 +264,19 @@ public class DocumentSettings
     /// </code>
     /// </example>
     /// </summary>
-    public TextStyle DefaultTextStyle { get; set; }
+    public TextStyle? DefaultTextStyle { get; set; }
 
     /// <summary>
     /// Gets or sets the watermark settings for the document.
     /// When null, no watermark is rendered.
     /// </summary>
-    public WatermarkSettings Watermark { get; set; }
+    public WatermarkSettings? Watermark { get; set; }
 
     /// <summary>
     /// Gets or sets the encryption settings for the document.
     /// When null, the document is not encrypted.
     /// </summary>
-    public EncryptionSettings Encryption { get; set; }
+    public EncryptionSettings? Encryption { get; set; }
 
     /// <summary>
     /// Gets whether encryption is enabled for this document.

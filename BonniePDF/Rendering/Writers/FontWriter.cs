@@ -17,8 +17,10 @@ namespace BonniePDF.Rendering.Writers;
 /// </summary>
 public class FontWriter
 {
-    private readonly IAsyncPdfWriter _asyncWriter;
-    private readonly IPdfWriter _writer;
+    // Exactly one is non-null, depending on which constructor was used - see
+    // StructureTreeWriter for the same pattern.
+    private readonly IAsyncPdfWriter? _asyncWriter;
+    private readonly IPdfWriter? _writer;
 
     /// <summary>
     /// Creates a FontWriter for synchronous operations
@@ -43,7 +45,7 @@ public class FontWriter
     /// </summary>
     public void WriteType1Font(int id, string fontName)
     {
-        _writer.WriteObject(id, new Dictionary<string, string>
+        _writer!.WriteObject(id, new Dictionary<string, string>
         {
             ["/Type"] = "/Font",
             ["/Subtype"] = "/Type1",
@@ -65,16 +67,16 @@ public class FontWriter
         GlyphUsageTracker tracker = fontInfo.Tracker;
 
         // Allocate object IDs for all components
-        int cidFontId = _writer.GetNewId();
-        int fontDescriptorId = _writer.GetNewId();
-        int fontFile2Id = _writer.GetNewId();
-        int toUnicodeId = _writer.GetNewId();
+        int cidFontId = _writer!.GetNewId();
+        int fontDescriptorId = _writer!.GetNewId();
+        int fontFile2Id = _writer!.GetNewId();
+        int toUnicodeId = _writer!.GetNewId();
 
         string baseFontName = fontInfo.SubsetFontName;
 
         // 1. Write FontFile2 (embedded TTF binary data)
         byte[] fontData;
-        TtfSubsetter subsetter = null;
+        TtfSubsetter? subsetter = null;
         if (enableSubsetting)
         {
             // Create subset font with only the used glyphs
@@ -94,7 +96,7 @@ public class FontWriter
         int cidSetId = 0;
         if (enableSubsetting && subsetter != null)
         {
-            cidSetId = _writer.GetNewId();
+            cidSetId = _writer!.GetNewId();
             WriteCIDSet(cidSetId, subsetter.MaxOriginalGid);
         }
 
@@ -105,8 +107,8 @@ public class FontWriter
         string cidToGidMapRef;
         if (enableSubsetting)
         {
-            int cidToGidMapId = _writer.GetNewId();
-            WriteCIDToGIDMap(cidToGidMapId, subsetter.OldToNewGidMap, subsetter.MaxOriginalGid);
+            int cidToGidMapId = _writer!.GetNewId();
+            WriteCIDToGIDMap(cidToGidMapId, subsetter!.OldToNewGidMap!, subsetter.MaxOriginalGid);
             cidToGidMapRef = $"{cidToGidMapId} 0 R";
         }
         else
@@ -124,7 +126,7 @@ public class FontWriter
         WriteToUnicodeCMap(toUnicodeId, cmapBuilder.Build());
 
         // 7. Write Type0 font (the main font dictionary)
-        _writer.WriteObject(type0Id, new Dictionary<string, string>
+        _writer!.WriteObject(type0Id, new Dictionary<string, string>
         {
             ["/Type"] = "/Font",
             ["/Subtype"] = "/Type0",
@@ -142,7 +144,7 @@ public class FontWriter
     /// </summary>
     private void WriteFontFile2(int id, byte[] fontData)
     {
-        _writer.WriteCompressedBinaryObject(id, new Dictionary<string, string>
+        _writer!.WriteCompressedBinaryObject(id, new Dictionary<string, string>
         {
             ["/Length1"] = fontData.Length.ToString()
         }, fontData);
@@ -181,7 +183,7 @@ public class FontWriter
         if (cidSetId > 0)
             dict["/CIDSet"] = $"{cidSetId} 0 R";
 
-        _writer.WriteObject(id, dict);
+        _writer!.WriteObject(id, dict);
     }
 
     /// <summary>
@@ -192,7 +194,7 @@ public class FontWriter
     private void WriteCIDSet(int id, int maxCid)
     {
         byte[] cidSetData = BuildCIDSetData(maxCid);
-        _writer.WriteCompressedBinaryObject(id, new Dictionary<string, string>(), cidSetData);
+        _writer!.WriteCompressedBinaryObject(id, new Dictionary<string, string>(), cidSetData);
     }
 
     /// <summary>
@@ -227,7 +229,7 @@ public class FontWriter
     private void WriteCIDFont(int id, string baseFontName, int fontDescriptorId, string widthArray,
         string cidToGidMapRef)
     {
-        _writer.WriteObject(id, new Dictionary<string, string>
+        _writer!.WriteObject(id, new Dictionary<string, string>
         {
             ["/Type"] = "/Font",
             ["/Subtype"] = "/CIDFontType2",
@@ -263,7 +265,7 @@ public class FontWriter
             }
         }
 
-        _writer.WriteCompressedBinaryObject(id, new Dictionary<string, string>(), mapData);
+        _writer!.WriteCompressedBinaryObject(id, new Dictionary<string, string>(), mapData);
     }
 
     /// <summary>
@@ -271,7 +273,7 @@ public class FontWriter
     /// </summary>
     private void WriteToUnicodeCMap(int id, string cmapContent)
     {
-        _writer.WriteObject(id, new Dictionary<string, string>(), cmapContent);
+        _writer!.WriteObject(id, new Dictionary<string, string>(), cmapContent);
     }
 
     /// <summary>
@@ -316,7 +318,7 @@ public class FontWriter
         if (_asyncWriter == null)
             throw new InvalidOperationException("AsyncFontWriter requires an IAsyncPdfWriter");
 
-        await _asyncWriter.WriteObjectAsync(id, new Dictionary<string, string>
+        await _asyncWriter!.WriteObjectAsync(id, new Dictionary<string, string>
         {
             ["/Type"] = "/Font",
             ["/Subtype"] = "/Type1",
@@ -338,16 +340,16 @@ public class FontWriter
         GlyphUsageTracker tracker = fontInfo.Tracker;
 
         // Allocate object IDs for all components
-        int cidFontId = _asyncWriter.GetNewId();
-        int fontDescriptorId = _asyncWriter.GetNewId();
-        int fontFile2Id = _asyncWriter.GetNewId();
-        int toUnicodeId = _asyncWriter.GetNewId();
+        int cidFontId = _asyncWriter!.GetNewId();
+        int fontDescriptorId = _asyncWriter!.GetNewId();
+        int fontFile2Id = _asyncWriter!.GetNewId();
+        int toUnicodeId = _asyncWriter!.GetNewId();
 
         string baseFontName = fontInfo.SubsetFontName;
 
         // 1. Write FontFile2 (embedded TTF binary data)
         byte[] fontData;
-        TtfSubsetter subsetter = null;
+        TtfSubsetter? subsetter = null;
         if (enableSubsetting)
         {
             // Create subset font with only the used glyphs
@@ -367,7 +369,7 @@ public class FontWriter
         int cidSetId = 0;
         if (enableSubsetting && subsetter != null)
         {
-            cidSetId = _asyncWriter.GetNewId();
+            cidSetId = _asyncWriter!.GetNewId();
             await WriteCIDSetAsync(cidSetId, subsetter.MaxOriginalGid, cancellationToken).ConfigureAwait(false);
         }
 
@@ -379,8 +381,8 @@ public class FontWriter
         string cidToGidMapRef;
         if (enableSubsetting && subsetter != null)
         {
-            int cidToGidMapId = _asyncWriter.GetNewId();
-            await WriteCIDToGIDMapAsync(cidToGidMapId, subsetter.OldToNewGidMap, subsetter.MaxOriginalGid,
+            int cidToGidMapId = _asyncWriter!.GetNewId();
+            await WriteCIDToGIDMapAsync(cidToGidMapId, subsetter.OldToNewGidMap!, subsetter.MaxOriginalGid,
                 cancellationToken).ConfigureAwait(false);
             cidToGidMapRef = $"{cidToGidMapId} 0 R";
         }
@@ -400,7 +402,7 @@ public class FontWriter
         await WriteToUnicodeCMapAsync(toUnicodeId, cmapBuilder.Build(), cancellationToken).ConfigureAwait(false);
 
         // 6. Write Type0 font (the main font dictionary)
-        await _asyncWriter.WriteObjectAsync(type0Id, new Dictionary<string, string>
+        await _asyncWriter!.WriteObjectAsync(type0Id, new Dictionary<string, string>
         {
             ["/Type"] = "/Font",
             ["/Subtype"] = "/Type0",
@@ -418,7 +420,7 @@ public class FontWriter
     /// </summary>
     private async Task WriteFontFile2Async(int id, byte[] fontData, CancellationToken cancellationToken)
     {
-        await _asyncWriter.WriteCompressedBinaryObjectAsync(id, new Dictionary<string, string>
+        await _asyncWriter!.WriteCompressedBinaryObjectAsync(id, new Dictionary<string, string>
             {
                 // /Length1 is specific to FontFile2 (TrueType) and represents the length of the font file itself
                 ["/Length1"] = fontData.Length.ToString()
@@ -462,7 +464,7 @@ public class FontWriter
         if (cidSetId > 0)
             dict["/CIDSet"] = $"{cidSetId} 0 R";
 
-        await _asyncWriter.WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -471,7 +473,7 @@ public class FontWriter
     private async Task WriteCIDSetAsync(int id, int maxCid, CancellationToken cancellationToken)
     {
         byte[] cidSetData = BuildCIDSetData(maxCid);
-        await _asyncWriter.WriteCompressedBinaryObjectAsync(id, new Dictionary<string, string>(), cidSetData,
+        await _asyncWriter!.WriteCompressedBinaryObjectAsync(id, new Dictionary<string, string>(), cidSetData,
             cidSetData.Length, cancellationToken).ConfigureAwait(false);
     }
 
@@ -481,7 +483,7 @@ public class FontWriter
     private async Task WriteCIDFontAsync(int id, string baseFontName, int fontDescriptorId, string widthArray,
         string cidToGidMapRef, CancellationToken cancellationToken)
     {
-        await _asyncWriter.WriteObjectAsync(id, new Dictionary<string, string>
+        await _asyncWriter!.WriteObjectAsync(id, new Dictionary<string, string>
         {
             ["/Type"] = "/Font",
             ["/Subtype"] = "/CIDFontType2",
@@ -530,7 +532,7 @@ public class FontWriter
             }
 
             // Pass the rented buffer and the EXACT mapSize
-            await _asyncWriter.WriteCompressedBinaryObjectAsync(
+            await _asyncWriter!.WriteCompressedBinaryObjectAsync(
                 id,
                 new Dictionary<string, string>(),
                 rentedBuffer,
@@ -550,7 +552,7 @@ public class FontWriter
     /// </summary>
     private async Task WriteToUnicodeCMapAsync(int id, string cmapContent, CancellationToken cancellationToken)
     {
-        await _asyncWriter.WriteObjectAsync(id, new Dictionary<string, string>(), cmapContent, cancellationToken)
+        await _asyncWriter!.WriteObjectAsync(id, new Dictionary<string, string>(), cmapContent, cancellationToken)
             .ConfigureAwait(false);
     }
 }

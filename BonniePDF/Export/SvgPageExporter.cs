@@ -19,7 +19,7 @@ namespace BonniePDF.Export;
 /// </summary>
 public sealed class SvgDocumentExport
 {
-    public SvgDocumentExport(IReadOnlyList<string> pages, string fontFaceCss, Rendering.LayoutSnapshot snapshot = null)
+    public SvgDocumentExport(IReadOnlyList<string> pages, string fontFaceCss, Rendering.LayoutSnapshot? snapshot = null)
     {
         Pages = pages;
         FontFaceCss = fontFaceCss;
@@ -39,7 +39,7 @@ public sealed class SvgDocumentExport
     /// rectangles are index-aligned with <see cref="Pages"/> and use the same
     /// top-left, points coordinate space as the SVG.
     /// </summary>
-    public Rendering.LayoutSnapshot Snapshot { get; }
+    public Rendering.LayoutSnapshot? Snapshot { get; }
 }
 
 /// <summary>
@@ -49,14 +49,14 @@ public sealed class SvgDocumentExport
 /// </summary>
 internal static class SvgPageExporter
 {
-    public static IReadOnlyList<string> Export(Document document, SvgPageExportOptions options)
+    public static IReadOnlyList<string> Export(Document document, SvgPageExportOptions? options)
         => ExportDocument(document, options).Pages;
 
     /// <summary>
     /// Like <see cref="Export"/>, but also returns <c>@font-face</c> CSS embedding a
     /// minimal subset (only the glyphs actually drawn) of each embedded font.
     /// </summary>
-    public static SvgDocumentExport ExportDocument(Document document, SvgPageExportOptions options)
+    public static SvgDocumentExport ExportDocument(Document document, SvgPageExportOptions? options)
     {
         options ??= new SvgPageExportOptions();
         DocumentSettings settings = document.Settings;
@@ -77,7 +77,7 @@ internal static class SvgPageExporter
         // Opt-in layout capture. Attached before rendering so the pipeline's
         // OpenNode/CloseNode/PageBreak hooks populate it; left null otherwise so
         // capture is a guarded no-op and output is unchanged.
-        LayoutRecorder recorder = options.CaptureLayout ? new LayoutRecorder() : null;
+        LayoutRecorder? recorder = options.CaptureLayout ? new LayoutRecorder() : null;
         if (recorder != null) ctx.LayoutRecorder = recorder;
 
         string title = ResolveTitle(document, options.Title);
@@ -100,7 +100,7 @@ internal static class SvgPageExporter
             results.Add(Assemble(body, i + 1, pageOutput.Size, options, title));
         }
 
-        LayoutSnapshot snapshot = null;
+        LayoutSnapshot? snapshot = null;
         if (recorder != null)
         {
             // Page sizes align with the emitted SVG pages.
@@ -201,10 +201,10 @@ internal static class SvgPageExporter
         return ((double)Math.Round(value, 2)).ToString(CultureInfo.InvariantCulture);
     }
 
-    private static string ResolveTitle(Document document, string explicitTitle)
+    private static string ResolveTitle(Document document, string? explicitTitle)
     {
         if (!string.IsNullOrEmpty(explicitTitle)) return explicitTitle;
-        string metaTitle = document.Metadata?.Title;
+        string? metaTitle = document.Metadata?.Title;
         return string.IsNullOrEmpty(metaTitle) ? "BonniePDF document" : metaTitle;
     }
 

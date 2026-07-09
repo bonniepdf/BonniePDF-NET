@@ -46,7 +46,7 @@ public class Hyperlink : IElement, IRoleProvider
     /// <summary>
     /// Gets or sets the URI (URL) that this hyperlink points to
     /// </summary>
-    public string Uri { get; set; }
+    public string? Uri { get; set; }
 
     /// <summary>
     /// Gets or sets the target 0-based page index (for internal links)
@@ -85,7 +85,7 @@ public class Hyperlink : IElement, IRoleProvider
     /// The structure element created for this link by the tagging pipeline.
     /// Set during render; used by the serializer to wire /StructParent and /OBJR.
     /// </summary>
-    internal Rendering.Tagging.StructureElement LinkedStructElement { get; set; }
+    internal Rendering.Tagging.StructureElement? LinkedStructElement { get; set; }
 
     // Internal properties set during rendering
     /// <summary>Gets the X position of the rendered annotation rectangle in PDF coordinates (bottom-left origin).</summary>

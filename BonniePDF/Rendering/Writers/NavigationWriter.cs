@@ -12,8 +12,10 @@ namespace BonniePDF.Rendering.Writers;
 /// </summary>
 public class NavigationWriter
 {
-    private readonly IPdfWriter _writer;
-    private readonly IAsyncPdfWriter _asyncWriter;
+    // Exactly one is non-null, depending on which constructor was used - see
+    // StructureTreeWriter for the same pattern.
+    private readonly IPdfWriter? _writer;
+    private readonly IAsyncPdfWriter? _asyncWriter;
 
     public NavigationWriter(IPdfWriter writer)
     {
@@ -58,7 +60,7 @@ public class NavigationWriter
         // Count total visible items
         int CountVisible(int parentId)
         {
-            if (!childrenByParent.TryGetValue(parentId, out List<int> value))
+            if (!childrenByParent.TryGetValue(parentId, out List<int>? value))
                 return 0;
             int count = 0;
             foreach (int idx in value)
@@ -83,7 +85,7 @@ public class NavigationWriter
             rootDict["/First"] = $"{flatList[rootChildren[0]].id} 0 R";
             rootDict["/Last"] = $"{flatList[rootChildren[^1]].id} 0 R";
         }
-        _writer.WriteObject(rootId, rootDict);
+        _writer!.WriteObject(rootId, rootDict);
 
         // Write each bookmark node
         for (int i = 0; i < flatList.Count; i++)
@@ -110,7 +112,7 @@ public class NavigationWriter
                 dict["/Next"] = $"{flatList[siblings[siblingIdx + 1]].id} 0 R";
 
             // Children
-            List<int> myChildren = childrenByParent.GetValueOrDefault(itemId);
+            List<int>? myChildren = childrenByParent.GetValueOrDefault(itemId);
             if (myChildren is { Count: > 0 })
             {
                 int childCount = CountVisible(itemId);
@@ -119,7 +121,7 @@ public class NavigationWriter
                 dict["/Last"] = $"{flatList[myChildren[^1]].id} 0 R";
             }
 
-            _writer.WriteObject(itemId, dict);
+            _writer!.WriteObject(itemId, dict);
         }
 
         return rootId;
@@ -128,7 +130,7 @@ public class NavigationWriter
         {
             foreach (BookmarkItem item in items)
             {
-                int itemId = _writer.GetNewId();
+                int itemId = _writer!.GetNewId();
                 flatList.Add((item, itemId, parentId, depth));
                 if (item.Children.Count > 0)
                     Flatten(item.Children, itemId, depth + 1);
@@ -164,7 +166,7 @@ public class NavigationWriter
 
         int CountVisible(int parentId)
         {
-            if (!childrenByParent.TryGetValue(parentId, out List<int> value))
+            if (!childrenByParent.TryGetValue(parentId, out List<int>? value))
                 return 0;
             int count = 0;
             foreach (int idx in value)
@@ -188,7 +190,7 @@ public class NavigationWriter
             rootDict["/First"] = $"{flatList[rootChildren[0]].id} 0 R";
             rootDict["/Last"] = $"{flatList[rootChildren[^1]].id} 0 R";
         }
-        await _asyncWriter.WriteObjectAsync(rootId, rootDict, null, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteObjectAsync(rootId, rootDict, null, cancellationToken).ConfigureAwait(false);
 
         for (int i = 0; i < flatList.Count; i++)
         {
@@ -211,7 +213,7 @@ public class NavigationWriter
             if (siblingIdx < siblings.Count - 1)
                 dict["/Next"] = $"{flatList[siblings[siblingIdx + 1]].id} 0 R";
 
-            List<int> myChildren = childrenByParent.GetValueOrDefault(itemId);
+            List<int>? myChildren = childrenByParent.GetValueOrDefault(itemId);
             if (myChildren is { Count: > 0 })
             {
                 int childCount = CountVisible(itemId);
@@ -220,7 +222,7 @@ public class NavigationWriter
                 dict["/Last"] = $"{flatList[myChildren[^1]].id} 0 R";
             }
 
-            await _asyncWriter.WriteObjectAsync(itemId, dict, null, cancellationToken).ConfigureAwait(false);
+            await _asyncWriter!.WriteObjectAsync(itemId, dict, null, cancellationToken).ConfigureAwait(false);
         }
 
         return rootId;
@@ -229,7 +231,7 @@ public class NavigationWriter
         {
             foreach (BookmarkItem item in items)
             {
-                int itemId = _asyncWriter.GetNewId();
+                int itemId = _asyncWriter!.GetNewId();
                 flatList.Add((item, itemId, parentId, depth));
                 if (item.Children.Count > 0)
                     Flatten(item.Children, itemId, depth + 1);

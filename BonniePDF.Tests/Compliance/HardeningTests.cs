@@ -1,17 +1,16 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
+using BonniePDF.Tests.Accessibility;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Compliance;
 
 [Collection("Serial")]
 
@@ -368,7 +367,7 @@ public class HardeningTests
 
     // ── Helpers ─────────────────────────────────────────────────────
 
-    private static byte[] GenerateTagged(System.Action<Document> populate)
+    private static byte[] GenerateTagged(System.Action<BonniePDF.Document> populate)
         => Generate(doc =>
         {
             doc.Settings.Version = PdfVersion.Pdf17;
@@ -377,9 +376,9 @@ public class HardeningTests
             populate(doc);
         });
 
-    private static byte[] Generate(System.Action<Document> populate)
+    private static byte[] Generate(System.Action<BonniePDF.Document> populate)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         populate(doc);
         using var ms = new MemoryStream();
         doc.Save(ms, true);

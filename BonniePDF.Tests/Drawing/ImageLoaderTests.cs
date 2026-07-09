@@ -1,7 +1,7 @@
 using BonniePDF.Rendering.Images;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Drawing;
 
 public class ImageLoaderTests
 {

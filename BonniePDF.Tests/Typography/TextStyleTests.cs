@@ -3,7 +3,7 @@ using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Typography;
 
 // TextStyle.MergeWith(base) returns a new style where THIS style's explicitly-set
 // values win, and unset (null/Normal/None) values fall back to `base`. These tests

@@ -8,7 +8,7 @@ using BonniePDF.Rendering;
 using BonniePDF.Rendering.Images;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Layout;
 
 // Table layout: column widths are proportional to weights; row height = tallest cell
 // (content + vertical padding), floored by row.MinHeight; cells share a row's Y; cell

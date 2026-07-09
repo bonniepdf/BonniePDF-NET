@@ -18,14 +18,12 @@ namespace BonniePDF.Rendering.Writers;
 /// </summary>
 public class PdfWriter : IPdfWriter, IDisposable
 {
-    private const bool _enablecompression = true;
-
     // ISO-8859-1 (Latin-1) encoding for PDF streams
     // This matches WinAnsiEncoding used by standard PDF fonts and ensures
     // characters like £ (U+00A3) are encoded as single byte 0xA3 instead of
     // UTF-8's two-byte sequence (0xC2 0xA3) which would display as "Â£"
     private static readonly Encoding Iso88591 = Encoding.GetEncoding("ISO-8859-1");
-    private readonly FileStream _fs;
+    private readonly FileStream? _fs;
     private readonly bool _leaveOpen;
 
     // Maps object ID to file position for the xref table
@@ -91,7 +89,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <summary>
     /// Gets or sets the encryptor for this writer. When set, streams are encrypted.
     /// </summary>
-    public PdfEncryptor Encryptor { get; set; }
+    public PdfEncryptor? Encryptor { get; set; }
 
     /// <summary>
     /// Gets a new unique object ID for the PDF
@@ -107,7 +105,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="id">The object ID</param>
     /// <param name="dict">Key-value pairs for the object dictionary</param>
     /// <param name="streamContent">Optional stream content for the object</param>
-    public void WriteObject(int id, IDictionary<string, string> dict, string streamContent = null)
+    public void WriteObject(int id, IDictionary<string, string> dict, string? streamContent = null)
     {
         _writer.Flush();
         _offsets[id] = _stream.Position;
@@ -194,7 +192,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="id">The object ID for the annotation</param>
     /// <param name="hyperlink">The hyperlink to create an annotation for</param>
     /// <returns>The object ID of the annotation</returns>
-    public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null)
+    public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int>? pageIds = null, int? structParentKey = null)
     {
         Dictionary<string, string> dict = new()
         {
@@ -513,6 +511,7 @@ public class PdfWriter : IPdfWriter, IDisposable
     /// <param name="firstPageId">The first page object ID (for OpenAction)</param>
     /// <param name="zoomType">The zoom type: "Fit" (fit page), "FitH" (fit height), "FitW" (fit width), or "XYZ" (custom zoom)</param>
     /// <param name="zoomLevel">For XYZ type: 1.0 = 100%, 0.5 = 50%, etc. Ignored for Fit types.</param>
+    [Obsolete("Unused by the library's own render pipeline (superseded by WriteCatalog(int, int, int, DocumentSettings, CatalogOptions), which every Document save path uses) and takes a stringly-typed zoomType. Kept for source compatibility only.")]
     public void WriteCatalogWithOpenAction(int id, int pagesId, int firstPageId, string zoomType = "Fit",
         double zoomLevel = 1.0)
     {

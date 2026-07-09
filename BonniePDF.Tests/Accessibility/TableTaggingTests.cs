@@ -1,4 +1,3 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
@@ -9,7 +8,7 @@ using BonniePDF.Rendering.Tagging;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 [Collection("Serial")]
 
@@ -23,7 +22,7 @@ public class TableTaggingTests
 {
     private static string GenerateTaggedTable(System.Action<Table> populate, System.Action<Table> hookHeader = null)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
@@ -123,7 +122,7 @@ public class TableTaggingTests
         // nested Table must not open a second one - otherwise the tree has
         // /Table > /Table, which violates PDF/UA 7.2-3 (a Table may only
         // contain TR, THead, TBody, TFoot, Caption).
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
@@ -172,7 +171,7 @@ public class TableTaggingTests
     {
         // Back-compat: with accessibility off, the renderer must not
         // emit any /S /Table, /S /TR, /S /TH, /S /TD at all.
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.None;
 

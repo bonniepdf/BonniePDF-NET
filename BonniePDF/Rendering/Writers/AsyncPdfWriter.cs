@@ -26,7 +26,7 @@ namespace BonniePDF.Rendering.Writers;
 public class AsyncPdfWriter : IAsyncPdfWriter
 {
     private static readonly Encoding Iso88591 = Encoding.GetEncoding("ISO-8859-1");
-    private readonly FileStream _fs;
+    private readonly FileStream? _fs;
     private readonly bool _leaveOpen;
 
     // Maps object ID to file position for the xref table
@@ -76,7 +76,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     /// <summary>
     /// Gets or sets the encryptor for this writer. When set, streams are encrypted.
     /// </summary>
-    public PdfEncryptor Encryptor { get; set; }
+    public PdfEncryptor? Encryptor { get; set; }
 
     /// <summary>
     /// Gets a new unique object ID for the PDF
@@ -93,7 +93,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="dict">Key-value pairs for the object dictionary</param>
     /// <param name="streamContent">Optional stream content for the object</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
-    public async Task WriteObjectAsync(int id, IDictionary<string, string> dict, string streamContent = null,
+    public async Task WriteObjectAsync(int id, IDictionary<string, string> dict, string? streamContent = null,
         CancellationToken cancellationToken = default)
     {
         await _writer.FlushAsync(cancellationToken).ConfigureAwait(false);
@@ -203,7 +203,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="hyperlink">The hyperlink to create an annotation for</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>The object ID of the annotation</returns>
-    public async Task<int> WriteLinkAnnotationAsync(int id, Hyperlink hyperlink, IList<int> pageIds = null,
+    public async Task<int> WriteLinkAnnotationAsync(int id, Hyperlink hyperlink, IList<int>? pageIds = null,
         int? structParentKey = null, CancellationToken cancellationToken = default)
     {
         Dictionary<string, string> dict = new()
@@ -568,6 +568,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="zoomType">The zoom type: "Fit" (fit page), "FitH" (fit height), "FitW" (fit width), or "XYZ" (custom zoom)</param>
     /// <param name="zoomLevel">For XYZ type: 1.0 = 100%, 0.5 = 50%, etc. Ignored for Fit types.</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
+    [Obsolete("Unused by the library's own render pipeline (superseded by WriteCatalogAsync(int, int, int, DocumentSettings, CatalogOptions, CancellationToken), which every Document save path uses) and takes a stringly-typed zoomType. Kept for source compatibility only.")]
     public async Task WriteCatalogWithOpenActionAsync(int id, int pagesId, int firstPageId, string zoomType = "Fit",
         double zoomLevel = 1.0, CancellationToken cancellationToken = default)
     {

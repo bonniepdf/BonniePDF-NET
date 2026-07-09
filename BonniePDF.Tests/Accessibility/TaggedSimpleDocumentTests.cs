@@ -1,4 +1,3 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
@@ -7,7 +6,7 @@ using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 [Collection("Serial")]
 
@@ -29,9 +28,9 @@ namespace BonniePDF.Tests;
 /// </summary>
 public class TaggedSimpleDocumentTests
 {
-    internal static Document BuildTaggedDocument()
+    internal static BonniePDF.Document BuildTaggedDocument()
     {
-        Document doc = new()
+        BonniePDF.Document doc = new()
         {
             Metadata = new DocumentMetadata
             {

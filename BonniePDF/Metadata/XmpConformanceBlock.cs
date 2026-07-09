@@ -34,14 +34,14 @@ internal sealed class XmpConformanceBlock
     /// the namespace is already predefined (e.g. <c>pdfaid</c>) and no
     /// extension declaration is needed.
     /// </summary>
-    public XmpExtensionSchema ExtensionSchema { get; }
+    public XmpExtensionSchema? ExtensionSchema { get; }
 
     /// <summary>Creates a new conformance block.</summary>
     public XmpConformanceBlock(
         string prefix,
         string namespaceUri,
         IReadOnlyList<KeyValuePair<string, string>> elements,
-        XmpExtensionSchema extensionSchema = null)
+        XmpExtensionSchema? extensionSchema = null)
     {
         Prefix = prefix;
         NamespaceUri = namespaceUri;
@@ -51,7 +51,7 @@ internal sealed class XmpConformanceBlock
 
     private const string PdfAidNamespace = "http://www.aiim.org/pdfa/ns/id/";
 
-    private static XmpConformanceBlock PdfAid(string part, string conformance = null, string rev = null)
+    private static XmpConformanceBlock PdfAid(string part, string? conformance = null, string? rev = null)
     {
         var elements = new List<KeyValuePair<string, string>>
         {
@@ -90,7 +90,7 @@ internal sealed class XmpConformanceBlock
     /// Returns the conformance block matching <paramref name="conformance"/>,
     /// or <c>null</c> if no PDF/A claim should be emitted.
     /// </summary>
-    public static XmpConformanceBlock ForPdfA(Configuration.PdfAConformance conformance) => conformance switch
+    public static XmpConformanceBlock? ForPdfA(Configuration.PdfAConformance conformance) => conformance switch
     {
         Configuration.PdfAConformance.PdfA1b => PdfA1B(),
         Configuration.PdfAConformance.PdfA1a => PdfA1A(),

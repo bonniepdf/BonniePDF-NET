@@ -4,7 +4,7 @@ using BonniePDF.Rendering;
 using BonniePDF.Rendering.Images;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Export;
 
 // The registry hands out stable, de-duplicated resource names (/F1, /I1, /GS_ALPHA_1, …)
 // and avoids emitting the same font/image/graphics-state twice. These tests pin that

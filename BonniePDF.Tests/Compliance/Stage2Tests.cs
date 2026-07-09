@@ -1,15 +1,13 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
 using BonniePDF.Elements.Tables;
+using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Tagging;
-using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Compliance;
 
 [Collection("Serial")]
 
@@ -186,9 +184,9 @@ public class Stage2Tests
 
     // Helpers
 
-    private static string GenerateTagged(System.Action<Document> populate)
+    private static string GenerateTagged(System.Action<BonniePDF.Document> populate)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
@@ -198,9 +196,9 @@ public class Stage2Tests
         return Encoding.ASCII.GetString(ms.ToArray());
     }
 
-    private static string GenerateUntagged(System.Action<Document> populate)
+    private static string GenerateUntagged(System.Action<BonniePDF.Document> populate)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.None;
         populate(doc);

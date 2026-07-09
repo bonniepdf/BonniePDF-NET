@@ -31,8 +31,11 @@ namespace BonniePDF.Rendering.Writers;
 /// </summary>
 public sealed class StructureTreeWriter
 {
-    private readonly IPdfWriter _writer;
-    private readonly IAsyncPdfWriter _asyncWriter;
+    // Exactly one of these is non-null, depending on which constructor was used;
+    // the sync members (Write/WriteSubtree/...) only ever run on an instance built
+    // via the sync constructor, and likewise for the async members.
+    private readonly IPdfWriter? _writer;
+    private readonly IAsyncPdfWriter? _asyncWriter;
 
     /// <summary>Creates a structure-tree writer that emits synchronously.</summary>
     public StructureTreeWriter(IPdfWriter writer)
@@ -70,11 +73,11 @@ public sealed class StructureTreeWriter
     /// </param>
     public int Write(
         StructureTreeBuilder builder,
-        IList<int> pageIds = null,
-        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)> annotBindings = null)
+        IList<int>? pageIds = null,
+        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>? annotBindings = null)
     {
-        int structTreeRootId = _writer.GetNewId();
-        int parentTreeId = (pageIds != null && pageIds.Count > 0) ? _writer.GetNewId() : 0;
+        int structTreeRootId = _writer!.GetNewId();
+        int parentTreeId = (pageIds != null && pageIds.Count > 0) ? _writer!.GetNewId() : 0;
 
         var elementIds = new Dictionary<StructureElement, int>(ReferenceEqualityComparer.Instance);
         var parentTreeNums = pageIds != null
@@ -84,9 +87,9 @@ public sealed class StructureTreeWriter
         WriteSubtree(builder.Root, structTreeRootId, elementIds, pageIds, parentTreeNums);
 
         if (parentTreeId > 0)
-            _writer.WriteObject(parentTreeId, BuildParentTreeDict(parentTreeNums, elementIds, annotBindings));
+            _writer!.WriteObject(parentTreeId, BuildParentTreeDict(parentTreeNums, elementIds, annotBindings));
 
-        _writer.WriteObject(structTreeRootId,
+        _writer!.WriteObject(structTreeRootId,
             BuildStructTreeRootDict(builder.Root, elementIds, parentTreeId, parentTreeNums, annotBindings));
 
         return structTreeRootId;
@@ -96,10 +99,10 @@ public sealed class StructureTreeWriter
         StructureElement element,
         int parentId,
         IDictionary<StructureElement, int> elementIds,
-        IList<int> pageIds,
-        IList<List<(int mcid, StructureElement elem)>> parentTreeNums)
+        IList<int>? pageIds,
+        IList<List<(int mcid, StructureElement elem)>>? parentTreeNums)
     {
-        int id = _writer.GetNewId();
+        int id = _writer!.GetNewId();
         elementIds[element] = id;
 
         foreach (var child in element.Children)
@@ -110,7 +113,7 @@ public sealed class StructureTreeWriter
         if (parentTreeNums != null)
             RecordParentTreeContributions(element, parentTreeNums);
 
-        _writer.WriteObject(id, BuildStructElemDict(element, parentId, elementIds, pageIds));
+        _writer!.WriteObject(id, BuildStructElemDict(element, parentId, elementIds, pageIds));
     }
 
     // ── Async ─────────────────────────────────────────────────────────
@@ -118,12 +121,12 @@ public sealed class StructureTreeWriter
     /// <summary>Async counterpart to <see cref="Write"/>.</summary>
     public async Task<int> WriteAsync(
         StructureTreeBuilder builder,
-        IList<int> pageIds = null,
-        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)> annotBindings = null,
+        IList<int>? pageIds = null,
+        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>? annotBindings = null,
         CancellationToken cancellationToken = default)
     {
-        int structTreeRootId = _asyncWriter.GetNewId();
-        int parentTreeId = (pageIds != null && pageIds.Count > 0) ? _asyncWriter.GetNewId() : 0;
+        int structTreeRootId = _asyncWriter!.GetNewId();
+        int parentTreeId = (pageIds != null && pageIds.Count > 0) ? _asyncWriter!.GetNewId() : 0;
 
         var elementIds = new Dictionary<StructureElement, int>(ReferenceEqualityComparer.Instance);
         var parentTreeNums = pageIds != null
@@ -135,12 +138,12 @@ public sealed class StructureTreeWriter
 
         if (parentTreeId > 0)
         {
-            await _asyncWriter
+            await _asyncWriter!
                 .WriteObjectAsync(parentTreeId, BuildParentTreeDict(parentTreeNums, elementIds, annotBindings), null, cancellationToken)
                 .ConfigureAwait(false);
         }
 
-        await _asyncWriter
+        await _asyncWriter!
             .WriteObjectAsync(structTreeRootId,
                 BuildStructTreeRootDict(builder.Root, elementIds, parentTreeId, parentTreeNums, annotBindings), null, cancellationToken)
             .ConfigureAwait(false);
@@ -152,11 +155,11 @@ public sealed class StructureTreeWriter
         StructureElement element,
         int parentId,
         IDictionary<StructureElement, int> elementIds,
-        IList<int> pageIds,
-        IList<List<(int mcid, StructureElement elem)>> parentTreeNums,
+        IList<int>? pageIds,
+        IList<List<(int mcid, StructureElement elem)>>? parentTreeNums,
         CancellationToken cancellationToken)
     {
-        int id = _asyncWriter.GetNewId();
+        int id = _asyncWriter!.GetNewId();
         elementIds[element] = id;
 
         foreach (var child in element.Children)
@@ -165,7 +168,7 @@ public sealed class StructureTreeWriter
         if (parentTreeNums != null)
             RecordParentTreeContributions(element, parentTreeNums);
 
-        await _asyncWriter
+        await _asyncWriter!
             .WriteObjectAsync(id, BuildStructElemDict(element, parentId, elementIds, pageIds), null, cancellationToken)
             .ConfigureAwait(false);
     }
@@ -176,7 +179,7 @@ public sealed class StructureTreeWriter
         StructureElement element,
         int parentObjectId,
         IDictionary<StructureElement, int> elementIds,
-        IList<int> pageIds)
+        IList<int>? pageIds)
     {
         var dict = new Dictionary<string, string>
         {
@@ -192,7 +195,7 @@ public sealed class StructureTreeWriter
         //      /Pg references the single shared page.
         //   3. MCIDs span multiple pages => /K entries become /MCR dicts
         //      with explicit /Pg + /MCID per entry; no /Pg on the elem.
-        BuildKidsAndPg(element, elementIds, pageIds, out string kids, out int? singlePageObjectId);
+        BuildKidsAndPg(element, elementIds, pageIds, out string? kids, out int? singlePageObjectId);
         if (kids != null) dict["/K"] = kids;
         if (singlePageObjectId.HasValue) dict["/Pg"] = $"{singlePageObjectId.Value} 0 R";
 
@@ -221,8 +224,8 @@ public sealed class StructureTreeWriter
         StructureElement documentRoot,
         IDictionary<StructureElement, int> elementIds,
         int parentTreeId,
-        IList<List<(int mcid, StructureElement elem)>> parentTreeNums,
-        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)> annotBindings = null)
+        IList<List<(int mcid, StructureElement elem)>>? parentTreeNums,
+        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>? annotBindings = null)
     {
         var dict = new Dictionary<string, string>
         {
@@ -249,15 +252,15 @@ public sealed class StructureTreeWriter
     }
 
     private static Dictionary<string, string> BuildParentTreeDict(
-        IList<List<(int mcid, StructureElement elem)>> parentTreeNums,
+        IList<List<(int mcid, StructureElement elem)>>? parentTreeNums,
         IDictionary<StructureElement, int> elementIds,
-        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)> annotBindings = null)
+        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>? annotBindings = null)
     {
         // PDF number-tree form: /Nums [ key1 value1 key2 value2 … ].
         // Value for each page key is an array indexed by MCID, where
         // entry i is the StructElem ref owning MCID i on that page.
         var parts = new List<string>();
-        for (int pageKey = 0; pageKey < parentTreeNums.Count; pageKey++)
+        for (int pageKey = 0; pageKey < parentTreeNums!.Count; pageKey++)
         {
             var entries = parentTreeNums[pageKey];
             parts.Add(pageKey.ToString(CultureInfo.InvariantCulture));
@@ -306,8 +309,8 @@ public sealed class StructureTreeWriter
     private static void BuildKidsAndPg(
         StructureElement element,
         IDictionary<StructureElement, int> elementIds,
-        IList<int> pageIds,
-        out string kids,
+        IList<int>? pageIds,
+        out string? kids,
         out int? singlePageObjectId)
     {
         singlePageObjectId = null;
@@ -406,7 +409,7 @@ public sealed class StructureTreeWriter
 internal sealed class ReferenceEqualityComparer : IEqualityComparer<StructureElement>
 {
     public static readonly ReferenceEqualityComparer Instance = new();
-    public bool Equals(StructureElement x, StructureElement y) => ReferenceEquals(x, y);
+    public bool Equals(StructureElement? x, StructureElement? y) => ReferenceEquals(x, y);
     public int GetHashCode(StructureElement obj) =>
         System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
 }

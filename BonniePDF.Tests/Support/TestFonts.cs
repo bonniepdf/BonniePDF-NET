@@ -1,9 +1,7 @@
-using System;
-using System.IO;
 using System.Reflection;
 using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Support;
 
 /// <summary>
 /// Provides a real TrueType font file for tests in a cross-platform way.

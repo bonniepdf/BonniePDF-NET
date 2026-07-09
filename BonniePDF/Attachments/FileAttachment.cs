@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BonniePDF.Attachments;
 
@@ -20,12 +21,12 @@ public sealed class FileAttachment
     /// <c>/F</c> and <c>/UF</c> entries (e.g. <c>"invoice.xml"</c>).
     /// Required.
     /// </summary>
-    public string FileName { get; set; }
+    public required string FileName { get; set; }
 
     /// <summary>
     /// The raw bytes of the file. Required and non-empty.
     /// </summary>
-    public byte[] Content { get; set; }
+    public required byte[] Content { get; set; }
 
     /// <summary>
     /// The relationship of this file to the document, written as
@@ -39,13 +40,13 @@ public sealed class FileAttachment
     /// the embedded-file stream's <c>/Subtype</c>. Optional but recommended;
     /// PDF/A-3 and e-invoicing validators expect it.
     /// </summary>
-    public string MediaType { get; set; }
+    public string? MediaType { get; set; }
 
     /// <summary>
     /// A human-readable description, written as the filespec's <c>/Desc</c>.
     /// Optional.
     /// </summary>
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
     /// <summary>
     /// The file's modification timestamp, written to the embedded-file
@@ -66,9 +67,10 @@ public sealed class FileAttachment
     /// Creates an attachment from a name and bytes with an optional
     /// relationship and media type.
     /// </summary>
+    [SetsRequiredMembers]
     public FileAttachment(string fileName, byte[] content,
         AttachmentRelationship relationship = AttachmentRelationship.Unspecified,
-        string mediaType = null)
+        string? mediaType = null)
     {
         FileName = fileName;
         Content = content;

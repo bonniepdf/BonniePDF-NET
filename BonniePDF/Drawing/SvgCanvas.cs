@@ -24,7 +24,7 @@ public class SvgCanvas : ICanvas
     private readonly float _xOffset;
     private readonly float _yOffset;
     private int _stateDepth;
-    private readonly Func<string, TtfFont> _fontResolver;
+    private readonly Func<string, TtfFont?>? _fontResolver;
 
     /// <summary>
     /// Process-wide counter for generating unique <c>&lt;clipPath&gt;</c> ids. Static so
@@ -55,7 +55,7 @@ public class SvgCanvas : ICanvas
     /// <param name="existingSb">Optional existing StringBuilder to write to</param>
     /// <param name="includeHeader">Whether to write the SVG header (default true if creating new SB, false if using existing)</param>
     public SvgCanvas(float width, float height, float xOffset = 0, float yOffset = 0, StringBuilder? existingSb = null,
-        bool? includeHeader = null, Func<string, TtfFont> fontResolver = null)
+        bool? includeHeader = null, Func<string, TtfFont?>? fontResolver = null)
         : this(width, height, xOffset, yOffset, existingSb, includeHeader, 0, false, fontResolver)
     {
     }
@@ -72,7 +72,7 @@ public class SvgCanvas : ICanvas
     /// <param name="pageNumber">Page number (0-based) for multipage mode</param>
     /// <param name="isMultiPageMode">Whether this canvas is part of a multipage document</param>
     public SvgCanvas(float width, float height, float xOffset, float yOffset, StringBuilder? existingSb,
-        bool? includeHeader, int pageNumber, bool isMultiPageMode, Func<string, TtfFont> fontResolver = null)
+        bool? includeHeader, int pageNumber, bool isMultiPageMode, Func<string, TtfFont?>? fontResolver = null)
     {
         Width = width;
         Height = height;
@@ -113,7 +113,7 @@ public class SvgCanvas : ICanvas
     /// subset (only used glyphs) of each font as an <c>@font-face</c>. Set by
     /// <see cref="Rendering.RenderContext"/>.
     /// </summary>
-    public System.Action<string, TtfFont, int> FontUsageSink { get; set; }
+    public System.Action<string, TtfFont, int>? FontUsageSink { get; set; }
 
     /// <summary>
     /// Optional callback that registers a font (by name/path) so it can then be
@@ -121,10 +121,10 @@ public class SvgCanvas : ICanvas
     /// context's font registrar; without it, embedded fonts referenced only in
     /// SVG output would never be loaded. Set by <see cref="Rendering.RenderContext"/>.
     /// </summary>
-    public System.Func<string, string> RegisterFontCallback { get; set; }
+    public System.Func<string, string>? RegisterFontCallback { get; set; }
 
     /// <summary>Registers (if needed) and resolves an embedded TTF for a font name.</summary>
-    private TtfFont ResolveFont(string fontFamily)
+    private TtfFont? ResolveFont(string fontFamily)
     {
         RegisterFontCallback?.Invoke(fontFamily);
         return _fontResolver?.Invoke(fontFamily);
@@ -352,7 +352,7 @@ public class SvgCanvas : ICanvas
         string fill = color.ToHexString();
         float baselineY = BaselineY(sy, fontSize);
 
-        TtfFont ttfFont = ResolveFont(fontFamily);
+        TtfFont? ttfFont = ResolveFont(fontFamily);
 
         if (ttfFont != null)
         {
@@ -417,7 +417,7 @@ public class SvgCanvas : ICanvas
         string fill = color.ToHexString();
         float baselineY = BaselineY(sy, fontSize);
 
-        TtfFont ttfFont = ResolveFont(fontFamily);
+        TtfFont? ttfFont = ResolveFont(fontFamily);
         string fontAttrs;
         if (ttfFont != null)
         {
@@ -478,7 +478,7 @@ public class SvgCanvas : ICanvas
 
         // An embedded font renders via the private @font-face name; a standard-14
         // font is viewer-supplied (generic stack + weight/style).
-        TtfFont ttfFont = ResolveFont(fontFamily);
+        TtfFont? ttfFont = ResolveFont(fontFamily);
         string fontAttrs;
         if (ttfFont != null)
         {
@@ -526,7 +526,7 @@ public class SvgCanvas : ICanvas
 
         // An embedded font renders via the private @font-face name; a standard-14
         // font is viewer-supplied (generic stack + weight/style).
-        TtfFont ttfFont = ResolveFont(fontFamily);
+        TtfFont? ttfFont = ResolveFont(fontFamily);
         string fontAttrs;
         if (ttfFont != null)
         {
@@ -549,7 +549,7 @@ public class SvgCanvas : ICanvas
     /// </summary>
     public Size MeasureText(string text, float fontSize, string fontFamily)
     {
-        TtfFont ttfFont = _fontResolver?.Invoke(fontFamily);
+        TtfFont? ttfFont = _fontResolver?.Invoke(fontFamily);
         float width = ttfFont != null
             ? FontMetrics.GetKernedStringWidth(text, ttfFont, fontSize)
             : FontMetrics.GetStringWidth(text, fontFamily, fontSize);

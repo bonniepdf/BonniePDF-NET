@@ -3,7 +3,7 @@ using BonniePDF.Core;
 using BonniePDF.Rendering.Pdf;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Drawing;
 
 // PdfDrawing emits raw PDF content-stream operators. These tests pin the operator
 // output: fills are wrapped in q…Q, strokes are inset by half the line width so the

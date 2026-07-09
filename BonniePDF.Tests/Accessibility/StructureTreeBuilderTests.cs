@@ -1,8 +1,7 @@
-using System.Collections.Generic;
 using BonniePDF.Rendering.Tagging;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Accessibility;
 
 /// <summary>
 /// this feature acceptance tests for the in-memory structure-tree model.

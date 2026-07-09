@@ -86,7 +86,7 @@ internal static class XmpMetadataWriter
     /// </summary>
     public static string GenerateXmpXml(
         DocumentMetadata metadata,
-        IReadOnlyList<XmpConformanceBlock> conformanceBlocks = null)
+        IReadOnlyList<XmpConformanceBlock>? conformanceBlocks = null)
     {
         var settings = new XmlWriterSettings
         {
@@ -127,7 +127,7 @@ internal static class XmpMetadataWriter
     /// per-element <c>xmlns:prefix</c> declarations that XmlWriter
     /// emits automatically.
     /// </summary>
-    private static void WriteConformanceBlocks(XmlWriter xw, IReadOnlyList<XmpConformanceBlock> blocks)
+    private static void WriteConformanceBlocks(XmlWriter xw, IReadOnlyList<XmpConformanceBlock>? blocks)
     {
         if (blocks == null) return;
         foreach (var block in blocks)
@@ -148,7 +148,7 @@ internal static class XmpMetadataWriter
     /// PDF/A there's no validator that checks this rule and the bag
     /// would be dead weight.
     /// </summary>
-    private static void WriteExtensionSchemas(XmlWriter xw, IReadOnlyList<XmpConformanceBlock> blocks)
+    private static void WriteExtensionSchemas(XmlWriter xw, IReadOnlyList<XmpConformanceBlock>? blocks)
     {
         if (blocks == null) return;
         bool hasPdfA = false;

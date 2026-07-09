@@ -76,7 +76,7 @@ public class AreaChart : CartesianChartBase
 
         Color fillColor = color.WithAlpha(opacity);
         Point first = coordinates[0];
-        Point last = coordinates[coordinates.Count - 1];
+        Point last = coordinates[^1];
 
         if (Orientation == ChartOrientation.Horizontal)
         {

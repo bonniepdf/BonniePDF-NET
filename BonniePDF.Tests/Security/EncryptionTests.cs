@@ -4,7 +4,7 @@ using BonniePDF.Security.Encryption;
 using BonniePDF.Security.Models;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Security;
 
 public class EncryptionTests
 {
@@ -72,7 +72,7 @@ public class EncryptionTests
     [Fact]
     public void AES256_RequiresPdf17_ThrowsOnPdf14()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.Version = PdfVersion.Pdf14;
         doc.Settings.Encryption = new EncryptionSettings
         {
@@ -88,7 +88,7 @@ public class EncryptionTests
     [Fact]
     public void AES256_WithPdf17_SavesSuccessfully()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.WithEncryptionAes256(opt => opt.WithPassword("secret"));
 
         using MemoryStream ms = new();
@@ -100,7 +100,7 @@ public class EncryptionTests
     [Fact]
     public void RC4_128_StillWorksAfterChanges()
     {
-        using Document doc = new();
+        using BonniePDF.Document doc = new();
         doc.Settings.WithEncryption128(opt => opt.WithPassword("pass123"));
 
         using MemoryStream ms = new();

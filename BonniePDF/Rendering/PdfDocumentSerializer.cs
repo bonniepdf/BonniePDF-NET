@@ -29,7 +29,7 @@ public class PdfDocumentSerializer
     /// </summary>
     /// <param name="document">The document to be serialized.</param>
     /// <param name="diagnostics">Optional collector for recoverable failures; defaults to a private instance.</param>
-    public PdfDocumentSerializer(Document document, DiagnosticsCollector diagnostics = null)
+    public PdfDocumentSerializer(Document document, DiagnosticsCollector? diagnostics = null)
     {
         _document = document ?? throw new ArgumentNullException(nameof(document));
         _diagnostics = diagnostics ?? new DiagnosticsCollector();
@@ -44,7 +44,7 @@ public class PdfDocumentSerializer
         int encryptId = 0;
         if (_document.Settings.IsEncrypted)
         {
-            writer.Encryptor = new Security.Encryption.PdfEncryptor(_document.Settings.Encryption);
+            writer.Encryptor = new Security.Encryption.PdfEncryptor(_document.Settings.Encryption!);
             encryptId = writer.GetNewId();
         }
 
@@ -65,7 +65,7 @@ public class PdfDocumentSerializer
         // 2. Initialize Shared Context
         PdfSize orientedPageSize = _document.Settings.GetOrientedPageSize();
 
-        IDictionary<string, int> resolvedTocEntries = null;
+        IDictionary<string, int>? resolvedTocEntries = null;
 
         if (RequiresTwoPassLayout())
         {
@@ -91,7 +91,7 @@ public class PdfDocumentSerializer
         // PDF/UA tagging context - created once, shared between the
         // render pipeline (canvas attaches MCIDs to the builder) and the
         // structure-tree writer at the end (emits the populated tree).
-        TaggingContext taggingContext = CreateTaggingContext();
+        TaggingContext? taggingContext = CreateTaggingContext();
 
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin)
         {
@@ -110,7 +110,7 @@ public class PdfDocumentSerializer
 
         if (RequiresTwoPassLayout())
         {
-            int expectedTotalPages = resolvedTocEntries.Count > 0 ? resolvedTocEntries.Values.Max() + 1 : 0;
+            int expectedTotalPages = resolvedTocEntries!.Count > 0 ? resolvedTocEntries.Values.Max() + 1 : 0;
             // Pre-allocate page IDs with a generous padding
             for (int i = 0; i < Math.Max(expectedTotalPages + 50, 100); i++)
             {
@@ -309,7 +309,7 @@ public class PdfDocumentSerializer
 
         // Write document attachments (embedded files) subject to the
         // conformance guard. Populates /Names /EmbeddedFiles and /AF.
-        IList<FileAttachment> attachmentsToWrite = ResolveAttachments();
+        IList<FileAttachment>? attachmentsToWrite = ResolveAttachments();
         if (attachmentsToWrite != null)
         {
             AttachmentWriter attachmentWriter = new(writer);
@@ -336,7 +336,7 @@ public class PdfDocumentSerializer
         int encryptId = 0;
         if (_document.Settings.IsEncrypted)
         {
-            writer.Encryptor = new Security.Encryption.PdfEncryptor(_document.Settings.Encryption);
+            writer.Encryptor = new Security.Encryption.PdfEncryptor(_document.Settings.Encryption!);
             encryptId = writer.GetNewId();
         }
 
@@ -351,7 +351,7 @@ public class PdfDocumentSerializer
         // 2. Initialize Shared Context
         PdfSize orientedPageSize = _document.Settings.GetOrientedPageSize();
 
-        IDictionary<string, int> resolvedTocEntries = null;
+        IDictionary<string, int>? resolvedTocEntries = null;
 
         if (RequiresTwoPassLayout())
         {
@@ -376,7 +376,7 @@ public class PdfDocumentSerializer
 
         // PDF/UA tagging context - shared between the render pipeline and
         // the async structure-tree writer below.
-        TaggingContext taggingContext = CreateTaggingContext();
+        TaggingContext? taggingContext = CreateTaggingContext();
 
         RenderContext ctx = new(orientedPageSize, _document.Settings.Margin);
         ctx.Conformance = _document.Settings.Conformance;
@@ -393,7 +393,7 @@ public class PdfDocumentSerializer
 
         if (RequiresTwoPassLayout())
         {
-            int expectedTotalPages = resolvedTocEntries.Count > 0 ? resolvedTocEntries.Values.Max() + 1 : 0;
+            int expectedTotalPages = resolvedTocEntries!.Count > 0 ? resolvedTocEntries.Values.Max() + 1 : 0;
             // Pre-allocate page IDs with a generous padding
             for (int i = 0; i < Math.Max(expectedTotalPages + 50, 100); i++)
             {
@@ -572,7 +572,7 @@ public class PdfDocumentSerializer
 
         // Write document attachments (embedded files) subject to the
         // conformance guard. Populates /Names /EmbeddedFiles and /AF.
-        IList<FileAttachment> attachmentsToWrite = ResolveAttachments();
+        IList<FileAttachment>? attachmentsToWrite = ResolveAttachments();
         if (attachmentsToWrite != null)
         {
             AttachmentWriter attachmentWriter = new(writer);
@@ -599,7 +599,7 @@ public class PdfDocumentSerializer
     /// attachments are dropped and a warning diagnostic recorded, keeping the
     /// emitted PDF's conformance claim honest.
     /// </summary>
-    private IList<FileAttachment> ResolveAttachments()
+    private IList<FileAttachment>? ResolveAttachments()
     {
         IList<FileAttachment> attachments = _document.Attachments;
         if (attachments == null || attachments.Count == 0)
@@ -660,7 +660,7 @@ public class PdfDocumentSerializer
     /// MCIDs to the builder) and the structure-tree writer (emits the
     /// populated tree into the PDF object graph).
     /// </summary>
-    private TaggingContext CreateTaggingContext()
+    private TaggingContext? CreateTaggingContext()
     {
         if (_document.Settings.Accessibility == AccessibilityMode.None) return null;
         if (_document.Settings.Version != PdfVersion.Pdf17) return null;

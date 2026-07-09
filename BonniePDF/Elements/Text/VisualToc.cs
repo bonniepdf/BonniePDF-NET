@@ -163,7 +163,7 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
         bool tagThisEntry = tagging != null;
         if (tagThisEntry)
         {
-            tagging.Tree.Begin(Rendering.Tagging.SemanticRole.TOCI);
+            tagging!.Tree.Begin(Rendering.Tagging.SemanticRole.TOCI);
             ctx.Canvas.BeginMarkedContent("TOCI");
         }
 
@@ -176,7 +176,7 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
             if (tagThisEntry)
             {
                 ctx.Canvas.EndMarkedContent();
-                tagging.Tree.End();
+                tagging!.Tree.End();
             }
         }
     }

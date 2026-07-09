@@ -126,7 +126,9 @@ public class RenderContext
     /// <summary>
     /// Gets the current drawing canvas.
     /// </summary>
-    public ICanvas Canvas { get; private set; }
+    // Always assigned by UpdateCanvas(), called unconditionally from every
+    // constructor; null! documents that to the compiler across the call boundary.
+    public ICanvas Canvas { get; private set; } = null!;
 
     /// <summary>
     /// PDF/UA tagging context. Non-null when the document opted into
@@ -134,14 +136,14 @@ public class RenderContext
     /// context so each per-page <see cref="PdfCanvas"/> gets it via
     /// <see cref="UpdateCanvas"/>.
     /// </summary>
-    public TaggingContext Tagging { get; set; }
+    public TaggingContext? Tagging { get; set; }
 
     /// <summary>
     /// Optional layout-snapshot recorder. Attached only when a caller opted into
     /// <c>CaptureLayout</c> (currently the SVG exporter). When null, all capture
     /// is a guarded no-op and output is byte-identical to the un-instrumented path.
     /// </summary>
-    public LayoutRecorder LayoutRecorder { get; set; }
+    public LayoutRecorder? LayoutRecorder { get; set; }
 
     /// <summary>
     /// Gets whether the context is in SVG rendering mode.
@@ -247,7 +249,7 @@ public class RenderContext
     /// Resolves the embedded <see cref="TtfFont"/> for the given font identifier,
     /// or <c>null</c> if the font is not embedded (i.e. it is a standard PDF font).
     /// </summary>
-    internal TtfFont ResolveEmbeddedFont(string fontIdentifier) => Resources.ResolveEmbeddedFont(fontIdentifier);
+    internal TtfFont? ResolveEmbeddedFont(string fontIdentifier) => Resources.ResolveEmbeddedFont(fontIdentifier);
 
     // ── SVG embedded-font usage ─────────────────────────────────────────────────
     // Accumulated across every SvgCanvas this context creates, so the page
@@ -280,7 +282,7 @@ public class RenderContext
     /// <see cref="PdfCanvas"/> so multi-script text never emits a <c>.notdef</c>
     /// reference.
     /// </summary>
-    internal List<ResolvedTextRun> ResolveTextRuns(string fontIdentifier, string text)
+    internal IList<ResolvedTextRun> ResolveTextRuns(string fontIdentifier, string text)
         => Resources.ResolveTextRuns(fontIdentifier, text);
 
     /// <summary>
@@ -326,7 +328,7 @@ public class RenderContext
     /// Returns the <see cref="EmbeddedFontInfo"/> for a font loaded from the given file path,
     /// loading and caching it on first access.
     /// </summary>
-    public EmbeddedFontInfo GetEmbeddedFont(string filePath) => Resources.GetEmbeddedFont(filePath);
+    public EmbeddedFontInfo? GetEmbeddedFont(string filePath) => Resources.GetEmbeddedFont(filePath);
 
     /// <summary>
     /// Creates a new page and resets the cursor position
@@ -344,7 +346,7 @@ public class RenderContext
         // then on the new page reopen the same roles with fresh MCIDs.
         // All MCIDs (old page + new page) attach to the same structure
         // elements because the StructureTreeBuilder stack is untouched.
-        string[] reopenRoles = null;
+        string[]? reopenRoles = null;
         if (Tagging != null && Tagging.OpenMarkedContentCount > 0)
         {
             reopenRoles = Tagging.SnapshotOpenRolesBottomUp();
@@ -405,7 +407,7 @@ public class RenderContext
     public void SwitchToPage(int index)
     {
         if (index < 0 || index >= Pages.Count)
-            throw new ArgumentOutOfRangeException();
+            throw new ArgumentOutOfRangeException(nameof(index));
         CurrentPageIndex = index;
         // Keep the tagging context's page tracking in lock-step with the
         // physical page. NewPage() does this for automatic overflow breaks;

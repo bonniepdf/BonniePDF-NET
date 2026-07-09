@@ -87,7 +87,7 @@ public abstract class ElementBase : IElement, IMargin, ICaptureMetadata
     /// Optional author-supplied name/key surfaced in the layout snapshot. Null by
     /// default; a future capture API can populate it.
     /// </summary>
-    public string CaptureName { get; set; }
+    public string? CaptureName { get; set; }
 
     /// <summary>
     /// Margin around this element

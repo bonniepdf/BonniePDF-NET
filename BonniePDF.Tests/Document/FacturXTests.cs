@@ -1,4 +1,3 @@
-using System.IO;
 using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.EInvoice;
@@ -6,7 +5,7 @@ using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Document;
 
 /// <summary>
 /// ZUGFeRD / Factur-X e-invoice binding. Parity peer of the TypeScript
@@ -28,9 +27,9 @@ public class FacturXTests
     private static byte[] InvoiceXml() =>
         Encoding.UTF8.GetBytes("<rsm:CrossIndustryInvoice><total>42.00</total></rsm:CrossIndustryInvoice>");
 
-    private static string Generate(System.Action<Document> populate)
+    private static string Generate(System.Action<BonniePDF.Document> populate)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         populate(doc);
         using var ms = new MemoryStream();
         doc.Save(ms, true);
@@ -64,7 +63,7 @@ public class FacturXTests
     [Fact]
     public void Apply_KeepsExistingPdfA3aChoice()
     {
-        var doc = new Document();
+        var doc = new BonniePDF.Document();
         doc.Settings.Conformance = PdfAConformance.PdfA3a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
@@ -88,7 +87,7 @@ public class FacturXTests
     [Fact]
     public void Apply_RejectsEmptyXml()
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         Assert.Throws<System.ArgumentException>(() => FacturX.Apply(doc, System.Array.Empty<byte>()));
     }
 

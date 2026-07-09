@@ -3,12 +3,12 @@ using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Text;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Images;
-using BonniePDF.Elements.Text;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Document;
 
 // Container layout: a fixed Height wins outright; otherwise
 // height = childHeight + padding(top+bottom) + border(vertical). The child is measured/

@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
-using Xunit;
-using BonniePDF;
 using BonniePDF.Configuration;
 using BonniePDF.Elements.Shapes;
 using BonniePDF.Rendering.Tagging;
+using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Content;
 
 /// <summary>
 /// Tests for the native 1D barcode encoders. Mirrors the TypeScript
@@ -187,7 +182,7 @@ public class BarcodeTests
     [Fact]
     public void Document_BarcodeRendersValidPdf()
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Add(new Barcode { Value = "1Z9999W99999999999", Symbology = BarcodeSymbology.Code128 });
         using var ms = new MemoryStream();
         doc.Save(ms, true);
@@ -196,9 +191,9 @@ public class BarcodeTests
         Assert.Contains("%%EOF", pdf);
     }
 
-    private static string GenerateTagged(Action<Document> populate)
+    private static string GenerateTagged(Action<BonniePDF.Document> populate)
     {
-        using var doc = new Document();
+        using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";

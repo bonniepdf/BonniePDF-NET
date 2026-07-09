@@ -60,7 +60,7 @@ public sealed class SvgPageExportOptions
     /// when <see cref="IncludeAccessibilityMetadata"/> is set. Defaults to the
     /// document metadata title, then a generic label.
     /// </summary>
-    public string Title { get; init; }
+    public string? Title { get; init; }
 
     /// <summary>
     /// Maximum number of pages to emit. The full document is still laid out (so

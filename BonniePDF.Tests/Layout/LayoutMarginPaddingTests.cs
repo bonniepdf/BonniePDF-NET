@@ -1,5 +1,5 @@
-using BonniePDF.Core;
 using BonniePDF.Configuration;
+using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Lists;
@@ -10,7 +10,7 @@ using BonniePDF.Rendering;
 using BonniePDF.Rendering.Images;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Layout;
 
 public class LayoutMarginPaddingTests
 {

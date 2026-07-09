@@ -20,14 +20,14 @@ namespace BonniePDF.Drawing;
 /// </summary>
 public class PdfCanvas : ICanvas
 {
-    private readonly Func<string, TtfFont> _embeddedFontResolver;
+    private readonly Func<string, TtfFont?> _embeddedFontResolver;
     private readonly Func<string, string> _fontResolver;
     private readonly Func<ImageInfo, string> _imageResolver;
     private readonly Action<string, string> _glyphTracker;
     private readonly Func<float, string> _alphaGraphicsStateResolver;
-    private readonly Func<string, string, List<ResolvedTextRun>> _textRunResolver;
-    private readonly Action _reportUntaggedImage;
-    private readonly Func<ShadingRequest, ShadingResources?> _shadingResolver;
+    private readonly Func<string, string, IList<ResolvedTextRun>>? _textRunResolver;
+    private readonly Action? _reportUntaggedImage;
+    private readonly Func<ShadingRequest, ShadingResources?>? _shadingResolver;
     private readonly StringBuilder _stream;
     private readonly float _xOffset;
     private readonly float _yOffset;
@@ -38,7 +38,7 @@ public class PdfCanvas : ICanvas
     // Points are stored in screen coords, transformed through _ctm, then Y-flipped at emit time.
     private float[] _ctm = { 1, 0, 0, 1, 0, 0 }; // identity [a b c d tx ty]
     private readonly Stack<float[]> _ctmStack = new();
-    private TaggingContext _tagging;
+    private TaggingContext? _tagging;
     private int _openMarkedContent;
     // Number of currently-open BDC sequences (sequences that allocated an MCID).
     private int _openTaggedCount;
@@ -65,14 +65,14 @@ public class PdfCanvas : ICanvas
         float pageHeight,
         float xOffset = 0,
         float yOffset = 0,
-        Func<string, string> fontResolver = null,
-        Func<ImageInfo, string> imageResolver = null,
-        Func<string, TtfFont> embeddedFontResolver = null,
-        Action<string, string> glyphTracker = null,
-        Func<float, string> alphaGraphicsStateResolver = null,
-        Func<string, string, List<ResolvedTextRun>> textRunResolver = null,
-        Action reportUntaggedImage = null,
-        Func<ShadingRequest, ShadingResources?> shadingResolver = null)
+        Func<string, string>? fontResolver = null,
+        Func<ImageInfo, string>? imageResolver = null,
+        Func<string, TtfFont?>? embeddedFontResolver = null,
+        Action<string, string>? glyphTracker = null,
+        Func<float, string>? alphaGraphicsStateResolver = null,
+        Func<string, string, IList<ResolvedTextRun>>? textRunResolver = null,
+        Action? reportUntaggedImage = null,
+        Func<ShadingRequest, ShadingResources?>? shadingResolver = null)
     {
         _stream = stream;
         Height = pageHeight;
@@ -266,7 +266,7 @@ public class PdfCanvas : ICanvas
 
         // Resolve runs first so any embedded/fallback fonts are registered before
         // glyph tracking and width measurement.
-        List<ResolvedTextRun> runs = ResolveRuns(text, fontFamily);
+        IList<ResolvedTextRun> runs = ResolveRuns(text, fontFamily);
         PdfOperators.SetFillColor(_stream, color);
 
         // Calculate X offset based on alignment
@@ -305,7 +305,7 @@ public class PdfCanvas : ICanvas
         // Now draw text at origin (0,0) since we've already translated
         PdfOperators.BeginText(_stream);
 
-        List<ResolvedTextRun> runs = ResolveRuns(text, fontFamily);
+        IList<ResolvedTextRun> runs = ResolveRuns(text, fontFamily);
         PdfOperators.SetFillColor(_stream, color);
         PdfOperators.SetTextPosition(_stream, 0, 0);
 
@@ -334,7 +334,7 @@ public class PdfCanvas : ICanvas
         }
 
         // Resolve runs and measure per-run so spacing matches what is emitted.
-        List<ResolvedTextRun> runs = ResolveRuns(text, fontFamily);
+        IList<ResolvedTextRun> runs = ResolveRuns(text, fontFamily);
         float extraSpace = availableWidth - MeasureRuns(runs, fontSize);
         float wordSpacing = extraSpace / spaceCount;
 
@@ -510,7 +510,7 @@ public class PdfCanvas : ICanvas
     /// resolver (glyph fallback). Without a resolver, returns a single legacy run
     /// using the primary font resolvers, preserving standalone-canvas behaviour.
     /// </summary>
-    private List<ResolvedTextRun> ResolveRuns(string text, string fontFamily)
+    private IList<ResolvedTextRun> ResolveRuns(string text, string fontFamily)
     {
         if (_textRunResolver != null) return _textRunResolver(fontFamily, text);
         return new List<ResolvedTextRun>
@@ -526,12 +526,12 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>Sums the rendered width of <paramref name="runs"/> at <paramref name="fontSize"/>, each run in its own font.</summary>
-    private static float MeasureRuns(List<ResolvedTextRun> runs, float fontSize)
+    private static float MeasureRuns(IList<ResolvedTextRun> runs, float fontSize)
     {
         float total = 0;
         foreach (ResolvedTextRun run in runs)
         {
-            TtfFont font = run.EmbeddedFont;
+            TtfFont? font = run.EmbeddedFont;
             if (font != null)
             {
                 foreach (System.Text.Rune rune in run.Text.EnumerateRunes())
@@ -554,7 +554,7 @@ public class PdfCanvas : ICanvas
     /// the fill colour first; each <c>Tj</c> advances the text point by its glyph
     /// widths, so consecutive runs flow on naturally.
     /// </summary>
-    private void EmitShowText(List<ResolvedTextRun> runs, float fontSize)
+    private void EmitShowText(IList<ResolvedTextRun> runs, float fontSize)
     {
         foreach (ResolvedTextRun run in runs)
         {
@@ -1309,7 +1309,7 @@ public class PdfCanvas : ICanvas
     /// fires, letting image callers surface a diagnostic rather than silently
     /// demoting meaningful content to an artifact.
     /// </remarks>
-    private void DrawAsArtifactFallback(Action draw, Action onAutoArtifact = null)
+    private void DrawAsArtifactFallback(Action draw, Action? onAutoArtifact = null)
     {
         bool needsFallbackArtifact = _tagging != null && _openMarkedContent == 0 && _artifactDepth == 0;
         if (needsFallbackArtifact)

@@ -19,7 +19,7 @@ public sealed class PageDescriptor
     internal ContentSlot FooterSlot { get; } = new();
     internal ContentSlot BackgroundSlot { get; } = new();
     internal ContentSlot ForegroundSlot { get; } = new();
-    internal TextStyle DefaultStyle { get; private set; }
+    internal TextStyle DefaultStyle { get; private set; } = new();
 
     /// <summary>
     /// Sets the page size.

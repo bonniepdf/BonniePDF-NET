@@ -28,6 +28,9 @@ public class VerticalStack : ElementBase, IStatefulElement
     /// </summary>
     public IList<IElement> Children => _children;
 
+    /// <inheritdoc />
+    public IEnumerable<IElement> GetChildren() => _children;
+
     /// <summary>
     /// Renders this vertical stack with state tracking for pagination.
     /// Children that implement IStatefulElement will be rendered with overflow support.

@@ -30,7 +30,7 @@ public class Document : IDisposable
 
     /// <summary>
     /// Recoverable issues collected during the most recent Save / SaveAsync /
-    /// ToByteArray call - typically font load failures or subset fallbacks.
+    /// GenerateBytes call - typically font load failures or subset fallbacks.
     /// Empty before generation. Call <see cref="PrintDiagnostics"/> to surface
     /// them via the console, or inspect directly to feed into custom UI /
     /// telemetry.
@@ -68,7 +68,7 @@ public class Document : IDisposable
     /// <summary>
     /// Creates a new instance of Document with the specified settings and metadata
     /// </summary>
-    public Document(DocumentSettings settings, DocumentMetadata metadata)
+    public Document(DocumentSettings? settings, DocumentMetadata? metadata)
     {
         Settings = settings ?? new DocumentSettings();
         Metadata = metadata ?? new DocumentMetadata();
@@ -119,7 +119,7 @@ public class Document : IDisposable
     /// </summary>
     public Document Attach(string fileName, byte[] content,
         AttachmentRelationship relationship = AttachmentRelationship.Unspecified,
-        string mediaType = null)
+        string? mediaType = null)
         => Attach(new FileAttachment(fileName, content, relationship, mediaType));
 
     /// <summary>
@@ -305,22 +305,44 @@ public class Document : IDisposable
         await SaveInternalAsync(stream, leaveOpen, cancellationToken).ConfigureAwait(false);
     }
 
-    public byte[] ToByteArray()
+    /// <summary>
+    /// Serializes the document to PDF bytes.
+    /// </summary>
+    public byte[] GenerateBytes()
     {
         MemoryStream ms = new();
-        this.Save(ms, leaveOpen: false);
+        Save(ms, leaveOpen: false);
         return ms.ToArray();
     }
 
-    public async Task<byte[]> ToByteArrayAsync()
+    /// <summary>
+    /// Asynchronously serializes the document to PDF bytes.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token for the operation</param>
+    public async Task<byte[]> GenerateBytesAsync(CancellationToken cancellationToken = default)
     {
         MemoryStream ms = new();
         await using (ms.ConfigureAwait(false))
         {
-            await this.SaveAsync(ms, leaveOpen: false).ConfigureAwait(false);
+            await SaveAsync(ms, leaveOpen: false, cancellationToken).ConfigureAwait(false);
             return ms.ToArray();
         }
     }
+
+    /// <summary>
+    /// Alias for <see cref="GenerateBytes"/>, kept for source compatibility with earlier
+    /// releases. Prefer <see cref="GenerateBytes"/> for new code.
+    /// </summary>
+    [Obsolete("Use GenerateBytes() instead.")]
+    public byte[] ToByteArray() => GenerateBytes();
+
+    /// <summary>
+    /// Alias for <see cref="GenerateBytesAsync(CancellationToken)"/>, kept for source
+    /// compatibility with earlier releases. Has no cancellation support; prefer
+    /// <see cref="GenerateBytesAsync(CancellationToken)"/> for new code.
+    /// </summary>
+    [Obsolete("Use GenerateBytesAsync(CancellationToken) instead.")]
+    public Task<byte[]> ToByteArrayAsync() => GenerateBytesAsync();
 
     // ─── SVG page export ────────────────────────────────────────────────
 
@@ -332,7 +354,7 @@ public class Document : IDisposable
     /// the visual layout matches.
     /// </summary>
     /// <param name="options">Export options; defaults are used when <c>null</c>.</param>
-    public IReadOnlyList<string> GenerateSvgPages(SvgPageExportOptions options = null)
+    public IReadOnlyList<string> GenerateSvgPages(SvgPageExportOptions? options = null)
     {
         ApplyDefaultStyleToTree();
         return SvgPageExporter.Export(this, options);
@@ -344,14 +366,14 @@ public class Document : IDisposable
     /// once into the host page so the SVG renders with the exact fonts used for
     /// layout, independent of what the viewer has installed.
     /// </summary>
-    public SvgDocumentExport GenerateSvgDocument(SvgPageExportOptions options = null)
+    public SvgDocumentExport GenerateSvgDocument(SvgPageExportOptions? options = null)
     {
         ApplyDefaultStyleToTree();
         return SvgPageExporter.ExportDocument(this, options);
     }
 
     /// <summary>Asynchronous sibling of <see cref="GenerateSvgDocument"/>.</summary>
-    public Task<SvgDocumentExport> GenerateSvgDocumentAsync(SvgPageExportOptions options = null,
+    public Task<SvgDocumentExport> GenerateSvgDocumentAsync(SvgPageExportOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -361,7 +383,7 @@ public class Document : IDisposable
     /// <summary>
     /// Renders a single page (zero-based index) to a standalone SVG string.
     /// </summary>
-    public string GenerateSvgPage(int pageIndex, SvgPageExportOptions options = null)
+    public string GenerateSvgPage(int pageIndex, SvgPageExportOptions? options = null)
     {
         IReadOnlyList<string> pages = GenerateSvgPages(options);
         if (pageIndex < 0 || pageIndex >= pages.Count)
@@ -374,14 +396,14 @@ public class Document : IDisposable
     /// Convenience for example cards and social previews: renders the first page
     /// to a standalone SVG string.
     /// </summary>
-    public string GenerateFirstPageSvg(SvgPageExportOptions options = null) => GenerateSvgPage(0, options);
+    public string GenerateFirstPageSvg(SvgPageExportOptions? options = null) => GenerateSvgPage(0, options);
 
     /// <summary>
     /// Asynchronous sibling of <see cref="GenerateSvgPages"/>. SVG export is
     /// CPU-bound and runs synchronously; this overload exists for API symmetry
     /// and cancellation support.
     /// </summary>
-    public Task<IReadOnlyList<string>> GenerateSvgPagesAsync(SvgPageExportOptions options = null,
+    public Task<IReadOnlyList<string>> GenerateSvgPagesAsync(SvgPageExportOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -389,7 +411,7 @@ public class Document : IDisposable
     }
 
     /// <summary>Asynchronous sibling of <see cref="GenerateSvgPage"/>.</summary>
-    public Task<string> GenerateSvgPageAsync(int pageIndex, SvgPageExportOptions options = null,
+    public Task<string> GenerateSvgPageAsync(int pageIndex, SvgPageExportOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -397,7 +419,7 @@ public class Document : IDisposable
     }
 
     /// <summary>Asynchronous sibling of <see cref="GenerateFirstPageSvg"/>.</summary>
-    public Task<string> GenerateFirstPageSvgAsync(SvgPageExportOptions options = null,
+    public Task<string> GenerateFirstPageSvgAsync(SvgPageExportOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -439,7 +461,8 @@ public class Document : IDisposable
         _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
-        await using AsyncPdfWriter writer = new(path, Settings.Version);
+        AsyncPdfWriter writer = new(path, Settings.Version);
+        await using var _ = writer.ConfigureAwait(false);
         var serializer = new PdfDocumentSerializer(this, _diagnostics);
         await serializer.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
     }
@@ -452,7 +475,8 @@ public class Document : IDisposable
         _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
-        await using AsyncPdfWriter writer = new(stream, leaveOpen, Settings.Version);
+        AsyncPdfWriter writer = new(stream, leaveOpen, Settings.Version);
+        await using var _ = writer.ConfigureAwait(false);
         var serializer = new PdfDocumentSerializer(this, _diagnostics);
         await serializer.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
     }
@@ -463,7 +487,7 @@ public class Document : IDisposable
     /// </summary>
     private void ApplyDefaultStyleToTree()
     {
-        TextStyle style = Settings.DefaultTextStyle;
+        TextStyle? style = Settings.DefaultTextStyle;
         if (style == null) return;
         foreach (Page page in _pages)
             foreach (IElement el in page.Elements)
@@ -508,7 +532,7 @@ public class Document : IDisposable
 
         // AES-256 requires PDF 1.7
         if (Settings.IsEncrypted &&
-            Settings.Encryption.Algorithm == Security.Models.EncryptionAlgorithm.AES_256 &&
+            Settings.Encryption!.Algorithm == Security.Models.EncryptionAlgorithm.AES_256 &&
             Settings.Version != PdfVersion.Pdf17)
         {
             throw new InvalidOperationException(

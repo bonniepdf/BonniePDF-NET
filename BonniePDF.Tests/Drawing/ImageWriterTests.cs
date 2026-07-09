@@ -4,7 +4,7 @@ using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Writers;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Drawing;
 
 public class ImageWriterTests
 {

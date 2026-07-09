@@ -12,8 +12,9 @@ namespace BonniePDF.Security.Encryption;
 /// </summary>
 public sealed class PdfEncryptor
 {
-    private readonly PdfEncryptionKey _key;
-    private readonly Aes256EncryptionKey _aesKey;
+    // Exactly one is non-null, based on _isAes256, set once in every constructor.
+    private readonly PdfEncryptionKey? _key;
+    private readonly Aes256EncryptionKey? _aesKey;
     private readonly bool _isAes256;
 
     /// <summary>
@@ -62,7 +63,7 @@ public sealed class PdfEncryptor
     /// <summary>
     /// Gets the document ID used in encryption.
     /// </summary>
-    public byte[] DocumentId => _isAes256 ? _aesKey.DocumentId : _key.DocumentId;
+    public byte[] DocumentId => _isAes256 ? _aesKey!.DocumentId : _key!.DocumentId;
 
     /// <summary>
     /// Gets the encryption settings.
@@ -75,16 +76,16 @@ public sealed class PdfEncryptor
     /// </summary>
     public byte[] EncryptData(byte[] data, int objectNumber, int generationNumber = 0)
     {
-        if (data == null || data.Length == 0)
-            return data;
+        if (data == null) return data!;
+        if (data.Length == 0) return data;
 
         if (_isAes256)
         {
-            AesCipher cipher = new(_aesKey.FileEncryptionKey);
+            AesCipher cipher = new(_aesKey!.FileEncryptionKey);
             return cipher.Encrypt(data);
         }
 
-        byte[] objectKey = _key.GetObjectKey(objectNumber, generationNumber);
+        byte[] objectKey = _key!.GetObjectKey(objectNumber, generationNumber);
         RC4Cipher rc4 = RC4Cipher.ForObject(objectKey);
         return rc4.TransformCopy(data);
     }
@@ -120,7 +121,7 @@ public sealed class PdfEncryptor
             // the caller should use EncryptData instead for AES.
             // As a fallback, we encrypt and copy back what fits (this path shouldn't be hit
             // in normal operation since WriteBinaryObject uses EncryptData).
-            AesCipher cipher = new(_aesKey.FileEncryptionKey);
+            AesCipher cipher = new(_aesKey!.FileEncryptionKey);
             byte[] encrypted = cipher.Encrypt(data);
             // Can't fit - this is a design limitation for in-place AES
             // In practice, PdfWriter should use EncryptData for AES mode
@@ -128,7 +129,7 @@ public sealed class PdfEncryptor
             return;
         }
 
-        byte[] objectKey = _key.GetObjectKey(objectNumber, generationNumber);
+        byte[] objectKey = _key!.GetObjectKey(objectNumber, generationNumber);
         RC4Cipher cipher2 = RC4Cipher.ForObject(objectKey);
         cipher2.Transform(data);
     }
@@ -146,7 +147,7 @@ public sealed class PdfEncryptor
             ["/Filter"] = "/Standard",
             ["/V"] = Settings.VersionValue.ToString(),
             ["/R"] = Settings.RevisionValue.ToString(),
-            ["/O"] = FormatHexString(_key.OwnerEntry),
+            ["/O"] = FormatHexString(_key!.OwnerEntry),
             ["/U"] = FormatHexString(_key.UserEntry),
             ["/P"] = _key.PermissionsValue.ToString()
         };
@@ -168,7 +169,7 @@ public sealed class PdfEncryptor
             ["/V"] = "5",
             ["/R"] = "6",
             ["/Length"] = "256",
-            ["/O"] = FormatHexString(_aesKey.OwnerEntry),
+            ["/O"] = FormatHexString(_aesKey!.OwnerEntry),
             ["/U"] = FormatHexString(_aesKey.UserEntry),
             ["/OE"] = FormatHexString(_aesKey.OwnerEncryptionEntry),
             ["/UE"] = FormatHexString(_aesKey.UserEncryptionEntry),
@@ -185,7 +186,7 @@ public sealed class PdfEncryptor
     /// </summary>
     public string GetIdArray()
     {
-        byte[] docId = _isAes256 ? _aesKey.DocumentId : _key.DocumentId;
+        byte[] docId = _isAes256 ? _aesKey!.DocumentId : _key!.DocumentId;
         string idHex = FormatHexString(docId);
         return $"[ {idHex} {idHex} ]";
     }

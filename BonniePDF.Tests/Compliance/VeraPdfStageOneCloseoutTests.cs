@@ -1,13 +1,8 @@
-using System;
-using System.IO;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Threading.Tasks;
-using BonniePDF.Core;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Compliance;
 
 /// <summary>
 /// this feature stage-1 closeout - opt-in VeraPDF integration tests for the
@@ -36,7 +31,7 @@ public class VeraPdfStageOneCloseoutTests
     public Task DickensNovel_PassesVeraPdfUa1() =>
         ValidateAsync(Stage1CloseoutTests.BuildDickensNovelDocument(), "dickens-novel-tagged.pdf");
 
-    private static async Task ValidateAsync(Document doc, string filename)
+    private static async Task ValidateAsync(BonniePDF.Document doc, string filename)
     {
         if (Environment.GetEnvironmentVariable("VERAPDF") != "1")
         {

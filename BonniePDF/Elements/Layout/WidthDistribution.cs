@@ -12,5 +12,5 @@ public enum WidthDistribution
     Weighted,
 
     /// <summary>Children use their preferred width (falls back to equal if not available)</summary>
-    Auto
+    Auto,
 }

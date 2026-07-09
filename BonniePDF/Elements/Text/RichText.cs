@@ -23,7 +23,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
     private readonly List<TextSpan> _spans = new();
     private float _cachedContentWidth = -1;
-    private List<RichTextLine> _cachedLines;
+    private List<RichTextLine>? _cachedLines;
 
     // State tracking for multipage rendering
     private int _lastLineRendered = -1;
@@ -58,7 +58,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Adds a text span with an explicit style.
     /// </summary>
-    public RichText Span(string text, TextStyle style = null)
+    public RichText Span(string text, TextStyle? style = null)
     {
         _spans.Add(new TextSpan
         {
@@ -82,7 +82,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Adds a text span followed by a line break.
     /// </summary>
-    public RichText Line(string text, TextStyle style = null)
+    public RichText Line(string text, TextStyle? style = null)
     {
         _spans.Add(new TextSpan
         {
@@ -316,7 +316,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             if (currentLine.Runs.Count > 0 && StylesEqual(currentLine.Runs[^1].Style, word.Style))
                 currentLine.Runs[^1].Text += word.Text;
             else
-                currentLine.Runs.Add(new StyledRun { Text = word.Text, Style = word.Style });
+                currentLine.Runs.Add(new StyledRun { Text = word.Text!, Style = word.Style });
 
             currentWidth += word.Width;
         }
@@ -348,7 +348,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     {
         List<StyledWord> words = new();
         bool prevSpanEndedWithSpace = false;
-        TextStyle prevResolvedStyle = null;
+        TextStyle? prevResolvedStyle = null;
 
         foreach (TextSpan span in _spans)
         {
@@ -585,7 +585,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
     // --- Helpers ---
 
-    private TextStyle ResolveStyle(TextStyle spanStyle)
+    private TextStyle ResolveStyle(TextStyle? spanStyle)
     {
         if (spanStyle == null) return DefaultStyle ?? new TextStyle { FontFamily = "Helvetica", FontSize = 12 };
         return spanStyle.MergeWith(DefaultStyle);
@@ -609,7 +609,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
     private static bool StylesEqual(TextStyle a, TextStyle b)
     {
-        return a.EffectiveFontName == b.EffectiveFontName &&
+        return string.Equals(a.EffectiveFontName, b.EffectiveFontName, StringComparison.Ordinal) &&
                Math.Abs(a.EffectiveFontSize - b.EffectiveFontSize) < 0.01f &&
                a.EffectiveColor.Equals(b.EffectiveColor) &&
                a.Decoration == b.Decoration &&
@@ -654,10 +654,10 @@ internal class RichTextLine
 internal class StyledRun
 {
     /// <summary>The text content</summary>
-    public string Text { get; set; }
+    public required string Text { get; set; }
 
     /// <summary>The resolved style for this run</summary>
-    public TextStyle Style { get; set; }
+    public required TextStyle Style { get; set; }
 }
 
 /// <summary>
@@ -665,8 +665,10 @@ internal class StyledRun
 /// </summary>
 internal class StyledWord
 {
-    public string Text { get; set; }
-    public TextStyle Style { get; set; }
+    // Not required: line-break placeholder words (IsLineBreak = true) are
+    // constructed without Text.
+    public string? Text { get; set; }
+    public required TextStyle Style { get; set; }
     public float Width { get; set; }
     public bool HasLeadingSpace { get; set; }
     public float LeadingSpaceWidth { get; set; }
@@ -677,6 +679,6 @@ internal class StyledWord
     /// span's resolved style - so the space inherits that span's background/color, not the
     /// following word's background/color.
     /// </summary>
-    public TextStyle LeadingSpaceStyle { get; set; }
+    public TextStyle? LeadingSpaceStyle { get; set; }
     public bool IsLineBreak { get; set; }
 }

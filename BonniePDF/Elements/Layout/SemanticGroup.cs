@@ -1,3 +1,4 @@
+using BonniePDF.Configuration;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Tagging;
 
@@ -11,7 +12,7 @@ namespace BonniePDF.Elements.Layout;
 ///
 /// When tagging is enabled (<see cref="AccessibilityMode.PdfUa1"/>)
 /// the pipeline wraps the whole group in a single structure element
-/// with the configured <see cref="Role"/>. Children that are themselves
+/// with the configured <see cref="SemanticRole"/>. Children that are themselves
 /// <see cref="IRoleProvider"/> get their own nested structure elements.
 /// </summary>
 public class SemanticGroup : VerticalStack, IRoleProvider

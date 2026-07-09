@@ -1,4 +1,4 @@
-using System;
+using BonniePDF.Core;
 
 namespace BonniePDF.Rendering.Tagging;
 
@@ -7,7 +7,7 @@ namespace BonniePDF.Rendering.Tagging;
 /// operation that would produce an invalid tree (e.g. closing a node
 /// that wasn't opened, ending past the document root).
 /// </summary>
-public sealed class StructureTreeException : Exception
+public sealed class StructureTreeException : BonniePdfException
 {
     /// <summary>Creates a new <see cref="StructureTreeException"/>.</summary>
     public StructureTreeException(string message) : base(message) { }

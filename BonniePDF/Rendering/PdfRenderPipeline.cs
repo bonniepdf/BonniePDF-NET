@@ -437,7 +437,7 @@ public static class PdfRenderPipeline
         float textWidth = FontMetrics.GetStringWidth(wm.Text, StandardFonts.Helvetica, (int)wm.FontSize);
 
         // Determine text encoding - embedded fonts use glyph ID hex strings
-        TtfFont embeddedFont = ctx.ResolveEmbeddedFont(wm.FontName);
+        TtfFont? embeddedFont = ctx.ResolveEmbeddedFont(wm.FontName);
         string textOperand = embeddedFont != null
             ? PdfSyntax.ToGlyphIdHexString(wm.Text, embeddedFont)
             : $"({PdfSyntax.Escape(wm.Text)})";
@@ -541,7 +541,7 @@ public static class PdfRenderPipeline
             // flush against the page edge.
             if (hasHeader)
             {
-                IElement headerElement = settings.HeaderTemplate!(pageNumber);
+                IElement? headerElement = settings.HeaderTemplate!(pageNumber);
                 if (headerElement != null)
                 {
                     float headerHeight = headerElement.MeasureHeight(contentWidth);
@@ -554,20 +554,22 @@ public static class PdfRenderPipeline
             }
 
             // Render Footer - symmetric: centred within the bottom-margin band.
-            if (hasFooter)
+            if (!hasFooter)
             {
-                IElement footerElement = settings.FooterTemplate!(pageNumber);
-                if (footerElement != null)
-                {
-                    float footerHeight = footerElement.MeasureHeight(contentWidth);
-                    float bandTop = ctx.PageSize.Height - ctx.Margin;
-                    ctx.CurrentX = startX;
-                    ctx.CurrentY = bandTop + MathF.Max(0f, (ctx.Margin - footerHeight) / 2f);
-                    if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
-                    footerElement.Render(ctx, contentWidth);
-                    if (ctx.Tagging != null) ctx.Canvas.EndArtifact();
-                }
+                return;
             }
+            IElement? footerElement = settings.FooterTemplate!(pageNumber);
+            if (footerElement == null)
+            {
+                return;
+            }
+            float footerHeight = footerElement.MeasureHeight(contentWidth);
+            float bandTop = ctx.PageSize.Height - ctx.Margin;
+            ctx.CurrentX = startX;
+            ctx.CurrentY = bandTop + MathF.Max(0f, (ctx.Margin - footerHeight) / 2f);
+            if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
+            footerElement.Render(ctx, contentWidth);
+            if (ctx.Tagging != null) ctx.Canvas.EndArtifact();
         }
         finally
         {

@@ -35,14 +35,14 @@ public static class TemplateRenderer
             // Render header
             if (settings.HeaderTemplate != null)
             {
-                IElement headerElement = settings.HeaderTemplate(pageNumber);
+                IElement? headerElement = settings.HeaderTemplate(pageNumber);
                 if (headerElement != null) RenderHeader(ctx, headerElement);
             }
 
             // Render footer
             if (settings.FooterTemplate != null)
             {
-                IElement footerElement = settings.FooterTemplate(pageNumber);
+                IElement? footerElement = settings.FooterTemplate(pageNumber);
                 if (footerElement != null) RenderFooter(ctx, footerElement);
             }
         }

@@ -3,7 +3,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Rendering.Writers;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Export;
 
 public class AsyncPdfWriterTests
 {

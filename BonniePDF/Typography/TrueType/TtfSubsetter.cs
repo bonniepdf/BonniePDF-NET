@@ -17,11 +17,11 @@ public class TtfSubsetter
     private readonly Dictionary<string, (uint offset, uint length)> _tables;
     private short _indexToLocFormat; // 0 = short offsets, 1 = long offsets
 
-    // Mapping from new GID to original GID
-    private Dictionary<ushort, ushort> _newToOldGid;
+    // Mapping from new GID to original GID. Populated by CreateSubset().
+    private Dictionary<ushort, ushort>? _newToOldGid;
 
-    // Mapping from original GID to new GID in the subset
-    private Dictionary<ushort, ushort> _oldToNewGid;
+    // Mapping from original GID to new GID in the subset. Populated by CreateSubset().
+    private Dictionary<ushort, ushort>? _oldToNewGid;
 
     // Head table info
     private int _unitsPerEm;
@@ -38,7 +38,7 @@ public class TtfSubsetter
     /// Gets the mapping from original GID to new GID after subsetting.
     /// Available after CreateSubset() is called.
     /// </summary>
-    public IReadOnlyDictionary<ushort, ushort> OldToNewGidMap => _oldToNewGid;
+    public IReadOnlyDictionary<ushort, ushort>? OldToNewGidMap => _oldToNewGid;
 
     /// <summary>
     /// Gets the maximum original GID that was used (for CIDToGIDMap size calculation)
@@ -295,7 +295,7 @@ public class TtfSubsetter
         Array.Copy(_originalData, info.offset, data, 0, info.length);
 
         // Update numberOfHMetrics to match subset glyph count
-        ushort numGlyphs = (ushort)_newToOldGid.Count;
+        ushort numGlyphs = (ushort)_newToOldGid!.Count;
         data[34] = (byte)(numGlyphs >> 8);
         data[35] = (byte)(numGlyphs & 0xFF);
 
@@ -312,7 +312,7 @@ public class TtfSubsetter
         Array.Copy(_originalData, info.offset, data, 0, info.length);
 
         // Update numGlyphs
-        ushort numGlyphs = (ushort)_newToOldGid.Count;
+        ushort numGlyphs = (ushort)_newToOldGid!.Count;
         data[4] = (byte)(numGlyphs >> 8);
         data[5] = (byte)(numGlyphs & 0xFF);
 
@@ -324,7 +324,7 @@ public class TtfSubsetter
         if (!_tables.TryGetValue("hmtx", out (uint offset, uint length) hmtxInfo))
             throw new Exception("Missing 'hmtx' table");
 
-        int numGlyphs = _newToOldGid.Count;
+        int numGlyphs = _newToOldGid!.Count;
 
         // Each glyph gets 4 bytes: advanceWidth (2) + leftSideBearing (2)
         byte[] data = new byte[numGlyphs * 4];
@@ -387,7 +387,7 @@ public class TtfSubsetter
             int codepoint = kvp.Key;
             ushort oldGid = kvp.Value;
 
-            if (!_oldToNewGid.TryGetValue(oldGid, out ushort newGid)) continue;
+            if (!_oldToNewGid!.TryGetValue(oldGid, out ushort newGid)) continue;
 
             allMappings[(uint)codepoint] = newGid;
             if (codepoint <= 0xFFFF)
@@ -604,7 +604,7 @@ public class TtfSubsetter
             !_tables.TryGetValue("loca", out (uint offset, uint length) locaInfo))
             throw new Exception("Missing 'glyf' or 'loca' table");
 
-        int numGlyphs = _newToOldGid.Count;
+        int numGlyphs = _newToOldGid!.Count;
 
         using MemoryStream glyfMs = new();
         using MemoryStream locaMs = new();
@@ -685,7 +685,7 @@ public class TtfSubsetter
             ushort oldComponentGid = (ushort)((result[offset + 2] << 8) | result[offset + 3]);
 
             // Remap the component GID
-            if (_oldToNewGid.TryGetValue(oldComponentGid, out ushort newComponentGid))
+            if (_oldToNewGid!.TryGetValue(oldComponentGid, out ushort newComponentGid))
             {
                 result[offset + 2] = (byte)(newComponentGid >> 8);
                 result[offset + 3] = (byte)(newComponentGid & 0xFF);

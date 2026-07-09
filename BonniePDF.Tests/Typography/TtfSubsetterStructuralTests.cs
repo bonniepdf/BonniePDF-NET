@@ -1,7 +1,8 @@
+using BonniePDF.Tests.Support;
 using BonniePDF.Typography.TrueType;
 using Xunit;
 
-namespace BonniePDF.Tests;
+namespace BonniePDF.Tests.Typography;
 
 /// <summary>
 /// Structural validity of the emitted subset. These guard browser-side rendering

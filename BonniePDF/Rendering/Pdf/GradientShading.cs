@@ -20,16 +20,16 @@ public sealed class ShadingRequest
     public int ShadingType { get; init; }
 
     /// <summary><c>[x0 y0 x1 y1]</c> (axial) or <c>[x0 y0 r0 x1 y1 r1]</c> (radial), in shading space.</summary>
-    public float[] Coords { get; init; }
+    public required float[] Coords { get; init; }
 
     /// <summary>Stops sorted by offset and padded so the first is at 0 and the last at 1.</summary>
-    public IReadOnlyList<ShadingStop> Stops { get; init; }
+    public required IReadOnlyList<ShadingStop> Stops { get; init; }
 
     /// <summary>PDF <c>/Extend</c> — pad the start/end colour beyond the axis/radii (SVG "pad").</summary>
     public (bool Start, bool End) Extend { get; init; }
 
     /// <summary>Bounding box of the painted region in shading space, for the mask form.</summary>
-    public float[] Bbox { get; init; }
+    public required float[] Bbox { get; init; }
 
     /// <summary>True when any stop is translucent, i.e. a soft mask is required.</summary>
     public bool HasAlpha { get; init; }
