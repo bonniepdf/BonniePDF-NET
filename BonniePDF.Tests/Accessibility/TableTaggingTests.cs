@@ -86,6 +86,74 @@ public class TableTaggingTests
     }
 
     [Fact]
+    public void PresentationTable_EmitsDivWithPContent_NoTableStructure()
+    {
+        // A layout table must NOT emit table structure (ISO 14289-1 §7.5 /
+        // Matterhorn checkpoint 15); its content is tagged in reading order under a Div.
+        string pdf = GenerateTaggedTable(
+            hookHeader: t => t.AddHeader(
+                new TableCell { Content = new TextBlock { Text = "A", FontName = StandardFonts.HelveticaBold } },
+                new TableCell { Content = new TextBlock { Text = "B", FontName = StandardFonts.HelveticaBold } },
+                new TableCell { Content = new TextBlock { Text = "C", FontName = StandardFonts.HelveticaBold } }),
+            populate: t =>
+            {
+                t.Presentation = true;
+                t.AddRow(new TextBlock { Text = "Bill to" }, new TextBlock { Text = "Ship to" }, new TextBlock { Text = "Details" });
+                t.AddRow(new TextBlock { Text = "Acme" }, new TextBlock { Text = "Acme" }, new TextBlock { Text = "Net 30" });
+            });
+
+        Assert.Contains("/S /Div", pdf);
+        Assert.Contains("/S /P", pdf);
+        Assert.DoesNotContain("/S /Table", pdf);
+        Assert.DoesNotContain("/S /TR", pdf);
+        Assert.DoesNotContain("/S /TH", pdf);
+        Assert.DoesNotContain("/S /TD", pdf);
+    }
+
+    [Fact]
+    public void PresentationFlag_FlipsSemanticRoleToDiv()
+    {
+        var t = new Table(100f);
+        Assert.Equal(SemanticRole.Table, t.SemanticRole);
+        t.Presentation = true;
+        Assert.Equal(SemanticRole.Div, t.SemanticRole);
+    }
+
+    [Fact]
+    public void Grid_IsLayoutElement_DivRolePinned()
+    {
+        var g = new Grid(1f, 1f);
+        Assert.Equal(SemanticRole.Div, g.SemanticRole);
+        // Pinned: the escape-hatch flag can't turn a Grid back into a data table.
+        g.Presentation = false;
+        Assert.Equal(SemanticRole.Div, g.SemanticRole);
+    }
+
+    [Fact]
+    public void Grid_EmitsDivWithPContent_NoTableStructure()
+    {
+        using var doc = new BonniePDF.Document();
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
+        var grid = new Grid(0.9f, 1f);
+        grid.AddRow(new TextBlock { Text = "Invoice #" }, new TextBlock { Text = "2026-001" });
+        grid.AddRow(new TextBlock { Text = "Terms" }, new TextBlock { Text = "Net 14" });
+        doc.Add(grid);
+
+        using var ms = new MemoryStream();
+        doc.Save(ms, true);
+        string pdf = Encoding.ASCII.GetString(ms.ToArray());
+
+        Assert.Contains("/S /Div", pdf);
+        Assert.Contains("/S /P", pdf);
+        Assert.DoesNotContain("/S /Table", pdf);
+        Assert.DoesNotContain("/S /TR", pdf);
+        Assert.DoesNotContain("/S /TH", pdf);
+        Assert.DoesNotContain("/S /TD", pdf);
+    }
+
+    [Fact]
     public void TaggedTable_HeaderCells_RenderAsTH_BodyCells_RenderAsTD()
     {
         // One header row + one data row, both with 3 cells.

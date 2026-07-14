@@ -55,7 +55,8 @@ public static class AttachedDataExample
         doc.Add(Tb("The source data for this report is embedded as quarterly-revenue.csv.", 9, Mute, bottom: 16));
 
         Table table = new(2f, 2f, 2f) { Border = Border.None, CellPadding = 6 };
-        table.AddRow(
+        // Real tabular data → a proper header row (emits TH cells for assistive tech).
+        table.AddHeader(
             Tb("Quarter", 8, Mute, bold: true),
             Tb("Revenue (EUR)", 8, Mute, bold: true, align: TextAlignment.Right),
             Tb("Customers", 8, Mute, bold: true, align: TextAlignment.Right));

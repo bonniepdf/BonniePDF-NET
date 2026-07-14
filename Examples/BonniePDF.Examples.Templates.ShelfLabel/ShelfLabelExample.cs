@@ -76,7 +76,7 @@ public static class ShelfLabelExample
         };
     }
 
-    private static Table MainOffer()
+    private static Grid MainOffer()
     {
         VerticalStack info = new();
         info.AddChild(Tb("HARVEST GROVE", 8, AccentDark, bold: true, bottom: 2));
@@ -95,12 +95,12 @@ public static class ShelfLabelExample
         price.AddChild(Tb(Money(2.49), 30, Ink, bold: true, align: TextAlignment.Right));
         price.AddChild(UnitPriceBadge());
 
-        Table row = new(1.75f, 1)
+        Grid row = new(1.75f, 1)
         {
             Border = Border.None,
             CellPadding = 8,
         };
-        row.AddRow(new Container { Child = info, Padding = new Thickness(0, 0, 6, 0) }, new Container { Child = price });
+        row.AddRow(new Container { Child = info, Padding = new Thickness(0, 0, 6, 0) }, price);
         return row;
     }
 
@@ -114,9 +114,9 @@ public static class ShelfLabelExample
         Child = Tb(Money(0.25) + "/100 g", 8.2f, AccentDark, bold: true, align: TextAlignment.Right),
     };
 
-    private static Table DetailRow()
+    private static Grid DetailRow()
     {
-        Table table = new(1, 1, 1)
+        Grid table = new(1, 1, 1)
         {
             Border = Border.None,
             CellPadding = 0,

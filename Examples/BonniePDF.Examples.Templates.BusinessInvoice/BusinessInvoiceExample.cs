@@ -59,7 +59,7 @@ public static class BusinessInvoiceExample
         // ============================================
         // HEADER - Company info left, "Invoice" title right
         // ============================================
-        Table headerTable = new(1.2f, 1f)
+        Grid headerTable = new(1.2f, 1f)
         {
             CellPadding = 0,
             Border = Border.None,
@@ -95,15 +95,15 @@ public static class BusinessInvoiceExample
         });
 
         headerTable.AddRow(
-            new Container { Child = companyStack },
-            new Container { Child = titleStack }
+            companyStack,
+            titleStack
         );
         mainStack.AddChild(headerTable);
 
         // ============================================
         // BILL TO / SHIP TO / DETAILS - 3-column bordered section
         // ============================================
-        Table addressTable = new(1f, 1f, 1.1f)
+        Grid addressTable = new(1f, 1f, 1.1f)
         {
             CellPadding = 10,
             Border = new Border(BorderStyle.Thin),
@@ -157,9 +157,9 @@ public static class BusinessInvoiceExample
         AddDetailRow(detailsStack, "Due date", DateTime.Now.AddDays(14).ToString("MM/dd/yyyy"));
 
         addressTable.AddRow(
-            new Container { Child = billToStack },
-            new Container { Child = shipToStack },
-            new Container { Child = detailsStack }
+            billToStack,
+            shipToStack,
+            detailsStack
         );
         mainStack.AddChild(addressTable);
 
@@ -261,7 +261,7 @@ public static class BusinessInvoiceExample
         decimal tax = subtotal * 0.0825m; // 8.25% sales tax
         decimal total = subtotal + tax;
 
-        Table footerTable = new(1.3f, 1f)
+        Grid footerTable = new(1.3f, 1f)
         {
             CellPadding = 0,
             Border = Border.None,
@@ -287,7 +287,7 @@ public static class BusinessInvoiceExample
         VerticalStack totalsStack = new();
 
         // Subtotal
-        Table subtotalRow = new(1f, 1f)
+        Grid subtotalRow = new(1f, 1f)
         {
             CellPadding = 6,
             Border = Border.None
@@ -307,7 +307,7 @@ public static class BusinessInvoiceExample
         totalsStack.AddChild(subtotalRow);
 
         // Sales Tax
-        Table taxRow = new(1f, 1f)
+        Grid taxRow = new(1f, 1f)
         {
             CellPadding = 6,
             Border = Border.None
@@ -327,7 +327,7 @@ public static class BusinessInvoiceExample
         totalsStack.AddChild(taxRow);
 
         // Early payment discount
-        Table discountRow = new(1f, 1f)
+        Grid discountRow = new(1f, 1f)
         {
             CellPadding = 6,
             Border = Border.None
@@ -357,7 +357,7 @@ public static class BusinessInvoiceExample
 
         // Total
         decimal totalDue = total - 1400m;
-        Table totalRow = new(1f, 1f)
+        Grid totalRow = new(1f, 1f)
         {
             CellPadding = 6,
             Border = Border.None
@@ -378,7 +378,7 @@ public static class BusinessInvoiceExample
 
         footerTable.AddRow(
             new Container { Child = messageStack, Padding = new Thickness(0, 0, 40, 0) },
-            new Container { Child = totalsStack }
+            totalsStack
         );
         mainStack.AddChild(footerTable);
 
@@ -426,7 +426,7 @@ public static class BusinessInvoiceExample
 
     private static void AddDetailRow(VerticalStack stack, string label, string value)
     {
-        Table row = new(0.9f, 1f)
+        Grid row = new(0.9f, 1f)
         {
             CellPadding = 0,
             Border = Border.None
@@ -446,9 +446,9 @@ public static class BusinessInvoiceExample
         stack.AddChild(row);
     }
 
-    private static Table CreatePaymentDetails()
+    private static Grid CreatePaymentDetails()
     {
-        Table paymentTable = new(1f, 1f, 1f)
+        Grid paymentTable = new(1f, 1f, 1f)
         {
             CellPadding = 0,
             Border = Border.None
@@ -495,9 +495,9 @@ public static class BusinessInvoiceExample
         refStack.AddChild(new TextBlock { Text = "number with payment", FontSize = 8, TextColor = TextMedium });
 
         paymentTable.AddRow(
-            new Container { Child = bankStack },
-            new Container { Child = otherStack },
-            new Container { Child = refStack }
+            bankStack,
+            otherStack,
+            refStack
         );
 
         return paymentTable;

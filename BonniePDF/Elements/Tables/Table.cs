@@ -13,8 +13,30 @@ namespace BonniePDF.Elements.Tables;
 /// </summary>
 public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 {
+    /// <summary>
+    /// When <c>true</c>, the table is a <b>layout (presentation) table</b>: it
+    /// arranges content in a grid with no tabular data relationships. Per
+    /// ISO 14289-1 §7.5 / Matterhorn checkpoint 15, such a table MUST NOT be
+    /// tagged with table structure — so it is tagged as a generic <c>Div</c>
+    /// grouping and each cell's content is tagged with its own natural role in
+    /// row-major reading order (no <c>Table</c>/<c>THead</c>/<c>TR</c>/<c>TH</c>/
+    /// <c>TD</c>, and <c>AddHeader</c>/<c>IsHeader</c> are ignored for tagging).
+    /// Visual output is unchanged. Default <c>false</c> (a semantic data table).
+    /// </summary>
+    public bool Presentation { get; set; }
+
+    /// <summary>
+    /// Whether this element tags as a layout grid (a <c>Div</c> grouping) rather
+    /// than a data table. Routed through a protected virtual so <see cref="Grid"/>
+    /// can pin it on; defaults to the public <see cref="Presentation"/> escape hatch.
+    /// </summary>
+    protected virtual bool IsLayoutGrid => Presentation;
+
+    /// <summary>The grouping role this table tags under: Table for data, Div for layout.</summary>
+    private SemanticRole GroupRole => IsLayoutGrid ? Rendering.Tagging.SemanticRole.Div : Rendering.Tagging.SemanticRole.Table;
+
     /// <inheritdoc />
-    public SemanticRole SemanticRole => Rendering.Tagging.SemanticRole.Table;
+    public SemanticRole SemanticRole => GroupRole;
 
     private readonly float[] _columnWeights;
     private readonly List<TableRow> _footers = new();
@@ -183,8 +205,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         // here when one isn't already current (PDF/UA 7.2). Guard avoids
         // double-wrapping the common (already-wrapped) case. A paginated table can
         // yield one Table per page fragment, which is structurally valid.
-        bool ownTable = tagging != null && tagging.Tree.Current.Role != SemanticRole.Table;
-        if (ownTable) tagging!.Tree.Begin(SemanticRole.Table);
+        bool ownTable = tagging != null && tagging.Tree.Current.Role != GroupRole;
+        if (ownTable) tagging!.Tree.Begin(GroupRole);
         try
         {
             return RenderStatefulRows(ctx, width, tagging);
@@ -200,6 +222,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     {
         float contentWidth = GetContentWidth(width);
         float[] widths = CalculateColumnWidths(contentWidth);
+        // Layout (presentation) tables emit no TR/TH/TD and therefore no row-groups.
+        TaggingContext? groupTagging = IsLayoutGrid ? null : tagging;
         // PDF/UA 7.2: rows must sit inside a THead/TBody/TFoot row-group. Groups
         // are opened lazily (only once a row actually renders, so no empty groups)
         // and closed before every return so the structure tree stays balanced.
@@ -221,21 +245,21 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
                 if (ctx.CurrentY + headerHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
                 {
-                    if (theadOpen && tagging != null) tagging!.Tree.End();
+                    if (theadOpen && groupTagging != null) groupTagging!.Tree.End();
                     if (artifactOpen) ctx.Canvas.EndArtifact();
                     return _lastRowRendered < 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
                 }
 
                 if (!theadOpen && !artifactOpen)
                 {
-                    if (isContinuation && tagging != null)
+                    if (isContinuation && groupTagging != null)
                     {
                         ctx.Canvas.BeginArtifact();
                         artifactOpen = true;
                     }
-                    else if (tagging != null)
+                    else if (groupTagging != null)
                     {
-                        tagging.Tree.Begin(SemanticRole.THead);
+                        groupTagging.Tree.Begin(SemanticRole.THead);
                         theadOpen = true;
                     }
                 }
@@ -243,7 +267,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 RenderRowDirect(ctx, headerRow, widths);
             }
 
-            if (theadOpen && tagging != null) tagging!.Tree.End();
+            if (theadOpen && groupTagging != null) groupTagging!.Tree.End();
             if (artifactOpen) ctx.Canvas.EndArtifact();
             _headersPending = false;
         }
@@ -268,17 +292,17 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             // Pagination check
             if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
             {
-                if (tbodyOpen && tagging != null) tagging!.Tree.End();
+                if (tbodyOpen && groupTagging != null) groupTagging!.Tree.End();
                 _lastRowRendered = i - 1;
                 _headersPending = RepeatHeadersOnNewPage && _headers.Count > 0;
                 return i == startRow ? RenderStatus.WrapRequired : RenderStatus.Overflow;
             }
 
-            if (!tbodyOpen && tagging != null) { tagging.Tree.Begin(SemanticRole.TBody); tbodyOpen = true; }
+            if (!tbodyOpen && groupTagging != null) { groupTagging.Tree.Begin(SemanticRole.TBody); tbodyOpen = true; }
             RenderRowDirect(ctx, row, widths);
             _lastRowRendered = i;
         }
-        if (tbodyOpen && tagging != null) tagging!.Tree.End();
+        if (tbodyOpen && groupTagging != null) groupTagging!.Tree.End();
 
         RenderFootersGrouped(ctx, widths, tagging);
         ctx.CurrentY += Margin.Bottom;
@@ -290,10 +314,11 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     private void RenderFootersGrouped(RenderContext ctx, float[] widths, TaggingContext? tagging)
     {
         if (_footers.Count == 0) return;
-        if (tagging != null) tagging.Tree.Begin(SemanticRole.TFoot);
+        TaggingContext? groupTagging = IsLayoutGrid ? null : tagging;
+        if (groupTagging != null) groupTagging.Tree.Begin(SemanticRole.TFoot);
         foreach (TableRow footerRow in _footers)
             RenderRowDirect(ctx, footerRow, widths);
-        if (tagging != null) tagging!.Tree.End();
+        if (groupTagging != null) groupTagging!.Tree.End();
     }
 
     /// <summary>
@@ -316,17 +341,48 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     /// twin that lives alongside this method for the
     /// non-pipeline render path.
     /// </summary>
+    /// <summary>
+    /// Records the row + per-cell nodes into the layout snapshot so the structure
+    /// and compliance views see the real <c>Table → TableRow → TableCell</c>
+    /// (TR/TH/TD) hierarchy — mirroring what the tagging pipeline writes to the PDF
+    /// structure tree. A no-op without a recorder, so PDF/SVG output is unchanged.
+    /// The cell's intrinsic <c>SemanticRole</c> (TH/TD) is read by the recorder's
+    /// a11y capture, so a table with header cells is correctly seen as having
+    /// headers. Returns callbacks to invoke around each cell and after the row.
+    /// </summary>
+    private (System.Action<TableCell, float, float> OpenCell, System.Action<TableCell> CloseCell, System.Action CloseRow)
+        CaptureRow(RenderContext ctx, TableRow row, float rowX, float rowY, float rowWidth, float rowHeight)
+    {
+        // Presentation tables emit no TR/TH/TD structure, so we don't record
+        // row/cell nodes either — the cell contents (tagged in reading order) nest
+        // directly under the table's Div node, mirroring the structure tree.
+        LayoutRecorder? rec = IsLayoutGrid ? null : ctx.LayoutRecorder;
+        int page = ctx.CurrentPageIndex;
+        float endY = rowY + rowHeight;
+        rec?.OpenNode(row, LayoutRecorder.CaptureTypeOf(row), LayoutRecorder.CaptureNameOf(row), page, rowX, rowY, rowWidth);
+        return (
+            (cell, x, width) => rec?.OpenNode(cell, LayoutRecorder.CaptureTypeOf(cell), LayoutRecorder.CaptureNameOf(cell), page, x, rowY, width),
+            cell => rec?.CloseNode(cell, page, endY, true),
+            () => rec?.CloseNode(row, page, endY, true)
+        );
+    }
+
     private void RenderRowDirect(RenderContext ctx, TableRow row, float[] widths)
     {
         float rowHeight = MeasureRowHeight(row, widths);
 
         var tagging = ctx.Tagging;
-        bool tagThisRow = tagging != null;
-        if (tagThisRow)
+        // Data tables tag TR/TH/TD; presentation (layout) tables tag each cell's
+        // content in reading order instead (no table structure). Exactly one applies.
+        bool dataTagging = tagging != null && !IsLayoutGrid;
+        bool presTagging = tagging != null && IsLayoutGrid;
+        if (dataTagging)
         {
             tagging!.Tree.Begin(SemanticRole.TR);
             ctx.Canvas.BeginContainerContent("TR");
         }
+
+        var capture = CaptureRow(ctx, row, ctx.CurrentX, ctx.CurrentY, widths.Sum(), rowHeight);
 
         try
         {
@@ -347,10 +403,12 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                     for (int j = 1; j < cell.ColumnSpan && i + j < widths.Length; j++)
                         colWidth += widths[i + j];
 
-                SemanticRole cellRole = cell.SemanticRole;
-                bool tagThisCell = tagThisRow;
-                if (tagThisCell)
+                capture.OpenCell(cell, currentX, colWidth);
+
+                ChildTagToken childTag = default;
+                if (dataTagging)
                 {
+                    SemanticRole cellRole = cell.SemanticRole;
                     tagging!.Tree.Begin(cellRole);
                     var cellAttrs = new List<string>();
                     if (cell.ColumnSpan > 1) cellAttrs.Add($"/ColSpan {cell.ColumnSpan}");
@@ -360,6 +418,12 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                         tagging!.Tree.SetAttributes($"<< /O /Table {string.Join(" ", cellAttrs)} >>");
                     ctx.Canvas.BeginMarkedContent(cellRole.ToPdfTag());
                 }
+                else if (presTagging)
+                {
+                    // Layout cell: tag the content with its own natural role (P,
+                    // Figure, …) in reading order, exactly as a stack tags a child.
+                    childTag = ChildTagging.BeginChildTag(ctx, cell.Content);
+                }
 
                 try
                 {
@@ -367,11 +431,16 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 }
                 finally
                 {
-                    if (tagThisCell)
+                    if (dataTagging)
                     {
                         ctx.Canvas.EndMarkedContent();
                         tagging!.Tree.End();
                     }
+                    else if (presTagging)
+                    {
+                        ChildTagging.EndChildTag(ctx, childTag);
+                    }
+                    capture.CloseCell(cell);
                 }
 
                 currentX += widths[i];
@@ -382,11 +451,12 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         }
         finally
         {
-            if (tagThisRow)
+            if (dataTagging)
             {
                 ctx.Canvas.EndMarkedContent();
                 tagging!.Tree.End();
             }
+            capture.CloseRow();
         }
     }
 
@@ -414,8 +484,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         // IRoleProvider children before calling Render. Only open our own when one
         // isn't already current, so the THead/TBody/TFoot groups get exactly one
         // Table ancestor (PDF/UA 7.2) instead of Table-in-Table.
-        bool ownTable = tagging != null && tagging.Tree.Current.Role != SemanticRole.Table;
-        if (ownTable) tagging!.Tree.Begin(SemanticRole.Table);
+        bool ownTable = tagging != null && tagging.Tree.Current.Role != GroupRole;
+        if (ownTable) tagging!.Tree.Begin(GroupRole);
         try
         {
             RenderContentRows(ctx, contentWidth, tagging);
@@ -430,18 +500,20 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     {
         float[] widths = CalculateColumnWidths(contentWidth);
         bool isFirstPage = true;
+        // Layout (presentation) tables emit no TR/TH/TD and therefore no row-groups.
+        TaggingContext? groupTagging = IsLayoutGrid ? null : tagging;
 
         // Render headers - grouped under THead (PDF/UA 7.2).
         if (_headers.Count > 0)
         {
-            if (tagging != null) tagging.Tree.Begin(SemanticRole.THead);
+            if (groupTagging != null) groupTagging.Tree.Begin(SemanticRole.THead);
             try
             {
                 foreach (TableRow row in _headers) RenderRow(ctx, row, widths, isFirstPage);
             }
             finally
             {
-                if (tagging != null) tagging!.Tree.End();
+                if (groupTagging != null) groupTagging!.Tree.End();
             }
         }
 
@@ -451,7 +523,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         // Render data rows - grouped under TBody.
         if (_rows.Count > 0)
         {
-            if (tagging != null) tagging.Tree.Begin(SemanticRole.TBody);
+            if (groupTagging != null) groupTagging.Tree.Begin(SemanticRole.TBody);
             try
             {
                 foreach (TableRow row in _rows)
@@ -477,21 +549,21 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             }
             finally
             {
-                if (tagging != null) tagging!.Tree.End();
+                if (groupTagging != null) groupTagging!.Tree.End();
             }
         }
 
         // Render footers - grouped under TFoot.
         if (_footers.Count > 0)
         {
-            if (tagging != null) tagging.Tree.Begin(SemanticRole.TFoot);
+            if (groupTagging != null) groupTagging.Tree.Begin(SemanticRole.TFoot);
             try
             {
                 foreach (TableRow row in _footers) RenderRow(ctx, row, widths, isFirstPage);
             }
             finally
             {
-                if (tagging != null) tagging!.Tree.End();
+                if (groupTagging != null) groupTagging!.Tree.End();
             }
         }
     }
@@ -513,12 +585,15 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         // when the cell doesn't already declare it. Renders unchanged
         // (and adds nothing to the content stream) when tagging is off.
         var tagging = ctx.Tagging;
-        bool tagThisRow = tagging != null;
-        if (tagThisRow)
+        bool dataTagging = tagging != null && !IsLayoutGrid;
+        bool presTagging = tagging != null && IsLayoutGrid;
+        if (dataTagging)
         {
             tagging!.Tree.Begin(SemanticRole.TR);
             ctx.Canvas.BeginContainerContent("TR");
         }
+
+        var capture = CaptureRow(ctx, row, ctx.CurrentX, ctx.CurrentY, widths.Sum(), rowHeight);
 
         try
         {
@@ -541,10 +616,12 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                     for (int j = 1; j < cell.ColumnSpan && i + j < widths.Length; j++)
                         colWidth += widths[i + j];
 
-                SemanticRole cellRole = cell.SemanticRole;
-                bool tagThisCell = tagThisRow;
-                if (tagThisCell)
+                capture.OpenCell(cell, currentX, colWidth);
+
+                ChildTagToken childTag = default;
+                if (dataTagging)
                 {
+                    SemanticRole cellRole = cell.SemanticRole;
                     tagging!.Tree.Begin(cellRole);
                     var cellAttrs = new List<string>();
                     if (cell.ColumnSpan > 1) cellAttrs.Add($"/ColSpan {cell.ColumnSpan}");
@@ -554,6 +631,10 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                         tagging!.Tree.SetAttributes($"<< /O /Table {string.Join(" ", cellAttrs)} >>");
                     ctx.Canvas.BeginMarkedContent(cellRole.ToPdfTag());
                 }
+                else if (presTagging)
+                {
+                    childTag = ChildTagging.BeginChildTag(ctx, cell.Content);
+                }
 
                 try
                 {
@@ -562,11 +643,16 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 }
                 finally
                 {
-                    if (tagThisCell)
+                    if (dataTagging)
                     {
                         ctx.Canvas.EndMarkedContent();
                         tagging!.Tree.End();
                     }
+                    else if (presTagging)
+                    {
+                        ChildTagging.EndChildTag(ctx, childTag);
+                    }
+                    capture.CloseCell(cell);
                 }
 
                 currentX += widths[i]; // Move by original column width (not spanned width)
@@ -578,11 +664,12 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         }
         finally
         {
-            if (tagThisRow)
+            if (dataTagging)
             {
                 ctx.Canvas.EndMarkedContent();
                 tagging!.Tree.End();
             }
+            capture.CloseRow();
         }
     }
 

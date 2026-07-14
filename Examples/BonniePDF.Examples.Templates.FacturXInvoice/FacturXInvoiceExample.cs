@@ -78,8 +78,8 @@ public static class FacturXInvoiceExample
         titleStack.AddChild(Cell("EN 16931 · Factur-X / ZUGFeRD", size: 8, color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0)));
         titleStack.AddChild(Cell("INV-2026-1001", color: Muted, align: TextAlignment.Right));
 
-        Table header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
-        header.AddRow(new Container { Child = seller }, new Container { Child = titleStack });
+        Grid header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
+        header.AddRow(seller, titleStack);
         root.AddChild(header);
 
         // ── Buyer + details ─────────────────────────────────────────────────
@@ -89,7 +89,7 @@ public static class FacturXInvoiceExample
         details.AddChild(TotalLine("Buyer reference", "PO-2026-042"));
         details.AddChild(TotalLine("Terms", "14 days net"));
 
-        Table meta = new(1f, 1f)
+        Grid meta = new(1f, 1f)
         {
             CellPadding = 12,
             Border = new Border(0.5f),
@@ -125,7 +125,7 @@ public static class FacturXInvoiceExample
             desc.AddChild(Cell(detail, size: 8, color: Muted));
 
             table.AddRow(
-                new Container { Child = desc },
+                desc,
                 Cell(qty.ToString(CultureInfo.InvariantCulture), align: TextAlignment.Center),
                 Cell(Money(unitPrice, Eur, Locale), align: TextAlignment.Right),
                 Cell(Money(amount, Eur, Locale), align: TextAlignment.Right));
@@ -166,7 +166,7 @@ public static class FacturXInvoiceExample
             Accent);
         payCell.Padding = new Thickness(0, 0, 20, 0);
 
-        Table bottom = new(1.1f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 20, 0, 0) };
+        Grid bottom = new(1.1f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 20, 0, 0) };
         bottom.AddRow(
             payCell,
             new Container { BackgroundColor = HeaderBg, CornerRadius = 6, Padding = new Thickness(12, 10, 12, 10), Child = xmlStack });

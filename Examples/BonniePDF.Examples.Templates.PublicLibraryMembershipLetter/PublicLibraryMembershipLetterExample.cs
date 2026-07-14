@@ -147,9 +147,9 @@ public static class PublicLibraryMembershipLetterExample
         return stack;
     }
 
-    private static Table AddressBlock(string longDate)
+    private static Grid AddressBlock(string longDate)
     {
-        Table top = new(1, 1)
+        Grid top = new(1, 1)
         {
             CellPadding = 0,
             Border = Border.None,
@@ -166,7 +166,7 @@ public static class PublicLibraryMembershipLetterExample
         meta.AddChild(Body(longDate, align: TextAlignment.Right, mb: 0));
         meta.AddChild(Body("Membership no. NBL-4471-208823", align: TextAlignment.Right, color: LibrarySecondary, size: 10, mb: 0));
 
-        top.AddRow(new Container { Child = addr }, new Container { Child = meta });
+        top.AddRow(addr, meta);
         return top;
     }
 

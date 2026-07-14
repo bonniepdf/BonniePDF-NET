@@ -52,7 +52,7 @@ public static class ShippingLabelExample
         // ── Carrier header + service class ────────────────────────────────────
         doc.Add(Band("ACME LOGISTICS", 12, Ink, Color.White));
 
-        Table svcRow = new(1f, 1f) { Border = Border.None, CellPadding = 0 };
+        Grid svcRow = new(1f, 1f) { Border = Border.None, CellPadding = 0 };
         svcRow.AddRow(
             new Container { Child = Tb("EXPRESS - NEXT DAY", 10, Color.White, bold: true) },
             new Container { Child = Tb("1.4 kg", 10, Color.White, bold: true, align: TextAlignment.Right) });
@@ -135,8 +135,8 @@ public static class ShippingLabelExample
             },
         });
 
-        Table bottom = new(2f, 1f) { Border = Border.None, CellPadding = 0 };
-        bottom.AddRow(new Container { Child = cartonStack }, new Container { Child = qrStack });
+        Grid bottom = new(2f, 1f) { Border = Border.None, CellPadding = 0 };
+        bottom.AddRow(cartonStack, qrStack);
         doc.Add(bottom);
 
         return doc;

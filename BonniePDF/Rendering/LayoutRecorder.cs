@@ -26,10 +26,13 @@ namespace BonniePDF.Rendering;
 // layout-snapshot fixture before it is considered landed.
 // ---------------------------------------------------------------------------
 
-/// <summary>Schema version emitted in every snapshot, so consumers can feature-detect.</summary>
+/// <summary>Schema version emitted in every snapshot, so consumers can feature-detect.
+/// v2 adds per-node <see cref="NodeAccessibility"/> (<c>A11y</c>) and
+/// <see cref="SnapshotMeta"/> (<c>Meta</c>); v1 consumers that ignore unknown fields
+/// remain compatible.</summary>
 public static class LayoutSnapshotSchema
 {
-    public const int Version = 1;
+    public const int Version = 2;
 }
 
 /// <summary>A single rectangle an element occupied on one page (top-left origin, points).</summary>
@@ -43,6 +46,51 @@ public sealed class LayoutRect
     public float Height { get; init; }
 }
 
+/// <summary>
+/// Accessibility facts captured for a layout node, mirroring what the tagging
+/// pipeline would write into the PDF structure tree for the same element. Present
+/// only when the element exposes a role (implements <c>IRoleProvider</c>).
+///
+/// These are the element's <em>intrinsic</em> semantics, read directly off the
+/// element — they do not depend on <c>AccessibilityMode</c> being enabled, so the
+/// compliance evaluator can answer "would this be accessible?" for untagged
+/// documents too.
+/// </summary>
+public sealed class NodeAccessibility
+{
+    /// <summary>Resolved PDF structure tag, e.g. "H1", "P", "Figure", "TH".</summary>
+    public string Role { get; init; } = "";
+    /// <summary>True when the element contributes real content to the structure tree.</summary>
+    public bool Tagged { get; init; }
+    /// <summary>True when the element renders as an /Artifact (out of reading order).</summary>
+    public bool Artifact { get; init; }
+    /// <summary>/Alt alternate text, when the element supplies non-empty alt text.</summary>
+    public string? Alt { get; init; }
+    /// <summary>Author explicitly marked the element decorative (artifact by intent).</summary>
+    public bool? Decorative { get; init; }
+    /// <summary>Heading level 1–6 for H1…H6 roles; null otherwise.</summary>
+    public int? HeadingLevel { get; init; }
+    /// <summary>True when the element is image-like (a figure candidate).</summary>
+    public bool? ImageLike { get; init; }
+}
+
+/// <summary>
+/// Document-level accessibility/compliance context, captured alongside the tree so
+/// the compliance evaluator can raise document-scoped findings (missing language,
+/// missing title, untagged document) without a second source of truth.
+/// </summary>
+public sealed class SnapshotMeta
+{
+    /// <summary>The document's declared AccessibilityMode as an int (0 = None, 1 = PdfUa1).</summary>
+    public int AccessibilityMode { get; init; }
+    /// <summary>The document's declared PDF/A conformance name (e.g. "None", "PdfA2b").</summary>
+    public string Conformance { get; init; } = "None";
+    /// <summary>BCP-47 document language (/Lang), when declared.</summary>
+    public string? Language { get; init; }
+    /// <summary>Document title, when declared.</summary>
+    public string? Title { get; init; }
+}
+
 /// <summary>One node in the layout tree: a rendered element and the area(s) it occupied.</summary>
 public sealed class LayoutNode
 {
@@ -54,6 +102,8 @@ public sealed class LayoutNode
     public string? Name { get; init; }
     /// <summary>The rectangles this node occupied — one per page it touched (may be empty).</summary>
     public IList<LayoutRect> Rects { get; } = new List<LayoutRect>();
+    /// <summary>Intrinsic accessibility facts, when the element declares a role; null otherwise.</summary>
+    public NodeAccessibility? A11y { get; set; }
     public IList<LayoutNode> Children { get; } = new List<LayoutNode>();
 }
 
@@ -65,6 +115,8 @@ public sealed class LayoutSnapshot
     public IReadOnlyList<PageSize> Pages { get; init; } = Array.Empty<PageSize>();
     /// <summary>Root node (the Document). Its children form the element tree in render order.</summary>
     public LayoutNode Root { get; init; } = new();
+    /// <summary>Document-level accessibility/compliance context; null when unset.</summary>
+    public SnapshotMeta? Meta { get; init; }
 
     public sealed class PageSize
     {
@@ -99,6 +151,7 @@ public sealed class LayoutRecorder
         new(ReferenceEqualityComparer.Instance);
     private int _nextId = 1;
     private IReadOnlyList<LayoutSnapshot.PageSize> _pageSizes = Array.Empty<LayoutSnapshot.PageSize>();
+    private SnapshotMeta? _meta;
 
     public LayoutRecorder()
     {
@@ -113,6 +166,9 @@ public sealed class LayoutRecorder
         _pageSizes = list;
     }
 
+    /// <summary>Records the document-level accessibility/compliance context.</summary>
+    public void SetMeta(SnapshotMeta meta) => _meta = meta;
+
     /// <summary>Opens (or resumes) a node for <paramref name="element"/>.</summary>
     public void OpenNode(object element, string type, string? name, int page, float x, float y, float width)
     {
@@ -120,6 +176,7 @@ public sealed class LayoutRecorder
         if (_open.ContainsKey(element)) return; // resumed segment of an open element
 
         var node = new LayoutNode { Id = $"n{_nextId++}", Type = type, Name = name };
+        node.A11y = AccessibilityOf(element, type);
         _stack[^1].Node.Children.Add(node);
 
         var frame = new OpenFrame { Node = node, X = x, Width = width, Page = page, StartY = y };
@@ -173,7 +230,8 @@ public sealed class LayoutRecorder
     {
         Version = LayoutSnapshotSchema.Version,
         Pages = _pageSizes,
-        Root = _root
+        Root = _root,
+        Meta = _meta
     };
 
     /// <summary>Reads an element's canonical capture type without depending on ElementBase.</summary>
@@ -187,5 +245,49 @@ public sealed class LayoutRecorder
     public static string? CaptureNameOf(object element)
     {
         return element is Elements.ICaptureMetadata meta ? meta.CaptureName : null;
+    }
+
+    private static readonly HashSet<string> ImageLikeTypes = new()
+    {
+        "Image", "QRCode", "Barcode", "DataMatrix", "CanvasElement"
+    };
+
+    /// <summary>
+    /// Derives <see cref="NodeAccessibility"/> from an element by reading its intrinsic
+    /// <c>SemanticRole</c> / <c>AltText</c> (the same properties the tagging pipeline
+    /// consumes via <c>IRoleProvider</c> / <c>IAltTextProvider</c>). Returns null for
+    /// elements that declare no role.
+    /// </summary>
+    public static NodeAccessibility? AccessibilityOf(object element, string type)
+    {
+        if (element is not Tagging.IRoleProvider roleProvider) return null;
+
+        string role = roleProvider.SemanticRole.ToString();
+        bool artifact = roleProvider.SemanticRole == Tagging.SemanticRole.Artifact;
+
+        int? headingLevel = role switch
+        {
+            "H1" => 1, "H2" => 2, "H3" => 3, "H4" => 4, "H5" => 5, "H6" => 6,
+            _ => (int?)null
+        };
+
+        string? alt = null;
+        bool? decorative = null;
+        if (element is Tagging.IAltTextProvider altProvider)
+        {
+            if (!string.IsNullOrEmpty(altProvider.AltText)) alt = altProvider.AltText;
+            if (altProvider.IsDecorative) decorative = true;
+        }
+
+        return new NodeAccessibility
+        {
+            Role = role,
+            Tagged = !artifact,
+            Artifact = artifact,
+            Alt = alt,
+            Decorative = decorative,
+            HeadingLevel = headingLevel,
+            ImageLike = ImageLikeTypes.Contains(type) ? true : (bool?)null
+        };
     }
 }

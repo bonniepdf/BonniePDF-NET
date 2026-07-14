@@ -105,6 +105,15 @@ internal static class SvgPageExporter
         {
             // Page sizes align with the emitted SVG pages.
             recorder.SetPages(renderedPages.Take(limit).Select(p => (p.Size.Width, p.Size.Height)));
+            // Document-level accessibility/compliance context for the evaluator.
+            string? metaTitle = document.Metadata?.Title;
+            recorder.SetMeta(new SnapshotMeta
+            {
+                AccessibilityMode = (int)settings.Accessibility,
+                Conformance = settings.Conformance.ToString(),
+                Language = settings.Language,
+                Title = string.IsNullOrEmpty(metaTitle) ? null : metaTitle
+            });
             snapshot = recorder.Snapshot();
         }
 
