@@ -79,7 +79,7 @@ public static class EventTicketExample
         });
         info.AddChild(Tb("Main Stage, Victoria Park, London", 10, BodyCol, bottom: 12));
 
-        Table facts = new(1f, 1f, 1f) { Border = Border.None, CellPadding = 0 };
+        Grid facts = new(1f, 1f, 1f) { Border = Border.None, CellPadding = 0 };
         facts.AddRow(
             new Container { Child = Field("DATE", "18 Jul 2026") },
             new Container { Child = Field("GATES", "16:00") },
@@ -152,8 +152,8 @@ public static class EventTicketExample
         };
 
         // ── Compose body | stub ───────────────────────────────────────────────
-        Table ticket = new(2.5f, 1.1f) { Border = Border.None, CellPadding = 0 };
-        ticket.AddRow(new Container { Child = body }, new Container { Child = stubBox });
+        Grid ticket = new(2.5f, 1.1f) { Border = Border.None, CellPadding = 0 };
+        ticket.AddRow(body, stubBox);
         doc.Add(ticket);
 
         return doc;

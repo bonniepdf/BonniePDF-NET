@@ -74,8 +74,8 @@ public static class UkVatInvoiceExample
         });
         titleStack.AddChild(Cell($"INV-UK-{year}-0311", color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0)));
 
-        Table header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
-        header.AddRow(new Container { Child = seller }, new Container { Child = titleStack });
+        Grid header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
+        header.AddRow(seller, titleStack);
         root.AddChild(header);
 
         // ── Customer + tax point ────────────────────────────────────────────
@@ -85,7 +85,7 @@ public static class UkVatInvoiceExample
         details.AddChild(TotalLine("Customer VAT no.", "GB 442 8810 21"));
         details.AddChild(TotalLine("Payment terms", "30 days"));
 
-        Table meta = new(1f, 1f)
+        Grid meta = new(1f, 1f)
         {
             CellPadding = 12,
             Border = new Border(0.5f),

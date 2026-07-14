@@ -101,14 +101,14 @@ public static class FinancialDashboardExample
             Margin = new Thickness(0, 5, 0, 0)
         });
 
-        Table headerLayout = new(1f, 1f)
+        Grid headerLayout = new(1f, 1f)
         {
             Border = Border.None,
             CellPadding = 0
         };
         headerLayout.AddRow(
-            new Container { Child = companyStack },
-            new Container { Child = reportStack }
+            companyStack,
+            reportStack
         );
 
         doc.Add(new Container
@@ -127,7 +127,7 @@ public static class FinancialDashboardExample
         Container newCustomersCell = CreateKpiCard("3,814", "NEW CUSTOMERS", "↑ 24.1% YoY", DeltaPos, true);
         Container satisfactionCell = CreateKpiCard("94.2%", "SATISFACTION", "↓ 0.8%", DeltaNeg, true);
 
-        Table kpiTable = new(1f, 1f, 1f, 1f)
+        Grid kpiTable = new(1f, 1f, 1f, 1f)
         {
             Border = Border.None,
             CellPadding = 0

@@ -78,16 +78,16 @@ public static class UkDegreeTranscriptExample
         return doc;
     }
 
-    private static Table Header()
+    private static Grid Header()
     {
-        Table header = new(2.4f, 1) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 0, 0, 6) };
+        Grid header = new(2.4f, 1) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 0, 0, 6) };
 
         VerticalStack uni = new();
         uni.AddChild(new TextBlock { Text = "UNIVERSITY OF WESSEXBRIDGE", FontName = StandardFonts.HelveticaBold, FontSize = 16, TextColor = Navy });
         uni.AddChild(new TextBlock { Text = "Founded 1887 - Registrar's Office", FontSize = 9, TextColor = Muted, Margin = new Thickness(0, 2, 0, 0) });
 
         header.AddRow(
-            new Container { Child = uni },
+            uni,
             new Container
             {
                 Child = new TextBlock
@@ -110,9 +110,9 @@ public static class UkDegreeTranscriptExample
         Child = new TextBlock { Text = " ", FontSize = 1 },
     };
 
-    private static Table StudentDetails()
+    private static Grid StudentDetails()
     {
-        Table details = new(1, 1) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 0, 0, 18) };
+        Grid details = new(1, 1) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 0, 0, 18) };
         VerticalStack left = new();
         left.AddChild(Kv("Student", "Alexandra R. Bennett"));
         left.AddChild(Kv("Student ID", "20458812"));
@@ -123,7 +123,7 @@ public static class UkDegreeTranscriptExample
         right.AddChild(Kv("Awarding body", "University of Wessexbridge"));
         right.AddChild(Kv("Date conferred", "15 July 2026"));
 
-        details.AddRow(new Container { Child = left }, new Container { Child = right });
+        details.AddRow(left, right);
         return details;
     }
 
@@ -206,7 +206,7 @@ public static class UkDegreeTranscriptExample
         };
 
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
-        row.AddChild(new Container { Child = text }, 3);
+        row.AddChild(text, 3);
         row.AddChild(new Container { Child = qr, HorizontalAlignment = HorizontalAlignment.End }, 1);
         return row;
     }

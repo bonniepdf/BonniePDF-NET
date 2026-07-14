@@ -87,9 +87,9 @@ public static class LabReportExample
         return doc;
     }
 
-    private static Table Header()
+    private static Grid Header()
     {
-        Table header = new(2.4f, 1)
+        Grid header = new(2.4f, 1)
         {
             CellPadding = 0,
             Border = Border.None,
@@ -128,7 +128,7 @@ public static class LabReportExample
             Alignment = TextAlignment.Right,
         };
 
-        header.AddRow(new Container { Child = org }, new Container { Child = title });
+        header.AddRow(org, title);
         return header;
     }
 
@@ -140,9 +140,9 @@ public static class LabReportExample
         Child = new TextBlock { Text = " ", FontSize = 1 },
     };
 
-    private static Table InfoBlock()
+    private static Grid InfoBlock()
     {
-        Table info = new(1, 1)
+        Grid info = new(1, 1)
         {
             CellPadding = 12,
             Border = new Border(0.5f),
@@ -166,7 +166,7 @@ public static class LabReportExample
         specimen.AddChild(KeyValue("Reported", "06 Jul 2026 11:37"));
         specimen.AddChild(KeyValue("Requested by", "Dr A. Kaur, Ward 12"));
 
-        info.AddRow(new Container { Child = patient }, new Container { Child = specimen });
+        info.AddRow(patient, specimen);
         return info;
     }
 

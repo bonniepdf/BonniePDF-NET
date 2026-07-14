@@ -94,8 +94,8 @@ public static class IndiaGstInvoiceExample
         qrStack.AddChild(qrBox);
         qrStack.AddChild(Cell("Signed QR (IRP)", size: 8, color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 4, 0, 0)));
 
-        Table header = new(1.5f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 14, 0, 14) };
-        header.AddRow(new Container { Child = seller }, new Container { Child = qrStack });
+        Grid header = new(1.5f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 14, 0, 14) };
+        header.AddRow(seller, qrStack);
         root.AddChild(header);
 
         // ── IRN band ─────────────────────────────────────────────────────────
@@ -119,7 +119,7 @@ public static class IndiaGstInvoiceExample
         details.AddChild(TotalLine("Place of supply", "Karnataka (29)"));
         details.AddChild(TotalLine("Reverse charge", "No"));
 
-        Table meta = new(1f, 1f)
+        Grid meta = new(1f, 1f)
         {
             CellPadding = 12,
             Border = new Border(0.5f),

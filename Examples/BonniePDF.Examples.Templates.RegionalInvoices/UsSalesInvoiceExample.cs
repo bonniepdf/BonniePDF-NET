@@ -71,8 +71,8 @@ public static class UsSalesInvoiceExample
         });
         titleStack.AddChild(Cell($"INV-US-{year}-0148", color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0)));
 
-        Table header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
-        header.AddRow(new Container { Child = seller }, new Container { Child = titleStack });
+        Grid header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
+        header.AddRow(seller, titleStack);
         root.AddChild(header);
 
         // ── Bill-to + details ────────────────────────────────────────────────
@@ -82,7 +82,7 @@ public static class UsSalesInvoiceExample
         details.AddChild(TotalLine("Purchase order", "PO-88213"));
         details.AddChild(TotalLine("Ship to", "Seattle, WA"));
 
-        Table meta = new(1f, 1f)
+        Grid meta = new(1f, 1f)
         {
             CellPadding = 12,
             Border = new Border(0.5f),
@@ -121,7 +121,7 @@ public static class UsSalesInvoiceExample
             }
 
             table.AddRow(
-                new Container { Child = desc },
+                desc,
                 Cell(it.Qty.ToString(System.Globalization.CultureInfo.InvariantCulture), align: TextAlignment.Center),
                 Cell(Money(it.UnitPrice, Usd), align: TextAlignment.Right),
                 Cell(Money(amount, Usd), align: TextAlignment.Right));

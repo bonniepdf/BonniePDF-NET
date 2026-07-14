@@ -112,7 +112,7 @@ public static class PatientSummaryExample
         doc.Add(Pad(new Spacer(16)));
 
         // ── 2. Vitals card (indigo bleed band, 4-up grid) ─────────────────────
-        Table vitalsGrid = new(1, 1, 1, 1) { Border = Border.None, CellPadding = 6 };
+        Grid vitalsGrid = new(1, 1, 1, 1) { Border = Border.None, CellPadding = 6 };
         vitalsGrid.AddRow(
             Vital("128/82", "mmHg", "Blood pressure", "Normal", Teal),
             Vital("72", "bpm", "Heart rate", "Normal", Teal),
@@ -186,26 +186,26 @@ public static class PatientSummaryExample
     }
 
     // A label/value pair as one borderless 2-column row.
-    private static Table DetailRow(string label, string value)
+    private static Grid DetailRow(string label, string value)
     {
-        Table row = new(1, 1.6f) { Border = Border.None, CellPadding = 3 };
+        Grid row = new(1, 1.6f) { Border = Border.None, CellPadding = 3 };
         row.AddRow(Tb(label.ToUpperInvariant(), 7.5f, Mute), Tb(value, 10, Body, bold: true));
         return row;
     }
 
-    private static Container Vital(string value, string unit, string label, string status, Color tone)
+    private static VerticalStack Vital(string value, string unit, string label, string status, Color tone)
     {
         VerticalStack v = new();
         v.AddChild(Tb(value, 18, Ink, bold: true));
         v.AddChild(Tb(unit, 8, Mute, top: 2));
         v.AddChild(Tb(label.ToUpperInvariant(), 7.5f, Body, bold: true, top: 8));
         v.AddChild(Tb(status, 7.5f, tone, bold: true, top: 3));
-        return new Container { Child = v };
+        return v;
     }
 
     private static Container Alert(string name, string detail, float top)
     {
-        Table row = new(1, 2.4f) { Border = Border.None, CellPadding = 3 };
+        Grid row = new(1, 2.4f) { Border = Border.None, CellPadding = 3 };
         row.AddRow(Tb(name, 10, Rose, bold: true), Tb(detail, 9.5f, Body));
         Container c = new() { Child = row };
         if (top > 0) c.Margin = new Thickness(0, top, 0, 0);
@@ -213,10 +213,10 @@ public static class PatientSummaryExample
     }
 
     // A borderless two-column grid (equal weights) wrapping the two children.
-    private static Table TwoUp(IElement left, IElement right)
+    private static Grid TwoUp(IElement left, IElement right)
     {
-        Table grid = new(1, 1) { Border = Border.None, CellPadding = 0 };
-        grid.AddRow(new Container { Child = left }, new Container { Child = right });
+        Grid grid = new(1, 1) { Border = Border.None, CellPadding = 0 };
+        grid.AddRow(left, right);
         return grid;
     }
 

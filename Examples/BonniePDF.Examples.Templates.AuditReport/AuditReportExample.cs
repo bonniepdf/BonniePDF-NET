@@ -101,7 +101,7 @@ public static class AuditReportExample
             "and require remediation before the next surveillance visit: the absence of a completed DPIA for high-risk processing, " +
             "and gaps in the personal-data breach notification procedure against the 72-hour deadline."));
 
-        Table kpis = new(1, 1, 1, 1) { Border = Border.None, CellPadding = 0, Margin = new Thickness(0, 6, 0, 20) };
+        Grid kpis = new(1, 1, 1, 1) { Border = Border.None, CellPadding = 0, Margin = new Thickness(0, 6, 0, 20) };
         kpis.AddRow(
             Kpi("82%", "Overall conformance", Primary),
             Kpi("71 / 93", "Controls implemented", Primary),
@@ -271,12 +271,12 @@ public static class AuditReportExample
         Margin = new Thickness(0, 0, 0, mb),
     };
 
-    private static Container MetaItem(string label, string value)
+    private static VerticalStack MetaItem(string label, string value)
     {
         VerticalStack stack = new();
         stack.AddChild(new TextBlock { Text = label.ToUpperInvariant(), FontName = StandardFonts.HelveticaBold, FontSize = 7, TextColor = Muted, Margin = new Thickness(0, 0, 0, 2) });
         stack.AddChild(new TextBlock { Text = value, FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = Ink });
-        return new Container { Child = stack };
+        return stack;
     }
 
     private static Container Kpi(string value, string label, Color accent)

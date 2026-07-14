@@ -154,16 +154,14 @@ public static class ColorPaletteExample
     };
 
     /// <summary>A centred header cell carrying a shade number (50, 100, … 950).</summary>
-    private static Container HeaderCell(string label) => new()
+    // Centred via Alignment; no wrapping Container needed — the cell it lands in
+    // already stretches with its column so the number stays centred over the swatch.
+    private static TextBlock HeaderCell(string label) => new()
     {
-        // No fixed Width: header cells stretch with their columns so numbers stay centred.
-        Child = new TextBlock
-        {
-            Text = label,
-            FontName = StandardFonts.Helvetica,
-            FontSize = 7,
-            TextColor = ColorPalette.Slate[500],
-            Alignment = TextAlignment.Center
-        }
+        Text = label,
+        FontName = StandardFonts.Helvetica,
+        FontSize = 7,
+        TextColor = ColorPalette.Slate[500],
+        Alignment = TextAlignment.Center
     };
 }

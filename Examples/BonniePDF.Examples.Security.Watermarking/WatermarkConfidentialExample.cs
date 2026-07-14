@@ -53,8 +53,8 @@ public static class WatermarkConfidentialExample
         // Summary table
         Table table = new(new float[] { 200, 120, 120 });
 
-        // Header row
-        table.AddRow(
+        // Header row (real tabular data → AddHeader emits TH cells for assistive tech)
+        table.AddHeader(
             CreateHeaderCell("Metric"),
             CreateHeaderCell($"Q3 {DateTime.Now.Year}"),
             CreateHeaderCell($"Q4 {DateTime.Now.Year}")

@@ -55,8 +55,8 @@ public static class SaasInvoiceExample
         meta.AddChild(Tb("Issued  18 Jun 2026", 9, Mute, align: TextAlignment.Right));
         meta.AddChild(Tb("Due  02 Jul 2026", 9, Mute, align: TextAlignment.Right));
 
-        Table headerTable = new(1f, 1f) { Border = Border.None, CellPadding = 0 };
-        headerTable.AddRow(new Container { Child = brand }, new Container { Child = meta });
+        Grid headerTable = new(1f, 1f) { Border = Border.None, CellPadding = 0 };
+        headerTable.AddRow(brand, meta);
         doc.Add(headerTable);
 
         doc.Add(Rule(14));
@@ -77,13 +77,13 @@ public static class SaasInvoiceExample
         from.AddChild(Tb("4 Tenter Ground, London E1 7NH", 9, BodyCol, align: TextAlignment.Right));
         from.AddChild(Tb("VAT GB 482 9173 55", 9, BodyCol, align: TextAlignment.Right));
 
-        Table addr = new(1f, 1f)
+        Grid addr = new(1f, 1f)
         {
             Border = Border.None,
             CellPadding = 0,
             Margin = new Thickness(0, 8, 0, 16),
         };
-        addr.AddRow(new Container { Child = billTo }, new Container { Child = from });
+        addr.AddRow(billTo, from);
         doc.Add(addr);
 
         // ── Line items (tagged table) ─────────────────────────────────────────
@@ -125,7 +125,7 @@ public static class SaasInvoiceExample
         // ── Totals ────────────────────────────────────────────────────────────
         double vat = subtotal * 0.2;
         double total = subtotal + vat;
-        Table totals = new(2.4f, 1f)
+        Grid totals = new(2.4f, 1f)
         {
             Border = Border.None,
             CellPadding = 5,
@@ -156,8 +156,8 @@ public static class SaasInvoiceExample
         };
         Container qrWrap = new() { Child = qr, Padding = new Thickness(6) };
 
-        Table payTable = new(2.2f, 1f) { Border = Border.None, CellPadding = 0 };
-        payTable.AddRow(new Container { Child = payInfo }, new Container { Child = qrWrap });
+        Grid payTable = new(2.2f, 1f) { Border = Border.None, CellPadding = 0 };
+        payTable.AddRow(payInfo, qrWrap);
 
         doc.Add(new Container
         {
