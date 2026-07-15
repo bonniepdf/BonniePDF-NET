@@ -7,8 +7,8 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating Margins & Units...");
-        using (var doc = MarginsExample.Generate())
+        Console.WriteLine("Generating Margins and Padding...");
+        using (var doc = MarginsAndPadding.Generate())
         {
             doc.Save(Path.Combine(outputDir, "margins.pdf"));
         }
