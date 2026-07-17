@@ -436,11 +436,17 @@ public static class PdfRenderPipeline
         // Approximate text width for centering
         float textWidth = FontMetrics.GetStringWidth(wm.Text, StandardFonts.Helvetica, (int)wm.FontSize);
 
-        // Determine text encoding - embedded fonts use glyph ID hex strings
+        // Determine text encoding - embedded fonts use glyph ID hex strings.
+        // kern the watermark like body text (the this feature SVG export already
+        // kerns it), falling back to a plain `Tj` operand when the font has no
+        // kern pairs for this string.
         TtfFont? embeddedFont = ctx.ResolveEmbeddedFont(wm.FontName);
-        string textOperand = embeddedFont != null
+        string? kernedOperand = embeddedFont != null && embeddedFont.HasKerning
+            ? PdfSyntax.ToKernedGlyphArray(wm.Text, embeddedFont)
+            : null;
+        string textOperand = kernedOperand ?? (embeddedFont != null
             ? PdfSyntax.ToGlyphIdHexString(wm.Text, embeddedFont)
-            : $"({PdfSyntax.Escape(wm.Text)})";
+            : $"({PdfSyntax.Escape(wm.Text)})");
 
         // Build PDF operators for the watermark
         // The operators are appended to the page stream so they render on top of all content
@@ -468,7 +474,10 @@ public static class PdfRenderPipeline
 
         PdfOperators.SetFillColor(wmOps, fillColor);
         PdfOperators.SetTextPosition(wmOps, -textWidth / 2f, 0);
-        PdfOperators.ShowText(wmOps, textOperand);
+        if (kernedOperand != null)
+            PdfOperators.ShowTextPositioned(wmOps, kernedOperand);
+        else
+            PdfOperators.ShowText(wmOps, textOperand);
         PdfOperators.EndText(wmOps);
         PdfOperators.RestoreState(wmOps);
 

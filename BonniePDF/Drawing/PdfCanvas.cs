@@ -578,10 +578,12 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>
-    /// Emits the font-selection (<c>Tf</c>) and show-text (<c>Tj</c>) operators for
-    /// the resolved runs. The caller must have positioned the text matrix and set
-    /// the fill colour first; each <c>Tj</c> advances the text point by its glyph
-    /// widths, so consecutive runs flow on naturally.
+    /// Emits the font-selection (<c>Tf</c>) and show-text operators for the
+    /// resolved runs - kerned <c>TJ</c> for embedded fonts with kern pairs,
+    /// plain <c>Tj</c> otherwise. The caller must have positioned the text matrix
+    /// and set the fill colour first; each show-text operator advances the text
+    /// point by its glyph widths (plus <c>TJ</c> adjustments), so consecutive
+    /// runs flow on naturally.
     /// </summary>
     private void EmitShowText(IList<ResolvedTextRun> runs, float fontSize)
     {
@@ -591,9 +593,22 @@ public class PdfCanvas : ICanvas
             _glyphTracker(run.FontIdentifier, run.Text);
             PdfOperators.SetFont(_stream, run.ResourceName, fontSize);
             if (run.EmbeddedFont != null)
-                PdfOperators.ShowText(_stream, PdfSyntax.ToGlyphIdHexString(run.Text, run.EmbeddedFont));
+            {
+                // embedded fonts with kern pairs paint with `TJ` so the PDF
+                // matches the kerned widths the layout engine reserved (and the
+                // kerned this feature SVG export). Unkerned strings keep the `Tj` path.
+                string? kerned = run.EmbeddedFont.HasKerning
+                    ? PdfSyntax.ToKernedGlyphArray(run.Text, run.EmbeddedFont)
+                    : null;
+                if (kerned != null)
+                    PdfOperators.ShowTextPositioned(_stream, kerned);
+                else
+                    PdfOperators.ShowText(_stream, PdfSyntax.ToGlyphIdHexString(run.Text, run.EmbeddedFont));
+            }
             else
+            {
                 PdfOperators.ShowText(_stream, $"({PdfSyntax.Escape(run.Text)})");
+            }
         }
     }
 

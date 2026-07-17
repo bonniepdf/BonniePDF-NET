@@ -17,8 +17,13 @@ internal static class TestFonts
 {
     private static readonly Lazy<string> SansRegular = new(() => Extract("LiberationSans-Regular.ttf"));
 
+    private static readonly Lazy<string> SerifRegular = new(() => Extract("LiberationSerif-Regular.ttf"));
+
     /// <summary>Path to a bundled Liberation Sans Regular TTF on disk.</summary>
     public static string SansRegularPath => SansRegular.Value;
+
+    /// <summary>Path to a bundled Liberation Serif Regular TTF on disk.</summary>
+    public static string SerifRegularPath => SerifRegular.Value;
 
     private static string Extract(string fileSuffix)
     {

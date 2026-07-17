@@ -139,4 +139,58 @@ internal static class PdfSyntax
         sb.Append('>');
         return sb.ToString();
     }
+
+    /// <summary>
+    /// Converts a string into a <c>TJ</c> array operand of glyph-ID hex runs with
+    /// kern-pair advance adjustments between adjacent glyphs, e.g.
+    /// <c>[&lt;0024&gt; 80 &lt;0057&gt;]</c>. Adjustments are in thousandths of an em
+    /// and are <em>subtracted</em> from the position by <c>TJ</c>, so a tightening
+    /// kern of -80 font units becomes a positive <c>80</c> array element.
+    /// </summary>
+    /// <returns>
+    /// The array operand, or <c>null</c> when no adjacent pair produces a non-zero
+    /// adjustment; callers then keep the plain <c>Tj</c> path so unkerned strings
+    /// stay byte-identical to the previous output.
+    /// </returns>
+    internal static string? ToKernedGlyphArray(string text, TtfFont font)
+    {
+        if (string.IsNullOrEmpty(text)) return null;
+
+        StringBuilder sb = new(text.Length * 4 + 8);
+        sb.Append("[<");
+        bool anyKern = false;
+        ushort prevGid = 0;
+        bool hasPrev = false;
+
+        foreach (Rune rune in text.EnumerateRunes())
+        {
+            if (Rune.IsControl(rune))
+                continue;
+
+            ushort gid = font.GetGlyphId(rune.Value);
+
+            if (hasPrev)
+            {
+                short kern = font.GetKerning(prevGid, gid);
+                // TJ subtracts its numbers from the displacement, so negate; scale
+                // font units to thousandths of an em. Math.Floor(x + 0.5) matches
+                // the TypeScript port's Math.round (half toward +infinity) - C#'s
+                // default Math.Round is banker's rounding and would diverge.
+                int adjustment = (int)Math.Floor(-kern * 1000.0 / font.UnitsPerEm + 0.5);
+                if (adjustment != 0)
+                {
+                    sb.Append("> ").Append(adjustment).Append(" <");
+                    anyKern = true;
+                }
+            }
+
+            sb.Append(gid.ToString("X4"));
+            prevGid = gid;
+            hasPrev = true;
+        }
+
+        if (!anyKern) return null;
+        sb.Append(">]");
+        return sb.ToString();
+    }
 }
