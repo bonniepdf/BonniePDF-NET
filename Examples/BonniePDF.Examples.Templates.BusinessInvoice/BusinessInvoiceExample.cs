@@ -31,7 +31,8 @@ public static class BusinessInvoiceExample
         Document doc = new(new DocumentSettings
         {
             PageSize = PdfSize.A4,
-            Margin = 36
+            Margin = 36,
+            PageColor = Color.White
         });
 
         doc.Settings.Version = PdfVersion.Pdf17;
