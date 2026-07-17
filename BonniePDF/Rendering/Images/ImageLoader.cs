@@ -104,8 +104,15 @@ public static class ImageLoader
             Format = ImageFormat.Jpeg
         };
 
-        // Parse JPEG segments to find SOF0 (Start of Frame) marker
+        // ICC profile spans 1..N APP2 segments, indexed by a sequence number.
+        // Collect them here and assemble into info.IccProfile after the scan.
+        List<(int Seq, byte[] Bytes)> iccChunks = new();
+        int iccTotal = 0;
+
+        // Parse JPEG segments to find the SOF (Start of Frame) marker plus
+        // any APP2 (ICC profile) / APP14 (Adobe CMYK transform) metadata.
         int pos = 2;
+        bool sofFound = false;
 
         while (pos < data.Length - 1)
         {
@@ -123,7 +130,6 @@ public static class ImageLoader
             {
                 // Skip marker (0xFF, 0xC0) and length (2 bytes)
                 pos += 2;
-                int length = (data[pos] << 8) | data[pos + 1];
                 pos += 2;
 
                 if (pos + 5 >= data.Length)
@@ -140,6 +146,7 @@ public static class ImageLoader
 
                 // Extract number of components
                 info.Components = data[pos];
+                pos++;
 
                 // Determine color space from component count
                 info.ColorSpace = info.Components switch
@@ -153,7 +160,52 @@ public static class ImageLoader
                 if (info.Width <= 0 || info.Height <= 0)
                     throw new InvalidOperationException("Invalid JPEG file: Invalid dimensions");
 
-                return info;
+                // Don't return yet - keep scanning for APP2/APP14 markers that
+                // may appear after SOF in some encoders (rare but legal).
+                sofFound = true;
+                continue;
+            }
+
+            // APP2 (0xFFE2) - may carry one chunk of an embedded ICC profile.
+            if (marker == 0xE2)
+            {
+                int segStart = pos + 2;
+                int segLen = (data[segStart] << 8) | data[segStart + 1];
+                int payloadStart = segStart + 2;
+                int payloadEnd = segStart + segLen;
+                if (TryParseIccProfileChunk(data, payloadStart, payloadEnd, out int seq, out int total,
+                        out byte[] chunkBytes))
+                {
+                    iccChunks.Add((seq, chunkBytes));
+                    iccTotal = total; // every chunk carries the same total
+                }
+
+                pos = payloadEnd;
+                continue;
+            }
+
+            // APP1 (0xFFE1) - may contain "Exif\0\0" + TIFF header with orientation.
+            if (marker == 0xE1)
+            {
+                int segStart = pos + 2;
+                int segLen = (data[segStart] << 8) | data[segStart + 1];
+                int payloadStart = segStart + 2;
+                int payloadEnd = segStart + segLen;
+                TryParseExifOrientation(data, payloadStart, payloadEnd, info);
+                pos = payloadEnd;
+                continue;
+            }
+
+            // APP14 (0xFFEE) - Adobe marker; transform=0 means CMYK ink-inverted.
+            if (marker == 0xEE)
+            {
+                int segStart = pos + 2;
+                int segLen = (data[segStart] << 8) | data[segStart + 1];
+                int payloadStart = segStart + 2;
+                int payloadEnd = segStart + segLen;
+                TryParseAdobeMarker(data, payloadStart, payloadEnd, info);
+                pos = payloadEnd;
+                continue;
             }
 
             // SOS (Start of Scan) - image data follows, no more metadata
@@ -169,7 +221,133 @@ public static class ImageLoader
             }
         }
 
-        throw new InvalidOperationException("Could not find JPEG dimensions (missing SOF marker)");
+        if (!sofFound)
+            throw new InvalidOperationException("Could not find JPEG dimensions (missing SOF marker)");
+
+        // Assemble the ICC profile when every announced chunk arrived. If
+        // anything is missing (out-of-spec encoder) we drop the profile rather
+        // than emit a truncated one - better to render with the device space.
+        if (iccChunks.Count > 0 && iccChunks.Count == iccTotal)
+        {
+            iccChunks.Sort((a, b) => a.Seq.CompareTo(b.Seq));
+            int totalLen = 0;
+            foreach ((int _, byte[] bytes) in iccChunks) totalLen += bytes.Length;
+            byte[] merged = new byte[totalLen];
+            int off = 0;
+            foreach ((int _, byte[] bytes) in iccChunks)
+            {
+                Array.Copy(bytes, 0, merged, off, bytes.Length);
+                off += bytes.Length;
+            }
+
+            info.IccProfile = merged;
+        }
+
+        return info;
+    }
+
+    /// <summary>
+    /// Pulls a single chunk of an embedded ICC profile out of an APP2 payload.
+    /// Returns false if the segment isn't an ICC chunk. Each chunk advertises
+    /// its 1-based sequence number and the total chunk count so the caller can
+    /// reassemble profiles spanning multiple APP2 segments.
+    /// </summary>
+    private static bool TryParseIccProfileChunk(byte[] data, int start, int end,
+        out int seq, out int total, out byte[] bytes)
+    {
+        seq = 0;
+        total = 0;
+        bytes = [];
+
+        // "ICC_PROFILE\0" identifier (12 bytes), then seq(1) + total(1) + bytes
+        if (end - start < 14 || end > data.Length) return false;
+        ReadOnlySpan<byte> id = "ICC_PROFILE\0"u8;
+        for (int i = 0; i < id.Length; i++)
+            if (data[start + i] != id[i])
+                return false;
+
+        seq = data[start + 12];
+        total = data[start + 13];
+        if (seq < 1 || total < 1 || seq > total) return false;
+
+        bytes = new byte[end - (start + 14)];
+        Array.Copy(data, start + 14, bytes, 0, bytes.Length);
+        return true;
+    }
+
+    /// <summary>
+    /// Parses the EXIF orientation tag (0x0112) from an APP1 payload, if
+    /// present. Returns silently when the segment isn't an EXIF blob or
+    /// doesn't carry an orientation tag - JPEGs without EXIF are very common.
+    /// </summary>
+    private static void TryParseExifOrientation(byte[] data, int start, int end, ImageInfo info)
+    {
+        // "Exif\0\0" identifier (6 bytes).
+        if (end - start < 6 || end > data.Length) return;
+        ReadOnlySpan<byte> exifId = "Exif\0\0"u8;
+        for (int i = 0; i < exifId.Length; i++)
+            if (data[start + i] != exifId[i])
+                return;
+
+        // TIFF header begins immediately after the EXIF identifier. All
+        // offsets inside the TIFF block are relative to the TIFF base.
+        int tiffBase = start + 6;
+        if (end - tiffBase < 8) return;
+
+        // Byte order: "II" = little-endian, "MM" = big-endian.
+        bool le = data[tiffBase] == 0x49 && data[tiffBase + 1] == 0x49;
+        bool be = data[tiffBase] == 0x4D && data[tiffBase + 1] == 0x4D;
+        if (!le && !be) return;
+
+        int U16(int off) => le
+            ? data[off] | (data[off + 1] << 8)
+            : (data[off] << 8) | data[off + 1];
+        long U32(int off) => le
+            ? (uint)(data[off] | (data[off + 1] << 8) | (data[off + 2] << 16) | (data[off + 3] << 24))
+            : (uint)((data[off] << 24) | (data[off + 1] << 16) | (data[off + 2] << 8) | data[off + 3]);
+
+        if (U16(tiffBase + 2) != 0x002A) return; // TIFF magic
+
+        long ifd0Offset = U32(tiffBase + 4);
+        int ifd0 = tiffBase + (int)ifd0Offset;
+        if (ifd0 + 2 > end || ifd0 < tiffBase) return;
+        int entryCount = U16(ifd0);
+        int entry = ifd0 + 2;
+        for (int i = 0; i < entryCount; i++, entry += 12)
+        {
+            if (entry + 12 > end) return;
+            int tag = U16(entry);
+            if (tag == 0x0112)
+            {
+                // Orientation tag. Type SHORT (3), count 1, value packed into
+                // the first 2 bytes of the 4-byte value field.
+                int value = U16(entry + 8);
+                if (value is >= 1 and <= 8) info.Orientation = value;
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Parses the Adobe APP14 marker. When the transform byte is 0 and the
+    /// image is CMYK, ink values are stored inverted (Photoshop convention);
+    /// we set the flag so the writer can emit the matching /Decode array.
+    /// </summary>
+    private static void TryParseAdobeMarker(byte[] data, int start, int end, ImageInfo info)
+    {
+        // "Adobe\0" identifier is 6 bytes; the segment also carries 5 bytes of
+        // version + flags + transform. Total payload >= 12 bytes.
+        if (end - start < 12 || end > data.Length) return;
+        ReadOnlySpan<byte> id = "Adobe"u8;
+        for (int i = 0; i < id.Length; i++)
+            if (data[start + i] != id[i])
+                return;
+
+        // Bytes: version(2) + flags0(2) + flags1(2) + transform(1).
+        // APP14 typically precedes SOF in real-world JPEGs, so we can't check
+        // ColorSpace here - the writer guards on CMYK at emit time.
+        byte transform = data[start + 11];
+        if (transform == 0) info.InvertCmykColors = true;
     }
 
     /// <summary>
@@ -186,6 +364,7 @@ public static class ImageLoader
         ImageInfo info = new() { Format = ImageFormat.Png, OriginalData = data };
         List<byte[]> idatChunks = new();
         byte[]? palette = null;
+        byte[]? compressedIccProfile = null;
         int colorType = 0;
         int bitDepth = 8;
 
@@ -261,6 +440,28 @@ public static class ImageLoader
                     Array.Copy(data, pos, chunk, 0, chunkLength);
                     idatChunks.Add(chunk);
                     break;
+
+                case "iCCP":
+                {
+                    // Profile name (1-79 bytes, Latin-1, null-terminated) +
+                    // compression method (1 byte, always 0) + zlib-compressed
+                    // ICC profile. Stash the compressed bytes and inflate them
+                    // after the chunk walk.
+                    int nameEnd = pos;
+                    int limit = Math.Min(pos + chunkLength, pos + 80);
+                    while (nameEnd < limit && data[nameEnd] != 0) nameEnd++;
+                    // nameEnd points at the terminating null; +1 skips it,
+                    // +1 more skips the compression-method byte.
+                    int profStart = nameEnd + 2;
+                    int profEnd = pos + chunkLength;
+                    if (profStart < profEnd)
+                    {
+                        compressedIccProfile = new byte[profEnd - profStart];
+                        Array.Copy(data, profStart, compressedIccProfile, 0, compressedIccProfile.Length);
+                    }
+
+                    break;
+                }
 
                 case "IEND":
                     // End of image
@@ -382,6 +583,28 @@ public static class ImageLoader
         info.Data = pixelData;
         info.AlphaData = alphaData ?? Array.Empty<byte>();
         info.Palette = palette ?? Array.Empty<byte>();
+
+        // Inflate the iCCP profile if one was carried. The profile stream is
+        // zlib-wrapped like IDAT; .NET can inflate it synchronously (the
+        // TypeScript implementation needs its async path for this - a
+        // platform-mandated difference). A malformed profile is dropped
+        // rather than truncated - better to render with the device space.
+        if (compressedIccProfile is { Length: > 2 })
+        {
+            try
+            {
+                using MemoryStream compressedStream =
+                    new(compressedIccProfile, 2, compressedIccProfile.Length - 2);
+                using DeflateStream deflateStream = new(compressedStream, CompressionMode.Decompress);
+                using MemoryStream resultStream = new();
+                deflateStream.CopyTo(resultStream);
+                info.IccProfile = resultStream.ToArray();
+            }
+            catch (InvalidDataException)
+            {
+                // Corrupt profile stream - fall back to the device colour space.
+            }
+        }
 
         return info;
     }

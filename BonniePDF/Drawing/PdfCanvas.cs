@@ -376,10 +376,38 @@ public class PdfCanvas : ICanvas
         {
             PdfOperators.SaveState(_stream);
             PdfOperators.Translate(_stream, pdfX, pdfY);
-            PdfOperators.Scale(_stream, width, height);
+            // Combine EXIF orientation with the display-size scale into a
+            // single cm matrix. For orientation 1 (the common case) this is
+            // [width 0 0 height 0 0], byte-identical to a plain Scale, so
+            // unrotated images are unchanged; 2-8 rotate/flip the placement
+            // without re-encoding the image stream.
+            (float a, float b, float c, float d, float e, float f) =
+                OrientationMatrix(image?.Orientation ?? 1, width, height);
+            PdfOperators.ConcatMatrix(_stream, a, b, c, d, e, f);
             PdfOperators.PaintXObject(_stream, imageName);
             PdfOperators.RestoreState(_stream);
         }, _reportUntaggedImage);
+    }
+
+    /// <summary>
+    /// Maps an EXIF orientation (1-8) to the PDF image placement matrix that
+    /// draws the unit image square upright at <paramref name="width"/> x
+    /// <paramref name="height"/>. Orientation 1 is the plain scale matrix.
+    /// </summary>
+    private static (float, float, float, float, float, float) OrientationMatrix(
+        int orientation, float width, float height)
+    {
+        return orientation switch
+        {
+            2 => (-width, 0, 0, height, width, 0),
+            3 => (-width, 0, 0, -height, width, height),
+            4 => (width, 0, 0, -height, 0, height),
+            5 => (0, -height, -width, 0, width, height),
+            6 => (0, -height, width, 0, 0, height),
+            7 => (0, height, width, 0, 0, 0),
+            8 => (0, height, -width, 0, width, 0),
+            _ => (width, 0, 0, height, 0, 0)
+        };
     }
 
     /// <summary>
@@ -462,13 +490,14 @@ public class PdfCanvas : ICanvas
     public void BeginArtifact()
     {
         // Emit an /Artifact wrapper only for tagged documents and only when not
-        // already inside a tagged marked-content sequence. Content drawn inside
-        // a structure element (e.g. a table cell's /TD) is already enclosed real
-        // content (satisfies PDF/UA 7.1), and nesting an artifact inside a tag
-        // is invalid. The emit decision is recorded so EndArtifact stays balanced.
+        // already inside an MCID-bearing marked-content sequence. A container BMC
+        // (for example /Div BMC) does not tag its paint operations as real content,
+        // so decorative marks inside it still need an /Artifact wrapper. Content
+        // inside a BDC is already real content and must not contain an artifact.
+        // The emit decision is recorded so EndArtifact stays balanced.
         // Only emit a BMC at the outermost artifact level: a nested /Artifact is
         // redundant, and emitting one inside an open structure scope is invalid.
-        bool emit = _tagging != null && _openMarkedContent == 0 && _artifactDepth == 0;
+        bool emit = _tagging != null && _openTaggedCount == 0 && _artifactDepth == 0;
         if (emit) PdfOperators.BeginArtifact(_stream);
         _artifactEmitStack.Push(emit);
         _artifactDepth++;
@@ -1154,9 +1183,6 @@ public class PdfCanvas : ICanvas
     /// </summary>
     private void StrokePathWithLinearGradient(LinearGradientPaint gradient, StrokeStyle style)
     {
-        PdfOperators.SaveState(_stream);
-        ApplyStrokeSettings(style);
-
         var (sx, sy) = TransformPoint(gradient.Start.X, gradient.Start.Y);
         var (ex, ey) = TransformPoint(gradient.End.X, gradient.End.Y);
         float gdx = ex - sx;
@@ -1164,59 +1190,8 @@ public class PdfCanvas : ICanvas
         float glen = gdx * gdx + gdy * gdy;
         if (glen < 0.001f) glen = 1f;
 
-        (float x, float y)? prev = null;
-        foreach (var (type, args) in _currentPath)
-        {
-            switch (type)
-            {
-                case 'M':
-                {
-                    prev = TransformPoint(args[0], args[1]);
-                    break;
-                }
-                case 'L':
-                {
-                    var cur = TransformPoint(args[0], args[1]);
-                    if (prev.HasValue)
-                    {
-                        float mx = (prev.Value.x + cur.x) / 2f;
-                        float my = (prev.Value.y + cur.y) / 2f;
-                        float t = ((mx - sx) * gdx + (my - sy) * gdy) / glen;
-                        Color color = SampleGradient(gradient.Stops, t);
-                        PdfOperators.SetStrokeColor(_stream, color);
-                        PdfOperators.MoveTo(_stream, prev.Value.x, prev.Value.y);
-                        PdfOperators.LineTo(_stream, cur.x, cur.y);
-                        PdfOperators.Stroke(_stream);
-                    }
-                    prev = cur;
-                    break;
-                }
-                case 'C':
-                {
-                    var cur = TransformPoint(args[4], args[5]);
-                    if (prev.HasValue)
-                    {
-                        var cp1 = TransformPoint(args[0], args[1]);
-                        var cp2 = TransformPoint(args[2], args[3]);
-                        float mx = (prev.Value.x + cur.x) / 2f;
-                        float my = (prev.Value.y + cur.y) / 2f;
-                        float t = ((mx - sx) * gdx + (my - sy) * gdy) / glen;
-                        Color color = SampleGradient(gradient.Stops, t);
-                        PdfOperators.SetStrokeColor(_stream, color);
-                        PdfOperators.MoveTo(_stream, prev.Value.x, prev.Value.y);
-                        PdfOperators.CurveTo(_stream, cp1.x, cp1.y, cp2.x, cp2.y, cur.x, cur.y);
-                        PdfOperators.Stroke(_stream);
-                    }
-                    prev = cur;
-                    break;
-                }
-                case 'H':
-                    prev = null;
-                    break;
-            }
-        }
-
-        PdfOperators.RestoreState(_stream);
+        StrokePathWithGradientSegments(gradient.Stops, style,
+            (mx, my) => ((mx - sx) * gdx + (my - sy) * gdy) / glen);
     }
 
     /// <summary>
@@ -1224,12 +1199,26 @@ public class PdfCanvas : ICanvas
     /// </summary>
     private void StrokePathWithRadialGradient(RadialGradientPaint gradient, StrokeStyle style)
     {
-        PdfOperators.SaveState(_stream);
-        ApplyStrokeSettings(style);
-
         var (cx, cy) = TransformPoint(gradient.Center.X, gradient.Center.Y);
         float radius = gradient.Radius * Math.Abs(_ctm[0]);
         if (radius < 0.001f) radius = 1f;
+
+        StrokePathWithGradientSegments(gradient.Stops, style,
+            (mx, my) => (float)Math.Sqrt((mx - cx) * (mx - cx) + (my - cy) * (my - cy)) / radius);
+    }
+
+    /// <summary>
+    /// Walks the current path stroking each segment in the gradient color
+    /// sampled at the segment's midpoint. <paramref name="offsetAtMidpoint"/>
+    /// maps a (transformed) midpoint to the gradient offset - a linear
+    /// projection for linear gradients, a normalised centre distance for
+    /// radial ones.
+    /// </summary>
+    private void StrokePathWithGradientSegments(IReadOnlyList<GradientStop> stops, StrokeStyle style,
+        Func<float, float, float> offsetAtMidpoint)
+    {
+        PdfOperators.SaveState(_stream);
+        ApplyStrokeSettings(style);
 
         (float x, float y)? prev = null;
         foreach (var (type, args) in _currentPath)
@@ -1246,11 +1235,8 @@ public class PdfCanvas : ICanvas
                     var cur = TransformPoint(args[0], args[1]);
                     if (prev.HasValue)
                     {
-                        float mx = (prev.Value.x + cur.x) / 2f;
-                        float my = (prev.Value.y + cur.y) / 2f;
-                        float dist = (float)Math.Sqrt((mx - cx) * (mx - cx) + (my - cy) * (my - cy));
-                        float t = dist / radius;
-                        Color color = SampleGradient(gradient.Stops, t);
+                        float t = offsetAtMidpoint((prev.Value.x + cur.x) / 2f, (prev.Value.y + cur.y) / 2f);
+                        Color color = SampleGradient(stops, t);
                         PdfOperators.SetStrokeColor(_stream, color);
                         PdfOperators.MoveTo(_stream, prev.Value.x, prev.Value.y);
                         PdfOperators.LineTo(_stream, cur.x, cur.y);
@@ -1266,11 +1252,8 @@ public class PdfCanvas : ICanvas
                     {
                         var cp1 = TransformPoint(args[0], args[1]);
                         var cp2 = TransformPoint(args[2], args[3]);
-                        float mx = (prev.Value.x + cur.x) / 2f;
-                        float my = (prev.Value.y + cur.y) / 2f;
-                        float dist = (float)Math.Sqrt((mx - cx) * (mx - cx) + (my - cy) * (my - cy));
-                        float t = dist / radius;
-                        Color color = SampleGradient(gradient.Stops, t);
+                        float t = offsetAtMidpoint((prev.Value.x + cur.x) / 2f, (prev.Value.y + cur.y) / 2f);
+                        Color color = SampleGradient(stops, t);
                         PdfOperators.SetStrokeColor(_stream, color);
                         PdfOperators.MoveTo(_stream, prev.Value.x, prev.Value.y);
                         PdfOperators.CurveTo(_stream, cp1.x, cp1.y, cp2.x, cp2.y, cur.x, cur.y);
@@ -1301,8 +1284,8 @@ public class PdfCanvas : ICanvas
     /// <summary>
     /// Wraps unscoped drawing in an /Artifact BMC for tagged documents, so the
     /// marks aren't left as bare (untagged) real content (PDF/UA 7.1). Skips the
-    /// wrapper when already inside a structure scope or an explicit /Artifact
-    /// region, so decorative content in headers/footers/slots isn't double-marked.
+    /// wrapper when already inside an MCID-bearing structure scope or an explicit
+    /// /Artifact region. Container-only BMC scopes do not count as tagged content.
     /// </summary>
     /// <remarks>
     /// <paramref name="onAutoArtifact"/> runs only when the fallback actually
@@ -1311,7 +1294,7 @@ public class PdfCanvas : ICanvas
     /// </remarks>
     private void DrawAsArtifactFallback(Action draw, Action? onAutoArtifact = null)
     {
-        bool needsFallbackArtifact = _tagging != null && _openMarkedContent == 0 && _artifactDepth == 0;
+        bool needsFallbackArtifact = _tagging != null && _openTaggedCount == 0 && _artifactDepth == 0;
         if (needsFallbackArtifact)
         {
             PdfOperators.BeginArtifact(_stream);

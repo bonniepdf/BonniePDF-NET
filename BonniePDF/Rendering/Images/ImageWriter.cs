@@ -76,20 +76,36 @@ public class ImageWriter
     /// </summary>
     public int WriteJpegImage(int id, ImageInfo image, string resourceName)
     {
+        // Write binary image data
+        _writer!.WriteBinaryObject(id, BuildJpegImageDict(image, ResolveColorSpace(image)), image.Data);
+        return id;
+    }
+
+    /// <summary>
+    /// Builds the XObject dictionary for a JPEG image. Shared by the sync and
+    /// async write paths so both emit byte-identical dictionaries.
+    /// </summary>
+    private static Dictionary<string, string> BuildJpegImageDict(ImageInfo image, string colorSpace)
+    {
         Dictionary<string, string> dict = new()
         {
             ["/Type"] = "/XObject",
             ["/Subtype"] = "/Image",
             ["/Width"] = image.Width.ToString(),
             ["/Height"] = image.Height.ToString(),
-            ["/ColorSpace"] = GetColorSpaceString(image.ColorSpace, image.Palette),
+            ["/ColorSpace"] = colorSpace,
             ["/BitsPerComponent"] = image.BitsPerComponent.ToString(),
             ["/Filter"] = "/DCTDecode" // JPEG compression filter
         };
 
-        // Write binary image data
-        _writer!.WriteBinaryObject(id, dict, image.Data);
-        return id;
+        if (image.InvertCmykColors && image.ColorSpace == ImageColorSpace.DeviceCMYK)
+        {
+            // Photoshop-exported CMYK JPEGs store inverted ink values; tell PDF
+            // to invert each component back during decoding.
+            dict["/Decode"] = "[1 0 1 0 1 0 1 0]";
+        }
+
+        return dict;
     }
 
     /// <summary>
@@ -110,28 +126,7 @@ public class ImageWriter
         // Compress pixel data using zlib/Deflate
         byte[] compressedData = CompressData(pixelData);
 
-        Dictionary<string, string> dict = new()
-        {
-            ["/Type"] = "/XObject",
-            ["/Subtype"] = "/Image",
-            ["/Width"] = image.Width.ToString(),
-            ["/Height"] = image.Height.ToString(),
-            ["/BitsPerComponent"] = image.BitsPerComponent.ToString(),
-            ["/Filter"] = "/FlateDecode"
-        };
-
-        // Handle color space
-        if (image.ColorSpace == ImageColorSpace.Indexed && image.Palette.Length > 0)
-        {
-            // Indexed color: [/Indexed /DeviceRGB maxIndex paletteHexString]
-            int maxIndex = image.Palette.Length / 3 - 1;
-            string paletteHex = "<" + BitConverter.ToString(image.Palette).Replace("-", "") + ">";
-            dict["/ColorSpace"] = $"[/Indexed /DeviceRGB {maxIndex} {paletteHex}]";
-        }
-        else
-        {
-            dict["/ColorSpace"] = GetColorSpaceString(image.ColorSpace, image.Palette);
-        }
+        Dictionary<string, string> dict = BuildPngImageDict(image, ResolveColorSpace(image));
 
         // Handle alpha channel (soft mask)
         if (writeSmask)
@@ -146,13 +141,127 @@ public class ImageWriter
     }
 
     /// <summary>
-    /// Writes a soft mask (alpha channel) for transparency
+    /// Builds the XObject dictionary for a PNG image. Shared by the sync and
+    /// async write paths so both emit byte-identical dictionaries; the
+    /// resolved colour space is passed in (its ICC branch writes a stream
+    /// object, which differs per path) and the /SMask entry is added by the
+    /// caller when a soft mask is written.
     /// </summary>
-    private void WriteSoftMask(int id, ImageInfo image)
+    private static Dictionary<string, string> BuildPngImageDict(ImageInfo image, string colorSpace)
     {
-        byte[] compressedAlpha = CompressData(image.AlphaData);
+        return new Dictionary<string, string>
+        {
+            ["/Type"] = "/XObject",
+            ["/Subtype"] = "/Image",
+            ["/Width"] = image.Width.ToString(),
+            ["/Height"] = image.Height.ToString(),
+            ["/BitsPerComponent"] = image.BitsPerComponent.ToString(),
+            ["/Filter"] = "/FlateDecode",
+            ["/ColorSpace"] = colorSpace
+        };
+    }
 
-        Dictionary<string, string> dict = new()
+    /// <summary>
+    /// Returns the value for the image XObject's /ColorSpace entry. When the
+    /// image carries an embedded ICC profile we write the profile as its own
+    /// stream object and reference it with <c>[/ICCBased id 0 R]</c>; that
+    /// gives the consuming reader the captured colour transform instead of
+    /// falling back to the device space. Without a profile we fall through to
+    /// the indexed palette (for paletted PNGs) or the device colour space.
+    /// </summary>
+    private string ResolveColorSpace(ImageInfo image)
+    {
+        string baseDevice = GetColorSpaceString(image.ColorSpace, image.Palette);
+
+        if (ShouldEmbedIccProfile(image))
+        {
+            int iccId = _writer!.GetNewId();
+            WriteIccProfile(iccId, image.IccProfile, image.Components, baseDevice);
+            return $"[/ICCBased {iccId} 0 R]";
+        }
+
+        return NonIccColorSpace(image, baseDevice);
+    }
+
+    /// <summary>
+    /// Async sibling of <see cref="ResolveColorSpace"/> - identical decision
+    /// logic, but the ICC profile stream is written through the async writer.
+    /// </summary>
+    private async Task<string> ResolveColorSpaceAsync(ImageInfo image, CancellationToken cancellationToken)
+    {
+        string baseDevice = GetColorSpaceString(image.ColorSpace, image.Palette);
+
+        if (ShouldEmbedIccProfile(image))
+        {
+            int iccId = _asyncWriter!.GetNewId();
+            await WriteIccProfileAsync(iccId, image.IccProfile, image.Components, baseDevice, cancellationToken)
+                .ConfigureAwait(false);
+            return $"[/ICCBased {iccId} 0 R]";
+        }
+
+        return NonIccColorSpace(image, baseDevice);
+    }
+
+    /// <summary>
+    /// The component count for the ICC stream's /N entry must match the
+    /// decoded image data: the PNG loader splits alpha out before the pixel
+    /// stream is written (decrementing Components), and JPEG Components is
+    /// already 1, 3, or 4 - so Components is the right value for both.
+    /// </summary>
+    private static bool ShouldEmbedIccProfile(ImageInfo image) =>
+        image.IccProfile.Length > 0 && image.ColorSpace != ImageColorSpace.Indexed && image.Components > 0;
+
+    private static string NonIccColorSpace(ImageInfo image, string baseDevice)
+    {
+        if (image.ColorSpace == ImageColorSpace.Indexed && image.Palette.Length > 0)
+        {
+            // Indexed color: [/Indexed /DeviceRGB maxIndex paletteHexString]
+            int maxIndex = image.Palette.Length / 3 - 1;
+            string paletteHex = "<" + BitConverter.ToString(image.Palette).Replace("-", "") + ">";
+            return $"[/Indexed /DeviceRGB {maxIndex} {paletteHex}]";
+        }
+
+        return baseDevice;
+    }
+
+    /// <summary>
+    /// Builds the dictionary for a standalone ICC-profile stream object that
+    /// an /ICCBased colour space can point at. /Alternate is set to the
+    /// matching device colour space so PDF readers without ICC support fall
+    /// back gracefully.
+    /// </summary>
+    private static Dictionary<string, string> BuildIccProfileDict(int components, string alternate)
+    {
+        return new Dictionary<string, string>
+        {
+            ["/N"] = components.ToString(),
+            ["/Alternate"] = alternate,
+            ["/Filter"] = "/FlateDecode"
+        };
+    }
+
+    private void WriteIccProfile(int id, byte[] profile, int components, string alternate)
+    {
+        byte[] compressed = CompressData(profile);
+        _writer!.WriteBinaryObject(id, BuildIccProfileDict(components, alternate), compressed);
+    }
+
+    private async Task WriteIccProfileAsync(int id, byte[] profile, int components, string alternate,
+        CancellationToken cancellationToken)
+    {
+        byte[] compressed = CompressData(profile);
+        await _asyncWriter!.WriteBinaryObjectAsync(id, BuildIccProfileDict(components, alternate), compressed,
+                compressed.Length, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Builds the XObject dictionary for a soft mask (alpha channel).
+    /// Shared by the sync and async write paths.
+    /// </summary>
+    private static Dictionary<string, string> BuildSoftMaskDict(ImageInfo image)
+    {
+        return new Dictionary<string, string>
         {
             ["/Type"] = "/XObject",
             ["/Subtype"] = "/Image",
@@ -162,8 +271,15 @@ public class ImageWriter
             ["/BitsPerComponent"] = image.BitsPerComponent.ToString(),
             ["/Filter"] = "/FlateDecode"
         };
+    }
 
-        _writer!.WriteBinaryObject(id, dict, compressedAlpha);
+    /// <summary>
+    /// Writes a soft mask (alpha channel) for transparency
+    /// </summary>
+    private void WriteSoftMask(int id, ImageInfo image)
+    {
+        byte[] compressedAlpha = CompressData(image.AlphaData);
+        _writer!.WriteBinaryObject(id, BuildSoftMaskDict(image), compressedAlpha);
     }
 
     /// <summary>
@@ -282,19 +398,11 @@ public class ImageWriter
     public async Task<int> WriteJpegImageAsync(int id, ImageInfo image, string resourceName,
         CancellationToken cancellationToken = default)
     {
-        Dictionary<string, string> dict = new()
-        {
-            ["/Type"] = "/XObject",
-            ["/Subtype"] = "/Image",
-            ["/Width"] = image.Width.ToString(),
-            ["/Height"] = image.Height.ToString(),
-            ["/ColorSpace"] = GetColorSpaceString(image.ColorSpace, image.Palette),
-            ["/BitsPerComponent"] = image.BitsPerComponent.ToString(),
-            ["/Filter"] = "/DCTDecode"
-        };
+        string colorSpace = await ResolveColorSpaceAsync(image, cancellationToken).ConfigureAwait(false);
 
         // Pass explicit length of the data
-        await _asyncWriter!.WriteBinaryObjectAsync(id, dict, image.Data, image.Data.Length, cancellationToken)
+        await _asyncWriter!.WriteBinaryObjectAsync(id, BuildJpegImageDict(image, colorSpace), image.Data,
+                image.Data.Length, cancellationToken)
             .ConfigureAwait(false);
         return id;
     }
@@ -320,27 +428,8 @@ public class ImageWriter
 
         try
         {
-            Dictionary<string, string> dict = new()
-            {
-                ["/Type"] = "/XObject",
-                ["/Subtype"] = "/Image",
-                ["/Width"] = image.Width.ToString(),
-                ["/Height"] = image.Height.ToString(),
-                ["/BitsPerComponent"] = image.BitsPerComponent.ToString(),
-                ["/Filter"] = "/FlateDecode"
-            };
-
-            // Handle color space
-            if (image.ColorSpace == ImageColorSpace.Indexed && image.Palette.Length > 0)
-            {
-                int maxIndex = image.Palette.Length / 3 - 1;
-                string paletteHex = "<" + BitConverter.ToString(image.Palette).Replace("-", "") + ">";
-                dict["/ColorSpace"] = $"[/Indexed /DeviceRGB {maxIndex} {paletteHex}]";
-            }
-            else
-            {
-                dict["/ColorSpace"] = GetColorSpaceString(image.ColorSpace, image.Palette);
-            }
+            string colorSpace = await ResolveColorSpaceAsync(image, cancellationToken).ConfigureAwait(false);
+            Dictionary<string, string> dict = BuildPngImageDict(image, colorSpace);
 
             // Handle alpha channel (soft mask)
             if (writeSmask)
@@ -372,18 +461,8 @@ public class ImageWriter
 
         try
         {
-            Dictionary<string, string> dict = new()
-            {
-                ["/Type"] = "/XObject",
-                ["/Subtype"] = "/Image",
-                ["/Width"] = image.Width.ToString(),
-                ["/Height"] = image.Height.ToString(),
-                ["/ColorSpace"] = "/DeviceGray",
-                ["/BitsPerComponent"] = image.BitsPerComponent.ToString(),
-                ["/Filter"] = "/FlateDecode"
-            };
-
-            await _asyncWriter!.WriteBinaryObjectAsync(id, dict, compressedBuffer, compressedLength, cancellationToken)
+            await _asyncWriter!.WriteBinaryObjectAsync(id, BuildSoftMaskDict(image), compressedBuffer,
+                    compressedLength, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
