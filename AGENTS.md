@@ -39,7 +39,7 @@ The public API targets the shape a .NET developer expects.
 - **No native binaries.** Pure managed code — no `SkiaSharp`, `System.Drawing`, ImageMagick, or libpdfium. The no-deps promise is a selling point.
 - **Standard-14 fonts work without embedding**; any other (TrueType) must be embedded with subsetting. PDF/A requires embedding even the standard 14.
 
-**Reciprocal cleanup obligation.** The TypeScript surface is being brought up to standard (see [`the specification`](the specification)). The parity principle is symmetric: when that work redefines a concept's canonical name or input shape in the spec, audit the C# surface for the *idiomatic C# expression* of the same concept — and conversely, never let a TypeScript-ism (camelCase members, union-typed pseudo-overloads, options bags where C# wants real overloads or named args) leak into this codebase to "match." Idiomatic divergence in spelling is the goal; behavioural parity is the invariant.
+**Reciprocal cleanup obligation.** The TypeScript surface is being brought up to standard (see [`the shared specification`](the shared specification)). The parity principle is symmetric: when that work redefines a concept's canonical name or input shape in the spec, audit the C# surface for the *idiomatic C# expression* of the same concept — and conversely, never let a TypeScript-ism (camelCase members, union-typed pseudo-overloads, options bags where C# wants real overloads or named args) leak into this codebase to "match." Idiomatic divergence in spelling is the goal; behavioural parity is the invariant.
 
 ## Engineering invariants (spec-level — both implementations honour these)
 
