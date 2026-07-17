@@ -36,6 +36,7 @@ public static class AnnualReportMaskedCoverExample
         {
             PageSize = PdfSize.A4,
             Margin = 0, // zero margin - full-bleed cover
+            PageColor = Color.White,
             Language = "en-GB",
         };
 

@@ -50,6 +50,7 @@ public static class PublicLibraryMembershipLetterExample
 
         DocumentSettings settings = new(PdfSize.A4, Margin)
         {
+            PageColor = Color.White,
             Conformance = PdfAConformance.PdfA2a,
             Accessibility = AccessibilityMode.PdfUa1,
             Language = "en-GB",

@@ -31,6 +31,7 @@ public static class ShippingLabelExample
         {
             PageSize = new PdfSize(288, 432, "Shipping Label 4x6"),
             Margin = 12,
+            PageColor = Color.White,
             Conformance = PdfAConformance.PdfA2a,
             Accessibility = AccessibilityMode.PdfUa1,
             Language = "en-GB",
