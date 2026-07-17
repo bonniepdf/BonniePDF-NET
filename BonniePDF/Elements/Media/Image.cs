@@ -56,8 +56,10 @@ public class Image : ElementBase, IRoleProvider, IAltTextProvider
     protected override float GetPreferredContentWidth()
     {
         ImageInfo info = GetImageInfo();
-        float nativeWidth = info.Width;
-        float nativeHeight = info.Height;
+        // Use display dimensions so EXIF-rotated JPEGs (orientation 5-8) lay
+        // out in their visual orientation, not their stored sensor orientation.
+        float nativeWidth = info.DisplayWidth;
+        float nativeHeight = info.DisplayHeight;
         float aspectRatio = nativeWidth / nativeHeight;
 
         if (Width.HasValue) return Width.Value;
@@ -115,8 +117,9 @@ public class Image : ElementBase, IRoleProvider, IAltTextProvider
     {
         ImageInfo info = GetImageInfo();
 
-        float nativeWidth = info.Width;
-        float nativeHeight = info.Height;
+        // Display dimensions account for EXIF orientation (5-8 swap W/H).
+        float nativeWidth = info.DisplayWidth;
+        float nativeHeight = info.DisplayHeight;
         float aspectRatio = nativeWidth / nativeHeight;
 
         // Use specified width or available width

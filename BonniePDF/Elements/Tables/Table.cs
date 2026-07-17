@@ -367,6 +367,16 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         );
     }
 
+    /// <summary>
+    /// Renders a row without pagination checks. Shared body for RenderRow,
+    /// which adds the footer-visibility and pagination checks first.
+    /// this feature tagging: pushes a /TR struct around the row and a /TH or /TD
+    /// around each cell so the structure tree mirrors the visible table.
+    /// ColumnSpan surfaces as /Attributes /ColSpan on the cell's StructElem;
+    /// header-ness is inherited from the row when the cell doesn't already
+    /// declare it. Renders unchanged (and adds nothing to the content
+    /// stream) when tagging is off.
+    /// </summary>
     private void RenderRowDirect(RenderContext ctx, TableRow row, float[] widths)
     {
         float rowHeight = MeasureRowHeight(row, widths);
@@ -578,99 +588,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         // Pagination check
         if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin) ctx.NewPage();
 
-        // this feature tagging: push a /TR struct around the row and a /TH or
-        // /TD around each cell so the structure tree mirrors the visible
-        // table. ColumnSpan surfaces as /Attributes /ColSpan on the
-        // cell's StructElem. Header-ness is inherited from the row
-        // when the cell doesn't already declare it. Renders unchanged
-        // (and adds nothing to the content stream) when tagging is off.
-        var tagging = ctx.Tagging;
-        bool dataTagging = tagging != null && !IsLayoutGrid;
-        bool presTagging = tagging != null && IsLayoutGrid;
-        if (dataTagging)
-        {
-            tagging!.Tree.Begin(SemanticRole.TR);
-            ctx.Canvas.BeginContainerContent("TR");
-        }
-
-        var capture = CaptureRow(ctx, row, ctx.CurrentX, ctx.CurrentY, widths.Sum(), rowHeight);
-
-        try
-        {
-            float startX = ctx.CurrentX;
-            float currentX = startX;
-
-            for (int i = 0; i < row.Cells.Length; i++)
-            {
-                TableCell cell = row.Cells[i];
-
-                // Defensive: cells added via TableRow.From() don't know
-                // their row's header-ness. Propagate at render time so
-                // the structure role resolves to TH instead of TD.
-                if (row.IsHeader && !cell.IsHeader) cell.IsHeader = true;
-
-                float colWidth = widths[i];
-
-                // Apply column span
-                if (cell.ColumnSpan > 1)
-                    for (int j = 1; j < cell.ColumnSpan && i + j < widths.Length; j++)
-                        colWidth += widths[i + j];
-
-                capture.OpenCell(cell, currentX, colWidth);
-
-                ChildTagToken childTag = default;
-                if (dataTagging)
-                {
-                    SemanticRole cellRole = cell.SemanticRole;
-                    tagging!.Tree.Begin(cellRole);
-                    var cellAttrs = new List<string>();
-                    if (cell.ColumnSpan > 1) cellAttrs.Add($"/ColSpan {cell.ColumnSpan}");
-                    // PDF/UA 7.5: TH cells need a Scope. Header rows are column headers.
-                    if (cellRole == SemanticRole.TH) cellAttrs.Add("/Scope /Column");
-                    if (cellAttrs.Count > 0)
-                        tagging!.Tree.SetAttributes($"<< /O /Table {string.Join(" ", cellAttrs)} >>");
-                    ctx.Canvas.BeginMarkedContent(cellRole.ToPdfTag());
-                }
-                else if (presTagging)
-                {
-                    childTag = ChildTagging.BeginChildTag(ctx, cell.Content);
-                }
-
-                try
-                {
-                    // Render cell with proper background
-                    RenderCell(ctx, cell, row, currentX, colWidth, rowHeight);
-                }
-                finally
-                {
-                    if (dataTagging)
-                    {
-                        ctx.Canvas.EndMarkedContent();
-                        tagging!.Tree.End();
-                    }
-                    else if (presTagging)
-                    {
-                        ChildTagging.EndChildTag(ctx, childTag);
-                    }
-                    capture.CloseCell(cell);
-                }
-
-                currentX += widths[i]; // Move by original column width (not spanned width)
-            }
-
-            // Move down by row height
-            ctx.CurrentX = startX;
-            ctx.CurrentY += rowHeight;
-        }
-        finally
-        {
-            if (dataTagging)
-            {
-                ctx.Canvas.EndMarkedContent();
-                tagging!.Tree.End();
-            }
-            capture.CloseRow();
-        }
+        RenderRowDirect(ctx, row, widths);
     }
 
     private void RenderCell(RenderContext ctx, TableCell cell, TableRow row, float x, float width, float rowHeight)
@@ -769,8 +687,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
     private static bool IsLastPage(RenderContext ctx)
     {
-        // Use the RenderContext.IsLastPage property which is set by the render pipeline
-        // and TemplateRenderer when processing each page
+        // Use the RenderContext.IsLastPage property, which the render
+        // pipeline sets when processing each page
         return ctx.IsLastPage;
     }
 }

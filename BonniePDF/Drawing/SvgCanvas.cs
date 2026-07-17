@@ -574,8 +574,43 @@ public class SvgCanvas : ICanvas
         if (bytes == null || bytes.Length == 0) return;
         string dataUri = $"data:{mimeType};base64,{Convert.ToBase64String(bytes)}";
 
+        int orientation = image.Orientation;
+        string? transform = SvgOrientationTransform(orientation, sx, sy, width, height);
+        if (transform != null)
+        {
+            // Orientations 5-8 (90 degree/270 degree rotations) swap the box
+            // the image is drawn into before the matrix rotates it back.
+            (float bw, float bh) = orientation is >= 5 and <= 8 ? (height, width) : (width, height);
+            _sb.AppendLf(
+                $"<g transform=\"{transform}\"><image width=\"{N(bw)}\" height=\"{N(bh)}\" href=\"{dataUri}\" preserveAspectRatio=\"none\"/></g>");
+            return;
+        }
+
         _sb.AppendLf(
             $"<image x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" href=\"{dataUri}\" preserveAspectRatio=\"none\"/>");
+    }
+
+    /// <summary>
+    /// Maps an EXIF orientation (1-8) to an SVG matrix transform placing the
+    /// image upright at (<paramref name="x"/>, <paramref name="y"/>). Returns
+    /// null for orientation 1, where the plain positioned &lt;image&gt; is used.
+    /// </summary>
+    private string? SvgOrientationTransform(int orientation, float x, float y, float width, float height)
+    {
+        string Matrix(float a, float b, float c, float d, float e, float f)
+            => $"matrix({N(a)} {N(b)} {N(c)} {N(d)} {N(e + x)} {N(f + y)})";
+
+        return orientation switch
+        {
+            2 => Matrix(-1, 0, 0, 1, width, 0),
+            3 => Matrix(-1, 0, 0, -1, width, height),
+            4 => Matrix(1, 0, 0, -1, 0, height),
+            5 => Matrix(0, 1, 1, 0, 0, 0),
+            6 => Matrix(0, 1, -1, 0, width, 0),
+            7 => Matrix(0, -1, -1, 0, width, height),
+            8 => Matrix(0, -1, 1, 0, 0, height),
+            _ => null
+        };
     }
 
     /// <summary>

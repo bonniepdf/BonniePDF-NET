@@ -127,6 +127,38 @@ public class PdfCanvasMarkedContentTests
         Assert.Equal(string.Empty, canvas.Stream.ToString());
     }
 
+    [Fact]
+    public void DecorativeDrawInsideContainerBmc_IsWrappedAsArtifact()
+    {
+        var (canvas, tree, _) = NewTaggedCanvas();
+        tree.Begin(SemanticRole.Div);
+
+        canvas.BeginContainerContent("Div");
+        canvas.FillRect();
+        canvas.EndMarkedContent();
+
+        string output = canvas.Stream.ToString();
+        Assert.Contains("/Div BMC", output);
+        Assert.Contains("/Artifact BMC", output);
+        Assert.True(output.IndexOf("/Artifact BMC", StringComparison.Ordinal) >
+                    output.IndexOf("/Div BMC", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void DecorativeDrawInsideMcidBearingContent_IsNotArtifacted()
+    {
+        var (canvas, tree, _) = NewTaggedCanvas();
+        tree.Begin(SemanticRole.P);
+
+        canvas.BeginMarkedContent("P");
+        canvas.FillRect();
+        canvas.EndMarkedContent();
+
+        string output = canvas.Stream.ToString();
+        Assert.Contains("/P << /MCID 0 >> BDC", output);
+        Assert.DoesNotContain("/Artifact BMC", output);
+    }
+
     // ── Helpers ──────────────────────────────────────────────────
 
     private static (PdfCanvasWithStream canvas, StructureTreeBuilder tree, TaggingContext ctx) NewTaggedCanvas()
@@ -158,6 +190,8 @@ public class PdfCanvasMarkedContentTests
             Stream = stream;
         }
         public void BeginMarkedContent(string role) => Inner.BeginMarkedContent(role);
+        public void BeginContainerContent(string role) => Inner.BeginContainerContent(role);
         public void EndMarkedContent() => Inner.EndMarkedContent();
+        public void FillRect() => Inner.FillRect(0, 0, 10, 10, BonniePDF.Core.Color.Black);
     }
 }
