@@ -250,6 +250,15 @@ internal static class PdfOperators
     internal static void ShowText(StringBuilder s, string operand)
         => s.AppendLf($"{operand} Tj");
 
+    /// <summary>
+    /// <c>TJ</c> - Show text with individual glyph positioning. The operand is a
+    /// pre-built array, e.g. <c>[&lt;0024&gt; 80 &lt;0057&gt;]</c>, where numbers are
+    /// advance adjustments in thousandths of an em, <em>subtracted</em> from the
+    /// current position (so a tightening kern of -80 font units is emitted as <c>80</c>).
+    /// </summary>
+    internal static void ShowTextPositioned(StringBuilder s, string arrayOperand)
+        => s.AppendLf($"{arrayOperand} TJ");
+
     // ── XObject (PDF Ref 8.8) ───────────────────────────────────────────
 
     /// <summary>
