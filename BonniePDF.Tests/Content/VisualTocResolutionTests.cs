@@ -85,4 +85,38 @@ public class VisualTocResolutionTests
         Assert.Equal(3, dests.Count);
         Assert.Equal(3, new HashSet<string>(dests).Count);
     }
+
+    [Fact]
+    public void EachLinkHasNonZeroClickableRectangle()
+    {
+        string pdf = BuildPdf();
+        var rects = LinkRectangles(pdf);
+        Assert.Equal(3, rects.Count);
+        foreach (string rect in rects)
+        {
+            Assert.NotEqual("0 0 0 0", rect);
+            string[] parts = rect.Split(' ');
+            Assert.True(float.Parse(parts[2], System.Globalization.CultureInfo.InvariantCulture)
+                        > float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture));
+            Assert.True(float.Parse(parts[3], System.Globalization.CultureInfo.InvariantCulture)
+                        > float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture));
+        }
+    }
+
+    /// <summary>Extracts the /Rect contents of each /Link annotation.</summary>
+    private static List<string> LinkRectangles(string pdf)
+    {
+        var rects = new List<string>();
+        int idx = 0;
+        while ((idx = pdf.IndexOf("/Subtype /Link", idx, System.StringComparison.Ordinal)) >= 0)
+        {
+            int rectKey = pdf.IndexOf("/Rect [", idx, System.StringComparison.Ordinal);
+            if (rectKey < 0) break;
+            int start = rectKey + "/Rect [".Length;
+            int end = pdf.IndexOf(']', start);
+            if (end > start) rects.Add(pdf.Substring(start, end - start).Trim());
+            idx = rectKey + 1;
+        }
+        return rects;
+    }
 }
