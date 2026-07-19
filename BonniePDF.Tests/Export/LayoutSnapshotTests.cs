@@ -87,6 +87,24 @@ public class LayoutSnapshotTests
     }
 
     [Fact]
+    public void Captures_HyperlinkNodes_WithLinkRole()
+    {
+        // Hyperlink implements IElement directly (not ElementBase), so it records
+        // its own snapshot node - a regression here makes links invisible to the
+        // previewer's structure and accessibility views.
+        var doc = new BonniePDF.Document();
+        doc.Add(new TextBlock { Text = "Before", FontSize = 12 });
+        doc.Add(new BonniePDF.Core.Hyperlink("https://example.com", "Visit example"));
+
+        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutNode link = Walk(snapshot.Root).First(n => n.Type == "Hyperlink");
+        Assert.NotNull(link.A11y);
+        Assert.Equal("Link", link.A11y!.Role);
+        Assert.True(link.A11y.Tagged);
+        Assert.NotEmpty(link.Rects);
+    }
+
+    [Fact]
     public void Splits_PaginatingElement_OneRectPerPage()
     {
         var doc = new BonniePDF.Document();

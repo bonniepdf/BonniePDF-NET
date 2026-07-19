@@ -32,10 +32,13 @@ public static class HyperlinksExample
         doc.Settings.DefaultZoom = ZoomLevel.FitPage;
         doc.Settings.DisplayDocTitle = true;
 
-        // Title
-        doc.Add(new TextBlock
+        // Title — a real Heading (H1), not a big TextBlock: PDF/UA preflight
+        // requires the outline to start at H1, and headings give AT users
+        // document structure.
+        doc.Add(new Heading
         {
             Text = "Hyperlink Support Demo",
+            TocIdentifier = "title",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
             TextColor = ColorPalette.Slate[800],
@@ -43,9 +46,11 @@ public static class HyperlinksExample
         });
 
         // Basic Links Section
-        doc.Add(new TextBlock
+        doc.Add(new Heading
         {
-            Text = "Basic Links:",
+            Text = "Basic Links",
+            TocIdentifier = "basic-links",
+            Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
@@ -66,9 +71,11 @@ public static class HyperlinksExample
         });
 
         // Styled Links Section
-        doc.Add(new TextBlock
+        doc.Add(new Heading
         {
-            Text = "Styled Links:",
+            Text = "Styled Links",
+            TocIdentifier = "styled-links",
+            Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
             TextColor = ColorPalette.Slate[600],
@@ -106,9 +113,11 @@ public static class HyperlinksExample
         });
 
         // Margins Section
-        doc.Add(new TextBlock
+        doc.Add(new Heading
         {
-            Text = "Links with Margins:",
+            Text = "Links with Margins",
+            TocIdentifier = "links-with-margins",
+            Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
             TextColor = ColorPalette.Slate[600]
