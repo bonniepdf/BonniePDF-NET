@@ -670,25 +670,8 @@ public class PdfDocumentSerializer
     /// <summary>
     /// Returns <c>true</c> if the document contains a <see cref="VisualToc"/> element,
     /// which requires a two-pass layout to resolve heading page numbers before rendering.
+    /// Delegates to <see cref="TocLayout.RequiresTwoPass"/> so the SVG export path
+    /// makes the identical decision.
     /// </summary>
-    private bool RequiresTwoPassLayout()
-    {
-        return _document.Pages.Any(page => page.Elements.Any(ContainsVisualToc));
-    }
-
-    /// <summary>
-    /// Recursively checks whether an element tree contains a <see cref="VisualToc"/> element.
-    /// Descends into layout containers such as <see cref="VerticalStack"/>, <see cref="HorizontalStack"/>,
-    /// and <see cref="Container"/>.
-    /// </summary>
-    private static bool ContainsVisualToc(IElement element)
-    {
-        if (element is VisualToc) return true;
-        if (element is VerticalStack vs) return vs.Children.Any(ContainsVisualToc);
-        if (element is HorizontalStack hs) return hs.Children.Any(ContainsVisualToc);
-        if (element is Container c && c.Child != null) return ContainsVisualToc(c.Child);
-        // IContentContainer covers fluent API slots (ContentSlot) that wrap a single child element
-        if (element is IContentContainer cc && cc.Child != null) return ContainsVisualToc(cc.Child);
-        return false;
-    }
+    private bool RequiresTwoPassLayout() => TocLayout.RequiresTwoPass(_document);
 }

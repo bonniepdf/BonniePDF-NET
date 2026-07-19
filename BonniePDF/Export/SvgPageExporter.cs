@@ -74,6 +74,26 @@ internal static class SvgPageExporter
             Conformance = settings.Conformance
         };
 
+        // Two-pass TOC resolution. A VisualToc renders before the headings it
+        // references, so on a single pass its page numbers resolve to "XX" and
+        // its links target page 1. Mirror PdfDocumentSerializer: run a throw-away
+        // layout pass first (through the same pipeline, so pagination - and thus
+        // the resolved page numbers - is identical) to populate TocEntries, then
+        // seed the real context. Only paid for when the document contains a TOC.
+        if (TocLayout.RequiresTwoPass(document))
+        {
+            RenderContext dryRunCtx = new(oriented, settings.Margin, isSvgMode: true, svgOptions, svgContentOnly: true)
+            {
+                Conformance = settings.Conformance,
+                TocEntries = new Dictionary<string, int>()
+            };
+            foreach (PageRenderOutput _ in PdfRenderPipeline.RenderPagesStreaming(document.Pages, settings, dryRunCtx))
+            {
+                // intentionally empty - discard the rendered output of the dry run
+            }
+            ctx.TocEntries = dryRunCtx.TocEntries;
+        }
+
         // Opt-in layout capture. Attached before rendering so the pipeline's
         // OpenNode/CloseNode/PageBreak hooks populate it; left null otherwise so
         // capture is a guarded no-op and output is unchanged.
