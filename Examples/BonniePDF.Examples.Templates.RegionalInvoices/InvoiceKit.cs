@@ -52,22 +52,14 @@ internal static class InvoiceKit
     public static string Money(decimal value, string symbol, string culture = "en-US")
         => symbol + value.ToString("N2", CultureInfo.GetCultureInfo(culture));
 
-    /// <summary>Vertical stack of plain text lines, e.g. a postal address block.</summary>
-    public static VerticalStack Lines(Color color, params string[] items)
-    {
-        VerticalStack stack = new();
-        AddLines(stack, color, items);
-        return stack;
-    }
+    /// <summary>A block of plain text lines, e.g. a postal address. A single TextBlock
+    /// using hard <c>\n</c> breaks, so the block tags as one paragraph under PDF/UA.</summary>
+    public static TextBlock Lines(Color color, params string[] items)
+        => Cell(string.Join('\n', items), color: color);
 
     /// <summary>Appends plain text lines to an existing stack (e.g. after a bold company name).</summary>
     public static void AddLines(VerticalStack stack, Color color, params string[] items)
-    {
-        foreach (string t in items)
-        {
-            stack.AddChild(Cell(t, color: color));
-        }
-    }
+        => stack.AddChild(Lines(color, items));
 
     /// <summary>A labelled block: a bold eyebrow label over a body element.</summary>
     public static Container Labelled(string label, IElement body, Color accent)

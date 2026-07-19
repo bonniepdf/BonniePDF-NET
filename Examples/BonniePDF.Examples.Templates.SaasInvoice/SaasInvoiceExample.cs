@@ -67,15 +67,12 @@ public static class SaasInvoiceExample
         VerticalStack billTo = new();
         billTo.AddChild(Tb("BILLED TO", 8, Mute, bold: true, bottom: 4));
         billTo.AddChild(Tb("Aperture Labs Inc.", 10, Ink, bold: true));
-        billTo.AddChild(Tb("Accounts Payable", 9, BodyCol));
-        billTo.AddChild(Tb("19 Enfield Road, London N1 5BA", 9, BodyCol));
-        billTo.AddChild(Tb("billing@aperture.example", 9, BodyCol));
+        billTo.AddChild(Tb("Accounts Payable\n19 Enfield Road, London N1 5BA\nbilling@aperture.example", 9, BodyCol));
 
         VerticalStack from = new();
         from.AddChild(Tb("FROM", 8, Mute, bold: true, bottom: 4, align: TextAlignment.Right));
         from.AddChild(Tb("Northwind Cloud Ltd", 10, Ink, bold: true, align: TextAlignment.Right));
-        from.AddChild(Tb("4 Tenter Ground, London E1 7NH", 9, BodyCol, align: TextAlignment.Right));
-        from.AddChild(Tb("VAT GB 482 9173 55", 9, BodyCol, align: TextAlignment.Right));
+        from.AddChild(Tb("4 Tenter Ground, London E1 7NH\nVAT GB 482 9173 55", 9, BodyCol, align: TextAlignment.Right));
 
         Grid addr = new(1f, 1f)
         {

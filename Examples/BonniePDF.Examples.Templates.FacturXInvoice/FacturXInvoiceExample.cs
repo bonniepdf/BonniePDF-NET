@@ -206,20 +206,13 @@ public static class FacturXInvoiceExample
     private static string Money(decimal value, string symbol, string culture)
         => symbol + value.ToString("N2", CultureInfo.GetCultureInfo(culture));
 
-    private static VerticalStack Lines(Color color, params string[] items)
-    {
-        VerticalStack stack = new();
-        AddLines(stack, color, items);
-        return stack;
-    }
+    // A single TextBlock using hard \n breaks, so an address or payment block
+    // tags as one paragraph under PDF/UA.
+    private static TextBlock Lines(Color color, params string[] items)
+        => Cell(string.Join('\n', items), color: color);
 
     private static void AddLines(VerticalStack stack, Color color, params string[] items)
-    {
-        foreach (string t in items)
-        {
-            stack.AddChild(Cell(t, color: color));
-        }
-    }
+        => stack.AddChild(Lines(color, items));
 
     private static Container Labelled(string label, IElement body, Color accent)
     {
