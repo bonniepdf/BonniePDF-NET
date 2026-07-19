@@ -157,11 +157,9 @@ public static class PublicLibraryMembershipLetterExample
             Margin = new Thickness(0, 0, 0, 24),
         };
 
-        VerticalStack addr = new();
-        foreach (string line in new[] { "Ms J. Okoro", "14 Elmfield Court", "Northbridge", "NB1 6QT" })
-        {
-            addr.AddChild(Body(line, mb: 0));
-        }
+        // One TextBlock with hard line breaks: the address tags as a single
+        // paragraph under PDF/UA instead of four.
+        TextBlock addr = Body("Ms J. Okoro\n14 Elmfield Court\nNorthbridge\nNB1 6QT", mb: 0);
 
         VerticalStack meta = new();
         meta.AddChild(Body(longDate, align: TextAlignment.Right, mb: 0));

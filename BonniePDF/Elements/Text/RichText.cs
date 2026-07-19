@@ -321,8 +321,12 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             currentWidth += word.Width;
         }
 
-        // Add the final line
-        if (currentLine.Runs.Count > 0)
+        // Add the final line. A paragraph that ends immediately after a raw
+        // text break ("a\n") keeps its trailing blank line, matching the
+        // TextBlock string rule; a structural Line()/LineBreak() terminal
+        // break does not create one.
+        StyledWord? lastWord = words.Count > 0 ? words[^1] : null;
+        if (currentLine.Runs.Count > 0 || (lastWord is { IsLineBreak: true, IsTextBreak: true }))
         {
             currentLine.TotalWidth = currentWidth;
             UpdateLineHeight(currentLine);
@@ -343,6 +347,9 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Breaks all spans into a flat list of styled words. Each word carries the style
     /// of the span it came from. Spaces between words are tracked for accurate measurement.
+    /// Raw break characters in span text (<c>\n</c>, with <c>\r\n</c>/<c>\r</c> normalised)
+    /// split the span into segments; each break becomes a text-break word and each
+    /// segment flows like a mini-span.
     /// </summary>
     private List<StyledWord> BuildStyledWords()
     {
@@ -353,9 +360,9 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         foreach (TextSpan span in _spans)
         {
             TextStyle resolved = ResolveStyle(span.Style);
-            string text = span.Text ?? "";
+            string rawText = span.Text ?? "";
 
-            if (string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(rawText))
             {
                 if (span.IsLineBreak)
                 {
@@ -365,53 +372,72 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
                 continue;
             }
 
-            // Split by spaces, preserving awareness of leading/trailing spaces
-            string[] parts = text.Split(' ');
+            string[] segments = rawText.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
 
-            for (int i = 0; i < parts.Length; i++)
+            for (int s = 0; s < segments.Length; s++)
             {
-                string part = parts[i];
-                if (string.IsNullOrEmpty(part)) continue;
-
-                // A word has a leading space if:
-                // 1. It's not the first token in its span (i > 0 means there was a space between parts)
-                // 2. It IS the first token in its span (i == 0), and either:
-                //    a. The span itself starts with a space (e.g. " mixed with"), or
-                //    b. The previous span ended with a space (e.g. "contains " → "bold")
-                bool hasLeadingSpace = i > 0 ||
-                    (words.Count > 0 && (text.StartsWith(' ') || prevSpanEndedWithSpace));
-
-                // Determine which style *owns* the leading space:
-                // - Inter-span space: the space came from the previous span's trailing space.
-                //   It should use the previous span's style (e.g. no highlight background),
-                //   NOT the current word's style.  This prevents the highlight background of
-                //   "highlight important text" bleeding into the space before it.
-                // - Intra-span space (i > 0) or span-leading space (text.StartsWith(' ')):
-                //   the space belongs to this span's style.
-                bool isInterSpanSpace = hasLeadingSpace
-                    && i == 0
-                    && prevSpanEndedWithSpace
-                    && !text.StartsWith(' ');
-
-                TextStyle spaceStyle = isInterSpanSpace && prevResolvedStyle != null
-                    ? prevResolvedStyle
-                    : resolved;
-
-                float partWidth = FontMetrics.GetStringWidth(
-                    part, resolved.EffectiveFontName, resolved.EffectiveFontSize);
-                float spaceWidth = hasLeadingSpace
-                    ? FontMetrics.GetStringWidth(" ", spaceStyle.EffectiveFontName, spaceStyle.EffectiveFontSize)
-                    : 0;
-
-                words.Add(new StyledWord
+                if (s > 0)
                 {
-                    Text = part,
-                    Style = resolved,
-                    Width = partWidth,
-                    HasLeadingSpace = hasLeadingSpace,
-                    LeadingSpaceWidth = spaceWidth,
-                    LeadingSpaceStyle = hasLeadingSpace ? spaceStyle : null
-                });
+                    words.Add(new StyledWord { Style = resolved, IsLineBreak = true, IsTextBreak = true });
+                    // A break consumes any pending trailing space; the next word
+                    // starts its line flush (the flow loop also drops leading spaces
+                    // at line starts).
+                    prevSpanEndedWithSpace = false;
+                }
+
+                string text = segments[s];
+                if (string.IsNullOrEmpty(text)) continue;
+
+                // Split by spaces, preserving awareness of leading/trailing spaces
+                string[] parts = text.Split(' ');
+
+                for (int i = 0; i < parts.Length; i++)
+                {
+                    string part = parts[i];
+                    if (string.IsNullOrEmpty(part)) continue;
+
+                    // A word has a leading space if:
+                    // 1. It's not the first token in its segment (i > 0 means there was a space between parts)
+                    // 2. It IS the first token in its segment (i == 0), and either:
+                    //    a. The segment itself starts with a space (e.g. " mixed with"), or
+                    //    b. The previous span ended with a space (e.g. "contains " → "bold")
+                    bool hasLeadingSpace = i > 0 ||
+                        (words.Count > 0 && (text.StartsWith(' ') || prevSpanEndedWithSpace));
+
+                    // Determine which style *owns* the leading space:
+                    // - Inter-span space: the space came from the previous span's trailing space.
+                    //   It should use the previous span's style (e.g. no highlight background),
+                    //   NOT the current word's style.  This prevents the highlight background of
+                    //   "highlight important text" bleeding into the space before it.
+                    // - Intra-span space (i > 0) or span-leading space (text.StartsWith(' ')):
+                    //   the space belongs to this span's style.
+                    bool isInterSpanSpace = hasLeadingSpace
+                        && i == 0
+                        && prevSpanEndedWithSpace
+                        && !text.StartsWith(' ');
+
+                    TextStyle spaceStyle = isInterSpanSpace && prevResolvedStyle != null
+                        ? prevResolvedStyle
+                        : resolved;
+
+                    float partWidth = FontMetrics.GetStringWidth(
+                        part, resolved.EffectiveFontName, resolved.EffectiveFontSize);
+                    float spaceWidth = hasLeadingSpace
+                        ? FontMetrics.GetStringWidth(" ", spaceStyle.EffectiveFontName, spaceStyle.EffectiveFontSize)
+                        : 0;
+
+                    words.Add(new StyledWord
+                    {
+                        Text = part,
+                        Style = resolved,
+                        Width = partWidth,
+                        HasLeadingSpace = hasLeadingSpace,
+                        LeadingSpaceWidth = spaceWidth,
+                        LeadingSpaceStyle = hasLeadingSpace ? spaceStyle : null
+                    });
+                }
+
+                prevSpanEndedWithSpace = text.EndsWith(' ');
             }
 
             // Handle trailing line break from the span
@@ -419,10 +445,6 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             {
                 words.Add(new StyledWord { Style = resolved, IsLineBreak = true });
                 prevSpanEndedWithSpace = false;
-            }
-            else
-            {
-                prevSpanEndedWithSpace = text.EndsWith(' ');
             }
 
             prevResolvedStyle = resolved;
@@ -681,4 +703,12 @@ internal class StyledWord
     /// </summary>
     public TextStyle? LeadingSpaceStyle { get; set; }
     public bool IsLineBreak { get; set; }
+
+    /// <summary>
+    /// True when this line break came from a raw break character (<c>\n</c>) inside
+    /// span text rather than the structural <c>Line()</c>/<c>LineBreak()</c> API. A
+    /// paragraph-final text break yields a trailing blank line (matching the
+    /// TextBlock string rule); a paragraph-final structural break does not.
+    /// </summary>
+    public bool IsTextBreak { get; set; }
 }

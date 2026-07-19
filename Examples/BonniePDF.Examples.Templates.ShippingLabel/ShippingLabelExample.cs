@@ -70,17 +70,13 @@ public static class ShippingLabelExample
         VerticalStack from = new();
         from.AddChild(Tb("FROM", 7, Mute, bold: true, bottom: 2));
         from.AddChild(Tb("Northwind Supplies", 8, Ink, bold: true));
-        from.AddChild(Tb("4 Tenter Ground", 8, BodyCol));
-        from.AddChild(Tb("London E1 7NH, UK", 8, BodyCol));
+        from.AddChild(Tb("4 Tenter Ground\nLondon E1 7NH, UK", 8, BodyCol));
         doc.Add(new Container { Child = from, Margin = new Thickness(0, 0, 0, 4) });
 
         VerticalStack to = new();
         to.AddChild(Tb("SHIP TO", 8, Mute, bold: true, bottom: 3));
         to.AddChild(Tb("Jordan Avery", 13, Ink, bold: true));
-        to.AddChild(Tb("Aperture Labs Inc.", 10, Ink));
-        to.AddChild(Tb("19 Enfield Road", 10, Ink));
-        to.AddChild(Tb("London N1 5BA", 10, Ink));
-        to.AddChild(Tb("United Kingdom", 10, Ink));
+        to.AddChild(Tb("Aperture Labs Inc.\n19 Enfield Road\nLondon N1 5BA\nUnited Kingdom", 10, Ink));
         doc.Add(new Container
         {
             Child = to,

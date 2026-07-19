@@ -206,13 +206,42 @@ public abstract class TextElementBase : ElementBase
     }
 
     /// <summary>
-    /// Computes wrapped lines for text that exceeds the maximum width.
-    /// Uses word wrapping to break lines at appropriate positions.
+    /// Computes wrapped lines for text.
+    /// Explicit line breaks (<c>\n</c>, <c>\r\n</c>, or a bare <c>\r</c>) are
+    /// honoured first and split the text into segments; each segment is then
+    /// word-wrapped to <paramref name="maxWidth"/>. An empty segment (from
+    /// consecutive breaks, or a leading/trailing break) yields one blank line,
+    /// so <c>"a\n\nb"</c> produces <c>["a", "", "b"]</c>. Text containing no
+    /// break characters wraps exactly as before.
     /// </summary>
     /// <param name="text">The text to wrap</param>
     /// <param name="maxWidth">The maximum width for a line</param>
     /// <returns>A list of lines, each fitting within the maximum width</returns>
     protected IList<string> ComputeLines(string text, float maxWidth)
+    {
+        List<string> lines = [];
+        if (string.IsNullOrEmpty(text)) return lines;
+
+        // Normalise CRLF / CR to LF, then split on hard breaks.
+        string[] segments = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+
+        foreach (string segment in segments)
+        {
+            List<string> wrapped = WrapSegment(segment, maxWidth);
+            if (wrapped.Count == 0)
+                // Preserve the blank line represented by an empty segment.
+                lines.Add("");
+            else
+                lines.AddRange(wrapped);
+        }
+
+        return lines;
+    }
+
+    /// <summary>
+    /// Word-wraps a single break-free segment to <paramref name="maxWidth"/>.
+    /// </summary>
+    private List<string> WrapSegment(string text, float maxWidth)
     {
         List<string> lines = [];
         if (string.IsNullOrEmpty(text)) return lines;
