@@ -135,6 +135,15 @@ public class Hyperlink : IElement, IRoleProvider
         // Save starting Y position for correct advancement
         float startY = ctx.CurrentY;
 
+        // Layout capture (opt-in, no-op without a recorder): Hyperlink implements
+        // IElement directly rather than extending ElementBase, so it must record
+        // its own node — otherwise links never appear in the layout snapshot and
+        // the previewer's structure/accessibility views cannot show them. Mirrors
+        // ElementBase.Render: the full margin box, opened and closed (complete)
+        // around the atomic render. The recorder derives the Link role via
+        // AccessibilityOf from IRoleProvider.SemanticRole.
+        ctx.LayoutRecorder?.OpenNode(this, "Hyperlink", null, ctx.CurrentPageIndex, ctx.CurrentX, startY, width);
+
         // Apply top margin
         ctx.CurrentY += Margin.Top;
 
@@ -176,6 +185,8 @@ public class Hyperlink : IElement, IRoleProvider
 
         // Advance Y by the total height (margins + content)
         ctx.CurrentY = startY + Margin.Top + contentHeight + Margin.Bottom;
+
+        ctx.LayoutRecorder?.CloseNode(this, ctx.CurrentPageIndex, ctx.CurrentY, complete: true);
     }
 
     /// <summary>
