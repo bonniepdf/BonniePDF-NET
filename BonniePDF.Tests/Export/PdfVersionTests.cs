@@ -172,6 +172,23 @@ public class PdfVersionTests
     }
 
     [Fact]
+    public void PdfA4_OmitsLegacyInfoDictionary()
+    {
+        using BonniePDF.Document doc = new();
+        doc.Settings.AsPdfA4();
+        doc.Metadata.Title = "XMP-only PDF/A-4 metadata";
+        using MemoryStream ms = new();
+
+        doc.Save(ms, true);
+
+        ms.Position = 0;
+        using StreamReader reader = new(ms);
+        string content = reader.ReadToEnd();
+        Assert.DoesNotContain("/Info ", content, StringComparison.Ordinal);
+        Assert.Contains("XMP-only PDF/A-4 metadata", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PdfA4_WithEncryption_ThrowsInvalidOperation()
     {
         using BonniePDF.Document doc = new();

@@ -242,7 +242,17 @@ public class PdfDocumentSerializer
 
         // 6. Write Metadata & Close
         MetadataWriter metadataWriter = new(writer);
-        metadataWriter.WriteDocumentInfo(infoId, _document.Metadata);
+        // ISO 19005-4 clauses 6.1.3-4/5 prohibit the legacy trailer /Info
+        // dictionary (except for a narrow PieceInfo/ModDate case). PDF/A-4
+        // metadata lives in XMP, so omit /Info entirely for the effective claim.
+        if (_document.Settings.Conformance == PdfAConformance.PdfA4)
+        {
+            documentInfoId = 0;
+        }
+        else
+        {
+            metadataWriter.WriteDocumentInfo(infoId, _document.Metadata);
+        }
 
         CatalogOptions catalogOptions = new();
 
@@ -505,7 +515,16 @@ public class PdfDocumentSerializer
 
         // 6. Write Metadata & Close
         MetadataWriter metadataWriter = new(writer);
-        await metadataWriter.WriteDocumentInfoAsync(infoId, _document.Metadata, cancellationToken).ConfigureAwait(false);
+        // PDF/A-4 metadata is carried by XMP; see the sync path for the
+        // ISO 19005-4 /Info restriction.
+        if (_document.Settings.Conformance == PdfAConformance.PdfA4)
+        {
+            documentInfoId = 0;
+        }
+        else
+        {
+            await metadataWriter.WriteDocumentInfoAsync(infoId, _document.Metadata, cancellationToken).ConfigureAwait(false);
+        }
 
         CatalogOptions catalogOptions = new();
 
