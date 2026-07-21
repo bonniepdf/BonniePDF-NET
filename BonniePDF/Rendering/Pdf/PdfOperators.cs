@@ -190,6 +190,14 @@ internal static class PdfOperators
         => s.AppendLf($"{PdfSyntax.FormatDecimal(spacing)} Tw");
 
     /// <summary>
+    /// Emits the character-spacing operator (<c>Tc</c>). Applies to every glyph
+    /// shown by both <c>Tj</c> and <c>TJ</c>, for simple and composite fonts
+    /// alike, so it is the universal mechanism for letter spacing.
+    /// </summary>
+    internal static void SetCharacterSpacing(StringBuilder s, float spacing)
+        => s.AppendLf($"{PdfSyntax.FormatDecimal(spacing)} Tc");
+
+    /// <summary>
     /// Convenience: <c>m … l S</c> - Draw and stroke a line between two points.
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7.pdf#page=226"/>
     /// </summary>

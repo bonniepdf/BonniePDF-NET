@@ -15,5 +15,8 @@ public enum TextDecoration
     Underline = 1,
 
     /// <summary>Line drawn through the middle of the text</summary>
-    Strikethrough = 2
+    Strikethrough = 2,
+
+    /// <summary>Line drawn above the text (over the cap height)</summary>
+    Overline = 4
 }

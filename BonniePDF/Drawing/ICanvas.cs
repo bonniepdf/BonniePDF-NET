@@ -115,6 +115,15 @@ public interface ICanvas
     Size MeasureText(string text, float fontSize, string fontFamily);
 
     /// <summary>
+    /// Sets the pending text-spacing state applied by subsequent
+    /// <see cref="DrawText"/> calls: <paramref name="letterSpacing"/> points are
+    /// added after every glyph and <paramref name="wordSpacing"/> points after
+    /// every space. Callers set the state before drawing and reset it to
+    /// <c>(0, 0)</c> afterwards. Both default to 0.
+    /// </summary>
+    void SetTextSpacing(float letterSpacing, float wordSpacing);
+
+    /// <summary>
     /// Draws an image at the specified location.
     /// </summary>
     /// <param name="image">The image information</param>

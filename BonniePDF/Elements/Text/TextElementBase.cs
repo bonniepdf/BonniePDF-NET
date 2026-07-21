@@ -148,9 +148,32 @@ public abstract class TextElementBase : ElementBase
     }
 
     /// <summary>
-    /// Text decoration (underline, strikethrough, or both)
+    /// Text decoration (underline, strikethrough, overline, or a combination)
     /// </summary>
     public TextDecoration TextDecoration { get; set; } = TextDecoration.None;
+
+    /// <summary>
+    /// Colour of the decoration lines. Null = use <see cref="TextColor"/> (pre-G-39 behaviour).
+    /// </summary>
+    public Color? DecorationColor { get; set; }
+
+    /// <summary>
+    /// Thickness of the decoration lines in points. Null = the default derived from
+    /// font size (<c>max(0.5, fontSize / 18)</c>).
+    /// </summary>
+    public float? DecorationThickness { get; set; }
+
+    /// <summary>Line style for decorations (solid/wavy/dashed/dotted) - this feature. Default solid.</summary>
+    public DecorationStyle DecorationStyle { get; set; } = DecorationStyle.Solid;
+
+    /// <summary>
+    /// Letter spacing (tracking) in points, added after every glyph.
+    /// Default 0. Reflected in measurement and both PDF and SVG output.
+    /// </summary>
+    public float LetterSpacing { get; set; }
+
+    /// <summary>Word spacing in points, added after every space. Default 0.</summary>
+    public float WordSpacing { get; set; }
 
     /// <summary>
     /// Resolves FontName from FontFamily + Weight + IsItalic via FontFamilyResolver.
@@ -287,6 +310,26 @@ public abstract class TextElementBase : ElementBase
     {
         // Replace tokens with estimated placeholders (2 digits) for measurement
         string measuredText = text.Replace(TotalPagesToken, "00").Replace(CurrentPageToken, "00");
-        return FontMetrics.GetStringWidth(measuredText, FontName, FontSize);
+        return FontMetrics.GetStringWidth(measuredText, FontName, FontSize) + SpacingWidth(measuredText);
+    }
+
+    /// <summary>
+    /// Extra advance contributed by <see cref="LetterSpacing"/>/<see cref="WordSpacing"/>
+    /// for a string: letter spacing after every glyph plus word spacing after
+    /// every space. Matches the PDF/SVG painters and the reserved layout width.
+    /// Zero when no spacing is set.
+    /// </summary>
+    protected float SpacingWidth(string text)
+    {
+        if (LetterSpacing == 0 && WordSpacing == 0) return 0;
+        int glyphs = 0;
+        int spaces = 0;
+        foreach (System.Text.Rune rune in text.EnumerateRunes())
+        {
+            if (rune.Value < 32) continue;
+            glyphs++;
+            if (rune.Value == ' ') spaces++;
+        }
+        return glyphs * LetterSpacing + spaces * WordSpacing;
     }
 }

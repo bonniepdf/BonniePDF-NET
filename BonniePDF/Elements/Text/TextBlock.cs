@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Tagging;
@@ -15,11 +17,36 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 {
     private float _cachedContentWidth = -1;
     private IList<string>? _cachedLines;
+    // Per-line paragraph metadata parallel to _cachedLines.
+    private IList<float>? _cachedIndents;
+    private IList<float>? _cachedSpaceBefore;
 
     // State tracking for multipage rendering
     private int _lastLineRendered = -1;
     public required string Text { get; set; }
     public TextAlignment Alignment { get; set; } = TextAlignment.Left;
+
+    /// <summary>
+    /// this feature line clamp: maximum number of lines to render. When set and the text
+    /// wraps to more lines, the block is truncated to this many lines and
+    /// <see cref="Ellipsis"/> is appended to the last visible line. Null = no clamp.
+    /// </summary>
+    public int? MaxLines { get; set; }
+
+    /// <summary>Ellipsis appended to the last line when <see cref="MaxLines"/> clamps. Default <c>…</c>.</summary>
+    public string Ellipsis { get; set; } = "…";
+
+    /// <summary>
+    /// this feature paragraph layout: horizontal indent (points) applied to the first line
+    /// of each paragraph (a paragraph = text between hard <c>\n</c> breaks). Default 0.
+    /// </summary>
+    public float FirstLineIndent { get; set; }
+
+    /// <summary>
+    /// this feature paragraph layout: extra vertical space (points) inserted before each
+    /// paragraph after the first. Default 0.
+    /// </summary>
+    public float ParagraphSpacing { get; set; }
 
     /// <summary>
     /// PDF/UA structure role for this element. Defaults to
@@ -80,14 +107,15 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         int remainingLines = lines.Count - startLine;
         float localY = ctx.CurrentY;
 
-        // Calculate how many lines fit on this page
+        // Calculate how many lines fit on this page. Each line's slot is the base
+        // line height plus any paragraph leading above it (this feature; zero when unused).
         int linesThatFit = 0;
         float testY = localY;
         for (int i = startLine; i < lines.Count; i++)
         {
-            if (testY + LineHeight > ctx.MaxY) break;
+            if (testY + SpaceBeforeOf(i) + LineHeight > ctx.MaxY) break;
             linesThatFit++;
-            testY += LineHeight;
+            testY += SpaceBeforeOf(i) + LineHeight;
         }
 
         // If all remaining lines fit, just render them all (no break needed)
@@ -142,7 +170,8 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         for (int i = startLine; i < endLine; i++)
         {
             bool isLastLine = i == lines.Count - 1;
-            DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX + Margin.Left, isLastLine);
+            localY += SpaceBeforeOf(i); // this feature paragraph leading (0 when unused)
+            DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX + Margin.Left + IndentOf(i), isLastLine);
             localY += LineHeight;
         }
 
@@ -165,19 +194,29 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     {
         _lastLineRendered = -1;
         _cachedLines = null;
+        _cachedIndents = null;
+        _cachedSpaceBefore = null;
         _cachedContentWidth = -1;
     }
 
     protected override float GetPreferredContentWidth()
     {
-        return MeasureTextWidth(Text);
+        return MeasureTextWidth(Text) + FirstLineIndent;
     }
 
     protected override float MeasureContentHeight(float contentWidth)
     {
         IList<string> lines = GetOrComputeLines(contentWidth);
-        return lines.Count * LineHeight;
+        float height = lines.Count * LineHeight;
+        for (int i = 0; i < lines.Count; i++) height += SpaceBeforeOf(i);
+        return height;
     }
+
+    /// <summary>Per-line horizontal indent; 0 when paragraph controls are unused.</summary>
+    private float IndentOf(int i) => _cachedIndents != null && i < _cachedIndents.Count ? _cachedIndents[i] : 0f;
+
+    /// <summary>Per-line extra leading above the line; 0 when unused.</summary>
+    private float SpaceBeforeOf(int i) => _cachedSpaceBefore != null && i < _cachedSpaceBefore.Count ? _cachedSpaceBefore[i] : 0f;
 
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
@@ -187,7 +226,8 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         for (int i = 0; i < lines.Count; i++)
         {
             bool isLastLine = i == lines.Count - 1;
-            DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX, isLastLine);
+            localY += SpaceBeforeOf(i); // this feature paragraph leading (0 when unused)
+            DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX + IndentOf(i), isLastLine);
             localY += LineHeight;
         }
 
@@ -205,6 +245,24 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     /// <param name="baseX">The starting X position</param>
     /// <param name="isLastLine">Whether this is the last line of the text block (last lines are not justified)</param>
     private void DrawSingleLine(RenderContext ctx, string line, float contentWidth, float y, float baseX,
+        bool isLastLine)
+    {
+        // apply letter/word spacing as canvas state around this line so the
+        // painters advance by the same amount the layout reserved. No-op (and
+        // byte-identical) when both are zero.
+        bool spaced = LetterSpacing != 0 || WordSpacing != 0;
+        if (spaced) ctx.Canvas.SetTextSpacing(LetterSpacing, WordSpacing);
+        try
+        {
+            DrawSingleLineInner(ctx, line, contentWidth, y, baseX, isLastLine);
+        }
+        finally
+        {
+            if (spaced) ctx.Canvas.SetTextSpacing(0, 0);
+        }
+    }
+
+    private void DrawSingleLineInner(RenderContext ctx, string line, float contentWidth, float y, float baseX,
         bool isLastLine)
     {
         // Substitute current page number inline - it is known at render time
@@ -285,23 +343,26 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     private void DrawDecorations(RenderContext ctx, float x, float y, float width)
     {
         // Line thickness scales with font size (typical: 1/18th of font size, min 0.5pt)
-        float thickness = Math.Max(0.5f, FontSize / 18f);
+        // unless an explicit DecorationThickness is set.
+        float thickness = DecorationThickness ?? Math.Max(0.5f, FontSize / 18f);
+        Color color = DecorationColor ?? TextColor;
+
+        if (TextDecoration.HasFlag(TextDecoration.Overline))
+        {
+            // Overline: drawn above the text, just over the cap height.
+            DecorationPainter.Paint(ctx.Canvas, x, y + FontSize * 0.15f, width, color, thickness, DecorationStyle);
+        }
 
         if (TextDecoration.HasFlag(TextDecoration.Underline))
         {
-            // Underline: drawn below the baseline.
-            // Baseline is approximately at y + fontSize. Underline offset below baseline ~fontSize/7.
-            float underlineY = y + FontSize + FontSize / 7f;
-            ctx.Canvas.DrawLine(x, underlineY, x + width, underlineY, TextColor, thickness);
+            // Underline: drawn below the baseline (~fontSize/7 below).
+            DecorationPainter.Paint(ctx.Canvas, x, y + FontSize + FontSize / 7f, width, color, thickness, DecorationStyle);
         }
 
         if (TextDecoration.HasFlag(TextDecoration.Strikethrough))
         {
             // Strikethrough: drawn at approximately half the cap height.
-            // Cap height is roughly 0.7 * fontSize, so midpoint is ~0.35 * fontSize from top,
-            // offset by the ascent baseline positioning (~0.5 * fontSize from line top).
-            float strikeY = y + FontSize * 0.55f;
-            ctx.Canvas.DrawLine(x, strikeY, x + width, strikeY, TextColor, thickness);
+            DecorationPainter.Paint(ctx.Canvas, x, y + FontSize * 0.55f, width, color, thickness, DecorationStyle);
         }
     }
 
@@ -370,8 +431,114 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         // Use tolerance for floating point comparison
         if (_cachedLines != null && Math.Abs(_cachedContentWidth - contentWidth) < 0.001f) return _cachedLines;
 
-        _cachedLines = ComputeLines(Text, contentWidth);
+        bool paragraphs = FirstLineIndent != 0 || ParagraphSpacing != 0;
+        List<string> lines;
+        List<float> indents;
+        List<float> spaceBefore;
+
+        if (paragraphs)
+        {
+            ComputeParagraphLayout(Text, contentWidth, out lines, out indents, out spaceBefore);
+        }
+        else
+        {
+            lines = new List<string>(ComputeLines(Text, contentWidth));
+            indents = Enumerable.Repeat(0f, lines.Count).ToList();
+            spaceBefore = Enumerable.Repeat(0f, lines.Count).ToList();
+        }
+
+        if (MaxLines is int max && max > 0 && lines.Count > max)
+        {
+            lines = ClampLines(lines, contentWidth, max);
+            indents = indents.GetRange(0, lines.Count);
+            spaceBefore = spaceBefore.GetRange(0, lines.Count);
+        }
+
+        _cachedLines = lines;
+        _cachedIndents = indents;
+        _cachedSpaceBefore = spaceBefore;
         _cachedContentWidth = contentWidth;
         return _cachedLines;
+    }
+
+    /// <summary>
+    /// this feature line clamp: keeps the first <paramref name="max"/> lines and appends
+    /// <see cref="Ellipsis"/> to the last visible one, trimming whole words (then
+    /// characters) until <c>line + ellipsis</c> fits <paramref name="contentWidth"/>.
+    /// Dropped lines are never drawn, so no hidden text reaches the content stream
+    /// or the structure tree - PDF/UA-safe by construction.
+    /// </summary>
+    private List<string> ClampLines(List<string> lines, float contentWidth, int max)
+    {
+        List<string> kept = lines.GetRange(0, max);
+        int lastIndex = kept.Count - 1;
+        string last = kept[lastIndex].TrimEnd();
+
+        while (last.Length > 0 && MeasureTextWidth(last + Ellipsis) > contentWidth)
+        {
+            int lastSpace = last.TrimEnd().LastIndexOf(' ');
+            last = lastSpace > 0 ? last[..lastSpace].TrimEnd() : last[..^1].TrimEnd();
+        }
+
+        kept[lastIndex] = last + Ellipsis;
+        return kept;
+    }
+
+    /// <summary>
+    /// this feature paragraph-aware line layout. Splits on hard <c>\n</c> breaks; the first
+    /// line of each paragraph wraps to a narrower column (by <see cref="FirstLineIndent"/>)
+    /// and carries that indent, and every paragraph after the first carries
+    /// <see cref="ParagraphSpacing"/> of leading before its first line.
+    /// </summary>
+    private void ComputeParagraphLayout(string text, float contentWidth,
+        out List<string> lines, out List<float> indents, out List<float> spaceBefore)
+    {
+        lines = new List<string>();
+        indents = new List<float>();
+        spaceBefore = new List<float>();
+
+        string[] segments = (text ?? string.Empty).Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+        for (int si = 0; si < segments.Length; si++)
+        {
+            List<string> wrapped = WrapWithFirstIndent(segments[si], contentWidth);
+            if (wrapped.Count == 0) wrapped.Add(string.Empty);
+            for (int li = 0; li < wrapped.Count; li++)
+            {
+                lines.Add(wrapped[li]);
+                indents.Add(li == 0 ? FirstLineIndent : 0f);
+                spaceBefore.Add(li == 0 && si > 0 ? ParagraphSpacing : 0f);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Greedy word-wrap where the first line fits <c>contentWidth - firstLineIndent</c>
+    /// and the remainder fits the full <paramref name="contentWidth"/>.
+    /// </summary>
+    private List<string> WrapWithFirstIndent(string segment, float contentWidth)
+    {
+        var lines = new List<string>();
+        if (segment.Length == 0) return lines;
+
+        string[] words = segment.Split(' ');
+        string current = string.Empty;
+        float widthLimit = contentWidth - FirstLineIndent;
+
+        foreach (string word in words)
+        {
+            string test = current.Length == 0 ? word : current + ' ' + word;
+            if (MeasureTextWidth(test) > widthLimit && current.Length != 0)
+            {
+                lines.Add(current);
+                current = word;
+                widthLimit = contentWidth; // subsequent lines are full width
+            }
+            else
+            {
+                current = test;
+            }
+        }
+        if (current.Length != 0) lines.Add(current);
+        return lines;
     }
 }

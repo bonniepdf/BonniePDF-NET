@@ -185,7 +185,7 @@ public class SvgCanvas : ICanvas
     /// Total advance width of a resolved run list, kerned within each run, so a
     /// fallback glyph's advance comes from the face that actually draws it.
     /// </summary>
-    private static float MeasureRuns(List<SvgTextRun> runs, float fontSize)
+    private float MeasureRuns(List<SvgTextRun> runs, float fontSize)
     {
         float width = 0f;
         foreach (SvgTextRun run in runs)
@@ -200,6 +200,9 @@ public class SvgCanvas : ICanvas
                 if (gid == 0) continue;
                 if (hasPrev && font.HasKerning) width += font.GetKerning(prevGid, gid) * scale;
                 width += font.GetGlyphWidth(gid) * scale;
+                // per-glyph letter spacing and per-space word spacing.
+                width += _letterSpacing;
+                if (rune.Value == ' ') width += _wordSpacing;
                 prevGid = gid;
                 hasPrev = true;
             }
@@ -505,6 +508,9 @@ public class SvgCanvas : ICanvas
                     glyphs.Append($"<tspan x=\"{Tspan(cursorX)}\" y=\"{Tspan(baselineY)}\">{charStr}</tspan>");
 
                     cursorX += runFont.GetGlyphWidth(gid) * scale;
+                    // letter spacing after every glyph; word spacing after spaces.
+                    cursorX += _letterSpacing;
+                    if (rune.Value == ' ') cursorX += _wordSpacing;
                     prevGid = gid;
                     hasPrev = true;
                 }
@@ -529,8 +535,12 @@ public class SvgCanvas : ICanvas
             // Fallback: no embedded TTF available - rely on browser/viewer rendering
             string anchor = GetTextAnchor(align);
             string escapedText = XmlEscape.EscapeXml(text);
+            // letter/word spacing map directly onto SVG presentation attributes.
+            string spacingAttr =
+                (_letterSpacing != 0 ? $" letter-spacing=\"{N(_letterSpacing)}\"" : "") +
+                (_wordSpacing != 0 ? $" word-spacing=\"{N(_wordSpacing)}\"" : "");
             _sb.AppendLf(
-                $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" {StandardFontCssAttrs(fontFamily)} font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"{anchor}\">{escapedText}</text>");
+                $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" {StandardFontCssAttrs(fontFamily)} font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"{anchor}\"{spacingAttr}>{escapedText}</text>");
         }
     }
 
@@ -689,7 +699,7 @@ public class SvgCanvas : ICanvas
         List<SvgTextRun> runs = ResolveRuns(fontFamily, text);
         if (runs.Count > 0) return new Size(MeasureRuns(runs, fontSize), height);
         if (_fontResolver?.Invoke(fontFamily) != null) return new Size(0f, height);
-        return new Size(FontMetrics.GetStringWidth(text, fontFamily, fontSize), height);
+        return new Size(FontMetrics.GetStringWidth(text, fontFamily, fontSize) + SpacingWidth(text), height);
     }
 
     /// <summary>
@@ -952,6 +962,36 @@ public class SvgCanvas : ICanvas
     }
 
     /// <inheritdoc />
+    /// <summary>Pending letter spacing in points, applied by the next DrawText.</summary>
+    private float _letterSpacing;
+    /// <summary>Pending word spacing in points, applied by the next DrawText.</summary>
+    private float _wordSpacing;
+
+    /// <inheritdoc />
+    public void SetTextSpacing(float letterSpacing, float wordSpacing)
+    {
+        _letterSpacing = letterSpacing;
+        _wordSpacing = wordSpacing;
+    }
+
+    /// <summary>
+    /// Extra advance from the pending letter/word spacing for a run's text,
+    /// matching what the glyph-positioning loop and <see cref="MeasureRuns"/> add.
+    /// </summary>
+    private float SpacingWidth(string text)
+    {
+        if (_letterSpacing == 0 && _wordSpacing == 0) return 0;
+        int glyphs = 0;
+        int spaces = 0;
+        foreach (Rune rune in text.EnumerateRunes())
+        {
+            if (Rune.IsControl(rune)) continue;
+            glyphs++;
+            if (rune.Value == ' ') spaces++;
+        }
+        return glyphs * _letterSpacing + spaces * _wordSpacing;
+    }
+
     public void SetGlobalAlpha(float alpha)
     {
         alpha = Math.Clamp(alpha, 0f, 1f);
