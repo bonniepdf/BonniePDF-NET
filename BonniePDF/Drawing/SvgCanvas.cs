@@ -5,6 +5,7 @@ using System.Text;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Export;
+using BonniePDF.Rendering;
 using BonniePDF.Rendering.Images;
 using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
@@ -123,11 +124,88 @@ public class SvgCanvas : ICanvas
     /// </summary>
     public System.Func<string, string>? RegisterFontCallback { get; set; }
 
+    /// <summary>
+    /// Optional callback that splits a draw call into per-font runs, routing code
+    /// points the primary font lacks to a fallback font that covers them. Set by
+    /// <see cref="Rendering.RenderContext"/> to the same resolver
+    /// <see cref="PdfCanvas"/> uses, so the SVG preview cannot drift from the PDF
+    /// in which font draws which code point.
+    /// <para>
+    /// This is the SVG side of the <c>.notdef</c> guard: a code point no font can
+    /// render must be dropped, never emitted against a face that lacks it.
+    /// Leaving it in place lets the viewer substitute an arbitrary system font
+    /// (typically a colour emoji face), painting a glyph that does not exist in
+    /// the PDF and whose advance width the layout engine never reserved.
+    /// </para>
+    /// </summary>
+    public Func<string, string, IList<ResolvedTextRun>>? TextRunResolver { get; set; }
+
     /// <summary>Registers (if needed) and resolves an embedded TTF for a font name.</summary>
     private TtfFont? ResolveFont(string fontFamily)
     {
         RegisterFontCallback?.Invoke(fontFamily);
         return _fontResolver?.Invoke(fontFamily);
+    }
+
+    /// <summary>
+    /// Splits text into per-font runs, keeping only those backed by an embedded
+    /// face. Returns an empty list when the family renders through the viewer's
+    /// own standard-14 faces, which is the signal for callers to take the plain
+    /// <c>&lt;text&gt;</c> path.
+    /// </summary>
+    private List<SvgTextRun> ResolveRuns(string fontFamily, string text)
+    {
+        var result = new List<SvgTextRun>();
+        if (TextRunResolver == null)
+        {
+            // No run resolver wired up: fall back to the primary font alone, still
+            // dropping code points it cannot render.
+            TtfFont? only = ResolveFont(fontFamily);
+            if (only == null) return result;
+            var candidates = new List<ShaperFont> { new() { FontIdentifier = fontFamily, Font = only } };
+            foreach (ShapedRun run in TextRunShaper.ShapeTextRuns(text, candidates).Runs)
+                result.Add(new SvgTextRun(fontFamily, only, run.Text));
+            return result;
+        }
+
+        RegisterFontCallback?.Invoke(fontFamily);
+        foreach (ResolvedTextRun run in TextRunResolver(fontFamily, text))
+        {
+            if (run.EmbeddedFont == null) continue;
+            result.Add(new SvgTextRun(run.FontIdentifier, run.EmbeddedFont, run.Text));
+        }
+
+        return result;
+    }
+
+    /// <summary>A maximal substring of a draw call renderable by one embedded face.</summary>
+    private readonly record struct SvgTextRun(string FontFamily, TtfFont Font, string Text);
+
+    /// <summary>
+    /// Total advance width of a resolved run list, kerned within each run, so a
+    /// fallback glyph's advance comes from the face that actually draws it.
+    /// </summary>
+    private static float MeasureRuns(List<SvgTextRun> runs, float fontSize)
+    {
+        float width = 0f;
+        foreach (SvgTextRun run in runs)
+        {
+            TtfFont font = run.Font;
+            float scale = fontSize / font.UnitsPerEm;
+            ushort prevGid = 0;
+            bool hasPrev = false;
+            foreach (Rune rune in run.Text.EnumerateRunes())
+            {
+                ushort gid = font.GetGlyphId(rune.Value);
+                if (gid == 0) continue;
+                if (hasPrev && font.HasKerning) width += font.GetKerning(prevGid, gid) * scale;
+                width += font.GetGlyphWidth(gid) * scale;
+                prevGid = gid;
+                hasPrev = true;
+            }
+        }
+
+        return width;
     }
 
     /// <summary>Records every code point of <paramref name="text"/> as used by the
@@ -140,6 +218,36 @@ public class SvgCanvas : ICanvas
             if (Rune.IsControl(rune)) continue;
             FontUsageSink(fontFamily, font, rune.Value);
         }
+    }
+
+    /// <summary>
+    /// Drops code points <paramref name="font"/> has no glyph for, so they are
+    /// never emitted against a face that cannot draw them (which would let the
+    /// viewer substitute a system font).
+    /// <para>
+    /// Used by the draw paths that emit a single <c>&lt;text&gt;</c> with one
+    /// <c>font-family</c> and let the viewer lay the glyphs out. Those cannot
+    /// represent a multi-font run, so uncovered code points are dropped rather
+    /// than routed to a fallback face; only <see cref="DrawText"/> positions
+    /// glyphs itself and can therefore switch fonts mid-string.
+    /// </para>
+    /// </summary>
+    private static string FilterToCoveredText(TtfFont font, string text)
+    {
+        var kept = new StringBuilder(text.Length);
+        bool dropped = false;
+        foreach (Rune rune in text.EnumerateRunes())
+        {
+            if (font.GetGlyphId(rune.Value) == 0 && !Rune.IsWhiteSpace(rune))
+            {
+                dropped = true;
+                continue;
+            }
+
+            kept.Append(rune.ToString());
+        }
+
+        return dropped ? kept.ToString() : text;
     }
 
     /// <summary>
@@ -352,48 +460,69 @@ public class SvgCanvas : ICanvas
         string fill = color.ToHexString();
         float baselineY = BaselineY(sy, fontSize);
 
-        TtfFont? ttfFont = ResolveFont(fontFamily);
+        List<SvgTextRun> runs = ResolveRuns(fontFamily, text);
 
-        if (ttfFont != null)
+        if (runs.Count > 0)
         {
-            float totalWidth = FontMetrics.GetKernedStringWidth(text, ttfFont, fontSize);
+            float totalWidth = MeasureRuns(runs, fontSize);
             float cursorX = sx;
             if (align == TextAlignment.Center)
                 cursorX -= totalWidth / 2f;
             else if (align == TextAlignment.Right)
                 cursorX -= totalWidth;
 
-            float scale = fontSize / ttfFont.UnitsPerEm;
-
-            // Reference the private embedded-face name (bound by the exporter's
-            // @font-face) so the viewer renders the exact font used for layout.
-            _sb.Append($"<text font-family=\"{EmbeddedFontFamily(fontFamily)}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" xml:space=\"preserve\">");
-
-            ushort prevGid = 0;
-            bool hasPrev = false;
-
-            foreach (Rune rune in text.EnumerateRunes())
+            // One <text> per font run, sharing a single advance cursor and
+            // baseline, so a fallback run is indistinguishable from the
+            // surrounding text apart from the face it uses. Kerning applies
+            // within a run but resets at each boundary, mirroring the PDF
+            // painter, where every run is its own TJ array.
+            foreach (SvgTextRun run in runs)
             {
-                if (Rune.IsControl(rune)) continue;
+                TtfFont runFont = run.Font;
+                float scale = fontSize / runFont.UnitsPerEm;
+                var glyphs = new StringBuilder();
 
-                ushort gid = ttfFont.GetGlyphId(rune.Value);
-                FontUsageSink?.Invoke(fontFamily, ttfFont, rune.Value);
+                ushort prevGid = 0;
+                bool hasPrev = false;
 
-                if (hasPrev && ttfFont.HasKerning)
+                foreach (Rune rune in run.Text.EnumerateRunes())
                 {
-                    short kern = ttfFont.GetKerning(prevGid, gid);
-                    cursorX += kern * scale;
+                    ushort gid = runFont.GetGlyphId(rune.Value);
+                    // The run resolver already dropped anything unrenderable; a
+                    // zero GID here would mean a face changed under us. Skip
+                    // rather than emit a character the subset cannot draw.
+                    if (gid == 0) continue;
+
+                    FontUsageSink?.Invoke(run.FontFamily, runFont, rune.Value);
+
+                    if (hasPrev && runFont.HasKerning)
+                    {
+                        short kern = runFont.GetKerning(prevGid, gid);
+                        cursorX += kern * scale;
+                    }
+
+                    string charStr = XmlEscape.EscapeXml(rune.ToString());
+                    glyphs.Append($"<tspan x=\"{Tspan(cursorX)}\" y=\"{Tspan(baselineY)}\">{charStr}</tspan>");
+
+                    cursorX += runFont.GetGlyphWidth(gid) * scale;
+                    prevGid = gid;
+                    hasPrev = true;
                 }
 
-                string charStr = XmlEscape.EscapeXml(rune.ToString());
-                _sb.Append($"<tspan x=\"{Tspan(cursorX)}\" y=\"{Tspan(baselineY)}\">{charStr}</tspan>");
+                if (glyphs.Length == 0) continue;
 
-                cursorX += ttfFont.GetGlyphWidth(gid) * scale;
-                prevGid = gid;
-                hasPrev = true;
+                // Reference the private embedded-face name (bound by the exporter's
+                // @font-face) so the viewer renders the exact font used for layout.
+                _sb.Append($"<text font-family=\"{EmbeddedFontFamily(run.FontFamily)}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" xml:space=\"preserve\">");
+                _sb.Append(glyphs);
+                _sb.AppendLf("</text>");
             }
-
-            _sb.AppendLf("</text>");
+        }
+        else if (ResolveFont(fontFamily) != null)
+        {
+            // An embedded family whose every code point was dropped produces no
+            // runs and must not fall through to the standard-14 path, which would
+            // hand the text to the viewer's own fonts.
         }
         else
         {
@@ -473,7 +602,6 @@ public class SvgCanvas : ICanvas
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         string fill = color.ToHexString();
-        string escapedText = XmlEscape.EscapeXml(text);
         float baselineY = sy + fontSize;
 
         // An embedded font renders via the private @font-face name; a standard-14
@@ -482,6 +610,8 @@ public class SvgCanvas : ICanvas
         string fontAttrs;
         if (ttfFont != null)
         {
+            text = FilterToCoveredText(ttfFont, text);
+            if (text.Length == 0) return;
             RecordEmbeddedUsage(fontFamily, ttfFont, text);
             fontAttrs = $"font-family=\"{EmbeddedFontFamily(fontFamily)}\"";
         }
@@ -490,6 +620,7 @@ public class SvgCanvas : ICanvas
             fontAttrs = StandardFontCssAttrs(fontFamily);
         }
 
+        string escapedText = XmlEscape.EscapeXml(text);
         _sb.AppendLf(
             $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" {fontAttrs} font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"start\" transform=\"rotate({N(angleDegrees)}, {N(sx)}, {N(baselineY)})\">{escapedText}</text>");
     }
@@ -521,7 +652,6 @@ public class SvgCanvas : ICanvas
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         string fill = color.ToHexString();
-        string escapedText = XmlEscape.EscapeXml(text);
         float baselineY = sy + fontSize * 0.8f;
 
         // An embedded font renders via the private @font-face name; a standard-14
@@ -530,6 +660,8 @@ public class SvgCanvas : ICanvas
         string fontAttrs;
         if (ttfFont != null)
         {
+            text = FilterToCoveredText(ttfFont, text);
+            if (text.Length == 0) return;
             RecordEmbeddedUsage(fontFamily, ttfFont, text);
             fontAttrs = $"font-family=\"{EmbeddedFontFamily(fontFamily)}\"";
         }
@@ -538,6 +670,7 @@ public class SvgCanvas : ICanvas
             fontAttrs = StandardFontCssAttrs(fontFamily);
         }
 
+        string escapedText = XmlEscape.EscapeXml(text);
         _sb.AppendLf(
             $"<text x=\"{sx}\" y=\"{baselineY}\" {fontAttrs} font-size=\"{fontSize}\" fill=\"{fill}\" text-anchor=\"start\" word-spacing=\"{wordSpacing:F2}\">{escapedText}</text>");
     }
@@ -549,12 +682,14 @@ public class SvgCanvas : ICanvas
     /// </summary>
     public Size MeasureText(string text, float fontSize, string fontFamily)
     {
-        TtfFont? ttfFont = _fontResolver?.Invoke(fontFamily);
-        float width = ttfFont != null
-            ? FontMetrics.GetKernedStringWidth(text, ttfFont, fontSize)
-            : FontMetrics.GetStringWidth(text, fontFamily, fontSize);
         float height = fontSize * 1.2f;
-        return new Size(width, height);
+
+        // Measured over the same runs that get painted, so a fallback glyph's
+        // advance comes from the face that actually draws it.
+        List<SvgTextRun> runs = ResolveRuns(fontFamily, text);
+        if (runs.Count > 0) return new Size(MeasureRuns(runs, fontSize), height);
+        if (_fontResolver?.Invoke(fontFamily) != null) return new Size(0f, height);
+        return new Size(FontMetrics.GetStringWidth(text, fontFamily, fontSize), height);
     }
 
     /// <summary>

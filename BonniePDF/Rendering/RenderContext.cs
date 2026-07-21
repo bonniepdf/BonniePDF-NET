@@ -206,7 +206,10 @@ public class RenderContext
             {
                 Options = SvgOptions,
                 FontUsageSink = TrackSvgFontUsage,
-                RegisterFontCallback = RegisterFont
+                RegisterFontCallback = RegisterFont,
+                // Both render paths share one run resolver, so the SVG preview
+                // cannot drift from the PDF in which font draws which code point.
+                TextRunResolver = ResolveTextRuns
             };
         }
         else
@@ -229,7 +232,10 @@ public class RenderContext
             {
                 Options = SvgOptions,
                 FontUsageSink = TrackSvgFontUsage,
-                RegisterFontCallback = RegisterFont
+                RegisterFontCallback = RegisterFont,
+                // Both render paths share one run resolver, so the SVG preview
+                // cannot drift from the PDF in which font draws which code point.
+                TextRunResolver = ResolveTextRuns
             };
 
         var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource,
