@@ -28,7 +28,7 @@ public static class ProductPhotoGalleryExample
 
     private static readonly Product[] Products =
     [
-        new("Terracotta Planter", "HG-1042", "GBP 28.00", "Hand-thrown stoneware planter with a matte terracotta glaze and a drainage saucer."),
+        new("Terracotta Planter", "HG-1042", "GBP 28.00", "Hand-thrown stoneware planter with a matte terracotta glaze."),
         new("Linen Throw", "HG-2277", "GBP 54.00", "Stonewashed pure-linen throw in oatmeal, finished with a hand-knotted fringe."),
         new("Brass Reading Lamp", "LT-0391", "GBP 120.00", "Adjustable desk lamp in brushed brass with a weighted base and warm-dim LED."),
         new("Ceramic Pour-Over", "KT-5108", "GBP 36.00", "Single-cup pour-over dripper in speckled clay, sized for a standard 02 filter."),
