@@ -18,6 +18,11 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "pdf_compliance.pdf"));
         }
+        Console.WriteLine("Generating PDF/A-4 validation fixture...");
+        using (var doc = PdfA4ValidationExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "pdfa4_baseline.pdf"));
+        }
 
         Console.WriteLine("Done! Files saved to " + outputDir);
     }

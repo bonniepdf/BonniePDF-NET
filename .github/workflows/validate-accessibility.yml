@@ -1,6 +1,6 @@
 name: PDF Conformance Validation
 
-# Compliance gate: builds the library, generates the tagged example PDFs, and
+# Compliance gate: builds the library, generates the conformance fixtures, and
 # validates every claimed PDF/A and PDF/UA conformance level with veraPDF. The
 # job fails if any PDF is non-compliant (tools/verapdf/validate.sh exits
 # non-zero), so a regression cannot reach master. See docs/ci/pdf-validation.md.
@@ -89,6 +89,10 @@ jobs:
           # them by name. Add new PDF/A example outputs here.
           find Examples -path '*/GeneratedPdfs/factur-x_invoice.pdf' -exec cp {} generated-pdfs/ \;
           find Examples -path '*/GeneratedPdfs/attached-data.pdf' -exec cp {} generated-pdfs/ \;
+          # Symmetric PDF/A-4 baseline fixture. Its XMP part=4 claim makes the
+          # auto detector select veraPDF flavour 4.
+          find Examples -path '*/GeneratedPdfs/pdfa4_baseline.pdf' -exec cp {} generated-pdfs/ \;
+          test -s generated-pdfs/pdfa4_baseline.pdf
           ls -l generated-pdfs
 
       # `auto` reads each PDF's XMP conformance claims (pdfaid + pdfuaid) and
