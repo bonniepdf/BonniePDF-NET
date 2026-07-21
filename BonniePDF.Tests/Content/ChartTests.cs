@@ -130,6 +130,8 @@ public class ChartTests
         public void ClipToCurrentPath(FillRule fillRule) =>
             Operations.Add($"ClipToCurrentPath({fillRule})");
         public void SetGlobalAlpha(float alpha) => Operations.Add($"SetGlobalAlpha({alpha})");
+
+        public void SetTextSpacing(float letterSpacing, float wordSpacing) { }
     }
 
     private static ChartData CreateSampleData()

@@ -215,7 +215,8 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         {
             TextStyle resolved = ResolveStyle(span.Style);
             totalWidth += FontMetrics.GetStringWidth(
-                span.Text ?? "", resolved.EffectiveFontName, resolved.EffectiveFontSize);
+                span.Text ?? "", resolved.EffectiveFontName, resolved.EffectiveFontSize)
+                + StyleSpacing(span.Text ?? "", resolved);
         }
 
         return totalWidth;
@@ -421,9 +422,11 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
                         : resolved;
 
                     float partWidth = FontMetrics.GetStringWidth(
-                        part, resolved.EffectiveFontName, resolved.EffectiveFontSize);
+                        part, resolved.EffectiveFontName, resolved.EffectiveFontSize)
+                        + StyleSpacing(part, resolved);
                     float spaceWidth = hasLeadingSpace
                         ? FontMetrics.GetStringWidth(" ", spaceStyle.EffectiveFontName, spaceStyle.EffectiveFontSize)
+                          + StyleSpacing(" ", spaceStyle)
                         : 0;
 
                     words.Add(new StyledWord
@@ -523,24 +526,38 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
                 ctx.Canvas.FillRect(currentX, y, runWidth, line.Height, style.BackgroundColor.Value);
             }
 
+            // Baseline shift (super/subscript) moves the glyphs vertically without
+            // affecting the run's advance width, so currentX and measurement are
+            // untouched. Positive shift = up, so subtract from the top-down y.
+            float shift = BaselineShiftResolver.Resolve(style.BaselineAlignment, style.BaselineShift, fontSize);
+            float runY = y - shift;
+
+            // letter/word spacing as canvas state for this run.
+            float ls = style.LetterSpacing ?? 0;
+            float ws = style.WordSpacing ?? 0;
+            bool spaced = ls != 0 || ws != 0;
+            if (spaced) ctx.Canvas.SetTextSpacing(ls, ws);
+
             // Draw each word segment separately when justified (to apply extra spacing)
             if (useJustify && extraWordSpacing > 0 && run.Text.Contains(' '))
             {
-                currentX = DrawJustifiedRun(ctx, run, currentX, y, line.Height, extraWordSpacing);
+                currentX = DrawJustifiedRun(ctx, run, currentX, runY, line.Height, extraWordSpacing);
             }
             else
             {
                 // Draw the run as a single text call
-                ctx.Canvas.DrawText(currentX, y, run.Text, color, fontSize, fontName, TextAlignment.Left);
+                ctx.Canvas.DrawText(currentX, runY, run.Text, color, fontSize, fontName, TextAlignment.Left);
 
-                float runWidth = FontMetrics.GetStringWidth(run.Text, fontName, fontSize);
+                float runWidth = FontMetrics.GetStringWidth(run.Text, fontName, fontSize) + StyleSpacing(run.Text, style);
 
                 // Draw decorations
                 if (style.Decoration != TextDecoration.None)
-                    DrawRunDecorations(ctx, style, currentX, y, runWidth, fontSize);
+                    DrawRunDecorations(ctx, style, currentX, runY, runWidth, fontSize);
 
                 currentX += runWidth;
             }
+
+            if (spaced) ctx.Canvas.SetTextSpacing(0, 0);
         }
     }
 
@@ -562,17 +579,18 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         {
             string word = words[i];
 
-            // Add space before word (except first)
+            // Add space before word (except first). The space glyph carries its own
+            // letter/word spacing in addition to the justification spread.
             if (i > 0)
             {
-                float spaceWidth = FontMetrics.GetStringWidth(" ", fontName, fontSize);
+                float spaceWidth = FontMetrics.GetStringWidth(" ", fontName, fontSize) + StyleSpacing(" ", style);
                 currentX += spaceWidth + extraWordSpacing;
             }
 
             if (!string.IsNullOrEmpty(word))
             {
                 ctx.Canvas.DrawText(currentX, y, word, color, fontSize, fontName, TextAlignment.Left);
-                float wordWidth = FontMetrics.GetStringWidth(word, fontName, fontSize);
+                float wordWidth = FontMetrics.GetStringWidth(word, fontName, fontSize) + StyleSpacing(word, style);
 
                 if (style.Decoration != TextDecoration.None)
                     DrawRunDecorations(ctx, style, currentX, y, wordWidth, fontSize);
@@ -585,24 +603,44 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     }
 
     /// <summary>
-    /// Draws underline and/or strikethrough decorations for a styled run.
+    /// Draws underline, strikethrough, and/or overline decorations for a styled run.
     /// </summary>
     private static void DrawRunDecorations(RenderContext ctx, TextStyle style,
         float x, float y, float width, float fontSize)
     {
-        float thickness = Math.Max(0.5f, fontSize / 18f);
+        float thickness = style.DecorationThickness ?? Math.Max(0.5f, fontSize / 18f);
+        Color color = style.DecorationColor ?? style.EffectiveColor;
+        DecorationStyle lineStyle = style.DecorationStyle;
+
+        if (style.Decoration.HasFlag(TextDecoration.Overline))
+            DecorationPainter.Paint(ctx.Canvas, x, y + fontSize * 0.15f, width, color, thickness, lineStyle);
 
         if (style.Decoration.HasFlag(TextDecoration.Underline))
-        {
-            float underlineY = y + fontSize + fontSize / 7f;
-            ctx.Canvas.DrawLine(x, underlineY, x + width, underlineY, style.EffectiveColor, thickness);
-        }
+            DecorationPainter.Paint(ctx.Canvas, x, y + fontSize + fontSize / 7f, width, color, thickness, lineStyle);
 
         if (style.Decoration.HasFlag(TextDecoration.Strikethrough))
+            DecorationPainter.Paint(ctx.Canvas, x, y + fontSize * 0.55f, width, color, thickness, lineStyle);
+    }
+
+    /// <summary>
+    /// Extra advance from a style's <see cref="TextStyle.LetterSpacing"/>/
+    /// <see cref="TextStyle.WordSpacing"/> for a string: letter spacing after
+    /// every glyph plus word spacing after every space. Zero when neither is set.
+    /// </summary>
+    private static float StyleSpacing(string text, TextStyle style)
+    {
+        float ls = style.LetterSpacing ?? 0;
+        float ws = style.WordSpacing ?? 0;
+        if (ls == 0 && ws == 0) return 0;
+        int glyphs = 0;
+        int spaces = 0;
+        foreach (System.Text.Rune rune in text.EnumerateRunes())
         {
-            float strikeY = y + fontSize * 0.55f;
-            ctx.Canvas.DrawLine(x, strikeY, x + width, strikeY, style.EffectiveColor, thickness);
+            if (rune.Value < 32) continue;
+            glyphs++;
+            if (rune.Value == ' ') spaces++;
         }
+        return glyphs * ls + spaces * ws;
     }
 
     // --- Helpers ---
@@ -616,7 +654,8 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     private static float MeasureRunWidth(StyledRun run, float extraWordSpacing)
     {
         float baseWidth = FontMetrics.GetStringWidth(
-            run.Text, run.Style.EffectiveFontName, run.Style.EffectiveFontSize);
+            run.Text, run.Style.EffectiveFontName, run.Style.EffectiveFontSize)
+            + StyleSpacing(run.Text, run.Style);
 
         if (extraWordSpacing > 0)
         {

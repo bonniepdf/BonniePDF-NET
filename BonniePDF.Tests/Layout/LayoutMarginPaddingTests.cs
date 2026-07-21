@@ -172,6 +172,7 @@ public class LayoutMarginPaddingTests
         public void DrawTextJustified(float x, float y, string text, Color color, float fontSize, string fontFamily, float availableWidth) =>
             Operations.Add($"DrawTextJustified({x},{y},'{text}',{fontSize},{fontFamily},{availableWidth})");
         public Size MeasureText(string text, float fontSize, string fontFamily) => new(text.Length * fontSize * 0.6f, fontSize);
+        public void SetTextSpacing(float letterSpacing, float wordSpacing) { }
         public void DrawImage(ImageInfo image, float x, float y, float width, float height) =>
             Operations.Add($"DrawImage({x},{y},{width},{height})");
         public void DrawFormXObject(string resourceName, float x, float y) =>

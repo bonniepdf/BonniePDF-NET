@@ -268,6 +268,7 @@ public class PdfCanvas : ICanvas
         // glyph tracking and width measurement.
         IList<ResolvedTextRun> runs = ResolveRuns(text, fontFamily);
         PdfOperators.SetFillColor(_stream, color);
+        BeginTextSpacing();
 
         // Calculate X offset based on alignment
         float xOffset = 0;
@@ -282,8 +283,41 @@ public class PdfCanvas : ICanvas
 
         EmitShowText(runs, fontSize);
 
+        EndTextSpacing();
         PdfOperators.EndText(_stream);
         EndColorAlpha(color);
+    }
+
+    /// <summary>Pending letter spacing in points, applied by the next DrawText.</summary>
+    private float _letterSpacing;
+    /// <summary>Pending word spacing in points, applied by the next DrawText.</summary>
+    private float _wordSpacing;
+
+    /// <inheritdoc />
+    public void SetTextSpacing(float letterSpacing, float wordSpacing)
+    {
+        _letterSpacing = letterSpacing;
+        _wordSpacing = wordSpacing;
+    }
+
+    /// <summary>
+    /// Emits the <c>Tc</c>/<c>Tw</c> text-state operators for the pending
+    /// letter/word spacing. <c>Tc</c> is universal; <c>Tw</c> only affects
+    /// single-byte fonts, so word spacing for embedded (composite) fonts is
+    /// injected into the <c>TJ</c> array by <see cref="EmitShowText"/>. No-op
+    /// (byte-identical) when both are zero.
+    /// </summary>
+    private void BeginTextSpacing()
+    {
+        if (_letterSpacing != 0) PdfOperators.SetCharacterSpacing(_stream, _letterSpacing);
+        if (_wordSpacing != 0) PdfOperators.SetWordSpacing(_stream, _wordSpacing);
+    }
+
+    /// <summary>Resets <c>Tc</c>/<c>Tw</c> to zero after a spaced text object.</summary>
+    private void EndTextSpacing()
+    {
+        if (_letterSpacing != 0) PdfOperators.SetCharacterSpacing(_stream, 0);
+        if (_wordSpacing != 0) PdfOperators.SetWordSpacing(_stream, 0);
     }
 
     /// <summary>
@@ -307,10 +341,12 @@ public class PdfCanvas : ICanvas
 
         IList<ResolvedTextRun> runs = ResolveRuns(text, fontFamily);
         PdfOperators.SetFillColor(_stream, color);
+        BeginTextSpacing();
         PdfOperators.SetTextPosition(_stream, 0, 0);
 
         EmitShowText(runs, fontSize);
 
+        EndTextSpacing();
         PdfOperators.EndText(_stream);
         PdfOperators.RestoreState(_stream);
     }
@@ -555,7 +591,7 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>Sums the rendered width of <paramref name="runs"/> at <paramref name="fontSize"/>, each run in its own font.</summary>
-    private static float MeasureRuns(IList<ResolvedTextRun> runs, float fontSize)
+    private float MeasureRuns(IList<ResolvedTextRun> runs, float fontSize)
     {
         float total = 0;
         foreach (ResolvedTextRun run in runs)
@@ -573,8 +609,29 @@ public class PdfCanvas : ICanvas
             {
                 total += FontMetrics.GetStringWidth(run.Text, run.FontIdentifier, fontSize);
             }
+            total += SpacingWidth(run.Text);
         }
         return total;
+    }
+
+    /// <summary>
+    /// Extra advance contributed by the pending letter/word spacing for a
+    /// run's text: letter spacing after every rendered glyph plus word spacing
+    /// after every space. Matches the PDF <c>Tc</c>/<c>Tw</c>/<c>TJ</c> output
+    /// and the reserved layout width. Zero when no spacing is set.
+    /// </summary>
+    private float SpacingWidth(string text)
+    {
+        if (_letterSpacing == 0 && _wordSpacing == 0) return 0;
+        int glyphs = 0;
+        int spaces = 0;
+        foreach (System.Text.Rune rune in text.EnumerateRunes())
+        {
+            if (rune.Value < 32) continue;
+            glyphs++;
+            if (rune.Value == ' ') spaces++;
+        }
+        return glyphs * _letterSpacing + spaces * _wordSpacing;
     }
 
     /// <summary>
@@ -594,6 +651,15 @@ public class PdfCanvas : ICanvas
             PdfOperators.SetFont(_stream, run.ResourceName, fontSize);
             if (run.EmbeddedFont != null)
             {
+                // word spacing (Tw) does not apply to composite fonts, so when
+                // it is set, inject it into the TJ array (combined with any kerning).
+                // Letter spacing is handled universally by Tc, above.
+                if (_wordSpacing != 0 && run.Text.Contains(' '))
+                {
+                    PdfOperators.ShowTextPositioned(_stream,
+                        PdfSyntax.ToSpacedGlyphArray(run.Text, run.EmbeddedFont, fontSize, _wordSpacing));
+                    continue;
+                }
                 // embedded fonts with kern pairs paint with `TJ` so the PDF
                 // matches the kerned widths the layout engine reserved (and the
                 // kerned this feature SVG export). Unkerned strings keep the `Tj` path.

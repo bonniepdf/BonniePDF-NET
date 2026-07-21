@@ -65,6 +65,76 @@ public sealed class TextSpanDescriptor
         return this;
     }
 
+    /// <summary>Adds overline decoration (a line above the text).</summary>
+    public TextSpanDescriptor Overline()
+    {
+        _style.Overline();
+        return this;
+    }
+
+    /// <summary>Sets the decoration line colour (underline/strikethrough/overline).</summary>
+    public TextSpanDescriptor DecorationColor(Color color)
+    {
+        _style.WithDecorationColor(color);
+        return this;
+    }
+
+    /// <summary>Sets the decoration line thickness in points.</summary>
+    public TextSpanDescriptor DecorationThickness(float thickness)
+    {
+        _style.WithDecorationThickness(thickness);
+        return this;
+    }
+
+    /// <summary>Raises the span above the baseline (superscript).</summary>
+    public TextSpanDescriptor Superscript()
+    {
+        _style.Superscript();
+        return this;
+    }
+
+    /// <summary>Lowers the span below the baseline (subscript).</summary>
+    public TextSpanDescriptor Subscript()
+    {
+        _style.Subscript();
+        return this;
+    }
+
+    /// <summary>Sets an explicit baseline shift in points (positive = up).</summary>
+    public TextSpanDescriptor BaselineShift(float points)
+    {
+        _style.WithBaselineShift(points);
+        return this;
+    }
+
+    /// <summary>Sets letter spacing (tracking) in points, added after every glyph.</summary>
+    public TextSpanDescriptor LetterSpacing(float points)
+    {
+        _style.WithLetterSpacing(points);
+        return this;
+    }
+
+    /// <summary>Sets word spacing in points, added after every space.</summary>
+    public TextSpanDescriptor WordSpacing(float points)
+    {
+        _style.WithWordSpacing(points);
+        return this;
+    }
+
+    /// <summary>Sets the decoration line style (solid/wavy/dashed/dotted).</summary>
+    public TextSpanDescriptor DecorationLineStyle(DecorationStyle style)
+    {
+        _style.WithDecorationStyle(style);
+        return this;
+    }
+
+    /// <summary>Adds a wavy underline (spell-check style).</summary>
+    public TextSpanDescriptor WavyUnderline()
+    {
+        _style.WavyUnderline();
+        return this;
+    }
+
     /// <summary>Sets the background highlight color.</summary>
     public TextSpanDescriptor BackgroundColor(Color color)
     {

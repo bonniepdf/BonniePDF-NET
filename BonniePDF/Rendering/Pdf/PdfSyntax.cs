@@ -193,4 +193,53 @@ internal static class PdfSyntax
         sb.Append(">]");
         return sb.ToString();
     }
+
+    /// <summary>
+    /// Converts a string into a <c>TJ</c> array operand that carries both
+    /// kern-pair adjustments <em>and</em> word spacing, for composite (Type0)
+    /// fonts where the PDF <c>Tw</c> operator does not apply (it only affects
+    /// single-byte code 32). After every space glyph an extra adjustment of
+    /// <c>-(wordSpacingPts / fontSize) * 1000</c> is inserted (negative → the
+    /// following glyph moves further right by <c>wordSpacingPts</c>). Letter
+    /// spacing is handled separately by <c>Tc</c>. Always returns a
+    /// <c>[...]</c> array; callers use it only when <paramref name="wordSpacingPts"/>
+    /// is non-zero. Mirrors the TypeScript <c>toSpacedGlyphArray</c>.
+    /// </summary>
+    internal static string ToSpacedGlyphArray(string text, TtfFont font, float fontSize, float wordSpacingPts)
+    {
+        int wordAdjustment = fontSize > 0
+            ? (int)Math.Floor(-wordSpacingPts * 1000.0 / fontSize + 0.5)
+            : 0;
+
+        StringBuilder sb = new(text.Length * 4 + 8);
+        sb.Append("[<");
+        ushort prevGid = 0;
+        bool prevWasSpace = false;
+        bool hasPrev = false;
+
+        foreach (Rune rune in text.EnumerateRunes())
+        {
+            if (Rune.IsControl(rune))
+                continue;
+
+            ushort gid = font.GetGlyphId(rune.Value);
+
+            if (hasPrev)
+            {
+                short kern = font.GetKerning(prevGid, gid);
+                int adjustment = (int)Math.Floor(-kern * 1000.0 / font.UnitsPerEm + 0.5);
+                if (prevWasSpace) adjustment += wordAdjustment;
+                if (adjustment != 0)
+                    sb.Append("> ").Append(adjustment).Append(" <");
+            }
+
+            sb.Append(gid.ToString("X4"));
+            prevGid = gid;
+            prevWasSpace = rune.Value == ' ';
+            hasPrev = true;
+        }
+
+        sb.Append(">]");
+        return sb.ToString();
+    }
 }
