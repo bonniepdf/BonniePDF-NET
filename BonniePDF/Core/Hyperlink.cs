@@ -130,7 +130,7 @@ public class Hyperlink : IElement, IRoleProvider
     /// <summary>
     /// Renders this hyperlink to the PDF context and registers the annotation
     /// </summary>
-    public void Render(RenderContext ctx, float width)
+    public virtual void Render(RenderContext ctx, float width)
     {
         // Save starting Y position for correct advancement
         float startY = ctx.CurrentY;

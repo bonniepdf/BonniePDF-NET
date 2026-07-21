@@ -32,7 +32,10 @@ public static class ComplianceFindingsRegisterExample
         [Severity.Resolved] = new("RESOLVED", ColorPalette.Green[600], ColorPalette.Green[50], ColorPalette.Green[200]),
     };
 
-    private sealed record Finding(string Id, string Category, Severity Severity, string Title, string Description);
+    private sealed record Finding(string Id, string Category, Severity Severity, string Title, string Description, string? Related = null);
+
+    /// <summary>Normalises a finding id (e.g. "F-011") into its anchor/toc key ("f-011").</summary>
+    private static string AnchorFor(string id) => id.ToLowerInvariant();
 
     private static readonly Finding[] Findings =
     [
@@ -40,7 +43,7 @@ public static class ComplianceFindingsRegisterExample
             "A single administrator account is shared across three regional teams with no individual accountability. Recommend provisioning named accounts and enforcing MFA before the next audit cycle."),
 
         new("F-002", "Data Encryption", Severity.High, "Unencrypted database backups",
-            "Nightly database backups are written to object storage without server-side encryption. Recommend enabling encryption at rest and rotating the affected snapshots."),
+            "Nightly database backups are written to object storage without server-side encryption. Recommend enabling encryption at rest and rotating the affected snapshots.", Related: "F-011"),
 
         new("F-003", "Password Policy", Severity.Medium, "Password rotation exceeds policy window",
             "Twelve service accounts have not rotated credentials within the 90-day policy window. Recommend automating rotation via the secrets manager already in use elsewhere."),
@@ -67,10 +70,10 @@ public static class ComplianceFindingsRegisterExample
             "Completion of the annual security-awareness course has risen from 74% to 98% following the reminder campaign. No further action required this cycle."),
 
         new("F-011", "Data Retention", Severity.Critical, "Deletion requests not propagating to backups",
-            "Right-to-erasure requests are honoured in the primary database but not in long-term backup archives. Recommend extending the deletion workflow to cover archived snapshots."),
+            "Right-to-erasure requests are honoured in the primary database but not in long-term backup archives. Recommend extending the deletion workflow to cover archived snapshots.", Related: "F-002"),
 
         new("F-012", "Access Reviews", Severity.High, "Quarterly access review overdue",
-            "The Q2 access review for the billing system was not completed; twelve accounts with elevated privileges have not been re-certified. Recommend closing the backlog before Q3 begins."),
+            "The Q2 access review for the billing system was not completed; twelve accounts with elevated privileges have not been re-certified. Recommend closing the backlog before Q3 begins.", Related: "F-001"),
 
         new("F-013", "Business Continuity", Severity.Medium, "Failover runbook untested this year",
             "The documented regional failover procedure has not been exercised since last year’s audit. Recommend scheduling a tabletop or live failover drill this quarter."),
@@ -82,7 +85,7 @@ public static class ComplianceFindingsRegisterExample
             "MFA is now enforced for all workforce accounts, including the previously exempted contractor group. Verified via the identity provider’s enforcement report."),
 
         new("F-016", "Third-Party Risk", Severity.High, "Vendor risk assessments twelve months stale",
-            "Risk assessments for three critical vendors have not been refreshed in over a year. Recommend prioritising re-assessment for vendors with direct production access."),
+            "Risk assessments for three critical vendors have not been refreshed in over a year. Recommend prioritising re-assessment for vendors with direct production access.", Related: "F-006"),
 
         new("F-017", "Audit Logging", Severity.Medium, "Administrative actions not centrally logged",
             "Administrative actions taken directly in the cloud console are not forwarded to the central log store. Recommend enabling the provider’s management-event log export."),
@@ -115,7 +118,11 @@ public static class ComplianceFindingsRegisterExample
 
         body.AddChild(new Heading($"{finding.Id} - {finding.Title}")
         {
-            TocIdentifier = finding.Id.ToLowerInvariant(),
+            TocIdentifier = AnchorFor(finding.Id),
+            // AnchorId makes this finding a cross-reference target for the Priority
+            // Actions summary and any "Related" links - resolved to a live page
+            // number by two-pass layout, independent of TocIdentifier's TOC role.
+            AnchorId      = AnchorFor(finding.Id),
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 12,
@@ -137,6 +144,35 @@ public static class ComplianceFindingsRegisterExample
             TextColor = ColorPalette.Slate[700],
         });
 
+        // Optional "Related: F-XXX on page N" cross-reference - a clickable
+        // SectionLink to the related finding plus its resolved page number.
+        if (finding.Related is not null)
+        {
+            HorizontalStack relatedRow = new() { Spacing = 4, Margin = new Thickness(0, 4, 0, 0) };
+
+            var relatedLabel = new TextBlock
+            {
+                Text = "Related:", FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = ColorPalette.Slate[500],
+            };
+            relatedRow.AddChild(relatedLabel, relatedLabel.GetPreferredWidth());
+
+            var relatedLink = new SectionLink(finding.Related, AnchorFor(finding.Related))
+            {
+                FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = ColorPalette.Blue[700],
+            };
+            relatedRow.AddChild(relatedLink, relatedLink.GetPreferredWidth());
+
+            var onPage = new TextBlock { Text = "on page", FontSize = 9, TextColor = ColorPalette.Slate[500] };
+            relatedRow.AddChild(onPage, onPage.GetPreferredWidth());
+
+            relatedRow.AddChild(new PageNumberOf(AnchorFor(finding.Related))
+            {
+                FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = ColorPalette.Slate[600],
+            });
+
+            body.AddChild(relatedRow);
+        }
+
         HorizontalStack row = new() { Spacing = 12, WidthDistribution = WidthDistribution.Weighted };
         row.AddChild(badge);
         row.AddChild(body, 1);
@@ -150,6 +186,69 @@ public static class ComplianceFindingsRegisterExample
             Border          = new Border(1),
             BorderColors    = new BorderColors(style.Border),
             Margin          = new Thickness(0, 0, 0, 10),
+        };
+    }
+
+    /// <summary>
+    /// Builds the "Priority Actions" callout: a bordered card listing every
+    /// Critical finding as a clickable <see cref="SectionLink"/> to its detail
+    /// card, followed by the page it lands on via <see cref="PageNumberOf"/>.
+    /// Both resolve during two-pass layout, so the summary stays correct no
+    /// matter how the cards paginate.
+    /// </summary>
+    private static Container PriorityActions(IReadOnlyList<Finding> critical)
+    {
+        VerticalStack inner = new() { Spacing = 4 };
+
+        inner.AddChild(new Heading("Priority Actions")
+        {
+            TocIdentifier = "priority-actions",
+            AnchorId      = "priority-actions",
+            Level         = 2,
+            FontName      = StandardFonts.HelveticaBold,
+            FontSize      = 13,
+            TextColor     = ColorPalette.Red[800],
+            Margin        = new Thickness(0, 0, 0, 2),
+        });
+
+        inner.AddChild(new TextBlock
+        {
+            Text      = $"{critical.Count} critical findings require immediate remediation:",
+            FontSize  = 10,
+            TextColor = ColorPalette.Slate[600],
+            Margin    = new Thickness(0, 0, 0, 4),
+        });
+
+        foreach (Finding finding in critical)
+        {
+            HorizontalStack row = new() { Spacing = 4, Margin = new Thickness(0, 0, 0, 2) };
+
+            var link = new SectionLink($"{finding.Id} - {finding.Title}", AnchorFor(finding.Id))
+            {
+                FontName = StandardFonts.HelveticaBold, FontSize = 10.5f, TextColor = ColorPalette.Blue[700],
+            };
+            row.AddChild(link, link.GetPreferredWidth());
+
+            var onPage = new TextBlock { Text = "page", FontSize = 10, TextColor = ColorPalette.Slate[500] };
+            row.AddChild(onPage, onPage.GetPreferredWidth());
+
+            row.AddChild(new PageNumberOf(AnchorFor(finding.Id))
+            {
+                FontName = StandardFonts.HelveticaBold, FontSize = 10, TextColor = ColorPalette.Slate[700],
+            });
+
+            inner.AddChild(row);
+        }
+
+        return new Container
+        {
+            Child           = inner,
+            Padding         = new Thickness(12),
+            BackgroundColor = ColorPalette.Red[50],
+            CornerRadius    = 8,
+            Border          = new Border(1),
+            BorderColors    = new BorderColors(ColorPalette.Red[200]),
+            Margin          = new Thickness(0, 0, 0, 16),
         };
     }
 
@@ -200,6 +299,12 @@ public static class ComplianceFindingsRegisterExample
             Text   = "Findings from the quarterly security and compliance review, ordered by identifier and colour-coded by severity. Each entry records the affected control category, a summary, and the recommended remediation.",
             Margin = new Thickness(0, 0, 0, 16),
         });
+
+        // Executive summary: a clickable index of the Critical findings, each
+        // showing the live page number where the detail card lands (resolved by
+        // two-pass layout). The "jump to detail" pattern real audit reports lead with.
+        Finding[] critical = Array.FindAll(Findings, f => f.Severity == Severity.Critical);
+        doc.Add(PriorityActions(critical));
 
         VerticalStack register = new();
         foreach (Finding finding in Findings)
