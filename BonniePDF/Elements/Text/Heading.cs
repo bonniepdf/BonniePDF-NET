@@ -19,6 +19,16 @@ public class Heading : TextBlock, IStatefulElement, IRoleProvider
     public required string TocIdentifier { get; set; }
 
     /// <summary>
+    /// Optional named-anchor id. When set, this heading doubles as a cross-reference
+    /// target: it records its page number against <see cref="AnchorId"/> in the shared
+    /// TOC registry so a <see cref="Core.SectionLink"/> can jump to it and a
+    /// <see cref="PageNumberOf"/> can print its page. Independent of
+    /// <see cref="TocIdentifier"/> (which drives the on-page <see cref="VisualToc"/>);
+    /// a heading may carry either, both, or neither.
+    /// </summary>
+    public string? AnchorId { get; set; }
+
+    /// <summary>
     /// Heading level (1–6). Maps to PDF/UA structure roles <c>H1</c>…<c>H6</c>
     /// when the document opts into tagging via
     /// <c>DocumentSettings.Accessibility</c>. Default <c>1</c>.
@@ -69,12 +79,23 @@ public class Heading : TextBlock, IStatefulElement, IRoleProvider
     /// <returns>The render status indicating whether the element is complete or overflowed.</returns>
     public override RenderStatus RenderStateful(RenderContext ctx, float width)
     {
-        if (!_tocRegistered)
-        {
-            ctx.TocEntries[TocIdentifier] = ctx.CurrentPageIndex + 1;
-            _tocRegistered = true;
-        }
+        RegisterToc(ctx);
         return base.RenderStateful(ctx, width);
+    }
+
+    /// <summary>
+    /// Records this heading's page number against its <see cref="TocIdentifier"/>
+    /// and, when present, its <see cref="AnchorId"/>, on the first render pass only.
+    /// </summary>
+    private void RegisterToc(RenderContext ctx)
+    {
+        if (_tocRegistered) return;
+        int pageNumber = ctx.CurrentPageIndex + 1;
+        if (!string.IsNullOrEmpty(TocIdentifier))
+            ctx.TocEntries[TocIdentifier] = pageNumber;
+        if (!string.IsNullOrEmpty(AnchorId))
+            ctx.TocEntries[AnchorId] = pageNumber;
+        _tocRegistered = true;
     }
 
     /// <summary>
@@ -95,11 +116,7 @@ public class Heading : TextBlock, IStatefulElement, IRoleProvider
     /// <param name="contentWidth">The available content width after margins.</param>
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
-        if (!_tocRegistered)
-        {
-            ctx.TocEntries[TocIdentifier] = ctx.CurrentPageIndex + 1;
-            _tocRegistered = true;
-        }
+        RegisterToc(ctx);
         base.RenderContent(ctx, contentWidth);
     }
 }
