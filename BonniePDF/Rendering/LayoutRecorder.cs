@@ -32,7 +32,7 @@ namespace BonniePDF.Rendering;
 /// remain compatible.</summary>
 public static class LayoutSnapshotSchema
 {
-    public const int Version = 2;
+    public const int Version = 3;
 }
 
 /// <summary>A single rectangle an element occupied on one page (top-left origin, points).</summary>
@@ -100,6 +100,8 @@ public sealed class LayoutNode
     public string Type { get; init; } = "";
     /// <summary>Optional author-supplied name/key; null when unset.</summary>
     public string? Name { get; init; }
+    /// <summary>Optional opaque source ID supplied by an editor integration.</summary>
+    public string? SourceId { get; init; }
     /// <summary>The rectangles this node occupied — one per page it touched (may be empty).</summary>
     public IList<LayoutRect> Rects { get; } = new List<LayoutRect>();
     /// <summary>Intrinsic accessibility facts, when the element declares a role; null otherwise.</summary>
