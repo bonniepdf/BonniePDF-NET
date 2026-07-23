@@ -17,6 +17,17 @@ namespace BonniePDF.Tests.Content;
 [Collection("Serial")]
 public class AdvancedTypographyTests
 {
+    private static int Count(string haystack, string needle)
+    {
+        int count = 0, idx = 0;
+        while ((idx = haystack.IndexOf(needle, idx, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            idx += needle.Length;
+        }
+        return count;
+    }
+
     private static string AllContentStreams(byte[] bytes)
     {
         string text = Encoding.GetEncoding("ISO-8859-1").GetString(bytes);

@@ -113,11 +113,13 @@ internal static class SvgPageExporter
         for (int i = 0; i < limit; i++)
         {
             PageRenderOutput pageOutput = renderedPages[i];
-            string body = SvgCanvas.ResolveTotalPages(pageOutput.ContentStream, totalPages);
-            // Link overlays go last so they sit above every painted layer and
-            // stay clickable in an SVG host (e.g. @bonniepdf/previewer).
-            body += BuildLinkOverlays(pageOutput.Hyperlinks, pageOutput.Size.Height);
-            results.Add(Assemble(body, i + 1, pageOutput.Size, options, title));
+            string visual = SvgCanvas.ResolveTotalPages(pageOutput.ContentStream, totalPages);
+            // Link overlays are kept OUT of the page body and passed separately so
+            // the assembler can place them above the painted layers while keeping
+            // them outside the page's atomic-image group — an ARIA role="img"
+            // prunes its subtree, so a live <a> nested inside it is invalid.
+            string overlays = BuildLinkOverlays(pageOutput.Hyperlinks, pageOutput.Size.Height);
+            results.Add(Assemble(visual, overlays, i + 1, pageOutput.Size, options, title));
         }
 
         LayoutSnapshot? snapshot = null;
@@ -186,7 +188,7 @@ internal static class SvgPageExporter
     }
 
     /// <summary>
-    /// Emits clickable link overlays for the hyperlinks registered on a page,
+    /// Builds clickable link overlays for the hyperlinks registered on a page,
     /// mirroring the /Link annotations the PDF serializer writes. External links
     /// (<see cref="Hyperlink.Uri"/>) become SVG <c>&lt;a&gt;</c> elements, so they
     /// are live links in any SVG host; internal links
@@ -195,6 +197,14 @@ internal static class SvgPageExporter
     /// @bonniepdf/previewer wires to page navigation. The rects paint nothing
     /// (<c>fill="none"</c>) but hit-test (<c>pointer-events="all"</c>). Hyperlink
     /// render bounds are PDF coordinates (bottom-left origin), so Y is flipped.
+    /// <para>
+    /// Every external <c>&lt;a&gt;</c> carries an <c>aria-label</c> giving it a
+    /// discernible accessible name — the link's visible text, the same value the
+    /// PDF pipeline writes into the annotation <c>/Contents</c> (PDF/UA 7-18) — so
+    /// the link reads identically across the PDF and its SVG preview. Without a
+    /// name an anchor wrapping only an invisible hit-rect is an unnamed link
+    /// (WCAG 2.4.4 / axe <c>link-name</c>).
+    /// </para>
     /// </summary>
     private static string BuildLinkOverlays(IList<Hyperlink> links, float pageHeight)
     {
@@ -213,7 +223,11 @@ internal static class SvgPageExporter
 
             if (!string.IsNullOrEmpty(link.Uri))
             {
-                sb.Append($"<a href=\"{XmlEscape.EscapeAttr(link.Uri)}\" target=\"_blank\" rel=\"noopener\"><rect {rect}/></a>");
+                // Prefer the visible link text; fall back to the URI so the anchor
+                // is never nameless even for links created without display text.
+                string name = string.IsNullOrEmpty(link.Text) ? link.Uri : link.Text;
+                sb.Append($"<a href=\"{XmlEscape.EscapeAttr(link.Uri)}\" target=\"_blank\" rel=\"noopener\" " +
+                          $"aria-label=\"{XmlEscape.EscapeAttr(name)}\"><rect {rect}/></a>");
             }
             else if (link.TargetPageIndex is int page && page >= 0)
             {
@@ -237,17 +251,42 @@ internal static class SvgPageExporter
         return string.IsNullOrEmpty(metaTitle) ? "BonniePDF document" : metaTitle;
     }
 
-    private static string Assemble(string body, int pageNumber, PdfSize size, SvgPageExportOptions options, string title)
+    private static string Assemble(
+        string body, string overlays, int pageNumber, PdfSize size, SvgPageExportOptions options, string title)
     {
         string w = Round(size.Width, options.Precision);
         string h = Round(size.Height, options.Precision);
 
+        // Only external anchors are focusable interactive controls; internal
+        // navigation rects are inert and don't force the model switch below.
+        bool hasInteractiveLinks = overlays.Contains("<a ", StringComparison.Ordinal);
+        string pageLabel = $"{XmlEscape.EscapeAttr(title)} - page {pageNumber}";
+
         StringBuilder sb = new();
         sb.Append($"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{w}\" height=\"{h}\" viewBox=\"0 0 {w} {h}\"");
 
+        string groupAttrs = "";
         if (options.IncludeAccessibilityMetadata)
         {
-            sb.Append($" role=\"img\" aria-label=\"{XmlEscape.EscapeAttr(title)} - page {pageNumber}\"");
+            if (hasInteractiveLinks)
+            {
+                // Model: "labelled image + named links". A page carrying live links
+                // cannot be a single atomic image — ARIA role="img" prunes its
+                // subtree, so a focusable <a> inside it is both invisible to AT and
+                // an invalid nesting (axe nested-interactive). Instead the root
+                // stays an unpruned graphics container named via aria-label; the
+                // painted page becomes an aria-hidden visual layer (its accessible
+                // name is the root's label, exactly as the atomic-image model
+                // presented it); and the link overlays ride above it as real,
+                // individually-named <a> siblings.
+                sb.Append($" aria-label=\"{pageLabel}\"");
+                groupAttrs = " aria-hidden=\"true\"";
+            }
+            else
+            {
+                // No interactive links: keep the whole page as one atomic labelled image.
+                sb.Append($" role=\"img\" aria-label=\"{pageLabel}\"");
+            }
         }
         sb.Append('>');
 
@@ -256,9 +295,14 @@ internal static class SvgPageExporter
             sb.Append($"<title>{XmlEscape.EscapeXml(title + " - page " + pageNumber)}</title>");
         }
 
-        sb.Append($"<g id=\"page-{pageNumber}\" data-bonniepdf-page=\"{pageNumber}\">");
+        sb.Append($"<g id=\"page-{pageNumber}\" data-bonniepdf-page=\"{pageNumber}\"{groupAttrs}>");
         sb.Append(body);
-        sb.Append("</g></svg>");
+        sb.Append("</g>");
+        // Overlays sit after (above) the visual group and, crucially, outside it —
+        // so external anchors are valid, focusable, named siblings of the page
+        // image rather than pruned descendants of it.
+        sb.Append(overlays);
+        sb.Append("</svg>");
         return sb.ToString();
     }
 
