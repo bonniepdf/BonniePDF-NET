@@ -290,9 +290,22 @@ public class SvgPageExportTests
         doc.Add(new Hyperlink("https://www.bonniepdf.dev/docs", "Visit the docs"));
 
         string svg = doc.GenerateSvgPages()[0];
-        Assert.Contains("<a href=\"https://www.bonniepdf.dev/docs\" target=\"_blank\" rel=\"noopener\">", svg, StringComparison.Ordinal);
+        Assert.Contains("<a href=\"https://www.bonniepdf.dev/docs\" target=\"_blank\" rel=\"noopener\"", svg, StringComparison.Ordinal);
         // The clickable area paints nothing but hit-tests across the link's bounds.
         Assert.Matches("<a [^>]*><rect [^>]*fill=\"none\" pointer-events=\"all\"/></a>", svg);
+    }
+
+    [Fact]
+    public void ExternalHyperlink_NamesAnchorWithLinkText()
+    {
+        // The anchor carries an accessible name equal to the visible link text, so
+        // a screen reader announces the same thing the PDF /Link annotation does
+        // (parity with the annotation /Contents, PDF/UA 7-18).
+        var doc = new BonniePDF.Document();
+        doc.Add(new Hyperlink("https://www.bonniepdf.dev/docs", "Visit the docs"));
+
+        string svg = doc.GenerateSvgPages()[0];
+        Assert.Matches("<a href=\"[^\"]*\" target=\"_blank\" rel=\"noopener\" aria-label=\"Visit the docs\">", svg);
     }
 
     [Fact]
@@ -303,6 +316,46 @@ public class SvgPageExportTests
 
         string svg = doc.GenerateSvgPages()[0];
         Assert.Contains("href=\"https://example.com/?a=1&amp;b=&quot;two&quot;\"", svg, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void HyperlinkAccessibleName_IsEscapedInAriaLabel()
+    {
+        var doc = new BonniePDF.Document();
+        doc.Add(new Hyperlink("https://example.com/terms", "Terms & \"Conditions\""));
+
+        string svg = doc.GenerateSvgPages()[0];
+        Assert.Contains("aria-label=\"Terms &amp; &quot;Conditions&quot;\"", svg, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PageWithLinks_IsLabelledImagePlusNamedSiblings_NotRoleImgOverLiveLinks()
+    {
+        // A page carrying focusable <a> links must NOT be an atomic image: ARIA
+        // role="img" prunes its subtree, which both hides and invalidates the links.
+        var doc = new BonniePDF.Document();
+        doc.Add(new Hyperlink("https://www.bonniepdf.dev/docs", "Visit the docs"));
+
+        string svg = doc.GenerateSvgPages()[0];
+        // Root is a named graphics container, not an atomic image.
+        Assert.Contains("aria-label=\"BonniePDF document - page 1\"", svg, StringComparison.Ordinal);
+        Assert.DoesNotContain("role=\"img\"", svg, StringComparison.Ordinal);
+        // The painted page is the aria-hidden visual layer; its label comes from root.
+        Assert.Contains("<g id=\"page-1\" data-bonniepdf-page=\"1\" aria-hidden=\"true\">", svg, StringComparison.Ordinal);
+        // The link is a sibling of that group (outside it), not a pruned descendant.
+        Assert.True(svg.IndexOf("<a ", StringComparison.Ordinal) > svg.IndexOf("</g>", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void LinkFreePage_KeepsAtomicImageModel()
+    {
+        var doc = new BonniePDF.Document();
+        doc.Add(new TextBlock { Text = "Hello, SVG world!", FontSize = 14 });
+
+        string svg = doc.GenerateSvgPages()[0];
+        Assert.Contains("role=\"img\"", svg, StringComparison.Ordinal);
+        Assert.Contains("<g id=\"page-1\" data-bonniepdf-page=\"1\">", svg, StringComparison.Ordinal);
+        Assert.DoesNotContain("aria-hidden=\"true\"", svg, StringComparison.Ordinal);
     }
 
     [Fact]
