@@ -225,7 +225,7 @@ public static class ComplianceFindingsRegisterExample
 
             var link = new SectionLink($"{finding.Id} - {finding.Title}", AnchorFor(finding.Id))
             {
-                FontName = StandardFonts.HelveticaBold, FontSize = 10.5f, TextColor = ColorPalette.Blue[700],
+                FontName = StandardFonts.HelveticaBold, FontSize = 10, TextColor = ColorPalette.Blue[700],
             };
             row.AddChild(link, link.GetPreferredWidth());
 
