@@ -1,5 +1,4 @@
 <Solution>
-  <Project Path="BonniePDF.Demo/BonniePDF.Demo.csproj" />
   <Project Path="BonniePDF.Tests/BonniePDF.Tests.csproj" />
   <Project Path="BonniePDF/BonniePDF.csproj" />
 
@@ -17,7 +16,7 @@
     <Project Path="Examples/BonniePDF.Examples.Typography.DickensNovel/BonniePDF.Examples.Typography.DickensNovel.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Typography.EmojisAndUnicode/BonniePDF.Examples.Typography.EmojisAndUnicode.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Typography.RichTextStyles/BonniePDF.Examples.Typography.RichTextStyles.csproj" />
-    <Project Path="Examples/BonniePDF.Examples.Typography.TextAlignment/BonniePDF.Examples.Typography.TextAlignment.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Typography.Alignment/BonniePDF.Examples.Typography.Alignment.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Typography.TextDecorations/BonniePDF.Examples.Typography.TextDecorations.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Elements.Hyperlinks/BonniePDF.Examples.Elements.Hyperlinks.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Elements.Images/BonniePDF.Examples.Elements.Images.csproj" />
