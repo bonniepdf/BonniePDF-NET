@@ -19,7 +19,7 @@ namespace BonniePDF.Examples.Templates.AttachedData;
 ///
 /// <para>Validated in CI by veraPDF as PDF/A-3b.</para>
 /// </summary>
-[System.ComponentModel.DisplayName("Report with embedded source data")]
+[System.ComponentModel.DisplayName("Report with Embedded Data")]
 [System.ComponentModel.Category("Templates")]
 [System.ComponentModel.Description("A PDF/A-3 report that embeds its underlying CSV data as an associated file (/AFRelationship /Source) for reproducibility.")]
 public static class AttachedDataExample
@@ -49,7 +49,7 @@ public static class AttachedDataExample
 
         doc.Metadata.Title = "Quarterly revenue 2026";
         doc.Metadata.Author = "BonniePDF";
-        doc.Metadata.Subject = "PDF/A-3 report with embedded source data";
+        doc.Metadata.Subject = "PDF/A-3 Report with Embedded Data";
 
         doc.Add(Tb("Quarterly revenue - 2026", 18, Ink, bold: true, bottom: 4));
         doc.Add(Tb("The source data for this report is embedded as quarterly-revenue.csv.", 9, Mute, bottom: 16));

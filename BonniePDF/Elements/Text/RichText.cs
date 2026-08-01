@@ -63,7 +63,10 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         _spans.Add(new TextSpan
         {
             Text = text,
-            Style = style
+            // Snapshot the style: the fluent builders mutate and return `this`,
+            // so a style shared across spans and mutated between them would
+            // otherwise leak its final state onto every span that references it.
+            Style = style?.Clone()
         });
         InvalidateCache();
         return this;
@@ -87,7 +90,8 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         _spans.Add(new TextSpan
         {
             Text = text,
-            Style = style,
+            // Snapshot the style - see Span() for why.
+            Style = style?.Clone(),
             IsLineBreak = true
         });
         InvalidateCache();
