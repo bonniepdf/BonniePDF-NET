@@ -260,6 +260,48 @@ public class RichTextTests
         Assert.Equal(new[] { "one", "two" }, canvas2.Texts.Select(t => t.Text));
     }
 
+    // Style snapshotting: the fluent builders mutate and return `this`, so a
+    // style shared across spans and mutated between them must not leak its final
+    // state back onto earlier spans. Shared conformance behaviour — the
+    // TypeScript sibling asserts the same in richtext.test.ts.
+    [Fact]
+    public void Span_SnapshotsStyleAtCallTime_ImmuneToLaterMutation()
+    {
+        TextStyle shared = new TextStyle().WithSize(9);
+        (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
+
+        RichText rt = new RichText().Span("first", shared);
+        shared.WithSize(30); // mutate the shared style after the first span
+        rt.Span("second", shared);
+        rt.Render(ctx, 5000);
+
+        var sizes = canvas.Texts.Select(t => t.FontSize).ToList();
+        // The first span kept size 9; the second is 30. The aliasing bug
+        // produced [30, 30] (no 9).
+        Assert.Contains(9f, sizes);
+        Assert.Contains(30f, sizes);
+    }
+
+    [Fact]
+    public void Clone_ReturnsIndependentCopy()
+    {
+        TextStyle a = new TextStyle().WithSize(10).WithColor(Color.Red).Bold();
+        a.Italic = true;
+
+        TextStyle b = a.Clone();
+        Assert.Equal(10, b.FontSize);
+        Assert.Equal(Color.Red, b.Color);
+        Assert.Equal(FontWeight.Bold, b.Weight);
+        Assert.True(b.Italic);
+
+        // Mutating the original must not touch the clone.
+        a.WithSize(20).WithColor(Color.Black);
+        a.Italic = false;
+        Assert.Equal(10, b.FontSize);
+        Assert.Equal(Color.Red, b.Color);
+        Assert.True(b.Italic);
+    }
+
     /// <summary>Canvas that captures structured draw calls so geometry can be asserted exactly.</summary>
     private sealed class RecordingCanvas : ICanvas
     {

@@ -8,7 +8,7 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating report with embedded source data...");
+        Console.WriteLine("Generating Report with Embedded Data...");
         using (var doc = AttachedDataExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "attached-data.pdf"));
