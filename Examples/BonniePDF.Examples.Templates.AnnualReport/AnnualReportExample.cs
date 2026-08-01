@@ -16,7 +16,7 @@ namespace BonniePDF.Examples.Templates.AnnualReport;
 /// header/footer slots carry the BonniePDF mark, generation time, and page
 /// numbers around the flowing report content.
 /// </summary>
-[System.ComponentModel.DisplayName("Annual Report")]
+[System.ComponentModel.DisplayName("Annual - Classic")]
 [System.ComponentModel.Category("Templates")]
 [System.ComponentModel.Description("A4 portrait annual report with a full-bleed cover, page backgrounds, and blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers.")]
 public static class AnnualReportExample

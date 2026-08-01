@@ -13,7 +13,7 @@ namespace BonniePDF.Examples.Templates.PublicLibraryMembershipLetter;
 /// masthead, membership details, borrowing limits, branch opening hours, and an
 /// alternative-formats notice. It deliberately avoids real government branding.
 /// </summary>
-[System.ComponentModel.DisplayName("Public Library Membership Letter")]
+[System.ComponentModel.DisplayName("Public Library Membership")]
 [System.ComponentModel.Category("Community")]
 [System.ComponentModel.Description("Fictional UK public-library membership confirmation with local-service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice. PDF/A-2a + PDF/UA-1.")]
 public static class PublicLibraryMembershipLetterExample

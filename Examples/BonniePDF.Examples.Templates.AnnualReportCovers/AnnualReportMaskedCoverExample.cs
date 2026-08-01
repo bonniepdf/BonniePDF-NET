@@ -17,7 +17,7 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 /// polygon path fed to <see cref="ICanvas.ClipToCurrentPath"/>.
 ///
 /// </summary>
-[System.ComponentModel.DisplayName("Annual Report Cover - Masked Image")]
+[System.ComponentModel.DisplayName("Annual - Masked")]
 [System.ComponentModel.Category("Templates")]
 [System.ComponentModel.Description("A two-page annual report. Page 1 is the classic photographic cover: a full-width hero image clipped to an angled mask cutting into a green title band with a gold seam. Page 2 is the \"inside the report\" spread - KPI band, quarterly-revenue column chart, revenue-by-segment donut, and a financial-summary table.")]
 public static class AnnualReportMaskedCoverExample

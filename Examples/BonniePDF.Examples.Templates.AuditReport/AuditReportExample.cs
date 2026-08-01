@@ -15,7 +15,7 @@ namespace BonniePDF.Examples.Templates.AuditReport;
 /// executive summary, KPI tiles, control-status charts, findings register, and
 /// confidential running header/footer.
 /// </summary>
-[System.ComponentModel.DisplayName("Compliance Audit Report (GDPR / ISO 27001)")]
+[System.ComponentModel.DisplayName("GDPR ISO 27001 Audit Report")]
 [System.ComponentModel.Category("Compliance")]
 [System.ComponentModel.Description("Enterprise data-protection and security audit report with running confidential header/footer, KPI tiles, charts, findings register, and recommendations. PDF/A-2a + PDF/UA-1.")]
 public static class AuditReportExample

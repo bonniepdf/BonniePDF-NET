@@ -10,19 +10,19 @@ internal sealed class Program
 
         var assets = LoadAssets(FindAssetsDir(), "images/sean-pollock-PhYq704ffdA-unsplash.jpg");
 
-        Console.WriteLine("Generating Annual Report Cover - Gradient...");
+        Console.WriteLine("Generating Annual - Gradient...");
         using (var doc = AnnualReportGradientCoverExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "annual_report_gradient_cover.pdf"));
         }
 
-        Console.WriteLine("Generating Annual Report Cover - Masked Image...");
+        Console.WriteLine("Generating Annual - Masked...");
         using (var doc = AnnualReportMaskedCoverExample.Generate(assets))
         {
             doc.Save(Path.Combine(outputDir, "annual_report_masked_cover.pdf"));
         }
 
-        Console.WriteLine("Generating Annual Report Cover - Geometric...");
+        Console.WriteLine("Generating Annual - Geometric...");
         using (var doc = AnnualReportGeometricCoverExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "annual_report_geometric_cover.pdf"));

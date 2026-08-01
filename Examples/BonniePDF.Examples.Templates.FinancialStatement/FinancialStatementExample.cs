@@ -13,7 +13,7 @@ namespace BonniePDF.Examples.Templates.FinancialStatement;
 /// prior-year comparatives, note references, bracketed negatives, and subtotal
 /// rules. Amounts are shown in GBP thousands.
 /// </summary>
-[System.ComponentModel.DisplayName("Statutory Financial Statements (IFRS)")]
+[System.ComponentModel.DisplayName("IFRS Financial Statements")]
 [System.ComponentModel.Category("Reports")]
 [System.ComponentModel.Description("UK/EU statutory financial statements in an IFRS-style format: income statement and financial position with comparatives, note references, bracketed negatives, and subtotal rules.")]
 public static class FinancialStatementExample

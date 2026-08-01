@@ -20,7 +20,7 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 /// full-page element, so the artwork bleeds to every paper edge - exactly how a
 /// printed report cover is laid out.
 /// </summary>
-[System.ComponentModel.DisplayName("Annual Report Cover - Gradient")]
+[System.ComponentModel.DisplayName("Annual - Gradient")]
 [System.ComponentModel.Category("Templates")]
 [System.ComponentModel.Description("A two-page annual report. Page 1 is a full-bleed cover drawn on the vector surface (indigo-to-fuchsia gradient, radial glow, diagonal accent rules, rotated brand mark, canvas-drawn type); page 2 is the \"inside the report\" spread - KPI band, quarterly-revenue column chart, revenue-by-segment donut, and a financial-summary table.")]
 public static class AnnualReportGradientCoverExample

@@ -13,8 +13,8 @@ namespace BonniePDF.Examples.Templates.EdgeReceipt;
 /// equivalent is designed for browser and edge runtimes; this .NET version keeps
 /// the document model, native-vector QR code, and Code 128 barcode in parity.
 /// </summary>
-[System.ComponentModel.DisplayName("Edge Receipt")]
-[System.ComponentModel.Category("Edge")]
+[System.ComponentModel.DisplayName("Point-of-Sale Receipt")]
+[System.ComponentModel.Category("Retail")]
 [System.ComponentModel.Description("Point-of-sale receipt on a custom 80mm thermal-printer page, in Courier with a native vector QR digital-receipt link and a Code 128 order barcode. PDF/A-2a + PDF/UA-1.")]
 public static class EdgeReceiptExample
 {

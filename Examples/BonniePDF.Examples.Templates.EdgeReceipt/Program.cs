@@ -8,7 +8,7 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating Edge Receipt...");
+        Console.WriteLine("Generating Point-of-Sale Receipt...");
         using (var doc = EdgeReceiptExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "edge_receipt.pdf"));

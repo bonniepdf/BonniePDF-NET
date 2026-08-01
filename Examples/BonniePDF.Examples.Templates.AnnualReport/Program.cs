@@ -11,7 +11,7 @@ internal sealed class Program
         string assetsDir = FindAssetsDir();
         var assets = LoadAssets(assetsDir, "images/sean-pollock-PhYq704ffdA-unsplash.jpg");
 
-        Console.WriteLine("Generating Annual Report...");
+        Console.WriteLine("Generating Annual - Classic...");
         using (var doc = AnnualReportExample.Generate(assets))
         {
             doc.Save(Path.Combine(outputDir, "annual_report.pdf"));

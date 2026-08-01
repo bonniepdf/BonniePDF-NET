@@ -8,7 +8,7 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating Public Library Membership Letter...");
+        Console.WriteLine("Generating Public Library Membership...");
         using (var doc = PublicLibraryMembershipLetterExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "public_library_membership_letter.pdf"));
