@@ -91,7 +91,7 @@ public static class DocumentSettingsExtensions
     public static DocumentSettings WithWatermark(this DocumentSettings settings, string text)
     {
         if (settings == null) throw new ArgumentNullException(nameof(settings));
-        settings.Watermark = new WatermarkSettings { Text = text };
+        settings.Watermark = new Watermark { Text = text };
         return settings;
     }
 
@@ -102,7 +102,7 @@ public static class DocumentSettingsExtensions
         float opacity, float rotationDegrees)
     {
         if (settings == null) throw new ArgumentNullException(nameof(settings));
-        settings.Watermark = new WatermarkSettings
+        settings.Watermark = new Watermark
         {
             Text = text,
             Opacity = opacity,

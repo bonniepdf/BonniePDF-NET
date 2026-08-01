@@ -32,7 +32,7 @@ public static class WatermarkConfidentialExample
         doc.Metadata.Author = "BonniePDF";
 
         // Custom watermark: red, larger, steeper angle
-        doc.Settings.Watermark = new WatermarkSettings
+        doc.Settings.Watermark = new Watermark
         {
             Text = "CONFIDENTIAL",
             FontSize = 60,

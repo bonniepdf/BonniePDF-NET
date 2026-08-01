@@ -159,7 +159,7 @@ public class SvgPageExportTests
     public void Watermark_RendersOverContent()
     {
         var doc = SimpleDoc();
-        doc.Settings.Watermark = new WatermarkSettings { Text = "DRAFT" };
+        doc.Settings.Watermark = new Watermark { Text = "DRAFT" };
         string svg = doc.GenerateFirstPageSvg();
         Assert.Contains("DRAFT", svg, StringComparison.Ordinal);
         Assert.Contains("rotate(45", svg, StringComparison.Ordinal); // default -45deg negated for SVG
