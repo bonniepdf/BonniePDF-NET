@@ -78,7 +78,7 @@ public class PageSlotsLayersTests
         using BonniePDF.Document doc = new();
         doc.Add(Text("BODYMARKER"));
         doc.Settings.PageBackground = _ => Text("BACKGROUNDMARKER");
-        doc.Settings.Watermark = new WatermarkSettings { Text = "WMARK" };
+        doc.Settings.Watermark = new Watermark { Text = "WMARK" };
 
         string stream = RenderPageStream(doc);
         Assert.True(stream.IndexOf("BACKGROUNDMARKER") < stream.IndexOf("WMARK"));
@@ -89,7 +89,7 @@ public class PageSlotsLayersTests
     {
         using BonniePDF.Document doc = new();
         doc.Add(Text("BODYMARKER"));
-        doc.Settings.Watermark = new WatermarkSettings { Text = "WMARK" };
+        doc.Settings.Watermark = new Watermark { Text = "WMARK" };
         doc.Settings.PageForeground = _ => Text("FOREGROUNDMARKER");
 
         string stream = RenderPageStream(doc);

@@ -416,7 +416,7 @@ public static class PdfRenderPipeline
             return;
         }
 
-        WatermarkSettings wm = settings.Watermark;
+        Watermark wm = settings.Watermark;
 
         // Register the watermark font so it gets a resource name and is included in the PDF
         string fontResourceName = ctx.RegisterFont(wm.FontName);
@@ -498,7 +498,7 @@ public static class PdfRenderPipeline
     /// paints on top of content. Mirrors the PDF watermark: centred, rotated,
     /// semi-transparent text.
     /// </summary>
-    private static void RenderWatermarkSvg(RenderContext ctx, WatermarkSettings wm, int pageIndex,
+    private static void RenderWatermarkSvg(RenderContext ctx, Watermark wm, int pageIndex,
         float pageWidth, float pageHeight)
     {
         float cx = pageWidth / 2f;

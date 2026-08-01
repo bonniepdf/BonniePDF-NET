@@ -270,7 +270,7 @@ public class DocumentSettings
     /// Gets or sets the watermark settings for the document.
     /// When null, no watermark is rendered.
     /// </summary>
-    public WatermarkSettings? Watermark { get; set; }
+    public Watermark? Watermark { get; set; }
 
     /// <summary>
     /// Gets or sets the encryption settings for the document.

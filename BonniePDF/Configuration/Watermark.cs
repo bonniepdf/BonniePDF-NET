@@ -7,7 +7,7 @@ namespace BonniePDF.Configuration;
 /// The watermark is rendered at the specified opacity and rotation using
 /// PDF ExtGState for transparency and the cm operator for rotation.
 /// </summary>
-public class WatermarkSettings
+public class Watermark
 {
     /// <summary>
     /// The watermark text to display (e.g. "DRAFT", "CONFIDENTIAL").
