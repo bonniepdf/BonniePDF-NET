@@ -88,7 +88,7 @@
     <ram:ApplicableHeaderTradeAgreement>
       <ram:BuyerReference>PO-2026-042</ram:BuyerReference>
       <ram:SellerTradeParty>
-        <ram:Name>BonniePDF GmbH</ram:Name>
+        <ram:Name>Sample Company GmbH</ram:Name>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>10115</ram:PostcodeCode>
           <ram:LineOne>Musterstrasse 1</ram:LineOne>
@@ -100,7 +100,7 @@
         </ram:SpecifiedTaxRegistration>
       </ram:SellerTradeParty>
       <ram:BuyerTradeParty>
-        <ram:Name>Contoso Ltd</ram:Name>
+        <ram:Name>Sample Customer</ram:Name>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>EC1A 1BB</ram:PostcodeCode>
           <ram:LineOne>1 Example Way</ram:LineOne>

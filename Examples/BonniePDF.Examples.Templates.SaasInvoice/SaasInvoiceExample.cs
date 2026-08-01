@@ -42,12 +42,12 @@ public static class SaasInvoiceExample
         });
 
         doc.Metadata.Title = "Invoice INV-2026-0042";
-        doc.Metadata.Author = "Northwind Cloud Ltd";
+        doc.Metadata.Author = "Sample Company Ltd";
         doc.Metadata.Subject = "Subscription invoice - accessible (PDF/UA) and archival (PDF/A-2a)";
 
         // ── Header: brand + invoice meta ──────────────────────────────────────
         VerticalStack brand = new();
-        brand.AddChild(Tb("NORTHWIND CLOUD", 15, Brand, bold: true));
+        brand.AddChild(Tb("SAMPLE COMPANY", 15, Brand, bold: true));
         brand.AddChild(Tb("Infrastructure for builders", 9, Mute));
 
         VerticalStack meta = new();
@@ -66,12 +66,12 @@ public static class SaasInvoiceExample
         // ── Bill-to / from ────────────────────────────────────────────────────
         VerticalStack billTo = new();
         billTo.AddChild(Tb("BILLED TO", 8, Mute, bold: true, bottom: 4));
-        billTo.AddChild(Tb("Aperture Labs Inc.", 10, Ink, bold: true));
-        billTo.AddChild(Tb("Accounts Payable\n19 Enfield Road, London N1 5BA\nbilling@aperture.example", 9, BodyCol));
+        billTo.AddChild(Tb("Sample Customer Ltd", 10, Ink, bold: true));
+        billTo.AddChild(Tb("Accounts Payable\n19 Enfield Road, London N1 5BA\nbilling@example.com", 9, BodyCol));
 
         VerticalStack from = new();
         from.AddChild(Tb("FROM", 8, Mute, bold: true, bottom: 4, align: TextAlignment.Right));
-        from.AddChild(Tb("Northwind Cloud Ltd", 10, Ink, bold: true, align: TextAlignment.Right));
+        from.AddChild(Tb("Sample Company Ltd", 10, Ink, bold: true, align: TextAlignment.Right));
         from.AddChild(Tb("4 Tenter Ground, London E1 7NH\nVAT GB 482 9173 55", 9, BodyCol, align: TextAlignment.Right));
 
         Grid addr = new(1f, 1f)
@@ -138,14 +138,14 @@ public static class SaasInvoiceExample
 
         VerticalStack payInfo = new();
         payInfo.AddChild(Tb("Pay by bank transfer or scan to pay", 10, Ink, bold: true, bottom: 6));
-        payInfo.AddChild(Tb("Account name  Northwind Cloud Ltd", 9, BodyCol, bottom: 2));
+        payInfo.AddChild(Tb("Account name  Sample Company Ltd", 9, BodyCol, bottom: 2));
         payInfo.AddChild(Tb("Sort code  04-00-72    Account  19483055", 9, BodyCol, bottom: 2));
         payInfo.AddChild(Tb("Reference  INV-2026-0042", 9, BodyCol, bottom: 2));
         payInfo.AddChild(Tb("Amount  " + Money(total), 9, Ink, bold: true));
 
         QRCode qr = new()
         {
-            Data = "https://pay.northwind.example/inv/INV-2026-0042",
+            Data = "https://pay.example.com/inv/INV-2026-0042",
             Size = 96,
             QuietZone = 1,
             ErrorCorrection = QrErrorCorrection.Medium,

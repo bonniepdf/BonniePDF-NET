@@ -45,11 +45,11 @@ public static class EdgeReceiptExample
         settings.DefaultTextStyle = new TextStyle().WithFamily("Courier").WithSize(9).WithColor(Ink);
 
         Document doc = new(settings);
-        doc.Metadata.Title = $"Receipt #{OrderNo} - Northwind Coffee";
-        doc.Metadata.Author = "Northwind Coffee";
+        doc.Metadata.Title = $"Receipt #{OrderNo} - Sample Coffee";
+        doc.Metadata.Author = "Sample Coffee";
         doc.Metadata.Subject = "Point-of-sale receipt generated locally with BonniePDF.";
 
-        doc.Add(new Heading("NORTHWIND COFFEE")
+        doc.Add(new Heading("SAMPLE COFFEE")
         {
             Level = 1,
             FontName = StandardFonts.CourierBold,
@@ -88,7 +88,7 @@ public static class EdgeReceiptExample
 
         QRCode qr = new()
         {
-            Data = $"https://receipts.northwind.example/r/{OrderNo}",
+            Data = $"https://receipts.example.com/r/{OrderNo}",
             Size = 108,
             QuietZone = 1,
             ErrorCorrection = QrErrorCorrection.Medium,

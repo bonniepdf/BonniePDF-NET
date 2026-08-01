@@ -1,6 +1,6 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Lists;
 using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
@@ -8,13 +8,14 @@ using BonniePDF.Typography;
 namespace BonniePDF.Examples.Basics.SimpleDocument;
 
 /// <summary>
-/// The core high-level Document API - three pages of text, spacers, and a
+/// The core high-level Document API - three pages of text, structured spacing, and a
 /// custom square page - authored as an accessible, archival PDF by default:
 /// <c>Conformance = PdfA2a</c> + <c>Accessibility = PdfUa1</c>. Headings use
 /// the semantic <see cref="Heading"/> element so they surface as
 /// <c>H1</c>..<c>H2</c> in the structure tree; body copy picks up implicit
-/// <c>P</c> tagging from <see cref="TextBlock"/>; the <see cref="QRCode"/>
-/// becomes a <c>Figure</c> with alt-text.
+/// <c>P</c> tagging from <see cref="TextBlock"/>; the feature list emits
+/// <c>L</c> &gt; <c>LI</c> &gt; <c>Lbl</c> + <c>LBody</c>; the
+/// <see cref="QRCode"/> becomes a <c>Figure</c> with alt-text.
 /// </summary>
 [System.ComponentModel.DisplayName("Simple Document")]
 [System.ComponentModel.Category("Basics")]
@@ -65,10 +66,9 @@ public static class SimpleDocumentExample
         // Body text uses DefaultTextStyle (family=Helvetica, size=12, color=Slate600)
         doc.Add(new TextBlock
         {
-            Text = "This PDF was created using the high-level Document API."
+            Text = "This PDF was created using the high-level Document API.",
+            Margin = new Thickness(0, 0, 0, 16)
         });
-
-        doc.Add(new Spacer(16));
 
         doc.Add(new Heading("Key Features")
         {
@@ -80,26 +80,32 @@ public static class SimpleDocumentExample
             Margin = new Thickness(0, 0, 0, 6)
         });
 
-        VerticalStack features = new();
-        features.AddChild(new TextBlock { Text = "- Simple, intuitive API", FontSize = 11 });
-        features.AddChild(new TextBlock { Text = "- Built-in metadata support", FontSize = 11 });
-        features.AddChild(new TextBlock { Text = "- Configurable zoom levels", FontSize = 11 });
-        features.AddChild(new TextBlock { Text = "- Viewer preferences", FontSize = 11 });
-        features.AddChild(new TextBlock { Text = "- Automatic page management", FontSize = 11 });
+        UnorderedList features = new()
+        {
+            FontSize = 11,
+            ItemSpacing = 2
+        };
+        features.AddItem("Simple, intuitive API");
+        features.AddItem("Built-in metadata support");
+        features.AddItem("Configurable zoom levels");
+        features.AddItem("Viewer preferences");
+        features.AddItem("Automatic page management");
 
         doc.Add(features);
 
         // ── Divider, then the accessibility note ──
-        doc.Add(new Spacer(16));
-        doc.Add(new Line { Thickness = 1, Color = ColorPalette.Slate[300] });
-        doc.Add(new Spacer(16));
+        doc.Add(new Line
+        {
+            Thickness = 1,
+            Color = ColorPalette.Slate[300],
+            Margin = new Thickness(0, 16, 0, 16)
+        });
 
         doc.Add(new TextBlock
         {
-            Text = "Existing elements (Heading, TextBlock, Image, QRCode) tag themselves automatically - no semantic verbs required."
+            Text = "Existing elements (Heading, TextBlock, UnorderedList, Image, QRCode) tag themselves automatically - no semantic verbs required.",
+            Margin = new Thickness(0, 0, 0, 16)
         });
-
-        doc.Add(new Spacer(16));
 
         doc.Add(new Heading("Scan to verify")
         {

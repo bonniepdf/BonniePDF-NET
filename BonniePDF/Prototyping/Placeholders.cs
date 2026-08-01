@@ -85,9 +85,9 @@ public class PlaceholderSource(int seed)
 
     private static readonly string[] CompanyNames =
     [
-        "Meridian Labs", "Studio Eleven", "Acme Corporation", "Northwind Traders",
-        "Contoso Ltd", "Alpine Software", "Lunar Industries", "Verdant Solutions",
-        "Pinnacle Systems", "Cobalt Dynamics",
+        "Sample Company", "Sample Customer", "Sample Supplier", "Sample Software",
+        "Sample Industries", "Sample Solutions", "Sample Systems", "Sample Services",
+        "Sample Retail", "Sample Group",
     ];
 
     private static readonly string[] LoremSentences =

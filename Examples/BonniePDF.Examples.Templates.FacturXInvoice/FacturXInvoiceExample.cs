@@ -60,7 +60,7 @@ public static class FacturXInvoiceExample
         });
 
         doc.Metadata.Title = "E-Invoice INV-2026-1001";
-        doc.Metadata.Author = "BonniePDF GmbH";
+        doc.Metadata.Author = "Sample Company GmbH";
         doc.Metadata.Subject =
             "EU e-invoice (Factur-X / ZUGFeRD, EN 16931): a PDF/A-3 invoice with the machine-readable CII XML embedded as an associated file.";
 
@@ -69,7 +69,7 @@ public static class FacturXInvoiceExample
 
         // ── Header ────────────────────────────────────────────────────────────
         VerticalStack seller = new();
-        seller.AddChild(Cell("BonniePDF GmbH", size: 16, bold: true, color: Ink, margin: new Thickness(0, 0, 0, 2)));
+        seller.AddChild(Cell("Sample Company GmbH", size: 16, bold: true, color: Ink, margin: new Thickness(0, 0, 0, 2)));
         AddLines(seller, Muted, "Musterstrasse 1", "10115 Berlin", "Germany");
         seller.AddChild(Cell("USt-IdNr. DE 123 456 789", bold: true, color: Accent, margin: new Thickness(0, 6, 0, 0)));
 
@@ -97,7 +97,7 @@ public static class FacturXInvoiceExample
             Margin = new Thickness(0, 0, 0, 18),
         };
         meta.AddRow(
-            Labelled("BILLED TO", Lines(Muted, "Contoso Ltd", "1 Example Way", "EC1A 1BB London", "United Kingdom"), Accent),
+            Labelled("BILLED TO", Lines(Muted, "Sample Customer", "1 Example Way", "EC1A 1BB London", "United Kingdom"), Accent),
             Labelled("DETAILS", details, Accent));
         root.AddChild(meta);
 

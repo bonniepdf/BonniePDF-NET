@@ -49,7 +49,7 @@ public static class UkVatInvoiceExample
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(Ink);
 
         doc.Metadata.Title = $"VAT Invoice INV-UK-{year}-0311";
-        doc.Metadata.Author = "Thornbury & Vale Ltd";
+        doc.Metadata.Author = "Sample Company Ltd";
         doc.Metadata.Subject = "UK VAT invoice with a per-rate VAT breakdown (standard, reduced, zero).";
 
         VerticalStack root = new();
@@ -57,7 +57,7 @@ public static class UkVatInvoiceExample
 
         // ── Header ────────────────────────────────────────────────────────────
         VerticalStack seller = new();
-        seller.AddChild(Cell("Thornbury & Vale Ltd", size: 16, bold: true, color: Ink, margin: new Thickness(0, 0, 0, 2)));
+        seller.AddChild(Cell("Sample Company Ltd", size: 16, bold: true, color: Ink, margin: new Thickness(0, 0, 0, 2)));
         AddLines(seller, Muted, "Unit 7, Kingswood Business Park", "Bristol BS15 8NY", "United Kingdom");
 
         seller.AddChild(Cell("VAT Reg. No. GB 218 4471 09", bold: true, color: Accent, margin: new Thickness(0, 6, 0, 0)));
@@ -93,7 +93,7 @@ public static class UkVatInvoiceExample
             Margin = new Thickness(0, 0, 0, 18),
         };
         meta.AddRow(
-            Labelled("INVOICE TO", Lines(Muted, "Harbourside Leisure plc", "Finance Department", "4 Waterfront Square", "Cardiff CF10 4PA"), Accent),
+            Labelled("INVOICE TO", Lines(Muted, "Sample Customer PLC", "Finance Department", "4 Waterfront Square", "Cardiff CF10 4PA"), Accent),
             Labelled("DETAILS", details, Accent));
         root.AddChild(meta);
 

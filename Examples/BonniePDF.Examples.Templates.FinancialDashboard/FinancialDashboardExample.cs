@@ -58,7 +58,7 @@ public static class FinancialDashboardExample
         string generated = $"Generated {today:d MMMM yyyy}";
 
         doc.Metadata.Title = title;
-        doc.Metadata.Author = "Acme Corporation";
+        doc.Metadata.Author = "Sample Company";
         doc.Metadata.Subject = $"{quarterLabel} financial dashboard - KPIs, monthly revenue chart, and product breakdown";
 
         // ════════════════════════════════════════════════════════════════════════
@@ -68,7 +68,7 @@ public static class FinancialDashboardExample
         VerticalStack companyStack = new();
         companyStack.AddChild(new TextBlock
         {
-            Text = "ACME CORPORATION",
+            Text = "Sample Company",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
             TextColor = Cream

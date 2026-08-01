@@ -62,14 +62,14 @@ public static class EventTicketExample
             };
         }
 
-        doc.Metadata.Title = "Event Ticket - Aurora Sound Festival";
-        doc.Metadata.Author = "Aurora Live";
+        doc.Metadata.Title = "Event Ticket - Sample Sound Festival";
+        doc.Metadata.Author = "Sample Live";
         doc.Metadata.Subject = "Event ticket - accessible (PDF/UA) and archival (PDF/A-2a)";
 
         // ── Main body (dark) ──────────────────────────────────────────────────
         VerticalStack info = new();
-        info.AddChild(Tb("AURORA LIVE presents", 8, Accent, bold: true, bottom: 6));
-        info.AddChild(new Heading("Aurora Sound Festival")
+        info.AddChild(Tb("SAMPLE LIVE presents", 8, Accent, bold: true, bottom: 6));
+        info.AddChild(new Heading("Sample Sound Festival")
         {
             Level = 1,
             FontName = StandardFonts.HelveticaBold,

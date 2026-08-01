@@ -23,7 +23,7 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 public static class AnnualReportMaskedCoverExample
 {
     private const string HeroImageKey = "images/sean-pollock-PhYq704ffdA-unsplash.jpg";
-    private const string Company = "Meridian Group";
+    private const string Company = "Sample Company";
     private const int Year = 2025;
     private static readonly string[] SegmentColors = ["#047857", "#0d9488", "#f59e0b", "#0284c7"];
 

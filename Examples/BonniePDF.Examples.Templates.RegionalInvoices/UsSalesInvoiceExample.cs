@@ -49,7 +49,7 @@ public static class UsSalesInvoiceExample
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(Ink);
 
         doc.Metadata.Title = $"Invoice INV-US-{year}-0148";
-        doc.Metadata.Author = "Redwood Systems Inc.";
+        doc.Metadata.Author = "Sample Company Inc.";
         doc.Metadata.Subject = "US commercial invoice with destination-based state and county sales tax.";
 
         VerticalStack root = new();
@@ -57,7 +57,7 @@ public static class UsSalesInvoiceExample
 
         // ── Header: seller | INVOICE ────────────────────────────────────────
         VerticalStack seller = new();
-        seller.AddChild(Cell("Redwood Systems Inc.", size: 16, bold: true, color: Ink, margin: new Thickness(0, 0, 0, 2)));
+        seller.AddChild(Cell("Sample Company Inc.", size: 16, bold: true, color: Ink, margin: new Thickness(0, 0, 0, 2)));
         AddLines(seller, Muted, "500 Market Street, Suite 1200", "San Francisco, CA 94105", "EIN 47-0912288");
 
         VerticalStack titleStack = new();
@@ -90,7 +90,7 @@ public static class UsSalesInvoiceExample
             Margin = new Thickness(0, 0, 0, 18),
         };
         meta.AddRow(
-            Labelled("BILL TO", Lines(Muted, "Cascade Retail LLC", "Accounts Payable", "18 Pioneer Square", "Seattle, WA 98104"), Accent),
+            Labelled("BILL TO", Lines(Muted, "Sample Customer LLC", "Accounts Payable", "18 Pioneer Square", "Seattle, WA 98104"), Accent),
             Labelled("DETAILS", details, Accent));
         root.AddChild(meta);
 
@@ -160,8 +160,8 @@ public static class UsSalesInvoiceExample
             Lines(
                 Muted,
                 "Please reference invoice INV-US-0148 and PO-88213 with payment.",
-                "ACH: Routing 121000248  ·  Account ****4471  ·  Redwood Systems Inc.",
-                "Checks payable to Redwood Systems Inc., 500 Market Street, San Francisco, CA 94105."),
+                "ACH: Routing 121000248  ·  Account ****4471  ·  Sample Company Inc.",
+                "Checks payable to Sample Company Inc., 500 Market Street, San Francisco, CA 94105."),
             Accent);
         note.Padding = new Thickness(0, 22, 0, 0);
         root.AddChild(note);

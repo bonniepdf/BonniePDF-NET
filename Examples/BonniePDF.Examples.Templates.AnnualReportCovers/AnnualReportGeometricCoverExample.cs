@@ -24,7 +24,7 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 [System.ComponentModel.Description("A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a circular masked image badge ringed in gold). Page 2 is the \"inside the report\" spread - KPI band, quarterly-revenue column chart, revenue-by-segment donut, and a financial-summary table.")]
 public static class AnnualReportGeometricCoverExample
 {
-    private const string Company = "Northwind Capital";
+    private const string Company = "Sample Company";
     private const int Year = 2025;
     private static readonly string[] SegmentColors = ["#0369a1", "#4f46e5", "#f59e0b", "#059669"];
 

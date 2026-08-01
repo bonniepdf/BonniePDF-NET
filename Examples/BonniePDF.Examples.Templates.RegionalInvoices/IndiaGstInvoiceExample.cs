@@ -57,7 +57,7 @@ public static class IndiaGstInvoiceExample
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(Ink);
 
         doc.Metadata.Title = $"GST e-Invoice INV-IN-{year}-0771";
-        doc.Metadata.Author = "Ashwin Technologies Pvt Ltd";
+        doc.Metadata.Author = "Sample Company Private Limited";
         doc.Metadata.Subject = "India GST e-invoice with IRN, signed QR, HSN codes, and CGST/SGST breakdown.";
 
         VerticalStack root = new();
@@ -67,7 +67,7 @@ public static class IndiaGstInvoiceExample
         // ── Header: seller | e-invoice signed QR ────────────────────────────
         VerticalStack seller = new();
         seller.AddChild(Cell("TAX INVOICE  ·  e-Invoice", bold: true, size: 8, color: Accent, margin: new Thickness(0, 0, 0, 6)));
-        seller.AddChild(Cell("Ashwin Technologies Pvt Ltd", bold: true, size: 15, color: Ink, margin: new Thickness(0, 0, 0, 2)));
+        seller.AddChild(Cell("Sample Company Private Limited", bold: true, size: 15, color: Ink, margin: new Thickness(0, 0, 0, 2)));
         AddLines(seller, Muted, "4th Floor, Prestige Tech Park", "Outer Ring Road, Bengaluru 560103", "Karnataka, India");
 
         seller.AddChild(Cell("GSTIN: 29ABCDE1234F1Z5", bold: true, color: Accent, margin: new Thickness(0, 6, 0, 0)));
@@ -127,7 +127,7 @@ public static class IndiaGstInvoiceExample
             Margin = new Thickness(0, 0, 0, 16),
         };
         meta.AddRow(
-            Labelled("BILL TO", Lines(Muted, "Meridian Retail Pvt Ltd", "No. 88, MG Road", "Bengaluru 560001", "Karnataka, India", "GSTIN: 29XYZAB6789K1Z2"), Accent),
+            Labelled("BILL TO", Lines(Muted, "Sample Customer Private Limited", "No. 88, MG Road", "Bengaluru 560001", "Karnataka, India", "GSTIN: 29XYZAB6789K1Z2"), Accent),
             Labelled("DETAILS", details, Accent));
         root.AddChild(meta);
 

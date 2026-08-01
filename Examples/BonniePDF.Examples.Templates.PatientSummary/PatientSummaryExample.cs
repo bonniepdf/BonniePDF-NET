@@ -45,12 +45,12 @@ public static class PatientSummaryExample
 
         Document doc = new(settings);
         doc.Metadata.Title = "Patient Summary";
-        doc.Metadata.Author = "Acme Health";
+        doc.Metadata.Author = "Sample Healthcare";
         doc.Metadata.Subject = "Patient summary sheet - demographics, vitals, and alerts";
 
         // ── Page header band ──────────────────────────────────────────────────
         VerticalStack brand = new();
-        brand.AddChild(Tb("ACME HEALTH", 13, Color.White, bold: true));
+        brand.AddChild(Tb("SAMPLE HEALTHCARE", 13, Color.White, bold: true));
         brand.AddChild(Tb("Patient Summary", 8, Cream, top: 4));
 
         VerticalStack issued = new();
@@ -63,8 +63,6 @@ public static class PatientSummaryExample
             Padding = new Thickness(28, 18, 28, 18),
             Child = TwoUp(brand, issued),
         });
-
-        doc.Add(Pad(new Spacer(20)));
 
         // ── 1. Patient card (teal bleed band) ─────────────────────────────────
         VerticalStack idLine = new();
@@ -84,7 +82,7 @@ public static class PatientSummaryExample
         detailsLeft.AddChild(DetailRow("Phone", "+44 7700 900482"));
 
         VerticalStack detailsRight = new();
-        detailsRight.AddChild(DetailRow("Patient ID", "ACME-9434765919"));
+        detailsRight.AddChild(DetailRow("Patient ID", "SAMPLE-9434765919"));
         detailsRight.AddChild(DetailRow("Ward", "Cardiology - 4B"));
         detailsRight.AddChild(DetailRow("Admitted", "16 Jun 2026"));
 
@@ -106,10 +104,9 @@ public static class PatientSummaryExample
             ClipContent = true, // ← mask the bleed band + body to the rounded outline
             Border = new Border(0.75f),
             BorderColors = new BorderColors(Hairline),
+            Margin = new Thickness(0, 20, 0, 16),
             Child = patientStack,
         }));
-
-        doc.Add(Pad(new Spacer(16)));
 
         // ── 2. Vitals card (indigo bleed band, 4-up grid) ─────────────────────
         Grid vitalsGrid = new(1, 1, 1, 1) { Border = Border.None, CellPadding = 6 };
@@ -119,9 +116,9 @@ public static class PatientSummaryExample
             Vital("37.1", "°C", "Temperature", "Normal", Teal),
             Vital("97", "% SpO2", "Oxygen", "Watch", Rose));
 
-        doc.Add(Pad(MakeCard(Indigo, "VITALS  ·  18 Jun 2026, 09:14", vitalsGrid)));
-
-        doc.Add(Pad(new Spacer(16)));
+        Container vitalsCard = MakeCard(Indigo, "VITALS  ·  18 Jun 2026, 09:14", vitalsGrid);
+        vitalsCard.Margin = new Thickness(0, 0, 0, 16);
+        doc.Add(Pad(vitalsCard));
 
         // ── 3. Allergies & alerts card (rose bleed band) ──────────────────────
         VerticalStack alerts = new();
@@ -129,9 +126,9 @@ public static class PatientSummaryExample
         alerts.AddChild(Alert("Latex", "Contact urticaria. Use nitrile gloves.", 6));
         alerts.AddChild(Alert("Warfarin", "On anticoagulation - INR target 2.0-3.0.", 6));
 
-        doc.Add(Pad(MakeCard(Rose, "ALLERGIES & ALERTS", alerts)));
-
-        doc.Add(Pad(new Spacer(28)));
+        Container alertsCard = MakeCard(Rose, "ALLERGIES & ALERTS", alerts);
+        alertsCard.Margin = new Thickness(0, 0, 0, 28);
+        doc.Add(Pad(alertsCard));
 
         return doc;
     }

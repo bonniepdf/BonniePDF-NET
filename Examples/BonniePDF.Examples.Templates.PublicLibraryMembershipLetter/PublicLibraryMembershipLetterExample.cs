@@ -56,7 +56,7 @@ public static class PublicLibraryMembershipLetterExample
             Language = "en-GB",
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"Northbridge Libraries  -  Ref NBL-4471-208823  -  Page {pageNumber}",
+                Text = $"Sample Libraries  -  Ref NBL-4471-208823  -  Page {pageNumber}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8,
                 TextColor = LibrarySecondary,
@@ -66,7 +66,7 @@ public static class PublicLibraryMembershipLetterExample
 
         Document doc = new(settings);
         doc.Metadata.Title = "Public library membership confirmation";
-        doc.Metadata.Author = "Northbridge Libraries";
+        doc.Metadata.Author = "Sample Libraries";
         doc.Metadata.Subject = "Public library membership confirmation with borrowing limits and branch hours (fictional).";
 
         doc.Add(Masthead());
@@ -74,7 +74,7 @@ public static class PublicLibraryMembershipLetterExample
         doc.Add(AddressBlock(longDate));
         doc.Add(H1("Your public library membership"));
         doc.Add(Body(
-            $"Welcome to Northbridge Libraries. Your membership is active from {longDate} " +
+            $"Welcome to Sample Libraries. Your membership is active from {longDate} " +
             $"and your first card renewal date is {renewalDate}. You can use your card at " +
             "any branch, online catalogue terminal, or through the library app."));
 
@@ -120,7 +120,7 @@ public static class PublicLibraryMembershipLetterExample
         Margin = new Thickness(0, 0, 0, 6),
         Child = new TextBlock
         {
-            Text = "Northbridge Libraries",
+            Text = "Sample Libraries",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
             TextColor = Color.White,
