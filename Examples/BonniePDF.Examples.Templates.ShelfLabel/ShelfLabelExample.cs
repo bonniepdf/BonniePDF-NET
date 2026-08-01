@@ -42,7 +42,7 @@ public static class ShelfLabelExample
 
         Document doc = new(settings);
         doc.Metadata.Title = "Harvest Grove Organic Rolled Oats - shelf label";
-        doc.Metadata.Author = "Greenfields";
+        doc.Metadata.Author = "Sample Shop";
         doc.Metadata.Subject = "EU/UK retail shelf-edge label with EAN-13 and mandatory unit price.";
 
         VerticalStack card = new();
@@ -65,7 +65,7 @@ public static class ShelfLabelExample
     private static Container RetailerStrip()
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Alignment = HorizontalAlignment.Center };
-        row.AddChild(Tb("GREENFIELDS", 10, Color.White, bold: true), 1);
+        row.AddChild(Tb("SAMPLESHOP", 10, Color.White, bold: true), 1);
         row.AddChild(Tb("Everyday Low Price", 9.4f, Color.White, bold: true, align: TextAlignment.Right), 1);
 
         return new Container

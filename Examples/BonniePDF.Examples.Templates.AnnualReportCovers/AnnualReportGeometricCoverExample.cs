@@ -19,7 +19,7 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 /// the PLACEHOLDER block with <c>canvas.DrawImage(...)</c> to crop a real photo to
 /// the circle. The clip is already in force.
 /// </summary>
-[System.ComponentModel.DisplayName("Annual Report Cover - Geometric")]
+[System.ComponentModel.DisplayName("Annual - Geometric")]
 [System.ComponentModel.Category("Templates")]
 [System.ComponentModel.Description("A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a circular masked image badge ringed in gold). Page 2 is the \"inside the report\" spread - KPI band, quarterly-revenue column chart, revenue-by-segment donut, and a financial-summary table.")]
 public static class AnnualReportGeometricCoverExample

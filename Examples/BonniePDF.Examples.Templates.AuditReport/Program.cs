@@ -8,7 +8,7 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating Compliance Audit Report...");
+        Console.WriteLine("Generating GDPR ISO 27001 Audit Report...");
         using (var doc = AuditReportExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "audit_report.pdf"));
