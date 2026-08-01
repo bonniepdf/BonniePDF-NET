@@ -39,7 +39,7 @@ public static class ShippingLabelExample
         });
 
         doc.Metadata.Title = "Shipping Label 1Z999AA10123456784";
-        doc.Metadata.Author = "Acme Logistics";
+        doc.Metadata.Author = "Sample Logistics";
         doc.Metadata.Subject = "Carrier-style shipping label - accessible (PDF/UA) and archival (PDF/A-2a)";
 
         Heading heading = new("Shipping label")
@@ -51,7 +51,7 @@ public static class ShippingLabelExample
         doc.Add(heading);
 
         // ── Carrier header + service class ────────────────────────────────────
-        doc.Add(Band("ACME LOGISTICS", 12, Ink, Color.White));
+        doc.Add(Band("SAMPLE LOGISTICS", 12, Ink, Color.White));
 
         Grid svcRow = new(1f, 1f) { Border = Border.None, CellPadding = 0 };
         svcRow.AddRow(
@@ -69,14 +69,14 @@ public static class ShippingLabelExample
         // ── From / To addresses ───────────────────────────────────────────────
         VerticalStack from = new();
         from.AddChild(Tb("FROM", 7, Mute, bold: true, bottom: 2));
-        from.AddChild(Tb("Northwind Supplies", 8, Ink, bold: true));
+        from.AddChild(Tb("Sample Supplies", 8, Ink, bold: true));
         from.AddChild(Tb("4 Tenter Ground\nLondon E1 7NH, UK", 8, BodyCol));
         doc.Add(new Container { Child = from, Margin = new Thickness(0, 0, 0, 4) });
 
         VerticalStack to = new();
         to.AddChild(Tb("SHIP TO", 8, Mute, bold: true, bottom: 3));
         to.AddChild(Tb("Jordan Avery", 13, Ink, bold: true));
-        to.AddChild(Tb("Aperture Labs Inc.\n19 Enfield Road\nLondon N1 5BA\nUnited Kingdom", 10, Ink));
+        to.AddChild(Tb("Sample Customer Ltd\n19 Enfield Road\nLondon N1 5BA\nUnited Kingdom", 10, Ink));
         doc.Add(new Container
         {
             Child = to,
@@ -124,7 +124,7 @@ public static class ShippingLabelExample
             HorizontalAlignment = HorizontalAlignment.End,
             Child = new QRCode
             {
-                Data = "https://track.acme.example/p/1Z999AA10123456784",
+                Data = "https://track.example.com/p/1Z999AA10123456784",
                 Size = 66,
                 QuietZone = 1,
                 ErrorCorrection = QrErrorCorrection.Quartile,

@@ -41,7 +41,7 @@ public static class AnnualReportExample
 
     private const string HeroImage = "images/sean-pollock-PhYq704ffdA-unsplash.jpg";
 
-    private const string Company = "Horizon Ventures";
+    private const string Company = "Sample Company";
     private const int Year = 2025;
     private const string ReportTitle = "Annual Report 2025";
 
@@ -84,7 +84,6 @@ public static class AnnualReportExample
 
         if (heroData is { Length: > 0 })
         {
-            doc.Add(new Spacer(24));
             doc.Add(new Image
             {
                 ImageData = heroData,
@@ -92,15 +91,16 @@ public static class AnnualReportExample
                 Height = 220,
                 FitMode = ImageFitMode.Cover,
                 IsDecorative = true,
+                Margin = new Thickness(0, 24, 0, 24),
             });
-            doc.Add(new Spacer(24));
         }
         else
         {
             doc.Add(new Spacer(150));
         }
-        doc.Add(BrandMark());
-        doc.Add(new Spacer(26));
+        HorizontalStack mark = BrandMark();
+        mark.Margin = new Thickness(0, 0, 0, 26);
+        doc.Add(mark);
         doc.Add(CoverLabel("ANNUAL REPORT"));
         doc.Add(CoverTitle(Company));
         doc.Add(TriColourRule());
@@ -113,8 +113,9 @@ public static class AnnualReportExample
         //  Page 2 - letter to shareholders + performance highlights
         // ══════════════════════════════════════════════════════════════════
         doc.AddPage();
-        doc.Add(new Spacer(10));
-        doc.Add(SectionHeading("Letter to Shareholders"));
+        TextBlock shareholderHeading = SectionHeading("Letter to Shareholders");
+        shareholderHeading.Margin = new Thickness(0, 10, 0, 12);
+        doc.Add(shareholderHeading);
         doc.Add(Body(
             "This past year tested our resolve and rewarded our discipline. Against a " +
             $"backdrop of shifting markets, {Company} delivered record revenue, expanded " +
@@ -126,17 +127,18 @@ public static class AnnualReportExample
             "it matters. Our teams answered that call. Operating margin improved for the " +
             "fourth consecutive year, customer retention reached an all-time high, and our " +
             "flagship platform now serves more than two million daily users."));
-
-        doc.Add(new Spacer(20));
-        doc.Add(SectionHeading("Performance Highlights"));
+        TextBlock performanceHeading = SectionHeading("Performance Highlights");
+        performanceHeading.Margin = new Thickness(0, 20, 0, 12);
+        doc.Add(performanceHeading);
         doc.Add(KpiRow());
 
         // ══════════════════════════════════════════════════════════════════
         //  Page 3 - operational review (flows naturally, repeating the bands)
         // ══════════════════════════════════════════════════════════════════
         doc.AddPage();
-        doc.Add(new Spacer(10));
-        doc.Add(SectionHeading("Operational Review"));
+        TextBlock operationalHeading = SectionHeading("Operational Review");
+        operationalHeading.Margin = new Thickness(0, 10, 0, 12);
+        doc.Add(operationalHeading);
         doc.Add(Body(
             "Revenue grew 18% year over year, led by double-digit gains across every " +
             "business line. The Platform division remained our largest contributor, while " +

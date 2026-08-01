@@ -50,13 +50,14 @@ public static class ProductRoadmapExample
 
         Document doc = new(settings);
         doc.Metadata.Title = "Product Roadmap";
-        doc.Metadata.Author = "Acme Platform";
+        doc.Metadata.Author = "Sample Platform";
         doc.Metadata.Subject = "H1 2026 product roadmap - swimlanes by team across a six-month timeline";
 
         // ── Title ─────────────────────────────────────────────────────────────
         doc.Add(Tb("Product Roadmap", 22, Ink, bold: true));
-        doc.Add(Tb("H1 2026  ·  Acme Platform", 10, Mute, top: 4));
-        doc.Add(new Spacer(16));
+        TextBlock subtitle = Tb("H1 2026  ·  Sample Platform", 10, Mute, top: 4);
+        subtitle.Margin = new Thickness(0, 4, 0, 16);
+        doc.Add(subtitle);
 
         // ── Month header (project block + six month bubbles) ──────────────────
         VerticalStack project = new();
@@ -68,12 +69,11 @@ public static class ProductRoadmapExample
             Spacing = 0,
             WidthDistribution = WidthDistribution.Weighted,
             Alignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 8),
         };
         headerRow.AddChild(new Container { Child = project, Padding = new Thickness(0, 3, 8, 3) }, LabelWeight);
         foreach (string m in Months) headerRow.AddChild(MonthCell(m), 1);
         doc.Add(headerRow);
-
-        doc.Add(new Spacer(8));
 
         // ── Swimlanes ─────────────────────────────────────────────────────────
         var teams = new (string Name, string Sub, Color Accent, Color[] Shades, (int S, int E, string L)[][] Rows)[]

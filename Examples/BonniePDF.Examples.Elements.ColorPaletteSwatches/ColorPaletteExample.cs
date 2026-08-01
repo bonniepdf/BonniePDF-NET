@@ -79,10 +79,8 @@ public static class ColorPaletteExample
             FontName = StandardFonts.Helvetica,
             FontSize = 9,
             TextColor = ColorPalette.Slate[500],
-            Margin = new Thickness(0, 4, 0, 0)
+            Margin = new Thickness(0, 4, 0, 8)
         });
-
-        doc.Add(new Spacer(8));
 
         // --- Grid ---
         VerticalStack grid = new() { Spacing = VGap };

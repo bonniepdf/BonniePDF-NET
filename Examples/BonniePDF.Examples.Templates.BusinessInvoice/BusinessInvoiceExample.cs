@@ -42,7 +42,7 @@ public static class BusinessInvoiceExample
         doc.Settings.Language = "en-US";
 
         doc.Metadata.Title = $"Invoice INV-{DateTime.Now.Year}-001";
-        doc.Metadata.Author = "Studio Eleven";
+        doc.Metadata.Author = "Sample Company Inc.";
         doc.Metadata.Subject = "Invoice for design and development services.";
 
         VerticalStack mainStack = new();
@@ -71,14 +71,14 @@ public static class BusinessInvoiceExample
         VerticalStack companyStack = new();
         companyStack.AddChild(new TextBlock
         {
-            Text = "STUDIO ELEVEN",
+            Text = "SAMPLE COMPANY INC.",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 20,
             TextColor = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
         // The address lines share one style, so they flow as a single paragraph.
-        companyStack.AddChild(new TextBlock { Text = "42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@studioeleven.co" });
+        companyStack.AddChild(new TextBlock { Text = "42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@example.com" });
 
         // Right: Invoice title - Heading (H1) instead of plain TextBlock so it
         // carries the semantic role for screen readers (PDF/UA-1 Matterhorn §14-1).
@@ -122,7 +122,7 @@ public static class BusinessInvoiceExample
         });
         // One TextBlock with hard line breaks: the address tags as a single
         // paragraph under PDF/UA instead of four.
-        billToStack.AddChild(new TextBlock { Text = "Meridian Labs\nSarah Chen\n88 Innovation Way\nAustin, TX 78701" });
+        billToStack.AddChild(new TextBlock { Text = "Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701" });
 
         // Ship To column
         VerticalStack shipToStack = new();
@@ -134,7 +134,7 @@ public static class BusinessInvoiceExample
             TextColor = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        shipToStack.AddChild(new TextBlock { Text = "Meridian Labs\nSarah Chen\n88 Innovation Way\nAustin, TX 78701" });
+        shipToStack.AddChild(new TextBlock { Text = "Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701" });
 
         // Details column
         VerticalStack detailsStack = new();
@@ -275,7 +275,7 @@ public static class BusinessInvoiceExample
         });
         // The three greeting lines share one style and flow as a single paragraph
         // via hard line breaks; "Thanks!" stays separate for its top margin.
-        messageStack.AddChild(new TextBlock { Text = "Hello!\nThank you for choosing Studio Eleven.\nPlease return this invoice with payment." });
+        messageStack.AddChild(new TextBlock { Text = "Hello!\nThank you for choosing Sample Company.\nPlease return this invoice with payment." });
         messageStack.AddChild(new TextBlock { Text = "Thanks!", Margin = new Thickness(0, 4, 0, 0) });
 
         // Right: Totals
@@ -404,7 +404,7 @@ public static class BusinessInvoiceExample
 
         mainStack.AddChild(new TextBlock
         {
-            Text = "Thank you for your business  |  hello@studioeleven.co  |  www.studioeleven.co",
+            Text = "Thank you for your business  |  hello@example.com  |  www.example.com",
             FontName = StandardFonts.Helvetica,
             FontSize = 8,
             TextColor = TextLight,
@@ -472,7 +472,7 @@ public static class BusinessInvoiceExample
             TextColor = AccentGreen,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        otherStack.AddChild(new TextBlock { Text = "PayPal: pay@studioeleven.co\nWise: @studioeleven", FontSize = 8, TextColor = TextMedium });
+        otherStack.AddChild(new TextBlock { Text = "PayPal: payments@example.com\nWise: @sample-company", FontSize = 8, TextColor = TextMedium });
 
         // Reference
         VerticalStack refStack = new();

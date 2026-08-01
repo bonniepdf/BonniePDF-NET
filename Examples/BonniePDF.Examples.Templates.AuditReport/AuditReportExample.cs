@@ -52,7 +52,7 @@ public static class AuditReportExample
             Language = "en-GB",
             HeaderTemplate = pageNumber => pageNumber == 1
                 ? null
-                : BandRow("Northwind Data Ltd - Audit AR-2026-014", "CONFIDENTIAL", ColorPalette.Rose[600]),
+                : BandRow("Sample Company - Audit AR-2026-014", "CONFIDENTIAL", ColorPalette.Rose[600]),
             FooterTemplate = pageNumber => BandRow("CONFIDENTIAL - not for distribution", $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", Muted),
         };
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Ink);
@@ -82,7 +82,7 @@ public static class AuditReportExample
         doc.Add(Eyebrow("AUDIT REPORT - CONFIDENTIAL"));
         doc.Add(H1("Data Protection & Information Security Audit"));
         doc.Add(Body(
-            "Northwind Data Ltd - assessment against the EU General Data Protection " +
+            "Sample Company - assessment against the EU General Data Protection " +
             "Regulation (2016/679), the UK GDPR / Data Protection Act 2018, and " +
             "ISO/IEC 27001:2022.",
             Muted));
@@ -96,7 +96,7 @@ public static class AuditReportExample
 
         doc.Add(H2("Executive summary"));
         doc.Add(Body(
-            "Northwind Data Ltd demonstrates a maturing information-security programme. Of the 93 Annex A controls in scope, " +
+            "Sample Company demonstrates a maturing information-security programme. Of the 93 Annex A controls in scope, " +
             "71 are fully implemented and 15 are partially implemented. Twelve findings were raised, of which two are rated Critical " +
             "and require remediation before the next surveillance visit: the absence of a completed DPIA for high-risk processing, " +
             "and gaps in the personal-data breach notification procedure against the 72-hour deadline."));
@@ -163,7 +163,7 @@ public static class AuditReportExample
         doc.Add(Body(
             "The audit combined documentation review, control walk-throughs, and sample testing across the in-scope processing activities. " +
             "Conformance is assessed against ISO/IEC 27001:2022 Annex A and the accountability obligations of the EU and UK GDPR. " +
-            "This report is confidential to Northwind Data Ltd."));
+            "This report is confidential to Sample Company."));
     }
 
     private static PieChart ControlDonut() => new()

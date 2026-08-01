@@ -52,7 +52,7 @@ public static class WatermarkDraftExample
         VerticalStack bannerStack = new();
         bannerStack.AddChild(new TextBlock
         {
-            Text = "HORIZON VENTURES",
+            Text = "SAMPLE COMPANY",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 11,
             TextColor = ColorPalette.Blue[200],
@@ -141,15 +141,13 @@ public static class WatermarkDraftExample
             Alignment = TextAlignment.Justify
         });
 
-        doc.Add(new Spacer(18));
-
         doc.Add(new TextBlock
         {
             Text = "Section 2: Expected Outcomes",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
             TextColor = ColorPalette.Blue[800],
-            Margin = new Thickness(0, 0, 0, 12)
+            Margin = new Thickness(0, 18, 0, 12)
         });
 
         doc.Add(new TextBlock

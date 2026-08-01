@@ -25,7 +25,7 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 [System.ComponentModel.Description("A two-page annual report. Page 1 is a full-bleed cover drawn on the vector surface (indigo-to-fuchsia gradient, radial glow, diagonal accent rules, rotated brand mark, canvas-drawn type); page 2 is the \"inside the report\" spread - KPI band, quarterly-revenue column chart, revenue-by-segment donut, and a financial-summary table.")]
 public static class AnnualReportGradientCoverExample
 {
-    private const string Company = "Aurora Dynamics";
+    private const string Company = "Sample Company";
     private const int Year = 2025;
     private static readonly string[] SegmentColors = ["#4f46e5", "#7c3aed", "#c026d3", "#f59e0b"];
 
@@ -119,7 +119,7 @@ public static class AnnualReportGradientCoverExample
         canvas.RestoreState();
 
         // 5. Cover type, drawn directly on the canvas.
-        canvas.DrawText(108f, h * 0.2f - 9f, "AURORA", Color.White, 15f, StandardFonts.HelveticaBold, TextAlignment.Left);
+        canvas.DrawText(108f, h * 0.2f - 9f, "SAMPLE", Color.White, 15f, StandardFonts.HelveticaBold, TextAlignment.Left);
 
         canvas.DrawText(72f, h * 0.34f, $"ANNUAL REPORT {Year}", ColorPalette.Fuchsia[200], 16f, StandardFonts.HelveticaBold, TextAlignment.Left);
         canvas.DrawText(72f, h * 0.4f, Company, Color.White, 52f, StandardFonts.HelveticaBold, TextAlignment.Left);

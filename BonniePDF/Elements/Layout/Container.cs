@@ -38,7 +38,7 @@ public class Container : BorderedElementBase, IContentContainer
     /// <code>
     /// new Container().Layers(layers => layers
     ///     .Background(new Image("card-bg.jpg"))
-    ///     .Foreground(new TextBlock("Horizon Ventures").Bold().FontSize(32)));
+    ///     .Foreground(new TextBlock("Sample Company").Bold().FontSize(32)));
     /// </code>
     /// </example>
     /// </summary>

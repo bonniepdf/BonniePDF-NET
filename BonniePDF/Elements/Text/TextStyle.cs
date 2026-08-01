@@ -150,6 +150,20 @@ public class TextStyle
     public string EffectiveFontName =>
         FontFamilyResolver.Resolve(FontFamily ?? "Helvetica", Weight, Italic);
 
+    /// <summary>
+    /// Returns an independent copy of this style.
+    /// </summary>
+    /// <remarks>
+    /// The fluent builders (<see cref="Bold"/>, <see cref="WithColor"/>,
+    /// <c>Subscript()</c>, …) mutate and return <c>this</c>, so a style shared
+    /// across several <see cref="RichText"/> spans and mutated between them would
+    /// otherwise leak its final state back onto the earlier spans.
+    /// <see cref="RichText.Span(string, TextStyle?)"/> clones the style on the way
+    /// in for exactly this reason. All fields are value types (<see cref="Core.Color"/>
+    /// is immutable), so a shallow copy is a full copy.
+    /// </remarks>
+    public TextStyle Clone() => (TextStyle)MemberwiseClone();
+
     // --- Fluent API ---
 
     /// <summary>Sets font weight to Bold (700)</summary>

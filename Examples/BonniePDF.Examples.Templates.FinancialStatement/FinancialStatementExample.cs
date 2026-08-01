@@ -77,7 +77,7 @@ public static class FinancialStatementExample
             Language = "en-GB",
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"Meridian Components Ltd  -  Company no. 07741122  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                Text = $"Sample Company Ltd  -  Company no. 07741122  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8,
                 TextColor = Muted,
@@ -86,11 +86,11 @@ public static class FinancialStatementExample
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Ink);
 
         Document doc = new(settings);
-        doc.Metadata.Title = "Financial Statements - Meridian Components Ltd";
-        doc.Metadata.Author = "Meridian Components Ltd";
+        doc.Metadata.Title = "Financial Statements - Sample Company Ltd";
+        doc.Metadata.Author = "Sample Company Ltd";
         doc.Metadata.Subject = "Statutory financial statements (IFRS) for the year ended 31 March 2026 (fictional).";
 
-        doc.Add(Company("Meridian Components Ltd"));
+        doc.Add(Company("Sample Company Ltd"));
         doc.Add(H1("Annual Report and Financial Statements"));
         doc.Add(Sub("For the year ended 31 March 2026"));
         doc.Add(Sub("Company registration number 07741122 (England & Wales)  -  Prepared under UK-adopted IFRS"));
