@@ -13,6 +13,32 @@ using BonniePDF.Typography.TrueType;
 namespace BonniePDF.Drawing;
 
 /// <summary>
+/// Source of unique <c>clip</c>/<c>grad</c> id suffixes for one or more
+/// <see cref="SvgCanvas"/> instances. A page's SVG can be composited from
+/// several canvases (the main canvas plus positioned child canvases for
+/// charts/images, all writing into one shared <see cref="StringBuilder"/> -
+/// see <see cref="Rendering.RenderContext.GetCanvas"/>), so ids must stay
+/// unique across all of them, not just within one instance. Sharing one
+/// allocator across those canvases achieves that; a fresh, un-shared
+/// allocator (the default) is correct for a standalone canvas whose output is
+/// never composited with another's.
+/// <para>
+/// Deliberately per-instance rather than a static/process-wide counter: a
+/// static counter would make a document's SVG output depend on how many other
+/// documents were rendered earlier in the same process, breaking the
+/// byte-for-byte reproducibility the equivalence guard and PDF/A determinism
+/// work both rely on.
+/// </para>
+/// </summary>
+public class SvgIdAllocator
+{
+    private int _clipId;
+    private int _gradId;
+    public string NextClipId() => $"clip{_clipId++}";
+    public string NextGradId() => $"grad{_gradId++}";
+}
+
+/// <summary>
 /// SVG implementation of ICanvas that adapts ICanvas calls to SVG tags.
 /// Unlike PdfCanvas, this passes coordinates through unchanged since SVG also uses
 /// Screen Coordinates (Top-Left origin).
@@ -28,14 +54,12 @@ public class SvgCanvas : ICanvas
     private readonly Func<string, TtfFont?>? _fontResolver;
 
     /// <summary>
-    /// Process-wide counter for generating unique <c>&lt;clipPath&gt;</c> ids. Static so
-    /// ids stay unique even when several canvases compose into one shared buffer
-    /// (page export writes positioned child canvases into the same StringBuilder).
+    /// Allocates <c>clip</c>/<c>grad</c> ids for this canvas. Set by
+    /// <see cref="Rendering.RenderContext"/> to an allocator shared with every
+    /// other canvas composited into the same document; defaults to a fresh,
+    /// un-shared allocator for standalone use (e.g. chart/symbology export).
     /// </summary>
-    private static int _clipIdCounter;
-
-    /// <summary>Process-wide counter for unique gradient definition ids.</summary>
-    private static int _gradientIdCounter;
+    public SvgIdAllocator IdAllocator { get; set; } = new();
 
     /// <summary>Accumulated SVG path data segments for the current path.</summary>
     private readonly List<string> _currentPathData = new();
@@ -801,7 +825,7 @@ public class SvgCanvas : ICanvas
     {
         float sx = x + _xOffset;
         float sy = y + _yOffset;
-        string id = $"clip{_clipIdCounter++}";
+        string id = IdAllocator.NextClipId();
         _sb.AppendLf(
             $"<clipPath id=\"{id}\"><rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" rx=\"{N(radius)}\" ry=\"{N(radius)}\"/></clipPath>");
         _sb.AppendLf($"<g clip-path=\"url(#{id})\">");
@@ -953,7 +977,7 @@ public class SvgCanvas : ICanvas
     {
         if (_currentPathData.Count == 0) return;
         string d = string.Join(" ", _currentPathData);
-        string id = $"clip{_clipIdCounter++}";
+        string id = IdAllocator.NextClipId();
         string rule = fillRule == FillRule.EvenOdd ? " clip-rule=\"evenodd\"" : "";
         _sb.AppendLf($"<clipPath id=\"{id}\"><path d=\"{d}\"{rule}/></clipPath>");
         _sb.AppendLf($"<g clip-path=\"url(#{id})\">");
@@ -1007,7 +1031,7 @@ public class SvgCanvas : ICanvas
     /// <summary>Emits a &lt;linearGradient&gt; definition and returns its id.</summary>
     private string EmitLinearGradientDef(LinearGradientPaint gradient)
     {
-        string id = $"grad{_gradientIdCounter++}";
+        string id = IdAllocator.NextGradId();
         _sb.Append($"<defs><linearGradient id=\"{id}\" x1=\"{N(gradient.Start.X + _xOffset)}\" y1=\"{N(gradient.Start.Y + _yOffset)}\" x2=\"{N(gradient.End.X + _xOffset)}\" y2=\"{N(gradient.End.Y + _yOffset)}\" gradientUnits=\"userSpaceOnUse\">");
         foreach (GradientStop stop in gradient.Stops)
         {
@@ -1025,7 +1049,7 @@ public class SvgCanvas : ICanvas
     /// <summary>Emits a &lt;radialGradient&gt; definition and returns its id.</summary>
     private string EmitRadialGradientDef(RadialGradientPaint gradient)
     {
-        string id = $"grad{_gradientIdCounter++}";
+        string id = IdAllocator.NextGradId();
         float cx = gradient.Center.X + _xOffset;
         float cy = gradient.Center.Y + _yOffset;
         string focalAttrs = "";
