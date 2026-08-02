@@ -45,12 +45,11 @@ public static class BusinessInvoiceExample
         doc.Metadata.Author = "Sample Company Inc.";
         doc.Metadata.Subject = "Invoice for design and development services.";
 
-        VerticalStack mainStack = new();
 
         // ============================================
         // GREEN ACCENT BAR - QuickBooks-style top strip
         // ============================================
-        mainStack.AddChild(new Container
+        doc.Add(new Container
         {
             BackgroundColor = AccentGreen,
             Padding = new Thickness(0, 4, 0, 4),
@@ -97,7 +96,7 @@ public static class BusinessInvoiceExample
             companyStack,
             titleStack
         );
-        mainStack.AddChild(headerTable);
+        doc.Add(headerTable);
 
         // ============================================
         // BILL TO / SHIP TO / DETAILS - 3-column bordered section
@@ -156,7 +155,7 @@ public static class BusinessInvoiceExample
             shipToStack,
             detailsStack
         );
-        mainStack.AddChild(addressTable);
+        doc.Add(addressTable);
 
         // ============================================
         // LINE ITEMS TABLE - Clean professional table
@@ -239,10 +238,10 @@ public static class BusinessInvoiceExample
             );
         }
 
-        mainStack.AddChild(lineItemsTable);
+        doc.Add(lineItemsTable);
 
         // Divider line under line items
-        mainStack.AddChild(new Container
+        doc.Add(new Container
         {
             BackgroundColor = AccentGreen,
             Padding = new Thickness(0, 0.75f, 0, 0),
@@ -375,7 +374,7 @@ public static class BusinessInvoiceExample
             new Container { Child = messageStack, Padding = new Thickness(0, 0, 40, 0) },
             totalsStack
         );
-        mainStack.AddChild(footerTable);
+        doc.Add(footerTable);
 
         // ============================================
         // PAYMENT DETAILS - Compact bank info section
@@ -389,12 +388,12 @@ public static class BusinessInvoiceExample
             BorderColors = BorderColors.LeftOnly(AccentGreen),
             Child = CreatePaymentDetails()
         };
-        mainStack.AddChild(paymentSection);
+        doc.Add(paymentSection);
 
         // ============================================
         // FOOTER NOTE
         // ============================================
-        mainStack.AddChild(new Container
+        doc.Add(new Container
         {
             BackgroundColor = AccentGreen,
             Padding = new Thickness(0, 0.5f, 0, 0),
@@ -402,7 +401,7 @@ public static class BusinessInvoiceExample
             Child = new TextBlock { Text = " ", FontSize = 1 }
         });
 
-        mainStack.AddChild(new TextBlock
+        doc.Add(new TextBlock
         {
             Text = "Thank you for your business  |  hello@example.com  |  www.example.com",
             FontName = StandardFonts.Helvetica,
@@ -415,7 +414,6 @@ public static class BusinessInvoiceExample
         // ============================================
         // BUILD DOCUMENT
         // ============================================
-        doc.Add(mainStack);
         return doc;
     }
 

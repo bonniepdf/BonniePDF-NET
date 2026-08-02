@@ -52,8 +52,7 @@ public static class UkVatInvoiceExample
         doc.Metadata.Author = "Sample Company Ltd";
         doc.Metadata.Subject = "UK VAT invoice with a per-rate VAT breakdown (standard, reduced, zero).";
 
-        VerticalStack root = new();
-        root.AddChild(AccentBar(Accent));
+        doc.Add(AccentBar(Accent));
 
         // ── Header ────────────────────────────────────────────────────────────
         VerticalStack seller = new();
@@ -76,7 +75,7 @@ public static class UkVatInvoiceExample
 
         Grid header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
         header.AddRow(seller, titleStack);
-        root.AddChild(header);
+        doc.Add(header);
 
         // ── Customer + tax point ────────────────────────────────────────────
         VerticalStack details = new();
@@ -95,7 +94,7 @@ public static class UkVatInvoiceExample
         meta.AddRow(
             Labelled("INVOICE TO", Lines(Muted, "Sample Customer PLC", "Finance Department", "4 Waterfront Square", "Cardiff CF10 4PA"), Accent),
             Labelled("DETAILS", details, Accent));
-        root.AddChild(meta);
+        doc.Add(meta);
 
         // ── Line items (with VAT-rate column) ───────────────────────────────
         Table table = new(3f, 0.6f, 1f, 0.7f, 1f)
@@ -128,8 +127,8 @@ public static class UkVatInvoiceExample
                 Cell(Money(net, Gbp, "en-GB"), align: TextAlignment.Right));
         }
 
-        root.AddChild(table);
-        root.AddChild(Divider(Rule, 0.5f));
+        doc.Add(table);
+        doc.Add(Divider(Rule, 0.5f));
 
         // ── VAT summary by rate (the defining feature of a UK VAT invoice) ──
         Table summary = new(1.4f, 1f, 1f, 1f)
@@ -159,7 +158,7 @@ public static class UkVatInvoiceExample
                 Cell(Money(pair.Value + vat, Gbp, "en-GB"), align: TextAlignment.Right));
         }
 
-        root.AddChild(summary);
+        doc.Add(summary);
 
         // ── Grand total ──────────────────────────────────────────────────────
         VerticalStack totals = new();
@@ -178,15 +177,14 @@ public static class UkVatInvoiceExample
         HorizontalStack totalsRow = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 10, 0, 0) };
         totalsRow.AddChild(new Container(), 1);
         totalsRow.AddChild(totalsBox, 1);
-        root.AddChild(totalsRow);
+        doc.Add(totalsRow);
 
-        root.AddChild(Cell(
+        doc.Add(Cell(
             "S = Standard 20%   ·   R = Reduced 5%   ·   Z = Zero-rated 0%",
             size: 8,
             color: Muted,
             margin: new Thickness(0, 20, 0, 0)));
 
-        doc.Add(root);
         return doc;
     }
 
