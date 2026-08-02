@@ -73,6 +73,14 @@ public class RenderContext
     /// <summary>Low-level SVG canvas options threaded into every <see cref="SvgCanvas"/> this context creates.</summary>
     public SvgRenderOptions SvgOptions { get; } = SvgRenderOptions.Legacy;
 
+    /// <summary>
+    /// Shared across every <see cref="SvgCanvas"/> this context creates (main
+    /// page canvases and positioned child canvases alike), so <c>clip</c>/<c>grad</c>
+    /// ids stay unique across a page composited from several canvases - see
+    /// <see cref="SvgIdAllocator"/>.
+    /// </summary>
+    private readonly SvgIdAllocator _svgIdAllocator = new();
+
     private readonly bool _svgContentOnly;
 
     /// <summary>
@@ -209,7 +217,8 @@ public class RenderContext
                 RegisterFontCallback = RegisterFont,
                 // Both render paths share one run resolver, so the SVG preview
                 // cannot drift from the PDF in which font draws which code point.
-                TextRunResolver = ResolveTextRuns
+                TextRunResolver = ResolveTextRuns,
+                IdAllocator = _svgIdAllocator
             };
         }
         else
@@ -235,7 +244,8 @@ public class RenderContext
                 RegisterFontCallback = RegisterFont,
                 // Both render paths share one run resolver, so the SVG preview
                 // cannot drift from the PDF in which font draws which code point.
-                TextRunResolver = ResolveTextRuns
+                TextRunResolver = ResolveTextRuns,
+                IdAllocator = _svgIdAllocator
             };
 
         var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource,
