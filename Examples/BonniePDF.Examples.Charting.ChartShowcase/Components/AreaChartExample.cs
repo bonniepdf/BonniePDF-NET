@@ -100,8 +100,9 @@ public static class AreaChartExample
         };
 
         // Create the area chart
-        AreaChart areaChart = new()
+        AreaChart areaChart = new(chartData)
         {
+            AltText = "Area chart showing monthly sales performance from January to December",
             Height = 400,
             StretchToFit = true,
             AreaColor = Color.FromHex(ChartColors.Purple),
@@ -114,7 +115,7 @@ public static class AreaChartExample
         };
 
         // Add the chart to the document
-        document.Add(new ChartElement(areaChart, chartData) { AltText = "Area chart showing monthly sales performance from January to December" });
+        document.Add(areaChart);
 
         // Save the document
         

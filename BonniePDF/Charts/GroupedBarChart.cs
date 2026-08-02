@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BonniePDF.Charts.Models;
 using BonniePDF.Core;
@@ -27,6 +28,12 @@ public class GroupedBarChart : CartesianChartBase
     public GroupedBarChart()
     {
         SvgShapeRendering = "crispEdges";
+    }
+
+    /// <summary>Creates a grouped bar chart bound to its document data.</summary>
+    public GroupedBarChart(ChartData data) : this()
+    {
+        Data = data ?? throw new ArgumentNullException(nameof(data));
     }
 
     /// <summary>

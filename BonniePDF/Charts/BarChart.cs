@@ -31,6 +31,12 @@ public class BarChart : CartesianChartBase
         SvgShapeRendering = "crispEdges";
     }
 
+    /// <summary>Creates a bar chart bound to its document data.</summary>
+    public BarChart(ChartData data) : this()
+    {
+        Data = data ?? throw new ArgumentNullException(nameof(data));
+    }
+
     /// <summary>
     /// Draws the bar chart elements for a single series.
     /// In vertical mode draws upward bars; in horizontal mode draws rightward bars.

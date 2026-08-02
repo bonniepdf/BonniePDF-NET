@@ -138,7 +138,8 @@ public class SvgPageExportTests
         {
             Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 10 }, new() { Label = "B", Value = 20 }] }]
         };
-        doc.Add(new ChartElement(chart, data));
+        chart.Data = data;
+        doc.Add(chart);
         string svg = doc.GenerateFirstPageSvg();
         Assert.Contains("<rect", svg, StringComparison.Ordinal);
     }

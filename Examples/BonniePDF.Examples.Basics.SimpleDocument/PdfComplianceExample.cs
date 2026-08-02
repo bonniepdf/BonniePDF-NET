@@ -1,110 +1,117 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Lists;
+using BonniePDF.Elements.Shapes;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Basics.SimpleDocument;
 
-/// <summary>
-/// PDF/A-2a + PDF/UA-1 - the recommended modern baseline.
-///
-/// <para>
-/// PDF/A-2a is the strongest of the "basic + accessible" archival levels:
-/// PDF/A-2 brings modern PDF 1.7 visual fidelity (transparency, JPEG2000,
-/// OpenType font embedding) on top of PDF/A-1, and the "a" suffix adds
-/// tagged structure - i.e. it presupposes PDF/UA-1.
-/// </para>
-///
-/// <para>
-/// Setting <see cref="DocumentSettings.Conformance"/> auto-upgrades
-/// <see cref="DocumentSettings.Version"/> to PDF 1.7 and emits the
-/// <c>pdfaid:part 2 / pdfaid:conformance A</c> XMP claim, the sRGB ICC
-/// profile, the <c>/OutputIntents</c> entry, and the
-/// <c>pdfaExtension:schemas</c> declaration for the <c>pdfuaid</c>
-/// namespace (PDF/A-2 §6.6.2.3.1). The "a" level requires
-/// <c>Accessibility = AccessibilityMode.PdfUa1</c> - the document
-/// throws at save time otherwise.
-/// </para>
-///
-/// Verified against veraPDF profile <c>2a</c>.
-/// </summary>
-[System.ComponentModel.DisplayName("PDF/A + PDF/UA")]
+/// <summary>A concise PDF/A-2a + PDF/UA-1 example.</summary>
+[System.ComponentModel.DisplayName("Archival & Accessible PDF")]
 [System.ComponentModel.Category("Basics")]
-[System.ComponentModel.Description("The modern archival + accessible baseline. Uses Conformance = PdfA2a alongside PdfUa1.")]
+[System.ComponentModel.Description("A concise PDF/A-2a and PDF/UA-1 example showing settings and responsibilities.")]
 public static class PdfComplianceExample
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Maintainability", "MA0051:Method is too long",
+        Justification = "The example intentionally keeps generation inline.")]
     public static Document Generate()
     {
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title = "PDF/A-2a Compliant Document",
+                Title = "Archival and Accessible PDF with BonniePDF",
                 Author = "BonniePDF",
-                Subject = "A minimal PDF/A-2a + PDF/UA-1 document - archival and accessible.",
-                Keywords = "pdf, pdf/a-2a, pdf/ua, accessibility, archival, BonniePDF",
+                Subject = "A concise PDF/A-2a and PDF/UA-1 example.",
+                Keywords = "pdf/a-2a, pdf/ua-1, accessibility, archival, BonniePDF",
             },
             Settings = new DocumentSettings
             {
-                // Conformance is the source of truth. PdfA2a auto-upgrades
-                // Version to PDF 1.7 and triggers all the PDF/A emission machinery.
                 Conformance = PdfAConformance.PdfA2a,
-                // "a" levels require PDF/UA-1 tagging.
                 Accessibility = AccessibilityMode.PdfUa1,
-                // BCP-47 tag - required for PDF/UA-1.
                 Language = "en-GB",
             },
         };
 
-        doc.Add(new Heading("PDF/A-2a + PDF/UA-1")
+        doc.Add(new Heading("Archival and accessible PDF")
         {
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
-            Margin = new Thickness(0, 0, 0, 12),
+            TextColor = ColorPalette.Slate[900],
+            Margin = new Thickness(0, 0, 0, 8),
         });
-
         doc.Add(new TextBlock
         {
-            Text = "This document targets PDF/A-2a - the \"accessible archival\" profile from ISO 19005-2. " +
-                   "It is simultaneously a long-term archival file (PDF/A) and a screen-reader-friendly document (PDF/UA-1). " +
-                   "Both claims are verified by veraPDF against profiles 2a and ua1 respectively.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
+            Text = "BonniePDF treats archival conformance and accessibility as separate settings, so a document can use either standard or combine both.",
+            FontSize = 11,
             TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 12),
         });
+        doc.Add(new Line
+        {
+            Thickness = 2,
+            Color = ColorPalette.Blue[600],
+            Margin = new Thickness(0, 0, 0, 14),
+        });
 
-        doc.Add(new Heading("Why PDF/A-2a over PDF/A-1b?")
+        doc.Add(new Heading("Settings used by this document")
         {
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
-            FontSize = 16,
+            FontSize = 15,
             TextColor = ColorPalette.Slate[800],
-            Margin = new Thickness(0, 16, 0, 8),
+            Margin = new Thickness(0, 0, 0, 5),
         });
-
-        doc.Add(new TextBlock
+        UnorderedList settings = new()
         {
-            Text = "PDF/A-1b (2005) is based on PDF 1.4 and disallows transparency, JPEG2000, and modern font features. " +
-                   "PDF/A-2a (2011) is based on PDF 1.7, lifts those restrictions, and crucially requires the same tagged " +
-                   "structure that the European Accessibility Act (EAA) calls for. For new documents authored in 2026 onward, " +
-                   "PDF/A-2a is the natural target - and BonniePDF reaches it with two lines of configuration.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            TextColor = ColorPalette.Slate[600],
-            Margin = new Thickness(0, 0, 0, 12),
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = "The legacy boolean Settings.PdfAEnabled = true still works and maps to PDF/A-2b under the hood - " +
-                   "the safe automatic upgrade from the historic PDF/A-1b baseline. For new code, prefer the explicit " +
-                   "Settings.Conformance = PdfAConformance.PdfA2a shown above.",
-            FontName = StandardFonts.Helvetica,
             FontSize = 10,
-            TextColor = ColorPalette.Slate[600],
+            TextColor = ColorPalette.Slate[700],
+            BulletColor = ColorPalette.Blue[600],
+            ItemSpacing = 5,
+            Margin = new Thickness(0, 0, 0, 14),
+        };
+        settings.AddItem("Conformance = PdfA2a - requests modern PDF/A archival output.");
+        settings.AddItem("Accessibility = PdfUa1 - emits tagged structure for assistive technology.");
+        settings.AddItem("Language = en-GB - declares the document language for screen readers.");
+        doc.Add(settings);
+
+        doc.Add(new Heading("Responsibilities")
+        {
+            Level = 2,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 15,
+            TextColor = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 5),
+        });
+        doc.Add(new TextBlock
+        {
+            Text = "BonniePDF handles the PDF version, conformance metadata, colour profiles, embedded standard-font substitutes, semantic tags, setting validation, and honest-claim resource checks.",
+            FontSize = 10,
+            TextColor = ColorPalette.Slate[700],
+            Margin = new Thickness(0, 0, 0, 8),
+        });
+        doc.Add(new TextBlock
+        {
+            Text = "The author supplies the required profile, title and language, logical reading order, alt text and table headers, and validates the final PDF against the required external profile.",
+            FontSize = 10,
+            TextColor = ColorPalette.Slate[700],
+            Margin = new Thickness(0, 0, 0, 16),
+        });
+
+        doc.Add(new Line
+        {
+            Color = ColorPalette.Slate[300],
+            Margin = new Thickness(0, 0, 0, 10),
+        });
+        doc.Add(new TextBlock
+        {
+            Text = "Legacy compatibility: PdfAEnabled reads true for any PDF/A profile. Assigning true selects PdfA2b; assigning false selects None. New code should use Conformance.",
+            FontName = StandardFonts.HelveticaOblique,
+            FontSize = 9,
+            TextColor = ColorPalette.Slate[500],
         });
 
         return doc;

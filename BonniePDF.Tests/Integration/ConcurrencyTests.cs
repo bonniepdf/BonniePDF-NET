@@ -105,7 +105,8 @@ public class ConcurrencyTests : IntegrationTestBase
                     Height = 250,
                     StretchToFit = true
                 };
-                doc.Add(new ChartElement(barChart, data));
+                barChart.Data = data;
+                doc.Add(barChart);
 
                 doc.Save(outputPath);
                 generatedFiles.Add(outputPath);
@@ -353,7 +354,8 @@ public class ConcurrencyTests : IntegrationTestBase
                     Height = 200,
                     StretchToFit = true
                 };
-                doc.Add(new ChartElement(barChart, chartDataCopy));
+                barChart.Data = chartDataCopy;
+                doc.Add(barChart);
 
                 doc.Save(outputPath);
                 generatedFiles.Add(outputPath);

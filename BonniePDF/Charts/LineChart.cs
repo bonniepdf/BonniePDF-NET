@@ -15,6 +15,15 @@ public class LineChart : CartesianChartBase
     private const string DefaultLineColorHex = "#4f46e5";
     private const float DefaultDataPointRadius = 5;
 
+    public LineChart()
+    {
+    }
+
+    /// <summary>Creates a line chart bound to its document data.</summary>
+    public LineChart(ChartData data) : base(data)
+    {
+    }
+
     /// <summary>
     /// Default line width for all series (can be overridden per series via Style).
     /// </summary>

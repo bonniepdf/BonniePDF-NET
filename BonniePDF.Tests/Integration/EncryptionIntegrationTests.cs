@@ -219,7 +219,8 @@ public class EncryptionIntegrationTests : IntegrationTestBase
                 Height = 200,
                 StretchToFit = true
             };
-            doc.Add(new ChartElement(barChart, chartData));
+            barChart.Data = chartData;
+            doc.Add(barChart);
 
             doc.Save(outputPath);
         }

@@ -60,7 +60,8 @@ public class MultiPageDocumentTests : IntegrationTestBase
                 Height = 300,
                 StretchToFit = true
             };
-            doc.Add(new ChartElement(barChart, barData));
+            barChart.Data = barData;
+            doc.Add(barChart);
 
             // Page 3: Line Chart
             doc.Add(new TextBlock
@@ -78,7 +79,8 @@ public class MultiPageDocumentTests : IntegrationTestBase
                 Height = 300,
                 StretchToFit = true
             };
-            doc.Add(new ChartElement(lineChart, lineData));
+            lineChart.Data = lineData;
+            doc.Add(lineChart);
 
             // Page 4: Images
             doc.Add(new TextBlock
@@ -119,7 +121,8 @@ public class MultiPageDocumentTests : IntegrationTestBase
                 Height = 400,
                 StretchToFit = true
             };
-            doc.Add(new ChartElement(pieChart, pieData));
+            pieChart.Data = pieData;
+            doc.Add(pieChart);
 
             doc.Save(outputPath);
         }
@@ -230,7 +233,8 @@ public class MultiPageDocumentTests : IntegrationTestBase
                         Height = 200,
                         StretchToFit = true
                     };
-                    stack.AddChild(new ChartElement(chart, data));
+                    chart.Data = data;
+                    stack.AddChild(chart);
                 }
             }
 
@@ -330,7 +334,8 @@ public class MultiPageDocumentTests : IntegrationTestBase
                 Height = 300,
                 StretchToFit = true
             };
-            doc.Add(new ChartElement(lineChart, data));
+            lineChart.Data = data;
+            doc.Add(lineChart);
 
             doc.Save(outputPath);
         }

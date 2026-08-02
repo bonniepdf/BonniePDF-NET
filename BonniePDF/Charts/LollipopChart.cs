@@ -15,6 +15,15 @@ public class LollipopChart : CartesianChartBase
     private const string DefaultColorHex = "#4f46e5";
     private const float DefaultHeadRadiusValue = 8;
 
+    public LollipopChart()
+    {
+    }
+
+    /// <summary>Creates a lollipop chart bound to its document data.</summary>
+    public LollipopChart(ChartData data) : base(data)
+    {
+    }
+
     /// <summary>
     /// Default stem width for all series (can be overridden per series via Style).
     /// </summary>

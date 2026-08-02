@@ -3,12 +3,14 @@ using BonniePDF.Drawing;
 using BonniePDF.Elements;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Tagging;
+using System;
 
 namespace BonniePDF.Charts;
 
 /// <summary>
 /// Element that renders a GroupedBarChart to the document.
 /// </summary>
+[Obsolete("GroupedBarChart is a document element. Set its Data and add it directly.")]
 public class GroupedBarChartElement : ElementBase, IRoleProvider, IAltTextProvider
 {
     private readonly GroupedBarChart _chart;

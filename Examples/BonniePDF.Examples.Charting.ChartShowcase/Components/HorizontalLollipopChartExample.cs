@@ -79,8 +79,9 @@ public static class HorizontalLollipopChartExample
             XAxis = new AxisOptions { Legend = "Product" }
         };
 
-        LollipopChart lollipopChart = new()
+        LollipopChart lollipopChart = new(chartData)
         {
+            AltText = "Horizontal lollipop chart ranking year-to-date revenue across eight product lines",
             Orientation = ChartOrientation.Horizontal,
             Height = 400,
             StretchToFit = true,
@@ -93,7 +94,7 @@ public static class HorizontalLollipopChartExample
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
-        document.Add(new ChartElement(lollipopChart, chartData) { AltText = "Horizontal lollipop chart ranking year-to-date revenue across eight product lines" });
+        document.Add(lollipopChart);
         
 
         //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");

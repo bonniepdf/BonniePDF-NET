@@ -103,8 +103,9 @@ public static class HorizontalGroupedBarChartExample
         chartData.Series.Add(clothingSeries);
         chartData.Series.Add(homeSeries);
 
-        GroupedBarChart groupedBarChart = new()
+        GroupedBarChart groupedBarChart = new(chartData)
         {
+            AltText = "Horizontal grouped bar chart comparing quarterly sales across Electronics, Clothing, and Home & Garden",
             Orientation = ChartOrientation.Horizontal,
             Height = 380,
             StretchToFit = true,
@@ -116,7 +117,7 @@ public static class HorizontalGroupedBarChartExample
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
-        document.Add(new GroupedBarChartElement(groupedBarChart, chartData) { AltText = "Horizontal grouped bar chart comparing quarterly sales across Electronics, Clothing, and Home & Garden" });
+        document.Add(groupedBarChart);
         
 
         //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");

@@ -98,8 +98,9 @@ public static class BarChartExample
 
         // Create the bar chart
         // StretchToFit = true will make the chart fill the container width
-        BarChart barChart = new()
+        BarChart barChart = new(chartData)
         {
+            AltText = "Bar chart showing monthly sales report from January to December",
             Height = 400,
             StretchToFit = true,
             BarColor = Color.FromHex("#4f46e5"),
@@ -112,7 +113,7 @@ public static class BarChartExample
         // We need to use the PdfCanvas to draw the chart
         // For this example, we'll create a custom element that wraps the chart
 
-        document.Add(new ChartElement(barChart, chartData) { AltText = "Bar chart showing monthly sales report from January to December" });
+        document.Add(barChart);
 
         // Save the document
         

@@ -163,7 +163,7 @@ internal static class CapabilitiesPage
         };
     }
 
-    private static ChartElement QuarterlyBarChart(Color primary)
+    private static BarChart QuarterlyBarChart(Color primary)
     {
         string[] labels = ["Q1", "Q2", "Q3", "Q4"];
         decimal[] values = [182, 205, 241, 288];
@@ -180,8 +180,9 @@ internal static class CapabilitiesPage
             YAxis = new AxisOptions { Prefix = "£", MaxValue = 320, StepCount = 4 },
         };
 
-        BarChart chart = new()
+        BarChart chart = new(data)
         {
+            AltText = "Column chart of quarterly revenue in £m rising from 182 in Q1 to 288 in Q4.",
             Height = 190,
             StretchToFit = true,
             BarColor = primary,
@@ -189,13 +190,10 @@ internal static class CapabilitiesPage
             LabelFontSize = 8,
             BackgroundColor = Color.White,
         };
-        return new ChartElement(chart, data)
-        {
-            AltText = "Column chart of quarterly revenue in £m rising from 182 in Q1 to 288 in Q4.",
-        };
+        return chart;
     }
 
-    private static ChartElement SegmentDonut(string[] colors)
+    private static PieChart SegmentDonut(string[] colors)
     {
         string[] labels = ["Platform", "Services", "Hardware", "Licensing"];
         decimal[] values = [512, 274, 118, 84];
@@ -207,8 +205,9 @@ internal static class CapabilitiesPage
 
         ChartData data = new() { Title = "Revenue by segment", Series = [series] };
 
-        PieChart chart = new()
+        PieChart chart = new(data)
         {
+            AltText = "Donut chart of revenue by segment: Platform, Services, Hardware, and Licensing.",
             Height = 190,
             StretchToFit = true,
             IsDonut = true,
@@ -217,10 +216,7 @@ internal static class CapabilitiesPage
             Colors = colors,
             BackgroundColor = Color.White,
         };
-        return new ChartElement(chart, data)
-        {
-            AltText = "Donut chart of revenue by segment: Platform, Services, Hardware, and Licensing.",
-        };
+        return chart;
     }
 
     private static Table FinancialTable(Color primary)

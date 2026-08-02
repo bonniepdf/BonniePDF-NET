@@ -14,6 +14,15 @@ public class AreaChart : CartesianChartBase
 {
     private const string DefaultAreaColorHex = "#4f46e5";
 
+    public AreaChart()
+    {
+    }
+
+    /// <summary>Creates an area chart bound to its document data.</summary>
+    public AreaChart(ChartData data) : base(data)
+    {
+    }
+
     /// <summary>
     /// Default fill opacity for all series (can be overridden per series via Style).
     /// </summary>

@@ -71,8 +71,9 @@ public static class PieChartExample
         };
 
         // Create the pie chart with custom colors matching the SVG
-        PieChart pieChart = new()
+        PieChart pieChart = new(chartData)
         {
+            AltText = "Donut-style pie chart showing proportional distribution of monthly sales",
             Height = 400,
             StretchToFit = true,
             IsDonut = true,
@@ -83,7 +84,7 @@ public static class PieChartExample
         };
 
         // Add the chart to the document
-        document.Add(new ChartElement(pieChart, chartData) { AltText = "Donut-style pie chart showing proportional distribution of monthly sales" });
+        document.Add(pieChart);
 
         // Save the document
         

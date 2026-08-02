@@ -1,7 +1,11 @@
+using System;
 using BonniePDF.Charts.Models;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
+using BonniePDF.Elements;
 using BonniePDF.Elements.Text;
+using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Charts;
 
@@ -10,13 +14,52 @@ namespace BonniePDF.Charts;
 /// using the ICanvas interface. This ensures charts can be rendered to any backend
 /// (PDF, SVG, etc.) without modification.
 /// </summary>
-public abstract class ChartBase
+public abstract class ChartBase : ElementBase, IRoleProvider, IAltTextProvider
 {
     // Title styling constants (matching SVG chart implementation)
     private const float TitleFontSize = 20;
     private const float TitleY = 35;
     private const string TitleFontFamily = "Arial, sans-serif";
     private static readonly Color TitleColor = Color.FromHex("#333333");
+
+    /// <summary>Creates an empty chart for construct-then-mutate authoring.</summary>
+    protected ChartBase()
+    {
+    }
+
+    /// <summary>Creates a chart bound to the data it will render.</summary>
+    protected ChartBase(ChartData data)
+    {
+        Data = data ?? throw new ArgumentNullException(nameof(data));
+    }
+
+    private ChartData _data = new();
+
+    /// <summary>Data rendered by this chart when it is used as a document element.</summary>
+    public ChartData Data
+    {
+        get => _data;
+        set => _data = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    /// <summary>Visible title drawn inside the chart.</summary>
+    public string Title
+    {
+        get => Data.Title;
+        set => Data.Title = value;
+    }
+
+    /// <summary>Alternate text description for screen readers.</summary>
+    public string AltText { get; set; } = string.Empty;
+
+    /// <summary>Marks the chart as decorative even when alternate text is present.</summary>
+    public bool IsDecorative { get; set; }
+
+    /// <inheritdoc />
+    public SemanticRole SemanticRole =>
+        IsDecorative || string.IsNullOrEmpty(AltText)
+            ? SemanticRole.Artifact
+            : SemanticRole.Figure;
 
     /// <summary>
     /// Width of the chart canvas in points
@@ -37,7 +80,7 @@ public abstract class ChartBase
 
     /// <summary>
     /// When true, the chart will stretch to fill the container width.
-    /// The Width property will be set automatically by the ChartElement.
+    /// The Width property will be set automatically by the document layout engine.
     /// </summary>
     public bool StretchToFit { get; set; }
 
@@ -70,6 +113,9 @@ public abstract class ChartBase
         DrawContent(canvas, data);
     }
 
+    /// <summary>Draws the chart's owned <see cref="Data"/> to a canvas.</summary>
+    public void Draw(ICanvas canvas) => Draw(canvas, Data);
+
     /// <summary>
     /// Draws the chart title centered at the top.
     /// </summary>
@@ -88,4 +134,20 @@ public abstract class ChartBase
     /// <param name="canvas">The canvas to draw to</param>
     /// <param name="data">The chart data to render</param>
     protected abstract void DrawContent(ICanvas canvas, ChartData data);
+
+    /// <inheritdoc />
+    protected override float GetPreferredContentWidth() => Width;
+
+    /// <inheritdoc />
+    protected override float MeasureContentHeight(float contentWidth) => Height;
+
+    /// <inheritdoc />
+    protected override void RenderContent(RenderContext ctx, float contentWidth)
+    {
+        if (StretchToFit) Width = contentWidth;
+
+        ICanvas canvas = ctx.GetCanvas(ctx.CurrentX, ctx.CurrentY);
+        Draw(canvas);
+        ctx.CurrentY += Height;
+    }
 }

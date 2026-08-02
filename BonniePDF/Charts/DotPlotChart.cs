@@ -15,6 +15,15 @@ public class DotPlotChart : CartesianChartBase
     private const string DefaultColorHex = "#4f46e5";
     private const float DefaultDotRadiusValue = 10;
 
+    public DotPlotChart()
+    {
+    }
+
+    /// <summary>Creates a dot plot bound to its document data.</summary>
+    public DotPlotChart(ChartData data) : base(data)
+    {
+    }
+
     /// <summary>
     /// Default dot radius for all series (can be overridden per series via Style).
     /// </summary>

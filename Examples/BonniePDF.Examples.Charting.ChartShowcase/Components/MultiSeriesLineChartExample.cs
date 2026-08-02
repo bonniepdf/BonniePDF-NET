@@ -120,8 +120,9 @@ public static class MultiSeriesLineChartExample
             }
         };
 
-        LineChart lineChart = new()
+        LineChart lineChart = new(chartData)
         {
+            AltText = $"Multi-series line chart comparing monthly revenue for {year - 1} and {year}.",
             Height = 380,
             StretchToFit = true,
             FontFamily = StandardFonts.Helvetica,
@@ -131,10 +132,7 @@ public static class MultiSeriesLineChartExample
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
-        document.Add(new ChartElement(lineChart, chartData)
-        {
-            AltText = $"Multi-series line chart comparing monthly revenue for {year - 1} and {year}."
-        });
+        document.Add(lineChart);
 
         return document;
     }
