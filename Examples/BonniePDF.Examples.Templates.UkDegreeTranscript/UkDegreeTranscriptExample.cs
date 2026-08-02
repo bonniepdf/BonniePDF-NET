@@ -83,8 +83,8 @@ public static class UkDegreeTranscriptExample
         Grid header = new(2.4f, 1) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 0, 0, 6) };
 
         VerticalStack uni = new();
-        uni.AddChild(new TextBlock { Text = "UNIVERSITY OF WESSEXBRIDGE", FontName = StandardFonts.HelveticaBold, FontSize = 16, TextColor = Navy });
-        uni.AddChild(new TextBlock { Text = "Founded 1887 - Registrar's Office", FontSize = 9, TextColor = Muted, Margin = new Thickness(0, 2, 0, 0) });
+        uni.Add(new TextBlock { Text = "UNIVERSITY OF WESSEXBRIDGE", FontName = StandardFonts.HelveticaBold, FontSize = 16, TextColor = Navy });
+        uni.Add(new TextBlock { Text = "Founded 1887 - Registrar's Office", FontSize = 9, TextColor = Muted, Margin = new Thickness(0, 2, 0, 0) });
 
         header.AddRow(
             uni,
@@ -114,14 +114,14 @@ public static class UkDegreeTranscriptExample
     {
         Grid details = new(1, 1) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 0, 0, 18) };
         VerticalStack left = new();
-        left.AddChild(Kv("Student", "Alexandra R. Bennett"));
-        left.AddChild(Kv("Student ID", "20458812"));
-        left.AddChild(Kv("Date of birth", "14 March 2003"));
+        left.Add(Kv("Student", "Alexandra R. Bennett"));
+        left.Add(Kv("Student ID", "20458812"));
+        left.Add(Kv("Date of birth", "14 March 2003"));
 
         VerticalStack right = new();
-        right.AddChild(Kv("Programme", "BSc (Hons) Computer Science"));
-        right.AddChild(Kv("Awarding body", "University of Wessexbridge"));
-        right.AddChild(Kv("Date conferred", "15 July 2026"));
+        right.Add(Kv("Programme", "BSc (Hons) Computer Science"));
+        right.Add(Kv("Awarding body", "University of Wessexbridge"));
+        right.Add(Kv("Date conferred", "15 July 2026"));
 
         details.AddRow(left, right);
         return details;
@@ -134,8 +134,8 @@ public static class UkDegreeTranscriptExample
                           (double)Modules.Where(m => m.Level >= 5).Sum(m => (m.Level == 6 ? 2 : 1) * m.Credits);
 
         VerticalStack stack = new();
-        stack.AddChild(new TextBlock { Text = "AWARD", FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = Muted });
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock { Text = "AWARD", FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = Muted });
+        stack.Add(new TextBlock
         {
             Text = "Upper Second-Class Honours (2:1)",
             FontName = StandardFonts.HelveticaBold,
@@ -143,7 +143,7 @@ public static class UkDegreeTranscriptExample
             TextColor = Navy,
             Margin = new Thickness(0, 2, 0, 2),
         });
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = $"Weighted average {weighted.ToString("0.0", CultureInfo.InvariantCulture)}%  -  {total} credits  -  FHEQ Level 6",
             FontSize = 9,
@@ -190,8 +190,8 @@ public static class UkDegreeTranscriptExample
     private static HorizontalStack Verification()
     {
         VerticalStack text = new();
-        text.AddChild(H2("Verification"));
-        text.AddChild(Body(
+        text.Add(H2("Verification"));
+        text.Add(Body(
             "This is an official record issued by the University of Wessexbridge. Scan the code or visit " +
             "verify.wessexbridge.ac.uk and enter transcript reference 20458812 to confirm authenticity. " +
             "The grading scheme is defined in the University Academic Regulations."));
@@ -206,8 +206,8 @@ public static class UkDegreeTranscriptExample
         };
 
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
-        row.AddChild(text, 3);
-        row.AddChild(new Container { Child = qr, HorizontalAlignment = HorizontalAlignment.End }, 1);
+        row.Add(text, 3);
+        row.Add(new Container { Child = qr, HorizontalAlignment = HorizontalAlignment.End }, 1);
         return row;
     }
 
@@ -233,8 +233,8 @@ public static class UkDegreeTranscriptExample
     private static HorizontalStack Kv(string label, string value)
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 0, 0, 5) };
-        row.AddChild(new TextBlock { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = Muted }, 2);
-        row.AddChild(new TextBlock { Text = value, FontSize = 10, TextColor = Ink }, 3);
+        row.Add(new TextBlock { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = Muted }, 2);
+        row.Add(new TextBlock { Text = value, FontSize = 10, TextColor = Ink }, 3);
         return row;
     }
 

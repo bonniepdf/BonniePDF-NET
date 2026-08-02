@@ -46,7 +46,7 @@ internal static class CapabilitiesPage
 
         VerticalStack content = new();
 
-        content.AddChild(new TextBlock
+        content.Add(new TextBlock
         {
             Text = "INSIDE THE REPORT",
             FontName = StandardFonts.HelveticaBold,
@@ -54,7 +54,7 @@ internal static class CapabilitiesPage
             TextColor = brand.Accent,
             Margin = new Thickness(0, 0, 0, 4),
         });
-        content.AddChild(new TextBlock
+        content.Add(new TextBlock
         {
             Text = "Performance at a glance",
             FontName = StandardFonts.HelveticaBold,
@@ -62,7 +62,7 @@ internal static class CapabilitiesPage
             TextColor = brand.Primary,
             Margin = new Thickness(0, 0, 0, 6),
         });
-        content.AddChild(new TextBlock
+        content.Add(new TextBlock
         {
             Text = $"{brand.Company}'s {brand.Year} results, laid out the way an annual report presents "
                 + "them: headline metrics, trend and mix charts, and an audited summary table.",
@@ -79,10 +79,10 @@ internal static class CapabilitiesPage
             Spacing = 12,
             Margin = new Thickness(0, 0, 0, 18),
         };
-        kpis.AddChild(KpiCard("£988M", "Total revenue", brand.Primary, brand.Tint), 1);
-        kpis.AddChild(KpiCard("+18%", "Year-over-year growth", brand.Accent, brand.Tint), 1);
-        kpis.AddChild(KpiCard("21.4%", "Operating margin", brand.Primary, brand.Tint), 1);
-        content.AddChild(kpis);
+        kpis.Add(KpiCard("£988M", "Total revenue", brand.Primary, brand.Tint), 1);
+        kpis.Add(KpiCard("+18%", "Year-over-year growth", brand.Accent, brand.Tint), 1);
+        kpis.Add(KpiCard("21.4%", "Operating margin", brand.Primary, brand.Tint), 1);
+        content.Add(kpis);
 
         // Charts row: column chart | donut
         HorizontalStack charts = new()
@@ -91,12 +91,12 @@ internal static class CapabilitiesPage
             Spacing = 14,
             Margin = new Thickness(0, 0, 0, 18),
         };
-        charts.AddChild(ChartCard("Quarterly revenue (£m)", QuarterlyBarChart(brand.Primary), brand.Accent), 1);
-        charts.AddChild(ChartCard("Revenue by segment", SegmentDonut(brand.SegmentColors), brand.Accent), 1);
-        content.AddChild(charts);
+        charts.Add(ChartCard("Quarterly revenue (£m)", QuarterlyBarChart(brand.Primary), brand.Accent), 1);
+        charts.Add(ChartCard("Revenue by segment", SegmentDonut(brand.SegmentColors), brand.Accent), 1);
+        content.Add(charts);
 
         // Financial summary table
-        content.AddChild(new TextBlock
+        content.Add(new TextBlock
         {
             Text = "Five-year financial summary",
             FontName = StandardFonts.HelveticaBold,
@@ -104,7 +104,7 @@ internal static class CapabilitiesPage
             TextColor = brand.Accent,
             Margin = new Thickness(0, 0, 0, 8),
         });
-        content.AddChild(FinancialTable(brand.Primary));
+        content.Add(FinancialTable(brand.Primary));
 
         // The cover documents use a zero margin, so inset the page ourselves.
         doc.Add(new Container
@@ -117,7 +117,7 @@ internal static class CapabilitiesPage
     private static Container KpiCard(string value, string label, Color accent, Color tint)
     {
         VerticalStack stack = new();
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = value,
             FontName = StandardFonts.HelveticaBold,
@@ -125,7 +125,7 @@ internal static class CapabilitiesPage
             TextColor = accent,
             Margin = new Thickness(0, 0, 0, 3),
         });
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = label,
             FontName = StandardFonts.Helvetica,
@@ -144,7 +144,7 @@ internal static class CapabilitiesPage
     private static Container ChartCard(string title, IElement body, Color accent)
     {
         VerticalStack stack = new();
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = title,
             FontName = StandardFonts.HelveticaBold,
@@ -152,7 +152,7 @@ internal static class CapabilitiesPage
             TextColor = accent,
             Margin = new Thickness(0, 0, 0, 8),
         });
-        stack.AddChild(body);
+        stack.Add(body);
         return new Container
         {
             Border = new Border(0.75f),

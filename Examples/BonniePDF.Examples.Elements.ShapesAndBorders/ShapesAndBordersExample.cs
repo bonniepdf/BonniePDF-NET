@@ -123,9 +123,9 @@ public static class ShapesAndBordersExample
             Margin = new Thickness(0, 0, 0, 12)
         };
 
-        cardRow.AddChild(CreateCard("Feature A", "Rounded corners make UI elements feel modern and approachable.", ColorPalette.Blue[500], ColorPalette.Blue[50]), 1f);
-        cardRow.AddChild(CreateCard("Feature B", "Bezier curves approximate perfect quarter-circle arcs.", ColorPalette.Purple[500], Color.FromHex("#faf5ff")), 1f);
-        cardRow.AddChild(CreateCard("Feature C", "Works with backgrounds, borders, or both combined.", ColorPalette.Teal[500], Color.FromHex("#f0fdfa")), 1f);
+        cardRow.Add(CreateCard("Feature A", "Rounded corners make UI elements feel modern and approachable.", ColorPalette.Blue[500], ColorPalette.Blue[50]), 1f);
+        cardRow.Add(CreateCard("Feature B", "Bezier curves approximate perfect quarter-circle arcs.", ColorPalette.Purple[500], Color.FromHex("#faf5ff")), 1f);
+        cardRow.Add(CreateCard("Feature C", "Works with backgrounds, borders, or both combined.", ColorPalette.Teal[500], Color.FromHex("#f0fdfa")), 1f);
 
         doc.Add(cardRow);
 
@@ -256,7 +256,7 @@ public static class ShapesAndBordersExample
     private static Container CreateCard(string title, string description, Color accentColor, Color bgColor)
     {
         VerticalStack content = new();
-        content.AddChild(new TextBlock
+        content.Add(new TextBlock
         {
             Text = title,
             FontName = StandardFonts.HelveticaBold,
@@ -264,7 +264,7 @@ public static class ShapesAndBordersExample
             TextColor = accentColor,
             Margin = new Thickness(0, 0, 0, 6)
         });
-        content.AddChild(new TextBlock
+        content.Add(new TextBlock
         {
             Text = description,
             FontName = StandardFonts.Helvetica,

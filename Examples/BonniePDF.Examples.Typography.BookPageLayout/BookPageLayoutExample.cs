@@ -121,14 +121,14 @@ public static class BookPageLayoutExample
 
         // "But then -" emphasis break
         VerticalStack emphStack = new() { Margin = new Thickness(0, 0, 0, 10) };
-        emphStack.AddChild(new TextBlock
+        emphStack.Add(new TextBlock
         {
             Text      = "But then –",
             FontName  = StandardFonts.TimesBold,
             FontSize  = 11,
             TextColor = ColorPalette.Slate[800],
         });
-        emphStack.AddChild(new TextBlock
+        emphStack.Add(new TextBlock
         {
             Text      = "he continued, his voice dropping to a conspiratorial whisper –",
             FontName  = StandardFonts.TimesItalic,
@@ -151,7 +151,7 @@ public static class BookPageLayoutExample
         // ── Pull-quote block ─────────────────────────────────────────────────
 
         VerticalStack quoteInner = new();
-        quoteInner.AddChild(new TextBlock
+        quoteInner.Add(new TextBlock
         {
             Text      = "We have discovered, through decades of research across multiple disciplines, that the " +
                         "architectural blueprint of memory is not unique to humans. It exists in varying forms " +

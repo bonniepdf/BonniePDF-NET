@@ -77,8 +77,8 @@ public class LayoutSnapshotTests
     {
         var doc = new BonniePDF.Document();
         var stack = new VerticalStack();
-        stack.AddChild(new TextBlock { Text = "A", FontSize = 12 });
-        stack.AddChild(new TextBlock { Text = "B", FontSize = 12 });
+        stack.Add(new TextBlock { Text = "A", FontSize = 12 });
+        stack.Add(new TextBlock { Text = "B", FontSize = 12 });
         doc.Add(stack);
 
         LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
@@ -152,8 +152,8 @@ public class LayoutSnapshotTests
         {
             var d = new BonniePDF.Document();
             var stack = new VerticalStack();
-            stack.AddChild(new TextBlock { Text = "Alpha", FontSize = 14 });
-            stack.AddChild(new TextBlock { Text = "Beta", FontSize = 11 });
+            stack.Add(new TextBlock { Text = "Alpha", FontSize = 14 });
+            stack.Add(new TextBlock { Text = "Beta", FontSize = 11 });
             d.Add(stack);
             for (int i = 0; i < 60; i++) d.Add(new TextBlock { Text = $"Row {i}", FontSize = 12 });
             return d;

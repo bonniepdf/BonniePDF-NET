@@ -67,7 +67,7 @@ public static partial class DickensNovelExample
                     WidthDistribution = WidthDistribution.Weighted,
                     Spacing = 0,
                 };
-                stack.AddChild(new TextBlock
+                stack.Add(new TextBlock
                 {
                     Text      = "A Tale of Two Cities",
                     FontName  = StandardFonts.TimesItalic,
@@ -75,7 +75,7 @@ public static partial class DickensNovelExample
                     TextColor = ColorPalette.Slate[500],
                     Alignment = TextAlignment.Left,
                 }, 1f);
-                stack.AddChild(new TextBlock
+                stack.Add(new TextBlock
                 {
                     Text      = "Charles Dickens",
                     FontName  = StandardFonts.TimesItalic,

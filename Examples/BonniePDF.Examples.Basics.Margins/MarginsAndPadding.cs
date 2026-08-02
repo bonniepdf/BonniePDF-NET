@@ -58,13 +58,13 @@ public static class MarginsAndPadding
             WidthDistribution = WidthDistribution.Equal,
             Spacing = 16
         };
-        comparison.AddChild(ComparisonColumn(
+        comparison.Add(ComparisonColumn(
             "Padding on the outer box",
             "The blue band is 16pt of padding: space the container reserves inside its own border.",
             // Outer box owns the space via padding; the inner content sits on a
             // contrasting fill so the padding band is actually visible.
             PaddingDemo()));
-        comparison.AddChild(ComparisonColumn(
+        comparison.Add(ComparisonColumn(
             "Margin on the inner box",
             "The blue band is 16pt of margin: space the inner element holds outside itself.",
             // Outer box has no padding; the inner element pushes itself away from the
@@ -159,7 +159,7 @@ public static class MarginsAndPadding
             Margin = new Thickness(20, 6, 20, 6) // 20pt horizontal, 6pt vertical
         };
 
-        stack.AddChild(new Container
+        stack.Add(new Container
         {
             BackgroundColor = ColorPalette.Green[100],
             Padding = new Thickness(8),
@@ -171,7 +171,7 @@ public static class MarginsAndPadding
             }
         });
 
-        stack.AddChild(new Container
+        stack.Add(new Container
         {
             BackgroundColor = ColorPalette.Purple[100],
             Padding = new Thickness(8),
@@ -184,7 +184,7 @@ public static class MarginsAndPadding
             }
         });
 
-        stack.AddChild(new Container
+        stack.Add(new Container
         {
             BackgroundColor = ColorPalette.Red[100],
             Padding = new Thickness(8),
@@ -227,15 +227,15 @@ public static class MarginsAndPadding
     private static VerticalStack ComparisonColumn(string heading, string caption, Container demo)
     {
         VerticalStack column = new() { Spacing = 4 };
-        column.AddChild(new TextBlock
+        column.Add(new TextBlock
         {
             Text = heading,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 10,
             TextColor = ColorPalette.Slate[700]
         });
-        column.AddChild(demo);
-        column.AddChild(new TextBlock
+        column.Add(demo);
+        column.Add(new TextBlock
         {
             Text = caption,
             FontSize = 9,

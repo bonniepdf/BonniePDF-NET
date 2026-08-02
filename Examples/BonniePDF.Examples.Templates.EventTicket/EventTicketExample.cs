@@ -68,8 +68,8 @@ public static class EventTicketExample
 
         // ── Main body (dark) ──────────────────────────────────────────────────
         VerticalStack info = new();
-        info.AddChild(Tb("SAMPLE LIVE presents", 8, Accent, bold: true, bottom: 6));
-        info.AddChild(new Heading("Sample Sound Festival")
+        info.Add(Tb("SAMPLE LIVE presents", 8, Accent, bold: true, bottom: 6));
+        info.Add(new Heading("Sample Sound Festival")
         {
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
@@ -77,14 +77,14 @@ public static class EventTicketExample
             TextColor = Cream,
             Margin = new Thickness(0, 0, 0, 3),
         });
-        info.AddChild(Tb("Main Stage, Victoria Park, London", 10, BodyCol, bottom: 12));
+        info.Add(Tb("Main Stage, Victoria Park, London", 10, BodyCol, bottom: 12));
 
         Grid facts = new(1f, 1f, 1f) { Border = Border.None, CellPadding = 0 };
         facts.AddRow(
             new Container { Child = Field("DATE", "18 Jul 2026") },
             new Container { Child = Field("GATES", "16:00") },
             new Container { Child = Field("ADMITS", "One") });
-        info.AddChild(facts);
+        info.Add(facts);
 
         // Ticket-id barcode runs along the full width of the body.
         Barcode ticketBarcode = new()
@@ -98,7 +98,7 @@ public static class EventTicketExample
             TextLabelFontSize = 7,
             AltText = "Ticket barcode (Code 128): ASF26-4471-XK",
         };
-        info.AddChild(new Container { Child = ticketBarcode, Margin = new Thickness(0, 16, 0, 0) });
+        info.Add(new Container { Child = ticketBarcode, Margin = new Thickness(0, 16, 0, 0) });
 
         Container body = new()
         {
@@ -110,7 +110,7 @@ public static class EventTicketExample
 
         // ── Tear-off stub (lighter) with the QR entry pass ────────────────────
         VerticalStack stub = new();
-        stub.AddChild(Tb("ADMIT ONE", 8, Accent, bold: true, bottom: 8, align: TextAlignment.Center));
+        stub.Add(Tb("ADMIT ONE", 8, Accent, bold: true, bottom: 8, align: TextAlignment.Center));
 
         QRCode qr = new()
         {
@@ -129,17 +129,17 @@ public static class EventTicketExample
             Padding = new Thickness(6),
             Child = qr,
         };
-        stub.AddChild(new Container
+        stub.Add(new Container
         {
             HorizontalAlignment = HorizontalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 10),
             Child = qrCard,
         });
 
-        stub.AddChild(Tb("SECTION", 7, Mute, bold: true, bottom: 2, align: TextAlignment.Center));
-        stub.AddChild(Tb("GA - STANDING", 12, Cream, bold: true, bottom: 8, align: TextAlignment.Center));
-        stub.AddChild(Tb("TICKET", 7, Mute, bold: true, bottom: 2, align: TextAlignment.Center));
-        stub.AddChild(Tb("ASF26-4471-XK", 10, Cream, bold: true, align: TextAlignment.Center));
+        stub.Add(Tb("SECTION", 7, Mute, bold: true, bottom: 2, align: TextAlignment.Center));
+        stub.Add(Tb("GA - STANDING", 12, Cream, bold: true, bottom: 8, align: TextAlignment.Center));
+        stub.Add(Tb("TICKET", 7, Mute, bold: true, bottom: 2, align: TextAlignment.Center));
+        stub.Add(Tb("ASF26-4471-XK", 10, Cream, bold: true, align: TextAlignment.Center));
 
         Container stubBox = new()
         {
@@ -162,8 +162,8 @@ public static class EventTicketExample
     private static VerticalStack Field(string label, string value)
     {
         VerticalStack v = new();
-        v.AddChild(Tb(label, 7, Mute, bold: true, bottom: 2));
-        v.AddChild(Tb(value, 11, Cream, bold: true));
+        v.Add(Tb(label, 7, Mute, bold: true, bottom: 2));
+        v.Add(Tb(value, 11, Cream, bold: true));
         return v;
     }
 

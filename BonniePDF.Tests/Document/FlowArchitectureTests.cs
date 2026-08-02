@@ -165,7 +165,7 @@ public class FlowArchitectureTests
     {
         VerticalStack stack = new();
         for (int i = 0; i < 50; i++)
-            stack.AddChild(new TextBlock { Text = $"Item {i}: Some content here", FontSize = 14 });
+            stack.Add(new TextBlock { Text = $"Item {i}: Some content here", FontSize = 14 });
 
         RenderContext ctx = new(new PdfSize(612, 200), 50);
 
@@ -349,7 +349,7 @@ public class FlowArchitectureTests
 
         VerticalStack stack = new();
         for (int i = 0; i < 100; i++)
-            stack.AddChild(new TextBlock
+            stack.Add(new TextBlock
             {
                 Text = $"Item {i}: This is a list item with some content that takes up space.",
                 FontSize = 12
@@ -401,7 +401,7 @@ public class FlowArchitectureTests
         Circle largeChild = new() { Diameter = 200 };
 
         VerticalStack stack = new();
-        stack.AddChild(largeChild);
+        stack.Add(largeChild);
 
         // Small page: 300pt height, 50pt margins = 200pt content area (MaxY = 250)
         // Position cursor near the bottom so 200pt child won't fit
@@ -422,8 +422,8 @@ public class FlowArchitectureTests
         Circle largeChild = new() { Diameter = 200 };
 
         VerticalStack stack = new();
-        stack.AddChild(smallChild);
-        stack.AddChild(largeChild);
+        stack.Add(smallChild);
+        stack.Add(largeChild);
 
         // Position cursor so first child fits but second doesn't
         RenderContext ctx = new(new PdfSize(612, 300), 50);
@@ -441,10 +441,10 @@ public class FlowArchitectureTests
         // Create a nested stack that will return WrapRequired
         Circle largeChild = new() { Diameter = 200 };
         VerticalStack innerStack = new();
-        innerStack.AddChild(largeChild);
+        innerStack.Add(largeChild);
 
         VerticalStack outerStack = new();
-        outerStack.AddChild(innerStack);
+        outerStack.Add(innerStack);
 
         // Position near bottom
         RenderContext ctx = new(new PdfSize(612, 300), 50);
@@ -466,10 +466,10 @@ public class FlowArchitectureTests
 
         // Fill most of the page with text
         string longText = string.Join('\n', Enumerable.Range(1, 40).Select(i => $"Line {i}"));
-        stack.AddChild(new TextBlock { Text = longText, FontSize = 12 });
+        stack.Add(new TextBlock { Text = longText, FontSize = 12 });
 
         // Add a large circle that won't fit in the remaining space
-        stack.AddChild(new Circle { Diameter = 300 });
+        stack.Add(new Circle { Diameter = 300 });
 
         doc.Add(stack);
 
@@ -489,7 +489,7 @@ public class FlowArchitectureTests
         // On A4 with 50pt margins: content area = 842 - 100 = 742pt
         // This 1000pt circle will trigger WrapRequired even on a fresh page
         VerticalStack stack = new();
-        stack.AddChild(new Circle { Diameter = 1000 });
+        stack.Add(new Circle { Diameter = 1000 });
 
         doc.Add(stack);
 
@@ -550,8 +550,8 @@ public class FlowArchitectureTests
         VerticalStack stack = new();
         // Add filler that takes some space
         string fillerText = string.Join(' ', Enumerable.Range(1, 6).Select(i => $"Filler{i}"));
-        stack.AddChild(new TextBlock { Text = fillerText, FontSize = 12 });
-        stack.AddChild(keepTogether);
+        stack.Add(new TextBlock { Text = fillerText, FontSize = 12 });
+        stack.Add(keepTogether);
 
         // Small page: 200pt height, 50pt margins = 100pt content area (MaxY=150)
         // Narrow width forces word wrapping to create many lines
@@ -569,7 +569,7 @@ public class FlowArchitectureTests
         // Element that can't fit on any single page - must render anyway to avoid infinite loop
         string hugeText = string.Join('\n', Enumerable.Range(1, 200).Select(i => $"Line {i}"));
         VerticalStack stack = new() { BreakAllowed = false };
-        stack.AddChild(new TextBlock { Text = hugeText });
+        stack.Add(new TextBlock { Text = hugeText });
 
         using BonniePDF.Document doc = new();
         doc.Add(stack);
@@ -724,8 +724,8 @@ public class FlowArchitectureTests
     public void HorizontalStack_SmallStackReturnsComplete()
     {
         HorizontalStack stack = new();
-        stack.AddChild(new TextBlock { Text = "Left" });
-        stack.AddChild(new TextBlock { Text = "Right" });
+        stack.Add(new TextBlock { Text = "Left" });
+        stack.Add(new TextBlock { Text = "Right" });
 
         RenderContext ctx = CreateTestContext();
 
@@ -740,8 +740,8 @@ public class FlowArchitectureTests
         HorizontalStack stack = new();
         // Use narrow width + long text to force word wrapping, creating tall children
         string text = string.Join(' ', Enumerable.Range(1, 20).Select(i => $"Word{i}"));
-        stack.AddChild(new TextBlock { Text = text, FontSize = 12 });
-        stack.AddChild(new TextBlock { Text = text, FontSize = 12 });
+        stack.Add(new TextBlock { Text = text, FontSize = 12 });
+        stack.Add(new TextBlock { Text = text, FontSize = 12 });
 
         // Position near bottom of a small page so the tall stack won't fit
         RenderContext ctx = new(new PdfSize(612, 200), 50);
@@ -757,7 +757,7 @@ public class FlowArchitectureTests
     public void HorizontalStack_RendersAtTopOfPage_EvenIfTall()
     {
         HorizontalStack stack = new();
-        stack.AddChild(new Circle { Diameter = 300 });
+        stack.Add(new Circle { Diameter = 300 });
 
         // At top of a small page - should render anyway
         RenderContext ctx = new(new PdfSize(612, 200), 50);
@@ -771,7 +771,7 @@ public class FlowArchitectureTests
     public void HorizontalStack_ResetStateClearsTracking()
     {
         HorizontalStack stack = new();
-        stack.AddChild(new TextBlock { Text = "Content" });
+        stack.Add(new TextBlock { Text = "Content" });
 
         RenderContext ctx = CreateTestContext();
 
@@ -794,13 +794,13 @@ public class FlowArchitectureTests
         VerticalStack vStack = new();
         // Fill most of the page
         string filler = string.Join('\n', Enumerable.Range(1, 40).Select(i => $"Line {i}"));
-        vStack.AddChild(new TextBlock { Text = filler });
+        vStack.Add(new TextBlock { Text = filler });
 
         // Add a horizontal stack that won't fit
         HorizontalStack hStack = new();
-        hStack.AddChild(new TextBlock { Text = "Left column\nLine 2\nLine 3" });
-        hStack.AddChild(new TextBlock { Text = "Right column\nLine 2\nLine 3" });
-        vStack.AddChild(hStack);
+        hStack.Add(new TextBlock { Text = "Left column\nLine 2\nLine 3" });
+        hStack.Add(new TextBlock { Text = "Right column\nLine 2\nLine 3" });
+        vStack.Add(hStack);
 
         using BonniePDF.Document doc = new();
         doc.Add(vStack);

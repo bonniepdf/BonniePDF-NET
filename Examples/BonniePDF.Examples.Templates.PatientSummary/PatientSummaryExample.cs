@@ -50,12 +50,12 @@ public static class PatientSummaryExample
 
         // ── Page header band ──────────────────────────────────────────────────
         VerticalStack brand = new();
-        brand.AddChild(Tb("SAMPLE HEALTHCARE", 13, Color.White, bold: true));
-        brand.AddChild(Tb("Patient Summary", 8, Cream, top: 4));
+        brand.Add(Tb("SAMPLE HEALTHCARE", 13, Color.White, bold: true));
+        brand.Add(Tb("Patient Summary", 8, Cream, top: 4));
 
         VerticalStack issued = new();
-        issued.AddChild(Tb("Confidential", 8, Cream, align: TextAlignment.Right));
-        issued.AddChild(Tb("Generated 18 June 2026", 8, Cream, align: TextAlignment.Right, top: 4));
+        issued.Add(Tb("Confidential", 8, Cream, align: TextAlignment.Right));
+        issued.Add(Tb("Generated 18 June 2026", 8, Cream, align: TextAlignment.Right, top: 4));
 
         doc.Add(new Container
         {
@@ -66,8 +66,8 @@ public static class PatientSummaryExample
 
         // ── 1. Patient card (teal bleed band) ─────────────────────────────────
         VerticalStack idLine = new();
-        idLine.AddChild(Tb("Eleanor M. Whitfield", 15, Color.White, bold: true));
-        idLine.AddChild(Tb("MRN 00482931  ·  DOB 14 Mar 1979  ·  Female", 9, Cream, top: 5));
+        idLine.Add(Tb("Eleanor M. Whitfield", 15, Color.White, bold: true));
+        idLine.Add(Tb("MRN 00482931  ·  DOB 14 Mar 1979  ·  Female", 9, Cream, top: 5));
 
         Container patientBand = new()
         {
@@ -77,14 +77,14 @@ public static class PatientSummaryExample
         };
 
         VerticalStack detailsLeft = new();
-        detailsLeft.AddChild(DetailRow("Blood type", "O positive"));
-        detailsLeft.AddChild(DetailRow("Primary GP", "Dr. A. Okafor"));
-        detailsLeft.AddChild(DetailRow("Phone", "+44 7700 900482"));
+        detailsLeft.Add(DetailRow("Blood type", "O positive"));
+        detailsLeft.Add(DetailRow("Primary GP", "Dr. A. Okafor"));
+        detailsLeft.Add(DetailRow("Phone", "+44 7700 900482"));
 
         VerticalStack detailsRight = new();
-        detailsRight.AddChild(DetailRow("Patient ID", "SAMPLE-9434765919"));
-        detailsRight.AddChild(DetailRow("Ward", "Cardiology - 4B"));
-        detailsRight.AddChild(DetailRow("Admitted", "16 Jun 2026"));
+        detailsRight.Add(DetailRow("Patient ID", "SAMPLE-9434765919"));
+        detailsRight.Add(DetailRow("Ward", "Cardiology - 4B"));
+        detailsRight.Add(DetailRow("Admitted", "16 Jun 2026"));
 
         Container detailsBody = new()
         {
@@ -94,8 +94,8 @@ public static class PatientSummaryExample
         };
 
         VerticalStack patientStack = new();
-        patientStack.AddChild(patientBand);
-        patientStack.AddChild(detailsBody);
+        patientStack.Add(patientBand);
+        patientStack.Add(detailsBody);
 
         doc.Add(Pad(new Container
         {
@@ -122,9 +122,9 @@ public static class PatientSummaryExample
 
         // ── 3. Allergies & alerts card (rose bleed band) ──────────────────────
         VerticalStack alerts = new();
-        alerts.AddChild(Alert("Penicillin", "Anaphylaxis - documented 2014. Avoid all beta-lactams.", 0));
-        alerts.AddChild(Alert("Latex", "Contact urticaria. Use nitrile gloves.", 6));
-        alerts.AddChild(Alert("Warfarin", "On anticoagulation - INR target 2.0-3.0.", 6));
+        alerts.Add(Alert("Penicillin", "Anaphylaxis - documented 2014. Avoid all beta-lactams.", 0));
+        alerts.Add(Alert("Latex", "Contact urticaria. Use nitrile gloves.", 6));
+        alerts.Add(Alert("Warfarin", "On anticoagulation - INR target 2.0-3.0.", 6));
 
         Container alertsCard = MakeCard(Rose, "ALLERGIES & ALERTS", alerts);
         alertsCard.Margin = new Thickness(0, 0, 0, 28);
@@ -168,8 +168,8 @@ public static class PatientSummaryExample
         };
 
         VerticalStack stack = new();
-        stack.AddChild(band);
-        stack.AddChild(bodyWrap);
+        stack.Add(band);
+        stack.Add(bodyWrap);
 
         return new Container
         {
@@ -193,10 +193,10 @@ public static class PatientSummaryExample
     private static VerticalStack Vital(string value, string unit, string label, string status, Color tone)
     {
         VerticalStack v = new();
-        v.AddChild(Tb(value, 18, Ink, bold: true));
-        v.AddChild(Tb(unit, 8, Mute, top: 2));
-        v.AddChild(Tb(label.ToUpperInvariant(), 7.5f, Body, bold: true, top: 8));
-        v.AddChild(Tb(status, 7.5f, tone, bold: true, top: 3));
+        v.Add(Tb(value, 18, Ink, bold: true));
+        v.Add(Tb(unit, 8, Mute, top: 2));
+        v.Add(Tb(label.ToUpperInvariant(), 7.5f, Body, bold: true, top: 8));
+        v.Add(Tb(status, 7.5f, tone, bold: true, top: 3));
         return v;
     }
 

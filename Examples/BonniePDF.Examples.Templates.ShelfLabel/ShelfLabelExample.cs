@@ -46,10 +46,10 @@ public static class ShelfLabelExample
         doc.Metadata.Subject = "EU/UK retail shelf-edge label with EAN-13 and mandatory unit price.";
 
         VerticalStack card = new();
-        card.AddChild(RetailerStrip());
-        card.AddChild(MainOffer());
-        card.AddChild(DetailRow());
-        card.AddChild(BarcodePanel());
+        card.Add(RetailerStrip());
+        card.Add(MainOffer());
+        card.Add(DetailRow());
+        card.Add(BarcodePanel());
 
         doc.Add(new Container
         {
@@ -65,8 +65,8 @@ public static class ShelfLabelExample
     private static Container RetailerStrip()
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Alignment = HorizontalAlignment.Center };
-        row.AddChild(Tb("SAMPLESHOP", 10, Color.White, bold: true), 1);
-        row.AddChild(Tb("Everyday Low Price", 9.4f, Color.White, bold: true, align: TextAlignment.Right), 1);
+        row.Add(Tb("SAMPLESHOP", 10, Color.White, bold: true), 1);
+        row.Add(Tb("Everyday Low Price", 9.4f, Color.White, bold: true, align: TextAlignment.Right), 1);
 
         return new Container
         {
@@ -79,8 +79,8 @@ public static class ShelfLabelExample
     private static Grid MainOffer()
     {
         VerticalStack info = new();
-        info.AddChild(Tb("HARVEST GROVE", 8, AccentDark, bold: true, bottom: 2));
-        info.AddChild(new Heading("Organic Rolled Oats")
+        info.Add(Tb("HARVEST GROVE", 8, AccentDark, bold: true, bottom: 2));
+        info.Add(new Heading("Organic Rolled Oats")
         {
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
@@ -88,12 +88,12 @@ public static class ShelfLabelExample
             TextColor = Ink,
             Margin = new Thickness(0, 0, 0, 1),
         });
-        info.AddChild(Tb("1 kg  -  Milled in the UK", 9, Body));
+        info.Add(Tb("1 kg  -  Milled in the UK", 9, Body));
 
         VerticalStack price = new();
-        price.AddChild(Tb("Was " + Money(2.99), 8.5f, Promo, bold: true, align: TextAlignment.Right));
-        price.AddChild(Tb(Money(2.49), 30, Ink, bold: true, align: TextAlignment.Right));
-        price.AddChild(UnitPriceBadge());
+        price.Add(Tb("Was " + Money(2.99), 8.5f, Promo, bold: true, align: TextAlignment.Right));
+        price.Add(Tb(Money(2.49), 30, Ink, bold: true, align: TextAlignment.Right));
+        price.Add(UnitPriceBadge());
 
         Grid row = new(1.75f, 1)
         {
@@ -132,8 +132,8 @@ public static class ShelfLabelExample
     private static Container DetailCell(string label, string value, Color accent)
     {
         VerticalStack stack = new();
-        stack.AddChild(Tb(label, 5.8f, Muted, bold: true, align: TextAlignment.Center));
-        stack.AddChild(Tb(value, 7.2f, accent, bold: true, align: TextAlignment.Center));
+        stack.Add(Tb(label, 5.8f, Muted, bold: true, align: TextAlignment.Center));
+        stack.Add(Tb(value, 7.2f, accent, bold: true, align: TextAlignment.Center));
 
         return new Container
         {
@@ -150,8 +150,8 @@ public static class ShelfLabelExample
     private static Container BarcodePanel()
     {
         VerticalStack stack = new();
-        stack.AddChild(Tb("EAN-13 / GS1 UK article number", 6.5f, Muted, bold: true, align: TextAlignment.Center, bottom: 2));
-        stack.AddChild(new Container
+        stack.Add(Tb("EAN-13 / GS1 UK article number", 6.5f, Muted, bold: true, align: TextAlignment.Center, bottom: 2));
+        stack.Add(new Container
         {
             HorizontalAlignment = HorizontalAlignment.Center,
             Child = new Barcode
@@ -162,8 +162,8 @@ public static class ShelfLabelExample
                 AltText = "EAN-13 article number 5012345678900.",
             },
         });
-        stack.AddChild(Tb("OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY", 6.2f, Body, bold: true, align: TextAlignment.Center, bottom: 1));
-        stack.AddChild(Tb("SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026", 5.8f, Muted, align: TextAlignment.Center));
+        stack.Add(Tb("OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY", 6.2f, Body, bold: true, align: TextAlignment.Center, bottom: 1));
+        stack.Add(Tb("SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026", 5.8f, Muted, align: TextAlignment.Center));
 
         return new Container
         {

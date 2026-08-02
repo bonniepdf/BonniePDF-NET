@@ -146,17 +146,17 @@ public static class FinancialStatementExample
             Margin = line.Indent ? new Thickness(14, 0, 0, 0) : new Thickness(),
         };
 
-        row.AddChild(label, 6);
-        row.AddChild(NumCell(line.Note ?? string.Empty, false, Muted, TextAlignment.Center), 1);
-        row.AddChild(NumCell(Format(line.Current), bold, bold ? Navy : Ink, TextAlignment.Right), 2);
-        row.AddChild(NumCell(Format(line.Prior), bold, Muted, TextAlignment.Right), 2);
+        row.Add(label, 6);
+        row.Add(NumCell(line.Note ?? string.Empty, false, Muted, TextAlignment.Center), 1);
+        row.Add(NumCell(Format(line.Current), bold, bold ? Navy : Ink, TextAlignment.Right), 2);
+        row.Add(NumCell(Format(line.Prior), bold, Muted, TextAlignment.Right), 2);
 
         if (line.Kind is not (Kind.Subtotal or Kind.Total)) return row;
 
         VerticalStack stack = new();
-        stack.AddChild(RuleLine(line.Kind == Kind.Total ? Navy : Rule, line.Kind == Kind.Total ? 0.8f : 0.5f));
-        stack.AddChild(row);
-        if (line.Kind == Kind.Total) stack.AddChild(RuleLine(Navy, 0.5f));
+        stack.Add(RuleLine(line.Kind == Kind.Total ? Navy : Rule, line.Kind == Kind.Total ? 0.8f : 0.5f));
+        stack.Add(row);
+        if (line.Kind == Kind.Total) stack.Add(RuleLine(Navy, 0.5f));
         return stack;
     }
 
@@ -167,10 +167,10 @@ public static class FinancialStatementExample
             WidthDistribution = WidthDistribution.Weighted,
             Margin = new Thickness(0, 2, 0, 2),
         };
-        row.AddChild(NumCell("", false, Muted, TextAlignment.Left), 6);
-        row.AddChild(NumCell("Note", false, Muted, TextAlignment.Center), 1);
-        row.AddChild(NumCell("2026", true, Navy, TextAlignment.Right), 2);
-        row.AddChild(NumCell("2025", true, Muted, TextAlignment.Right), 2);
+        row.Add(NumCell("", false, Muted, TextAlignment.Left), 6);
+        row.Add(NumCell("Note", false, Muted, TextAlignment.Center), 1);
+        row.Add(NumCell("2026", true, Navy, TextAlignment.Right), 2);
+        row.Add(NumCell("2025", true, Muted, TextAlignment.Right), 2);
         return row;
     }
 

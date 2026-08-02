@@ -86,7 +86,7 @@ public static class VerticalStackOverflowExample
         VerticalStack sheet = new() { Spacing = 18 };
         foreach (string location in Locations)
         {
-            sheet.AddChild(new Barcode
+            sheet.Add(new Barcode
             {
                 Value             = location,
                 Symbology         = BarcodeSymbology.Code128,

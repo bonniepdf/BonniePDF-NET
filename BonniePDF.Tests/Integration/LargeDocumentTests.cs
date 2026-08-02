@@ -102,7 +102,7 @@ public class LargeDocumentTests : IntegrationTestBase
 
             for (int i = 1; i <= 500; i++)
             {
-                stack.AddChild(new TextBlock
+                stack.Add(new TextBlock
                 {
                     Text = $"Text block {i}: Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                     FontSize = 10
@@ -154,7 +154,7 @@ public class LargeDocumentTests : IntegrationTestBase
                         StretchToFit = true
                     };
                     lineChart.Data = data;
-                    stack.AddChild(lineChart);
+                    stack.Add(lineChart);
                 }
 
                 doc.Add(stack);
@@ -201,7 +201,7 @@ public class LargeDocumentTests : IntegrationTestBase
 
                 for (int img = 0; img < 4; img++)
                 {
-                    hStack.AddChild(new Image
+                    hStack.Add(new Image
                     {
                         ImageData = imageData,
                         Width = 100,

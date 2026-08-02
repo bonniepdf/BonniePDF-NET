@@ -93,12 +93,12 @@ public static class ColorPaletteExample
             WidthDistribution = WidthDistribution.Weighted,
             Spacing = HGap
         };
-        header.AddChild(new Container { Width = LabelWidth });
+        header.Add(new Container { Width = LabelWidth });
         foreach (int shade in ColorPalette.Shades)
         {
-            header.AddChild(HeaderCell(shade.ToString(System.Globalization.CultureInfo.InvariantCulture)), 1f);
+            header.Add(HeaderCell(shade.ToString(System.Globalization.CultureInfo.InvariantCulture)), 1f);
         }
-        grid.AddChild(header);
+        grid.Add(header);
 
         // One row per palette, lightest (50) on the left to darkest (950) on the right.
         foreach ((string name, ColorPalette ramp) in Palettes)
@@ -109,12 +109,12 @@ public static class ColorPaletteExample
                 WidthDistribution = WidthDistribution.Weighted,
                 Spacing = HGap
             };
-            row.AddChild(RowLabel(name));
+            row.Add(RowLabel(name));
             foreach (int shade in ColorPalette.Shades)
             {
-                row.AddChild(Swatch(ramp, shade), 1f);
+                row.Add(Swatch(ramp, shade), 1f);
             }
-            grid.AddChild(row);
+            grid.Add(row);
         }
 
         doc.Add(grid);

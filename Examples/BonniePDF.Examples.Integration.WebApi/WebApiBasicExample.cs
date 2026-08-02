@@ -47,7 +47,7 @@ public static class WebApiBasicExample
         });
 
         VerticalStack features = new();
-        features.AddChild(new TextBlock
+        features.Add(new TextBlock
         {
             Text = "Benefits of this approach:",
             FontName = StandardFonts.HelveticaBold,
@@ -55,11 +55,11 @@ public static class WebApiBasicExample
             TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
-        features.AddChild(new TextBlock { Text = "• No temporary files on disk" });
-        features.AddChild(new TextBlock { Text = "• Better security (sensitive data never hits disk)" });
-        features.AddChild(new TextBlock { Text = "• Non-blocking async I/O" });
-        features.AddChild(new TextBlock { Text = "• Better scalability under load" });
-        features.AddChild(new TextBlock { Text = "• Cleaner code (no temp file cleanup)" });
+        features.Add(new TextBlock { Text = "• No temporary files on disk" });
+        features.Add(new TextBlock { Text = "• Better security (sensitive data never hits disk)" });
+        features.Add(new TextBlock { Text = "• Non-blocking async I/O" });
+        features.Add(new TextBlock { Text = "• Better scalability under load" });
+        features.Add(new TextBlock { Text = "• Cleaner code (no temp file cleanup)" });
 
         doc.Add(features);
         return doc;
@@ -100,7 +100,7 @@ public static class WebApiBasicExample
         });
 
         VerticalStack features = new();
-        features.AddChild(new TextBlock
+        features.Add(new TextBlock
         {
             Text = "Benefits of this approach:",
             FontName = StandardFonts.HelveticaBold,
@@ -108,11 +108,11 @@ public static class WebApiBasicExample
             TextColor = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
-        features.AddChild(new TextBlock { Text = "• No temporary files on disk" });
-        features.AddChild(new TextBlock { Text = "• Better security (sensitive data never hits disk)" });
-        features.AddChild(new TextBlock { Text = "• Non-blocking async I/O" });
-        features.AddChild(new TextBlock { Text = "• Better scalability under load" });
-        features.AddChild(new TextBlock { Text = "• Cleaner code (no temp file cleanup)" });
+        features.Add(new TextBlock { Text = "• No temporary files on disk" });
+        features.Add(new TextBlock { Text = "• Better security (sensitive data never hits disk)" });
+        features.Add(new TextBlock { Text = "• Non-blocking async I/O" });
+        features.Add(new TextBlock { Text = "• Better scalability under load" });
+        features.Add(new TextBlock { Text = "• Cleaner code (no temp file cleanup)" });
 
         doc.Add(features);
 

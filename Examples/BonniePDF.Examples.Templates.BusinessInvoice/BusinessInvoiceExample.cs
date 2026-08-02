@@ -68,7 +68,7 @@ public static class BusinessInvoiceExample
 
         // Left: Company branding
         VerticalStack companyStack = new();
-        companyStack.AddChild(new TextBlock
+        companyStack.Add(new TextBlock
         {
             Text = "SAMPLE COMPANY INC.",
             FontName = StandardFonts.HelveticaBold,
@@ -77,13 +77,13 @@ public static class BusinessInvoiceExample
             Margin = new Thickness(0, 0, 0, 4)
         });
         // The address lines share one style, so they flow as a single paragraph.
-        companyStack.AddChild(new TextBlock { Text = "42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@example.com" });
+        companyStack.Add(new TextBlock { Text = "42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@example.com" });
 
         // Right: Invoice title - Heading (H1) instead of plain TextBlock so it
         // carries the semantic role for screen readers (PDF/UA-1 Matterhorn §14-1).
         // Visually identical to the prior styled TextBlock.
         VerticalStack titleStack = new();
-        titleStack.AddChild(new Heading("Invoice")
+        titleStack.Add(new Heading("Invoice")
         {
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
@@ -111,7 +111,7 @@ public static class BusinessInvoiceExample
 
         // Bill To column
         VerticalStack billToStack = new();
-        billToStack.AddChild(new TextBlock
+        billToStack.Add(new TextBlock
         {
             Text = "Bill to",
             FontName = StandardFonts.HelveticaBold,
@@ -121,11 +121,11 @@ public static class BusinessInvoiceExample
         });
         // One TextBlock with hard line breaks: the address tags as a single
         // paragraph under PDF/UA instead of four.
-        billToStack.AddChild(new TextBlock { Text = "Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701" });
+        billToStack.Add(new TextBlock { Text = "Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701" });
 
         // Ship To column
         VerticalStack shipToStack = new();
-        shipToStack.AddChild(new TextBlock
+        shipToStack.Add(new TextBlock
         {
             Text = "Ship to",
             FontName = StandardFonts.HelveticaBold,
@@ -133,11 +133,11 @@ public static class BusinessInvoiceExample
             TextColor = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        shipToStack.AddChild(new TextBlock { Text = "Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701" });
+        shipToStack.Add(new TextBlock { Text = "Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701" });
 
         // Details column
         VerticalStack detailsStack = new();
-        detailsStack.AddChild(new TextBlock
+        detailsStack.Add(new TextBlock
         {
             Text = "Details",
             FontName = StandardFonts.HelveticaBold,
@@ -264,7 +264,7 @@ public static class BusinessInvoiceExample
 
         // Left: Customer message
         VerticalStack messageStack = new();
-        messageStack.AddChild(new TextBlock
+        messageStack.Add(new TextBlock
         {
             Text = "Customer message",
             FontName = StandardFonts.HelveticaBold,
@@ -274,8 +274,8 @@ public static class BusinessInvoiceExample
         });
         // The three greeting lines share one style and flow as a single paragraph
         // via hard line breaks; "Thanks!" stays separate for its top margin.
-        messageStack.AddChild(new TextBlock { Text = "Hello!\nThank you for choosing Sample Company.\nPlease return this invoice with payment." });
-        messageStack.AddChild(new TextBlock { Text = "Thanks!", Margin = new Thickness(0, 4, 0, 0) });
+        messageStack.Add(new TextBlock { Text = "Hello!\nThank you for choosing Sample Company.\nPlease return this invoice with payment." });
+        messageStack.Add(new TextBlock { Text = "Thanks!", Margin = new Thickness(0, 4, 0, 0) });
 
         // Right: Totals
         VerticalStack totalsStack = new();
@@ -298,7 +298,7 @@ public static class BusinessInvoiceExample
                 TextColor = TextDark
             }.AlignRight()
         );
-        totalsStack.AddChild(subtotalRow);
+        totalsStack.Add(subtotalRow);
 
         // Sales Tax
         Grid taxRow = new(1f, 1f)
@@ -318,7 +318,7 @@ public static class BusinessInvoiceExample
                 TextColor = TextDark
             }.AlignRight()
         );
-        totalsStack.AddChild(taxRow);
+        totalsStack.Add(taxRow);
 
         // Early payment discount
         Grid discountRow = new(1f, 1f)
@@ -338,10 +338,10 @@ public static class BusinessInvoiceExample
                 TextColor = AccentGreen
             }.AlignRight()
         );
-        totalsStack.AddChild(discountRow);
+        totalsStack.Add(discountRow);
 
         // Divider before total
-        totalsStack.AddChild(new Container
+        totalsStack.Add(new Container
         {
             BackgroundColor = TextDark,
             Padding = new Thickness(0, 0.5f, 0, 0),
@@ -368,7 +368,7 @@ public static class BusinessInvoiceExample
                 TextColor = TextDark
             }.AlignRight()
         );
-        totalsStack.AddChild(totalRow);
+        totalsStack.Add(totalRow);
 
         footerTable.AddRow(
             new Container { Child = messageStack, Padding = new Thickness(0, 0, 40, 0) },
@@ -436,7 +436,7 @@ public static class BusinessInvoiceExample
                 TextColor = TextMedium
             }.AlignLeft()
         );
-        stack.AddChild(row);
+        stack.Add(row);
     }
 
     private static Grid CreatePaymentDetails()
@@ -449,7 +449,7 @@ public static class BusinessInvoiceExample
 
         // Bank details
         VerticalStack bankStack = new();
-        bankStack.AddChild(new TextBlock
+        bankStack.Add(new TextBlock
         {
             Text = "Bank Transfer",
             FontName = StandardFonts.HelveticaBold,
@@ -458,11 +458,11 @@ public static class BusinessInvoiceExample
             Margin = new Thickness(0, 0, 0, 4)
         });
         // Each column's lines share one style and flow as a single paragraph.
-        bankStack.AddChild(new TextBlock { Text = "Chase Bank\nRouting: 021000021\nAccount: ****7842", FontSize = 8, TextColor = TextMedium });
+        bankStack.Add(new TextBlock { Text = "Chase Bank\nRouting: 021000021\nAccount: ****7842", FontSize = 8, TextColor = TextMedium });
 
         // Other payment
         VerticalStack otherStack = new();
-        otherStack.AddChild(new TextBlock
+        otherStack.Add(new TextBlock
         {
             Text = "Other Methods",
             FontName = StandardFonts.HelveticaBold,
@@ -470,11 +470,11 @@ public static class BusinessInvoiceExample
             TextColor = AccentGreen,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        otherStack.AddChild(new TextBlock { Text = "PayPal: payments@example.com\nWise: @sample-company", FontSize = 8, TextColor = TextMedium });
+        otherStack.Add(new TextBlock { Text = "PayPal: payments@example.com\nWise: @sample-company", FontSize = 8, TextColor = TextMedium });
 
         // Reference
         VerticalStack refStack = new();
-        refStack.AddChild(new TextBlock
+        refStack.Add(new TextBlock
         {
             Text = "Reference",
             FontName = StandardFonts.HelveticaBold,
@@ -482,7 +482,7 @@ public static class BusinessInvoiceExample
             TextColor = AccentGreen,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        refStack.AddChild(new TextBlock { Text = "Please include invoice\nnumber with payment", FontSize = 8, TextColor = TextMedium });
+        refStack.Add(new TextBlock { Text = "Please include invoice\nnumber with payment", FontSize = 8, TextColor = TextMedium });
 
         paymentTable.AddRow(
             bankStack,

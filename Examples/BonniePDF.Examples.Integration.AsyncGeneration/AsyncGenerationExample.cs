@@ -47,10 +47,10 @@ public static class AsyncGenerationExample
         });
 
         VerticalStack features = new();
-        features.AddChild(new TextBlock { Text = "✓ Non-blocking I/O - perfect for web applications" });
-        features.AddChild(new TextBlock { Text = "✓ Better thread pool utilization" });
-        features.AddChild(new TextBlock { Text = "✓ Supports cancellation tokens" });
-        features.AddChild(new TextBlock { Text = "✓ Scalable for high-throughput scenarios" });
+        features.Add(new TextBlock { Text = "✓ Non-blocking I/O - perfect for web applications" });
+        features.Add(new TextBlock { Text = "✓ Better thread pool utilization" });
+        features.Add(new TextBlock { Text = "✓ Supports cancellation tokens" });
+        features.Add(new TextBlock { Text = "✓ Scalable for high-throughput scenarios" });
 
         doc.Add(features);
 

@@ -66,14 +66,14 @@ public static class FinancialDashboardExample
         // ════════════════════════════════════════════════════════════════════════
 
         VerticalStack companyStack = new();
-        companyStack.AddChild(new TextBlock
+        companyStack.Add(new TextBlock
         {
             Text = "Sample Company",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
             TextColor = Cream
         });
-        companyStack.AddChild(new TextBlock
+        companyStack.Add(new TextBlock
         {
             Text = "Confidential - Internal Use Only",
             FontName = StandardFonts.Helvetica,
@@ -83,7 +83,7 @@ public static class FinancialDashboardExample
         });
 
         VerticalStack reportStack = new();
-        reportStack.AddChild(new TextBlock
+        reportStack.Add(new TextBlock
         {
             Text = title,
             FontName = StandardFonts.HelveticaBold,
@@ -91,7 +91,7 @@ public static class FinancialDashboardExample
             TextColor = Cream,
             Alignment = TextAlignment.Right
         });
-        reportStack.AddChild(new TextBlock
+        reportStack.Add(new TextBlock
         {
             Text = generated,
             FontName = StandardFonts.Helvetica,
@@ -262,14 +262,14 @@ public static class FinancialDashboardExample
     private static Container CreateKpiCard(string value, string label, string delta, Color deltaColor, bool showLeftBorder)
     {
         VerticalStack stack = new();
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = value,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
             TextColor = Espresso
         });
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = label,
             FontName = StandardFonts.Helvetica,
@@ -277,7 +277,7 @@ public static class FinancialDashboardExample
             TextColor = Brown,
             Margin = new Thickness(0, 4, 0, 0)
         });
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = delta,
             FontName = StandardFonts.HelveticaBold,

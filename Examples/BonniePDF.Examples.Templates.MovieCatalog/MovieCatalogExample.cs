@@ -39,21 +39,21 @@ public static class MovieCatalogExample
         IList<Movie> movies = MoviesData.GetMockMovies();
         // Title Section
         VerticalStack titleStack = new();
-        titleStack.AddChild(new TextBlock
+        titleStack.Add(new TextBlock
         {
             Text = "Classic Movies Collection",
             FontName = StandardFonts.TimesBold,
             FontSize = 26,
             TextColor = ColorPalette.Slate[900]
         });
-        titleStack.AddChild(new TextBlock
+        titleStack.Add(new TextBlock
         {
             Text = "A curated selection of timeless cinema from the golden age of Hollywood",
             FontName = StandardFonts.TimesItalic,
             FontSize = 12,
             TextColor = ColorPalette.Slate[600]
         });
-        titleStack.AddChild(new TextBlock
+        titleStack.Add(new TextBlock
         {
             Text = $"Total Movies: {MoviesData.GetMockMovies().Count} | Compiled: {DateTime.Now:MMMM yyyy}",
             FontName = StandardFonts.Helvetica,
@@ -135,7 +135,7 @@ public static class MovieCatalogExample
 
         // Statistics Section
         VerticalStack statsStack = new();
-        statsStack.AddChild(new TextBlock
+        statsStack.Add(new TextBlock
         {
             Text = "Collection Statistics", FontName = StandardFonts.HelveticaBold, FontSize = 12,
             TextColor = ColorPalette.Slate[800]
@@ -146,22 +146,22 @@ public static class MovieCatalogExample
         Movie earliest = movies.OrderBy(m => m.Year).First();
         Movie latest = movies.OrderByDescending(m => m.Year).First();
 
-        statsStack.AddChild(new TextBlock
+        statsStack.Add(new TextBlock
         {
             Text = $"- Average Rating: {avgRating:F1}/10", FontName = StandardFonts.Helvetica, FontSize = 10,
             TextColor = ColorPalette.Slate[600]
         });
-        statsStack.AddChild(new TextBlock
+        statsStack.Add(new TextBlock
         {
             Text = $"- Top Rated: {topRated.Title} ({topRated.Rating:F1})", FontName = StandardFonts.Helvetica,
             FontSize = 10, TextColor = ColorPalette.Slate[600]
         });
-        statsStack.AddChild(new TextBlock
+        statsStack.Add(new TextBlock
         {
             Text = $"- Year Range: {earliest.Year} - {latest.Year}", FontName = StandardFonts.Helvetica, FontSize = 10,
             TextColor = ColorPalette.Slate[600]
         });
-        statsStack.AddChild(new TextBlock
+        statsStack.Add(new TextBlock
         {
             Text = "- Most Represented Genre: Drama", FontName = StandardFonts.Helvetica, FontSize = 10,
             TextColor = ColorPalette.Slate[600]

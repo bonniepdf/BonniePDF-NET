@@ -77,9 +77,9 @@ public static class HorizontalStacksExample
             WidthDistribution = WidthDistribution.Equal,
             Spacing           = 10,
         };
-        equalStack.AddChild(new TextBlock { Text = "Column A", FontName = StandardFonts.HelveticaBold });
-        equalStack.AddChild(new TextBlock { Text = "Column B", FontName = StandardFonts.HelveticaBold });
-        equalStack.AddChild(new TextBlock { Text = "Column C", FontName = StandardFonts.HelveticaBold });
+        equalStack.Add(new TextBlock { Text = "Column A", FontName = StandardFonts.HelveticaBold });
+        equalStack.Add(new TextBlock { Text = "Column B", FontName = StandardFonts.HelveticaBold });
+        equalStack.Add(new TextBlock { Text = "Column C", FontName = StandardFonts.HelveticaBold });
         doc.Add(equalStack);
 
         doc.Add(new TextBlock
@@ -140,7 +140,7 @@ public static class HorizontalStacksExample
             };
             foreach ((string label, float boxHeight, Color bg) in boxes)
             {
-                row.AddChild(new Container
+                row.Add(new Container
                 {
                     Child           = new TextBlock { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 11, TextColor = Color.White },
                     Padding         = new Thickness(12, 6, 12, 6),
@@ -184,8 +184,8 @@ public static class HorizontalStacksExample
         foreach ((string key, string value) in pairs)
         {
             var row = new HorizontalStack { Spacing = 10 };
-            row.AddChild(new TextBlock { Text = key,   FontName = StandardFonts.HelveticaBold, FontSize = 12 }, 120f);
-            row.AddChild(new TextBlock { Text = value, FontSize = 12 });
+            row.Add(new TextBlock { Text = key,   FontName = StandardFonts.HelveticaBold, FontSize = 12 }, 120f);
+            row.Add(new TextBlock { Text = value, FontSize = 12 });
             doc.Add(row);
         }
 
@@ -208,12 +208,12 @@ public static class HorizontalStacksExample
         });
 
         var twoCol = new HorizontalStack { WidthDistribution = WidthDistribution.Equal, Spacing = 20 };
-        twoCol.AddChild(new TextBlock
+        twoCol.Add(new TextBlock
         {
             Text     = "PDF/UA-1 (ISO 14289-1) is the standard for accessible PDFs. It requires that all content be tagged with semantic structure elements such as headings, paragraphs, lists, and figures.",
             FontSize = 11,
         });
-        twoCol.AddChild(new TextBlock
+        twoCol.Add(new TextBlock
         {
             Text     = "PDF/A-2a (ISO 19005-2) is the modern archival profile. Together with PDF/UA-1 they cover both preservation and accessibility requirements for professional documents.",
             FontSize = 11,

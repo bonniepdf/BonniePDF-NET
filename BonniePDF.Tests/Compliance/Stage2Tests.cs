@@ -35,9 +35,9 @@ public class Stage2Tests
         {
             var g = new SemanticGroup(SemanticRole.Sect);
             var h = new Heading("Section heading") { TocIdentifier = "s", Level = 1, FontSize = 18 };
-            g.AddChild(h);
+            g.Add(h);
             var p = new TextBlock { Text = "Body text.", FontSize = 12 };
-            g.AddChild(p);
+            g.Add(p);
             doc.Add(g);
         });
 
@@ -52,8 +52,8 @@ public class Stage2Tests
         string pdf = GenerateTagged(doc =>
         {
             var stack = new VerticalStack();
-            stack.AddChild(new Heading("Stack heading") { TocIdentifier = "sh", Level = 2, FontSize = 16 });
-            stack.AddChild(new TextBlock { Text = "Stack body.", FontSize = 12 });
+            stack.Add(new Heading("Stack heading") { TocIdentifier = "sh", Level = 2, FontSize = 16 });
+            stack.Add(new TextBlock { Text = "Stack body.", FontSize = 12 });
             doc.Add(stack);
         });
 
@@ -70,7 +70,7 @@ public class Stage2Tests
             var t = new Table(150f, 150f);
             t.AddHeader(new TextBlock { Text = "A" }, new TextBlock { Text = "B" });
             t.AddRow(new TextBlock { Text = "1" }, new TextBlock { Text = "2" });
-            stack.AddChild(t);
+            stack.Add(t);
             doc.Add(stack);
         });
 

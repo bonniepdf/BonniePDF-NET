@@ -88,10 +88,10 @@ public static class AuditReportExample
             Muted));
 
         HorizontalStack meta = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 4, 0, 20) };
-        meta.AddChild(MetaItem("Report ref", "AR-2026-014"), 1);
-        meta.AddChild(MetaItem("Audit period", "Apr-Jun 2026"), 1);
-        meta.AddChild(MetaItem("Issued", longDate), 1);
-        meta.AddChild(MetaItem("Auditor", "Aegis Assurance LLP"), 1);
+        meta.Add(MetaItem("Report ref", "AR-2026-014"), 1);
+        meta.Add(MetaItem("Audit period", "Apr-Jun 2026"), 1);
+        meta.Add(MetaItem("Issued", longDate), 1);
+        meta.Add(MetaItem("Auditor", "Aegis Assurance LLP"), 1);
         doc.Add(meta);
 
         doc.Add(H2("Executive summary"));
@@ -225,8 +225,8 @@ public static class AuditReportExample
     private static HorizontalStack BandRow(string left, string right, Color rightColor)
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
-        row.AddChild(new TextBlock { Text = left, FontName = StandardFonts.Helvetica, FontSize = 8, TextColor = Muted }, 3);
-        row.AddChild(new TextBlock { Text = right, FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = rightColor, Alignment = TextAlignment.Right }, 2);
+        row.Add(new TextBlock { Text = left, FontName = StandardFonts.Helvetica, FontSize = 8, TextColor = Muted }, 3);
+        row.Add(new TextBlock { Text = right, FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = rightColor, Alignment = TextAlignment.Right }, 2);
         return row;
     }
 
@@ -270,16 +270,16 @@ public static class AuditReportExample
     private static VerticalStack MetaItem(string label, string value)
     {
         VerticalStack stack = new();
-        stack.AddChild(new TextBlock { Text = label.ToUpperInvariant(), FontName = StandardFonts.HelveticaBold, FontSize = 7, TextColor = Muted, Margin = new Thickness(0, 0, 0, 2) });
-        stack.AddChild(new TextBlock { Text = value, FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = Ink });
+        stack.Add(new TextBlock { Text = label.ToUpperInvariant(), FontName = StandardFonts.HelveticaBold, FontSize = 7, TextColor = Muted, Margin = new Thickness(0, 0, 0, 2) });
+        stack.Add(new TextBlock { Text = value, FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = Ink });
         return stack;
     }
 
     private static Container Kpi(string value, string label, Color accent)
     {
         VerticalStack stack = new();
-        stack.AddChild(new TextBlock { Text = value, FontName = StandardFonts.HelveticaBold, FontSize = 20, TextColor = accent, Margin = new Thickness(0, 0, 0, 3) });
-        stack.AddChild(new TextBlock { Text = label, FontName = StandardFonts.Helvetica, FontSize = 8.5f, TextColor = Muted });
+        stack.Add(new TextBlock { Text = value, FontName = StandardFonts.HelveticaBold, FontSize = 20, TextColor = accent, Margin = new Thickness(0, 0, 0, 3) });
+        stack.Add(new TextBlock { Text = label, FontName = StandardFonts.Helvetica, FontSize = 8.5f, TextColor = Muted });
         return new Container { BackgroundColor = ColorPalette.Indigo[50], Padding = new Thickness(14, 12, 14, 12), Child = stack };
     }
 

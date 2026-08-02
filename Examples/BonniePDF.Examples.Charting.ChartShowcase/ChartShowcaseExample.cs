@@ -35,7 +35,7 @@ public static class ChartShowcaseExample
                 };
 
                 // Left: Title (auto-width, left-aligned)
-                outerStack.AddChild(new TextBlock
+                outerStack.Add(new TextBlock
                 {
                     Text = "BonniePDF Charting Examples",
                     FontName = StandardFonts.Helvetica,
@@ -44,7 +44,7 @@ public static class ChartShowcaseExample
                 }, null); // Auto width
 
                 // Right: Page Numbers (weighted to fill remaining space, right-aligned within that space)
-                outerStack.AddChild(new TextBlock
+                outerStack.Add(new TextBlock
                 {
                     Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                     FontName = StandardFonts.Helvetica,

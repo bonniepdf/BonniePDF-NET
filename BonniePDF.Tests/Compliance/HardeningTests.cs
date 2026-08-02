@@ -259,13 +259,13 @@ public class HardeningTests
         string pdf = Encoding.ASCII.GetString(GenerateTagged(doc =>
         {
             var stack = new VerticalStack();
-            stack.AddChild(new Heading("Inside a stack") { TocIdentifier = "s", Level = 1, FontSize = 18 });
+            stack.Add(new Heading("Inside a stack") { TocIdentifier = "s", Level = 1, FontSize = 18 });
             var t = new Table(150f, 150f);
             t.AddHeader(
                 new TableCell { Content = new TextBlock { Text = "A" } },
                 new TableCell { Content = new TextBlock { Text = "B" } });
             t.AddRow(new TextBlock { Text = "1" }, new TextBlock { Text = "2" });
-            stack.AddChild(t);
+            stack.Add(t);
             doc.Add(stack);
         }));
 

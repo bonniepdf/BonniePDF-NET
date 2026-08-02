@@ -152,8 +152,8 @@ public static class EdgeReceiptExample
             WidthDistribution = WidthDistribution.Weighted,
             Margin = new Thickness(0, 1.5f, 0, 1.5f),
         };
-        row.AddChild(Cell(label, size, bold, TextAlignment.Left), 3);
-        row.AddChild(Cell(value, size, bold, TextAlignment.Right), 2);
+        row.Add(Cell(label, size, bold, TextAlignment.Left), 3);
+        row.Add(Cell(value, size, bold, TextAlignment.Right), 2);
         return row;
     }
 

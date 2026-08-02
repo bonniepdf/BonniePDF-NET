@@ -198,7 +198,7 @@ public class TableTaggingTests
         VerticalStack cellStack = new();
         Table nested = new(1f, 1f) { Border = Border.None };
         nested.AddRow(new TextBlock { Text = "Subtotal" }, new TextBlock { Text = "$1.00" });
-        cellStack.AddChild(nested);
+        cellStack.Add(nested);
 
         Table outer = new(1f, 1f) { Border = Border.None };
         outer.AddRow(new TextBlock { Text = "left" }, new TableCell { Content = cellStack });

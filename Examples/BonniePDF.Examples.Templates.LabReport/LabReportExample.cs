@@ -97,21 +97,21 @@ public static class LabReportExample
         };
 
         VerticalStack org = new();
-        org.AddChild(new TextBlock
+        org.Add(new TextBlock
         {
             Text = "City General Hospital Pathology Services",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
             TextColor = ClinicalBlue,
         });
-        org.AddChild(new TextBlock
+        org.Add(new TextBlock
         {
             Text = "Department of Laboratory Medicine - Haematology & Clinical Chemistry",
             FontSize = 9,
             TextColor = Muted,
             Margin = new Thickness(0, 2, 0, 0),
         });
-        org.AddChild(new TextBlock
+        org.Add(new TextBlock
         {
             Text = "UKAS Medical Laboratory 8842 - accredited to ISO 15189",
             FontSize = 8,
@@ -152,20 +152,20 @@ public static class LabReportExample
         };
 
         VerticalStack patient = new();
-        patient.AddChild(SectionLabel("PATIENT"));
-        patient.AddChild(KeyValue("Name", "WESTON, Harold"));
-        patient.AddChild(KeyValue("Date of birth", "02 Nov 1951 (74y)"));
-        patient.AddChild(KeyValue("Sex", "Male"));
-        patient.AddChild(KeyValue("Patient ID", "CGH-9434765919"));
-        patient.AddChild(KeyValue("Hospital no.", "CGH-2208814"));
+        patient.Add(SectionLabel("PATIENT"));
+        patient.Add(KeyValue("Name", "WESTON, Harold"));
+        patient.Add(KeyValue("Date of birth", "02 Nov 1951 (74y)"));
+        patient.Add(KeyValue("Sex", "Male"));
+        patient.Add(KeyValue("Patient ID", "CGH-9434765919"));
+        patient.Add(KeyValue("Hospital no.", "CGH-2208814"));
 
         VerticalStack specimen = new();
-        specimen.AddChild(SectionLabel("SPECIMEN"));
-        specimen.AddChild(KeyValue("Specimen ID", "L26-118842"));
-        specimen.AddChild(KeyValue("Collected", "06 Jul 2026 08:14"));
-        specimen.AddChild(KeyValue("Received", "06 Jul 2026 09:02"));
-        specimen.AddChild(KeyValue("Reported", "06 Jul 2026 11:37"));
-        specimen.AddChild(KeyValue("Requested by", "Dr A. Kaur, Ward 12"));
+        specimen.Add(SectionLabel("SPECIMEN"));
+        specimen.Add(KeyValue("Specimen ID", "L26-118842"));
+        specimen.Add(KeyValue("Collected", "06 Jul 2026 08:14"));
+        specimen.Add(KeyValue("Received", "06 Jul 2026 09:02"));
+        specimen.Add(KeyValue("Reported", "06 Jul 2026 11:37"));
+        specimen.Add(KeyValue("Requested by", "Dr A. Kaur, Ward 12"));
 
         info.AddRow(patient, specimen);
         return info;
@@ -211,8 +211,8 @@ public static class LabReportExample
     private static Container Authorisation()
     {
         VerticalStack stack = new();
-        stack.AddChild(SectionLabel("AUTHORISED BY"));
-        stack.AddChild(new TextBlock
+        stack.Add(SectionLabel("AUTHORISED BY"));
+        stack.Add(new TextBlock
         {
             Text = "Dr S. Patel, Consultant Haematologist (electronically authorised)",
             FontName = StandardFonts.HelveticaBold,
@@ -220,7 +220,7 @@ public static class LabReportExample
             TextColor = Ink,
             Margin = new Thickness(0, 2, 0, 2),
         });
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = "Reported 06 Jul 2026 11:37  -  Analyser: Sysmex XN-1000 / Roche cobas c503",
             FontSize = 8.5f,
@@ -274,14 +274,14 @@ public static class LabReportExample
             WidthDistribution = WidthDistribution.Weighted,
             Margin = new Thickness(0, 0, 0, 4),
         };
-        row.AddChild(new TextBlock
+        row.Add(new TextBlock
         {
             Text = label,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9,
             TextColor = Muted,
         }, 2);
-        row.AddChild(new TextBlock
+        row.Add(new TextBlock
         {
             Text = value,
             FontSize = 9.5f,

@@ -14,7 +14,7 @@ public static class HorizontalStackExtensions
     /// </summary>
     public static HorizontalStack Item(this HorizontalStack s, IElement element)
     {
-        s.AddChild(element);
+        s.Add(element);
         return s;
     }
 
@@ -23,7 +23,7 @@ public static class HorizontalStackExtensions
     /// </summary>
     public static HorizontalStack Item(this HorizontalStack s, IElement element, float weight)
     {
-        s.AddChild(element, weight);
+        s.Add(element, weight);
         return s;
     }
 

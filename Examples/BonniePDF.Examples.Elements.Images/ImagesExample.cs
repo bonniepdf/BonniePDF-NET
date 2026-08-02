@@ -184,7 +184,7 @@ public static class ImagesExample
     private static void Group(Document doc, params IElement[] elements)
     {
         var stack = new VerticalStack();
-        foreach (IElement el in elements) stack.AddChild(el);
+        foreach (IElement el in elements) stack.Add(el);
         doc.Add(new Container { Child = stack });
     }
 

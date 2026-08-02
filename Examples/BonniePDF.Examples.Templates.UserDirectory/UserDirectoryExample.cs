@@ -55,8 +55,8 @@ public static class UserDirectoryExample
         };
 
         VerticalStack headerStack = new();
-        headerStack.AddChild(title);
-        headerStack.AddChild(subtitle);
+        headerStack.Add(title);
+        headerStack.Add(subtitle);
 
         // Users Table
         Table usersTable = new(1f, 2f, 2.5f, 2f, 1.5f, 2f, 2f)
