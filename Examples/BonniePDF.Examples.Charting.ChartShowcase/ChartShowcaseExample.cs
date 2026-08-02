@@ -135,8 +135,9 @@ public static class ChartShowcaseExample
         };
 
         // Create bar chart
-        BarChart barChart = new()
+        BarChart barChart = new(chartData)
         {
+            AltText = "Bar chart showing monthly sales from January to December with values in pounds sterling",
             Height = 400,
             StretchToFit = true,
             BarColor = Color.FromHex(ChartColors.Indigo),
@@ -146,7 +147,7 @@ public static class ChartShowcaseExample
         };
 
         // Add chart to document
-        document.Add(new ChartElement(barChart, chartData) { AltText = "Bar chart showing monthly sales from January to December with values in pounds sterling" });
+        document.Add(barChart);
     }
 
     private static void AddGroupedBarChart(Document document)
@@ -167,16 +168,6 @@ public static class ChartShowcaseExample
             TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
-
-        // Create grouped bar chart with 3 series
-        GroupedBarChart groupedBarChart = new()
-        {
-            Height = 400,
-            StretchToFit = true,
-            FontFamily = StandardFonts.Helvetica,
-            ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa"),
-        };
 
         IList<string> months = ExampleChartData.MonthLabels;
         decimal[] electronicsValues = [4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800];
@@ -209,8 +200,19 @@ public static class ChartShowcaseExample
         groupedChartData.Series.Add(clothingSeries);
         groupedChartData.Series.Add(homeSeries);
 
+        // Create grouped bar chart with 3 series
+        GroupedBarChart groupedBarChart = new(groupedChartData)
+        {
+            AltText = "Grouped bar chart comparing monthly revenue across Electronics, Clothing, and Home & Garden product lines",
+            Height = 400,
+            StretchToFit = true,
+            FontFamily = StandardFonts.Helvetica,
+            ShowValueLabels = true,
+            BackgroundColor = Color.FromHex("#fafafa"),
+        };
+
         // Add chart to document
-        document.Add(new GroupedBarChartElement(groupedBarChart, groupedChartData) { AltText = "Grouped bar chart comparing monthly revenue across Electronics, Clothing, and Home & Garden product lines" });
+        document.Add(groupedBarChart);
     }
 
     private static void AddLineChart(Document document)
@@ -251,8 +253,9 @@ public static class ChartShowcaseExample
         };
 
         // Create line chart
-        LineChart lineChart = new()
+        LineChart lineChart = new(chartData)
         {
+            AltText = "Line chart showing monthly revenue trends from January to December",
             Height = 400,
             StretchToFit = true,
             LineColor = Color.FromHex(ChartColors.Violet),
@@ -265,7 +268,7 @@ public static class ChartShowcaseExample
         };
 
         // Add chart to document
-        document.Add(new ChartElement(lineChart, chartData) { AltText = "Line chart showing monthly revenue trends from January to December" });
+        document.Add(lineChart);
     }
 
     private static void AddMultiSeriesLineChart(Document document)
@@ -348,8 +351,9 @@ public static class ChartShowcaseExample
         };
 
         // Create line chart with multiple series
-        LineChart lineChart = new()
+        LineChart lineChart = new(chartData)
         {
+            AltText = "Multi-series line chart comparing year-over-year monthly revenue",
             Height = 400,
             StretchToFit = true,
             FontFamily = StandardFonts.Helvetica,
@@ -360,7 +364,7 @@ public static class ChartShowcaseExample
         };
 
         // Add chart to document
-        document.Add(new ChartElement(lineChart, chartData) { AltText = "Multi-series line chart comparing year-over-year monthly revenue" });
+        document.Add(lineChart);
     }
 
     private static void AddAreaChart(Document document)
@@ -401,8 +405,9 @@ public static class ChartShowcaseExample
         };
 
         // Create area chart
-        AreaChart areaChart = new()
+        AreaChart areaChart = new(chartData)
         {
+            AltText = "Area chart showing monthly sales performance from January to December",
             Height = 400,
             StretchToFit = true,
             AreaColor = Color.FromHex(ChartColors.Purple),
@@ -415,7 +420,7 @@ public static class ChartShowcaseExample
         };
 
         // Add chart to document
-        document.Add(new ChartElement(areaChart, chartData) { AltText = "Area chart showing monthly sales performance from January to December" });
+        document.Add(areaChart);
     }
 
     private static void AddLollipopChart(Document document)
@@ -456,8 +461,9 @@ public static class ChartShowcaseExample
         };
 
         // Create lollipop chart
-        LollipopChart lollipopChart = new()
+        LollipopChart lollipopChart = new(chartData)
         {
+            AltText = "Lollipop chart showing quarterly revenue metrics",
             Height = 400,
             StretchToFit = true,
             LollipopColor = Color.FromHex(ChartColors.Pink),
@@ -470,7 +476,7 @@ public static class ChartShowcaseExample
         };
 
         // Add chart to document
-        document.Add(new ChartElement(lollipopChart, chartData) { AltText = "Lollipop chart showing quarterly revenue metrics" });
+        document.Add(lollipopChart);
     }
 
     private static void AddDotPlotChart(Document document)
@@ -511,8 +517,9 @@ public static class ChartShowcaseExample
         };
 
         // Create dot plot chart
-        DotPlotChart dotPlotChart = new()
+        DotPlotChart dotPlotChart = new(chartData)
         {
+            AltText = "Dot plot chart showing product sales performance across eight products",
             Height = 400,
             StretchToFit = true,
             DotColor = Color.FromHex(ChartColors.Teal),
@@ -524,7 +531,7 @@ public static class ChartShowcaseExample
         };
 
         // Add chart to document
-        document.Add(new ChartElement(dotPlotChart, chartData) { AltText = "Dot plot chart showing product sales performance across eight products" });
+        document.Add(dotPlotChart);
     }
 
     private static void AddPieChart(Document document)
@@ -554,8 +561,9 @@ public static class ChartShowcaseExample
         };
 
         // Create pie chart
-        PieChart pieChart = new()
+        PieChart pieChart = new(chartData)
         {
+            AltText = "Pie chart showing proportional distribution of monthly sales",
             Height = 400,
             StretchToFit = true,
             IsDonut = true,
@@ -566,7 +574,7 @@ public static class ChartShowcaseExample
         };
 
         // Add chart to document
-        document.Add(new ChartElement(pieChart, chartData) { AltText = "Pie chart showing proportional distribution of monthly sales" });
+        document.Add(pieChart);
     }
 }
 

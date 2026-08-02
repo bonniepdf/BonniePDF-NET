@@ -13,7 +13,7 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "simple_document.pdf"));
         }
-        Console.WriteLine("Generating PDF/A + PDF/UA...");
+        Console.WriteLine("Generating Archival & Accessible PDF...");
         using (var doc = PdfComplianceExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "pdf_compliance.pdf"));

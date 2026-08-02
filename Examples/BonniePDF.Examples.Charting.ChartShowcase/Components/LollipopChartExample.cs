@@ -91,8 +91,9 @@ public static class LollipopChartExample
         };
 
         // Create the lollipop chart
-        LollipopChart lollipopChart = new()
+        LollipopChart lollipopChart = new(chartData)
         {
+            AltText = "Lollipop chart showing quarterly revenue performance",
             Height = 400,
             StretchToFit = true,
             LollipopColor = Color.FromHex(ChartColors.Pink),
@@ -105,7 +106,7 @@ public static class LollipopChartExample
         };
 
         // Add the chart to the document
-        document.Add(new ChartElement(lollipopChart, chartData) { AltText = "Lollipop chart showing quarterly revenue performance" });
+        document.Add(lollipopChart);
 
         // Save the document
         

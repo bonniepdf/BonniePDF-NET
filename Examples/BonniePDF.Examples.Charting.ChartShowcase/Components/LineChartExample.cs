@@ -80,8 +80,9 @@ public static class LineChartExample
         };
 
         // Create the line chart
-        LineChart lineChart = new()
+        LineChart lineChart = new(chartData)
         {
+            AltText = "Line chart showing monthly revenue trends from January to December",
             Height = 400,
             StretchToFit = true,
             LineColor = Color.FromHex(ChartColors.Violet),
@@ -94,7 +95,7 @@ public static class LineChartExample
         };
 
         // Add the chart to the document
-        document.Add(new ChartElement(lineChart, chartData) { AltText = "Line chart showing monthly revenue trends from January to December" });
+        document.Add(lineChart);
 
         // Save the document
         

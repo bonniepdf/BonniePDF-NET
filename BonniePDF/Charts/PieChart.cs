@@ -18,6 +18,15 @@ namespace BonniePDF.Charts;
 /// </summary>
 public class PieChart : ChartBase
 {
+    public PieChart()
+    {
+    }
+
+    /// <summary>Creates a pie chart bound to its document data.</summary>
+    public PieChart(ChartData data) : base(data)
+    {
+    }
+
     // Layout proportions (relative to chart dimensions)
     private const float TitleAreaHeight = 60;
     private const float TopPadding = 20; // padding between title and pie top

@@ -3,12 +3,14 @@ using BonniePDF.Drawing;
 using BonniePDF.Elements;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Tagging;
+using System;
 
 namespace BonniePDF.Charts;
 
 /// <summary>
 /// Custom element that renders a chart using ICanvas to PDF.
 /// </summary>
+[Obsolete("Charts are document elements. Set chart.Data and add the chart directly.")]
 public class ChartElement(ChartBase chart, ChartData data) : ElementBase, IRoleProvider, IAltTextProvider
 {
     /// <summary>

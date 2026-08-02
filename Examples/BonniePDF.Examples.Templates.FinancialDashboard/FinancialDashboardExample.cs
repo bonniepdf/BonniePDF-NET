@@ -144,8 +144,7 @@ public static class FinancialDashboardExample
         });
 
         // ════════════════════════════════════════════════════════════════════════
-        // 3.  Monthly revenue bar chart - ChartElement must be a direct doc.Add() call;
-        //     nesting it inside a Container or Table prevents width resolution.
+        // 3.  Monthly revenue bar chart
         // ════════════════════════════════════════════════════════════════════════
 
         doc.Add(new Container
@@ -180,8 +179,9 @@ public static class FinancialDashboardExample
             }
         };
 
-        BarChart barChart = new()
+        BarChart barChart = new(chartData)
         {
+            AltText = "Bar chart of monthly revenue in thousands, ranging from 125 in January to 233 in December.",
             Height = 200,
             StretchToFit = true,
             BarColor = Terra,
@@ -189,11 +189,8 @@ public static class FinancialDashboardExample
             LabelFontSize = 8
         };
 
-        // Direct doc.Add - the only way ChartElement resolves its available width
-        doc.Add(new ChartElement(barChart, chartData)
-        {
-            AltText = "Bar chart of monthly revenue in thousands, ranging from 125 in January to 233 in December."
-        });
+        // Charts are document elements and participate in normal width resolution.
+        doc.Add(barChart);
 
         // ════════════════════════════════════════════════════════════════════════
         // 4.  Top products table

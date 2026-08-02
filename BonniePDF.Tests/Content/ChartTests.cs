@@ -157,6 +157,42 @@ public class ChartTests
     }
 
     [Fact]
+    public void Chart_IsADirectElementThatOwnsItsDataAndAccessibility()
+    {
+        ChartData data = CreateSampleData();
+        BarChart chart = new(data)
+        {
+            Title = "Revenue",
+            AltText = "Revenue by category",
+            YAxis = new AxisOptions { Prefix = "$" }
+        };
+
+        Assert.Same(data, chart.Data);
+        Assert.Equal("Revenue", chart.Data.Title);
+        Assert.Equal("Revenue", chart.Title);
+        Assert.Equal("$", chart.Data.YAxis.Prefix);
+        Assert.Equal("Revenue by category", chart.AltText);
+    }
+
+    [Fact]
+    public void TaggedDocument_DirectChartWithAltText_EmitsFigureWithAlt()
+    {
+        using var doc = new BonniePDF.Document();
+        doc.Settings.Version = PdfVersion.Pdf17;
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Language = "en-GB";
+        doc.Add(new BarChart(CreateSampleData())
+        {
+            AltText = "Revenue by category"
+        });
+
+        string pdf = Encoding.ASCII.GetString(doc.GenerateBytes());
+
+        Assert.Contains("/S /Figure", pdf);
+        Assert.Contains("/Alt (Revenue by category)", pdf);
+    }
+
+    [Fact]
     public void BarChart_Draw_ExecutesDrawingOperations()
     {
         var chart = new BarChart();
@@ -308,9 +344,9 @@ public class ChartTests
     public void AreaChart_Pdf_RegistersAlphaGraphicsStateForFillOpacity()
     {
         using var doc = new BonniePDF.Document();
-        var chart = new AreaChart { FillOpacity = 0.42f };
+        var chart = new AreaChart(CreateSampleData()) { FillOpacity = 0.42f };
 
-        doc.Add(new ChartElement(chart, CreateSampleData()));
+        doc.Add(chart);
 
         string pdf = Encoding.ASCII.GetString(doc.GenerateBytes());
         Assert.Contains("/ExtGState", pdf);
@@ -325,7 +361,7 @@ public class ChartTests
         // flattened to fully opaque.
         using var docA1 = new BonniePDF.Document();
         docA1.Settings.Conformance = PdfAConformance.PdfA1b;
-        docA1.Add(new ChartElement(new AreaChart { FillOpacity = 0.42f }, CreateSampleData()));
+        docA1.Add(new AreaChart(CreateSampleData()) { FillOpacity = 0.42f });
         string a1 = Encoding.ASCII.GetString(docA1.GenerateBytes());
         Assert.Contains("/ca 1.0000", a1);
         Assert.DoesNotContain("/ca 0.4200", a1);
@@ -334,7 +370,7 @@ public class ChartTests
         // is preserved.
         using var docA2 = new BonniePDF.Document();
         docA2.Settings.Conformance = PdfAConformance.PdfA2b;
-        docA2.Add(new ChartElement(new AreaChart { FillOpacity = 0.42f }, CreateSampleData()));
+        docA2.Add(new AreaChart(CreateSampleData()) { FillOpacity = 0.42f });
         string a2 = Encoding.ASCII.GetString(docA2.GenerateBytes());
         Assert.Contains("/ca 0.4200", a2);
     }

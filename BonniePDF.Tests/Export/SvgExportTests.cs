@@ -70,6 +70,13 @@ public class SvgExportTests
     }
 
     [Fact]
+    public void Chart_ToSvg_UsesOwnedDataByDefault()
+    {
+        string svg = new BarChart(SampleChartData()).ToSvg();
+        Assert.Contains("Test Chart", svg);
+    }
+
+    [Fact]
     public void GroupedBarChart_ToSvg_RootUsesCrispEdges()
     {
         string svg = new GroupedBarChart().ToSvg(SampleChartData());

@@ -67,7 +67,8 @@ public class LargeDocumentTests : IntegrationTestBase
                         Height = 200,
                         StretchToFit = true
                     };
-                    doc.Add(new ChartElement(barChart, data));
+                    barChart.Data = data;
+                    doc.Add(barChart);
                 }
             }
 
@@ -152,7 +153,8 @@ public class LargeDocumentTests : IntegrationTestBase
                         Height = 120,
                         StretchToFit = true
                     };
-                    stack.AddChild(new ChartElement(lineChart, data));
+                    lineChart.Data = data;
+                    stack.AddChild(lineChart);
                 }
 
                 doc.Add(stack);
@@ -359,7 +361,8 @@ public class LargeDocumentTests : IntegrationTestBase
                         Height = 200,
                         StretchToFit = true
                     };
-                    doc.Add(new ChartElement(barChart, data));
+                    barChart.Data = data;
+                    doc.Add(barChart);
                 }
 
                 // Add text

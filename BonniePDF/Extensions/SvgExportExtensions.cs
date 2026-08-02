@@ -14,6 +14,9 @@ namespace BonniePDF.Extensions;
 /// </summary>
 public static class SvgExportExtensions
 {
+    /// <summary>Renders a chart's owned data to an SVG string.</summary>
+    public static string ToSvg(this ChartBase chart) => ToSvg(chart, chart.Data);
+
     /// <summary>
     /// Renders the page to an SVG string.
     /// </summary>

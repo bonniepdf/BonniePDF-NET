@@ -110,17 +110,10 @@ public static class AuditReportExample
         doc.Add(kpis);
 
         doc.Add(H2("Control status"));
-        doc.Add(new ChartElement(ControlDonut(), ControlData())
-        {
-            AltText = "Donut chart: 71 compliant, 15 partial, 5 non-conformant, 2 not applicable of 93 controls.",
-            Margin = new Thickness(0, 0, 0, 12),
-        });
+        doc.Add(ControlDonut());
 
         doc.Add(H2("Findings by severity"));
-        doc.Add(new ChartElement(SeverityBars(), SeverityData())
-        {
-            AltText = "Column chart of findings by severity: 2 Critical, 4 High, 4 Medium, 2 Low.",
-        });
+        doc.Add(SeverityBars());
     }
 
     private static void AddFindingsRegister(Document doc)
@@ -166,8 +159,10 @@ public static class AuditReportExample
             "This report is confidential to Sample Company."));
     }
 
-    private static PieChart ControlDonut() => new()
+    private static PieChart ControlDonut() => new(ControlData())
     {
+        AltText = "Donut chart: 71 compliant, 15 partial, 5 non-conformant, 2 not applicable of 93 controls.",
+        Margin = new Thickness(0, 0, 0, 12),
         Height = 180,
         StretchToFit = true,
         IsDonut = true,
@@ -195,8 +190,9 @@ public static class AuditReportExample
         ],
     };
 
-    private static BarChart SeverityBars() => new()
+    private static BarChart SeverityBars() => new(SeverityData())
     {
+        AltText = "Column chart of findings by severity: 2 Critical, 4 High, 4 Medium, 2 Low.",
         Height = 180,
         StretchToFit = true,
         BarColor = Primary,

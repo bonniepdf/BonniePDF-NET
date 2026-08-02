@@ -78,8 +78,9 @@ public static class HorizontalBarChartExample
             XAxis = new AxisOptions { Legend = "Region" }
         };
 
-        BarChart barChart = new()
+        BarChart barChart = new(chartData)
         {
+            AltText = "Horizontal bar chart ranking regional sales performance across six UK regions",
             Orientation = ChartOrientation.Horizontal,
             Height = 380,
             StretchToFit = true,
@@ -91,7 +92,7 @@ public static class HorizontalBarChartExample
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
-        document.Add(new ChartElement(barChart, chartData) { AltText = "Horizontal bar chart ranking regional sales performance across six UK regions" });
+        document.Add(barChart);
         
 
         //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");

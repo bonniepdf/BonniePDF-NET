@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BonniePDF.Charts.Models;
 using BonniePDF.Core;
@@ -13,6 +14,14 @@ namespace BonniePDF.Charts;
 /// </summary>
 public abstract class CartesianChartBase : ChartBase
 {
+    protected CartesianChartBase()
+    {
+    }
+
+    protected CartesianChartBase(ChartData data) : base(data)
+    {
+    }
+
     // Layout constants (relative to chart height)
     protected const float TitleAreaHeight = 60; // Space for title at top
     protected const float BottomPadding = 70; // Space for x-axis labels and legend
@@ -43,6 +52,20 @@ public abstract class CartesianChartBase : ChartBase
     // Styling constants
     protected static readonly Color AxisColor = Color.FromHex("#666666");
     protected static readonly Color GridLineColor = Color.FromHex("#e0e0e0");
+
+    /// <summary>Category-axis presentation owned by this chart.</summary>
+    public AxisOptions XAxis
+    {
+        get => Data.XAxis;
+        set => Data.XAxis = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    /// <summary>Value-axis presentation owned by this chart.</summary>
+    public AxisOptions YAxis
+    {
+        get => Data.YAxis;
+        set => Data.YAxis = value ?? throw new ArgumentNullException(nameof(value));
+    }
 
     /// <summary>
     /// Font family for labels

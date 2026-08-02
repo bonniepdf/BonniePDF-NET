@@ -251,7 +251,9 @@ public sealed class LayoutRecorder
 
     private static readonly HashSet<string> ImageLikeTypes = new()
     {
-        "Image", "QRCode", "Barcode", "DataMatrix", "CanvasElement"
+        "Image", "QRCode", "Barcode", "DataMatrix", "CanvasElement",
+        "BarChart", "GroupedBarChart", "LineChart", "AreaChart", "PieChart",
+        "DotPlotChart", "LollipopChart", "ChartElement", "GroupedBarChartElement"
     };
 
     /// <summary>

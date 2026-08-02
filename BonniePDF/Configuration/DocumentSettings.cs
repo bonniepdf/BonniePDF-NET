@@ -194,11 +194,13 @@ public class DocumentSettings
     public PdfAConformance Conformance { get; set; } = PdfAConformance.None;
 
     /// <summary>
-    /// Legacy boolean PDF/A switch. Maps onto <see cref="Conformance"/>:
-    /// reading returns <c>true</c> whenever any PDF/A level is selected;
-    /// writing <c>true</c> selects <see cref="PdfAConformance.PdfA2b"/>
-    /// (the modern visual-reproducibility baseline) and writing
-    /// <c>false</c> selects <see cref="PdfAConformance.None"/>.
+    /// Legacy boolean view of <see cref="Conformance"/>, not a separate PDF/A
+    /// setting. Reading it returns <c>true</c> whenever any PDF/A level is
+    /// selected. Writing it replaces the exact conformance level:
+    /// <c>true</c> selects <see cref="PdfAConformance.PdfA2b"/>, the modern
+    /// visual-reproducibility baseline, while <c>false</c> selects
+    /// <see cref="PdfAConformance.None"/>. Prefer <see cref="Conformance"/> in
+    /// new code when the precise PDF/A profile matters.
     /// </summary>
     public bool PdfAEnabled
     {

@@ -78,8 +78,9 @@ public static class GroupedBarChartExample
         chartData.Series.Add(homeSeries);
 
         // Create the grouped bar chart with 3 series (3 bars per month)
-        GroupedBarChart groupedBarChart = new()
+        GroupedBarChart groupedBarChart = new(chartData)
         {
+            AltText = "Grouped bar chart comparing quarterly revenue across Electronics, Clothing, and Home & Garden product lines",
             Height = 400,
             StretchToFit = true,
             FontFamily = StandardFonts.Helvetica,
@@ -88,7 +89,7 @@ public static class GroupedBarChartExample
         };
 
         // Add the chart to the document
-        document.Add(new GroupedBarChartElement(groupedBarChart, chartData) { AltText = "Grouped bar chart comparing quarterly revenue across Electronics, Clothing, and Home & Garden product lines" });
+        document.Add(groupedBarChart);
 
         // Save the document
         

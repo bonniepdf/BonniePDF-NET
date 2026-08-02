@@ -95,8 +95,9 @@ public static class DotPlotChartExample
         };
 
         // Create the dot plot chart
-        DotPlotChart dotPlotChart = new()
+        DotPlotChart dotPlotChart = new(chartData)
         {
+            AltText = "Dot plot chart showing product sales performance across eight products",
             Height = 400,
             StretchToFit = true,
             DotColor = Color.FromHex(ChartColors.Teal),
@@ -108,7 +109,7 @@ public static class DotPlotChartExample
         };
 
         // Add the chart to the document
-        document.Add(new ChartElement(dotPlotChart, chartData) { AltText = "Dot plot chart showing product sales performance across eight products" });
+        document.Add(dotPlotChart);
 
         // Save the document
         
