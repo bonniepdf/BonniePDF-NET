@@ -47,13 +47,13 @@ public static class SaasInvoiceExample
 
         // ── Header: brand + invoice meta ──────────────────────────────────────
         VerticalStack brand = new();
-        brand.AddChild(Tb("SAMPLE COMPANY", 15, Brand, bold: true));
-        brand.AddChild(Tb("Infrastructure for builders", 9, Mute));
+        brand.Add(Tb("SAMPLE COMPANY", 15, Brand, bold: true));
+        brand.Add(Tb("Infrastructure for builders", 9, Mute));
 
         VerticalStack meta = new();
-        meta.AddChild(Tb("Invoice  INV-2026-0042", 10, Ink, bold: true, align: TextAlignment.Right));
-        meta.AddChild(Tb("Issued  18 Jun 2026", 9, Mute, align: TextAlignment.Right));
-        meta.AddChild(Tb("Due  02 Jul 2026", 9, Mute, align: TextAlignment.Right));
+        meta.Add(Tb("Invoice  INV-2026-0042", 10, Ink, bold: true, align: TextAlignment.Right));
+        meta.Add(Tb("Issued  18 Jun 2026", 9, Mute, align: TextAlignment.Right));
+        meta.Add(Tb("Due  02 Jul 2026", 9, Mute, align: TextAlignment.Right));
 
         Grid headerTable = new(1f, 1f) { Border = Border.None, CellPadding = 0 };
         headerTable.AddRow(brand, meta);
@@ -65,14 +65,14 @@ public static class SaasInvoiceExample
 
         // ── Bill-to / from ────────────────────────────────────────────────────
         VerticalStack billTo = new();
-        billTo.AddChild(Tb("BILLED TO", 8, Mute, bold: true, bottom: 4));
-        billTo.AddChild(Tb("Sample Customer Ltd", 10, Ink, bold: true));
-        billTo.AddChild(Tb("Accounts Payable\n19 Enfield Road, London N1 5BA\nbilling@example.com", 9, BodyCol));
+        billTo.Add(Tb("BILLED TO", 8, Mute, bold: true, bottom: 4));
+        billTo.Add(Tb("Sample Customer Ltd", 10, Ink, bold: true));
+        billTo.Add(Tb("Accounts Payable\n19 Enfield Road, London N1 5BA\nbilling@example.com", 9, BodyCol));
 
         VerticalStack from = new();
-        from.AddChild(Tb("FROM", 8, Mute, bold: true, bottom: 4, align: TextAlignment.Right));
-        from.AddChild(Tb("Sample Company Ltd", 10, Ink, bold: true, align: TextAlignment.Right));
-        from.AddChild(Tb("4 Tenter Ground, London E1 7NH\nVAT GB 482 9173 55", 9, BodyCol, align: TextAlignment.Right));
+        from.Add(Tb("FROM", 8, Mute, bold: true, bottom: 4, align: TextAlignment.Right));
+        from.Add(Tb("Sample Company Ltd", 10, Ink, bold: true, align: TextAlignment.Right));
+        from.Add(Tb("4 Tenter Ground, London E1 7NH\nVAT GB 482 9173 55", 9, BodyCol, align: TextAlignment.Right));
 
         Grid addr = new(1f, 1f)
         {
@@ -137,11 +137,11 @@ public static class SaasInvoiceExample
         doc.Add(new Heading("How to pay") { Level = 2 });
 
         VerticalStack payInfo = new();
-        payInfo.AddChild(Tb("Pay by bank transfer or scan to pay", 10, Ink, bold: true, bottom: 6));
-        payInfo.AddChild(Tb("Account name  Sample Company Ltd", 9, BodyCol, bottom: 2));
-        payInfo.AddChild(Tb("Sort code  04-00-72    Account  19483055", 9, BodyCol, bottom: 2));
-        payInfo.AddChild(Tb("Reference  INV-2026-0042", 9, BodyCol, bottom: 2));
-        payInfo.AddChild(Tb("Amount  " + Money(total), 9, Ink, bold: true));
+        payInfo.Add(Tb("Pay by bank transfer or scan to pay", 10, Ink, bold: true, bottom: 6));
+        payInfo.Add(Tb("Account name  Sample Company Ltd", 9, BodyCol, bottom: 2));
+        payInfo.Add(Tb("Sort code  04-00-72    Account  19483055", 9, BodyCol, bottom: 2));
+        payInfo.Add(Tb("Reference  INV-2026-0042", 9, BodyCol, bottom: 2));
+        payInfo.Add(Tb("Amount  " + Money(total), 9, Ink, bold: true));
 
         QRCode qr = new()
         {

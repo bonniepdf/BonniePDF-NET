@@ -68,15 +68,15 @@ public static class ShippingLabelExample
 
         // ── From / To addresses ───────────────────────────────────────────────
         VerticalStack from = new();
-        from.AddChild(Tb("FROM", 7, Mute, bold: true, bottom: 2));
-        from.AddChild(Tb("Sample Supplies", 8, Ink, bold: true));
-        from.AddChild(Tb("4 Tenter Ground\nLondon E1 7NH, UK", 8, BodyCol));
+        from.Add(Tb("FROM", 7, Mute, bold: true, bottom: 2));
+        from.Add(Tb("Sample Supplies", 8, Ink, bold: true));
+        from.Add(Tb("4 Tenter Ground\nLondon E1 7NH, UK", 8, BodyCol));
         doc.Add(new Container { Child = from, Margin = new Thickness(0, 0, 0, 4) });
 
         VerticalStack to = new();
-        to.AddChild(Tb("SHIP TO", 8, Mute, bold: true, bottom: 3));
-        to.AddChild(Tb("Jordan Avery", 13, Ink, bold: true));
-        to.AddChild(Tb("Sample Customer Ltd\n19 Enfield Road\nLondon N1 5BA\nUnited Kingdom", 10, Ink));
+        to.Add(Tb("SHIP TO", 8, Mute, bold: true, bottom: 3));
+        to.Add(Tb("Jordan Avery", 13, Ink, bold: true));
+        to.Add(Tb("Sample Customer Ltd\n19 Enfield Road\nLondon N1 5BA\nUnited Kingdom", 10, Ink));
         doc.Add(new Container
         {
             Child = to,
@@ -105,8 +105,8 @@ public static class ShippingLabelExample
 
         // ── Carton code (ITF-14) + QR parcel link, side by side ───────────────
         VerticalStack cartonStack = new();
-        cartonStack.AddChild(Tb("CARTON (ITF-14)", 7, Mute, bold: true, bottom: 2));
-        cartonStack.AddChild(new Container
+        cartonStack.Add(Tb("CARTON (ITF-14)", 7, Mute, bold: true, bottom: 2));
+        cartonStack.Add(new Container
         {
             Child = new Barcode
             {
@@ -118,8 +118,8 @@ public static class ShippingLabelExample
         });
 
         VerticalStack qrStack = new();
-        qrStack.AddChild(Tb("SCAN", 7, Mute, bold: true, bottom: 2, align: TextAlignment.Right));
-        qrStack.AddChild(new Container
+        qrStack.Add(Tb("SCAN", 7, Mute, bold: true, bottom: 2, align: TextAlignment.Right));
+        qrStack.Add(new Container
         {
             HorizontalAlignment = HorizontalAlignment.End,
             Child = new QRCode

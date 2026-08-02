@@ -50,7 +50,7 @@ public static class WatermarkDraftExample
 
         // Brand banner - a filled container introduces the document above the stamp.
         VerticalStack bannerStack = new();
-        bannerStack.AddChild(new TextBlock
+        bannerStack.Add(new TextBlock
         {
             Text = "SAMPLE COMPANY",
             FontName = StandardFonts.HelveticaBold,
@@ -58,7 +58,7 @@ public static class WatermarkDraftExample
             TextColor = ColorPalette.Blue[200],
             Margin = new Thickness(0, 0, 0, 6)
         });
-        bannerStack.AddChild(new TextBlock
+        bannerStack.Add(new TextBlock
         {
             Text = "Product Strategy Proposal",
             FontName = StandardFonts.HelveticaBold,

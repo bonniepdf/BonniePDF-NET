@@ -201,7 +201,7 @@ public class MultiPageDocumentTests : IntegrationTestBase
             VerticalStack stack = new();
 
             // Add title
-            stack.AddChild(new TextBlock
+            stack.Add(new TextBlock
             {
                 Text = "Continuous Content Flow Test",
                 FontSize = 20,
@@ -212,7 +212,7 @@ public class MultiPageDocumentTests : IntegrationTestBase
             // Add multiple text blocks that should flow across pages
             for (int i = 1; i <= 15; i++)
             {
-                stack.AddChild(new TextBlock
+                stack.Add(new TextBlock
                 {
                     Text = $"Section {i}: Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
                            "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
@@ -234,7 +234,7 @@ public class MultiPageDocumentTests : IntegrationTestBase
                         StretchToFit = true
                     };
                     chart.Data = data;
-                    stack.AddChild(chart);
+                    stack.Add(chart);
                 }
             }
 

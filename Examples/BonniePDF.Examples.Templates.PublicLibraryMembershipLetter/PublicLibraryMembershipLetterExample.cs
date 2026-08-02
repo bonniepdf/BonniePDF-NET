@@ -130,7 +130,7 @@ public static class PublicLibraryMembershipLetterExample
     private static VerticalStack ServiceHeader()
     {
         VerticalStack stack = new();
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = "Membership Services",
             FontName = StandardFonts.HelveticaBold,
@@ -138,7 +138,7 @@ public static class PublicLibraryMembershipLetterExample
             TextColor = LibraryInk,
             Margin = new Thickness(0, 0, 0, 2),
         });
-        stack.AddChild(new Container
+        stack.Add(new Container
         {
             BackgroundColor = LibraryGreen,
             Padding = new Thickness(0, 1.5f, 0, 0),
@@ -162,8 +162,8 @@ public static class PublicLibraryMembershipLetterExample
         TextBlock addr = Body("Ms J. Okoro\n14 Elmfield Court\nNorthbridge\nNB1 6QT", mb: 0);
 
         VerticalStack meta = new();
-        meta.AddChild(Body(longDate, align: TextAlignment.Right, mb: 0));
-        meta.AddChild(Body("Membership no. NBL-4471-208823", align: TextAlignment.Right, color: LibrarySecondary, size: 10, mb: 0));
+        meta.Add(Body(longDate, align: TextAlignment.Right, mb: 0));
+        meta.Add(Body("Membership no. NBL-4471-208823", align: TextAlignment.Right, color: LibrarySecondary, size: 10, mb: 0));
 
         top.AddRow(addr, meta);
         return top;
@@ -172,8 +172,8 @@ public static class PublicLibraryMembershipLetterExample
     private static Container StatusCallout()
     {
         VerticalStack stack = new();
-        stack.AddChild(new TextBlock { Text = "Membership status", FontSize = 11, TextColor = LibrarySecondary });
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock { Text = "Membership status", FontSize = 11, TextColor = LibrarySecondary });
+        stack.Add(new TextBlock
         {
             Text = "Active",
             FontName = StandardFonts.HelveticaBold,
@@ -181,7 +181,7 @@ public static class PublicLibraryMembershipLetterExample
             TextColor = LibraryInk,
             Margin = new Thickness(0, 2, 0, 2),
         });
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = "Borrow, renew, and reserve items from today",
             FontSize = 11,

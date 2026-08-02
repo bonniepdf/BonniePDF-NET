@@ -94,8 +94,8 @@ public static class CrossReferencesExample
             };
 
             var row = new HorizontalStack { Spacing = 4, Margin = new Thickness(16, 0, 0, 10) };
-            row.AddChild(label, label.GetPreferredWidth());
-            row.AddChild(pageRef);
+            row.Add(label, label.GetPreferredWidth());
+            row.Add(pageRef);
             doc.Add(row);
         }
 

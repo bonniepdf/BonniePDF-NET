@@ -22,7 +22,7 @@ public sealed class ColumnDescriptor
     public IContentContainer Item()
     {
         var slot = new ContentSlot();
-        Stack.AddChild(slot);
+        Stack.Add(slot);
         return slot;
     }
 }

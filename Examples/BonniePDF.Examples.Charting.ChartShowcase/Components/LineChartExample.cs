@@ -30,8 +30,8 @@ public static class LineChartExample
             FooterTemplate = pageNumber =>
             {
                 HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.AddChild(new TextBlock { Text = "BonniePDF - Line Chart", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500] }, null);
-                stack.AddChild(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                stack.Add(new TextBlock { Text = "BonniePDF - Line Chart", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500] }, null);
+                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
                 return stack;
             }
         });

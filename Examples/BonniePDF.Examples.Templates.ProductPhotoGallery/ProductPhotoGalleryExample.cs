@@ -93,9 +93,9 @@ public static class ProductPhotoGalleryExample
                 Spacing = 16,
                 WidthDistribution = WidthDistribution.Equal,
             };
-            row.AddChild(ProductCard(Products[i]));
-            if (i + 1 < Products.Length) row.AddChild(ProductCard(Products[i + 1]));
-            gallery.AddChild(row);
+            row.Add(ProductCard(Products[i]));
+            if (i + 1 < Products.Length) row.Add(ProductCard(Products[i + 1]));
+            gallery.Add(row);
         }
 
         doc.Add(gallery);
@@ -105,7 +105,7 @@ public static class ProductPhotoGalleryExample
     private static Container ProductCard(Product product)
     {
         VerticalStack body = new() { Spacing = 4 };
-        body.AddChild(ProductMedia(product));
+        body.Add(ProductMedia(product));
 
         Heading name = new(product.Name)
         {
@@ -116,19 +116,19 @@ public static class ProductPhotoGalleryExample
             TextColor = Ink,
             Margin = new Thickness(0, 6, 0, 0),
         };
-        body.AddChild(name);
+        body.Add(name);
 
         HorizontalStack meta = new()
         {
             WidthDistribution = WidthDistribution.Weighted,
         };
-        meta.AddChild(new TextBlock
+        meta.Add(new TextBlock
         {
             Text = product.Sku,
             FontSize = 9,
             TextColor = Muted,
         }, 1f);
-        meta.AddChild(new TextBlock
+        meta.Add(new TextBlock
         {
             Text = product.Price,
             FontName = StandardFonts.HelveticaBold,
@@ -136,9 +136,9 @@ public static class ProductPhotoGalleryExample
             TextColor = Accent,
             Alignment = TextAlignment.Right,
         }, 1f);
-        body.AddChild(meta);
+        body.Add(meta);
 
-        body.AddChild(new TextBlock
+        body.Add(new TextBlock
         {
             Text = product.Blurb,
             FontSize = 9.5f,

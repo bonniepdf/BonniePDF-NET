@@ -32,7 +32,7 @@ public sealed class RowDescriptor
     {
         EnsureWeightedDistribution();
         var slot = new ContentSlot();
-        Stack.AddChild(slot, weight);
+        Stack.Add(slot, weight);
         return slot;
     }
 
@@ -47,7 +47,7 @@ public sealed class RowDescriptor
         // Use a container with fixed width wrapping a slot
         var slot = new ContentSlot();
         var container = new Container { Width = width, Child = slot };
-        Stack.AddChild(container, 0f); // Weight 0 = uses preferred width (the fixed Width)
+        Stack.Add(container, 0f); // Weight 0 = uses preferred width (the fixed Width)
         return slot;
     }
 
@@ -61,11 +61,11 @@ public sealed class RowDescriptor
         if (_hasRelativeOrConstant)
         {
             // In weighted mode, auto items get weight 0 (use preferred width)
-            Stack.AddChild(slot, 0f);
+            Stack.Add(slot, 0f);
         }
         else
         {
-            Stack.AddChild(slot);
+            Stack.Add(slot);
         }
 
         return slot;

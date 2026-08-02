@@ -209,9 +209,9 @@ public static class AnnualReportExample
         TextBlock left, TextBlock center, TextBlock right, float leftWeight = 1, float centerWeight = 1, float rightWeight = 1)
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
-        row.AddChild(left, leftWeight);
-        row.AddChild(center, centerWeight);
-        row.AddChild(right, rightWeight);
+        row.Add(left, leftWeight);
+        row.Add(center, centerWeight);
+        row.Add(right, rightWeight);
         return row;
     }
 
@@ -236,7 +236,7 @@ public static class AnnualReportExample
         HorizontalStack row = new() { Spacing = 6 };
         foreach (Color color in new[] { Primary, Secondary, Tertiary })
         {
-            row.AddChild(new Container { BackgroundColor = color, Width = 14, Height = 14, CornerRadius = 3 });
+            row.Add(new Container { BackgroundColor = color, Width = 14, Height = 14, CornerRadius = 3 });
         }
         return row;
     }
@@ -264,7 +264,7 @@ public static class AnnualReportExample
         HorizontalStack row = new() { Spacing = 0, Margin = new Thickness(0, 18, 0, 18) };
         foreach (Color color in new[] { Primary, Secondary, Tertiary })
         {
-            row.AddChild(new Container { BackgroundColor = color, Width = 34, Height = 5 });
+            row.Add(new Container { BackgroundColor = color, Width = 34, Height = 5 });
         }
         return row;
     }
@@ -321,16 +321,16 @@ public static class AnnualReportExample
     private static HorizontalStack KpiRow()
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 14 };
-        row.AddChild(KpiCard("£2.4B", "Total revenue", Primary), 1);
-        row.AddChild(KpiCard("+18%", "Year-over-year growth", Secondary), 1);
-        row.AddChild(KpiCard("2.1M", "Daily active users", Tertiary), 1);
+        row.Add(KpiCard("£2.4B", "Total revenue", Primary), 1);
+        row.Add(KpiCard("+18%", "Year-over-year growth", Secondary), 1);
+        row.Add(KpiCard("2.1M", "Daily active users", Tertiary), 1);
         return row;
     }
 
     private static Container KpiCard(string value, string label, Color accent)
     {
         VerticalStack stack = new();
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = value,
             FontName = StandardFonts.HelveticaBold,
@@ -338,7 +338,7 @@ public static class AnnualReportExample
             TextColor = accent,
             Margin = new Thickness(0, 0, 0, 4),
         });
-        stack.AddChild(new TextBlock
+        stack.Add(new TextBlock
         {
             Text = label,
             FontName = StandardFonts.Helvetica,

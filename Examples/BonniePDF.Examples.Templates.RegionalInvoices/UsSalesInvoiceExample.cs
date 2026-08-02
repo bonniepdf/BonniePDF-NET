@@ -56,11 +56,11 @@ public static class UsSalesInvoiceExample
 
         // ── Header: seller | INVOICE ────────────────────────────────────────
         VerticalStack seller = new();
-        seller.AddChild(Cell("Sample Company Inc.", size: 16, bold: true, color: Ink, margin: new Thickness(0, 0, 0, 2)));
+        seller.Add(Cell("Sample Company Inc.", size: 16, bold: true, color: Ink, margin: new Thickness(0, 0, 0, 2)));
         AddLines(seller, Muted, "500 Market Street, Suite 1200", "San Francisco, CA 94105", "EIN 47-0912288");
 
         VerticalStack titleStack = new();
-        titleStack.AddChild(new Heading("INVOICE")
+        titleStack.Add(new Heading("INVOICE")
         {
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
@@ -68,7 +68,7 @@ public static class UsSalesInvoiceExample
             TextColor = Accent,
             Alignment = TextAlignment.Right,
         });
-        titleStack.AddChild(Cell($"INV-US-{year}-0148", color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0)));
+        titleStack.Add(Cell($"INV-US-{year}-0148", color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0)));
 
         Grid header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
         header.AddRow(seller, titleStack);
@@ -76,10 +76,10 @@ public static class UsSalesInvoiceExample
 
         // ── Bill-to + details ────────────────────────────────────────────────
         VerticalStack details = new();
-        details.AddChild(TotalLine("Invoice date", now.ToString("MMM d, yyyy")));
-        details.AddChild(TotalLine("Due date (Net 30)", due.ToString("MMM d, yyyy")));
-        details.AddChild(TotalLine("Purchase order", "PO-88213"));
-        details.AddChild(TotalLine("Ship to", "Seattle, WA"));
+        details.Add(TotalLine("Invoice date", now.ToString("MMM d, yyyy")));
+        details.Add(TotalLine("Due date (Net 30)", due.ToString("MMM d, yyyy")));
+        details.Add(TotalLine("Purchase order", "PO-88213"));
+        details.Add(TotalLine("Ship to", "Seattle, WA"));
 
         Grid meta = new(1f, 1f)
         {
@@ -113,10 +113,10 @@ public static class UsSalesInvoiceExample
             decimal amount = it.Qty * it.UnitPrice;
             subtotal += amount;
             VerticalStack desc = new();
-            desc.AddChild(Cell(it.Description));
+            desc.Add(Cell(it.Description));
             if (it.Detail is not null)
             {
-                desc.AddChild(Cell(it.Detail, size: 8, color: Muted));
+                desc.Add(Cell(it.Detail, size: 8, color: Muted));
             }
 
             table.AddRow(
@@ -135,11 +135,11 @@ public static class UsSalesInvoiceExample
         decimal total = subtotal + stateTax + countyTax;
 
         VerticalStack totals = new();
-        totals.AddChild(TotalLine("Subtotal", Money(subtotal, Usd)));
-        totals.AddChild(TotalLine("CA state sales tax (6.25%)", Money(stateTax, Usd)));
-        totals.AddChild(TotalLine("King County district tax (2.25%)", Money(countyTax, Usd)));
-        totals.AddChild(Divider(Ink, 0.6f));
-        totals.AddChild(TotalLine("Total due (USD)", Money(total, Usd), bold: true, size: 13, color: Accent));
+        totals.Add(TotalLine("Subtotal", Money(subtotal, Usd)));
+        totals.Add(TotalLine("CA state sales tax (6.25%)", Money(stateTax, Usd)));
+        totals.Add(TotalLine("King County district tax (2.25%)", Money(countyTax, Usd)));
+        totals.Add(Divider(Ink, 0.6f));
+        totals.Add(TotalLine("Total due (USD)", Money(total, Usd), bold: true, size: 13, color: Accent));
 
         Container totalsBox = new()
         {
@@ -149,8 +149,8 @@ public static class UsSalesInvoiceExample
             CornerRadius = 8,
         };
         HorizontalStack totalsRow = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 6, 0, 0) };
-        totalsRow.AddChild(new Container(), 1);
-        totalsRow.AddChild(totalsBox, 1);
+        totalsRow.Add(new Container(), 1);
+        totalsRow.Add(totalsBox, 1);
         doc.Add(totalsRow);
 
         // ── Remittance note ─────────────────────────────────────────────────

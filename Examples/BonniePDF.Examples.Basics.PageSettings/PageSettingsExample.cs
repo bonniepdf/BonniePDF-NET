@@ -62,7 +62,7 @@ public static class PageSettingsExample
                 // 3. Build a "Spec Card" for each page
                 var content = new VerticalStack();
 
-                content.AddChild(new TextBlock
+                content.Add(new TextBlock
                 {
                     Text = $"{formatName} ({orientation})",
                     FontName = StandardFonts.HelveticaBold,
@@ -70,13 +70,13 @@ public static class PageSettingsExample
                     TextColor = ColorPalette.Slate[800]
                 });
 
-                content.AddChild(new TextBlock { Text = "Technical Specifications", FontSize = 14, TextColor = ColorPalette.Slate[500] });
-                content.AddChild(new Line { Color = ColorPalette.Slate[200], Thickness = 1 });
+                content.Add(new TextBlock { Text = "Technical Specifications", FontSize = 14, TextColor = ColorPalette.Slate[500] });
+                content.Add(new Line { Color = ColorPalette.Slate[200], Thickness = 1 });
 
                 // Data Table Simulation
-                content.AddChild(CreateSpecLine("Points:", $"{current.Width:F2}pt x {current.Height:F2}pt"));
-                content.AddChild(CreateSpecLine("Inches:", $"{current.Width / 72:F2}\" x {current.Height / 72:F2}\""));
-                content.AddChild(CreateSpecLine("Millimeters:", $"{(current.Width / 72 * 25.4f):F1}mm x {(current.Height / 72 * 25.4f):F1}mm"));
+                content.Add(CreateSpecLine("Points:", $"{current.Width:F2}pt x {current.Height:F2}pt"));
+                content.Add(CreateSpecLine("Inches:", $"{current.Width / 72:F2}\" x {current.Height / 72:F2}\""));
+                content.Add(CreateSpecLine("Millimeters:", $"{(current.Width / 72 * 25.4f):F1}mm x {(current.Height / 72 * 25.4f):F1}mm"));
 
                 doc.Add(content);
             }

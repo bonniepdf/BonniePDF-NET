@@ -14,7 +14,7 @@ public static class VerticalStackExtensions
     /// </summary>
     public static VerticalStack Item(this VerticalStack s, IElement element)
     {
-        s.AddChild(element);
+        s.Add(element);
         return s;
     }
 
@@ -24,7 +24,7 @@ public static class VerticalStackExtensions
     public static VerticalStack Items(this VerticalStack s, IEnumerable<IElement> elements)
     {
         foreach (var element in elements)
-            s.AddChild(element);
+            s.Add(element);
         return s;
     }
 
@@ -34,7 +34,7 @@ public static class VerticalStackExtensions
     public static VerticalStack Items(this VerticalStack s, params IElement[] elements)
     {
         foreach (var element in elements)
-            s.AddChild(element);
+            s.Add(element);
         return s;
     }
 }

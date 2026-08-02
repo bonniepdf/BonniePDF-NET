@@ -116,7 +116,7 @@ public static class ComplianceFindingsRegisterExample
 
         VerticalStack body = new() { Spacing = 3 };
 
-        body.AddChild(new Heading($"{finding.Id} - {finding.Title}")
+        body.Add(new Heading($"{finding.Id} - {finding.Title}")
         {
             TocIdentifier = AnchorFor(finding.Id),
             // AnchorId makes this finding a cross-reference target for the Priority
@@ -129,7 +129,7 @@ public static class ComplianceFindingsRegisterExample
             TextColor     = ColorPalette.Slate[800],
         });
 
-        body.AddChild(new TextBlock
+        body.Add(new TextBlock
         {
             Text      = finding.Category,
             FontName  = StandardFonts.HelveticaBold,
@@ -137,7 +137,7 @@ public static class ComplianceFindingsRegisterExample
             TextColor = ColorPalette.Slate[500],
         });
 
-        body.AddChild(new TextBlock
+        body.Add(new TextBlock
         {
             Text      = finding.Description,
             FontSize  = 10.5f,
@@ -154,28 +154,28 @@ public static class ComplianceFindingsRegisterExample
             {
                 Text = "Related:", FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = ColorPalette.Slate[500],
             };
-            relatedRow.AddChild(relatedLabel, relatedLabel.GetPreferredWidth());
+            relatedRow.Add(relatedLabel, relatedLabel.GetPreferredWidth());
 
             var relatedLink = new SectionLink(finding.Related, AnchorFor(finding.Related))
             {
                 FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = ColorPalette.Blue[700],
             };
-            relatedRow.AddChild(relatedLink, relatedLink.GetPreferredWidth());
+            relatedRow.Add(relatedLink, relatedLink.GetPreferredWidth());
 
             var onPage = new TextBlock { Text = "on page", FontSize = 9, TextColor = ColorPalette.Slate[500] };
-            relatedRow.AddChild(onPage, onPage.GetPreferredWidth());
+            relatedRow.Add(onPage, onPage.GetPreferredWidth());
 
-            relatedRow.AddChild(new PageNumberOf(AnchorFor(finding.Related))
+            relatedRow.Add(new PageNumberOf(AnchorFor(finding.Related))
             {
                 FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = ColorPalette.Slate[600],
             });
 
-            body.AddChild(relatedRow);
+            body.Add(relatedRow);
         }
 
         HorizontalStack row = new() { Spacing = 12, WidthDistribution = WidthDistribution.Weighted };
-        row.AddChild(badge);
-        row.AddChild(body, 1);
+        row.Add(badge);
+        row.Add(body, 1);
 
         return new Container
         {
@@ -200,7 +200,7 @@ public static class ComplianceFindingsRegisterExample
     {
         VerticalStack inner = new() { Spacing = 4 };
 
-        inner.AddChild(new Heading("Priority Actions")
+        inner.Add(new Heading("Priority Actions")
         {
             TocIdentifier = "priority-actions",
             AnchorId      = "priority-actions",
@@ -211,7 +211,7 @@ public static class ComplianceFindingsRegisterExample
             Margin        = new Thickness(0, 0, 0, 2),
         });
 
-        inner.AddChild(new TextBlock
+        inner.Add(new TextBlock
         {
             Text      = $"{critical.Count} critical findings require immediate remediation:",
             FontSize  = 10,
@@ -227,17 +227,17 @@ public static class ComplianceFindingsRegisterExample
             {
                 FontName = StandardFonts.HelveticaBold, FontSize = 10, TextColor = ColorPalette.Blue[700],
             };
-            row.AddChild(link, link.GetPreferredWidth());
+            row.Add(link, link.GetPreferredWidth());
 
             var onPage = new TextBlock { Text = "page", FontSize = 10, TextColor = ColorPalette.Slate[500] };
-            row.AddChild(onPage, onPage.GetPreferredWidth());
+            row.Add(onPage, onPage.GetPreferredWidth());
 
-            row.AddChild(new PageNumberOf(AnchorFor(finding.Id))
+            row.Add(new PageNumberOf(AnchorFor(finding.Id))
             {
                 FontName = StandardFonts.HelveticaBold, FontSize = 10, TextColor = ColorPalette.Slate[700],
             });
 
-            inner.AddChild(row);
+            inner.Add(row);
         }
 
         return new Container
@@ -309,7 +309,7 @@ public static class ComplianceFindingsRegisterExample
         VerticalStack register = new();
         foreach (Finding finding in Findings)
         {
-            register.AddChild(FindingCard(finding));
+            register.Add(FindingCard(finding));
         }
         doc.Add(register);
 

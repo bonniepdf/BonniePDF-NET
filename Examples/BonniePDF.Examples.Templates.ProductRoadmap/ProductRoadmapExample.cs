@@ -61,8 +61,8 @@ public static class ProductRoadmapExample
 
         // ── Month header (project block + six month bubbles) ──────────────────
         VerticalStack project = new();
-        project.AddChild(Tb("PROJECT TITLE HERE", 9, Ink, bold: true));
-        project.AddChild(Tb("Sample Text Here", 7, Mute, top: 2));
+        project.Add(Tb("PROJECT TITLE HERE", 9, Ink, bold: true));
+        project.Add(Tb("Sample Text Here", 7, Mute, top: 2));
 
         HorizontalStack headerRow = new()
         {
@@ -71,8 +71,8 @@ public static class ProductRoadmapExample
             Alignment = HorizontalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 8),
         };
-        headerRow.AddChild(new Container { Child = project, Padding = new Thickness(0, 3, 8, 3) }, LabelWeight);
-        foreach (string m in Months) headerRow.AddChild(MonthCell(m), 1);
+        headerRow.Add(new Container { Child = project, Padding = new Thickness(0, 3, 8, 3) }, LabelWeight);
+        foreach (string m in Months) headerRow.Add(MonthCell(m), 1);
         doc.Add(headerRow);
 
         // ── Swimlanes ─────────────────────────────────────────────────────────
@@ -174,9 +174,9 @@ public static class ProductRoadmapExample
     private static Container StripeBand(float height, bool top = false)
     {
         HorizontalStack band = new() { Spacing = 0, WidthDistribution = WidthDistribution.Weighted };
-        band.AddChild(GridCell(height, top: top, left: true), LabelWeight); // label gutter stays white
+        band.Add(GridCell(height, top: top, left: true), LabelWeight); // label gutter stays white
         for (int m = 1; m <= Months.Length; m++)
-            band.AddChild(GridCell(height, shade: m % 2 == 0, top: top), 1);
+            band.Add(GridCell(height, shade: m % 2 == 0, top: top), 1);
         return new Container { CrispEdges = true, Child = band };
     }
 
@@ -192,17 +192,17 @@ public static class ProductRoadmapExample
             Alignment = HorizontalAlignment.Center,
             Height = RowHeight,
         };
-        row.AddChild(labelCell, LabelWeight);
+        row.Add(labelCell, LabelWeight);
 
         int cursor = 1;
         for (int i = 0; i < segs.Length; i++)
         {
             (int s, int e, string l) = segs[i];
-            if (s > cursor) row.AddChild(new Spacer(BarHeight), s - cursor);
-            row.AddChild(Bar(l, shades[i % 2], shades[0]), e - s + 1);
+            if (s > cursor) row.Add(new Spacer(BarHeight), s - cursor);
+            row.Add(Bar(l, shades[i % 2], shades[0]), e - s + 1);
             cursor = e + 1;
         }
-        if (cursor <= Months.Length) row.AddChild(new Spacer(BarHeight), Months.Length - cursor + 1);
+        if (cursor <= Months.Length) row.Add(new Spacer(BarHeight), Months.Length - cursor + 1);
 
         return row;
     }
@@ -221,8 +221,8 @@ public static class ProductRoadmapExample
     private static Container TeamLabel(string name, string sub, Color accent)
     {
         VerticalStack v = new();
-        v.AddChild(Tb(name, 9, Ink, bold: true));
-        v.AddChild(Tb(sub, 7, Mute, top: 2));
+        v.Add(Tb(name, 9, Ink, bold: true));
+        v.Add(Tb(sub, 7, Mute, top: 2));
         return new Container
         {
             Child = v,

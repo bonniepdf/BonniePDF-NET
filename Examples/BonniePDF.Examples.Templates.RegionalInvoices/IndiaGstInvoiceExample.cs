@@ -65,12 +65,12 @@ public static class IndiaGstInvoiceExample
 
         // ── Header: seller | e-invoice signed QR ────────────────────────────
         VerticalStack seller = new();
-        seller.AddChild(Cell("TAX INVOICE  ·  e-Invoice", bold: true, size: 8, color: Accent, margin: new Thickness(0, 0, 0, 6)));
-        seller.AddChild(Cell("Sample Company Private Limited", bold: true, size: 15, color: Ink, margin: new Thickness(0, 0, 0, 2)));
+        seller.Add(Cell("TAX INVOICE  ·  e-Invoice", bold: true, size: 8, color: Accent, margin: new Thickness(0, 0, 0, 6)));
+        seller.Add(Cell("Sample Company Private Limited", bold: true, size: 15, color: Ink, margin: new Thickness(0, 0, 0, 2)));
         AddLines(seller, Muted, "4th Floor, Prestige Tech Park", "Outer Ring Road, Bengaluru 560103", "Karnataka, India");
 
-        seller.AddChild(Cell("GSTIN: 29ABCDE1234F1Z5", bold: true, color: Accent, margin: new Thickness(0, 6, 0, 0)));
-        seller.AddChild(Cell("State: Karnataka (29)  ·  PAN: ABCDE1234F", size: 8, color: Muted));
+        seller.Add(Cell("GSTIN: 29ABCDE1234F1Z5", bold: true, color: Accent, margin: new Thickness(0, 6, 0, 0)));
+        seller.Add(Cell("State: Karnataka (29)  ·  PAN: ABCDE1234F", size: 8, color: Muted));
 
         // Signed QR: on a real e-invoice this encodes the IRP-signed payload (JWT).
         string qrPayload = $"{{\"SellerGstin\":\"29ABCDE1234F1Z5\",\"BuyerGstin\":\"29XYZAB6789K1Z2\","
@@ -90,8 +90,8 @@ public static class IndiaGstInvoiceExample
             },
         };
         VerticalStack qrStack = new();
-        qrStack.AddChild(qrBox);
-        qrStack.AddChild(Cell("Signed QR (IRP)", size: 8, color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 4, 0, 0)));
+        qrStack.Add(qrBox);
+        qrStack.Add(Cell("Signed QR (IRP)", size: 8, color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 4, 0, 0)));
 
         Grid header = new(1.5f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 14, 0, 14) };
         header.AddRow(seller, qrStack);
@@ -99,9 +99,9 @@ public static class IndiaGstInvoiceExample
 
         // ── IRN band ─────────────────────────────────────────────────────────
         VerticalStack irnStack = new();
-        irnStack.AddChild(Cell("IRN (Invoice Reference Number)", bold: true, size: 8, color: Accent, margin: new Thickness(0, 0, 0, 2)));
-        irnStack.AddChild(Cell(Irn, size: 8, color: Ink));
-        irnStack.AddChild(Cell($"Ack No. 112500771223344   ·   Ack Date {date}", size: 8, color: Muted, margin: new Thickness(0, 3, 0, 0)));
+        irnStack.Add(Cell("IRN (Invoice Reference Number)", bold: true, size: 8, color: Accent, margin: new Thickness(0, 0, 0, 2)));
+        irnStack.Add(Cell(Irn, size: 8, color: Ink));
+        irnStack.Add(Cell($"Ack No. 112500771223344   ·   Ack Date {date}", size: 8, color: Muted, margin: new Thickness(0, 3, 0, 0)));
         doc.Add(new Container
         {
             BackgroundColor = ColorPalette.Emerald[50],
@@ -113,10 +113,10 @@ public static class IndiaGstInvoiceExample
 
         // ── Buyer + invoice details ─────────────────────────────────────────
         VerticalStack details = new();
-        details.AddChild(TotalLine("Invoice no.", $"INV-IN-{year}-0771"));
-        details.AddChild(TotalLine("Invoice date", date));
-        details.AddChild(TotalLine("Place of supply", "Karnataka (29)"));
-        details.AddChild(TotalLine("Reverse charge", "No"));
+        details.Add(TotalLine("Invoice no.", $"INV-IN-{year}-0771"));
+        details.Add(TotalLine("Invoice date", date));
+        details.Add(TotalLine("Place of supply", "Karnataka (29)"));
+        details.Add(TotalLine("Reverse charge", "No"));
 
         Grid meta = new(1f, 1f)
         {
@@ -167,11 +167,11 @@ public static class IndiaGstInvoiceExample
         decimal grand = taxable + cgst + sgst;
 
         VerticalStack totals = new();
-        totals.AddChild(TotalLine("Taxable value", Money(taxable, Inr, "en-IN")));
-        totals.AddChild(TotalLine("CGST @ 9%", Money(cgst, Inr, "en-IN")));
-        totals.AddChild(TotalLine("SGST @ 9%", Money(sgst, Inr, "en-IN")));
-        totals.AddChild(Divider(Ink, 0.6f));
-        totals.AddChild(TotalLine("Total (INR)", Money(grand, Inr, "en-IN"), bold: true, size: 13, color: Accent));
+        totals.Add(TotalLine("Taxable value", Money(taxable, Inr, "en-IN")));
+        totals.Add(TotalLine("CGST @ 9%", Money(cgst, Inr, "en-IN")));
+        totals.Add(TotalLine("SGST @ 9%", Money(sgst, Inr, "en-IN")));
+        totals.Add(Divider(Ink, 0.6f));
+        totals.Add(TotalLine("Total (INR)", Money(grand, Inr, "en-IN"), bold: true, size: 13, color: Accent));
 
         Container totalsBox = new()
         {
@@ -181,8 +181,8 @@ public static class IndiaGstInvoiceExample
             CornerRadius = 8,
         };
         HorizontalStack totalsRow = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 6, 0, 0) };
-        totalsRow.AddChild(new Container(), 1);
-        totalsRow.AddChild(totalsBox, 1);
+        totalsRow.Add(new Container(), 1);
+        totalsRow.Add(totalsBox, 1);
         doc.Add(totalsRow);
 
         doc.Add(Cell(

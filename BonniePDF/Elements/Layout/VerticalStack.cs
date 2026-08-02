@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BonniePDF.Core;
@@ -209,9 +210,19 @@ public class VerticalStack : ElementBase, IStatefulElement
     /// <summary>
     /// Adds a child element to this stack
     /// </summary>
-    public void AddChild(IElement child)
+    public void Add(IElement child)
     {
         _children.Add(child);
+    }
+
+    /// <summary>
+    /// Adds a child element to this stack.
+    /// </summary>
+    /// <remarks>Deprecated: use <see cref="Add"/> instead.</remarks>
+    [Obsolete("Use Add instead.")]
+    public void AddChild(IElement child)
+    {
+        Add(child);
     }
 
     protected override float GetPreferredContentWidth()

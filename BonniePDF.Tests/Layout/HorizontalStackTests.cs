@@ -11,6 +11,21 @@ namespace BonniePDF.Tests.Layout;
 public class HorizontalStackTests
 {
     [Fact]
+    public void DeprecatedAddChildAliases_ForwardToAdd()
+    {
+        HorizontalStack horizontal = new();
+        VerticalStack vertical = new();
+
+#pragma warning disable CS0618
+        horizontal.AddChild(new TextBlock { Text = "horizontal" }, 1f);
+        vertical.AddChild(new TextBlock { Text = "vertical" });
+#pragma warning restore CS0618
+
+        Assert.Single(horizontal.Children);
+        Assert.Single(vertical.Children);
+    }
+
+    [Fact]
     public void AutoDistribution_UsesIntrinsicWidths()
     {
         // Arrange
@@ -20,8 +35,8 @@ public class HorizontalStackTests
         TextBlock text2 = new()
             { Text = "World", FontName = StandardFonts.Helvetica, FontSize = 10 }; // Width approx 25
 
-        stack.AddChild(text1);
-        stack.AddChild(text2);
+        stack.Add(text1);
+        stack.Add(text2);
 
         // Measure with ample space
         // To verify widths, we need to inspect the internals or check if MeasureContentHeight calls child with correct width.
@@ -48,8 +63,8 @@ public class HorizontalStackTests
         // Flexible element
         TextBlock value = new() { Text = "Value", FontName = StandardFonts.Helvetica, FontSize = 10 };
 
-        stack.AddChild(label); // Auto (null weight)
-        stack.AddChild(value, 1f); // Weighted (1)
+        stack.Add(label); // Auto (null weight)
+        stack.Add(value, 1f); // Weighted (1)
 
         // Act
         // We can't easily verify the *rendered* width without a mock Canvas.
@@ -64,8 +79,8 @@ public class HorizontalStackTests
         TestElement fixedItem = new() { PreferredWidth = 100 };
         TestElement flexItem = new() { PreferredWidth = 50 }; // Should be ignored in favor of weight
 
-        stack.AddChild(fixedItem, null); // Auto
-        stack.AddChild(flexItem, 1f); // Weight 1
+        stack.Add(fixedItem, null); // Auto
+        stack.Add(flexItem, 1f); // Weight 1
 
         float totalWidth = 500;
 
@@ -92,8 +107,8 @@ public class HorizontalStackTests
         TestElement item1 = new() { PreferredWidth = 100 };
         TestElement item2 = new() { PreferredWidth = 200 };
 
-        stack.AddChild(item1);
-        stack.AddChild(item2);
+        stack.Add(item1);
+        stack.Add(item2);
 
         float totalWidth = 500;
         RenderContext ctx = new(new PdfSize(totalWidth, 100), 0);

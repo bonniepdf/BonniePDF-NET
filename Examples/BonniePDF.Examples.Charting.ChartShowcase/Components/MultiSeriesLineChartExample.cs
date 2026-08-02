@@ -34,14 +34,14 @@ public static class MultiSeriesLineChartExample
                 {
                     WidthDistribution = WidthDistribution.Weighted
                 };
-                stack.AddChild(new TextBlock
+                stack.Add(new TextBlock
                 {
                     Text = "BonniePDF - Multi-Series Line Chart",
                     FontName = StandardFonts.Helvetica,
                     FontSize = 10,
                     TextColor = ColorPalette.Slate[500]
                 }, null);
-                stack.AddChild(new TextBlock
+                stack.Add(new TextBlock
                 {
                     Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                     FontName = StandardFonts.Helvetica,

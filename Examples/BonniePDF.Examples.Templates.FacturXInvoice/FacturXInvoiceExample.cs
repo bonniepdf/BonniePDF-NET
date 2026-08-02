@@ -68,14 +68,14 @@ public static class FacturXInvoiceExample
 
         // ── Header ────────────────────────────────────────────────────────────
         VerticalStack seller = new();
-        seller.AddChild(Cell("Sample Company GmbH", size: 16, bold: true, color: Ink, margin: new Thickness(0, 0, 0, 2)));
+        seller.Add(Cell("Sample Company GmbH", size: 16, bold: true, color: Ink, margin: new Thickness(0, 0, 0, 2)));
         AddLines(seller, Muted, "Musterstrasse 1", "10115 Berlin", "Germany");
-        seller.AddChild(Cell("USt-IdNr. DE 123 456 789", bold: true, color: Accent, margin: new Thickness(0, 6, 0, 0)));
+        seller.Add(Cell("USt-IdNr. DE 123 456 789", bold: true, color: Accent, margin: new Thickness(0, 6, 0, 0)));
 
         VerticalStack titleStack = new();
-        titleStack.AddChild(Cell("E-INVOICE", size: 24, bold: true, color: Accent, align: TextAlignment.Right));
-        titleStack.AddChild(Cell("EN 16931 · Factur-X / ZUGFeRD", size: 8, color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0)));
-        titleStack.AddChild(Cell("INV-2026-1001", color: Muted, align: TextAlignment.Right));
+        titleStack.Add(Cell("E-INVOICE", size: 24, bold: true, color: Accent, align: TextAlignment.Right));
+        titleStack.Add(Cell("EN 16931 · Factur-X / ZUGFeRD", size: 8, color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0)));
+        titleStack.Add(Cell("INV-2026-1001", color: Muted, align: TextAlignment.Right));
 
         Grid header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
         header.AddRow(seller, titleStack);
@@ -83,10 +83,10 @@ public static class FacturXInvoiceExample
 
         // ── Buyer + details ─────────────────────────────────────────────────
         VerticalStack details = new();
-        details.AddChild(TotalLine("Invoice date", "07 Jul 2026"));
-        details.AddChild(TotalLine("Due date", "21 Jul 2026"));
-        details.AddChild(TotalLine("Buyer reference", "PO-2026-042"));
-        details.AddChild(TotalLine("Terms", "14 days net"));
+        details.Add(TotalLine("Invoice date", "07 Jul 2026"));
+        details.Add(TotalLine("Due date", "21 Jul 2026"));
+        details.Add(TotalLine("Buyer reference", "PO-2026-042"));
+        details.Add(TotalLine("Terms", "14 days net"));
 
         Grid meta = new(1f, 1f)
         {
@@ -120,8 +120,8 @@ public static class FacturXInvoiceExample
             decimal amount = qty * unitPrice;
             net += amount;
             VerticalStack desc = new();
-            desc.AddChild(Cell(description));
-            desc.AddChild(Cell(detail, size: 8, color: Muted));
+            desc.Add(Cell(description));
+            desc.Add(Cell(detail, size: 8, color: Muted));
 
             table.AddRow(
                 desc,
@@ -136,10 +136,10 @@ public static class FacturXInvoiceExample
         // ── Totals (mirror the embedded XML exactly: 4000 / 760 / 4760) ───────
         decimal vat = net * VatRate;
         VerticalStack totals = new();
-        totals.AddChild(TotalLine("Total net", Money(net, Eur, Locale)));
-        totals.AddChild(TotalLine("VAT (19%)", Money(vat, Eur, Locale)));
-        totals.AddChild(Divider(Ink, 0.6f));
-        totals.AddChild(TotalLine("Total due (EUR)", Money(net + vat, Eur, Locale), bold: true, size: 13, color: Accent));
+        totals.Add(TotalLine("Total net", Money(net, Eur, Locale)));
+        totals.Add(TotalLine("VAT (19%)", Money(vat, Eur, Locale)));
+        totals.Add(Divider(Ink, 0.6f));
+        totals.Add(TotalLine("Total due (EUR)", Money(net + vat, Eur, Locale), bold: true, size: 13, color: Accent));
 
         Container totalsBox = new()
         {
@@ -149,15 +149,15 @@ public static class FacturXInvoiceExample
             CornerRadius = 8,
         };
         HorizontalStack totalsRow = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 6, 0, 0) };
-        totalsRow.AddChild(new Container(), 1);
-        totalsRow.AddChild(totalsBox, 1);
+        totalsRow.Add(new Container(), 1);
+        totalsRow.Add(totalsBox, 1);
         doc.Add(totalsRow);
 
         // ── Remittance + embedded-XML panel ─────────────────────────────────
         VerticalStack xmlStack = new();
-        xmlStack.AddChild(Cell("STRUCTURED DATA", bold: true, size: 8, color: Muted, margin: new Thickness(0, 0, 0, 4)));
-        xmlStack.AddChild(Cell("factur-x.xml (EN 16931 CII) is embedded in this", size: 8, color: Muted));
-        xmlStack.AddChild(Cell("PDF/A-3 as an associated file — /AFRelationship /Data.", size: 8, color: Muted));
+        xmlStack.Add(Cell("STRUCTURED DATA", bold: true, size: 8, color: Muted, margin: new Thickness(0, 0, 0, 4)));
+        xmlStack.Add(Cell("factur-x.xml (EN 16931 CII) is embedded in this", size: 8, color: Muted));
+        xmlStack.Add(Cell("PDF/A-3 as an associated file — /AFRelationship /Data.", size: 8, color: Muted));
 
         Container payCell = Labelled(
             "PAYMENT",
@@ -210,21 +210,21 @@ public static class FacturXInvoiceExample
         => Cell(string.Join('\n', items), color: color);
 
     private static void AddLines(VerticalStack stack, Color color, params string[] items)
-        => stack.AddChild(Lines(color, items));
+        => stack.Add(Lines(color, items));
 
     private static Container Labelled(string label, IElement body, Color accent)
     {
         VerticalStack stack = new();
-        stack.AddChild(Cell(label, size: 8f, bold: true, color: accent, margin: new Thickness(0, 0, 0, 5)));
-        stack.AddChild(body);
+        stack.Add(Cell(label, size: 8f, bold: true, color: accent, margin: new Thickness(0, 0, 0, 5)));
+        stack.Add(body);
         return new Container { Child = stack };
     }
 
     private static HorizontalStack TotalLine(string label, string value, bool bold = false, float size = 9f, Color? color = null)
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 3, 0, 3) };
-        row.AddChild(Cell(label, size: size, bold: bold, color: color ?? Muted), 3);
-        row.AddChild(Cell(value, size: size, bold: bold, color: color ?? Ink, align: TextAlignment.Right), 2);
+        row.Add(Cell(label, size: size, bold: bold, color: color ?? Muted), 3);
+        row.Add(Cell(value, size: size, bold: bold, color: color ?? Ink, align: TextAlignment.Right), 2);
         return row;
     }
 

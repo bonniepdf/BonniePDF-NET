@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BonniePDF.Core;
 using BonniePDF.Rendering;
@@ -47,18 +48,38 @@ public class HorizontalStack : ElementBase, IStatefulElement
     /// <summary>
     /// Adds a child element to this stack with auto width
     /// </summary>
-    public void AddChild(IElement child)
+    public void Add(IElement child)
     {
-        AddChild(child, null);
+        Add(child, null);
     }
 
     /// <summary>
-    /// Adds a child element to this stack with a specific width (only used when WidthDistribution is Weighted)
+    /// Adds a child element to this stack with a specific weight (only used when WidthDistribution is Weighted)
     /// </summary>
-    public void AddChild(IElement child, float? width)
+    public void Add(IElement child, float? weight)
     {
         _children.Add(child);
-        _widths.Add(width);
+        _widths.Add(weight);
+    }
+
+    /// <summary>
+    /// Adds a child element to this stack with auto width.
+    /// </summary>
+    /// <remarks>Deprecated: use <see cref="Add(IElement)"/> instead.</remarks>
+    [Obsolete("Use Add instead.")]
+    public void AddChild(IElement child)
+    {
+        Add(child);
+    }
+
+    /// <summary>
+    /// Adds a child element to this stack with a specific weight.
+    /// </summary>
+    /// <remarks>Deprecated: use <see cref="Add(IElement, float?)"/> instead.</remarks>
+    [Obsolete("Use Add instead.")]
+    public void AddChild(IElement child, float? width)
+    {
+        Add(child, width);
     }
 
     /// <summary>

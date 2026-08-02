@@ -59,14 +59,14 @@ internal static class InvoiceKit
 
     /// <summary>Appends plain text lines to an existing stack (e.g. after a bold company name).</summary>
     public static void AddLines(VerticalStack stack, Color color, params string[] items)
-        => stack.AddChild(Lines(color, items));
+        => stack.Add(Lines(color, items));
 
     /// <summary>A labelled block: a bold eyebrow label over a body element.</summary>
     public static Container Labelled(string label, IElement body, Color accent)
     {
         VerticalStack stack = new();
-        stack.AddChild(Cell(label, size: 8f, bold: true, color: accent, margin: new Thickness(0, 0, 0, 5)));
-        stack.AddChild(body);
+        stack.Add(Cell(label, size: 8f, bold: true, color: accent, margin: new Thickness(0, 0, 0, 5)));
+        stack.Add(body);
         return new Container { Child = stack };
     }
 
@@ -83,8 +83,8 @@ internal static class InvoiceKit
             WidthDistribution = WidthDistribution.Weighted,
             Margin = new Thickness(0, 3, 0, 3),
         };
-        row.AddChild(Cell(label, size: size, bold: bold, color: color ?? Muted), 3);
-        row.AddChild(Cell(value, size: size, bold: bold, color: color ?? Ink, align: TextAlignment.Right), 2);
+        row.Add(Cell(label, size: size, bold: bold, color: color ?? Muted), 3);
+        row.Add(Cell(value, size: size, bold: bold, color: color ?? Ink, align: TextAlignment.Right), 2);
         return row;
     }
 
