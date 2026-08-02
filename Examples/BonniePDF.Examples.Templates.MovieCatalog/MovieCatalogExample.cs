@@ -176,15 +176,11 @@ public static class MovieCatalogExample
             TextColor = ColorPalette.Slate[400]
         };
 
-        // Main Layout
-        VerticalStack mainStack = new();
-        mainStack.AddChild(titleStack);
-        mainStack.AddChild(moviesTable);
-        mainStack.AddChild(statsStack);
-        mainStack.AddChild(footer);
-
         // Add to document
-        doc.Add(mainStack);
+        doc.Add(titleStack);
+        doc.Add(moviesTable);
+        doc.Add(statsStack);
+        doc.Add(footer);
 
         // Save PDF
         return doc;

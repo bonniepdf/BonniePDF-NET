@@ -129,11 +129,6 @@ public static class UserDirectoryExample
             rowIndex++;
         }
 
-        // Main Layout
-        VerticalStack mainStack = new();
-        mainStack.AddChild(headerStack);
-        mainStack.AddChild(usersTable);
-
         // Footer note
         TextBlock footer = new()
         {
@@ -143,10 +138,10 @@ public static class UserDirectoryExample
             TextColor = ColorPalette.Slate[400]
         };
 
-        mainStack.AddChild(footer);
-
         // Add to document
-        doc.Add(mainStack);
+        doc.Add(headerStack);
+        doc.Add(usersTable);
+        doc.Add(footer);
 
         // Save PDF
         return doc;
