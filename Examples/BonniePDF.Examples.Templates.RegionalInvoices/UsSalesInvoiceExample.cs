@@ -52,8 +52,7 @@ public static class UsSalesInvoiceExample
         doc.Metadata.Author = "Sample Company Inc.";
         doc.Metadata.Subject = "US commercial invoice with destination-based state and county sales tax.";
 
-        VerticalStack root = new();
-        root.AddChild(AccentBar(Accent));
+        doc.Add(AccentBar(Accent));
 
         // ── Header: seller | INVOICE ────────────────────────────────────────
         VerticalStack seller = new();
@@ -73,7 +72,7 @@ public static class UsSalesInvoiceExample
 
         Grid header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
         header.AddRow(seller, titleStack);
-        root.AddChild(header);
+        doc.Add(header);
 
         // ── Bill-to + details ────────────────────────────────────────────────
         VerticalStack details = new();
@@ -92,7 +91,7 @@ public static class UsSalesInvoiceExample
         meta.AddRow(
             Labelled("BILL TO", Lines(Muted, "Sample Customer LLC", "Accounts Payable", "18 Pioneer Square", "Seattle, WA 98104"), Accent),
             Labelled("DETAILS", details, Accent));
-        root.AddChild(meta);
+        doc.Add(meta);
 
         // ── Line items ──────────────────────────────────────────────────────
         Table table = new(3f, 0.7f, 1f, 1f)
@@ -127,8 +126,8 @@ public static class UsSalesInvoiceExample
                 Cell(Money(amount, Usd), align: TextAlignment.Right));
         }
 
-        root.AddChild(table);
-        root.AddChild(Divider(Rule, 0.5f));
+        doc.Add(table);
+        doc.Add(Divider(Rule, 0.5f));
 
         // ── Totals: sales tax is state + county on the taxable subtotal ─────
         decimal stateTax = subtotal * StateTaxRate;
@@ -152,7 +151,7 @@ public static class UsSalesInvoiceExample
         HorizontalStack totalsRow = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 6, 0, 0) };
         totalsRow.AddChild(new Container(), 1);
         totalsRow.AddChild(totalsBox, 1);
-        root.AddChild(totalsRow);
+        doc.Add(totalsRow);
 
         // ── Remittance note ─────────────────────────────────────────────────
         Container note = Labelled(
@@ -164,9 +163,8 @@ public static class UsSalesInvoiceExample
                 "Checks payable to Sample Company Inc., 500 Market Street, San Francisco, CA 94105."),
             Accent);
         note.Padding = new Thickness(0, 22, 0, 0);
-        root.AddChild(note);
+        doc.Add(note);
 
-        doc.Add(root);
         return doc;
     }
 }

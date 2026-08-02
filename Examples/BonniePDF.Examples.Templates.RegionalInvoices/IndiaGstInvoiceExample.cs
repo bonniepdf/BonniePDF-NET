@@ -60,9 +60,8 @@ public static class IndiaGstInvoiceExample
         doc.Metadata.Author = "Sample Company Private Limited";
         doc.Metadata.Subject = "India GST e-invoice with IRN, signed QR, HSN codes, and CGST/SGST breakdown.";
 
-        VerticalStack root = new();
-        root.AddChild(AccentBar(Saffron, 4));
-        root.AddChild(AccentBar(Accent, 4));
+        doc.Add(AccentBar(Saffron, 4));
+        doc.Add(AccentBar(Accent, 4));
 
         // ── Header: seller | e-invoice signed QR ────────────────────────────
         VerticalStack seller = new();
@@ -96,14 +95,14 @@ public static class IndiaGstInvoiceExample
 
         Grid header = new(1.5f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 14, 0, 14) };
         header.AddRow(seller, qrStack);
-        root.AddChild(header);
+        doc.Add(header);
 
         // ── IRN band ─────────────────────────────────────────────────────────
         VerticalStack irnStack = new();
         irnStack.AddChild(Cell("IRN (Invoice Reference Number)", bold: true, size: 8, color: Accent, margin: new Thickness(0, 0, 0, 2)));
         irnStack.AddChild(Cell(Irn, size: 8, color: Ink));
         irnStack.AddChild(Cell($"Ack No. 112500771223344   ·   Ack Date {date}", size: 8, color: Muted, margin: new Thickness(0, 3, 0, 0)));
-        root.AddChild(new Container
+        doc.Add(new Container
         {
             BackgroundColor = ColorPalette.Emerald[50],
             CornerRadius = 6,
@@ -129,7 +128,7 @@ public static class IndiaGstInvoiceExample
         meta.AddRow(
             Labelled("BILL TO", Lines(Muted, "Sample Customer Private Limited", "No. 88, MG Road", "Bengaluru 560001", "Karnataka, India", "GSTIN: 29XYZAB6789K1Z2"), Accent),
             Labelled("DETAILS", details, Accent));
-        root.AddChild(meta);
+        doc.Add(meta);
 
         // ── Line items with HSN + taxable value ─────────────────────────────
         Table table = new(2.6f, 0.9f, 0.5f, 1f, 1f)
@@ -159,8 +158,8 @@ public static class IndiaGstInvoiceExample
                 Cell(Money(value, Inr, "en-IN"), align: TextAlignment.Right));
         }
 
-        root.AddChild(table);
-        root.AddChild(Divider(Rule, 0.5f));
+        doc.Add(table);
+        doc.Add(Divider(Rule, 0.5f));
 
         // ── GST breakdown (intra-state → CGST + SGST) ───────────────────────
         decimal cgst = taxable * Cgst;
@@ -184,16 +183,15 @@ public static class IndiaGstInvoiceExample
         HorizontalStack totalsRow = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 6, 0, 0) };
         totalsRow.AddChild(new Container(), 1);
         totalsRow.AddChild(totalsBox, 1);
-        root.AddChild(totalsRow);
+        doc.Add(totalsRow);
 
-        root.AddChild(Cell(
+        doc.Add(Cell(
             "This is a computer-generated e-invoice registered on the GST Invoice Registration Portal. "
                 + "The signed QR above encodes the IRP-issued payload.",
             size: 8,
             color: Muted,
             margin: new Thickness(0, 20, 0, 0)));
 
-        doc.Add(root);
         return doc;
     }
 }

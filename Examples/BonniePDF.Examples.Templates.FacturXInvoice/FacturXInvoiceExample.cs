@@ -64,8 +64,7 @@ public static class FacturXInvoiceExample
         doc.Metadata.Subject =
             "EU e-invoice (Factur-X / ZUGFeRD, EN 16931): a PDF/A-3 invoice with the machine-readable CII XML embedded as an associated file.";
 
-        VerticalStack root = new();
-        root.AddChild(AccentBar(Accent));
+        doc.Add(AccentBar(Accent));
 
         // ── Header ────────────────────────────────────────────────────────────
         VerticalStack seller = new();
@@ -80,7 +79,7 @@ public static class FacturXInvoiceExample
 
         Grid header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
         header.AddRow(seller, titleStack);
-        root.AddChild(header);
+        doc.Add(header);
 
         // ── Buyer + details ─────────────────────────────────────────────────
         VerticalStack details = new();
@@ -99,7 +98,7 @@ public static class FacturXInvoiceExample
         meta.AddRow(
             Labelled("BILLED TO", Lines(Muted, "Sample Customer", "1 Example Way", "EC1A 1BB London", "United Kingdom"), Accent),
             Labelled("DETAILS", details, Accent));
-        root.AddChild(meta);
+        doc.Add(meta);
 
         // ── Line items ──────────────────────────────────────────────────────
         Table table = new(3f, 0.7f, 1f, 1f)
@@ -131,8 +130,8 @@ public static class FacturXInvoiceExample
                 Cell(Money(amount, Eur, Locale), align: TextAlignment.Right));
         }
 
-        root.AddChild(table);
-        root.AddChild(Divider(RuleCol, 0.5f));
+        doc.Add(table);
+        doc.Add(Divider(RuleCol, 0.5f));
 
         // ── Totals (mirror the embedded XML exactly: 4000 / 760 / 4760) ───────
         decimal vat = net * VatRate;
@@ -152,7 +151,7 @@ public static class FacturXInvoiceExample
         HorizontalStack totalsRow = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 6, 0, 0) };
         totalsRow.AddChild(new Container(), 1);
         totalsRow.AddChild(totalsBox, 1);
-        root.AddChild(totalsRow);
+        doc.Add(totalsRow);
 
         // ── Remittance + embedded-XML panel ─────────────────────────────────
         VerticalStack xmlStack = new();
@@ -170,9 +169,8 @@ public static class FacturXInvoiceExample
         bottom.AddRow(
             payCell,
             new Container { BackgroundColor = HeaderBg, CornerRadius = 6, Padding = new Thickness(12, 10, 12, 10), Child = xmlStack });
-        root.AddChild(bottom);
+        doc.Add(bottom);
 
-        doc.Add(root);
 
         // ── Bind the invoice XML: PDF/A-3 + embedded CII + fx: XMP ─────────────
         byte[] invoiceXml = File.ReadAllBytes(
