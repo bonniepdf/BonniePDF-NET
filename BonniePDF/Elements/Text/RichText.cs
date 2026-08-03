@@ -338,11 +338,11 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             lines.Add(currentLine);
         }
 
-        // If no content at all, add one empty line with default height
+        // If no content at all, add one empty line with default height.
         if (lines.Count == 0)
         {
             RichTextLine emptyLine = new();
-            emptyLine.Height = DefaultStyle.EffectiveFontSize * 1.2f;
+            emptyLine.Height = GetStyleLineHeight(DefaultStyle);
             lines.Add(emptyLine);
         }
 
@@ -461,19 +461,23 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     }
 
     /// <summary>
-    /// Sets the line height to the maximum font size across all runs * 1.2.
+    /// Sets the line height to the greatest effective line height across all runs.
     /// </summary>
     private void UpdateLineHeight(RichTextLine line)
     {
-        float maxFontSize = DefaultStyle.EffectiveFontSize;
+        float maxLineHeight = GetStyleLineHeight(DefaultStyle);
         foreach (StyledRun run in line.Runs)
         {
-            float fontSize = run.Style.EffectiveFontSize;
-            if (fontSize > maxFontSize) maxFontSize = fontSize;
+            float lineHeight = GetStyleLineHeight(run.Style);
+            if (lineHeight > maxLineHeight) maxLineHeight = lineHeight;
         }
 
-        line.Height = maxFontSize * 1.2f;
+        line.Height = maxLineHeight;
     }
+
+    /// <summary>Returns font size multiplied by the style's line-height multiplier (default 1.2).</summary>
+    private static float GetStyleLineHeight(TextStyle style) =>
+        style.EffectiveFontSize * (style.LineHeight ?? 1.2f);
 
     // --- Drawing ---
 

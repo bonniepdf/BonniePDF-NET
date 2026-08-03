@@ -141,7 +141,7 @@ public class FontEmbeddingAndTextStyleTests
     }
 
     [Fact]
-    public void DefaultTextStyle_LineHeightMultiplier_AppliedWhenNotSet()
+    public void DefaultTextStyle_LineHeight_AppliedWhenNotSet()
     {
         var tb = new TextBlock { Text = "Hello" };
         Generate(doc =>
@@ -149,19 +149,19 @@ public class FontEmbeddingAndTextStyleTests
             doc.Settings.DefaultTextStyle = new TextStyle().WithLineHeight(1.5f);
             doc.Add(tb);
         });
-        Assert.Equal(1.5f, tb.LineHeightMultiplier);
+        Assert.Equal(1.5f, tb.LineHeight);
     }
 
     [Fact]
-    public void DefaultTextStyle_LineHeightMultiplier_NotOverriddenWhenExplicit()
+    public void DefaultTextStyle_LineHeight_NotOverriddenWhenExplicit()
     {
-        var tb = new TextBlock { Text = "Hello", LineHeightMultiplier = 2.0f }; // explicit
+        var tb = new TextBlock { Text = "Hello", LineHeight = 2.0f }; // explicit
         Generate(doc =>
         {
             doc.Settings.DefaultTextStyle = new TextStyle().WithLineHeight(1.5f);
             doc.Add(tb);
         });
-        Assert.Equal(2.0f, tb.LineHeightMultiplier); // should NOT be overridden
+        Assert.Equal(2.0f, tb.LineHeight); // should NOT be overridden
     }
 
     [Fact]

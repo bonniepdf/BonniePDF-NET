@@ -163,7 +163,7 @@ public class TextStyleTests
         Assert.Equal(ColorPalette.Amber[400], new TextStyle().WithBackground(ColorPalette.Amber[400]).BackgroundColor);
         Assert.Equal(FontWeight.Bold, new TextStyle().WithWeight(FontWeight.Bold).Weight);
         Assert.Equal("Times", new TextStyle().WithFamily("Times").FontFamily);
-        Assert.Equal(1.5f, new TextStyle().WithLineHeight(1.5f).LineHeightMultiplier);
+        Assert.Equal(1.5f, new TextStyle().WithLineHeight(1.5f).LineHeight);
     }
 
     [Fact]

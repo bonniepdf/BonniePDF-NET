@@ -40,7 +40,7 @@ public abstract class TextElementBase : ElementBase
     private bool _fontSizeExplicit;
     private Color _textColor = Color.Black;
     private bool _textColorExplicit;
-    private float _lineHeightMultiplier = 1.2f;
+    private float _lineHeight = 1.2f;
     private bool _lineHeightExplicit;
 
     protected TextElementBase()
@@ -190,16 +190,16 @@ public abstract class TextElementBase : ElementBase
     /// Multiplier applied to font size to compute line height. Default is 1.2.
     /// Set to a value like 1.5 for looser leading or 1.0 for tight leading.
     /// </summary>
-    public float LineHeightMultiplier
+    public float LineHeight
     {
-        get => _lineHeightMultiplier;
-        set { _lineHeightMultiplier = value; _lineHeightExplicit = true; }
+        get => _lineHeight;
+        set { _lineHeight = value; _lineHeightExplicit = true; }
     }
 
     /// <summary>
-    /// Line height calculated from font size and LineHeightMultiplier
+    /// Line height calculated from font size and LineHeight
     /// </summary>
-    protected float LineHeight => FontSize * LineHeightMultiplier;
+    protected float LineHeight => FontSize * LineHeight;
 
     /// <summary>
     /// Applies style properties from <paramref name="style"/> only for properties
@@ -224,8 +224,8 @@ public abstract class TextElementBase : ElementBase
             _fontSize = style.FontSize.Value;
         if (!_textColorExplicit && style.Color.HasValue)
             _textColor = style.Color.Value;
-        if (!_lineHeightExplicit && style.LineHeightMultiplier.HasValue)
-            _lineHeightMultiplier = style.LineHeightMultiplier.Value;
+        if (!_lineHeightExplicit && style.LineHeight.HasValue)
+            _lineHeight = style.LineHeight.Value;
     }
 
     /// <summary>
