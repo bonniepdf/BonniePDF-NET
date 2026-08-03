@@ -91,7 +91,7 @@ public class TextStyle
     /// Line-height multiplier applied to font size. Null = inherit (1.2 if not set anywhere).
     /// Set to 1.5 for looser leading or 1.0 for tight leading.
     /// </summary>
-    public float? LineHeightMultiplier { get; set; }
+    public float? LineHeight { get; set; }
 
     /// <summary>
     /// Resolves the actual PDF font name by combining FontFamily + Weight + Italic
@@ -128,7 +128,7 @@ public class TextStyle
             LetterSpacing = LetterSpacing ?? baseStyle.LetterSpacing,
             WordSpacing = WordSpacing ?? baseStyle.WordSpacing,
             DecorationStyle = DecorationStyle != DecorationStyle.Solid ? DecorationStyle : baseStyle.DecorationStyle,
-            LineHeightMultiplier = LineHeightMultiplier ?? baseStyle.LineHeightMultiplier,
+            LineHeight = LineHeight ?? baseStyle.LineHeight,
         };
     }
 
@@ -317,7 +317,7 @@ public class TextStyle
     /// <summary>Sets the line-height multiplier</summary>
     public TextStyle WithLineHeight(float multiplier)
     {
-        LineHeightMultiplier = multiplier;
+        LineHeight = multiplier;
         return this;
     }
 }

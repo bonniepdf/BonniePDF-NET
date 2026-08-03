@@ -12,7 +12,7 @@ namespace BonniePDF.Tests.Document;
 
 public class RichTextTests
 {
-    // The default style is Helvetica 12pt; line height is defined as tallest-font * 1.2.
+    // The default style is Helvetica 12pt; line height is font size * multiplier (default 1.2).
     private const string DefaultFont = "Helvetica";
     private const float DefaultSize = 12f;
     private const float LineHeight = DefaultSize * 1.2f; // 14.4
@@ -52,6 +52,31 @@ public class RichTextTests
     {
         RichText rt = new RichText().Span("small ").Span("big", Sized(24));
         Close(24f * 1.2f, rt.MeasureHeight(500));
+    }
+
+    [Fact]
+    public void LineHeight_HonoursDefaultStyleMultiplier()
+    {
+        TextStyle defaultStyle = new() { FontSize = 12f, LineHeight = 1.5f };
+        Close(12f * 1.5f, new RichText { DefaultStyle = defaultStyle }.MeasureHeight(500));
+
+        RichText rt = new()
+        {
+            DefaultStyle = defaultStyle
+        };
+        rt.Line("one").Line("two");
+
+        Close(2f * 12f * 1.5f, rt.MeasureHeight(500));
+    }
+
+    [Fact]
+    public void LineHeight_UsesGreatestFontSizeAndMultiplierProductAcrossMixedRuns()
+    {
+        TextStyle loose = new() { FontSize = 12f, LineHeight = 3f };
+        TextStyle large = new() { FontSize = 24f };
+        RichText rt = new RichText().Span("loose ", loose).Span("large", large);
+
+        Close(12f * 3f, rt.MeasureHeight(500));
     }
 
     [Fact]
