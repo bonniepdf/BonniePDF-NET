@@ -11,7 +11,7 @@ namespace BonniePDF.Examples.Layout.TextBlockOverflow;
 /// (PDF/A-2a + PDF/UA-1). Three self-documenting sections describe what the
 /// reader is seeing; the body is long enough to flow across several pages.
 /// Headings stay semantic (H1, H2), paragraphs stay P, and the running
-/// "Page N of M" footer is an Artifact.
+/// "Page N of M" footer is marked as decorative.
 ///
 /// Acceptance: VeraPDF profile ua1 reports zero failures.
 /// </summary>
@@ -26,10 +26,10 @@ public static class TextBlockOverflowExample
             "The paragraphs in this section are ordinary TextBlock elements added one after another. When a page runs out of vertical space, BonniePDF breaks to a new page and continues the flow automatically - you never position text or insert page breaks by hand."),
 
         ("Structure Survives the Page Break",
-            "Automatic pagination does not flatten the document. Each section heading stays a semantic H2 in the structure tree and every paragraph a P, so a screen reader can navigate heading-to-heading even though the text spans several pages."),
+            "Automatic pagination does not flatten the document. Each section heading stays semantically structured, so a screen reader can navigate heading-to-heading even though the text spans several pages."),
 
-        ("The Footer Is an Artifact",
-            "The \"Page N of M\" line at the foot of every page comes from a footer template. It is tagged as an Artifact, so assistive technology skips it; the total page count is resolved after layout, once the number of pages is known."),
+        ("The Footer is Decorative",
+            "The \"Page N of M\" line at the foot of every page comes from a footer template. It is marked as decorative, so assistive technology skips it; the total page count is resolved after layout, once the number of pages is known."),
     };
 
     public static Document Generate()

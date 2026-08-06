@@ -51,7 +51,7 @@ public static class ListsExample
         var decimalList = new OrderedList { NumberFormat = NumberFormat.Decimal, FontSize = 12, ItemSpacing = 6 };
         decimalList.AddItem("Plan the document structure before writing.");
         decimalList.AddItem("Apply semantic headings so assistive technology can navigate by section.");
-        decimalList.AddItem("Tag every image with alternative text or mark it as an artifact.");
+        decimalList.AddItem("Tag every image with alternative text or mark it as decorative.");
         decimalList.AddItem("Validate the output with veraPDF before publishing.");
         doc.Add(decimalList);
 
