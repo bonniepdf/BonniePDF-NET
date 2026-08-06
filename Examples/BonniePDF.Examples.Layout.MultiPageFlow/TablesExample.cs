@@ -8,12 +8,12 @@ using BonniePDF.Typography;
 namespace BonniePDF.Examples.Layout.MultiPageFlow;
 
 /// <summary>
-/// A Table with repeating column headers spanning multiple pages, tagged /TH and /TD
+/// A Table with repeating column headers spanning multiple pages, tagged accessible table cells
 /// cells, a "Page N of M" footer Artifact, and prose sections — all PDF/A-2a + PDF/UA-1.
 /// </summary>
 [System.ComponentModel.DisplayName("Tables")]
 [System.ComponentModel.Category("Elements")]
-[System.ComponentModel.Description("A Table with repeating headers spanning multiple pages, /TH and /TD tagged cells, a page-number footer, and prose sections. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description("A Table with repeating headers spanning multiple pages, accessible cells, a page-number footer, and prose sections. PDF/A-2a + PDF/UA-1.")]
 public static class TablesExample
 {
     private static readonly (string Name, string Department, string Role)[] Employees =
@@ -133,7 +133,7 @@ public static class TablesExample
 
         doc.Add(new TextBlock
         {
-            Text   = "The table below lists team members by department. Column headers repeat on every page for easy reference. Each cell is tagged as /TH (header) or /TD (data) within the /Table structure tree.",
+            Text   = "The table below lists team members by department. Column headers repeat on every page for easy reference. Each cell is automatically tagged for screen readers.",
             Margin = new Thickness(0, 0, 0, 10),
         });
 

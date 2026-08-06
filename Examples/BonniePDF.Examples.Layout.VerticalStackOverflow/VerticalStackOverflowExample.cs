@@ -19,7 +19,7 @@ namespace BonniePDF.Examples.Layout.VerticalStackOverflow;
 ///
 /// The example is a warehouse asset-label sheet - one scannable Code 128 label
 /// per storage location. Every label is a Figure with alt-text; the running
-/// footer is an Artifact.
+/// footer is marked as decorative.
 /// </summary>
 [System.ComponentModel.DisplayName("VerticalStack Overflow")]
 [System.ComponentModel.Category("Layout")]

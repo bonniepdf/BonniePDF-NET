@@ -58,7 +58,7 @@ public static class RichTextExample
         {
             Text   = "RichText lets you mix bold, italic, coloured, highlighted, and differently-sized spans within a single " +
                      "flowing paragraph. All formatting is per-span while the text wraps and aligns as a unit. " +
-                     "Every RichText is tagged as a /P element in the structure tree.",
+                     "Every RichText is automatically structured as a paragraph for screen readers.",
             Margin = new Thickness(0, 0, 0, 16),
         });
 
