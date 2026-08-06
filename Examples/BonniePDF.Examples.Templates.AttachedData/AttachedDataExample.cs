@@ -12,7 +12,7 @@ namespace BonniePDF.Examples.Templates.AttachedData;
 /// <summary>
 /// A PDF/A-3 report that carries its underlying data as an embedded associated
 /// file. The rendered table is the human-readable view; the same numbers are
-/// attached as <c>quarterly-revenue.csv</c> with <c>/AFRelationship /Source</c>
+/// attached as <c>quarterly-revenue.csv</c>
 /// so downstream tools (or an auditor) can consume the exact source data
 /// without re-keying it from the page. Demonstrates the generic this feature
 /// attachment API (as opposed to the Factur-X-specific binding).
@@ -21,7 +21,7 @@ namespace BonniePDF.Examples.Templates.AttachedData;
 /// </summary>
 [System.ComponentModel.DisplayName("Report with Embedded Data")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("A PDF/A-3 report that embeds its underlying CSV data as an associated file (/AFRelationship /Source) for reproducibility.")]
+[System.ComponentModel.Description("A PDF/A-3 report that embeds its underlying CSV data as an associated file for reproducibility.")]
 public static class AttachedDataExample
 {
     private static readonly Color Ink = ColorPalette.Slate[900];
