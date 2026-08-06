@@ -81,7 +81,7 @@ public abstract class ListElementBase : TextElementBase
         foreach (string item in items)
         {
             IList<string> lines = ComputeLines(item, itemWidth);
-            totalHeight += lines.Count * LineHeight + ItemSpacing;
+            totalHeight += lines.Count * ComputedLineHeight + ItemSpacing;
         }
 
         // Remove spacing after last item
@@ -144,7 +144,7 @@ public abstract class ListElementBase : TextElementBase
             for (int i = 0; i < lines.Count; i++)
             {
                 string line = lines[i];
-                CheckPageBreak(ctx, ref localY, LineHeight);
+                CheckPageBreak(ctx, ref localY, ComputedLineHeight);
 
                 float markerX = ctx.CurrentX;
                 float textX = ctx.CurrentX + markerWidth + 5;
@@ -177,7 +177,7 @@ public abstract class ListElementBase : TextElementBase
                     ctx.Canvas.EndMarkedContent();
                 }
 
-                localY += LineHeight;
+                localY += ComputedLineHeight;
             }
 
             if (tagging is not null)

@@ -1,4 +1,4 @@
-namespace BonniePDF.Examples.Templates.UserDirectory;
+namespace BonniePDF.Examples.Templates.Payslip;
 
 internal sealed class Program
 {
@@ -8,10 +8,10 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating User Directory...");
-        using (var doc = UserDirectoryExample.Generate())
+        Console.WriteLine("Generating Payslip...");
+        using (var doc = PayslipExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "user_directory.pdf"));
+            doc.Save(Path.Combine(outputDir, "payslip.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

@@ -113,9 +113,9 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         float testY = localY;
         for (int i = startLine; i < lines.Count; i++)
         {
-            if (testY + SpaceBeforeOf(i) + LineHeight > ctx.MaxY) break;
+            if (testY + SpaceBeforeOf(i) + ComputedLineHeight > ctx.MaxY) break;
             linesThatFit++;
-            testY += SpaceBeforeOf(i) + LineHeight;
+            testY += SpaceBeforeOf(i) + ComputedLineHeight;
         }
 
         // If all remaining lines fit, just render them all (no break needed)
@@ -172,7 +172,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
             bool isLastLine = i == lines.Count - 1;
             localY += SpaceBeforeOf(i); // this feature paragraph leading (0 when unused)
             DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX + Margin.Left + IndentOf(i), isLastLine);
-            localY += LineHeight;
+            localY += ComputedLineHeight;
         }
 
         _lastLineRendered = endLine - 1;
@@ -207,7 +207,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     protected override float MeasureContentHeight(float contentWidth)
     {
         IList<string> lines = GetOrComputeLines(contentWidth);
-        float height = lines.Count * LineHeight;
+        float height = lines.Count * ComputedLineHeight;
         for (int i = 0; i < lines.Count; i++) height += SpaceBeforeOf(i);
         return height;
     }
@@ -228,7 +228,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
             bool isLastLine = i == lines.Count - 1;
             localY += SpaceBeforeOf(i); // this feature paragraph leading (0 when unused)
             DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX + IndentOf(i), isLastLine);
-            localY += LineHeight;
+            localY += ComputedLineHeight;
         }
 
         // Advance Y by the total content height

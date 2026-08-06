@@ -63,26 +63,6 @@ public class HorizontalStack : ElementBase, IStatefulElement
     }
 
     /// <summary>
-    /// Adds a child element to this stack with auto width.
-    /// </summary>
-    /// <remarks>Deprecated: use <see cref="Add(IElement)"/> instead.</remarks>
-    [Obsolete("Use Add instead.")]
-    public void AddChild(IElement child)
-    {
-        Add(child);
-    }
-
-    /// <summary>
-    /// Adds a child element to this stack with a specific weight.
-    /// </summary>
-    /// <remarks>Deprecated: use <see cref="Add(IElement, float?)"/> instead.</remarks>
-    [Obsolete("Use Add instead.")]
-    public void AddChild(IElement child, float? width)
-    {
-        Add(child, width);
-    }
-
-    /// <summary>
     /// Renders this horizontal stack with state tracking for pagination.
     /// HorizontalStack is treated as atomic - all children render together on one page.
     /// If the stack doesn't fit, it requests a new page rather than splitting.
