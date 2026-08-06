@@ -1,4 +1,4 @@
-namespace BonniePDF.Examples.Templates.MovieCatalog;
+namespace BonniePDF.Examples.Templates.OutpatientAppointmentLetter;
 
 internal sealed class Program
 {
@@ -8,10 +8,10 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating Movie Catalog...");
-        using (var doc = MovieCatalogExample.Generate())
+        Console.WriteLine("Generating Outpatient Appointment...");
+        using (var doc = OutpatientAppointmentLetterExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "movie_catalog.pdf"));
+            doc.Save(Path.Combine(outputDir, "outpatient_appointment_letter.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

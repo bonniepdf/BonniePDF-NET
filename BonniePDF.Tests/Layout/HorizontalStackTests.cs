@@ -11,14 +11,14 @@ namespace BonniePDF.Tests.Layout;
 public class HorizontalStackTests
 {
     [Fact]
-    public void DeprecatedAddChildAliases_ForwardToAdd()
+    public void DeprecatedAddAliases_ForwardToAdd()
     {
         HorizontalStack horizontal = new();
         VerticalStack vertical = new();
 
 #pragma warning disable CS0618
-        horizontal.AddChild(new TextBlock { Text = "horizontal" }, 1f);
-        vertical.AddChild(new TextBlock { Text = "vertical" });
+        horizontal.Add(new TextBlock { Text = "horizontal" }, 1f);
+        vertical.Add(new TextBlock { Text = "vertical" });
 #pragma warning restore CS0618
 
         Assert.Single(horizontal.Children);

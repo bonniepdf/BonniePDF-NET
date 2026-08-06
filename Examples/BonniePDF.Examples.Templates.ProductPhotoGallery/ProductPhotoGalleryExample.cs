@@ -8,14 +8,16 @@ using BonniePDF.Typography;
 namespace BonniePDF.Examples.Templates.ProductPhotoGallery;
 
 /// <summary>
-/// A retail product-photo gallery / look-book. Products are laid out two-per-row
-/// as photo cards with name, SKU, price, and blurb in an accessible PDF/A-2a +
-/// PDF/UA-1 document. Product photographs are represented by labelled
-/// placeholders until real assets are supplied.
+/// A retail product gallery / look-book. Products are laid out two-per-row as
+/// cards with name, SKU, price, and blurb in an accessible PDF/A-2a + PDF/UA-1
+/// document that paginates automatically. Each card leads with a deterministic
+/// colour-blocked tile - a per-product tint with the product's initial - drawn
+/// natively by the engine, so the catalogue is self-contained and needs no
+/// bundled photography.
 /// </summary>
-[System.ComponentModel.DisplayName("Product Photo Gallery")]
-[System.ComponentModel.Category("Catalogs")]
-[System.ComponentModel.Description("A retail look-book: products laid out two-per-row as photo cards with name, SKU, price, and blurb, paginating automatically. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.DisplayName("Product Gallery")]
+[System.ComponentModel.Category("Retail")]
+[System.ComponentModel.Description("A retail look-book: products laid out two-per-row as cards with name, SKU, price, and blurb, paginating automatically. Each card leads with a deterministic colour-blocked tile drawn natively by the engine, so the catalogue is self-contained. PDF/A-2a + PDF/UA-1.")]
 public static class ProductPhotoGalleryExample
 {
     private const float CardImageHeight = 128f;
@@ -25,6 +27,20 @@ public static class ProductPhotoGalleryExample
     private static readonly Color Body = ColorPalette.Slate[600];
     private static readonly Color Muted = ColorPalette.Slate[500];
     private static readonly Color Rule = ColorPalette.Slate[200];
+
+    // One tint per card, cycled by position, so the catalogue reads as a
+    // deliberate colour-blocked design rather than a set of missing images.
+    private static readonly ColorPalette[] TileHues =
+    [
+        ColorPalette.Emerald,
+        ColorPalette.Amber,
+        ColorPalette.Rose,
+        ColorPalette.Sky,
+        ColorPalette.Violet,
+        ColorPalette.Teal,
+        ColorPalette.Orange,
+        ColorPalette.Indigo,
+    ];
 
     private static readonly Product[] Products =
     [
@@ -63,7 +79,7 @@ public static class ProductPhotoGalleryExample
         Document doc = new(settings);
         doc.Metadata.Title = "Product Gallery - Spring Collection";
         doc.Metadata.Author = "BonniePDF";
-        doc.Metadata.Subject = "An accessible PDF/A-2a + PDF/UA-1 retail product-photo gallery.";
+        doc.Metadata.Subject = "An accessible PDF/A-2a + PDF/UA-1 retail product gallery.";
         doc.Metadata.Keywords = "pdf, accessibility, retail, catalogue, product gallery, e-commerce, BonniePDF";
 
         Heading h1 = new("Spring Collection")
@@ -85,6 +101,12 @@ public static class ProductPhotoGalleryExample
             Margin = new Thickness(0, 0, 0, 18),
         });
 
+        doc.Add(BuildGallery());
+        return doc;
+    }
+
+    private static VerticalStack BuildGallery()
+    {
         VerticalStack gallery = new() { Spacing = 16 };
         for (int i = 0; i < Products.Length; i += 2)
         {
@@ -93,19 +115,18 @@ public static class ProductPhotoGalleryExample
                 Spacing = 16,
                 WidthDistribution = WidthDistribution.Equal,
             };
-            row.Add(ProductCard(Products[i]));
-            if (i + 1 < Products.Length) row.Add(ProductCard(Products[i + 1]));
+            row.Add(ProductCard(Products[i], i));
+            if (i + 1 < Products.Length) row.Add(ProductCard(Products[i + 1], i + 1));
             gallery.Add(row);
         }
 
-        doc.Add(gallery);
-        return doc;
+        return gallery;
     }
 
-    private static Container ProductCard(Product product)
+    private static Container ProductCard(Product product, int index)
     {
         VerticalStack body = new() { Spacing = 4 };
-        body.Add(ProductMedia(product));
+        body.Add(ProductMedia(product, index));
 
         Heading name = new(product.Name)
         {
@@ -156,24 +177,26 @@ public static class ProductPhotoGalleryExample
         };
     }
 
-    private static Container ProductMedia(Product product)
+    private static Container ProductMedia(Product product, int index)
     {
-        TextBlock label = new()
+        ColorPalette hue = TileHues[index % TileHues.Length];
+
+        TextBlock monogram = new()
         {
-            Text = product.Name,
+            Text = product.Name[..1].ToUpperInvariant(),
             FontName = StandardFonts.HelveticaBold,
-            FontSize = 10,
-            TextColor = ColorPalette.Slate[400],
+            FontSize = 40,
+            TextColor = hue[600],
             Alignment = TextAlignment.Center,
-            Margin = new Thickness(0, CardImageHeight / 2 - 14, 0, 0),
+            Margin = new Thickness(0, 40, 0, 0),
         };
 
         return new Container
         {
             Height = CardImageHeight,
-            BackgroundColor = ColorPalette.Slate[100],
+            BackgroundColor = hue[100],
             CornerRadius = 6,
-            Child = label,
+            Child = monogram,
         };
     }
 

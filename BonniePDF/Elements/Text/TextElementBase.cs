@@ -197,9 +197,11 @@ public abstract class TextElementBase : ElementBase
     }
 
     /// <summary>
-    /// Line height calculated from font size and LineHeight
+    /// Line height in points, computed from the font size and the
+    /// <see cref="LineHeight"/> multiplier. This is the actual vertical advance
+    /// used by layout; <see cref="LineHeight"/> is the multiplier that scales it.
     /// </summary>
-    protected float LineHeight => FontSize * LineHeight;
+    protected float ComputedLineHeight => FontSize * LineHeight;
 
     /// <summary>
     /// Applies style properties from <paramref name="style"/> only for properties
