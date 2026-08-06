@@ -13,9 +13,8 @@ namespace BonniePDF.Examples.Templates.FacturXInvoice;
 /// <summary>
 /// The single EU e-invoice showcase: the polished human-readable invoice layout
 /// <em>and</em> the real machine-readable half. <see cref="FacturX.Apply"/> binds
-/// the caller-supplied EN 16931 CII XML - it forces PDF/A-3, embeds
-/// <c>factur-x.xml</c> as an associated file (<c>/AFRelationship /Data</c>), and
-/// writes the <c>fx:</c> XMP block.
+/// the caller-supplied EN 16931 CII XML - it forces PDF/A-3 and embeds
+/// <c>factur-x.xml</c> as an associated file.
 ///
 /// <para>The visible totals mirror the embedded XML exactly (net 4000.00, VAT
 /// 760.00, gross 4760.00) - a real e-invoice's human- and machine-readable views
@@ -27,7 +26,7 @@ namespace BonniePDF.Examples.Templates.FacturXInvoice;
 /// </summary>
 [System.ComponentModel.DisplayName("EU E-Invoice (Factur-X / ZUGFeRD, EN 16931)")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("A cross-border EU e-invoice in the EN 16931 / Factur-X idiom: a polished PDF/A-3 invoice carrying the machine-readable CII invoice XML embedded as an associated file and the fx: XMP metadata.")]
+[System.ComponentModel.Description("A cross-border EU e-invoice in the EN 16931 / Factur-X idiom: a polished PDF/A-3 invoice carrying the machine-readable CII invoice XML embedded as an associated file.")]
 public static class FacturXInvoiceExample
 {
     private static readonly Color Ink = ColorPalette.Slate[700];
@@ -157,7 +156,7 @@ public static class FacturXInvoiceExample
         VerticalStack xmlStack = new();
         xmlStack.Add(Cell("STRUCTURED DATA", bold: true, size: 8, color: Muted, margin: new Thickness(0, 0, 0, 4)));
         xmlStack.Add(Cell("factur-x.xml (EN 16931 CII) is embedded in this", size: 8, color: Muted));
-        xmlStack.Add(Cell("PDF/A-3 as an associated file — /AFRelationship /Data.", size: 8, color: Muted));
+        xmlStack.Add(Cell("PDF/A-3 as an associated file.", size: 8, color: Muted));
 
         Container payCell = Labelled(
             "PAYMENT",
@@ -172,7 +171,7 @@ public static class FacturXInvoiceExample
         doc.Add(bottom);
 
 
-        // ── Bind the invoice XML: PDF/A-3 + embedded CII + fx: XMP ─────────────
+        // ── Bind the invoice XML: PDF/A-3 + embedded CII ─────────────
         byte[] invoiceXml = File.ReadAllBytes(
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "factur-x.xml"));
         FacturX.Apply(doc, invoiceXml, FacturXProfile.En16931);
