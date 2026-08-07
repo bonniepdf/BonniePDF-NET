@@ -2,17 +2,19 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Layout.HorizontalStacks;
 
 /// <summary>
-/// HorizontalStack layouts in an accessible, archival document (PDF/A-2a +
-/// PDF/UA-1). HorizontalStack is a layout primitive; it does not claim a
-/// semantic structure role. All readable text within the stack is carried by
-/// TextBlock children that ARE tagged, so every piece of text is announced as
-/// its own paragraph regardless of where it sits horizontally.
+/// HorizontalStack layouts - equal and weighted width distribution, cross-axis
+/// alignment, key-value pairs, and two-column text - in an accessible, archival
+/// document (PDF/A-2a + PDF/UA-1).
+///
+/// HorizontalStack is a layout primitive and claims no semantic role of its own.
+/// All readable text is carried by TextBlock children that ARE tagged, so every
+/// piece of text is announced as its own paragraph regardless of where it sits
+/// horizontally.
 ///
 /// Acceptance: VeraPDF profile ua1 reports zero failures.
 /// </summary>
@@ -29,7 +31,7 @@ public static class HorizontalStacksExample
             {
                 Title    = "Horizontal Stacks Demo",
                 Author   = "BonniePDF",
-                Subject  = "Demonstrates HorizontalStack layout in an accessible PDF/A-2a + PDF/UA-1 document.",
+                Subject  = "Demonstrates horizontal stack layouts in an accessible PDF/A-2a + PDF/UA-1 document.",
                 Keywords = "pdf, accessibility, layout, horizontal stack, columns, BonniePDF",
             },
             Settings = new DocumentSettings
@@ -39,12 +41,12 @@ public static class HorizontalStacksExample
                 Language      = "en-GB",
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
-                    .WithSize(12)
-                    .WithColor(ColorPalette.Slate[600]),
+                    .WithSize(11)
+                    .WithColor(ColorPalette.Slate[700]),
             },
         };
 
-        doc.Add(new Heading("Horizontal Layout Examples")
+        doc.Add(new Heading("Horizontal Stack Layouts")
         {
             TocIdentifier = "intro",
             Level         = 1,
@@ -56,20 +58,17 @@ public static class HorizontalStacksExample
 
         doc.Add(new TextBlock
         {
-            Text   = "HorizontalStack arranges child elements side-by-side. Each child carries its own tagged content; the stack itself is pure layout and adds nothing a screen reader has to announce.",
-            Margin = new Thickness(0, 0, 0, 12),
+            Text   = "HorizontalStack arranges child elements side-by-side. Width distribution controls how available space is divided between columns; cross-axis alignment controls how children of differing heights line up vertically. All text inside stacks is accessible to screen readers.",
+            Margin = new Thickness(0, 0, 0, 16),
         });
 
         // ── Equal width distribution ───────────────────────────────────────────
 
-        doc.Add(new Heading("Equal width distribution")
+        doc.Add(SectionHeading("Equal Width Distribution", "s-equal", 0));
+        doc.Add(new TextBlock
         {
-            TocIdentifier = "equal-width",
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 14,
-            TextColor     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 0, 0, 8),
+            Text   = "Three columns sharing available width equally (WidthDistribution.Equal).",
+            Margin = new Thickness(0, 0, 0, 8),
         });
 
         var equalStack = new HorizontalStack
@@ -77,32 +76,36 @@ public static class HorizontalStacksExample
             WidthDistribution = WidthDistribution.Equal,
             Spacing           = 10,
         };
-        equalStack.Add(new TextBlock { Text = "Column A", FontName = StandardFonts.HelveticaBold });
-        equalStack.Add(new TextBlock { Text = "Column B", FontName = StandardFonts.HelveticaBold });
-        equalStack.Add(new TextBlock { Text = "Column C", FontName = StandardFonts.HelveticaBold });
+        equalStack.Add(Box("Column 1", ColorPalette.Blue[600]));
+        equalStack.Add(Box("Column 2", ColorPalette.Indigo[600]));
+        equalStack.Add(Box("Column 3", ColorPalette.Slate[600]));
         doc.Add(equalStack);
 
+        // ── Weighted distribution ──────────────────────────────────────────────
+
+        doc.Add(SectionHeading("Weighted Width Distribution", "s-weighted", 16));
         doc.Add(new TextBlock
         {
-            Text   = "All three columns share the available width equally. Each TextBlock child is tagged as its own paragraph.",
-            Margin = new Thickness(0, 8, 0, 12),
+            Text   = "Columns with a 1:2:3 weight ratio - the second column is twice as wide as the first, and the third is three times as wide.",
+            Margin = new Thickness(0, 0, 0, 8),
         });
+
+        var weightedStack = new HorizontalStack
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Spacing           = 10,
+        };
+        weightedStack.Add(Box("1×", ColorPalette.Slate[400]), 1f);
+        weightedStack.Add(Box("2×", ColorPalette.Slate[600]), 2f);
+        weightedStack.Add(Box("3×", ColorPalette.Slate[800]), 3f);
+        doc.Add(weightedStack);
 
         // ── Cross-axis (vertical) alignment ────────────────────────────────────
 
-        doc.Add(new Heading("Cross-axis alignment")
-        {
-            TocIdentifier = "cross-axis",
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 14,
-            TextColor     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 0, 0, 8),
-        });
-
+        doc.Add(SectionHeading("Cross-Axis Alignment", "s-align", 16));
         doc.Add(new TextBlock
         {
-            Text   = "When a stack has a fixed height and its children differ in height, Alignment positions each child along the cross (vertical) axis. The same three boxes - 40pt, 65pt and 90pt tall - are shown top-aligned, centred, and bottom-aligned.",
+            Text   = "When a stack has a fixed height and its children differ in height, stack.Alignment positions each child along the cross (vertical) axis. The same three boxes - 40pt, 65pt and 90pt tall - are shown top-aligned, centred, and bottom-aligned.",
             Margin = new Thickness(0, 0, 0, 8),
         });
 
@@ -157,87 +160,87 @@ public static class HorizontalStacksExample
         // yet, so force the whole block onto the next page with a break.
         doc.Add(new PageBreak());
 
-        doc.Add(new Heading("Key-value pairs")
-        {
-            TocIdentifier = "key-value",
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 14,
-            TextColor     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 14, 0, 8),
-        });
-
+        doc.Add(SectionHeading("Key-Value Pairs", "s-kv", 16));
         doc.Add(new TextBlock
         {
-            Text   = "A common pattern pairs a narrow label column with a wider value column.",
-            Margin = new Thickness(0, 0, 0, 6),
+            Text   = "A practical pattern: a narrow bold key column paired with a wider value column using weighted distribution.",
+            Margin = new Thickness(0, 0, 0, 8),
         });
 
         (string key, string value)[] pairs =
         {
-            ("Name:",    "Ada Lovelace"),
-            ("Role:",    "Mathematician"),
-            ("Born:",    "10 December 1815"),
-            ("Known for:", "First algorithm intended for a computing machine"),
+            ("Document Title:", "Horizontal Stacks Demo"),
+            ("Author:",         "BonniePDF"),
+            ("Standard:",       "ISO 14289-1 (PDF/UA-1)"),
+            ("Layout Engine:",  "BonniePDF Flow Layout"),
         };
 
         foreach ((string key, string value) in pairs)
         {
-            var row = new HorizontalStack { Spacing = 10 };
-            row.Add(new TextBlock { Text = key,   FontName = StandardFonts.HelveticaBold, FontSize = 12 }, 120f);
-            row.Add(new TextBlock { Text = value, FontSize = 12 });
+            var row = new HorizontalStack
+            {
+                WidthDistribution = WidthDistribution.Weighted,
+                Spacing           = 10,
+                Margin            = new Thickness(0, 0, 0, 6),
+            };
+            row.Add(new TextBlock { Text = key,   FontName = StandardFonts.HelveticaBold, TextColor = ColorPalette.Slate[700] }, 1f);
+            row.Add(new TextBlock { Text = value, TextColor = ColorPalette.Slate[800] }, 3f);
             doc.Add(row);
         }
 
-        // ── Multi-column text ──────────────────────────────────────────────────
+        // ── Two-column text ────────────────────────────────────────────────────
 
-        doc.Add(new Heading("Multi-column description")
-        {
-            TocIdentifier = "multi-column",
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 14,
-            TextColor     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 14, 0, 8),
-        });
-
+        doc.Add(SectionHeading("Two-Column Text Layout", "s-twocol", 16));
         doc.Add(new TextBlock
         {
-            Text   = "Side-by-side text columns are equally accessible when each column is a tagged TextBlock.",
-            Margin = new Thickness(0, 0, 0, 6),
+            Text   = "A newspaper-style two-column layout achieved with an equal-weight HorizontalStack containing two TextBlocks.",
+            Margin = new Thickness(0, 0, 0, 8),
         });
 
-        var twoCol = new HorizontalStack { WidthDistribution = WidthDistribution.Equal, Spacing = 20 };
+        var twoCol = new HorizontalStack
+        {
+            WidthDistribution = WidthDistribution.Equal,
+            Spacing           = 20,
+        };
         twoCol.Add(new TextBlock
         {
-            Text     = "PDF/UA-1 (ISO 14289-1) is the standard for accessible PDFs. It requires that all content be tagged with semantic structure elements such as headings, paragraphs, lists, and figures.",
-            FontSize = 11,
+            Text = "The first column contains flowing prose that demonstrates how text wraps within a constrained width. " +
+                   "HorizontalStack automatically divides the available page width so each child receives its share. " +
+                   "Text inside each column wraps independently, giving a true two-column reading experience.",
         });
         twoCol.Add(new TextBlock
         {
-            Text     = "PDF/A-2a (ISO 19005-2) is the modern archival profile. Together with PDF/UA-1 they cover both preservation and accessibility requirements for professional documents.",
-            FontSize = 11,
+            Text = "The second column runs in parallel with the first. Both columns sit within a single HorizontalStack " +
+                   "element, meaning they are rendered side-by-side. This pattern is commonly used for newsletters, " +
+                   "product sheets, and comparison tables where parallel content aids comprehension.",
         });
         doc.Add(twoCol);
 
-        // ── Summary ────────────────────────────────────────────────────────────
-
-        doc.Add(new Heading("Summary")
-        {
-            TocIdentifier = "summary",
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 14,
-            TextColor     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 14, 0, 8),
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = "HorizontalStack is a transparent layout container: it holds no readable content of its own, so there is nothing on it to tag - its TextBlock children carry the text. " +
-                   "The reading order follows the order in which children were added to the stack.",
-        });
-
         return doc;
     }
+
+    /// <summary>A padded, coloured box with a bold white label - the repeated unit above.</summary>
+    private static Container Box(string label, Color background, float? height = null) => new()
+    {
+        Padding         = new Thickness(12, 8, 12, 8),
+        BackgroundColor = background,
+        Height          = height,
+        Child           = new TextBlock
+        {
+            Text      = label,
+            FontName  = StandardFonts.HelveticaBold,
+            FontSize  = 11,
+            TextColor = Color.White,
+        },
+    };
+
+    private static Heading SectionHeading(string text, string tocIdentifier, float topMargin) => new(text)
+    {
+        TocIdentifier = tocIdentifier,
+        Level         = 2,
+        FontName      = StandardFonts.HelveticaBold,
+        FontSize      = 14,
+        TextColor     = ColorPalette.Indigo[600],
+        Margin        = new Thickness(0, topMargin, 0, 8),
+    };
 }
