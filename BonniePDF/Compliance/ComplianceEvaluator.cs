@@ -117,7 +117,7 @@ public static class CompliancePreflight
                 Standard = Ua,
                 Clause = "ISO 14289-1:2014 §7.2",
                 Message =
-                    "The document declares no natural language (/Lang). Screen readers cannot " +
+                    "The document does not declare what language it is written in. Screen readers cannot " +
                     "choose the right pronunciation rules for the text.",
                 FixHint = "Set Settings.Language to a BCP-47 tag, e.g. \"en-GB\"."
             });
@@ -224,7 +224,7 @@ public static class CompliancePreflight
                 Severity = ComplianceSeverity.Error,
                 Standard = Ua,
                 Clause = "ISO 14289-1:2014 §7.3",
-                Message = $"{node.Type} is tagged as a Figure but has no /Alt alternate text.",
+                Message = $"{node.Type} is tagged as a figure but has no alternative text.",
                 FixHint = "Set the element's AltText.",
                 NodeId = node.Id,
                 Role = a11y.Role,

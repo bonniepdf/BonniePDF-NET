@@ -21,7 +21,7 @@ namespace BonniePDF.Examples.Templates.AttachedData;
 /// </summary>
 [System.ComponentModel.DisplayName("Report with Embedded Data")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("A PDF/A-3 report that embeds its underlying CSV data as an associated file for reproducibility.")]
+[System.ComponentModel.Description("A PDF/A-3 report that carries its source CSV inside the file, so a reader can check the numbers without re-keying them.")]
 public static class AttachedDataExample
 {
     private static readonly Color Ink = ColorPalette.Slate[900];
@@ -69,7 +69,7 @@ public static class AttachedDataExample
         }
         doc.Add(table);
 
-        // ── Embed the source data as an associated file ────────────────
+        // ── Embed the source data as an attachment ────────────────
         doc.Attach(new FileAttachment
         {
             FileName = "quarterly-revenue.csv",

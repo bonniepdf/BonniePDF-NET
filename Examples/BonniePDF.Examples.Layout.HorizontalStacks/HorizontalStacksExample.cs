@@ -11,14 +11,14 @@ namespace BonniePDF.Examples.Layout.HorizontalStacks;
 /// HorizontalStack layouts in an accessible, archival document (PDF/A-2a +
 /// PDF/UA-1). HorizontalStack is a layout primitive; it does not claim a
 /// semantic structure role. All readable text within the stack is carried by
-/// TextBlock children that ARE tagged, so the structure tree sees each piece
-/// of text as a /P paragraph regardless of its horizontal position.
+/// TextBlock children that ARE tagged, so every piece of text is announced as
+/// its own paragraph regardless of where it sits horizontally.
 ///
 /// Acceptance: VeraPDF profile ua1 reports zero failures.
 /// </summary>
 [System.ComponentModel.DisplayName("Horizontal Stacks")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("Horizontal layout blocks - width distribution, cross-axis alignment, and side-by-side text, all tagged as /P paragraphs.")]
+[System.ComponentModel.Description("Horizontal layout blocks - width distribution, cross-axis alignment, and side-by-side text, all tagged for screen readers.")]
 public static class HorizontalStacksExample
 {
     public static Document Generate()
@@ -56,7 +56,7 @@ public static class HorizontalStacksExample
 
         doc.Add(new TextBlock
         {
-            Text   = "HorizontalStack arranges child elements side-by-side. Each child carries its own tagged content; the stack itself is a layout primitive with no structure-tree role.",
+            Text   = "HorizontalStack arranges child elements side-by-side. Each child carries its own tagged content; the stack itself is pure layout and adds nothing a screen reader has to announce.",
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -84,7 +84,7 @@ public static class HorizontalStacksExample
 
         doc.Add(new TextBlock
         {
-            Text   = "All three columns share the available width equally. Each TextBlock child is tagged as a /P paragraph in the structure tree.",
+            Text   = "All three columns share the available width equally. Each TextBlock child is tagged as its own paragraph.",
             Margin = new Thickness(0, 8, 0, 12),
         });
 
@@ -234,7 +234,7 @@ public static class HorizontalStacksExample
 
         doc.Add(new TextBlock
         {
-            Text = "HorizontalStack is a transparent layout container. VeraPDF does not require it to carry a structure-tree role because the readable content is held by its tagged TextBlock children. " +
+            Text = "HorizontalStack is a transparent layout container: it holds no readable content of its own, so there is nothing on it to tag - its TextBlock children carry the text. " +
                    "The reading order follows the order in which children were added to the stack.",
         });
 

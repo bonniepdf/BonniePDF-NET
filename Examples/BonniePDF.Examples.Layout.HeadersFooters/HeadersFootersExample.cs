@@ -9,15 +9,15 @@ namespace BonniePDF.Examples.Layout.HeadersFooters;
 /// <summary>
 /// Page header/footer templates in an accessible, archival document
 /// (PDF/A-2a + PDF/UA-1). Header/footer template content is automatically
-/// tagged as /Artifact so screen readers skip decorative running heads and
-/// page numbers, while the numbered body sections use semantic Heading and
-/// TextBlock elements that map to the required structure tree.
+/// marked decorative, so screen readers skip running heads and page numbers,
+/// while the numbered body sections use semantic Heading and TextBlock
+/// elements.
 ///
 /// Acceptance: VeraPDF profile ua1 reports zero failures.
 /// </summary>
 [System.ComponentModel.DisplayName("Headers & Footers")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("Header/footer templates on every page - template content tagged as Artifact, numbered body sections tagged semantically.")]
+[System.ComponentModel.Description("Header/footer templates on every page - template content marked decorative, numbered body sections tagged semantically.")]
 public static class HeadersFootersExample
 {
     public static Document Generate()
@@ -41,7 +41,7 @@ public static class HeadersFootersExample
                     .WithSize(11)
                     .WithColor(ColorPalette.Slate[600]),
 
-                // Header/footer template content is rendered as /Artifact - screen readers skip it.
+                // Header/footer template content is marked decorative - screen readers skip it.
                 HeaderTemplate = pageNum => new TextBlock
                 {
                     Text      = $"BonniePDF Documentation - page {pageNum}",
@@ -77,8 +77,8 @@ public static class HeadersFootersExample
         {
             ("Header and footer templates",
                 "The HeaderTemplate and FooterTemplate delegates are called once per page after all body " +
-                "content has been laid out. The element each delegate returns is rendered as a PDF /Artifact " +
-                "so that assistive technology ignores decorative running text and page numbers."),
+                "content has been laid out. Whatever element a delegate returns is drawn at the top or " +
+                "bottom of the page and marked decorative, so screen readers skip it."),
 
             ("Dynamic content",
                 "The page-number integer passed to each delegate lets you build 'Page N of M' footers, " +
@@ -87,19 +87,18 @@ public static class HeadersFootersExample
 
             ("Any IElement is accepted",
                 "Templates are not limited to plain text. You can return a HorizontalStack containing a " +
-                "logo image on one side and a page number on the other - all tagged as /Artifact " +
-                "automatically."),
+                "logo image on one side and a page number on the other, and it is still treated as " +
+                "decoration."),
 
             ("Body content is fully tagged",
-                "Headings, paragraphs, lists, tables, and images added via doc.Add() receive their normal " +
-                "structure-tree entries. The tagging machinery keeps body content and artifact content " +
-                "in separate marked-content sequences so their BDC/EMC scopes never intermix."),
+                "Headings, paragraphs, lists, tables, and images added via doc.Add() are tagged for screen " +
+                "readers as you would expect. Body content and running furniture are kept apart, so " +
+                "the two never bleed into each other."),
 
             ("Validation",
-                "VeraPDF with the PDF/UA-1 profile verifies that (a) every real-content operator is " +
-                "wrapped in a tagged marked-content sequence, (b) every artifact is wrapped in an " +
-                "untagged BMC sequence, and (c) the structure tree is syntactically valid. This example " +
-                "is designed to pass all of those checks."),
+                "VeraPDF with the PDF/UA-1 profile checks that every piece of real content is tagged and " +
+                "every piece of decoration is marked as such. This example is designed to pass those " +
+                "checks with no failures."),
 
             ("Screen-reader experience",
                 "When a user navigates the document with a screen reader, the running headers and footers " +
@@ -108,13 +107,13 @@ public static class HeadersFootersExample
 
             ("Multi-page flow",
                 "This document intentionally generates multiple pages so you can confirm that every page " +
-                "has both header and footer template elements, each tagged as /Artifact, while the body " +
-                "headings and paragraphs carry their own semantic structure-tree entries."),
+                "has both a header and a footer, each skipped by screen readers, while the body headings " +
+                "and paragraphs keep their own semantic roles."),
 
             ("Summary",
-                "PDF/UA-1 requires that all content either carries a structure-tree entry or is explicitly " +
-                "marked as an artifact. BonniePDF satisfies both sides of that rule automatically: body " +
-                "elements are tagged via the structure tree; template output is wrapped in /Artifact BMC."),
+                "PDF/UA-1 asks that every mark on the page is either meaningful content or explicitly " +
+                "decoration. BonniePDF handles both sides of that automatically: what you add to the " +
+                "document is tagged, and what a template draws is marked decorative."),
         };
 
         for (int i = 0; i < sections.Length; i++)

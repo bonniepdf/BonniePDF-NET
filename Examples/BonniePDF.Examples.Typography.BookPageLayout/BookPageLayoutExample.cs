@@ -9,8 +9,8 @@ namespace BonniePDF.Examples.Typography.BookPageLayout;
 
 /// <summary>
 /// A typeset chapter page in the style of an academic monograph. The chapter label
-/// is a plain /P, the chapter title is an /H1 Heading, and every body paragraph
-/// is a /P TextBlock. The pull-quote block is a bordered Container with outer
+/// is a plain paragraph, the chapter title is a semantic Heading, and the body
+/// is ordinary TextBlock prose. The pull-quote block is a bordered Container with outer
 /// horizontal margins to inset it from the text column. PDF/A-2a + PDF/UA-1.
 /// </summary>
 [System.ComponentModel.DisplayName("Book Page Layout")]

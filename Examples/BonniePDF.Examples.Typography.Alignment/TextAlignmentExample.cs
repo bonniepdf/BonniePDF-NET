@@ -8,15 +8,15 @@ namespace BonniePDF.Examples.Typography.Alignment;
 
 /// <summary>
 /// Left, centre, right, and justified text alignment. PDF/A-2a + PDF/UA-1: the
-/// heading is /H1, section titles /H2, and every aligned paragraph is a /P —
-/// alignment is purely presentational and does not change the structure-tree role.
+/// headings and paragraphs are tagged the same whatever the alignment, because
+/// alignment is purely presentational.
 ///
 /// All text is set in standard-14 Times Roman. For a demonstration of why an
 /// embedded font makes right/centre/justified edges exact, see EmbeddedFontMetricsExample.
 /// </summary>
 [System.ComponentModel.DisplayName("Text Alignment")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("Left, centre, right, and justified text alignment including book-style paragraphs, tagged as /H2 headings and /P paragraphs. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description("Left, centre, right, and justified text alignment including book-style paragraphs, accessible to screen readers. PDF/A-2a + PDF/UA-1.")]
 public static class TextAlignmentExample
 {
     private const string SampleText =
@@ -63,7 +63,7 @@ public static class TextAlignmentExample
         doc.Add(new TextBlock
         {
             Text   = "The four standard alignments are shown below. Each paragraph carries the same text and the " +
-                     "same /P structure-tree role — alignment is a purely visual property.",
+                     "same tagging — alignment is a purely visual property.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 

@@ -12,9 +12,9 @@ namespace BonniePDF.Examples.Typography.DickensNovel;
 /// PDF/UA-1 tagged Dickens novel example.
 ///
 /// Reads the full Project Gutenberg plain-text edition of <em>A Tale of Two Cities</em>
-/// (pg98.txt) and renders it as a tagged, multi-hundred-page PDF. Book-level headings are
-/// /H1, chapter headings are /H2, and body paragraphs are /P. Running headers and the
-/// centred page number in the footer are both tagged as /Artifact.
+/// (pg98.txt) and renders it as a tagged, multi-hundred-page PDF. Book titles and chapter
+/// titles are semantic headings and the prose is tagged as paragraphs, so a screen reader
+/// can navigate by chapter. The running header and the centred page number are decorative.
 ///
 /// The source text (pg98.txt) is bundled next to this example and copied to the
 /// build output directory, so it resolves on any platform.
@@ -58,7 +58,7 @@ public static partial class DickensNovelTaggedExample
                     .WithSize(11)
                     .WithColor(ColorPalette.Slate[900]),
 
-                // Running header - tagged as /Artifact automatically.
+                // Running header - marked decorative automatically.
                 HeaderTemplate = pageNum =>
                 {
                     if (pageNum <= 1) return null;
@@ -73,7 +73,7 @@ public static partial class DickensNovelTaggedExample
                     };
                 },
 
-                // Page number footer - tagged as /Artifact automatically.
+                // Page number footer - marked decorative automatically.
                 FooterTemplate = pageNum =>
                 {
                     if (pageNum <= 1) return null;

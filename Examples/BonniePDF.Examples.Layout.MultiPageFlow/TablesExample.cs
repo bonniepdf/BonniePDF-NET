@@ -9,7 +9,7 @@ namespace BonniePDF.Examples.Layout.MultiPageFlow;
 
 /// <summary>
 /// A Table with repeating column headers spanning multiple pages, tagged accessible table cells
-/// cells, a "Page N of M" footer Artifact, and prose sections — all PDF/A-2a + PDF/UA-1.
+/// cells, a decorative "Page N of M" footer, and prose sections — all PDF/A-2a + PDF/UA-1.
 /// </summary>
 [System.ComponentModel.DisplayName("Tables")]
 [System.ComponentModel.Category("Elements")]
