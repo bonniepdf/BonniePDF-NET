@@ -11,11 +11,10 @@ namespace BonniePDF.Examples.Basics.SimpleDocument;
 /// The core high-level Document API - three pages of text, structured spacing, and a
 /// custom square page - authored as an accessible, archival PDF by default:
 /// <c>Conformance = PdfA2a</c> + <c>Accessibility = PdfUa1</c>. Headings use
-/// the semantic <see cref="Heading"/> element so they surface as
-/// <c>H1</c>..<c>H2</c> in the structure tree; body copy picks up implicit
-/// <c>P</c> tagging from <see cref="TextBlock"/>; the feature list emits
-/// <c>L</c> &gt; <c>LI</c> &gt; <c>Lbl</c> + <c>LBody</c>; the
-/// <see cref="QRCode"/> becomes a <c>Figure</c> with alt-text.
+/// the semantic <see cref="Heading"/> element, so they nest correctly for a
+/// screen reader; <see cref="TextBlock"/> copy is tagged as paragraphs without
+/// you asking; the feature list is structured as a real list; and the
+/// <see cref="QRCode"/> carries alt text.
 /// </summary>
 [System.ComponentModel.DisplayName("Simple Document")]
 [System.ComponentModel.Category("Basics")]

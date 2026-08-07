@@ -14,7 +14,7 @@ namespace BonniePDF.Examples.Templates.FacturXInvoice;
 /// The single EU e-invoice showcase: the polished human-readable invoice layout
 /// <em>and</em> the real machine-readable half. <see cref="FacturX.Apply"/> binds
 /// the caller-supplied EN 16931 CII XML - it forces PDF/A-3 and embeds
-/// <c>factur-x.xml</c> as an associated file.
+/// <c>factur-x.xml</c> inside the invoice.
 ///
 /// <para>The visible totals mirror the embedded XML exactly (net 4000.00, VAT
 /// 760.00, gross 4760.00) - a real e-invoice's human- and machine-readable views
@@ -26,7 +26,7 @@ namespace BonniePDF.Examples.Templates.FacturXInvoice;
 /// </summary>
 [System.ComponentModel.DisplayName("EU E-Invoice (Factur-X / ZUGFeRD, EN 16931)")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("A cross-border EU e-invoice in the EN 16931 / Factur-X idiom: a polished PDF/A-3 invoice carrying the machine-readable CII invoice XML embedded as an associated file.")]
+[System.ComponentModel.Description("A cross-border EU e-invoice following EN 16931 / Factur-X: a polished PDF/A-3 invoice carrying the machine-readable CII invoice XML inside it.")]
 public static class FacturXInvoiceExample
 {
     private static readonly Color Ink = ColorPalette.Slate[700];
@@ -61,7 +61,7 @@ public static class FacturXInvoiceExample
         doc.Metadata.Title = "E-Invoice INV-2026-1001";
         doc.Metadata.Author = "Sample Company GmbH";
         doc.Metadata.Subject =
-            "EU e-invoice (Factur-X / ZUGFeRD, EN 16931): a PDF/A-3 invoice with the machine-readable CII XML embedded as an associated file.";
+            "EU e-invoice (Factur-X / ZUGFeRD, EN 16931): a PDF/A-3 invoice with the machine-readable CII XML embedded inside it.";
 
         doc.Add(AccentBar(Accent));
 
@@ -156,7 +156,7 @@ public static class FacturXInvoiceExample
         VerticalStack xmlStack = new();
         xmlStack.Add(Cell("STRUCTURED DATA", bold: true, size: 8, color: Muted, margin: new Thickness(0, 0, 0, 4)));
         xmlStack.Add(Cell("factur-x.xml (EN 16931 CII) is embedded in this", size: 8, color: Muted));
-        xmlStack.Add(Cell("PDF/A-3 as an associated file.", size: 8, color: Muted));
+        xmlStack.Add(Cell("PDF/A-3 invoice.", size: 8, color: Muted));
 
         Container payCell = Labelled(
             "PAYMENT",

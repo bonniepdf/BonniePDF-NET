@@ -9,7 +9,7 @@ namespace BonniePDF.Examples.Elements.Lists;
 /// <summary>
 /// Ordered and unordered lists — numbering formats, bullet styles, custom start
 /// numbers, coloured bullets, and nested sub-lists. PDF/A-2a + PDF/UA-1: every
-/// item is tagged as an L &gt; LI &gt; Lbl + LBody structure tree for screen readers.
+/// item is automatically structured as a real list for screen readers.
 /// </summary>
 [System.ComponentModel.DisplayName("Lists")]
 [System.ComponentModel.Category("Elements")]
@@ -42,8 +42,8 @@ public static class ListsExample
 
         doc.Add(new TextBlock
         {
-            Text   = "Ordered lists number each item. Every item maps to an LI structure element " +
-                     "containing a Lbl (the marker) and an LBody (the text).",
+            Text   = "Ordered lists number each item. The marker and the item text are held " +
+                     "separately, so a screen reader can announce where an item sits in the list.",
             Margin = new Thickness(0, 0, 0, 8),
         });
 
@@ -67,7 +67,7 @@ public static class ListsExample
         var alphaList = new OrderedList { NumberFormat = NumberFormat.LowerAlpha, FontSize = 12, ItemSpacing = 6 };
         alphaList.AddItem("Provide document language metadata.");
         alphaList.AddItem("Embed all fonts used in the file.");
-        alphaList.AddItem("Include an OutputIntent colour profile.");
+        alphaList.AddItem("Include a colour profile so colours reproduce reliably.");
         doc.Add(alphaList);
 
         Section(doc, "Custom start number", "s-start");
@@ -108,7 +108,7 @@ public static class ListsExample
 
         doc.Add(new TextBlock
         {
-            Text   = "Bullet items follow the same L > LI > Lbl + LBody structure. Several bullet styles are available.",
+            Text   = "Bullet items are structured the same way; only the marker changes. Several bullet styles are available.",
             Margin = new Thickness(0, 0, 0, 8),
         });
 

@@ -17,7 +17,7 @@ namespace BonniePDF.Examples.Layout.TextBlockOverflow;
 /// </summary>
 [System.ComponentModel.DisplayName("TextBlock Overflow")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("Long-form text flowing across multiple pages - self-documenting /H2 sections stay tagged, with an Artifact page-number footer.")]
+[System.ComponentModel.Description("Long-form text flowing across multiple pages - self-documenting sections stay tagged as they paginate, with a decorative page-number footer.")]
 public static class TextBlockOverflowExample
 {
     private static readonly (string Title, string Intro)[] Sections =
@@ -53,7 +53,7 @@ public static class TextBlockOverflowExample
                     .WithSize(11)
                     .WithColor(ColorPalette.Slate[700]),
 
-                // Page numbers in the footer are /Artifact - screen readers skip them.
+                // Page numbers in the footer are decorative - screen readers skip them.
                 FooterTemplate = pageNum => new TextBlock
                 {
                     Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",

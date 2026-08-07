@@ -56,7 +56,7 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text   = "Underline and strikethrough are presentational properties on TextBlock. " +
-                     "They do not change the structure-tree role — all decorated paragraphs remain /P elements.",
+                     "They do not change how the text is tagged — a decorated paragraph is still a paragraph.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 
