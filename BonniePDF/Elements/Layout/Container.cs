@@ -181,8 +181,13 @@ public class Container : BorderedElementBase, IContentContainer
         // Save Y position before adding padding for accurate comparison
         float yBeforePadding = ctx.CurrentY;
 
-        ctx.CurrentX += Padding.Left;
-        ctx.CurrentY += Padding.Top;
+        // The child renders inside the border box: MeasureContentHeight and the
+        // width below both reserve the border widths, so the origin must be offset
+        // by Border.Left/Top as well - otherwise the child hugs the outer top-left
+        // edge and the reserved space piles up as a visible gap at the right and
+        // bottom edges (the border no longer "lines up" with the content).
+        ctx.CurrentX += Border.Left + Padding.Left;
+        ctx.CurrentY += Border.Top + Padding.Top;
 
         float childWidth = effectiveWidth - Padding.Left - Padding.Right - Border.HorizontalWidth;
 
@@ -221,7 +226,7 @@ public class Container : BorderedElementBase, IContentContainer
         if (yAfterChildRender == yBeforeChildRender)
         {
             float childHeight = Child.MeasureHeight(childWidth);
-            ctx.CurrentY = yBeforePadding + Padding.Top + childHeight;
+            ctx.CurrentY = yBeforePadding + Border.Top + Padding.Top + childHeight;
         }
 
         ctx.CurrentY += Padding.Bottom;

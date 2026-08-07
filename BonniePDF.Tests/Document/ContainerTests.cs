@@ -120,8 +120,12 @@ public class ContainerTests
         float startY = ctx.CurrentY;
         c.Render(ctx, 500);
 
-        Assert.Equal(5, probe.RenderedX, 3);            // currentX + padding.left
-        Assert.Equal(startY + 10, probe.RenderedAtY, 3); // + padding.top
+        // The child renders inside the border box: origin offset by border + padding
+        // on each leading edge, width reduced by both paddings and both borders.
+        // (Offsetting by padding alone while shrinking by the border too was the
+        // historical bug that left a border-width gap at the right/bottom edges.)
+        Assert.Equal(2 + 5, probe.RenderedX, 3);              // currentX + border.left + padding.left
+        Assert.Equal(startY + 2 + 10, probe.RenderedAtY, 3);  // + border.top + padding.top
         Assert.Equal(500 - 5 - 15 - 4, probe.RenderedWidth, 3); // - padding - border
         Assert.Equal(10 + 10 + 20 + 4, ctx.CurrentY - startY, 3); // full box advance
     }
