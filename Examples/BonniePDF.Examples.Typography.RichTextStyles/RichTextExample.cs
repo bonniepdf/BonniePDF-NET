@@ -66,7 +66,7 @@ public static class RichTextExample
 
         Section(doc, "Weight & Style", "s-weight");
 
-        doc.Add(new RichText()
+        doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 10) }
             .Span("Inline text can be ")
             .Span("bold", new TextStyle().Bold())
             .Span(", ")
@@ -84,7 +84,7 @@ public static class RichTextExample
 
         Section(doc, "Coloured Spans", "s-colors");
 
-        doc.Add(new RichText()
+        doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 10) }
             .Span("Text can be ")
             .Span("red",       new TextStyle().WithColor(Color.Red))
             .Span(", ")
@@ -102,7 +102,7 @@ public static class RichTextExample
 
         Section(doc, "Inline Decorations", "s-decorations");
 
-        doc.Add(new RichText()
+        doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 10) }
             .Span("Decorations are per-span: ")
             .Span("underlined words",     new TextStyle().Underline())
             .Span(", ")
@@ -118,7 +118,7 @@ public static class RichTextExample
 
         Section(doc, "Background Highlights", "s-highlights");
 
-        doc.Add(new RichText()
+        doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 10) }
             .Span("Background colours create a ")
             .Span("highlighter pen effect", new TextStyle().WithBackground(Color.FromHex("#fef08a")))
             .Span(" across any span. Combine with colour for ")
@@ -132,7 +132,7 @@ public static class RichTextExample
 
         Section(doc, "Mixed Font Sizes", "s-sizes");
 
-        doc.Add(new RichText()
+        doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 10) }
             .Span("The same paragraph can carry ")
             .Span("larger text", new TextStyle().WithSize(18))
             .Span(" alongside ")
