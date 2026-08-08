@@ -1,7 +1,6 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Layout.HeadersFooters;
@@ -15,115 +14,101 @@ namespace BonniePDF.Examples.Layout.HeadersFooters;
 ///
 /// Acceptance: VeraPDF profile ua1 reports zero failures.
 /// </summary>
-[System.ComponentModel.DisplayName("Headers & Footers")]
+[System.ComponentModel.DisplayName("Headers &amp; Footers")]
 [System.ComponentModel.Category("Layout")]
 [System.ComponentModel.Description("Header/footer templates on every page - template content marked decorative, numbered body sections tagged semantically.")]
 public static class HeadersFootersExample
 {
+    private static readonly (string Title, string Body)[] Sections =
+    {
+        ("Introduction",
+            "This document demonstrates the header and footer template system in BonniePDF. Headers and footers are automatically rendered on each page after all content has been laid out. They are marked as decorative elements and are skipped by screen readers."),
+
+        ("Header Templates",
+            "The header template function receives the page number and returns an IElement that is rendered at the top of each page. This allows for dynamic content such as section titles, document names, or logos. The element is positioned in the header region defined by the document margin."),
+
+        ("Footer Templates",
+            "Similarly, the footer template function creates elements for the bottom of each page. Common uses include page numbers, copyright notices, and document revision dates. You may return null to suppress the footer on a specific page."),
+
+        ("Dynamic Content",
+            "Templates can contain any valid IElement, including HorizontalStack for multi-column layouts, TextBlocks for simple text, or even Images for logos and branding. The total page count is available through the TotalPagesToken sentinel."),
+
+        ("Page Numbering",
+            "The page number passed to templates is 1-based, making it easy to display \"Page 1 of N\" style pagination. The total page count is resolved after layout completes, ensuring accuracy even when content reflows during finalisation."),
+
+        ("Rendering Order",
+            "Templates are rendered after all page content is finalised, ensuring accurate page counts and proper positioning regardless of how content flows across pages. This means you can safely reference the total page count in both header and footer templates."),
+
+        ("Conditional Templates",
+            "You can conditionally render headers or footers by returning null from the template function. For example, you might omit the header on the first page to give more room for a title section, or hide the footer on a table of contents page."),
+
+        ("Accessibility",
+            "Header and footer templates are automatically marked as decorative elements. This means assistive technologies skip over them when reading the document, preventing repeated announcement of decorative running headers on every page turn."),
+    };
+
     public static Document Generate()
     {
-        Document doc = new()
+        Document doc = new(new DocumentSettings
+        {
+            Conformance   = PdfAConformance.PdfA2a,
+            Accessibility = AccessibilityMode.PdfUa1,
+            Language      = "en-GB",
+            DefaultTextStyle = new TextStyle()
+                .WithFamily(StandardFonts.Helvetica)
+                .WithSize(11)
+                .WithColor(ColorPalette.Slate[700]),
+
+            // Header/footer template content is marked decorative - screen readers skip it.
+            HeaderTemplate = pageNum => new TextBlock
+            {
+                Text      = $"BonniePDF - Headers & Footers - Page {pageNum}",
+                FontName  = StandardFonts.Helvetica,
+                FontSize  = 9,
+                TextColor = ColorPalette.Slate[500],
+                Alignment = TextAlignment.Center,
+            },
+            FooterTemplate = pageNum => new TextBlock
+            {
+                Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
+                FontName  = StandardFonts.Helvetica,
+                FontSize  = 9,
+                TextColor = ColorPalette.Slate[400],
+                Alignment = TextAlignment.Center,
+            },
+        })
         {
             Metadata = new DocumentMetadata
             {
-                Title   = "Headers and Footers Demo",
-                Author  = "BonniePDF",
-                Subject = "Demonstrates page headers and footers in an accessible PDF/A-2a + PDF/UA-1 document.",
+                Title    = "Headers and Footers Demo",
+                Author   = "BonniePDF",
+                Subject  = "Demonstrates page headers and footers in an accessible PDF/A-2a + PDF/UA-1 document.",
                 Keywords = "pdf, accessibility, headers, footers, page numbers, BonniePDF",
             },
-            Settings = new DocumentSettings
-            {
-                Conformance   = PdfAConformance.PdfA2a,
-                Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
-                DefaultTextStyle = new TextStyle()
-                    .WithFamily(StandardFonts.Helvetica)
-                    .WithSize(11)
-                    .WithColor(ColorPalette.Slate[600]),
-
-                // Header/footer template content is marked decorative - screen readers skip it.
-                HeaderTemplate = pageNum => new TextBlock
-                {
-                    Text      = $"BonniePDF Documentation - page {pageNum}",
-                    FontName  = StandardFonts.Helvetica,
-                    FontSize  = 9,
-                    TextColor = ColorPalette.Slate[500],
-                    Alignment = TextAlignment.Center,
-                },
-                FooterTemplate = pageNum => new TextBlock
-                {
-                    Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken} · Confidential",
-                    FontName  = StandardFonts.Helvetica,
-                    FontSize  = 9,
-                    TextColor = ColorPalette.Slate[500],
-                    Alignment = TextAlignment.Center,
-                },
-            },
         };
-
-        // ── Chapter 1 ─────────────────────────────────────────────────────────
 
         doc.Add(new Heading("Chapter 1: Headers & Footers")
         {
-            TocIdentifier = "ch1",
+            TocIdentifier = "intro",
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 20,
+            FontSize      = 22,
             TextColor     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 12),
+            Margin        = new Thickness(0, 0, 0, 14),
         });
 
-        (string subtitle, string body)[] sections =
+        doc.Add(new TextBlock
         {
-            ("Header and footer templates",
-                "The HeaderTemplate and FooterTemplate delegates are called once per page after all body " +
-                "content has been laid out. Whatever element a delegate returns is drawn at the top or " +
-                "bottom of the page and marked decorative, so screen readers skip it."),
+            Text   = "Headers and footers are rendered as decorative elements - they are visible on every page but are skipped by screen readers. The numbered sections below describe how the template system works.",
+            Margin = new Thickness(0, 0, 0, 12),
+        });
 
-            ("Dynamic content",
-                "The page-number integer passed to each delegate lets you build 'Page N of M' footers, " +
-                "alternate the running head on even/odd pages, or suppress the template on the title page " +
-                "by returning null."),
-
-            ("Any IElement is accepted",
-                "Templates are not limited to plain text. You can return a HorizontalStack containing a " +
-                "logo image on one side and a page number on the other, and it is still treated as " +
-                "decoration."),
-
-            ("Body content is fully tagged",
-                "Headings, paragraphs, lists, tables, and images added via doc.Add() are tagged for screen " +
-                "readers as you would expect. Body content and running furniture are kept apart, so " +
-                "the two never bleed into each other."),
-
-            ("Validation",
-                "VeraPDF with the PDF/UA-1 profile checks that every piece of real content is tagged and " +
-                "every piece of decoration is marked as such. This example is designed to pass those " +
-                "checks with no failures."),
-
-            ("Screen-reader experience",
-                "When a user navigates the document with a screen reader, the running headers and footers " +
-                "are invisible: the AT jumps straight from the end of one page's body text to the beginning " +
-                "of the next, with no interruption from repeated page-number announcements."),
-
-            ("Multi-page flow",
-                "This document intentionally generates multiple pages so you can confirm that every page " +
-                "has both a header and a footer, each skipped by screen readers, while the body headings " +
-                "and paragraphs keep their own semantic roles."),
-
-            ("Summary",
-                "PDF/UA-1 asks that every mark on the page is either meaningful content or explicitly " +
-                "decoration. BonniePDF handles both sides of that automatically: what you add to the " +
-                "document is tagged, and what a template draws is marked decorative."),
-        };
-
-        for (int i = 0; i < sections.Length; i++)
+        for (int i = 0; i < Sections.Length; i++)
         {
-            (string subtitle, string body) = sections[i];
-            string number = $"1.{i + 1}";
+            (string title, string body) = Sections[i];
 
-            doc.Add(new Heading($"{number} {subtitle}")
+            doc.Add(new Heading($"1.{i + 1} {title}")
             {
-                TocIdentifier = subtitle.ToLowerInvariant().Replace(' ', '-').Replace(':', '-'),
+                TocIdentifier = Slug(title),
                 Level         = 2,
                 FontName      = StandardFonts.HelveticaBold,
                 FontSize      = 14,
@@ -131,13 +116,30 @@ public static class HeadersFootersExample
                 Margin        = new Thickness(0, 14, 0, 6),
             });
 
+            doc.Add(new TextBlock { Text = body, Margin = new Thickness(0, 0, 0, 8) });
+
+            // Second paragraph to push content onto additional pages
             doc.Add(new TextBlock
             {
-                Text   = body,
-                Margin = new Thickness(0, 0, 0, 6),
+                Text = "This section is part of the Headers & Footers demonstration. Each page carries the same " +
+                       "running header and footer so you can observe them across multiple pages. The content here " +
+                       "intentionally repeats to ensure the document spans several pages.",
+                Margin = new Thickness(0, 0, 0, 8),
             });
         }
 
         return doc;
+    }
+
+    /// <summary>Lowercases and hyphenates a section title for its TOC anchor.</summary>
+    private static string Slug(string title)
+    {
+        var sb = new System.Text.StringBuilder(title.Length);
+        foreach (char c in title.ToLowerInvariant())
+        {
+            if (char.IsAsciiLetterLower(c) || char.IsAsciiDigit(c)) sb.Append(c);
+            else if (sb.Length > 0 && sb[^1] != '-') sb.Append('-');
+        }
+        return sb.ToString().Trim('-');
     }
 }
