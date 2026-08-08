@@ -63,7 +63,9 @@ public static class PdfRenderPipeline
             // will use stale values from the previous page, causing incorrect text positioning.
             float pageWidth = page.Width;
             float pageHeight = page.Height;
-            float pageMargin = page.Margin;
+            // Pages created from document settings inherit the margin lazily, so a
+            // DocumentSettings assigned after construction still reaches page 1.
+            float pageMargin = page.HasExplicitMargin ? page.Margin : settings.Margin;
 
             ctx.PageSize = page.Size;
             ctx.Margin = pageMargin;
@@ -277,7 +279,9 @@ public static class PdfRenderPipeline
             // is created with the correct PageHeight for Y-axis transformation
             float pageWidth = page.Width;
             float pageHeight = page.Height;
-            float pageMargin = page.Margin;
+            // Pages created from document settings inherit the margin lazily, so a
+            // DocumentSettings assigned after construction still reaches page 1.
+            float pageMargin = page.HasExplicitMargin ? page.Margin : settings.Margin;
 
             ctx.PageSize = page.Size;
             ctx.Margin = pageMargin;

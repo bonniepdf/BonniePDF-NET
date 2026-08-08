@@ -162,7 +162,7 @@ public class Document : IDisposable
     public Page AddPage()
     {
         PdfSize orientedPageSize = Settings.GetOrientedPageSize();
-        Page page = new(orientedPageSize, Settings.Margin);
+        Page page = new(orientedPageSize, Settings.Margin, inheritMargin: true);
         _pages.Add(page);
         return page;
     }
@@ -172,7 +172,7 @@ public class Document : IDisposable
     /// </summary>
     public Page AddPage(PdfSize pageSize)
     {
-        Page page = new(pageSize, Settings.Margin);
+        Page page = new(pageSize, Settings.Margin, inheritMargin: true);
         _pages.Add(page);
         return page;
     }
@@ -193,7 +193,7 @@ public class Document : IDisposable
     public Page AddPage(PdfSize pageSize, PageOrientation orientation)
     {
         PdfSize orientedSize = pageSize.GetOrientedSize(orientation);
-        Page page = new(orientedSize, Settings.Margin);
+        Page page = new(orientedSize, Settings.Margin, inheritMargin: true);
         _pages.Add(page);
         return page;
     }

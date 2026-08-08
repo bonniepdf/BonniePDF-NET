@@ -20,6 +20,7 @@ public class Page
     {
         Size = new PdfSize(width, height);
         Margin = margin;
+        HasExplicitMargin = true;
     }
 
     /// <summary>
@@ -29,7 +30,27 @@ public class Page
     {
         Size = pageSize;
         Margin = margin;
+        HasExplicitMargin = true;
     }
+
+    /// <summary>
+    /// Creates a page that inherits its margin from
+    /// <see cref="DocumentSettings.Margin"/> at render time. <paramref name="fallbackMargin"/>
+    /// seeds <see cref="Margin"/> so the property stays meaningful before rendering.
+    /// </summary>
+    internal Page(PdfSize pageSize, float fallbackMargin, bool inheritMargin)
+    {
+        Size = pageSize;
+        Margin = fallbackMargin;
+        HasExplicitMargin = !inheritMargin;
+    }
+
+    /// <summary>
+    /// Whether this page carries a margin of its own. When <c>false</c> the
+    /// renderer takes <see cref="DocumentSettings.Margin"/> instead, so settings
+    /// assigned after the document was constructed still reach the first page.
+    /// </summary>
+    internal bool HasExplicitMargin { get; }
 
     /// <summary>
     /// Gets the elements on this page
