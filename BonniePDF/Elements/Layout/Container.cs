@@ -94,6 +94,16 @@ public class Container : BorderedElementBase, IContentContainer
     /// </summary>
     public HorizontalAlignment? HorizontalAlignment { get; set; }
 
+    /// <summary>
+    /// Vertical alignment of the child within the container's available height.
+    /// Only has an effect when the container is taller than its child needs -
+    /// normally because <see cref="Height"/> is set - so it is the way to anchor
+    /// content to the bottom (or middle) of a fixed box without hand-computing a
+    /// top padding against a font's metrics. <c>null</c>/<c>Start</c> keep the
+    /// default top placement; <c>Stretch</c> is treated as "fill" (no offset).
+    /// </summary>
+    public VerticalAlignment? VerticalAlignment { get; set; }
+
     protected override float GetPreferredContentWidth()
     {
         if (Width.HasValue)
@@ -203,6 +213,18 @@ public class Container : BorderedElementBase, IContentContainer
                 ctx.CurrentX += align == BonniePDF.Core.HorizontalAlignment.Center ? slack / 2f : slack;
                 childWidth = preferred;
             }
+        }
+
+        // Vertical alignment consumes the slack between the child's measured height
+        // and the container's own, so a fixed-height box can anchor its content to
+        // the bottom instead of being positioned by a hand-tuned top padding.
+        var vAlign = VerticalAlignment;
+        if (vAlign == BonniePDF.Core.VerticalAlignment.Center || vAlign == BonniePDF.Core.VerticalAlignment.End)
+        {
+            float innerHeight = containerHeight - Padding.Top - Padding.Bottom - Border.VerticalWidth;
+            float slack = innerHeight - Child.MeasureHeight(childWidth);
+            if (slack > 0)
+                ctx.CurrentY += vAlign == BonniePDF.Core.VerticalAlignment.Center ? slack / 2f : slack;
         }
 
         // Save Y position before child render. Tag the child so a role-bearing
