@@ -10,8 +10,8 @@
     <Description>BonniePDF is a high-performance, zero-dependency PDF generation engine for .NET. Engineered for speed and compliance, it features an intuitive Fluent API for building complex documents, reports, integrated charting, and native PDF/A support.</Description>
     <Version>2026.7.2</Version>
     <Authors>BonniePDF</Authors>
-    <!-- source-available: BonniePDF Community License 1.0 for free use, Commercial License at >= $1M revenue.
-         Not a single SPDX expression, so the full dual-license text is packed as a file. -->
+    <!-- Custom source-available Community License for eligible use; paid use is
+         governed by the separately packed Commercial License Agreement. -->
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl>https://github.com/bonniepdf/BonniePDF-NET</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -68,8 +68,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Pack the dual-license text (BonniePDF Community License 1.0 + Commercial) referenced by PackageLicenseFile. -->
+    <!-- Pack the current Community License referenced by PackageLicenseFile. -->
     <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <!-- Paid customers receive an Order; this standard agreement travels with the package. -->
+    <None Include="..\COMMERCIAL-LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\THIRD-PARTY-NOTICES.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
