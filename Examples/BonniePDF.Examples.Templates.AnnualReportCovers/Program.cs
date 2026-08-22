@@ -23,7 +23,7 @@ internal sealed class Program
         }
 
         Console.WriteLine("Generating Annual - Geometric...");
-        using (var doc = AnnualReportGeometricCoverExample.Generate())
+        using (var doc = AnnualReportGeometricCoverExample.Generate(assets))
         {
             doc.Save(Path.Combine(outputDir, "annual_report_geometric_cover.pdf"));
         }

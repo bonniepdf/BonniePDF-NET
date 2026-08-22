@@ -29,7 +29,7 @@ public static class EventTicketExample
     private static readonly Color Accent = ColorPalette.Violet[500];
     private static readonly Color Stub = ColorPalette.Slate[800];
 
-    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         // Landscape boarding-pass style ticket: 640 x 300 pt.
         Document doc = new(new DocumentSettings
@@ -43,24 +43,22 @@ public static class EventTicketExample
             DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(BodyCol),
         });
 
-        byte[]? bgData = null;
-        assets?.TryGetValue(BgImageKey, out bgData);
+        ArgumentNullException.ThrowIfNull(assets);
+        if (!assets.TryGetValue(BgImageKey, out byte[]? bgData) || bgData.Length == 0)
+            throw new InvalidOperationException($"Missing required asset: {BgImageKey}");
 
-        if (bgData is { Length: > 0 })
+        doc.Settings.PageBackground = _ => new Container
         {
-            doc.Settings.PageBackground = _ => new Container
+            Height = 300,
+            Child = new Image
             {
+                ImageData = bgData,
+                Width = 640,
                 Height = 300,
-                Child = new Image
-                {
-                    ImageData = bgData,
-                    Width = 640,
-                    Height = 300,
-                    FitMode = ImageFitMode.Cover,
-                    IsDecorative = true,
-                },
-            };
-        }
+                FitMode = ImageFitMode.Cover,
+                IsDecorative = true,
+            },
+        };
 
         doc.Metadata.Title = "Event Ticket - Sample Sound Festival";
         doc.Metadata.Author = "Sample Live";

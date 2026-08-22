@@ -32,7 +32,7 @@ public static class AnnualReportExample
     private static readonly Color CoverBg = ColorPalette.Blue[900];   // deepest primary tint - cover field
     private static readonly Color BandBg = ColorPalette.Blue[100];    // lightest primary tint - header/footer bands
     private static readonly Color Ink = ColorPalette.Slate[600];      // body copy
-    private static readonly Color Heading = ColorPalette.Blue[800];   // section headings
+    private static readonly Color HeadingColor = ColorPalette.Blue[800];   // section headings
 
     // A4 portrait. The generous margin doubles as the height of the full-bleed
     // header/footer bands, leaving the band text comfortably clear of the paper
@@ -49,13 +49,14 @@ public static class AnnualReportExample
     private static readonly string Generated =
         "Generated " + DateTime.Now.ToString("d MMMM yyyy 'at' HH:mm", CultureInfo.InvariantCulture);
 
-    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         DocumentSettings settings = new()
         {
             PageSize = PdfSize.A4,
             Margin = Margin,
-            Conformance = PdfAConformance.PdfA2b,
+            Conformance = PdfAConformance.PdfA2a, // the accessible archival level - requires tagging
+            Accessibility = AccessibilityMode.PdfUa1,
             Language = "en-GB",
 
             // The cover gets a full-bleed navy field; every inner page gets the
@@ -79,25 +80,19 @@ public static class AnnualReportExample
         // ══════════════════════════════════════════════════════════════════
         //  Page 1 - front cover (overlaid on the deep-blue background slot)
         // ══════════════════════════════════════════════════════════════════
-        byte[]? heroData = null;
-        assets?.TryGetValue(HeroImage, out heroData);
+        ArgumentNullException.ThrowIfNull(assets);
+        if (!assets.TryGetValue(HeroImage, out byte[]? heroData) || heroData.Length == 0)
+            throw new InvalidOperationException($"Missing required asset: {HeroImage}");
 
-        if (heroData is { Length: > 0 })
+        doc.Add(new Image
         {
-            doc.Add(new Image
-            {
-                ImageData = heroData,
-                Width = PdfSize.A4.Width - Margin * 2,
-                Height = 220,
-                FitMode = ImageFitMode.Cover,
-                IsDecorative = true,
-                Margin = new Thickness(0, 24, 0, 24),
-            });
-        }
-        else
-        {
-            doc.Add(new Spacer(150));
-        }
+            ImageData = heroData,
+            Width = PdfSize.A4.Width - Margin * 2,
+            Height = 220,
+            FitMode = ImageFitMode.Cover,
+            IsDecorative = true,
+            Margin = new Thickness(0, 24, 0, 24),
+        });
         HorizontalStack mark = BrandMark();
         mark.Margin = new Thickness(0, 0, 0, 26);
         doc.Add(mark);
@@ -105,7 +100,7 @@ public static class AnnualReportExample
         doc.Add(CoverTitle(Company));
         doc.Add(TriColourRule());
         doc.Add(CoverSubtitle($"Fiscal Year {Year}"));
-        doc.Add(heroData is { Length: > 0 } ? new Spacer(40) : new Spacer(210));
+        doc.Add(new Spacer(40));
         doc.Add(CoverCredit("Prepared with BonniePDF"));
         doc.Add(CoverCredit(Generated));
 
@@ -113,7 +108,7 @@ public static class AnnualReportExample
         //  Page 2 - letter to shareholders + performance highlights
         // ══════════════════════════════════════════════════════════════════
         doc.AddPage();
-        TextBlock shareholderHeading = SectionHeading("Letter to Shareholders");
+        Heading shareholderHeading = SectionHeading("Letter to Shareholders");
         shareholderHeading.Margin = new Thickness(0, 10, 0, 12);
         doc.Add(shareholderHeading);
         doc.Add(Body(
@@ -127,7 +122,7 @@ public static class AnnualReportExample
             "it matters. Our teams answered that call. Operating margin improved for the " +
             "fourth consecutive year, customer retention reached an all-time high, and our " +
             "flagship platform now serves more than two million daily users."));
-        TextBlock performanceHeading = SectionHeading("Performance Highlights");
+        Heading performanceHeading = SectionHeading("Performance Highlights");
         performanceHeading.Margin = new Thickness(0, 20, 0, 12);
         doc.Add(performanceHeading);
         doc.Add(KpiRow());
@@ -136,7 +131,7 @@ public static class AnnualReportExample
         //  Page 3 - operational review (flows naturally, repeating the bands)
         // ══════════════════════════════════════════════════════════════════
         doc.AddPage();
-        TextBlock operationalHeading = SectionHeading("Operational Review");
+        Heading operationalHeading = SectionHeading("Operational Review");
         operationalHeading.Margin = new Thickness(0, 10, 0, 12);
         doc.Add(operationalHeading);
         doc.Add(Body(
@@ -250,9 +245,10 @@ public static class AnnualReportExample
         Margin = new Thickness(0, 0, 0, 12),
     };
 
-    private static TextBlock CoverTitle(string text) => new()
+    /// <summary>The company name on the cover is the document's H1.</summary>
+    private static Heading CoverTitle(string text) => new(text)
     {
-        Text = text,
+        Level = 1,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 42,
         TextColor = Color.White,
@@ -288,18 +284,18 @@ public static class AnnualReportExample
 
     // ── Inner content ───────────────────────────────────────────────────────
 
-    private static TextBlock SectionHeading(string text) => new()
+    private static Heading SectionHeading(string text) => new(text)
     {
-        Text = text,
+        Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 20,
-        TextColor = Heading,
+        TextColor = HeadingColor,
         Margin = new Thickness(0, 0, 0, 12),
     };
 
-    private static TextBlock SubHeading(string text) => new()
+    private static Heading SubHeading(string text) => new(text)
     {
-        Text = text,
+        Level = 3,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 14,
         TextColor = ColorPalette.Blue[700],

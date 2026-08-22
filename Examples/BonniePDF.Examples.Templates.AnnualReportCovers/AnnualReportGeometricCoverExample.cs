@@ -2,7 +2,9 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Elements.Drawing;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
+using BonniePDF.Rendering.Images;
 using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Templates.AnnualReportCovers;
@@ -15,15 +17,15 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 /// star placed with affine transforms, and a circular masked image badge (a photo
 /// cropped to a circle - the most common "team / hero" cover crop) ringed in gold.
 ///
-/// As in the masked-cover example the badge image is a vector placeholder; replace
-/// the PLACEHOLDER block with <c>canvas.DrawImage(...)</c> to crop a real photo to
-/// the circle. The clip is already in force.
+/// The badge is a real photograph: the circular path is pushed as a clip and the
+/// image drawn over its bounding square, so the circle does the cropping.
 /// </summary>
 [System.ComponentModel.DisplayName("Annual - Geometric")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a circular masked image badge ringed in gold). Page 2 is the \"inside the report\" spread - KPI band, quarterly-revenue column chart, revenue-by-segment donut, and a financial-summary table.")]
+[System.ComponentModel.Description("A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a photo cropped to a circular badge ringed in gold). Page 2 is the \"inside the report\" spread - KPI band, quarterly-revenue column chart, revenue-by-segment donut, and a financial-summary table.")]
 public static class AnnualReportGeometricCoverExample
 {
+    private const string BadgeImageKey = "images/sean-pollock-PhYq704ffdA-unsplash.jpg";
     private const string Company = "Sample Company";
     private const int Year = 2025;
     private static readonly string[] SegmentColors = ["#0369a1", "#4f46e5", "#f59e0b", "#059669"];
@@ -31,13 +33,30 @@ public static class AnnualReportGeometricCoverExample
     private static readonly Color Ink = ColorPalette.Slate[800];
     private static readonly Color Accent = ColorPalette.Amber[500];
 
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+        if (!assets.TryGetValue(BadgeImageKey, out byte[]? badgeData))
+            throw new InvalidOperationException($"Missing required asset: {BadgeImageKey}");
+        ImageInfo badgeImage = ImageLoader.Load(badgeData);
+
         DocumentSettings settings = new()
         {
             PageSize = PdfSize.A4,
             Margin = 0, // zero margin - full-bleed cover
             Language = "en-GB",
+            Accessibility = AccessibilityMode.PdfUa1,
+            // The cover artwork lives in the page-background slot. Slots are painted
+            // inside an /Artifact marked-content section, so the sun, the polygons
+            // and the photo badge stay out of the structure tree where decoration
+            // belongs - and the cover type above flows as ordinary tagged content.
+            PageBackground = pageNumber => pageNumber == 1
+                ? new CanvasElement((canvas, w, h) => DrawCover(canvas, w, h, badgeImage))
+                {
+                    CanvasHeight = PdfSize.A4.Height,
+                    IsDecorative = true,
+                }
+                : null,
         };
 
         Document doc = new(settings);
@@ -45,12 +64,7 @@ public static class AnnualReportGeometricCoverExample
         doc.Metadata.Author = Company;
         doc.Metadata.Subject = $"{Company} Annual Report {Year} - geometric cover with a circular masked image (vector drawing surface)";
 
-        CanvasElement cover = new(DrawCover)
-        {
-            CanvasHeight = PdfSize.A4.Height,
-            AltText = $"{Company} Annual Report {Year} cover: a geometric layout with a circular cropped photo badge and the company name.",
-        };
-        doc.Add(cover);
+        doc.Add(CoverType());
 
         // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
         CapabilitiesPage.Add(doc, new ReportBrand(
@@ -59,17 +73,6 @@ public static class AnnualReportGeometricCoverExample
             SegmentColors));
 
         return doc;
-    }
-
-    private static void AddCircle(ICanvas canvas, float cx, float cy, float r)
-    {
-        float k = r * 0.5522847498f;
-        canvas.MoveTo(cx + r, cy);
-        canvas.CubicBezierTo(cx + r, cy + k, cx + k, cy + r, cx, cy + r);
-        canvas.CubicBezierTo(cx - k, cy + r, cx - r, cy + k, cx - r, cy);
-        canvas.CubicBezierTo(cx - r, cy - k, cx - k, cy - r, cx, cy - r);
-        canvas.CubicBezierTo(cx + k, cy - r, cx + r, cy - k, cx + r, cy);
-        canvas.ClosePath();
     }
 
     /// <summary>Regular polygon centred at (cx, cy), built in local coordinates.</summary>
@@ -102,7 +105,7 @@ public static class AnnualReportGeometricCoverExample
         canvas.ClosePath();
     }
 
-    private static void DrawCover(ICanvas canvas, float w, float h)
+    private static void DrawCover(ICanvas canvas, float w, float h, ImageInfo badgeImage)
     {
         // 1. Light backdrop.
         canvas.BeginPath();
@@ -111,7 +114,7 @@ public static class AnnualReportGeometricCoverExample
 
         // 2. Radial "sun" bleeding off the top-left corner.
         canvas.BeginPath();
-        AddCircle(canvas, 30f, 40f, 340f);
+        canvas.AddCircle(30f, 40f, 340f);
         canvas.FillCurrentPath(new RadialGradientPaint(
             new Point(30f, 40f), 340f,
             new[]
@@ -157,34 +160,78 @@ public static class AnnualReportGeometricCoverExample
 
         canvas.SaveState();
         canvas.BeginPath();
-        AddCircle(canvas, bx, by, br);
+        canvas.AddCircle(bx, by, br);
         canvas.ClipToCurrentPath();
 
-        // -- PLACEHOLDER --------------------------------------------------------
-        // Replace with `canvas.DrawImage(image, bx - br, by - br, br * 2, br * 2)`
-        // to crop a real photo to the circle; the circular clip above still applies.
-        canvas.BeginPath();
-        canvas.AddRect(bx - br, by - br, br * 2f, br * 2f);
-        canvas.FillCurrentPath(new LinearGradientPaint(
-            new Point(bx - br, by - br), new Point(bx + br, by + br),
-            new GradientStop(0f, ColorPalette.Indigo[500]),
-            new GradientStop(1f, ColorPalette.Sky[400])));
-        canvas.DrawText(bx, by - 6f, "PHOTO", Color.White.WithAlpha(0.85f), 13f, StandardFonts.HelveticaBold, TextAlignment.Center);
-        // -----------------------------------------------------------------------
+        // The photo is drawn over the badge's bounding square; the circular clip
+        // above is what crops it to the circle.
+        canvas.DrawImage(badgeImage, bx - br, by - br, br * 2f, br * 2f);
 
         canvas.RestoreState();
 
         // Gold ring around the badge.
         canvas.BeginPath();
-        AddCircle(canvas, bx, by, br);
+        canvas.AddCircle(bx, by, br);
         canvas.StrokeCurrentPath(new StrokeStyle { Paint = Accent, Width = 5f });
 
-        // 5. Cover type, centred under the badge.
-        canvas.DrawText(bx, by + br + 40f, $"ANNUAL REPORT {Year}", ColorPalette.Amber[600], 15f, StandardFonts.HelveticaBold, TextAlignment.Center);
-        canvas.DrawText(bx, by + br + 64f, Company, Ink, 44f, StandardFonts.HelveticaBold, TextAlignment.Center);
-        canvas.DrawText(bx, by + br + 124f, "Stewardship, growth, and long-term value", ColorPalette.Slate[500], 13f, StandardFonts.Helvetica, TextAlignment.Center);
+    }
 
-        // 6. Footer credit.
-        canvas.DrawText(bx, h * 0.94f, $"Prepared with BonniePDF - Fiscal Year {Year}", ColorPalette.Slate[400], 10f, StandardFonts.Helvetica, TextAlignment.Center);
+    /// <summary>
+    /// The cover type as real text elements rather than canvas glyphs: the company
+    /// name is the document's H1 and everything here lands in the structure tree,
+    /// so a screen reader reads the cover in order instead of meeting one opaque
+    /// figure.
+    /// </summary>
+    private static Container CoverType()
+    {
+        VerticalStack stack = new();
+
+        stack.Add(new TextBlock($"ANNUAL REPORT {Year}")
+        {
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 15,
+            TextColor = ColorPalette.Amber[600],
+            Alignment = TextAlignment.Center,
+        });
+
+        stack.Add(new Heading(Company)
+        {
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 44,
+            LineHeight = 1f,
+            TextColor = Ink,
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 48),
+        });
+
+        stack.Add(new TextBlock("Stewardship, growth, and long-term value")
+        {
+            FontSize = 13,
+            TextColor = ColorPalette.Slate[500],
+            Alignment = TextAlignment.Center,
+            // The block is anchored to the foot of the page, so this gap is what
+            // sets how far the type sits below the badge: the eyebrow was clearing
+            // the gold ring by about 3pt, which read as a collision.
+            Margin = new Thickness(0, 0, 0, 240),
+        });
+
+        stack.Add(new TextBlock($"Prepared with BonniePDF · Fiscal Year {Year}")
+        {
+            FontSize = 10,
+            TextColor = ColorPalette.Slate[400],
+            Alignment = TextAlignment.Center,
+        });
+
+        // Anchored to the foot of the page rather than positioned by a top padding
+        // measured against the font's metrics: the block keeps its footing if the
+        // title wraps or a face changes.
+        return new Container
+        {
+            Height = PdfSize.A4.Height,
+            VerticalAlignment = VerticalAlignment.End,
+            Padding = new Thickness(56, 0, 56, 48),
+            Child = stack,
+        };
     }
 }

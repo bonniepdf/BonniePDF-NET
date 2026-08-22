@@ -54,9 +54,11 @@ internal static class CapabilitiesPage
             TextColor = brand.Accent,
             Margin = new Thickness(0, 0, 0, 4),
         });
-        content.Add(new TextBlock
+        // A real H2 under the cover's H1: the section title carries structure, not
+        // just 22pt of bold type.
+        content.Add(new Heading("Performance at a glance")
         {
-            Text = "Performance at a glance",
+            Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 22,
             TextColor = brand.Primary,
@@ -96,9 +98,9 @@ internal static class CapabilitiesPage
         content.Add(charts);
 
         // Financial summary table
-        content.Add(new TextBlock
+        content.Add(new Heading("Five-year financial summary")
         {
-            Text = "Five-year financial summary",
+            Level = 3,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 11,
             TextColor = brand.Accent,
