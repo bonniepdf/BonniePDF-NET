@@ -1,0 +1,458 @@
+BONNIEPDF COMMERCIAL LICENSE AGREEMENT 1.0
+
+Version 1.0
+Effective 23 October 2026
+
+This agreement governs commercial licences for the BonniePDF Software,
+including its digital-signing packages. It is a business-to-business agreement
+and is not offered to consumers.
+
+By accepting an Order, downloading Software supplied under an Order, or using
+the Software for Production Use, the Customer agrees to this agreement. The
+individual accepting it represents that they have authority to bind the
+Customer.
+
+1. PARTIES AND DEFINITIONS
+
+"Affiliate" means an entity that directly or indirectly controls, is
+controlled by, or is under common control with another entity. "Control" means
+ownership of more than fifty per cent (50%) of the voting interests or the
+legal power to direct the entity's management.
+
+"Automatic Renewal" means the renewal of an Updates Term for a further Renewal
+Term, using the payment method held by the merchant of record, as described in
+section 4.
+
+"Competing Product" means a general-purpose PDF generation library, software
+development kit, toolkit, component, API, hosted service, or substantially
+similar product whose primary purpose is to provide third parties with PDF
+generation functionality that substitutes for the Software. A domain-specific
+application or service that generates PDFs only as an ancillary part of its
+own broader functionality is not a Competing Product.
+
+"Covered Affiliate" means an Affiliate expressly covered by an Enterprise
+Order. An Affiliate is not covered merely because it belongs to the Customer's
+corporate group.
+
+"Covered Version" means a version of the Software first made available to the
+Customer during its active Updates Term.
+
+"Customer" means the legal entity identified as customer in the applicable
+Order. Unless an Enterprise Order says otherwise, Customer does not include
+Affiliates.
+
+"Documentation" means the user documentation supplied for the Software.
+
+"Order" means an order form, checkout record, quote accepted by the Customer,
+or other ordering document that identifies the Customer, edition, fees, Updates
+Term, and any additional purchased rights. An Order that provides for Automatic
+Renewal also states the amount due at checkout, the Renewal Fee, the renewal
+interval, the first renewal date or how it is determined, the cancellation
+method, and any price protection.
+
+"Production Use" means use in a live application, service, workflow, or
+environment for the benefit of the Customer, its customers, or other third
+parties.
+
+"Provider" means CodeFocus Limited, a company registered in England and Wales
+under company number 16088203 whose registered office is at 1 Little Lane,
+Haxby, York, YO32 3QU, England, and any successor that validly acquires the
+relevant rights. Where an Order is processed by a merchant of record, that
+merchant handles the sale, payment, invoicing, and applicable indirect taxes,
+and the Provider supplies the software licence described in the Order.
+
+"Renewal Fee" means the recurring updates-and-support fee stated in the Order,
+excluding tax, currency conversion, and any discount the Order states to be
+temporary or one-off.
+
+"Renewal Term" means each further twelve (12) month Updates Term that begins
+when a Renewal Fee is successfully paid.
+
+"Software" means the BonniePDF PDF generation library for TypeScript/
+JavaScript and .NET together with the BonniePDF digital-signing packages,
+BonniePDF.Signing and @bonniepdf/signing, including source code, compiled code,
+Documentation, and examples supplied under an Order. It excludes certificates,
+private keys, timestamping services, and trust services, which the Customer
+supplies or obtains itself.
+
+"Support" means the standard support, if any, identified in the Order. Support
+does not include a response-time commitment, service-level agreement, custom
+development, legal advice, or compliance certification unless expressly
+agreed in writing.
+
+"Updates Term" means the period identified in the Order during which the
+Customer may receive new versions, updates, and included Support. The initial
+Updates Term is twelve (12) months unless the Order says otherwise.
+
+2. EDITIONS AND COVERED ORGANISATIONS
+
+2.1 Professional. A Professional licence covers one Customer legal entity. It
+includes an unlimited number of the Customer's employees and contractors acting
+solely on its behalf. It does not cover a parent, subsidiary, sister company,
+client, or other Affiliate as a separate user.
+
+The Customer may deploy its finished applications without application, server,
+document, or end-user limits. Other people may use those applications in the
+ordinary course without receiving standalone access to the Software.
+
+2.2 Enterprise. An Enterprise licence covers the Customer and the Covered
+Affiliates identified in the Order. It includes an unlimited number of the
+Customer's and each Covered Affiliate's employees and contractors acting solely
+on their behalf. If the Order states that all current Affiliates are covered,
+entities that become Affiliates after the Order date are covered only after the
+Customer notifies the Provider and the Provider confirms coverage in writing.
+An entity ceases to be covered when it ceases to be an Affiliate, except for a
+reasonable transition agreed in writing.
+
+2.3 Enterprise+. Custom rights, service levels, indemnities, escrow, bespoke
+terms, or coverage outside sections 2.1 and 2.2 exist only if stated in a
+signed Order or separate agreement. The Enterprise+ label alone grants no
+additional rights.
+
+3. COMMERCIAL LICENCE GRANT
+
+Subject to payment of applicable fees and compliance with this agreement, the
+Provider grants the Customer a worldwide, non-exclusive, non-transferable
+licence to:
+
+(a) install, use, reproduce, and modify Covered Versions;
+
+(b) use Covered Versions for Production Use in open-source or closed-source
+applications and services;
+
+(c) permit the people covered by the applicable Edition to develop, test,
+operate, and support those applications and services;
+
+(d) deploy an unlimited number of applications, servers, and instances and
+generate an unlimited number of documents; and
+
+(e) distribute compiled copies of Covered Versions only as an embedded
+component of the Customer's application where recipients cannot reasonably use
+the Software as a standalone PDF generation library. Delivering the Software to
+end users' browsers or devices as part of the client-side code of a web,
+desktop, or mobile application is distribution of an embedded component.
+
+One commercial core licence covers both the TypeScript/JavaScript and .NET
+implementations. There are no separate developer-seat, document, server,
+deployment, end-user, or runtime royalties unless an Order expressly grants a
+different OEM arrangement.
+
+4. PERPETUAL COVERED-VERSION RIGHTS AND RENEWALS
+
+The licence to each Covered Version is perpetual unless terminated under this
+agreement. Expiry or non-renewal of an Updates Term does not disable, time-bomb,
+or end the Customer's right to continue using Covered Versions.
+
+The Customer may receive versions first made available after its Updates Term
+only by renewing or purchasing a new Updates Term.
+
+4.1 Website Orders. An Order placed through the Provider's website checkout
+comprises a one-time perpetual licence fee and an annual updates-and-support
+fee. The first annual fee covers the initial twelve (12) month Updates Term.
+Unless the Customer cancels before the renewal date, the Updates Term renews by
+Automatic Renewal for successive Renewal Terms at the Renewal Fee shown before
+checkout and recorded in the Order.
+
+4.2 Cancellation. The Customer may cancel Automatic Renewal at any time through
+the merchant of record's customer portal or by another method identified in the
+Order. Cancellation takes effect at the end of the paid Updates Term then
+current and stops later renewal charges. It does not entitle the Customer to a
+refund of a fee already paid unless the Order, the merchant-of-record terms, or
+applicable law provides otherwise.
+
+4.3 Effect on Covered Versions. Cancellation, expiry, non-renewal, and a failed
+renewal end only the Customer's access to later versions and to Support. They
+do not disable or end the Customer's rights to Covered Versions first made
+available during fully paid Updates Terms.
+
+4.4 Failed renewal payment. If a Renewal Fee is not paid on the renewal date,
+no Renewal Term begins until payment succeeds. If payment succeeds within
+thirty (30) days, the Renewal Term runs from the originally scheduled renewal
+date. If it does not, Automatic Renewal is cancelled. The Provider may, but
+need not, continue Support during that period.
+
+4.5 Renewal price. Where the Order records price protection, the base Renewal
+Fee stated in the Order applies to each Renewal Term while Automatic Renewal
+remains continuously in effect, including where a failed payment is recovered
+under section 4.4. Price protection ends if the Customer cancels Automatic
+Renewal or a failed payment is not recovered under section 4.4, and any later
+purchase is at the Provider's then-current price. Taxes, currency conversion,
+reseller charges, and one-off discounts do not form part of the protected base
+Renewal Fee. Otherwise, renewal pricing and discounts are governed by the
+Order.
+
+4.6 Other Orders. A signed Order, purchase order, reseller order, or directly
+invoiced Order renews only as that Order expressly states. Where it states
+nothing, renewal is by agreement and is not automatic.
+
+5. SOURCE CODE AND MODIFICATIONS
+
+The Customer may inspect and modify source code for its internal use. The
+Provider is not required to support modified code. The Customer owns its own
+application code and modifications that do not contain Provider intellectual
+property; the Provider retains ownership of the Software and all BonniePDF-
+derived portions of modifications.
+
+The Customer must not distribute Software source code outside covered
+employees and contractors, except where an Order expressly permits source
+redistribution.
+
+6. RESTRICTIONS
+
+The Customer must not, and must not permit another person to:
+
+(a) use, modify, distribute, sell, or make the Software available as, or as a
+material component of, a Competing Product;
+
+(b) offer the Software's general-purpose PDF generation capability to third
+parties as a standalone hosted API or service;
+
+(c) redistribute, sublicense, rent, lease, sell, or transfer the Software on a
+standalone basis;
+
+(d) remove, alter, or obscure copyright, licence, or attribution notices;
+
+(e) circumvent an access control or licence-key mechanism in a separately
+licensed add-on;
+
+(f) use the Software in violation of applicable law; or
+
+(g) use BonniePDF trademarks in a way that implies endorsement or identifies a
+competing product.
+
+OEM, embedded-library, reseller, white-label, and hosted-PDF-platform rights
+require an express written Order and are not included by default.
+
+7. CONTRACTORS, CLIENT WORK, AND TRANSITIVE USERS
+
+Contractors may use the Software only on behalf of a covered Customer and must
+be bound by confidentiality and use restrictions at least as protective as
+this agreement. The Customer remains responsible for their compliance.
+
+A consultancy or agency licence does not automatically cover a client's
+Production Use. The legal entity that owns, controls, commercially uses, or
+receives the primary business benefit from the resulting application must have
+its own applicable Community or commercial rights.
+
+End users of a Customer application do not need a separate licence merely
+because the Software is embedded as a non-standalone component.
+
+8. EVALUATION
+
+Before purchasing, an otherwise ineligible Organisation may evaluate the
+Software solely for internal development, testing, security review, proof of
+concept, and non-production staging. Evaluation excludes Production Use,
+processing live customer data, and distribution outside the evaluator and its
+evaluation contractors.
+
+9. SIGNING AND ABSENCE OF TECHNICAL ENFORCEMENT
+
+The Software has no runtime activation, licence key, telemetry, document limit,
+or remote validation requirement. The Customer's obligations under this
+agreement are contractual rather than technically enforced. The absence of a
+technical restriction is not a licence, a waiver, or evidence of permission,
+and does not enlarge the rights granted by clause 3 or the Order.
+
+Digital signing is part of the Software and is included with every paid licence
+at no additional fee. It is covered by the same Order, for the same covered
+organisations and people, for as long as the Customer retains rights to a
+Covered Version. It is not sold separately.
+
+Signing is not available under the BonniePDF Community License, which licenses
+the core library only. Production Use of the signing packages always requires a
+paid licence under this agreement.
+
+The signing packages act on cryptographic material the Customer supplies or
+obtains. The Provider does not warrant that a signature produced with the
+Software is qualified, admissible, or legally valid in any jurisdiction.
+Optional timestamping and certificate validation depend on third-party services
+outside the Provider's control; those are functions of the signature itself and
+are unrelated to licensing.
+
+10. FEES, TAXES, AND PAYMENT
+
+The Customer must pay fees in the currency and by the deadline stated in the
+Order. Fees are non-cancellable and non-refundable except where the Order,
+merchant-of-record terms, or applicable law expressly provides otherwise.
+
+By accepting an Order that provides for Automatic Renewal, the Customer
+authorises the merchant of record to collect the Renewal Fee and applicable tax
+at each renewal until Automatic Renewal is cancelled. Cancellation prevents
+later renewal charges but does not reverse a completed initial or renewal
+transaction.
+
+A merchant of record may process payment, invoicing, indirect tax, refunds,
+renewals, and chargebacks under its buyer terms. The Customer remains
+responsible for accurate organisation, tax, and contact information.
+
+If a payment is refunded, charged back, or reversed, rights supplied solely by
+that payment terminate, unless the Provider confirms otherwise in writing. A
+refund, chargeback, or reversal of a Renewal Fee affects only rights to
+versions first made available during the Renewal Term that fee paid for; it
+does not affect rights under earlier fully paid Updates Terms.
+
+11. SUPPORT AND UPDATES
+
+During an active Updates Term, the Provider will use commercially reasonable
+efforts to provide the standard Support identified in the Order. Support is
+provided only for unmodified Covered Versions on supported platforms.
+
+The Provider may change, add, or remove functionality in future versions. The
+Provider does not promise that a specific standard, regulation, third-party
+service, runtime, or platform will remain unchanged or supported indefinitely.
+
+12. COMPLIANCE CONFIRMATION
+
+No more than once in any twelve-month period, the Provider may ask the Customer
+to confirm in writing its covered legal entities and compliance with sections
+2, 3, and 6. The Provider may make an additional request where it has a
+reasonable, documented basis to suspect material unlicensed use. The Provider
+will not require access to customer documents or production systems under this
+standard agreement.
+
+13. OWNERSHIP, FEEDBACK, AND TRADEMARKS
+
+The Provider and its licensors retain all right, title, and interest in the
+Software. No ownership transfers to the Customer.
+
+If the Customer voluntarily provides feedback, it grants the Provider a
+worldwide, perpetual, irrevocable, royalty-free licence to use and incorporate
+that feedback without restriction or obligation.
+
+This agreement does not grant trademark rights except to identify the Software
+accurately and reproduce required notices.
+
+14. CONFIDENTIALITY AND LICENCE RECORDS
+
+Each party must protect the other's non-public information using reasonable
+care and use it only to perform this agreement. Confidential information
+excludes information independently developed, lawfully received without a duty
+of confidence, or publicly available without breach.
+
+Licence confirmations and offline add-on keys may be shared only with covered
+employees, contractors, professional advisers, and auditors who need them and
+are bound to protect them.
+
+15. DATA PROTECTION
+
+Each party is an independent controller of business contact and transaction
+data it processes for contracting, billing, support, security, and legal
+compliance. Neither party appoints the other to process personal data contained
+in Customer-generated PDFs merely because the Software is used locally in the
+Customer's environment.
+
+16. WARRANTIES AND DISCLAIMERS
+
+Each party warrants that it has authority to enter this agreement.
+
+For a period of ninety (90) days from delivery, the Provider warrants that the 
+unmodified supported Covered Version will materially conform to its Documentation. 
+Where the Documentation identifies a supported PDF profile, supported inputs 
+generated according to that Documentation will satisfy the machine-verifiable 
+checks stated in the published validation matrix. 
+
+The Customer's sole and exclusive remedy, and the Provider's entire liability for 
+breach of this warranty, will be correction or workaround of the defect, 
+replacement of the Software, or if the Provider cannot reasonably remedy it, a 
+refund of the affected licence fee. This is a technical conformance warranty, not 
+legal advice, document certification, or a guarantee that a Customer's particular 
+document, workflow, or organisation complies with any law.
+
+EXCEPT FOR THE LIMITED WARRANTY ABOVE, THE SOFTWARE, DOCUMENTATION, UPDATES, AND 
+SUPPORT ARE PROVIDED "AS IS" AND "AS AVAILABLE". TO THE MAXIMUM EXTENT PERMITTED 
+BY LAW, THE PROVIDER DISCLAIMS ALL OTHER EXPRESS, IMPLIED, AND STATUTORY 
+WARRANTIES AND CONDITIONS, INCLUDING MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS 
+FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. THE PROVIDER DOES NOT 
+WARRANT THAT THE SOFTWARE IS ERROR-FREE, SECURE, UNINTERRUPTED, OR SUITABLE FOR 
+ANY PARTICULAR LEGAL, REGULATORY, ACCESSIBILITY, ARCHIVAL, OR SIGNING REQUIREMENT.
+
+17. CUSTOMER RESPONSIBILITY AND INDEMNITY
+
+The Customer is responsible for its applications, content, certificates,
+configuration, testing, legal compliance, and use of generated documents.
+
+The Customer will indemnify the Provider against third-party claims arising
+from the Customer's application, content, unlawful use, or breach of section 6,
+except to the extent caused by the Provider's breach of this agreement.
+
+18. LIMITATION OF LIABILITY
+
+Nothing in this agreement limits liability for death or personal injury caused
+by negligence, fraud or fraudulent misrepresentation, or another liability
+that cannot lawfully be limited.
+
+Subject to that rule, neither party is liable for indirect, incidental,
+special, consequential, exemplary, or punitive loss, or for loss of profit,
+revenue, business, goodwill, data, or anticipated savings.
+
+The Provider's total aggregate liability arising out of or relating to this
+agreement is limited to fees paid for the affected Software during the twelve
+(12) months immediately before the event giving rise to the claim. The
+Customer's payment obligations and liability for breach of sections 6, 14, or
+the Provider's intellectual-property rights are not subject to that cap.
+
+19. TERM AND TERMINATION
+
+This agreement starts when the first Order is accepted. Either party may
+terminate an active Updates Term for a material breach not cured within thirty
+(30) days after written notice. The Provider may terminate immediately for a
+deliberate Competing Product use, deliberate circumvention, infringement of its
+intellectual-property rights, insolvency where legally permitted, or a payment
+reversal relating to the licence. A reversal of a Renewal Fee affects only the
+rights described in section 10.
+
+Termination for Customer breach ends all affected licence rights, including
+perpetual rights. Non-renewal without breach, including cancellation of
+Automatic Renewal or a failed renewal payment, is not termination: it ends only
+Updates and Support at the end of the paid Updates Term and does not end rights
+to Covered Versions.
+
+On termination of licence rights, the Customer must stop using and distributing
+the affected Software and destroy copies in its control, except copies retained
+solely where required by law. Sections 5, 6, and 12 through 22 survive.
+
+20. ASSIGNMENT AND CHANGE OF CONTROL
+
+The Customer may not assign or transfer this agreement or an Order without the
+Provider's prior written consent. A merger, reorganisation, or sale of
+substantially all relevant assets is a transfer. The Provider will not
+unreasonably withhold consent where the successor is not a competitor, accepts
+this agreement, and pays any reasonable licence-scope adjustment.
+
+The Provider may assign this agreement with the Software business or to an
+Affiliate, provided that the assignment does not reduce the Customer's
+perpetual rights to Covered Versions.
+
+21. GENERAL
+
+The parties are independent contractors. This agreement creates no partnership,
+agency, employment, fiduciary, or exclusive relationship. Neither party may
+bind the other.
+
+Notices may be sent to the business or email address in the Order. If a
+provision is unenforceable, it will be modified only to the minimum extent
+necessary, and the remaining provisions continue in effect. Failure to enforce
+a provision is not a waiver. A person who is not a party has no right to enforce
+this agreement under the Contracts (Rights of Third Parties) Act 1999.
+
+Neither party is liable for delay caused by circumstances beyond its reasonable
+control, except for payment obligations.
+
+This agreement is governed by the laws of England and Wales. The courts of
+England and Wales have exclusive jurisdiction over disputes relating to it.
+
+22. ORDER OF PRECEDENCE AND ENTIRE AGREEMENT
+
+If documents conflict, the following order applies: (1) a separately signed
+negotiated agreement; (2) the Order; (3) a product-specific add-on agreement;
+(4) this agreement; and (5) website summaries, FAQs, Documentation, and other
+marketing copy. A document controls only for the subject it addresses.
+
+This agreement and the applicable Order are the entire agreement for the
+purchased rights and replace prior discussions about them. A change must be in
+writing and accepted by authorised representatives of both parties, except that
+the Provider may update standard terms for future Orders and future renewals.
+An update cannot reduce perpetual rights already granted to Covered Versions.
+
+Current product and contact information is available at:
+https://www.bonniepdf.dev/pricing

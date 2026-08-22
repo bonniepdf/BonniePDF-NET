@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/BonniePDF?style=flat-square&logo=nuget)](https://www.nuget.org/packages/BonniePDF)
 [![NuGet downloads](https://img.shields.io/nuget/dt/BonniePDF?style=flat-square&logo=nuget)](https://www.nuget.org/packages/BonniePDF)
-[![License: source-available](<https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg?style=flat-square>)](https://www.bonniepdf.dev/license/)
+[![License: BonniePDF Community](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg?style=flat-square)](./LICENSE)
 ![coverage](./badges/coverage.svg)
 
 [Live examples](https://www.bonniepdf.dev/examples) · [Documentation](https://www.bonniepdf.dev/docs/dotnet/getting-started) · [NuGet](https://www.nuget.org/packages/BonniePDF) · [TypeScript package](https://www.npmjs.com/package/@bonniepdf/core)
@@ -176,9 +176,9 @@ The repository includes veraPDF-backed validation coverage for supported PDF/A a
 
 ## Licence
 
-BonniePDF is distributed under the BonniePDF Community License 1.0. It is free for individuals, education, non-profits, open-source projects and organisations below the stated annual-revenue threshold. A commercial licence is required for larger organisations.
+Current versions are source-available under the [BonniePDF Community License 1.0](./LICENSE). Anyone may evaluate the complete core in non-production. Qualifying personal non-commercial, charity, education, research, and open-source-project use is also free. Commercial production—including live internal-business and client use—requires a [commercial licence](./COMMERCIAL-LICENSE.txt) before production begins.
 
-There are no licence keys, activation servers or runtime feature gates. See the [licensing page](https://www.bonniepdf.dev/license/) and the repository licence for the complete terms.
+Solo covers commercial production for one named developer and one business. Professional and Enterprise provide broader organisational coverage. One paid core licence covers both .NET and TypeScript/JavaScript without document, server, deployment, or end-user fees. The core has no licence keys, activation servers, telemetry, or runtime feature gates. Digital signing is included with every paid core licence at no extra charge and is governed by its own agreement. See the [licensing overview](https://www.bonniepdf.dev/license/) for details.
 
 ## Contributing
 
