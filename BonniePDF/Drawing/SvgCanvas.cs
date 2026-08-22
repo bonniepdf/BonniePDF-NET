@@ -891,6 +891,18 @@ public class SvgCanvas : ICanvas
     }
 
     /// <inheritdoc />
+    public void AddEllipse(float cx, float cy, float rx, float ry)
+    {
+        (float startX, float startY, var segments) = EllipseGeometry.ToBeziers(cx, cy, rx, ry);
+        MoveTo(startX, startY);
+        foreach (var s in segments) CubicBezierTo(s.C1X, s.C1Y, s.C2X, s.C2Y, s.X, s.Y);
+        ClosePath();
+    }
+
+    /// <inheritdoc />
+    public void AddCircle(float cx, float cy, float radius) => AddEllipse(cx, cy, radius, radius);
+
+    /// <inheritdoc />
     public void FillCurrentPath(Paint paint, FillRule fillRule = FillRule.NonZero)
     {
         if (_currentPathData.Count == 0) return;
