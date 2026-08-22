@@ -176,7 +176,7 @@ The repository includes veraPDF-backed validation coverage for supported PDF/A a
 
 ## Licence
 
-Current versions are source-available under the [BonniePDF Community License 1.0](./LICENSE). Anyone may evaluate the complete core in non-production. Qualifying personal non-commercial, charity, education, research, and open-source-project use is also free. Commercial production—including live internal-business and client use—requires a [commercial licence](./COMMERCIAL-LICENSE.txt) before production begins.
+Current versions are source-available under the [BonniePDF Community License 1.0](./LICENSE). Anyone may evaluate the complete core in non-production. Personal and independent non-commercial projects, qualifying charity and education use, and qualifying OSI-licensed open-source project work are also free. Commercial production—including live internal-business and client use—requires a [commercial licence](./COMMERCIAL-LICENSE.txt) before production begins.
 
 Solo covers commercial production for one named developer and one business. Professional and Enterprise provide broader organisational coverage. One paid core licence covers both .NET and TypeScript/JavaScript without document, server, deployment, or end-user fees. The core has no licence keys, activation servers, telemetry, or runtime feature gates. Digital signing is included with every paid core licence at no extra charge and is governed by its own agreement. See the [licensing overview](https://www.bonniepdf.dev/license/) for details.
 
