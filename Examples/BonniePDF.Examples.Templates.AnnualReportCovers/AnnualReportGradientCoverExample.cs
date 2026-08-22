@@ -2,6 +2,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Elements.Drawing;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 
@@ -36,6 +37,18 @@ public static class AnnualReportGradientCoverExample
             PageSize = PdfSize.A4,
             Margin = 0, // zero margin - full-bleed cover
             Language = "en-GB",
+            Accessibility = AccessibilityMode.PdfUa1,
+            // The cover artwork lives in the page-background slot. Slots are painted
+            // inside an /Artifact marked-content section, so the gradient, the glow
+            // and the accent rules stay out of the structure tree where decoration
+            // belongs - and the cover type above flows as ordinary tagged content.
+            PageBackground = pageNumber => pageNumber == 1
+                ? new CanvasElement(DrawCover)
+                {
+                    CanvasHeight = PdfSize.A4.Height,
+                    IsDecorative = true,
+                }
+                : null,
         };
 
         Document doc = new(settings);
@@ -43,12 +56,7 @@ public static class AnnualReportGradientCoverExample
         doc.Metadata.Author = Company;
         doc.Metadata.Subject = $"{Company} Annual Report {Year} - gradient cover (vector drawing surface)";
 
-        CanvasElement cover = new(DrawCover)
-        {
-            CanvasHeight = PdfSize.A4.Height,
-            AltText = $"{Company} Annual Report {Year} cover: a deep indigo-to-fuchsia gradient with the company name and report year.",
-        };
-        doc.Add(cover);
+        doc.Add(CoverType());
 
         // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
         CapabilitiesPage.Add(doc, new ReportBrand(
@@ -57,18 +65,6 @@ public static class AnnualReportGradientCoverExample
             SegmentColors));
 
         return doc;
-    }
-
-    /// <summary>A reusable circle sub-path built from four cubic-bezier quadrants.</summary>
-    private static void AddCircle(ICanvas canvas, float cx, float cy, float r)
-    {
-        float k = r * 0.5522847498f;
-        canvas.MoveTo(cx + r, cy);
-        canvas.CubicBezierTo(cx + r, cy + k, cx + k, cy + r, cx, cy + r);
-        canvas.CubicBezierTo(cx - k, cy + r, cx - r, cy + k, cx - r, cy);
-        canvas.CubicBezierTo(cx - r, cy - k, cx - k, cy - r, cx, cy - r);
-        canvas.CubicBezierTo(cx + k, cy - r, cx + r, cy - k, cx + r, cy);
-        canvas.ClosePath();
     }
 
     private static void DrawCover(ICanvas canvas, float w, float h)
@@ -86,7 +82,7 @@ public static class AnnualReportGradientCoverExample
         //    light bleeding across the gradient rather than a hard disc.
         canvas.SaveState();
         canvas.BeginPath();
-        AddCircle(canvas, w * 0.84f, h * 0.16f, 260f);
+        canvas.AddCircle(w * 0.84f, h * 0.16f, 260f);
         canvas.FillCurrentPath(new RadialGradientPaint(
             new Point(w * 0.84f, h * 0.16f), 260f,
             new[]
@@ -118,21 +114,77 @@ public static class AnnualReportGradientCoverExample
         canvas.FillCurrentPath(ColorPalette.Amber[400]);
         canvas.RestoreState();
 
-        // 5. Cover type, drawn directly on the canvas.
-        canvas.DrawText(108f, h * 0.2f - 9f, "SAMPLE", Color.White, 15f, StandardFonts.HelveticaBold, TextAlignment.Left);
-
-        canvas.DrawText(72f, h * 0.34f, $"ANNUAL REPORT {Year}", ColorPalette.Fuchsia[200], 16f, StandardFonts.HelveticaBold, TextAlignment.Left);
-        canvas.DrawText(72f, h * 0.4f, Company, Color.White, 52f, StandardFonts.HelveticaBold, TextAlignment.Left);
-
-        // A short gold rule under the title.
+        // The gold rule under the title is decoration, so it stays a drawn box.
         canvas.BeginPath();
         canvas.AddRect(74f, h * 0.49f, 120f, 5f);
         canvas.FillCurrentPath(ColorPalette.Amber[400]);
+    }
 
-        canvas.DrawText(72f, h * 0.52f, "Designing the systems that power tomorrow", ColorPalette.Violet[100], 14f, StandardFonts.Helvetica, TextAlignment.Left);
+    /// <summary>
+    /// The cover type as real text elements rather than canvas glyphs: the company
+    /// name is the document's H1 and everything here lands in the structure tree,
+    /// so a screen reader reads the cover in order instead of meeting one opaque
+    /// figure.
+    /// </summary>
+    private static Container CoverType()
+    {
+        VerticalStack stack = new();
 
-        // 6. Footer credit, lower-left.
-        canvas.DrawText(72f, h * 0.92f, "Prepared with BonniePDF", ColorPalette.Violet[200], 10f, StandardFonts.Helvetica, TextAlignment.Left);
-        canvas.DrawText(72f, h * 0.94f, $"Fiscal Year {Year} - Confidential", ColorPalette.Violet[300], 10f, StandardFonts.Helvetica, TextAlignment.Left);
+        stack.Add(new TextBlock("SAMPLE")
+        {
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 15,
+            TextColor = Color.White,
+            Margin = new Thickness(36, 0, 0, 108),
+        });
+
+        stack.Add(new TextBlock($"ANNUAL REPORT {Year}")
+        {
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 16,
+            TextColor = ColorPalette.Fuchsia[200],
+            Margin = new Thickness(0, 0, 0, 8),
+        });
+
+        stack.Add(new Heading(Company)
+        {
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 52,
+            LineHeight = 1f,
+            TextColor = Color.White,
+            Margin = new Thickness(0, 0, 0, 70),
+        });
+
+        stack.Add(new TextBlock("Designing the systems that power tomorrow")
+        {
+            FontSize = 14,
+            TextColor = ColorPalette.Violet[100],
+            Margin = new Thickness(0, 0, 0, 324),
+        });
+
+        stack.Add(new TextBlock("Prepared with BonniePDF")
+        {
+            FontSize = 10,
+            TextColor = ColorPalette.Violet[200],
+            Margin = new Thickness(0, 0, 0, 7),
+        });
+
+        stack.Add(new TextBlock($"Fiscal Year {Year} · Confidential")
+        {
+            FontSize = 10,
+            TextColor = ColorPalette.Violet[300],
+        });
+
+        // Anchored to the foot of the page rather than positioned by a top padding
+        // measured against the font's metrics: the block keeps its footing if the
+        // title wraps or a face changes.
+        return new Container
+        {
+            Height = PdfSize.A4.Height,
+            VerticalAlignment = VerticalAlignment.End,
+            Padding = new Thickness(72, 0, 72, 51),
+            Child = stack,
+        };
     }
 }
