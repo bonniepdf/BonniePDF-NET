@@ -117,6 +117,10 @@ public class ChartTests
             Operations.Add($"QuadraticBezierTo({cpx},{cpy},{x},{y})");
         public void AddRect(float x, float y, float width, float height) =>
             Operations.Add($"AddRect({x},{y},{width},{height})");
+        public void AddEllipse(float cx, float cy, float rx, float ry) =>
+            Operations.Add($"AddEllipse({cx},{cy},{rx},{ry})");
+        public void AddCircle(float cx, float cy, float radius) =>
+            Operations.Add($"AddCircle({cx},{cy},{radius})");
         public void ClosePath() => Operations.Add("ClosePath()");
         public void FillCurrentPath(Paint paint, FillRule fillRule) =>
             Operations.Add($"FillCurrentPath({fillRule})");

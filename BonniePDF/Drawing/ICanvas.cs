@@ -253,6 +253,17 @@ public interface ICanvas
     /// <summary>Add a rectangle sub-path.</summary>
     void AddRect(float x, float y, float width, float height);
 
+    /// <summary>
+    /// Appends a closed axis-aligned ellipse to the current path, as four cubic
+    /// Beziers (PDF has no arc operator). Unlike <see cref="FillEllipse"/> this is
+    /// a path primitive, so the result can be stroked with a full
+    /// <see cref="StrokeStyle"/>, filled with a gradient, or pushed as a clip.
+    /// </summary>
+    void AddEllipse(float cx, float cy, float rx, float ry);
+
+    /// <summary>Appends a closed circle to the current path. See <see cref="AddEllipse"/>.</summary>
+    void AddCircle(float cx, float cy, float radius);
+
     /// <summary>Close the current sub-path.</summary>
     void ClosePath();
 

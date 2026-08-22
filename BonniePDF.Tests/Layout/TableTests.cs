@@ -227,6 +227,8 @@ public class TableTests
         public void CubicBezierTo(float cp1x, float cp1y, float cp2x, float cp2y, float x, float y) { }
         public void QuadraticBezierTo(float cpx, float cpy, float x, float y) { }
         public void AddRect(float x, float y, float width, float height) { }
+        public void AddEllipse(float cx, float cy, float rx, float ry) { }
+        public void AddCircle(float cx, float cy, float radius) { }
         public void ClosePath() { }
         public void FillCurrentPath(Paint paint, FillRule fillRule) { }
         public void StrokeCurrentPath(StrokeStyle style) { }
