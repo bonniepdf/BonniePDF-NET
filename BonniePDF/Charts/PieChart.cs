@@ -6,6 +6,7 @@ using BonniePDF.Charts.Models;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Elements.Text;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Charts;
 
@@ -45,7 +46,7 @@ public class PieChart : ChartBase
     // Donut hole proportions
     private const float DonutHoleRatio = 0.33f; // donut hole radius as fraction of pie radius
 
-    private const string FontFamily = "Arial, sans-serif";
+    private const string FontFamily = StandardFonts.Helvetica;
 
     // Styling constants
     private static readonly Color LegendTextColor = Color.FromHex("#333333");

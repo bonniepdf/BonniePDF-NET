@@ -4,6 +4,7 @@ using BonniePDF.Charts.Models;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Elements.Text;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Charts;
 
@@ -70,7 +71,7 @@ public abstract class CartesianChartBase : ChartBase
     /// <summary>
     /// Font family for labels
     /// </summary>
-    public string FontFamily { get; set; } = "Arial, sans-serif";
+    public string FontFamily { get; set; } = StandardFonts.Helvetica;
 
     /// <summary>
     /// Whether to show value labels above each data point

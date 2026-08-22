@@ -6,6 +6,7 @@ using BonniePDF.Elements;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Tagging;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Charts;
 
@@ -19,7 +20,7 @@ public abstract class ChartBase : ElementBase, IRoleProvider, IAltTextProvider
     // Title styling constants (matching SVG chart implementation)
     private const float TitleFontSize = 20;
     private const float TitleY = 35;
-    private const string TitleFontFamily = "Arial, sans-serif";
+    private const string TitleFontFamily = StandardFonts.Helvetica;
     private static readonly Color TitleColor = Color.FromHex("#333333");
 
     /// <summary>Creates an empty chart for construct-then-mutate authoring.</summary>

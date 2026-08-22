@@ -73,6 +73,13 @@ internal static class SvgPageExporter
         {
             Conformance = settings.Conformance
         };
+        // Mirror PdfDocumentSerializer: PDF/UA-1 substitutes embedded Liberation for
+        // the standard-14 references, so the preview must resolve them the same way.
+        // Without this the SVG falls back to a generic "Helvetica, Arial, sans-serif"
+        // stack and the page previews in whatever face the viewer happens to have -
+        // not the face the PDF actually carries, and not what the TypeScript
+        // exporter emits for the same document.
+        ctx.Resources.EmbedStandardFonts = settings.Accessibility == AccessibilityMode.PdfUa1;
 
         // Two-pass TOC resolution. A VisualToc renders before the headings it
         // references, so on a single pass its page numbers resolve to "XX" and
@@ -87,6 +94,7 @@ internal static class SvgPageExporter
                 Conformance = settings.Conformance,
                 TocEntries = new Dictionary<string, int>()
             };
+            dryRunCtx.Resources.EmbedStandardFonts = ctx.Resources.EmbedStandardFonts;
             foreach (PageRenderOutput _ in PdfRenderPipeline.RenderPagesStreaming(document.Pages, settings, dryRunCtx))
             {
                 // intentionally empty - discard the rendered output of the dry run
