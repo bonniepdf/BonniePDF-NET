@@ -3,6 +3,7 @@ using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
@@ -109,11 +110,10 @@ public static class AuditReportExample
             Kpi("2", "Critical", ColorPalette.Rose[600]));
         doc.Add(kpis);
 
-        doc.Add(H2("Control status"));
-        doc.Add(ControlDonut());
-
-        doc.Add(H2("Findings by severity"));
-        doc.Add(SeverityBars());
+        VerticalStack charts = new() { Spacing = 12, Margin = new Thickness(0, 0, 0, 6) };
+        charts.Add(ChartCard("Control status (93 controls)", ControlDonut()));
+        charts.Add(ChartCard("Findings by severity", SeverityBars()));
+        doc.Add(charts);
     }
 
     private static void AddFindingsRegister(Document doc)
@@ -162,8 +162,7 @@ public static class AuditReportExample
     private static PieChart ControlDonut() => new(ControlData())
     {
         AltText = "Donut chart: 71 compliant, 15 partial, 5 non-conformant, 2 not applicable of 93 controls.",
-        Margin = new Thickness(0, 0, 0, 12),
-        Height = 180,
+        Height = 130,
         StretchToFit = true,
         IsDonut = true,
         TotalLabel = "Controls",
@@ -174,7 +173,6 @@ public static class AuditReportExample
 
     private static ChartData ControlData() => new()
     {
-        Title = "Control status",
         Series =
         [
             new ChartSeries
@@ -193,7 +191,7 @@ public static class AuditReportExample
     private static BarChart SeverityBars() => new(SeverityData())
     {
         AltText = "Column chart of findings by severity: 2 Critical, 4 High, 4 Medium, 2 Low.",
-        Height = 180,
+        Height = 130,
         StretchToFit = true,
         BarColor = Primary,
         FontFamily = StandardFonts.Helvetica,
@@ -216,7 +214,6 @@ public static class AuditReportExample
 
         return new ChartData
         {
-            Title = "Findings by severity",
             Series = [series],
             YAxis = new AxisOptions { MaxValue = 6, StepCount = 3 },
         };
@@ -281,6 +278,29 @@ public static class AuditReportExample
         stack.Add(new TextBlock { Text = value, FontName = StandardFonts.HelveticaBold, FontSize = 20, TextColor = accent, Margin = new Thickness(0, 0, 0, 3) });
         stack.Add(new TextBlock { Text = label, FontName = StandardFonts.Helvetica, FontSize = 8.5f, TextColor = Muted });
         return new Container { BackgroundColor = ColorPalette.Indigo[50], Padding = new Thickness(14, 12, 14, 12), Child = stack };
+    }
+
+    private static Container ChartCard(string title, IElement chart)
+    {
+        VerticalStack stack = new();
+        stack.Add(new TextBlock
+        {
+            Text = title,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 11,
+            TextColor = Primary,
+            Margin = new Thickness(0, 0, 0, 8),
+        });
+        stack.Add(chart);
+        return new Container
+        {
+            Border = new Border(0.75f),
+            BorderColors = new BorderColors(Rule),
+            CornerRadius = 8,
+            ClipContent = true,
+            Padding = new Thickness(14, 14, 14, 14),
+            Child = stack,
+        };
     }
 
     private static TextBlock Th(string text) => new() { Text = text, FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = Color.White };
