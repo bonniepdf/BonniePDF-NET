@@ -29,6 +29,9 @@ internal sealed record ReportBrand(
 /// annual report. This appends a second page that does exactly that - a KPI
 /// band, a quarterly-revenue column chart, a revenue-by-segment donut, and a
 /// financial-summary table - so every cover showcase reads as a two-page report.
+/// The charts deliberately use the full editorial column. Annual-report charts
+/// need room for axes, legends and data labels; squeezing two plots into equal
+/// half-page cards makes the decoration win over the information.
 ///
 /// The covers use a zero-margin document (the artwork bleeds to the paper edge),
 /// so this page supplies its own inset via a padded container.
@@ -86,15 +89,17 @@ internal static class CapabilitiesPage
         kpis.Add(KpiCard("21.4%", "Operating margin", brand.Primary, brand.Tint), 1);
         content.Add(kpis);
 
-        // Charts row: column chart | donut
-        HorizontalStack charts = new()
+        // Full-width editorial charts. The chart implementations reserve space for
+        // axes and a right-hand legend, so two half-width cards leave almost no plot
+        // area and can force legend content beyond the card. Stacking mirrors real
+        // annual-report layouts: one clear visual per reading row.
+        VerticalStack charts = new()
         {
-            WidthDistribution = WidthDistribution.Weighted,
-            Spacing = 14,
+            Spacing = 12,
             Margin = new Thickness(0, 0, 0, 18),
         };
-        charts.Add(ChartCard("Quarterly revenue (£m)", QuarterlyBarChart(brand.Primary), brand.Accent), 1);
-        charts.Add(ChartCard("Revenue by segment", SegmentDonut(brand.SegmentColors), brand.Accent), 1);
+        charts.Add(ChartCard("Quarterly revenue (£m)", QuarterlyBarChart(brand.Primary), brand.Accent));
+        charts.Add(ChartCard("Revenue by segment", SegmentDonut(brand.SegmentColors), brand.Accent));
         content.Add(charts);
 
         // Financial summary table
@@ -160,6 +165,7 @@ internal static class CapabilitiesPage
             Border = new Border(0.75f),
             BorderColors = new BorderColors(Rule),
             CornerRadius = 8,
+            ClipContent = true,
             Padding = new Thickness(14, 14, 14, 14),
             Child = stack,
         };
@@ -177,7 +183,6 @@ internal static class CapabilitiesPage
 
         ChartData data = new()
         {
-            Title = "Quarterly revenue",
             Series = [series],
             YAxis = new AxisOptions { Prefix = "£", MaxValue = 320, StepCount = 4 },
         };
@@ -185,7 +190,7 @@ internal static class CapabilitiesPage
         BarChart chart = new(data)
         {
             AltText = "Column chart of quarterly revenue in £m rising from 182 in Q1 to 288 in Q4.",
-            Height = 190,
+            Height = 130,
             StretchToFit = true,
             BarColor = primary,
             FontFamily = StandardFonts.Helvetica,
@@ -205,12 +210,12 @@ internal static class CapabilitiesPage
             series.DataPoints.Add(new ChartDataPoint { Label = labels[i], Value = values[i] });
         }
 
-        ChartData data = new() { Title = "Revenue by segment", Series = [series] };
+        ChartData data = new() { Series = [series] };
 
         PieChart chart = new(data)
         {
             AltText = "Donut chart of revenue by segment: Platform, Services, Hardware, and Licensing.",
-            Height = 190,
+            Height = 130,
             StretchToFit = true,
             IsDonut = true,
             TotalLabel = "Total",
