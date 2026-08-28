@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using BonniePDF.Rendering.Images;
 using BonniePDF.Typography.TrueType;
 
@@ -13,11 +14,10 @@ namespace BonniePDF.Typography;
 /// Supports both standard PDF fonts and custom TTF fonts.
 /// </summary>
 /// <remarks>
-/// All caches below are process-wide statics read and written during layout, so
-/// concurrent document generation (a common server workload) can hit them from
-/// multiple threads at once. They use <see cref="ConcurrentDictionary{TKey,TValue}"/>
-/// rather than plain <see cref="Dictionary{TKey,TValue}"/>/<see cref="HashSet{T}"/>
-/// for that reason.
+/// Parsed-font caches and aliases explicitly registered by application code are
+/// process-wide and thread-safe. Aliases discovered while rendering are scoped
+/// to the current document's async flow so one document cannot change another
+/// document's wrapping or pagination.
 /// </remarks>
 public static class FontMetrics
 {
@@ -35,13 +35,43 @@ public static class FontMetrics
     // ConcurrentHashSet in the BCL.
     private static readonly ConcurrentDictionary<string, byte> TtfFontLoadFailed = new(StringComparer.OrdinalIgnoreCase);
 
-    // Alias map: logical font name (e.g. "Helvetica-Bold") → physical TTF path (e.g. "C:/Windows/Fonts/arialbd.ttf")
-    // Populated by PdfResourceRegistry when PDF/A mode resolves a standard font to an embedded TTF file.
-    // This ensures measurement uses actual TTF metrics to match rendering exactly.
-    private static readonly ConcurrentDictionary<string, string> FontPathAliases = new(StringComparer.OrdinalIgnoreCase);
+    // Explicit aliases registered outside document generation remain process-wide
+    // for backwards compatibility. Serializer-discovered aliases live in the
+    // AsyncLocal scope below so one document cannot change another's layout.
+    private static readonly ConcurrentDictionary<string, string> GlobalFontPathAliases = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<string, TtfFont> GlobalFontInstanceAliases = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly AsyncLocal<DocumentAliasScope?> CurrentDocumentScope = new();
 
-    // Instance map: logical font name → already-parsed TtfFont (for bytes-based fonts with no file path).
-    private static readonly ConcurrentDictionary<string, TtfFont> FontInstanceAliases = new(StringComparer.OrdinalIgnoreCase);
+    private sealed class DocumentAliasScope(bool embedStandardFonts)
+    {
+        public bool EmbedStandardFonts { get; } = embedStandardFonts;
+        public Dictionary<string, string> PathAliases { get; } = new(GlobalFontPathAliases, StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, TtfFont> InstanceAliases { get; } = new(GlobalFontInstanceAliases, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private sealed class DocumentAliasScopeLease(DocumentAliasScope? previous) : IDisposable
+    {
+        private bool _disposed;
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            CurrentDocumentScope.Value = previous;
+            _disposed = true;
+        }
+    }
+
+    /// <summary>
+    /// Starts an async-flow-local font-alias scope for one document render.
+    /// Embedded standard-font substitutes are resolved lazily on the first
+    /// measurement, before layout makes a wrapping or pagination decision.
+    /// </summary>
+    internal static IDisposable BeginDocumentScope(bool embedStandardFonts)
+    {
+        DocumentAliasScope? previous = CurrentDocumentScope.Value;
+        CurrentDocumentScope.Value = new DocumentAliasScope(embedStandardFonts);
+        return new DocumentAliasScopeLease(previous);
+    }
 
     /// <summary>
     /// Registers a logical font name alias pointing to a specific TTF file path.
@@ -51,7 +81,11 @@ public static class FontMetrics
     /// </summary>
     public static void RegisterFontAlias(string logicalName, string ttfPath)
     {
-        FontPathAliases[logicalName] = ttfPath;
+        DocumentAliasScope? scope = CurrentDocumentScope.Value;
+        if (scope != null)
+            scope.PathAliases[logicalName] = ttfPath;
+        else
+            GlobalFontPathAliases[logicalName] = ttfPath;
     }
 
     /// <summary>
@@ -61,7 +95,11 @@ public static class FontMetrics
     /// </summary>
     public static void RegisterFontInstance(string logicalName, TtfFont font)
     {
-        FontInstanceAliases[logicalName] = font;
+        DocumentAliasScope? scope = CurrentDocumentScope.Value;
+        if (scope != null)
+            scope.InstanceAliases[logicalName] = font;
+        else
+            GlobalFontInstanceAliases[logicalName] = font;
     }
 
     // -----------------------------------------------------------------------
@@ -206,19 +244,37 @@ public static class FontMetrics
         if (string.IsNullOrEmpty(text)) return 0;
 
         // A. IS IT A CUSTOM TTF FILE (direct path)?
-        if (fontIdentifier.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase))
+        if (fontIdentifier.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) ||
+            fontIdentifier.EndsWith(".otf", StringComparison.OrdinalIgnoreCase))
             return GetTtfWidth(text, fontIdentifier, fontSize);
 
-        // B1. IS IT A BYTES-LOADED FONT INSTANCE (from FontManager)?
-        if (FontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont? instanceFont))
-            return GetKernedStringWidth(text, instanceFont!, fontSize);
+        DocumentAliasScope? scope = CurrentDocumentScope.Value;
+        if (scope != null)
+        {
+            if (scope.InstanceAliases.TryGetValue(fontIdentifier, out TtfFont? scopedInstance))
+                return GetKernedStringWidth(text, scopedInstance, fontSize);
 
-        // B2. IS IT A REGISTERED ALIAS TO A TTF FILE?
-        // When PDF/A mode embeds a real TTF for a logical name (e.g. "Helvetica-Bold" → arialbd.ttf),
-        // measure using the actual TTF metrics so layout matches rendering.
-        // B1. IS IT A REGISTERED ALIAS TO A TtfFont INSTANCE (bytes-based)?
-        if (FontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont? fontInstance))
-            return GetKernedStringWidth(text, fontInstance!, fontSize);
+            if (scope.PathAliases.TryGetValue(fontIdentifier, out string? scopedPath))
+                return GetTtfWidth(text, scopedPath, fontSize);
+
+            // PDF/A and PDF/UA embed bundled substitutes for the standard 12
+            // Latin Type-1 fonts. Resolve that exact face before the first layout
+            // measurement, rather than discovering it while drawing text.
+            if (scope.EmbedStandardFonts && FontManager.GetParsedStandardFont(fontIdentifier) is TtfFont embedded)
+            {
+                scope.InstanceAliases[fontIdentifier] = embedded;
+                return GetKernedStringWidth(text, embedded, fontSize);
+            }
+
+            return GetStandardFontWidth(text, fontIdentifier, fontSize);
+        }
+
+        // Outside document generation, preserve explicitly registered global aliases.
+        if (GlobalFontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont? instanceFont))
+            return GetKernedStringWidth(text, instanceFont, fontSize);
+
+        if (GlobalFontPathAliases.TryGetValue(fontIdentifier, out string? aliasedPath))
+            return GetTtfWidth(text, aliasedPath, fontSize);
 
         // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
         return GetStandardFontWidth(text, fontIdentifier, fontSize);

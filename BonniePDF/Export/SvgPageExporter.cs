@@ -7,6 +7,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
 using BonniePDF.Rendering;
+using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF.Export;
@@ -60,6 +61,9 @@ internal static class SvgPageExporter
     {
         options ??= new SvgPageExportOptions();
         DocumentSettings settings = document.Settings;
+        bool embedStandardFonts = settings.Conformance != PdfAConformance.None ||
+                                  settings.Accessibility == AccessibilityMode.PdfUa1;
+        using IDisposable fontScope = FontMetrics.BeginDocumentScope(embedStandardFonts);
 
         var svgOptions = new SvgRenderOptions
         {
