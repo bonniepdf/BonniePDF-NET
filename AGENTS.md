@@ -1,6 +1,6 @@
 # BonniePDF (.NET) - agent guide
 
-The .NET implementation of BonniePDF. C#, targets `net8.0` (all projects in the solution - core, tests, benchmarks, demo, examples - target the same TFM; check `BonniePDF/BonniePDF.csproj` for the authoritative value before assuming otherwise), zero native dependencies, no GDI+/SkiaSharp. Published on NuGet as `BonniePDF`.
+The .NET implementation of BonniePDF. C#, targets `net8.0` (all projects in the solution - core, tests, demo, examples - target the same TFM; check `BonniePDF/BonniePDF.csproj` for the authoritative value before assuming otherwise), zero native dependencies, no GDI+/SkiaSharp. Published on NuGet as `BonniePDF`.
 
 For the cross-project picture, see [`../AGENTS.md`](../AGENTS.md). The TypeScript implementation lives at [`../BonniePDF-TypeScript/`](../BonniePDF-TypeScript/).
 
