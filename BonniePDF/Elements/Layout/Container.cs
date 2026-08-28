@@ -85,8 +85,7 @@ public class Container : BorderedElementBase, IContentContainer
     public bool CrispEdges { get; set; }
 
     /// <summary>
-    /// Horizontal alignment of the child within the container's available width
-    /// (<c>AlignCenter</c>/<c>AlignRight</c>/<c>AlignLeft</c>).
+    /// Horizontal alignment of the child within the container's available width.
     /// When the child is narrower than the container it is positioned
     /// accordingly; otherwise it fills the width as before. <c>null</c>/
     /// <c>Start</c> keep the default left placement; <c>Stretch</c> is treated
