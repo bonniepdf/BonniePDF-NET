@@ -12,6 +12,7 @@ using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Tagging;
 using BonniePDF.Fluent;
 using BonniePDF.Rendering.Writers;
+using BonniePDF.Typography;
 
 namespace BonniePDF.Rendering;
 
@@ -40,6 +41,8 @@ public class PdfDocumentSerializer
     /// </summary>
     public void Serialize(IPdfWriter writer)
     {
+        using IDisposable fontScope = FontMetrics.BeginDocumentScope(UsesEmbeddedStandardFonts());
+
         // 0. Set up encryption if configured
         int encryptId = 0;
         if (_document.Settings.IsEncrypted)
@@ -342,6 +345,8 @@ public class PdfDocumentSerializer
     /// </summary>
     public async Task SerializeAsync(IAsyncPdfWriter writer, CancellationToken cancellationToken)
     {
+        using IDisposable fontScope = FontMetrics.BeginDocumentScope(UsesEmbeddedStandardFonts());
+
         // 0. Set up encryption if configured
         int encryptId = 0;
         if (_document.Settings.IsEncrypted)
@@ -610,6 +615,10 @@ public class PdfDocumentSerializer
 
         await writer.CloseAsync(catalogId, documentInfoId, cancellationToken).ConfigureAwait(false);
     }
+
+    private bool UsesEmbeddedStandardFonts() =>
+        _document.Settings.Conformance != PdfAConformance.None ||
+        _document.Settings.Accessibility == AccessibilityMode.PdfUa1;
 
     /// <summary>
     /// Applies the embedded-file conformance guard (<see cref="AttachmentRules"/>)

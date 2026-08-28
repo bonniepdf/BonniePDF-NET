@@ -48,9 +48,12 @@ public static class FontManager
     // not safe under concurrent writes.
     private static readonly ConcurrentDictionary<string, byte[]> _registry = new(StringComparer.OrdinalIgnoreCase);
 
-    // Parsed-font cache for the fallback chain, keyed like _registry. Entries are
-    // null when the bytes failed to parse, so we don't re-attempt on every call.
-    private static readonly ConcurrentDictionary<string, TtfFont?> _fallbackCache = new(StringComparer.OrdinalIgnoreCase);
+    // Parsed-font cache for the fallback chain, keyed like _registry. Retaining
+    // the source byte-array identity makes replacement registrations coherent:
+    // an entry is reparsed whenever the registry value for its key changes.
+    private static readonly ConcurrentDictionary<string, ParsedFontCacheEntry> _fallbackCache = new(StringComparer.OrdinalIgnoreCase);
+
+    private sealed record ParsedFontCacheEntry(byte[] Bytes, TtfFont? Font);
 
     // Standard PDF font → Liberation family+weight mapping
     private static readonly Dictionary<string, (string family, string weight)> StandardFontMap =
@@ -124,6 +127,21 @@ public static class FontManager
     }
 
     /// <summary>
+    /// Returns the parsed registered substitute for a standard PDF font, or
+    /// <c>null</c> when no substitute is available. Instances are cached by the
+    /// underlying family and weight and are safe to share as immutable metrics.
+    /// </summary>
+    internal static TtfFont? GetParsedStandardFont(string standardFontName)
+    {
+        if (!StandardFontMap.TryGetValue(standardFontName, out var mapping)) return null;
+
+        string key = $"{mapping.family}:{mapping.weight}";
+        if (!_registry.TryGetValue(key, out byte[]? bytes)) return null;
+
+        return GetParsedFont(key, bytes);
+    }
+
+    /// <summary>
     /// Returns raw TTF bytes for a registered family/weight pair, or <c>null</c>.
     /// </summary>
     public static byte[]? GetBytesForFamily(string family, string subfamily)
@@ -154,26 +172,7 @@ public static class FontManager
             string key = entry.Key;
             byte[] bytes = entry.Value;
 
-            // GetOrAdd (rather than TryGetValue-then-set) so two threads racing on
-            // the same uncached font can't both win the write - the second parse's
-            // result would simply be discarded, but GetOrAdd avoids the duplicate
-            // work and guarantees every caller observes the same cached instance.
-            // The factoryArgument overload passes `bytes` in rather than closing
-            // over it, avoiding a per-call closure allocation.
-            TtfFont? font = _fallbackCache.GetOrAdd(
-                key,
-                static (_, fontBytes) =>
-                {
-                    try
-                    {
-                        return TtfFont.LoadFromBytes(fontBytes);
-                    }
-                    catch
-                    {
-                        return null;
-                    }
-                },
-                bytes);
+            TtfFont? font = GetParsedFont(key, bytes);
 
             if (font != null)
                 result.Add(new FallbackFont { Key = key, Bytes = bytes, Font = font });
@@ -192,6 +191,30 @@ public static class FontManager
     public static void RestoreBundledFonts() => AutoRegisterBundledFonts();
 
     // ── Internal ─────────────────────────────────────────────────
+
+    private static TtfFont? GetParsedFont(string key, byte[] bytes)
+    {
+        ParsedFontCacheEntry entry = _fallbackCache.AddOrUpdate(
+            key,
+            static (_, source) => ParseFont(source),
+            static (_, existing, source) => ReferenceEquals(existing.Bytes, source)
+                ? existing
+                : ParseFont(source),
+            bytes);
+        return entry.Font;
+    }
+
+    private static ParsedFontCacheEntry ParseFont(byte[] bytes)
+    {
+        try
+        {
+            return new ParsedFontCacheEntry(bytes, TtfFont.LoadFromBytes(bytes));
+        }
+        catch
+        {
+            return new ParsedFontCacheEntry(bytes, null);
+        }
+    }
 
     private static void AutoRegisterBundledFonts()
     {
