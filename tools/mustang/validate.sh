@@ -20,7 +20,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MUSTANG_VERSION="${MUSTANG_VERSION:-2.16.2}"
+MUSTANG_VERSION="${MUSTANG_VERSION:-2.26.0}"
 JAR="$HERE/Mustang-CLI-${MUSTANG_VERSION}.jar"
 
 if [ "$#" -lt 1 ]; then
