@@ -1,0 +1,4 @@
+# Shell scripts must keep LF endings. The CI gates invoke tools/*/validate.sh
+# directly; a CRLF checkout committed from Windows makes them fail with an
+# opaque "bad interpreter" / exit 126 rather than a readable error.
+*.sh text eol=lf
