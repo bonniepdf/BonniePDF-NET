@@ -1,8 +1,8 @@
 namespace BonniePDF.Elements;
 
 /// <summary>
-/// Optional metadata an element exposes to the layout snapshot recorder
-/// (BonniePDF/the specification). Implemented by
+/// Optional metadata an element exposes to the layout snapshot recorder,
+/// as defined by the shared specification. Implemented by
 /// <see cref="ElementBase"/>; the recorder falls back to <c>GetType().Name</c>
 /// for anything that does not implement it.
 /// </summary>

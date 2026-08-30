@@ -217,8 +217,7 @@ public class DocumentSettings
     /// conformance claim, <c>/Lang</c>, <c>/MarkInfo</c>).
     ///
     /// Orthogonal to <see cref="PdfAEnabled"/>: a document can be
-    /// PDF/A, PDF/UA, both, or neither. See
-    /// <c>the specification</c>.
+    /// PDF/A, PDF/UA, both, or neither.
     /// </summary>
     public AccessibilityMode Accessibility { get; set; } = AccessibilityMode.None;
 

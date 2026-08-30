@@ -20,8 +20,8 @@ namespace BonniePDF.Compliance;
 // finished file, and crucially they *pass* image-like content that silently fell
 // back to /Artifact for want of alt text; this evaluator flags exactly that.
 //
-// Mirrors the TypeScript reference (core/src/Compliance/ComplianceEvaluator.ts);
-// both conform to BonniePDF/the specification.
+// Mirrors the TypeScript implementation; both conform to the shared
+// compliance-preflight specification and the shared conformance fixtures.
 //
 // NOTE: authored without a .NET toolchain in the build environment — must be
 // compiled and run against the shared fixtures before it is considered landed.
