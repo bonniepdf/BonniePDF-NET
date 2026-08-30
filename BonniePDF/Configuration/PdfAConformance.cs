@@ -15,7 +15,6 @@ namespace BonniePDF.Configuration;
 /// not require structure tagging and so are the safe upgrade path for
 /// documents that have not yet adopted PDF/UA-1.
 ///
-/// See <c>the specification</c> for the design.
 /// </summary>
 public enum PdfAConformance
 {

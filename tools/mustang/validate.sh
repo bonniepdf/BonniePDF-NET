@@ -17,9 +17,6 @@
 # Requirements: a JDK (java 11+) and curl on PATH. Both are provided by
 # actions/setup-java in CI; locally, install a JDK.
 #
-# NOTE: the Mustang release URL, asset name, and CLI flags below are pinned
-# best-effort and must be confirmed by the first CI run. See the this feature gap doc
-# (BonniePDF/src/the specification).
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

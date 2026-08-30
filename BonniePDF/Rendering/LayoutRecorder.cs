@@ -17,9 +17,9 @@ namespace BonniePDF.Rendering;
 // SVG uses. No bottom-left↔top-left flip happens here; the PDF flip is applied
 // later, inside the PDF canvas.
 //
-// This mirrors the TypeScript reference (core/src/Rendering/LayoutRecorder.ts);
-// both conform to BonniePDF/the specification and are verified
-// against the shared conformance fixtures.
+// This mirrors the TypeScript implementation; both conform to the shared
+// layout-snapshot specification and are verified against the shared
+// conformance fixtures.
 //
 // NOTE: This file has NOT been compiled in the authoring environment (no .NET
 // toolchain was available). It must be built and run against the

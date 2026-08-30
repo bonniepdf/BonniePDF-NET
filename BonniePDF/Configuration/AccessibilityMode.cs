@@ -24,9 +24,8 @@ namespace BonniePDF.Configuration;
 /// launch - do not add <c>PdfUa2</c> speculatively.
 /// </para>
 ///
-/// See <c>the specification</c> for the
-/// full design and <c>this feature-implementation-plan.md</c> for the staged
-/// implementation.
+/// Tagged-PDF behaviour is defined by the shared specification, which both
+/// implementations conform to.
 /// </summary>
 public enum AccessibilityMode
 {
