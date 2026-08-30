@@ -39,7 +39,7 @@ public class ComplianceWriter
 
         // Compress the ICC profile
         using MemoryStream ms = new();
-        using (ZLibStream zlib = new(ms, CompressionLevel.Optimal))
+        using (ZLibStream zlib = new(ms, CompressionLevel.SmallestSize))
         {
             zlib.Write(iccData, 0, iccData.Length);
         }
@@ -66,7 +66,7 @@ public class ComplianceWriter
         byte[] iccData = SRgbIccProfile.Generate();
 
         using MemoryStream ms = new();
-        using (ZLibStream zlib = new(ms, CompressionLevel.Optimal))
+        using (ZLibStream zlib = new(ms, CompressionLevel.SmallestSize))
         {
             await zlib.WriteAsync(iccData, cancellationToken).ConfigureAwait(false);
         }

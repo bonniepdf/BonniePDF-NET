@@ -293,7 +293,7 @@ public class ImageWriter
         output.WriteByte(0x78);
         output.WriteByte(0x9C);
 
-        using (DeflateStream deflate = new(output, CompressionLevel.Optimal, true))
+        using (DeflateStream deflate = new(output, CompressionLevel.SmallestSize, true))
         {
             deflate.Write(data, 0, data.Length);
         }
@@ -326,7 +326,7 @@ public class ImageWriter
             output.WriteByte(0x78);
             output.WriteByte(0x9C);
 
-            using (DeflateStream deflate = new(output, CompressionLevel.Optimal, true))
+            using (DeflateStream deflate = new(output, CompressionLevel.SmallestSize, true))
             {
                 deflate.Write(data, 0, data.Length);
             }

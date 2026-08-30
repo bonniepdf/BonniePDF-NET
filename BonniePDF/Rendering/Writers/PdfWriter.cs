@@ -172,7 +172,7 @@ public class PdfWriter : IPdfWriter, IDisposable
 
         // 2. Compress using ZLibStream to ensure correct ZLIB headers (0x78 0x9C)
         using MemoryStream memoryStream = new();
-        using (ZLibStream zlib = new(memoryStream, CompressionLevel.Optimal))
+        using (ZLibStream zlib = new(memoryStream, CompressionLevel.SmallestSize))
         {
             zlib.Write(rawBytes, 0, rawBytes.Length);
         }
@@ -456,7 +456,7 @@ public class PdfWriter : IPdfWriter, IDisposable
         }
 
         using MemoryStream memoryStream = new();
-        using (ZLibStream zlib = new(memoryStream, CompressionLevel.Optimal))
+        using (ZLibStream zlib = new(memoryStream, CompressionLevel.SmallestSize))
         {
             zlib.Write(streamContent, 0, streamContent.Length);
         }
