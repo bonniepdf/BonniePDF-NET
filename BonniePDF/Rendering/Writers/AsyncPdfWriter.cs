@@ -172,7 +172,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
             using (MemoryStream outputMs = new(rentedBuffer))
             {
                 // 4. Compress into the MemoryStream
-                using (ZLibStream zlib = new(outputMs, CompressionLevel.Optimal, true))
+                using (ZLibStream zlib = new(outputMs, CompressionLevel.SmallestSize, true))
                 {
                     await zlib.WriteAsync(rawBytes, cancellationToken).ConfigureAwait(false);
                 }
@@ -461,7 +461,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
         int length, CancellationToken cancellationToken = default)
     {
         using MemoryStream memoryStream = new();
-        using (ZLibStream zlib = new(memoryStream, CompressionLevel.Optimal, leaveOpen: true))
+        using (ZLibStream zlib = new(memoryStream, CompressionLevel.SmallestSize, leaveOpen: true))
         {
             await zlib.WriteAsync(streamContent.AsMemory(0, length), cancellationToken).ConfigureAwait(false);
         }
