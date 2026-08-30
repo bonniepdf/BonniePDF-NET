@@ -478,6 +478,36 @@ public class PdfCanvas : ICanvas
     /// </summary>
     public void SetTaggingContext(TaggingContext tagging) => _tagging = tagging;
 
+    /// <summary>Depth of MCID-bearing marked-content scopes currently open on this canvas.</summary>
+    internal int OpenTaggedCount => _openTaggedCount;
+
+    /// <summary>Depth of /Artifact regions currently open on this canvas.</summary>
+    internal int ArtifactDepth => _artifactDepth;
+
+    /// <summary>
+    /// Adopts the open-scope depths of another canvas writing into the same
+    /// content stream.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="RenderContext.GetCanvas"/> hands out a fresh canvas positioned
+    /// at a child's origin, but it appends to the *same* stream as the canvas
+    /// that is already rendering. Without this, the new canvas believes it is at
+    /// top level: a chart or drawing rendered inside a `/Figure` BDC opened by
+    /// its parent would wrap its own marks in `/Artifact BMC`, producing an
+    /// artifact nested inside tagged content and failing PDF/UA-1 7.1 (tests 1
+    /// and 2).
+    ///
+    /// Only the depth *counters* are copied, never the emit stacks: this canvas
+    /// did not open those scopes and must never close them. The counters are
+    /// exactly what the "do I need to wrap this?" decisions in
+    /// <see cref="BeginArtifact"/> and <see cref="DrawAsArtifactFallback"/> read.
+    /// </remarks>
+    internal void InheritOpenScopes(int openTaggedCount, int artifactDepth)
+    {
+        _openTaggedCount = openTaggedCount;
+        _artifactDepth = artifactDepth;
+    }
+
     /// <inheritdoc />
     public void BeginMarkedContent(string role)
     {

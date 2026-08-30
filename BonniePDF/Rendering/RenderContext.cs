@@ -251,7 +251,16 @@ public class RenderContext
         var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource,
             ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage,
             RegisterShading);
-        if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
+        if (Tagging != null)
+        {
+            pdfCanvas.SetTaggingContext(Tagging);
+            // The new canvas appends to the same stream as the one already
+            // rendering, so it has to see the marked-content scopes that canvas
+            // has open - otherwise it treats itself as top level and wraps its
+            // marks in a redundant /Artifact nested inside them.
+            if (Canvas is PdfCanvas active)
+                pdfCanvas.InheritOpenScopes(active.OpenTaggedCount, active.ArtifactDepth);
+        }
         return pdfCanvas;
     }
 
