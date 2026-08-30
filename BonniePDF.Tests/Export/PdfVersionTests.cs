@@ -1,4 +1,5 @@
 using BonniePDF.Configuration;
+using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Security.Models;
 using Xunit;
@@ -153,6 +154,31 @@ public class PdfVersionTests
         using MemoryStream ms = new();
 
         Assert.Throws<InvalidOperationException>(() => doc.Save(ms, true));
+    }
+
+    // Regression: Settings.Accessibility = PdfUa1 with the Pdf14 default left
+    // untouched used to silently skip tagging entirely - the structure tree
+    // is only emitted for Pdf17, and unlike PDF/A above, nothing upgraded
+    // the version for an accessibility-only request. No error, no
+    // diagnostic, just a document that silently claimed nothing.
+    [Fact]
+    public void PdfUa1_DirectAccessibilityAutoUpgradesToPdf17()
+    {
+        using BonniePDF.Document doc = new();
+        doc.Add(new TextBlock("hello"));
+        doc.Settings.Language = "en-US";
+        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        using MemoryStream ms = new();
+
+        doc.Save(ms, true);
+
+        Assert.Equal(PdfVersion.Pdf17, doc.Settings.Version);
+        ms.Position = 0;
+        using StreamReader reader = new(ms);
+        string content = reader.ReadToEnd();
+        Assert.StartsWith("%PDF-1.7", content);
+        Assert.Contains("/StructTreeRoot", content);
+        Assert.Contains("/MarkInfo", content);
     }
 
     [Fact]
