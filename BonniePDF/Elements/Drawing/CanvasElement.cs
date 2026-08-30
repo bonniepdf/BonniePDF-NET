@@ -35,11 +35,18 @@ public class CanvasElement : ElementBase, IRoleProvider, IAltTextProvider
             ? SemanticRole.Artifact
             : SemanticRole.Figure;
 
+    /// <summary>
+    /// Fixed width for the canvas element in points. <c>0</c> (the default)
+    /// fills the available content width; a positive value fixes the width and
+    /// is clamped to the space available.
+    /// </summary>
+    public float CanvasWidth { get; set; }
+
     /// <summary>Fixed height for the canvas element in points.</summary>
     public float CanvasHeight { get; set; } = 100f;
 
     /// <inheritdoc />
-    protected override float GetPreferredContentWidth() => 0; // fills available width
+    protected override float GetPreferredContentWidth() => CanvasWidth;
 
     /// <inheritdoc />
     protected override float MeasureContentHeight(float contentWidth) => CanvasHeight;
@@ -49,14 +56,18 @@ public class CanvasElement : ElementBase, IRoleProvider, IAltTextProvider
     {
         ICanvas canvas = ctx.GetCanvas(ctx.CurrentX, ctx.CurrentY);
 
+        // CanvasWidth 0 means "fill what is available"; a positive value fixes
+        // the width but never overflows the column.
+        float drawWidth = CanvasWidth > 0 ? Math.Min(CanvasWidth, contentWidth) : contentWidth;
+
         canvas.SaveState();
         canvas.BeginPath();
-        canvas.AddRect(0, 0, contentWidth, CanvasHeight);
+        canvas.AddRect(0, 0, drawWidth, CanvasHeight);
         canvas.ClipToCurrentPath();
 
         try
         {
-            _drawHandler(canvas, contentWidth, CanvasHeight);
+            _drawHandler(canvas, drawWidth, CanvasHeight);
         }
         finally
         {
