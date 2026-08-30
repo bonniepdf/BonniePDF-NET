@@ -38,6 +38,7 @@
     <Project Path="Examples/BonniePDF.Examples.Templates.Payslip/BonniePDF.Examples.Templates.Payslip.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.Quotation/BonniePDF.Examples.Templates.Quotation.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.EmploymentContract/BonniePDF.Examples.Templates.EmploymentContract.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.UtilityBill/BonniePDF.Examples.Templates.UtilityBill.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.AuditReport/BonniePDF.Examples.Templates.AuditReport.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.ShelfLabel/BonniePDF.Examples.Templates.ShelfLabel.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.UkDegreeTranscript/BonniePDF.Examples.Templates.UkDegreeTranscript.csproj" />
