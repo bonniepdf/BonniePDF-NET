@@ -7,7 +7,7 @@
 
 [Live examples](https://www.bonniepdf.dev/examples) · [Documentation](https://www.bonniepdf.dev/docs/dotnet/getting-started) · [NuGet](https://www.nuget.org/packages/BonniePDF) · [TypeScript package](https://www.npmjs.com/package/@bonniepdf/core)
 
-Create polished, accessible and archival-ready PDFs directly from C#. BonniePDF is a pure managed .NET document engine with automatic layout and pagination, vector charts, embedded fonts, PDF/UA tagging and PDF/A conformance—all with zero dependencies and no Chromium, `System.Drawing`, SkiaSharp or native binaries.
+Create polished, tagged and preservation-focused PDFs directly from C#. BonniePDF is a pure managed .NET document engine with automatic layout and pagination, vector charts, embedded fonts, PDF/UA tagging and PDF/A profile support—all with zero dependencies and no Chromium, `System.Drawing`, SkiaSharp or native binaries.
 
 BonniePDF creates new PDFs from code. It is not an HTML converter, PDF parser, form filler or editor for existing files.
 
@@ -113,7 +113,7 @@ document.Add(new Heading("Quarterly report")
 
 document.Add(new TextBlock
 {
-    Text = "Generated as an accessible, archival PDF with no native dependencies."
+    Text = "Generated as a tagged, PDF/A document with no native dependencies."
 });
 
 await document.SaveAsync("quarterly-report.pdf");
@@ -165,7 +165,7 @@ byte[] bytes = await document.GenerateBytesAsync();
 
 BonniePDF generates structure while it lays out the document, so accessibility information is part of the authoring model rather than a post-processing pass. The optional layout snapshot and compliance preflight can identify missing language, title, alternative text and heading issues before delivery. The live previewer visualises both the structure tree and findings directly over the generated pages.
 
-The repository includes veraPDF-backed validation coverage for supported PDF/A and PDF/UA claims. As with any standards-sensitive workflow, validate your final documents and fonts against the profile required by your organisation.
+The repository includes veraPDF-backed validation coverage for supported PDF/A and PDF/UA claims. Machine validation does not judge whether content is meaningful or establish legal compliance. Validate final documents, fonts, and configuration against the required profile, including human accessibility review where appropriate.
 
 ## Examples and documentation
 
