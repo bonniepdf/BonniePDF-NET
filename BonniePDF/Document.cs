@@ -558,6 +558,19 @@ public class Document : IDisposable
                 $"{Settings.Conformance} requires tagged output. Set Settings.Accessibility = AccessibilityMode.PdfUa1.");
         }
 
+        // PDF/UA-1 tagging requires PDF 1.7 too, and nothing else upgrades
+        // the version for an accessibility-only request (the PDF/A branch
+        // above only covers its own conformance levels). Silently upgrade
+        // the default rather than silently dropping tagging - the caller
+        // asked for accessible output, so honour that intent, same as PDF/A
+        // above. An explicit Pdf20 request is left alone and still hits the
+        // throw below.
+        if (Settings.Accessibility == AccessibilityMode.PdfUa1 && Settings.Version != PdfVersion.Pdf17 &&
+            Settings.Version != PdfVersion.Pdf20)
+        {
+            Settings.Version = PdfVersion.Pdf17;
+        }
+
         // PDF/UA-1 is bound to PDF 1.7. PDF/UA-2 (the PDF 2.0 accessibility
         // standard) is not implemented yet, so reject PDF/UA-1 on a PDF 2.0
         // document rather than silently dropping the tagging.
