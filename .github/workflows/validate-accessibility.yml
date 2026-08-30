@@ -93,8 +93,12 @@ jobs:
           # detector: part=3 conformance=A selects veraPDF flavour 3a, part=4
           # selects flavour 4. Without them those levels are never validated,
           # because no example document claims them.
+          find Examples -path '*/GeneratedPdfs/pdfa1b_baseline.pdf' -exec cp {} generated-pdfs/ \;
+          find Examples -path '*/GeneratedPdfs/pdfa1a_baseline.pdf' -exec cp {} generated-pdfs/ \;
           find Examples -path '*/GeneratedPdfs/pdfa3a_baseline.pdf' -exec cp {} generated-pdfs/ \;
           find Examples -path '*/GeneratedPdfs/pdfa4_baseline.pdf' -exec cp {} generated-pdfs/ \;
+          test -s generated-pdfs/pdfa1b_baseline.pdf
+          test -s generated-pdfs/pdfa1a_baseline.pdf
           test -s generated-pdfs/pdfa3a_baseline.pdf
           test -s generated-pdfs/pdfa4_baseline.pdf
           ls -l generated-pdfs
