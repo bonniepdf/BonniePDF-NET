@@ -18,6 +18,16 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "pdf_compliance.pdf"));
         }
+        Console.WriteLine("Generating PDF/A-1b validation fixture...");
+        using (var doc = PdfA1ValidationExample.GenerateBasic())
+        {
+            doc.Save(Path.Combine(outputDir, "pdfa1b_baseline.pdf"));
+        }
+        Console.WriteLine("Generating PDF/A-1a validation fixture...");
+        using (var doc = PdfA1ValidationExample.GenerateAccessible())
+        {
+            doc.Save(Path.Combine(outputDir, "pdfa1a_baseline.pdf"));
+        }
         Console.WriteLine("Generating PDF/A-3a validation fixture...");
         using (var doc = PdfA3aValidationExample.Generate())
         {
