@@ -128,8 +128,8 @@ public static class CourseCertificateExample
         }
     })
     {
-        // A .NET CanvasElement always fills the width available to it, so the
-        // frame spans the content area without being told to.
+        // CanvasWidth 0 (the default) means "fill the width available", which is
+        // what makes the frame span the content area.
         CanvasHeight = FrameHeight,
         IsDecorative = true,
     };
@@ -168,6 +168,7 @@ public static class CourseCertificateExample
         canvas.DrawText(cx - textWidth / 2, cy + fontSize / 3, label, Accent, fontSize, StandardFonts.TimesBold, 0);
     })
     {
+        CanvasWidth = 74,
         CanvasHeight = 74,
         IsDecorative = true,
     };
@@ -224,12 +225,8 @@ public static class CourseCertificateExample
     /// <summary>Seal on the left, signatures in the middle, verification on the right.</summary>
     private static HorizontalStack Attestation(CertificateData data)
     {
-        // A .NET CanvasElement always fills the width available to it, so the
-        // medallion is squared off by the container around it rather than by a
-        // width on the element itself.
         Container seal = new()
         {
-            Width = 74,
             Child = SealMedallion(data.Course.Grade),
             Margin = new Thickness(0, 6, 0, 0),
         };
