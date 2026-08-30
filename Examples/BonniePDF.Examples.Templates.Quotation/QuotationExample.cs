@@ -140,7 +140,14 @@ public static class QuotationExample
     private static VerticalStack Masthead(QuotationData data)
     {
         VerticalStack identity = new() { Spacing = 2 };
-        identity.Add(Text(data.Supplier.Name, bold: true, size: 15, color: Accent));
+        identity.Add(new Heading(data.Supplier.Name)
+        {
+            Level = 1,
+            TocIdentifier = "quotation",
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 15f,
+            TextColor = Accent,
+        });
         identity.Add(Text(data.Supplier.Address, size: 7.5f, color: Muted));
         identity.Add(Text(data.Supplier.Registration, size: 7.5f, color: Faint));
 
@@ -200,7 +207,7 @@ public static class QuotationExample
         }
 
         VerticalStack stack = new() { Margin = new Thickness(0, 0, 0, 14) };
-        stack.Add(SectionTitle("Scope of work"));
+        stack.Add(SectionTitle("Scope of work", "scope"));
         stack.Add(list);
         return stack;
     }
@@ -280,7 +287,7 @@ public static class QuotationExample
         }
 
         VerticalStack stack = new() { Margin = new Thickness(0, 0, 0, 14) };
-        stack.Add(SectionTitle("Pricing options"));
+        stack.Add(SectionTitle("Pricing options", "pricing"));
         stack.Add(row);
         return stack;
     }
@@ -304,7 +311,7 @@ public static class QuotationExample
         }
 
         VerticalStack stack = new() { Margin = new Thickness(0, 0, 0, 14) };
-        stack.Add(SectionTitle("Optional add-ons"));
+        stack.Add(SectionTitle("Optional add-ons", "add-ons"));
         stack.Add(table);
         return stack;
     }
@@ -343,7 +350,7 @@ public static class QuotationExample
         }
 
         VerticalStack stack = new() { Margin = new Thickness(0, 0, 0, 16) };
-        stack.Add(SectionTitle("Assumptions and exclusions"));
+        stack.Add(SectionTitle("Assumptions and exclusions", "assumptions"));
         stack.Add(list);
         return stack;
     }
@@ -373,7 +380,7 @@ public static class QuotationExample
         intro.Margin = new Thickness(0, 0, 0, 4);
 
         VerticalStack body = new();
-        body.Add(SectionTitle("Acceptance"));
+        body.Add(SectionTitle("Acceptance", "acceptance"));
         body.Add(intro);
         body.Add(fields);
 
@@ -397,12 +404,20 @@ public static class QuotationExample
         Alignment = align,
     };
 
-    private static TextBlock SectionTitle(string text)
+    /// <summary>
+    /// Section titles are real level-2 headings rather than styled body text, so
+    /// assistive technology gets a navigable outline of the quotation instead of
+    /// a flat wall of paragraphs. They nest under the level-1 masthead.
+    /// </summary>
+    private static Heading SectionTitle(string text, string id) => new(text)
     {
-        TextBlock block = Text(text, bold: true, size: 11);
-        block.Margin = new Thickness(0, 0, 0, 6);
-        return block;
-    }
+        Level = 2,
+        TocIdentifier = id,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 11f,
+        TextColor = Ink,
+        Margin = new Thickness(0, 0, 0, 6),
+    };
 
     private static TextBlock ColumnHead(string text, TextAlignment align = TextAlignment.Left) =>
         Text(text, bold: true, size: 7.5f, color: Muted, align: align);
