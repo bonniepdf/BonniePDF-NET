@@ -274,8 +274,15 @@ public static class CourseCertificateExample
             AltText = $"Verification code linking to {data.VerificationUrl}",
         };
 
+        // QRCode always renders flush to the left of whatever width it is
+        // given - unlike TextBlock, it has no alignment of its own, so a
+        // Container with HorizontalAlignment.Center is what actually centres
+        // it under the (wider) captions below. Without this the QR sits
+        // offset from text that otherwise looks centred.
+        Container qrBox = new() { HorizontalAlignment = HorizontalAlignment.Center, Child = qr };
+
         VerticalStack verification = new() { Spacing = 3 };
-        verification.Add(qr);
+        verification.Add(qrBox);
         verification.Add(Caption("Verify online", 6.5f));
         verification.Add(Caption(data.Award.CertificateId, 6.5f, Faint));
 
