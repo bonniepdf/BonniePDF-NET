@@ -96,6 +96,7 @@ public partial class SvgGlyphFallbackTests
         finally
         {
             FontManager.Clear();
+            FontManager.RestoreBundledFonts();
         }
     }
 
@@ -118,6 +119,7 @@ public partial class SvgGlyphFallbackTests
         finally
         {
             FontManager.Clear();
+            FontManager.RestoreBundledFonts();
         }
     }
 
@@ -138,6 +140,7 @@ public partial class SvgGlyphFallbackTests
         finally
         {
             FontManager.Clear();
+            FontManager.RestoreBundledFonts();
         }
     }
 
@@ -157,6 +160,7 @@ public partial class SvgGlyphFallbackTests
         finally
         {
             FontManager.Clear();
+            FontManager.RestoreBundledFonts();
         }
     }
 }
