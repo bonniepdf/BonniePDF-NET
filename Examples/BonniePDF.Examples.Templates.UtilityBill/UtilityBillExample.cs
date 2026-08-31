@@ -41,8 +41,8 @@ public static class UtilityBillExample
 
     // ── Deterministic sample fixture ──────────────────────────────────────────
     private static readonly UtilityBillData Sample = new(
-        new Supplier("Westbrook Energy", "PO Box 4120, Cardiff CF10 3RT", "0800 000 0000", "Supply licence held with the energy regulator"),
-        new Customer("Sample Customer", "48 Cotham Road, Bristol BS6 6DR", "WE-8842-01773"),
+        new Supplier("Sample Energy", "PO Box 4120, Cardiff CF10 3RT", "0800 000 0000", "Supply licence held with the energy regulator"),
+        new Customer("Sample Customer", "48 Sample Road, Bristol BS6 6DR", "SE-8842-01773"),
         new BillingPeriod("1 May 2026", "31 July 2026", "5 August 2026", "19 August 2026"),
         Charges:
         [
@@ -58,7 +58,7 @@ public static class UtilityBillExample
             new MonthUsage("Feb", 1436), new MonthUsage("Mar", 1204), new MonthUsage("Apr", 1002),
             new MonthUsage("May", 861), new MonthUsage("Jun", 798), new MonthUsage("Jul", 810),
         ],
-        Payment: new PaymentDetails("WE884201773", "20-00-00", "41827734"),
+        Payment: new PaymentDetails("SE884201773", "20-00-00", "41827734"),
         Locale: "en-GB",
         Currency: "GBP");
 

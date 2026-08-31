@@ -42,8 +42,8 @@ public static class QuotationExample
 
     // ── Deterministic sample fixture ──────────────────────────────────────────
     private static readonly QuotationData Sample = new(
-        new Supplier("Northwind Document Systems Ltd", "12 Harbour Square, Bristol BS1 4QA, United Kingdom", "proposals@example.com", "Company No. 09876543 · VAT GB 123 4567 89"),
-        new Customer("Meridian Logistics plc", "Sample Recipient, Head of Platform", "Ashford Distribution Park, Kent TN23 7HL"),
+        new Supplier("Sample Company Ltd", "12 Harbour Square, Bristol BS1 4QA, United Kingdom", "proposals@example.com", "Company No. 09876543 · VAT GB 123 4567 89"),
+        new Customer("Sample Customer Ltd", "Sample Recipient, Head of Platform", "Sample Business Park, Kent TN23 7HL"),
         new Reference("QTE-2026-0417", "30 August 2026", "29 September 2026", "Sample Account Manager"),
         Scope:
         [

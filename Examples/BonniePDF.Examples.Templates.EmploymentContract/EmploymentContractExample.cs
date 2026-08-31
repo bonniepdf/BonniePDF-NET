@@ -35,8 +35,8 @@ public static class EmploymentContractExample
 
     // ── Deterministic sample fixture ──────────────────────────────────────────
     private static readonly ContractData Sample = new(
-        new Employer("Northwind Document Systems Ltd", "12 Harbour Square, Bristol BS1 4QA, United Kingdom", "Company No. 09876543"),
-        new Employee("Sample Employee", "48 Cotham Road, Bristol BS6 6DR, United Kingdom"),
+        new Employer("Sample Company Ltd", "12 Harbour Square, Bristol BS1 4QA, United Kingdom", "Company No. 09876543"),
+        new Employee("Sample Employee", "48 Sample Road, Bristol BS6 6DR, United Kingdom"),
         new Role("Senior Platform Engineer", "Engineering", "Head of Platform", "1 October 2026"),
         new Terms(
             "£72,000 per annum, paid monthly in arrears",
