@@ -234,7 +234,21 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
             TargetPageIndex = targetPage
         };
         link.SetRenderBounds(pdfX, pdfY, contentWidth, lineHeight);
-        ctx.RegisterHyperlink(link);
+
+        // Unlike a Hyperlink added as a document child, this one is built and
+        // registered directly rather than going through Hyperlink.Render(), so
+        // it never passes through the pipeline's per-element ChildTagging wrap
+        // that assigns LinkedStructElement (PDF/UA 14.8.4.4.2 requires every
+        // Link annotation to be tagged). Open/close that wrap explicitly here.
+        ChildTagToken token = ChildTagging.BeginChildTag(ctx, link);
+        try
+        {
+            ctx.RegisterHyperlink(link);
+        }
+        finally
+        {
+            ChildTagging.EndChildTag(ctx, token);
+        }
     }
 
     /// <summary>
