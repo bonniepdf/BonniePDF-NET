@@ -1,3 +1,4 @@
+using System.Linq;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements;
@@ -15,14 +16,14 @@ namespace BonniePDF.Examples.Templates.CourseCertificate;
 /// opposite — read once, framed, and judged almost entirely on how it looks.
 /// That makes it the one place where the engine's compositional features earn
 /// their keep rather than its tabular ones: a drawn ornamental frame layered
-/// behind the wording, a rosette seal built from paths rather than a bitmap,
-/// centred serif typography in landscape, and a verification code that makes
-/// the credential checkable. Output is PDF/A-2a + PDF/UA-1, with the decorative
+/// behind the wording, a compact monogram crest built from vectors, centred
+/// serif typography in landscape, and a verification code that makes the
+/// credential checkable. Output is PDF/A-2a + PDF/UA-1, with the decorative
 /// artwork marked as such so a screen reader is read the award, not the ornament.
 /// </summary>
 [System.ComponentModel.DisplayName("Course Certificate")]
 [System.ComponentModel.Category("Education")]
-[System.ComponentModel.Description("A landscape course completion certificate: a drawn ornamental frame layered behind the wording, a rosette seal built from paths rather than a bitmap, centred serif typography, and a verification code that makes the credential checkable. Decorative artwork is kept out of the reading order. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description("A landscape course completion certificate: a drawn ornamental frame layered behind the wording, a compact monogram crest built from vectors, centred serif typography, and a verification code that makes the credential checkable. Decorative artwork is kept out of the reading order. PDF/A-2a + PDF/UA-1.")]
 public static class CourseCertificateExample
 {
     // ── Design tokens ─────────────────────────────────────────────────────────
@@ -32,7 +33,7 @@ public static class CourseCertificateExample
     private static readonly Color Accent = ColorPalette.Indigo[700];
     private static readonly Color AccentMid = ColorPalette.Indigo[400];
     private static readonly Color AccentSoft = ColorPalette.Indigo[100];
-    private static readonly Color Gold = ColorPalette.Amber[500];
+    private static readonly Color Gold = ColorPalette.Amber[600];
 
     // A4 landscape (595.276pt tall) less the page margin on both edges. A
     // certificate is a fixed-format document, so the frame is sized to the
@@ -78,7 +79,7 @@ public static class CourseCertificateExample
         // A leading spacer settles the wording into the frame rather than
         // letting it start hard against the top rule.
         VerticalStack body = new();
-        body.Add(new Spacer(46));
+        body.Add(new Spacer(14));
         body.Add(Citation(data));
         body.Add(Attestation(data));
 
@@ -135,43 +136,64 @@ public static class CourseCertificateExample
     };
 
     /// <summary>
-    /// The seal: concentric rings with a ring of radiating points between them,
-    /// then the grade struck across the middle. Drawn rather than embedded so it
-    /// scales cleanly and carries no bitmap payload.
+    /// The crest: a restrained circular monogram with four small gold lozenges.
+    /// Drawn rather than embedded so it scales cleanly and carries no bitmap
+    /// payload.
     /// </summary>
-    private static CanvasElement SealMedallion(string grade) => new((canvas, width, height) =>
+    private static CanvasElement SealMedallion(string institutionName) => new((canvas, width, height) =>
     {
         float cx = width / 2;
         float cy = height / 2;
-        float outer = Math.Min(cx, cy) - 1;
+        float outer = Math.Min(cx, cy) - 6;
 
-        // Radiating points, drawn first so the discs above cover their roots.
-        const int points = 16;
-        for (int i = 0; i < points; i++)
+        // Four restrained lozenges give the crest a ceremonial detail without
+        // the visual noise of a full starburst.
+        foreach (double a in new[] { 0, Math.PI / 2, Math.PI, Math.PI * 3 / 2 })
         {
-            double a = (double)i / points * Math.PI * 2;
-            double half = Math.PI / points;
+            const float pointDistance = 3.5f;
+            float px = cx + (float)Math.Cos(a) * (outer + pointDistance);
+            float py = cy + (float)Math.Sin(a) * (outer + pointDistance);
+            float tangentX = (float)Math.Cos(a + Math.PI / 2) * 2.5f;
+            float tangentY = (float)Math.Sin(a + Math.PI / 2) * 2.5f;
+            float radialX = (float)Math.Cos(a) * 3.5f;
+            float radialY = (float)Math.Sin(a) * 3.5f;
             canvas.FillPath(
             [
-                new Point(cx + (float)Math.Cos(a) * outer, cy + (float)Math.Sin(a) * outer),
-                new Point(cx + (float)Math.Cos(a + half) * (outer * 0.72f), cy + (float)Math.Sin(a + half) * (outer * 0.72f)),
-                new Point(cx + (float)Math.Cos(a - half) * (outer * 0.72f), cy + (float)Math.Sin(a - half) * (outer * 0.72f)),
+                new Point(px + radialX, py + radialY),
+                new Point(px + tangentX, py + tangentY),
+                new Point(px - radialX, py - radialY),
+                new Point(px - tangentX, py - tangentY),
             ], Gold);
         }
 
-        canvas.FillCircle(cx, cy, outer * 0.74f, AccentSoft);
-        canvas.FillCircle(cx, cy, outer * 0.66f, Color.White);
+        canvas.FillCircle(cx, cy, outer, Accent);
+        canvas.FillCircle(cx, cy, outer - 1.5f, Color.White);
+        canvas.FillCircle(cx, cy, outer - 4.5f, AccentSoft);
 
-        string label = grade.ToUpperInvariant();
-        const float fontSize = 7.5f;
-        float textWidth = canvas.MeasureText(label, fontSize, StandardFonts.TimesBold).Width;
-        canvas.DrawText(cx - textWidth / 2, cy + fontSize / 3, label, Accent, fontSize, StandardFonts.TimesBold, 0);
+        string monogram = string.Concat(institutionName
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Take(2)
+            .Select(word => word[0]))
+            .ToUpperInvariant();
+        const float fontSize = 13f;
+        float monogramWidth = canvas.MeasureText(monogram, fontSize, StandardFonts.TimesBold).Width;
+        canvas.DrawText(cx - monogramWidth / 2, cy - fontSize / 2, monogram, Accent, fontSize, StandardFonts.TimesBold, 0);
     })
     {
-        CanvasWidth = 74,
-        CanvasHeight = 74,
+        CanvasWidth = 52,
+        CanvasHeight = 52,
         IsDecorative = true,
     };
+
+    /// <summary>A small crest, centred above the institution name.</summary>
+    private static HorizontalStack InstitutionCrest(string name)
+    {
+        HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 0, 0, 7) };
+        row.Add(new Spacer(1), 1f);
+        row.Add(new Container { Child = SealMedallion(name) }, 0.15f);
+        row.Add(new Spacer(1), 1f);
+        return row;
+    }
 
     // ── Section builders ──────────────────────────────────────────────────────
 
@@ -179,6 +201,8 @@ public static class CourseCertificateExample
     private static VerticalStack Citation(CertificateData data)
     {
         VerticalStack stack = new();
+
+        stack.Add(InstitutionCrest(data.Institution.Name));
 
         stack.Add(Text(data.Institution.Name.ToUpperInvariant(), font: StandardFonts.Helvetica, size: 9, color: Accent, align: TextAlignment.Center));
 
@@ -222,21 +246,9 @@ public static class CourseCertificateExample
         return stack;
     }
 
-    /// <summary>Seal on the left, signatures in the middle, verification on the right.</summary>
+    /// <summary>A balanced signature and verification row.</summary>
     private static HorizontalStack Attestation(CertificateData data)
     {
-        Container seal = new()
-        {
-            Child = SealMedallion(data.Course.Grade),
-            Margin = new Thickness(0, 6, 0, 0),
-        };
-
-        HorizontalStack signatures = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 28 };
-        foreach (Signatory signatory in data.Signatories)
-        {
-            signatures.Add(SignatureColumn(signatory.Name, signatory.Role), 1);
-        }
-
         QRCode qr = new()
         {
             Data = data.VerificationUrl,
@@ -245,20 +257,23 @@ public static class CourseCertificateExample
             AltText = $"Verification code linking to {data.VerificationUrl}",
         };
 
-        VerticalStack verification = new() { Spacing = 3 };
+        VerticalStack verification = new() { Spacing = 3, Margin = new Thickness(0, 16, 0, 0) };
         verification.Add(qr);
         verification.Add(Caption("Verify online", 7));
         verification.Add(Caption(data.Award.CertificateId, 7, Faint));
 
+        Signatory registrar = data.Signatories[0];
+        Signatory programmeLead = data.Signatories[1];
+
         HorizontalStack row = new()
         {
             WidthDistribution = WidthDistribution.Weighted,
-            Spacing = 24,
+            Spacing = 32,
             Margin = new Thickness(0, 74, 0, 0),
         };
-        row.Add(seal, 0.9f);
-        row.Add(signatures, 2.4f);
-        row.Add(verification, 0.9f);
+        row.Add(SignatureColumn(registrar.Name, registrar.Role), 1f);
+        row.Add(SignatureColumn(programmeLead.Name, programmeLead.Role), 1f);
+        row.Add(verification, 0.5f);
         return row;
     }
 
