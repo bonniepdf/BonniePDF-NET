@@ -72,6 +72,7 @@ public class CrossLanguageEquivalenceTests
             ["Document"] = 1,
             ["TOC"] = 1,
             ["TOCI"] = 3,
+            ["Link"] = 3, // one per TOCI entry - PDF/UA 14.8.4.4.2 requires TOC links to be tagged
             ["H1"] = 3,
             ["P"] = 3,
         }, new SortedDictionary<string, int>(fp));
