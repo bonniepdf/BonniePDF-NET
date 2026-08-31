@@ -44,16 +44,16 @@ public static class CourseCertificateExample
 
     // ── Deterministic sample fixture ──────────────────────────────────────────
     private static readonly CertificateData Sample = new(
-        new Institution("Westbrook Institute", "School of Applied Computing"),
+        new Institution("Sample Institute", "School of Applied Computing"),
         Recipient: "Sample Recipient",
         new Course("Accessible Document Engineering", 45, "Distinction"),
-        new Award("has successfully completed the programme of study and assessment in", "30 August 2026", "WI-ADE-2026-04188"),
+        new Award("has successfully completed the programme of study and assessment in", "30 August 2026", "SI-ADE-2026-04188"),
         Signatories:
         [
             new Signatory("Sample Registrar", "Registrar"),
             new Signatory("Sample Programme Lead", "Programme Lead"),
         ],
-        VerificationUrl: "https://example.com/verify/WI-ADE-2026-04188",
+        VerificationUrl: "https://example.com/verify/SI-ADE-2026-04188",
         Locale: "en-GB");
 
     public static Document Generate()
