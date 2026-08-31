@@ -250,34 +250,47 @@ public static class CourseCertificateExample
     }
 
     /// <summary>A balanced signature and verification row.</summary>
-    private static HorizontalStack Attestation(CertificateData data)
+    private static VerticalStack Attestation(CertificateData data)
     {
+        Signatory registrar = data.Signatories[0];
+        Signatory programmeLead = data.Signatories[1];
+
+        HorizontalStack signatures = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Spacing = 56,
+            Margin = new Thickness(0, 74, 0, 26),
+        };
+        signatures.Add(new Spacer(1), 1f);
+        signatures.Add(SignatureColumn(registrar.Name, registrar.Role), 1.3f);
+        signatures.Add(SignatureColumn(programmeLead.Name, programmeLead.Role), 1.3f);
+        signatures.Add(new Spacer(1), 1f);
+
         QRCode qr = new()
         {
             Data = data.VerificationUrl,
-            Size = 52,
+            Size = 42,
             ForegroundColor = Ink,
             AltText = $"Verification code linking to {data.VerificationUrl}",
         };
 
-        VerticalStack verification = new() { Spacing = 3, Margin = new Thickness(0, 16, 0, 0) };
+        VerticalStack verification = new() { Spacing = 3 };
         verification.Add(qr);
-        verification.Add(Caption("Verify online", 7));
-        verification.Add(Caption(data.Award.CertificateId, 7, Faint));
+        verification.Add(Caption("Verify online", 6.5f));
+        verification.Add(Caption(data.Award.CertificateId, 6.5f, Faint));
 
-        Signatory registrar = data.Signatories[0];
-        Signatory programmeLead = data.Signatories[1];
+        // The trailing spacer is deliberate, not decorative: the certificate
+        // ID caption is wider than the QR code, and without room held clear
+        // on the right the wider caption pokes past the frame's inner rule.
+        HorizontalStack verificationRow = new() { WidthDistribution = WidthDistribution.Weighted };
+        verificationRow.Add(new Spacer(1), 1f);
+        verificationRow.Add(verification, 0.1f);
+        verificationRow.Add(new Spacer(1), 0.04f);
 
-        HorizontalStack row = new()
-        {
-            WidthDistribution = WidthDistribution.Weighted,
-            Spacing = 32,
-            Margin = new Thickness(0, 74, 0, 0),
-        };
-        row.Add(SignatureColumn(registrar.Name, registrar.Role), 1f);
-        row.Add(SignatureColumn(programmeLead.Name, programmeLead.Role), 1f);
-        row.Add(verification, 0.5f);
-        return row;
+        VerticalStack stack = new();
+        stack.Add(signatures);
+        stack.Add(verificationRow);
+        return stack;
     }
 
     /// <summary>A ruled line with the signatory beneath it — one signature column.</summary>
