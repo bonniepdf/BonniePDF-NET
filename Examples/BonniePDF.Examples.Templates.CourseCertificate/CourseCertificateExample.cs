@@ -77,9 +77,12 @@ public static class CourseCertificateExample
         doc.Metadata.Subject = "Course completion certificate (fictional sample data).";
 
         // A leading spacer settles the wording into the frame rather than
-        // letting it start hard against the top rule.
+        // letting it start hard against the top rule. 30pt clears the crest's
+        // own lozenge points (which reach to the very top of its 52pt box)
+        // past the frame's inner rule at 16pt inset - without this the crest
+        // visually crosses the border instead of sitting inside it.
         VerticalStack body = new();
-        body.Add(new Spacer(14));
+        body.Add(new Spacer(30));
         body.Add(Citation(data));
         body.Add(Attestation(data));
 
