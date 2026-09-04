@@ -1,4 +1,39 @@
+# Line endings.
+#
+# Git stores text as LF. Without this file the working-tree ending is whatever
+# each developer's core.autocrlf produces, and a file can end up mixed - LF
+# written into a CRLF working copy, or the reverse. Mixed endings do not show
+# up in a diff, but they break exact-match edits and tooling that reads the
+# file as bytes, so pin the working tree to LF as well and make what you edit
+# the same as what git stores.
+*                text=auto eol=lf
+
 # Shell scripts must keep LF endings. The CI gates invoke tools/*/validate.sh
 # directly; a CRLF checkout committed from Windows makes them fail with an
 # opaque "bad interpreter" / exit 126 rather than a readable error.
-*.sh text eol=lf
+*.sh             text eol=lf
+
+# Windows shells and the Visual Studio solution parser expect CRLF.
+*.bat            text eol=crlf
+*.cmd            text eol=crlf
+*.ps1            text eol=crlf
+*.sln            text eol=crlf
+
+# Binary, so git never rewrites a byte inside them.
+*.png            binary
+*.jpg            binary
+*.jpeg           binary
+*.gif            binary
+*.ico            binary
+*.webp           binary
+*.pdf            binary
+*.woff           binary
+*.woff2          binary
+*.ttf            binary
+*.otf            binary
+*.eot            binary
+*.zip            binary
+*.vsix           binary
+*.snk            binary
+*.dll            binary
+*.exe            binary
