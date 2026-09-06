@@ -6,6 +6,10 @@ using BonniePDF.Core;
 
 namespace BonniePDF.Prototyping;
 
+/// <summary>
+/// Deterministic placeholder text for prototyping layouts before real content
+/// exists. The sequence is seeded, so repeated renders produce the same document.
+/// </summary>
 public static class Placeholders
 {
     private static PlaceholderSource _global = new(42);
@@ -49,8 +53,16 @@ public static class Placeholders
     public static void Reset() => _global = new PlaceholderSource(42);
 }
 
+/// <summary>
+/// One priced line of placeholder invoice content.
+/// </summary>
 public record InvoiceLineItem(string Service, string Description, int Quantity, decimal UnitPrice, decimal Total);
 
+/// <summary>
+/// A single seeded stream of placeholder values. Use this directly when one
+/// document needs its own sequence, independent of the shared
+/// <see cref="Placeholders"/> stream.
+/// </summary>
 public class PlaceholderSource(int seed)
 {
     private int _index = Math.Abs(seed) % 1000;

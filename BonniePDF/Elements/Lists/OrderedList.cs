@@ -52,14 +52,7 @@ public class OrderedList : ListElementBase
 
     protected override float MeasureContentHeight(float contentWidth)
     {
-        float itemWidth = contentWidth - Indent;
-        float totalHeight = MeasureItemsHeight(_items, itemWidth);
-
-        // Measure nested lists
-        foreach (OrderedList nestedList in _nestedLists)
-            totalHeight += nestedList.MeasureHeight(contentWidth - Indent) + ItemSpacing;
-
-        return totalHeight;
+        return MeasureListHeight(_items, _nestedLists, contentWidth);
     }
 
     protected override void RenderItems(RenderContext ctx, float contentWidth)
@@ -95,17 +88,7 @@ public class OrderedList : ListElementBase
         // Update Y position
         ctx.CurrentY = localY;
 
-        // Render nested lists
-        foreach (OrderedList nestedList in _nestedLists)
-        {
-            float originalX = ctx.CurrentX;
-            ctx.CurrentX += Indent;
-
-            nestedList.Render(ctx, contentWidth - Indent);
-
-            ctx.CurrentX = originalX;
-            ctx.CurrentY += ItemSpacing;
-        }
+        RenderNestedLists(ctx, _nestedLists, contentWidth);
     }
 
     private string FormatNumber(int number)

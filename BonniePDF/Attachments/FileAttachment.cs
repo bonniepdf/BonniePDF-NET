@@ -12,7 +12,7 @@ namespace BonniePDF.Attachments;
 ///
 /// <para>Attaching a file only affects generated documents; it does not read
 /// or modify an existing PDF (that is the separate document-operations
-/// feature, this feature).</para>
+/// feature).</para>
 /// </summary>
 public sealed class FileAttachment
 {

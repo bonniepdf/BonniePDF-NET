@@ -50,7 +50,7 @@ public sealed class BarcodeContentException : BonniePdfException
 /// are learned together.
 ///
 /// Encoding is pure managed code with zero dependencies. The bar patterns are
-/// identical to the BonniePDF TypeScript port for the same input.
+/// identical to the BonniePDF TypeScript implementation for the same input.
 /// </summary>
 public class Barcode : ElementBase, IRoleProvider, IAltTextProvider
 {

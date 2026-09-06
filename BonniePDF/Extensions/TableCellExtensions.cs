@@ -4,8 +4,11 @@ using BonniePDF.Elements.Tables;
 
 namespace BonniePDF.Extensions;
 
+/// <summary>
+/// Convenience conversions that wrap elements and values as table cells.
+/// </summary>
 public static class TableCellExtensions
-{    
+{
     /// <summary>
     /// Converts an IElement to a TableCell
     /// </summary>

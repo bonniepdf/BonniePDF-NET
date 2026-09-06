@@ -224,7 +224,7 @@ public class SvgCanvas : ICanvas
                 if (gid == 0) continue;
                 if (hasPrev && font.HasKerning) width += font.GetKerning(prevGid, gid) * scale;
                 width += font.GetGlyphWidth(gid) * scale;
-                // per-glyph letter spacing and per-space word spacing.
+                // Per-glyph letter spacing and per-space word spacing.
                 width += _letterSpacing;
                 if (rune.Value == ' ') width += _wordSpacing;
                 prevGid = gid;
@@ -532,7 +532,7 @@ public class SvgCanvas : ICanvas
                     glyphs.Append($"<tspan x=\"{Tspan(cursorX)}\" y=\"{Tspan(baselineY)}\">{charStr}</tspan>");
 
                     cursorX += runFont.GetGlyphWidth(gid) * scale;
-                    // letter spacing after every glyph; word spacing after spaces.
+                    // Letter spacing after every glyph; word spacing after spaces.
                     cursorX += _letterSpacing;
                     if (rune.Value == ' ') cursorX += _wordSpacing;
                     prevGid = gid;
@@ -559,7 +559,7 @@ public class SvgCanvas : ICanvas
             // Fallback: no embedded TTF available - rely on browser/viewer rendering
             string anchor = GetTextAnchor(align);
             string escapedText = XmlEscape.EscapeXml(text);
-            // letter/word spacing map directly onto SVG presentation attributes.
+            // Letter/word spacing map directly onto SVG presentation attributes.
             string spacingAttr =
                 (_letterSpacing != 0 ? $" letter-spacing=\"{N(_letterSpacing)}\"" : "") +
                 (_wordSpacing != 0 ? $" word-spacing=\"{N(_wordSpacing)}\"" : "");
@@ -1016,16 +1016,7 @@ public class SvgCanvas : ICanvas
     /// </summary>
     private float SpacingWidth(string text)
     {
-        if (_letterSpacing == 0 && _wordSpacing == 0) return 0;
-        int glyphs = 0;
-        int spaces = 0;
-        foreach (Rune rune in text.EnumerateRunes())
-        {
-            if (Rune.IsControl(rune)) continue;
-            glyphs++;
-            if (rune.Value == ' ') spaces++;
-        }
-        return glyphs * _letterSpacing + spaces * _wordSpacing;
+        return TextSpacing.GetWidth(text, _letterSpacing, _wordSpacing);
     }
 
     public void SetGlobalAlpha(float alpha)

@@ -474,7 +474,7 @@ public class PdfCanvas : ICanvas
     /// When non-null, <see cref="BeginMarkedContent"/> /
     /// <see cref="EndMarkedContent"/> emit PDF marked-content operators
     /// and register MCIDs with the structure tree; when null, both are
-    /// no-ops and the canvas behaves exactly as it did pre-G-1.
+    /// no-ops and the canvas emits untagged content.
     /// </summary>
     public void SetTaggingContext(TaggingContext tagging) => _tagging = tagging;
 
@@ -681,7 +681,7 @@ public class PdfCanvas : ICanvas
             PdfOperators.SetFont(_stream, run.ResourceName, fontSize);
             if (run.EmbeddedFont != null)
             {
-                // word spacing (Tw) does not apply to composite fonts, so when
+                // Word spacing (Tw) does not apply to composite fonts, so when
                 // it is set, inject it into the TJ array (combined with any kerning).
                 // Letter spacing is handled universally by Tc, above.
                 if (_wordSpacing != 0 && run.Text.Contains(' '))
@@ -690,9 +690,9 @@ public class PdfCanvas : ICanvas
                         PdfSyntax.ToSpacedGlyphArray(run.Text, run.EmbeddedFont, fontSize, _wordSpacing));
                     continue;
                 }
-                // embedded fonts with kern pairs paint with `TJ` so the PDF
+                // Embedded fonts with kern pairs paint with `TJ` so the PDF
                 // matches the kerned widths the layout engine reserved (and the
-                // kerned this feature SVG export). Unkerned strings keep the `Tj` path.
+                // kerned SVG export). Unkerned strings keep the `Tj` path.
                 string? kerned = run.EmbeddedFont.HasKerning
                     ? PdfSyntax.ToKernedGlyphArray(run.Text, run.EmbeddedFont)
                     : null;

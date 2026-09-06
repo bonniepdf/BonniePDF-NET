@@ -1,5 +1,8 @@
 ﻿namespace BonniePDF.Elements.Text;
 
+/// <summary>
+/// Horizontal alignment of text within the width available to it.
+/// </summary>
 public enum TextAlignment
 {
     Left = 0,

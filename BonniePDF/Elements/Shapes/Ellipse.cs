@@ -3,6 +3,9 @@ using BonniePDF.Rendering;
 
 namespace BonniePDF.Elements.Shapes;
 
+/// <summary>
+/// Draws a filled and optionally stroked ellipse at the current flow position.
+/// </summary>
 public class Ellipse : ElementBase
 {
     public float Width { get; set; } = 16;

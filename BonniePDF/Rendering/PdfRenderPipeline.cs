@@ -131,13 +131,13 @@ public static class PdfRenderPipeline
     /// </summary>
     internal static void RenderElementWithOverflow(IElement element, RenderContext ctx, float contentWidth)
     {
-        // when tagging is on and the element declares a structure
+        // When tagging is on and the element declares a structure
         // role, push the role onto the in-memory tree and wrap the
         // element's render in a /role MCID BDC ... EMC pair so the
         // canvas's draw calls attach as marked content. Pop after.
         //
         // No-op when tagging is off (Tagging == null) or the element
-        // isn't an IRoleProvider - pre-G-1 elements behave exactly as
+        // isn't an IRoleProvider - untagged elements behave exactly as
         // they did.
         //
         // Shared with the layout containers via BeginChildTag/EndChildTag so
@@ -355,7 +355,7 @@ public static class PdfRenderPipeline
             ctx.Margin = pageDimensions.TryGetValue(i, out dimensions) ? dimensions.Margin : settings.Margin;
             ctx.SwitchToPage(i);
 
-            // full-page background slot. Painted behind everything,
+            // Full-page background slot. Painted behind everything,
             // ignoring margins. Prepended so it ends up at the very back of
             // the painter's-model stream. A per-page Page.PageBackground element
             // overrides the document-level template for this page.
@@ -381,7 +381,7 @@ public static class PdfRenderPipeline
             // slot sits above it.
             RenderWatermark(ctx, settings, i, pageSize.Width, pageSize.Height);
 
-            // full-page foreground slot. Painted on top of everything,
+            // Full-page foreground slot. Painted on top of everything,
             // ignoring margins (explicit stamps / overlays). A per-page
             // Page.PageForeground element overrides the document-level template.
             if (pageDimensions.TryGetValue(i, out var fgDims) && fgDims.PageForeground != null)
@@ -441,7 +441,7 @@ public static class PdfRenderPipeline
         float textWidth = FontMetrics.GetStringWidth(wm.Text, StandardFonts.Helvetica, (int)wm.FontSize);
 
         // Determine text encoding - embedded fonts use glyph ID hex strings.
-        // kern the watermark like body text (the this feature SVG export already
+        // Kern the watermark like body text (the SVG export already
         // kerns it), falling back to a plain `Tj` operand when the font has no
         // kern pairs for this string.
         TtfFont? embeddedFont = ctx.ResolveEmbeddedFont(wm.FontName);
@@ -485,7 +485,7 @@ public static class PdfRenderPipeline
         PdfOperators.EndText(wmOps);
         PdfOperators.RestoreState(wmOps);
 
-        // wrap watermark in /Artifact BMC ... EMC so screen readers skip it.
+        // Wrap watermark in /Artifact BMC ... EMC so screen readers skip it.
         if (ctx.Tagging != null)
         {
             wmOps.Insert(0, "/Artifact BMC\n");
@@ -594,7 +594,7 @@ public static class PdfRenderPipeline
     }
 
     /// <summary>
-    /// Renders a full-page slot element (this feature page Background / Foreground).
+    /// Renders a full-page slot element (page Background / Foreground).
     /// The slot spans the entire page and ignores the margins, so the element
     /// is rendered at the page origin (0, 0) with the full page width.
     ///

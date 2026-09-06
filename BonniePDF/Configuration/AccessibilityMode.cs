@@ -18,7 +18,7 @@ namespace BonniePDF.Configuration;
 /// PDF 2.0 tagged-PDF structure model that PDF/UA-2 requires is not
 /// implemented - the structure tree is still emitted for PDF 1.7 only.
 /// Adding a <c>PdfUa2</c> value before that lands would create a "lying
-/// enum" - the same kind of claim-without-substance the this feature honest-claim
+/// enum" - the same kind of claim-without-substance the honest-claim
 /// guard exists to prevent. Requesting <see cref="PdfUa1"/> on a PDF 2.0
 /// document throws rather than silently dropping the tagging. Roadmap, not
 /// launch - do not add <c>PdfUa2</c> speculatively.

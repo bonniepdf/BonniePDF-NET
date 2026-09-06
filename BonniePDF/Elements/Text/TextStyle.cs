@@ -49,7 +49,7 @@ public class TextStyle
 
     /// <summary>
     /// Colour of the decoration lines (underline/strikethrough/overline).
-    /// Null = use the text <see cref="Color"/>, matching the pre-G-39 behaviour.
+    /// Null = use the text <see cref="Color"/>, which is the default.
     /// </summary>
     public Color? DecorationColor { get; set; }
 

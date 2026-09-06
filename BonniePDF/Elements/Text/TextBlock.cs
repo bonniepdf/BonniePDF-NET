@@ -27,7 +27,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     public TextAlignment Alignment { get; set; } = TextAlignment.Left;
 
     /// <summary>
-    /// this feature line clamp: maximum number of lines to render. When set and the text
+    /// Line clamp: maximum number of lines to render. When set and the text
     /// wraps to more lines, the block is truncated to this many lines and
     /// <see cref="Ellipsis"/> is appended to the last visible line. Null = no clamp.
     /// </summary>
@@ -37,13 +37,13 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     public string Ellipsis { get; set; } = "…";
 
     /// <summary>
-    /// this feature paragraph layout: horizontal indent (points) applied to the first line
+    /// Paragraph layout: horizontal indent (points) applied to the first line
     /// of each paragraph (a paragraph = text between hard <c>\n</c> breaks). Default 0.
     /// </summary>
     public float FirstLineIndent { get; set; }
 
     /// <summary>
-    /// this feature paragraph layout: extra vertical space (points) inserted before each
+    /// Paragraph layout: extra vertical space (points) inserted before each
     /// paragraph after the first. Default 0.
     /// </summary>
     public float ParagraphSpacing { get; set; }
@@ -108,7 +108,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         float localY = ctx.CurrentY;
 
         // Calculate how many lines fit on this page. Each line's slot is the base
-        // line height plus any paragraph leading above it (this feature; zero when unused).
+        // line height plus any paragraph leading above it (zero when unused).
         int linesThatFit = 0;
         float testY = localY;
         for (int i = startLine; i < lines.Count; i++)
@@ -170,7 +170,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         for (int i = startLine; i < endLine; i++)
         {
             bool isLastLine = i == lines.Count - 1;
-            localY += SpaceBeforeOf(i); // this feature paragraph leading (0 when unused)
+            localY += SpaceBeforeOf(i); // paragraph leading (0 when unused)
             DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX + Margin.Left + IndentOf(i), isLastLine);
             localY += ComputedLineHeight;
         }
@@ -226,7 +226,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         for (int i = 0; i < lines.Count; i++)
         {
             bool isLastLine = i == lines.Count - 1;
-            localY += SpaceBeforeOf(i); // this feature paragraph leading (0 when unused)
+            localY += SpaceBeforeOf(i); // paragraph leading (0 when unused)
             DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX + IndentOf(i), isLastLine);
             localY += ComputedLineHeight;
         }
@@ -247,7 +247,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     private void DrawSingleLine(RenderContext ctx, string line, float contentWidth, float y, float baseX,
         bool isLastLine)
     {
-        // apply letter/word spacing as canvas state around this line so the
+        // Apply letter/word spacing as canvas state around this line so the
         // painters advance by the same amount the layout reserved. No-op (and
         // byte-identical) when both are zero.
         bool spaced = LetterSpacing != 0 || WordSpacing != 0;
@@ -462,7 +462,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     }
 
     /// <summary>
-    /// this feature line clamp: keeps the first <paramref name="max"/> lines and appends
+    /// Line clamp: keeps the first <paramref name="max"/> lines and appends
     /// <see cref="Ellipsis"/> to the last visible one, trimming whole words (then
     /// characters) until <c>line + ellipsis</c> fits <paramref name="contentWidth"/>.
     /// Dropped lines are never drawn, so no hidden text reaches the content stream
@@ -485,7 +485,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     }
 
     /// <summary>
-    /// this feature paragraph-aware line layout. Splits on hard <c>\n</c> breaks; the first
+    /// Paragraph-aware line layout. Splits on hard <c>\n</c> breaks; the first
     /// line of each paragraph wraps to a narrower column (by <see cref="FirstLineIndent"/>)
     /// and carries that indent, and every paragraph after the first carries
     /// <see cref="ParagraphSpacing"/> of leading before its first line.

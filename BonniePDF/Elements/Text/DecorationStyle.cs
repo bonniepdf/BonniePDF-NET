@@ -5,7 +5,7 @@ using BonniePDF.Drawing;
 namespace BonniePDF.Elements.Text;
 
 /// <summary>
-/// Line style for text decorations (underline/strikethrough/overline) - this feature.
+/// Line style for text decorations (underline/strikethrough/overline).
 /// All variants are painted with straight <see cref="ICanvas.DrawLine"/> segments
 /// so they render identically on the PDF and SVG canvases.
 /// </summary>
@@ -37,7 +37,7 @@ public static class DecorationPainter
     /// Wavy/dashed/dotted are approximated with short straight segments so the
     /// output is canvas-agnostic and PDF/UA-safe (paths only, no fonts).
     /// <see cref="DecorationStyle.Solid"/> emits a single segment, byte-identical
-    /// to the pre-G-39 decoration output.
+    /// to a plain single-segment line.
     /// </summary>
     public static void Paint(ICanvas canvas, float x, float y, float width, Color color, float thickness, DecorationStyle style)
     {

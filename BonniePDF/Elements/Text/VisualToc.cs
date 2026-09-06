@@ -151,7 +151,7 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
     }
 
     /// <summary>
-    /// wraps <see cref="DrawTocEntry"/> in a <c>/TOCI</c> struct
+    /// Wraps <see cref="DrawTocEntry"/> in a <c>/TOCI</c> struct
     /// element + marked-content scope so each entry is its own
     /// addressable item in the PDF/UA structure tree. The outer
     /// <c>/TOC</c> wrap comes from the pipeline's IRoleProvider hook

@@ -13,7 +13,7 @@ internal static class StringBuilderExtensions
     /// <see cref="StringBuilder.AppendLine(string)"/> - which uses
     /// <see cref="System.Environment.NewLine"/> (<c>\r\n</c> on Windows) - this is
     /// platform-independent, so generated output is byte-identical across operating
-    /// systems (and aligned with the TypeScript port, which emits <c>\n</c>).
+    /// systems (and aligned with the TypeScript implementation, which emits <c>\n</c>).
     /// </summary>
     internal static StringBuilder AppendLf(this StringBuilder sb, string text = "")
         => sb.Append(text).Append('\n');

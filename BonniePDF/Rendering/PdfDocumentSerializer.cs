@@ -121,7 +121,7 @@ public class PdfDocumentSerializer
             }
         }
 
-        // annotation bindings for /StructParent + /OBJR wiring.
+        // Annotation bindings for /StructParent + /OBJR wiring.
         // Keys start well above the page count so the /ParentTree number
         // tree has no collision between page keys (0..N-1) and annotation keys.
         const int AnnotStructParentBase = 10_000;
@@ -171,7 +171,7 @@ public class PdfDocumentSerializer
             if (taggingContext != null)
             {
                 pageDict["/StructParents"] = (pageIndex - 1).ToString();
-                pageDict["/Tabs"] = "/S"; // follow structure order for tab navigation
+                pageDict["/Tabs"] = "/S"; // Follow structure order for tab navigation
             }
 
             // Write link annotations if present
@@ -208,7 +208,7 @@ public class PdfDocumentSerializer
         // 4. Post-Processing (Write Resources)
         string globalResources = ctx.Resources.WriteResources(writer, pageIds.Count);
 
-        // ── Honest PDF/A claim ──────────────────────────────────
+        // ── Honest PDF/A claim ─────────────────────────────────────
         // Settings.PdfAEnabled is opt-in, but PDF/A-1b §6.3.4 forbids
         // non-embedded fonts. When the caller asked for PDF/A but the
         // document references any of the standard 14 (which we don't
@@ -297,10 +297,9 @@ public class PdfDocumentSerializer
         }
 
         // Write PDF/UA structure tree. The tree was populated during the
-        // render pass via taggingContext (this feature wire MCIDs and
-        // semantic roles through the canvas). For this feature the tree is still
-        // a Document-only skeleton; this feature adds the renderer-driven
-        // population. this feature threads annotation bindings for /OBJR.
+        // Render pass via taggingContext, which wires MCIDs and semantic
+        // roles through the canvas, populates the tree from the renderer, and
+        // threads annotation bindings for /OBJR.
         if (taggingContext != null)
         {
             StructureTreeWriter structureTreeWriter = new(writer);
@@ -416,7 +415,7 @@ public class PdfDocumentSerializer
             }
         }
 
-        // annotation bindings for /StructParent + /OBJR wiring.
+        // Annotation bindings for /StructParent + /OBJR wiring.
         const int AnnotStructParentBase = 10_000;
         var annotBindings = new List<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>();
         int globalAnnotIndex = 0;
@@ -461,7 +460,7 @@ public class PdfDocumentSerializer
             if (taggingContext != null)
             {
                 pageDict["/StructParents"] = (pageIndex - 1).ToString();
-                pageDict["/Tabs"] = "/S"; // follow structure order for tab navigation
+                pageDict["/Tabs"] = "/S"; // Follow structure order for tab navigation
             }
 
             // Write link annotations if present
@@ -498,7 +497,7 @@ public class PdfDocumentSerializer
         // 4. Post-Processing (Write Resources)
         string globalResources = await ctx.Resources.WriteResourcesAsync(writer, pageIds.Count, cancellationToken).ConfigureAwait(false);
 
-        // drop the PDF/A claim if any standard-14 font slipped
+        // Drop the PDF/A claim if any standard-14 font slipped
         // through unembedded - see the sync path for the rationale.
         if (_document.Settings.PdfAEnabled && ctx.Resources.HasNonEmbeddedStandardFont())
         {
@@ -572,7 +571,7 @@ public class PdfDocumentSerializer
 
         // Write PDF/UA structure tree (async). See sync path for the
         // rationale. taggingContext carries the same builder that the
-        // canvas populated during render. this feature threads annotation bindings
+        // canvas populated during render, which also threads annotation bindings
         // for /OBJR wiring.
         if (taggingContext != null)
         {

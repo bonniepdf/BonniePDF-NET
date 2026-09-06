@@ -540,7 +540,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             float shift = BaselineShiftResolver.Resolve(style.BaselineAlignment, style.BaselineShift, fontSize);
             float runY = y - shift;
 
-            // letter/word spacing as canvas state for this run.
+            // Letter/word spacing as canvas state for this run.
             float ls = style.LetterSpacing ?? 0;
             float ws = style.WordSpacing ?? 0;
             bool spaced = ls != 0 || ws != 0;
@@ -632,23 +632,12 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
     /// <summary>
     /// Extra advance from a style's <see cref="TextStyle.LetterSpacing"/>/
-    /// <see cref="TextStyle.WordSpacing"/> for a string: letter spacing after
-    /// every glyph plus word spacing after every space. Zero when neither is set.
+    /// <see cref="TextStyle.WordSpacing"/> for a string: letter spacing after every
+    /// glyph plus word spacing after every space. Zero when neither is set.
     /// </summary>
     private static float StyleSpacing(string text, TextStyle style)
     {
-        float ls = style.LetterSpacing ?? 0;
-        float ws = style.WordSpacing ?? 0;
-        if (ls == 0 && ws == 0) return 0;
-        int glyphs = 0;
-        int spaces = 0;
-        foreach (System.Text.Rune rune in text.EnumerateRunes())
-        {
-            if (rune.Value < 32) continue;
-            glyphs++;
-            if (rune.Value == ' ') spaces++;
-        }
-        return glyphs * ls + spaces * ws;
+        return TextSpacing.GetWidth(text, style.LetterSpacing ?? 0, style.WordSpacing ?? 0);
     }
 
     // --- Helpers ---

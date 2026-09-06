@@ -16,8 +16,7 @@ public class ChartElement(ChartBase chart, ChartData data) : ElementBase, IRoleP
     /// <summary>
     /// Alternate text description for screen readers (e.g. "Bar chart showing monthly sales").
     /// When set on a PDF/UA-1 document, the chart is tagged as a /Figure with this alt text.
-    /// When empty the chart is tagged as /Artifact (decorative), matching the TS ChartElement
-    /// behaviour when no altText is provided.
+    /// When empty the chart is tagged as /Artifact (decorative).
     /// </summary>
     public string AltText { get; set; } = string.Empty;
 
