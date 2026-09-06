@@ -140,7 +140,7 @@ public static class ProductRoadmapExample
     {
         BackgroundColor = fill,
         CornerRadius = 5,
-        ClipContent = true, // ← this feature
+        ClipContent = true, // ← clip to the rounded outline
         Height = BarHeight,
         Border = new Border(Line),
         BorderColors = new BorderColors(outline),
@@ -208,7 +208,7 @@ public static class ProductRoadmapExample
     }
 
     // One roadmap row: the striped column grid (background) with the bars floating
-    // on top (this feature Layers). Both layers share the same weights, so the bars sit over
+    // on top Layers. Both layers share the same weights, so the bars sit over
     // their month columns and the grid runs continuously behind them.
     private static Container RoadmapRow(IElement labelCell, (int S, int E, string L)[] segs, Color[] shades, bool top = false)
     {

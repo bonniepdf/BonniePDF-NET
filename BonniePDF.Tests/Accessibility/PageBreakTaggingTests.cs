@@ -9,7 +9,7 @@ namespace BonniePDF.Tests.Accessibility;
 [Collection("Serial")]
 
 /// <summary>
-/// page-break-aware tagging tests. Marked-content scopes
+/// Page-break-aware tagging tests. Marked-content scopes
 /// (BDC/EMC) cannot cross a page boundary per PDF spec, but structure
 /// elements can. Verifies that the per-page BDC/EMC counts are
 /// balanced even when a tagged element overflows across pages, and

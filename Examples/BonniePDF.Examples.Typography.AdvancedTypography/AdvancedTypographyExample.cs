@@ -6,7 +6,7 @@ using BonniePDF.Typography;
 namespace BonniePDF.Examples.Typography.AdvancedTypography;
 
 /// <summary>
-/// this feature advanced typography (phase 1a): super/subscript baseline shift and
+/// Advanced typography: super/subscript baseline shift and
 /// decoration styling (overline + underline/strikethrough colour &amp; thickness).
 /// These are visual controls that leave glyph advances - and therefore layout -
 /// untouched.

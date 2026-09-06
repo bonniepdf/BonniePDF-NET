@@ -8,7 +8,7 @@ using Xunit;
 namespace BonniePDF.Tests.Accessibility;
 
 /// <summary>
-/// alt-text on media + implicit Figure / Artifact tagging.
+/// Alt-text on media + implicit Figure / Artifact tagging.
 /// Mostly unit-tested via QRCode end-to-end (QRCode doesn't need a
 /// real image fixture); Image is tested at the property / role level
 /// without rendering.

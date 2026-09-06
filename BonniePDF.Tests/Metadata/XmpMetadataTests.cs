@@ -110,7 +110,7 @@ public class XmpMetadataTests
         Assert.Contains("B", xml);
     }
 
-    // ── PDF/UA conformance and additive composition ──────────
+    // ── PDF/UA conformance and additive composition ─────────────────
 
     [Fact]
     public void XmpMetadataWriter_PdfUa1_IncludesPdfuaidPart()
@@ -138,8 +138,8 @@ public class XmpMetadataTests
     {
         // The additive-hook contract: two registered blocks emit into the
         // same XMP packet without collision. This is the future-proofing
-        // smoke test promised by the this feature this feature design - when ZUGFeRD lands
-        // it'll be a third entry in this same array.
+        // smoke test for that contract - when ZUGFeRD lands it will be a
+        // third entry in this same array.
         var metadata = new DocumentMetadata { Title = "Both" };
         string xml = XmpMetadataWriter.GenerateXmpXml(metadata, new[]
         {

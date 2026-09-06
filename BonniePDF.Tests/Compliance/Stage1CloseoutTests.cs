@@ -12,7 +12,7 @@ namespace BonniePDF.Tests.Compliance;
 [Collection("Serial")]
 
 /// <summary>
-/// stage-1 closeout. Three representative tagged documents
+/// Three representative tagged documents
 /// exercising the stage-1 surface area:
 /// <list type="bullet">
 ///   <item><description><c>business-invoice</c> shape - Heading + body + table with header row, totals;</description></item>

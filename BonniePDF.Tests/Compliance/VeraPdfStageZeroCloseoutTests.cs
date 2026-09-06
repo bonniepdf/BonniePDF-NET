@@ -6,7 +6,7 @@ using Xunit;
 namespace BonniePDF.Tests.Compliance;
 
 /// <summary>
-/// this feature stage-0 closeout - opt-in VeraPDF integration test. Runs the
+/// Opt-in VeraPDF integration test. Runs the
 /// tagged simple-document fixture through a local VeraPDF REST
 /// service (the same one <c>BonniePDF.Validation</c> uses) and
 /// asserts zero failed rules under profile <c>ua1</c>.

@@ -12,7 +12,7 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 /// <summary>
 /// Annual-report front cover #3 - "Geometric badge".
 ///
-/// A light, modern cover built from this feature primitives: a radial "sun" bleeding off
+/// A light, modern cover built from vector drawing primitives: a radial "sun" bleeding off
 /// the top-left corner, an abstract cluster of translucent rotated polygons and a
 /// star placed with affine transforms, and a circular masked image badge (a photo
 /// cropped to a circle - the most common "team / hero" cover crop) ringed in gold.

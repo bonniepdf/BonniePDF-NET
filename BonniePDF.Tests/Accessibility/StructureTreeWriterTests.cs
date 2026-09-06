@@ -6,7 +6,7 @@ using Xunit;
 namespace BonniePDF.Tests.Accessibility;
 
 /// <summary>
-/// this feature acceptance tests for <see cref="StructureTreeWriter"/>.
+/// Acceptance tests for <see cref="StructureTreeWriter"/>.
 /// Drives the writer with a fake <see cref="IPdfWriter"/> that records
 /// every object emitted, so the tests can assert the PDF object graph
 /// shape without spinning up a full Document.

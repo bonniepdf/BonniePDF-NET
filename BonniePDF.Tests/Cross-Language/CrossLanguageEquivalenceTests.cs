@@ -6,7 +6,7 @@ using Xunit;
 namespace BonniePDF.Tests.Cross_Language;
 
 /// <summary>
-/// cross-language equivalence. The .NET and TS implementations
+/// Cross-language equivalence. The .NET and TS implementations
 /// must produce structurally-equivalent PDF/UA output (not
 /// byte-identical PDFs - object IDs differ between runs and between
 /// languages - but the same structure-tree shape).

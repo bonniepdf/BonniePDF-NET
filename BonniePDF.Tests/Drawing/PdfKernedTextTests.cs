@@ -15,7 +15,7 @@ namespace BonniePDF.Tests.Drawing;
 /// Embedded fonts with kern pairs must paint with the <c>TJ</c> operator whose
 /// array interleaves glyph hex runs with advance adjustments in thousandths of
 /// an em, so the PDF ink matches the kerned widths the layout engine reserves
-/// (and the kerned this feature SVG export). Unkerned strings and standard-14 fonts
+/// (and the kerned SVG export). Unkerned strings and standard-14 fonts
 /// keep the plain <c>Tj</c> path, byte-identical to before.
 ///
 /// Liberation Serif reference values (2048 UPEM), identical bytes to the

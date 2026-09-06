@@ -5,7 +5,7 @@ using Xunit;
 namespace BonniePDF.Tests.Accessibility;
 
 /// <summary>
-/// this feature / this feature integration smoke tests. Builds a Document, opts into
+/// Integration smoke tests. Builds a Document, opts into
 /// PDF/UA-1, saves it, and inspects the raw bytes for the catalog
 /// entries that the writer should now emit.
 ///
@@ -44,7 +44,7 @@ public class TaggedDocumentTests
     [Fact]
     public void PdfAOnlyStillEmitsMarkInfoForBackCompat()
     {
-        // Pre-G-1 behaviour: PdfAEnabled adds /MarkInfo. Make sure this
+        // Long-standing behaviour: PdfAEnabled adds /MarkInfo. Make sure this
         // path is unchanged when tagging is off.
         string pdf = GeneratePdf(accessibility: AccessibilityMode.None, language: null, pdfA: true);
 
