@@ -257,7 +257,7 @@ internal static class XmpMetadataWriter
             xw.WriteElementString(XmlPrefixes.Pdf, XmlElements.Producer, XmpNamespaces.Pdf, metadata.Producer);
 
         // Conformance blocks (PDF/A, PDF/UA, ZUGFeRD, …) are emitted by
-        // WriteConformanceBlocks above - see this feature this feature design note for
+        // WriteConformanceBlocks above - see design note for
         // the additive-hook rationale.
     }
 

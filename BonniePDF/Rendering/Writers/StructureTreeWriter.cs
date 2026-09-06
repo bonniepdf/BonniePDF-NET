@@ -25,8 +25,8 @@ namespace BonniePDF.Rendering.Writers;
 ///     when all its MCIDs are on the same page (the common case for
 ///     elements that don't overflow).</description></item>
 ///   <item><description><c>/K [ &lt;&lt;/Type /MCR /Pg p1 /MCID m1&gt;&gt; … ]</c>
-///     when MCIDs span pages (an element that page-broke after the
-///     this feature close+reopen fix runs).</description></item>
+///     when MCIDs span pages (an element that page-broke, once the
+///     close+reopen fix runs).</description></item>
 /// </list>
 /// </summary>
 public sealed class StructureTreeWriter
@@ -67,8 +67,8 @@ public sealed class StructureTreeWriter
     /// or null when no page-aware output is needed (test fixtures).
     /// </param>
     /// <param name="annotBindings">
-    /// Annotation /StructParent bindings collected during serialization
-    ///. Each entry wires a link annotation into the parent tree
+    /// Annotation /StructParent bindings collected during serialization.
+    /// Each entry wires a link annotation into the parent tree
     /// and emits an /OBJR child on the owning Link struct element.
     /// </param>
     public int Write(
@@ -238,7 +238,7 @@ public sealed class StructureTreeWriter
             dict["/ParentTree"] = $"{parentTreeId} 0 R";
             // /ParentTreeNextKey = max key used + 1.
             // For pages it's the page count; if there are annotation
-            // bindings with higher keys (this feature uses 10_000+), use those.
+            // bindings with higher keys (annotation bindings use 10_000+), use those.
             int nextKey = parentTreeNums?.Count ?? 0;
             if (annotBindings != null && annotBindings.Count > 0)
             {
@@ -284,7 +284,7 @@ public sealed class StructureTreeWriter
             parts.Add("[ " + string.Join(" ", slots) + " ]");
         }
 
-        // Annotation struct parent entries: each link annotation gets
+        // Annotation struct-parent entries: each link annotation gets
         // its own key mapping directly to its containing Link struct element.
         if (annotBindings != null)
         {

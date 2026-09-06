@@ -10,7 +10,7 @@ namespace BonniePDF.Metadata;
 /// with its own XML namespace prefix.
 ///
 /// By design, XMP injection must be additive - every conformance feature
-/// (current PDF/A, PDF/UA from this feature, ZUGFeRD's <c>fx</c> later)
+/// (PDF/A, PDF/UA, ZUGFeRD's <c>fx</c>)
 /// registers through this same hook so no one feature has to rewrite
 /// the packet.
 /// </summary>

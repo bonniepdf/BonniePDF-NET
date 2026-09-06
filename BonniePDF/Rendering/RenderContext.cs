@@ -364,7 +364,7 @@ public class RenderContext
         // before the reset below so open nodes can close their rect at the boundary.
         float outgoingBottomY = CurrentY;
 
-        // this feature page-break-aware tagging: marked-content scopes (BDC/EMC)
+        // Page-break-aware tagging: marked-content scopes (BDC/EMC)
         // cannot cross a page boundary per PDF spec, but structure
         // elements can. Snapshot any marked-content currently open,
         // emit EMC on the outgoing page so the marks are balanced,

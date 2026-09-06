@@ -120,6 +120,9 @@ public sealed class LayoutSnapshot
     /// <summary>Document-level accessibility/compliance context; null when unset.</summary>
     public SnapshotMeta? Meta { get; init; }
 
+    /// <summary>
+    /// The page's dimensions in points, as laid out.
+    /// </summary>
     public sealed class PageSize
     {
         public float Width { get; init; }

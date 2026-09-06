@@ -212,7 +212,7 @@ public class AsyncPdfWriter : IAsyncPdfWriter
             ["/Subtype"] = "/Link",
             ["/Rect"] = hyperlink.GetRectangleString(),
             ["/F"] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
-            // this feature / PDF/UA rule 7-18: /Contents mirrors the visible
+            // PDF/UA rule 7-18: /Contents mirrors the visible
             // link text. See the sync variant for the rationale.
             ["/Contents"] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
         };

@@ -306,7 +306,7 @@ internal static class PdfOperators
     /// <summary>Emit <c>/Artifact BMC</c> (no MCID, not in struct tree).</summary>
     internal static void BeginArtifact(StringBuilder s) => s.AppendLf("/Artifact BMC");
 
-    // ── Extended path / state operators (this feature Vector Drawing Surface) ───
+    // ── Extended path / state operators (Vector Drawing Surface) ───
 
     /// <summary>
     /// <c>J</c> - Set the line cap style (0=butt, 1=round, 2=square).

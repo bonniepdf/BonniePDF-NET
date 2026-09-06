@@ -30,7 +30,7 @@ public enum SvgTextMode
 /// <summary>
 /// Options controlling how a document page is exported to SVG.
 ///
-/// Mirrors the public surface documented in api-gap this feature (faithful page SVG
+/// Mirrors the documented public surface for faithful page SVG
 /// export) and the TypeScript <c>SvgPageExportOptions</c>. All members have
 /// sensible defaults that produce compact, deterministic, standalone SVG.
 /// </summary>

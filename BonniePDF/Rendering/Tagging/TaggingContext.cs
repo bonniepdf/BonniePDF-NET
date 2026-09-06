@@ -8,7 +8,7 @@ namespace BonniePDF.Rendering.Tagging;
 /// per-page MCID counter that the canvas uses to label each
 /// marked-content sequence, and a stack of currently-open
 /// marked-content roles used by the page-break handler to keep
-/// BDC/EMC balanced per page (this feature / this feature / this feature stage 0).
+/// BDC/EMC balanced per page.
 ///
 /// One instance per <c>Document</c> render; <see cref="RenderContext"/>
 /// hands it to each page's <c>PdfCanvas</c>. When tagging is disabled,

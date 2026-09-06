@@ -91,6 +91,50 @@ public abstract class ListElementBase : TextElementBase
     }
 
     /// <summary>
+    /// Measures text items and nested lists using the shared list indentation rules.
+    /// </summary>
+    /// <param name="items">The list's own text items.</param>
+    /// <param name="nestedLists">The nested lists rendered beneath the items.</param>
+    /// <param name="contentWidth">The width available to the list, before indentation.</param>
+    /// <returns>The combined height of the items and nested lists.</returns>
+    protected float MeasureListHeight(
+        IEnumerable<string> items,
+        IEnumerable<ListElementBase> nestedLists,
+        float contentWidth)
+    {
+        float totalHeight = MeasureItemsHeight(items, contentWidth - Indent);
+
+        foreach (ListElementBase nestedList in nestedLists)
+            totalHeight += nestedList.MeasureHeight(contentWidth - Indent) + ItemSpacing;
+
+        return totalHeight;
+    }
+
+    /// <summary>
+    /// Renders nested lists at the shared indentation, restoring the parent cursor
+    /// after each one.
+    /// </summary>
+    /// <param name="ctx">The active render context.</param>
+    /// <param name="nestedLists">The nested lists to render.</param>
+    /// <param name="contentWidth">The width available to the list, before indentation.</param>
+    protected void RenderNestedLists(
+        RenderContext ctx,
+        IEnumerable<ListElementBase> nestedLists,
+        float contentWidth)
+    {
+        foreach (ListElementBase nestedList in nestedLists)
+        {
+            float originalX = ctx.CurrentX;
+            ctx.CurrentX += Indent;
+
+            nestedList.Render(ctx, contentWidth - Indent);
+
+            ctx.CurrentX = originalX;
+            ctx.CurrentY += ItemSpacing;
+        }
+    }
+
+    /// <summary>
     /// Checks if a new page is needed before rendering content.
     /// </summary>
     /// <param name="ctx">The render context</param>

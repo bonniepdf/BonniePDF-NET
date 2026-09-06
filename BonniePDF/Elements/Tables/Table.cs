@@ -334,7 +334,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     /// Renders a row without internal pagination checks.
     /// Used by RenderStateful() where pagination is handled externally.
     ///
-    /// this feature tagging: pushes /TR around the row and /TH or /TD around
+    /// Tagging: pushes /TR around the row and /TH or /TD around
     /// each cell when the document has opted into PDF/UA. ColumnSpan
     /// surfaces as /Attributes /ColSpan on the cell's StructElem.
     /// No-op when tagging is off; see RenderRow for the non-stateful
@@ -370,7 +370,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Renders a row without pagination checks. Shared body for RenderRow,
     /// which adds the footer-visibility and pagination checks first.
-    /// this feature tagging: pushes a /TR struct around the row and a /TH or /TD
+    /// Tagging: pushes a /TR struct around the row and a /TH or /TD
     /// around each cell so the structure tree mirrors the visible table.
     /// ColumnSpan surfaces as /Attributes /ColSpan on the cell's StructElem;
     /// header-ness is inherited from the row when the cell doesn't already
