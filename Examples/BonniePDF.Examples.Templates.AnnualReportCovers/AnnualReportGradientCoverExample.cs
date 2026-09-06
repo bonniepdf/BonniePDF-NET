@@ -11,7 +11,7 @@ namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 /// <summary>
 /// Annual-report front cover #1 - "Gradient field".
 ///
-/// A full-bleed annual-report cover painted entirely on the this feature vector drawing
+/// A full-bleed annual-report cover painted entirely on the vector drawing
 /// surface. The whole page is one <see cref="CanvasElement"/>: a vertical
 /// linear-gradient backdrop, a soft radial "glow" that fades to transparent, a
 /// set of fine diagonal accent rules, a rotated brand mark, and the cover type

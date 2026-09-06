@@ -30,9 +30,9 @@ namespace BonniePDF.Tests.Compliance;
 /// Known stage-2 gaps that VeraPDF will still flag (documented in
 /// the failing tests rather than silently passing):
 /// - Header/footer template content is rendered but not tagged as
-///   /Artifact (this feature fixes this).
+///   /Artifact (since fixed).
 /// - Hyperlink annotations don't carry /StructParent (full
-///   annotation reachability - deferred from this feature).
+///   annotation reachability).
 /// </summary>
 public class HardeningTests
 {
@@ -211,12 +211,12 @@ public class HardeningTests
         Assert.Equal(1, SubstringCounter.Count(pdf, "/S /H1"));
     }
 
-    // ── 8. Header/footer templates (this feature fixed) ─────────────────────
+    // ── 8. Header/footer templates ──────────────────────────────────
 
     [Fact]
     public void Fixture08_HeaderFooterTemplates_KnownToProduceUntaggedContent()
     {
-        // this feature fixed this: header/footer template content is now tagged as
+        // Header/footer template content is now tagged as
         // /Artifact so screen readers skip it.
         // /Artifact BMC is in the page content stream - requires compression off.
         InternalConfiguration.EnableCompression = false;
@@ -241,7 +241,7 @@ public class HardeningTests
             Assert.Contains("/S /H1", pdf);
             // Document structure exists.
             Assert.Contains("/S /Document", pdf);
-            // this feature fixed this: header/footer template content is now tagged as
+            // Header/footer template content is now tagged as
             // /Artifact so screen readers skip it.
             Assert.Contains("/Artifact BMC", pdf);
         }
@@ -319,7 +319,7 @@ public class HardeningTests
         Assert.Matches(@"/Alt <FEFF[0-9A-F]*2014[0-9A-F]*>", pdf);
     }
 
-    // ── 11. this feature Stage 2 - real PDF/A when fonts are registered ────────
+    // ── 11. Real PDF/A when fonts are registered ─────────────────────
 
     [Fact]
     public void Fixture11a_FontManager_HasBundledFonts_AfterStaticInit()

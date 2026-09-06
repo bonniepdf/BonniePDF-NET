@@ -14,7 +14,7 @@ namespace BonniePDF.Examples.Templates.AttachedData;
 /// file. The rendered table is the human-readable view; the same numbers are
 /// attached as <c>quarterly-revenue.csv</c>
 /// so downstream tools (or an auditor) can consume the exact source data
-/// without re-keying it from the page. Demonstrates the generic this feature
+/// without re-keying it from the page. Demonstrates the generic
 /// attachment API (as opposed to the Factur-X-specific binding).
 ///
 /// <para>Validated in CI by veraPDF as PDF/A-3b.</para>

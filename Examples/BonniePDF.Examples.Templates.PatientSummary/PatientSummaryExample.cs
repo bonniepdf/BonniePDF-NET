@@ -101,7 +101,7 @@ public static class PatientSummaryExample
         {
             BackgroundColor = Card,
             CornerRadius = 14,
-            ClipContent = true, // ← mask the bleed band + body to the rounded outline
+            ClipContent = true, // ← Mask the bleed band + body to the rounded outline
             Border = new Border(0.75f),
             BorderColors = new BorderColors(Hairline),
             Margin = new Thickness(0, 20, 0, 16),
@@ -175,7 +175,7 @@ public static class PatientSummaryExample
         {
             BackgroundColor = Card,
             CornerRadius = 14,
-            ClipContent = true, // ← this feature
+            ClipContent = true, // ← clip to the rounded outline
             Border = new Border(0.75f),
             BorderColors = new BorderColors(Hairline),
             Child = stack,

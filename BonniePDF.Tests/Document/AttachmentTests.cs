@@ -8,7 +8,7 @@ using Xunit;
 namespace BonniePDF.Tests.Document;
 
 /// <summary>
-/// file attachments (embedded / associated files). Parity peer of the
+/// File attachments (embedded / associated files). Parity peer of the
 /// TypeScript <c>tests/document/attachments.test.ts</c>; both derive from the
 /// shared conformance behaviour for <c>/EmbeddedFiles</c>, <c>/Filespec</c>,
 /// and <c>/AF</c>.

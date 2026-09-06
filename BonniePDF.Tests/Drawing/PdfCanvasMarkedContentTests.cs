@@ -6,7 +6,7 @@ using Xunit;
 namespace BonniePDF.Tests.Drawing;
 
 /// <summary>
-/// marked-content emission tests for <see cref="PdfCanvas"/>.
+/// Marked-content emission tests for <see cref="PdfCanvas"/>.
 /// Drives the canvas directly with a stub TaggingContext and asserts
 /// the emitted PDF operators wrap text/image draws in BDC/EMC. Also
 /// verifies the byte-identical-when-tagging-off invariant the plan

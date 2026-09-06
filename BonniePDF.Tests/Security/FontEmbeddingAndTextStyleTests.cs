@@ -7,11 +7,11 @@ using Xunit;
 
 namespace BonniePDF.Tests.Security;
 
-/// <summary>this feature Stage 2 and this feature tests.</summary>
+/// <summary>Font embedding, PDF/A claim honesty, and the DefaultTextStyle cascade.</summary>
 [Collection("Serial")]
 public class FontEmbeddingAndTextStyleTests
 {
-    // ── this feature Stage 2: FontManager ─────────────────────────────────────
+    // ── FontManager ──────────────────────────────────────────────────
 
     [Fact]
     public void FontManager_HasBundledFonts_AfterStaticInit()
@@ -111,7 +111,7 @@ public class FontEmbeddingAndTextStyleTests
         Assert.DoesNotContain("/FontFile2", pdf);
     }
 
-    // ── DefaultTextStyle cascade ────────────────────────────────
+    // ── DefaultTextStyle cascade ─────────────────────────────────────
 
     [Fact]
     public void DefaultTextStyle_AppliedToUnstyledElements()

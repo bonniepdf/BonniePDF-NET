@@ -11,7 +11,7 @@ namespace BonniePDF.Tests.Accessibility;
 [Collection("Serial")]
 
 /// <summary>
-/// stage-0 closeout. Builds a representative tagged document
+/// Builds a representative tagged document
 /// inline (so the test project doesn't take a cross-project reference)
 /// and asserts the byte-level shape VeraPDF profile <c>ua1</c> verifies:
 ///
@@ -36,7 +36,7 @@ public class TaggedSimpleDocumentTests
             {
                 Title = "Simple Document - Tagged (PDF/UA-1)",
                 Author = "BonniePDF",
-                Subject = "this feature stage-0 closeout fixture.",
+                Subject = "Tagged PDF/UA-1 conformance fixture.",
                 Keywords = "pdf, pdf/ua, accessibility",
             },
             Settings = new DocumentSettings

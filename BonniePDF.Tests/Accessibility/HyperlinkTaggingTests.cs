@@ -10,7 +10,7 @@ namespace BonniePDF.Tests.Accessibility;
 [Collection("Serial")]
 
 /// <summary>
-/// hyperlink tagging. A standalone <see cref="Hyperlink"/>
+/// Hyperlink tagging. A standalone <see cref="Hyperlink"/>
 /// element in a tagged document produces a <c>/Link</c> structure
 /// element wrapping the link text, and the link annotation carries
 /// <c>/Contents</c> mirroring the visible text (VeraPDF profile

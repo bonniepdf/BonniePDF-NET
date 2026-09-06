@@ -5,7 +5,7 @@ using Xunit;
 namespace BonniePDF.Tests.Compliance;
 
 /// <summary>
-/// this feature stage-1 closeout - opt-in VeraPDF integration tests for the
+/// Opt-in VeraPDF integration tests for the
 /// three exemplar scenarios (business-invoice, multi-page-flow,
 /// dickens-novel). Mirrors <see cref="VeraPdfStageZeroCloseoutTests"/>
 /// - same opt-in gating (<c>VERAPDF=1</c>) + local VeraPDF REST

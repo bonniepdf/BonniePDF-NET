@@ -12,7 +12,7 @@ namespace BonniePDF.Tests.Compliance;
 [Collection("Serial")]
 
 /// <summary>
-/// this feature through Stage 2 accessibility hardening.
+/// Accessibility hardening.
 /// Semantic groups, artifact tagging for headers/footers/watermarks,
 /// /Tabs /S reading-order hint, and annotation /StructParent + /OBJR.
 /// </summary>

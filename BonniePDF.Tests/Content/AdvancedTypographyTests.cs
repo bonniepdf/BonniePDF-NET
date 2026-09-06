@@ -9,7 +9,7 @@ using Xunit;
 namespace BonniePDF.Tests.Content;
 
 /// <summary>
-/// this feature advanced typography controls (phase 1a): overline + decoration
+/// Advanced typography controls: overline + decoration
 /// colour/thickness, and super/subscript baseline shift. These are vertical /
 /// visual-only controls that do not change glyph advances, so measurement and
 /// pagination are unaffected.

@@ -8,7 +8,7 @@ namespace BonniePDF.Tests.Accessibility;
 [Collection("Serial")]
 
 /// <summary>
-/// implicit tagging tests. Asserts that existing elements
+/// Implicit tagging tests. Asserts that existing elements
 /// (Heading, TextBlock) automatically emit structure elements and
 /// marked-content sequences when the document opts into
 /// <see cref="AccessibilityMode.PdfUa1"/>. No source-level semantic

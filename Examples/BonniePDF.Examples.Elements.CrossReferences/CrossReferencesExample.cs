@@ -7,7 +7,7 @@ using BonniePDF.Typography;
 namespace BonniePDF.Examples.Elements.CrossReferences;
 
 /// <summary>
-/// this feature cross-references: <see cref="Section"/> (named anchors),
+/// Cross-references: <see cref="Section"/> (named anchors),
 /// <see cref="SectionLink"/> (clickable internal jumps), and
 /// <see cref="PageNumberOf"/> ("see page 42"). The contents block sits on page 1,
 /// ahead of the chapters it points at, so every reference is resolved by the

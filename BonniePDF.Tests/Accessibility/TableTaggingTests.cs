@@ -13,7 +13,7 @@ namespace BonniePDF.Tests.Accessibility;
 [Collection("Serial")]
 
 /// <summary>
-/// table structure tagging. Asserts that a tagged Table
+/// Table structure tagging. Asserts that a tagged Table
 /// produces the <c>/Table > /TR > [/TH | /TD]</c> structure hierarchy
 /// per ISO 32000-1 §14.8.4.3, and that <c>ColumnSpan</c> surfaces as
 /// the documented <c>/A</c> attributes dict on the cell's StructElem.
@@ -262,7 +262,7 @@ public class TableTaggingTests
     {
         // Even with the nested wrap (Table > TR > TH/TD around cell
         // text), the per-page BDC/EMC counts must stay balanced after
-        // the this feature page-break-aware fix.
+        // the page-break-aware fix.
         // Table and TR are container roles that emit BMC, so count opens = BDC + BMC.
         InternalConfiguration.EnableCompression = false;
         try
