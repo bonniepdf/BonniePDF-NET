@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using BonniePDF.Drawing;
 using BonniePDF.Elements.Text;
 using BonniePDF.Export;
@@ -62,15 +62,21 @@ public partial class SvgGlyphFallbackTests
         return doc;
     }
 
-    [GeneratedRegex(@"<tspan x=""([\-\d.]+)""")]
-    private static partial Regex TspanXRegex();
+    [GeneratedRegex(@"<text x=""([^""]+)""")]
+    private static partial Regex TextXListRegex();
 
     [GeneratedRegex("font-family:'(bpf-[^']+)'")]
     private static partial Regex FontFaceFamilyRegex();
 
-    private static IEnumerable<float> TspanXs(string svg) =>
-        TspanXRegex().Matches(svg)
-            .Select(m => float.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture));
+    /// <summary>
+    /// Every glyph origin on the page, in paint order. Glyph-positioned runs carry
+    /// one <c>&lt;text&gt;</c> per run with a space-separated <c>x</c> list - one
+    /// entry per glyph - so the origins are the concatenation of those lists.
+    /// </summary>
+    private static IEnumerable<float> GlyphXs(string svg) =>
+        TextXListRegex().Matches(svg)
+            .SelectMany(m => m.Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            .Select(v => float.Parse(v, System.Globalization.CultureInfo.InvariantCulture));
 
     [Fact]
     public void UncoveredCodePoints_AreRoutedToAFallbackFace()
@@ -130,7 +136,7 @@ public partial class SvgGlyphFallbackTests
         try
         {
             IReadOnlyList<string> pages = SymbolsDoc(Star + Church).GenerateSvgPages();
-            float[] xs = TspanXs(pages[0]).ToArray();
+            float[] xs = GlyphXs(pages[0]).ToArray();
 
             Assert.Equal(2, xs.Length);
             // Strictly increasing: the fallback run continues where the primary
@@ -152,8 +158,8 @@ public partial class SvgGlyphFallbackTests
         {
             // Right-aligned text is positioned from its measured width, so a wrong
             // measurement shifts the whole line. Every glyph must contribute.
-            float wide = TspanXs(SymbolsDoc(Church + FuelPump + RaisedFist).GenerateSvgPages()[0]).Max();
-            float narrow = TspanXs(SymbolsDoc(Church).GenerateSvgPages()[0]).Max();
+            float wide = GlyphXs(SymbolsDoc(Church + FuelPump + RaisedFist).GenerateSvgPages()[0]).Max();
+            float narrow = GlyphXs(SymbolsDoc(Church).GenerateSvgPages()[0]).Max();
 
             Assert.True(wide > narrow, $"expected {wide} > {narrow}");
         }

@@ -1,4 +1,4 @@
-using BonniePDF.Charts;
+﻿using BonniePDF.Charts;
 using BonniePDF.Charts.Models;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
@@ -264,8 +264,10 @@ public class SvgPageExportTests
 
         SvgDocumentExport export = doc.GenerateSvgDocument();
 
-        // Text references the private embedded family; an @font-face data URI binds it.
-        Assert.Contains("font-family=\"bpf-", export.Pages[0], StringComparison.Ordinal);
+        // Text references the private embedded family via an inline style (so a host
+        // `* { font-family: inherit }` reset cannot override it); an @font-face data
+        // URI binds the name to the subset bytes.
+        Assert.Contains("style=\"font-family:'bpf-", export.Pages[0], StringComparison.Ordinal);
         Assert.Contains("@font-face", export.FontFaceCss, StringComparison.Ordinal);
         Assert.Contains("src:url(\"data:font/ttf;base64,", export.FontFaceCss, StringComparison.Ordinal);
         // The subset is a fraction of the full font (performance).

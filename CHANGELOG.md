@@ -15,6 +15,32 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+### Fixed
+
+- SVG page export now positions glyphs the same way as `@bonniepdf/core`, which
+  the shared specification pins because SVG is the artefact parity tooling
+  compares. Embedded-font text is emitted as one `<text>` per font run carrying
+  a per-glyph `x` list, replacing a `<tspan>` per glyph — identical geometry in
+  roughly a third of the markup (a representative invoice page went from 50.8 KB
+  to 20.7 KB of SVG body).
+- `DrawTextRotated` and `DrawTextJustified` now position embedded-font glyphs
+  explicitly instead of emitting a plain run and leaving the spacing to the
+  viewer. Rotated and justified text in an embedded face could previously land
+  at positions the PDF did not use.
+- Rotated SVG text turned the opposite way to the PDF it previews. The PDF
+  painter rotates counter-clockwise for a positive angle in PDF's y-up space;
+  SVG is y-down, so the exporter now negates the angle. Watermarks were the
+  visible case.
+- `DrawTextRotated` and `DrawTextJustified` hardcoded one branch of the baseline
+  calculation instead of calling `BaselineY`, placing text incorrectly when
+  `SvgCanvasOptions.PdfBaseline` was not at its default.
+- `DrawTextJustified` formatted coordinates and font size with the current
+  culture, which emits a comma decimal separator — and so malformed SVG — on
+  comma-decimal locales. It now formats invariantly like every other path.
+- Embedded families are now bound through a `style` attribute with a generic
+  fallback rather than a bare `font-family` presentation attribute, so a host
+  stylesheet's `* { font-family: inherit }` reset cannot override the face and
+  text stays broadly correct if the `@font-face` fails to load.
 - Consolidated duplicated internal logic with no change in behaviour:
   letter/word spacing advance is now calculated in one place shared by the
   text elements and both canvases, the nested-list measure and render loops
