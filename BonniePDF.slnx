@@ -1,8 +1,9 @@
-<Solution>
+﻿<Solution>
   <Project Path="BonniePDF.Tests/BonniePDF.Tests.csproj" />
   <Project Path="BonniePDF/BonniePDF.csproj" />
 
   <Folder Name="/Examples/">
+    <Project Path="Examples/BonniePDF.Examples.ShowcaseAssets/BonniePDF.Examples.ShowcaseAssets.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Basics.Margins/BonniePDF.Examples.Basics.Margins.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Basics.PageSettings/BonniePDF.Examples.Basics.PageSettings.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Basics.SimpleDocument/BonniePDF.Examples.Basics.SimpleDocument.csproj" />
