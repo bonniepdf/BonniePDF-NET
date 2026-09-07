@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -99,6 +99,9 @@ public class PdfCanvas : ICanvas
     /// Gets the height of the canvas (returns the page height)
     /// </summary>
     public float Height { get; }
+
+    /// <inheritdoc />
+    public int GraphicsStateDepth => _stateDepth;
 
     /// <summary>
     /// Pushes graphics state (PDF: q)

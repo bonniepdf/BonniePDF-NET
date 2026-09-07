@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
@@ -379,6 +379,17 @@ public class RenderContext
                 Canvas.EndMarkedContent();
         }
 
+        // Graphics state gets the same treatment, and for the same reason: a q
+        // without its Q (or a <g> without its </g>) may not cross a page boundary.
+        // An element that breaks the page from inside its own Render leaves the
+        // caller's SaveState open here - the caller's finally will RestoreState
+        // against the *new* page, which would otherwise silently drop the close and
+        // leave the outgoing page unbalanced. Close them here, reopen below, so both
+        // pages balance and the caller's RestoreState still has a scope to close.
+        int reopenStateDepth = Canvas.GraphicsStateDepth;
+        for (int i = 0; i < reopenStateDepth; i++)
+            Canvas.RestoreState();
+
         Pages.Add(new StringBuilder());
         CurrentPageIndex++;
         CurrentX = Margin;
@@ -392,6 +403,8 @@ public class RenderContext
         // Layout capture: split every open node's rect across the page boundary.
         LayoutRecorder?.PageBreak(outgoingBottomY, CurrentPageIndex, CurrentY);
 
+        for (int i = 0; i < reopenStateDepth; i++)
+            Canvas.SaveState();
         if (reopenRoles != null)
         {
             foreach (string role in reopenRoles)

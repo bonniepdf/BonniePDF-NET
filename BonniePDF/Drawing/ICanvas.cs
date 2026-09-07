@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BonniePDF.Core;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Images;
@@ -18,6 +18,15 @@ public interface ICanvas
     float Height { get; }
 
     /// <summary>Pushes graphics state (PDF: q, SVG: &lt;g&gt;)</summary>
+    /// <summary>
+    /// How many graphics-state scopes are currently open (PDF <c>q</c> without its
+    /// <c>Q</c>; SVG <c>&lt;g&gt;</c> without its <c>&lt;/g&gt;</c>). A page break has to
+    /// close these on the outgoing page and reopen them on the new one, the same way
+    /// marked content is handled, because neither may cross a page boundary.
+    /// Canvases that do not track graphics state report 0.
+    /// </summary>
+    int GraphicsStateDepth => 0;
+
     void SaveState();
 
     /// <summary>
