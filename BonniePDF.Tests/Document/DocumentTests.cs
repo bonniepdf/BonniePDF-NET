@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using Xunit;
 
@@ -72,7 +72,7 @@ public class DocumentTests
     private static float FirstGlyphX(string svg)
     {
         // Depending on the font path the exporter emits either <text x="..."> or
-        // per-glyph <tspan x="...">; the first x attribute is the text origin either way.
+        // a space-separated per-glyph x list; the first x value is the text origin either way.
         int start = svg.IndexOf("<text", StringComparison.Ordinal);
         Assert.True(start >= 0, "expected at least one text element in the SVG");
         int attr = svg.IndexOf(" x=\"", start, StringComparison.Ordinal);

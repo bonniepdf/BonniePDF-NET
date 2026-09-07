@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -248,6 +248,74 @@ public class SvgCanvas : ICanvas
     }
 
     /// <summary>
+    /// Paints text as explicitly positioned glyphs, one <c>&lt;text&gt;</c> element
+    /// per font run, positions carried by the element's multi-value <c>x</c> list.
+    /// Runs share a single advance cursor and baseline, so a fallback run is
+    /// indistinguishable from the surrounding text apart from the face it uses.
+    ///
+    /// Kerning applies within a run but is reset at each boundary, mirroring the
+    /// PDF painter, where every run is its own <c>TJ</c> array.
+    ///
+    /// The family goes in a <c>style</c> attribute rather than a presentation
+    /// attribute so a host stylesheet's <c>* { font-family: inherit }</c> reset
+    /// cannot override it.
+    /// </summary>
+    private string GlyphPositionedRuns(float startX, float baselineY, List<SvgTextRun> runs, string fillHex,
+        float fontSize, float extraPerSpace, string extraAttributes = "", string? transform = null,
+        float letterSpacing = 0f)
+    {
+        string transformAttr = transform is null ? "" : $" transform=\"{transform}\"";
+        var elements = new StringBuilder();
+        float cursor = startX;
+
+        foreach (SvgTextRun run in runs)
+        {
+            TtfFont runFont = run.Font;
+            float scale = fontSize / runFont.UnitsPerEm;
+            var xs = new List<string>();
+            var chars = new StringBuilder();
+
+            ushort prevGid = 0;
+            bool hasPrev = false;
+
+            foreach (Rune rune in run.Text.EnumerateRunes())
+            {
+                ushort gid = runFont.GetGlyphId(rune.Value);
+                // The run resolver already dropped anything unrenderable; a zero
+                // GID here would mean a face changed under us. Skip rather than
+                // emit a character the embedded subset cannot draw.
+                if (gid == 0) continue;
+
+                FontUsageSink?.Invoke(run.FontFamily, runFont, rune.Value);
+
+                if (hasPrev && runFont.HasKerning)
+                    cursor += runFont.GetKerning(prevGid, gid) * scale;
+
+                xs.Add(N(cursor));
+                chars.Append(rune.ToString());
+                cursor += runFont.GetGlyphWidth(gid) * scale;
+                // Letter spacing after every glyph; word spacing after spaces
+                // (extraPerSpace also carries justification spacing when present).
+                cursor += letterSpacing;
+                if (rune.Value == ' ') cursor += extraPerSpace;
+                prevGid = gid;
+                hasPrev = true;
+            }
+
+            if (xs.Count == 0) continue;
+
+            string familyStyle =
+                $"font-family:'{XmlEscape.EscapeXml(EmbeddedFontFamily(run.FontFamily))}',{GenericFontFallback(runFont)}";
+            elements.Append(
+                $"<text x=\"{string.Join(" ", xs)}\" y=\"{N(baselineY)}\" fill=\"{fillHex}\" font-size=\"{N(fontSize)}\" style=\"{familyStyle}\" xml:space=\"preserve\"{extraAttributes}{transformAttr}>")
+                .Append(XmlEscape.EscapeXml(chars.ToString()))
+                .Append("</text>");
+        }
+
+        return elements.ToString();
+    }
+
+    /// <summary>
     /// Drops code points <paramref name="font"/> has no glyph for, so they are
     /// never emitted against a face that cannot draw them (which would let the
     /// viewer substitute a system font).
@@ -302,14 +370,6 @@ public class SvgCanvas : ICanvas
     /// Locale-safe number formatting for SVG output (always '.' decimal separator).
     /// </summary>
     private static string Inv(float v) => v.ToString(CultureInfo.InvariantCulture);
-
-    /// <summary>
-    /// Formats a per-glyph <c>&lt;tspan&gt;</c> coordinate. Honours configured
-    /// precision; otherwise falls back to the historical two-decimal format.
-    /// </summary>
-    private string Tspan(float v) => Options.Precision is int p
-        ? Math.Round((double)v, p).ToString(CultureInfo.InvariantCulture)
-        : v.ToString("F2", CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Gets the page number (0-based) for multipage mode.
@@ -498,55 +558,8 @@ public class SvgCanvas : ICanvas
             else if (align == TextAlignment.Right)
                 cursorX -= totalWidth;
 
-            // One <text> per font run, sharing a single advance cursor and
-            // baseline, so a fallback run is indistinguishable from the
-            // surrounding text apart from the face it uses. Kerning applies
-            // within a run but resets at each boundary, mirroring the PDF
-            // painter, where every run is its own TJ array.
-            foreach (SvgTextRun run in runs)
-            {
-                TtfFont runFont = run.Font;
-                float scale = fontSize / runFont.UnitsPerEm;
-                var glyphs = new StringBuilder();
-
-                ushort prevGid = 0;
-                bool hasPrev = false;
-
-                foreach (Rune rune in run.Text.EnumerateRunes())
-                {
-                    ushort gid = runFont.GetGlyphId(rune.Value);
-                    // The run resolver already dropped anything unrenderable; a
-                    // zero GID here would mean a face changed under us. Skip
-                    // rather than emit a character the subset cannot draw.
-                    if (gid == 0) continue;
-
-                    FontUsageSink?.Invoke(run.FontFamily, runFont, rune.Value);
-
-                    if (hasPrev && runFont.HasKerning)
-                    {
-                        short kern = runFont.GetKerning(prevGid, gid);
-                        cursorX += kern * scale;
-                    }
-
-                    string charStr = XmlEscape.EscapeXml(rune.ToString());
-                    glyphs.Append($"<tspan x=\"{Tspan(cursorX)}\" y=\"{Tspan(baselineY)}\">{charStr}</tspan>");
-
-                    cursorX += runFont.GetGlyphWidth(gid) * scale;
-                    // Letter spacing after every glyph; word spacing after spaces.
-                    cursorX += _letterSpacing;
-                    if (rune.Value == ' ') cursorX += _wordSpacing;
-                    prevGid = gid;
-                    hasPrev = true;
-                }
-
-                if (glyphs.Length == 0) continue;
-
-                // Reference the private embedded-face name (bound by the exporter's
-                // @font-face) so the viewer renders the exact font used for layout.
-                _sb.Append($"<text font-family=\"{EmbeddedFontFamily(run.FontFamily)}\" font-size=\"{N(fontSize)}\" fill=\"{fill}\" xml:space=\"preserve\">");
-                _sb.Append(glyphs);
-                _sb.AppendLf("</text>");
-            }
+            _sb.AppendLf(GlyphPositionedRuns(cursorX, baselineY, runs, fill, fontSize, _wordSpacing,
+                letterSpacing: _letterSpacing));
         }
         else if (ResolveFont(fontFamily) != null)
         {
@@ -580,21 +593,21 @@ public class SvgCanvas : ICanvas
         string fill = color.ToHexString();
         float baselineY = BaselineY(sy, fontSize);
 
+        const string attr = " data-bonniepdf-total-pages=\"true\"";
         TtfFont? ttfFont = ResolveFont(fontFamily);
-        string fontAttrs;
         if (ttfFont != null)
         {
+            // The placeholder is substituted with the real total at view time, so
+            // the subset must carry every digit, not just those in "00".
             for (int cp = '0'; cp <= '9'; cp++)
                 FontUsageSink?.Invoke(fontFamily, ttfFont, cp);
-            fontAttrs = $"font-family=\"{EmbeddedFontFamily(fontFamily)}\"";
-        }
-        else
-        {
-            fontAttrs = StandardFontCssAttrs(fontFamily);
+            var runs = new List<SvgTextRun> { new(fontFamily, ttfFont, placeholder) };
+            _sb.AppendLf(GlyphPositionedRuns(sx, baselineY, runs, fill, fontSize, 0f, attr));
+            return;
         }
 
         _sb.AppendLf(
-            $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" {fontAttrs} font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"start\" data-bonniepdf-total-pages=\"true\">{placeholder}</text>");
+            $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" {StandardFontCssAttrs(fontFamily)} font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"start\"{attr}>{placeholder}</text>");
     }
 
     /// <summary>Resolves deferred total-page placeholders in already-rendered SVG markup.</summary>
@@ -633,30 +646,34 @@ public class SvgCanvas : ICanvas
     /// </summary>
     public void DrawTextRotated(float x, float y, string text, Color color, float fontSize, string fontFamily, float angleDegrees)
     {
+        if (string.IsNullOrEmpty(text)) return;
+
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         string fill = color.ToHexString();
-        float baselineY = sy + fontSize;
+        float baselineY = BaselineY(sy, fontSize);
 
-        // An embedded font renders via the private @font-face name; a standard-14
-        // font is viewer-supplied (generic stack + weight/style).
-        TtfFont? ttfFont = ResolveFont(fontFamily);
-        string fontAttrs;
-        if (ttfFont != null)
+        // The angle is negated: the PDF painter rotates counter-clockwise for a
+        // positive angle in PDF's y-up space, and SVG's y-down space turns the
+        // same sign into a clockwise turn. Without this the preview mirrors the
+        // rotation of the PDF it is previewing.
+        string transform = $"rotate({N(-angleDegrees)} {N(sx)} {N(baselineY)})";
+
+        List<SvgTextRun> runs = ResolveRuns(fontFamily, text);
+        if (runs.Count > 0)
         {
-            text = FilterToCoveredText(ttfFont, text);
-            if (text.Length == 0) return;
-            RecordEmbeddedUsage(fontFamily, ttfFont, text);
-            fontAttrs = $"font-family=\"{EmbeddedFontFamily(fontFamily)}\"";
+            _sb.AppendLf(GlyphPositionedRuns(sx, baselineY, runs, fill, fontSize, 0f, "", transform));
+            return;
         }
-        else
-        {
-            fontAttrs = StandardFontCssAttrs(fontFamily);
-        }
+
+        // An embedded family whose every code point was dropped produces no runs
+        // and must not fall through to the standard-14 path, which would hand the
+        // text to the viewer's own fonts.
+        if (ResolveFont(fontFamily) != null) return;
 
         string escapedText = XmlEscape.EscapeXml(text);
         _sb.AppendLf(
-            $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" {fontAttrs} font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"start\" transform=\"rotate({N(angleDegrees)}, {N(sx)}, {N(baselineY)})\">{escapedText}</text>");
+            $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" {StandardFontCssAttrs(fontFamily)} font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"start\" transform=\"{transform}\">{escapedText}</text>");
     }
 
     /// <summary>
@@ -679,34 +696,31 @@ public class SvgCanvas : ICanvas
             return;
         }
 
-        float textWidth = FontMetrics.GetStringWidth(text, fontFamily, fontSize);
-        float extraSpace = availableWidth - textWidth;
-        float wordSpacing = extraSpace / spaceCount;
+        // Measured over the same runs that get painted, so the extra space is
+        // distributed against the width the glyphs actually occupy.
+        float textWidth = MeasureText(text, fontSize, fontFamily).Width;
+        float extraPerSpace = (availableWidth - textWidth) / spaceCount;
 
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         string fill = color.ToHexString();
-        float baselineY = sy + fontSize * 0.8f;
+        float baselineY = BaselineY(sy, fontSize);
 
-        // An embedded font renders via the private @font-face name; a standard-14
-        // font is viewer-supplied (generic stack + weight/style).
-        TtfFont? ttfFont = ResolveFont(fontFamily);
-        string fontAttrs;
-        if (ttfFont != null)
+        List<SvgTextRun> runs = ResolveRuns(fontFamily, text);
+        if (runs.Count > 0)
         {
-            text = FilterToCoveredText(ttfFont, text);
-            if (text.Length == 0) return;
-            RecordEmbeddedUsage(fontFamily, ttfFont, text);
-            fontAttrs = $"font-family=\"{EmbeddedFontFamily(fontFamily)}\"";
+            _sb.AppendLf(GlyphPositionedRuns(sx, baselineY, runs, fill, fontSize, extraPerSpace));
+            return;
         }
-        else
-        {
-            fontAttrs = StandardFontCssAttrs(fontFamily);
-        }
+
+        // An embedded family whose every code point was dropped produces no runs
+        // and must not fall through to the standard-14 path, which would hand the
+        // text to the viewer's own fonts.
+        if (ResolveFont(fontFamily) != null) return;
 
         string escapedText = XmlEscape.EscapeXml(text);
         _sb.AppendLf(
-            $"<text x=\"{sx}\" y=\"{baselineY}\" {fontAttrs} font-size=\"{fontSize}\" fill=\"{fill}\" text-anchor=\"start\" word-spacing=\"{wordSpacing:F2}\">{escapedText}</text>");
+            $"<text x=\"{N(sx)}\" y=\"{N(baselineY)}\" {StandardFontCssAttrs(fontFamily)} font-size=\"{N(fontSize)}\" fill=\"{fill}\" text-anchor=\"start\" word-spacing=\"{N(extraPerSpace)}\" xml:space=\"preserve\">{escapedText}</text>");
     }
 
     /// <summary>
@@ -1192,6 +1206,18 @@ public class SvgCanvas : ICanvas
         string s = sb.ToString();
         while (s.Contains("--")) s = s.Replace("--", "-");
         return s.Trim('-');
+    }
+
+    /// <summary>
+    /// Generic CSS family to sit behind the embedded face, so text still renders
+    /// in a broadly correct shape if the <c>@font-face</c> fails to load. Derived
+    /// from the PDF font descriptor flags (bit 1 fixed-pitch, bit 2 serif).
+    /// </summary>
+    private static string GenericFontFallback(TtfFont font)
+    {
+        if ((font.Flags & 1) != 0) return "monospace";
+        if ((font.Flags & 2) != 0) return "serif";
+        return "sans-serif";
     }
 
     private static string GetFillAttributes(Color color)
