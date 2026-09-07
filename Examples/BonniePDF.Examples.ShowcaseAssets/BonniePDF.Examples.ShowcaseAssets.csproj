@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BonniePDF\BonniePDF.csproj" />
+    <ProjectReference Include="..\BonniePDF.Examples.Templates.AnnualReportCovers\BonniePDF.Examples.Templates.AnnualReportCovers.csproj" />
+    <ProjectReference Include="..\BonniePDF.Examples.Templates.BusinessInvoice\BonniePDF.Examples.Templates.BusinessInvoice.csproj" />
+    <ProjectReference Include="..\BonniePDF.Examples.Templates.FinancialDashboard\BonniePDF.Examples.Templates.FinancialDashboard.csproj" />
+    <ProjectReference Include="..\BonniePDF.Examples.Templates.LabReport\BonniePDF.Examples.Templates.LabReport.csproj" />
+    <ProjectReference Include="..\BonniePDF.Examples.Templates.PublicLibraryMembershipLetter\BonniePDF.Examples.Templates.PublicLibraryMembershipLetter.csproj" />
+    <ProjectReference Include="..\BonniePDF.Examples.Templates.ShippingLabel\BonniePDF.Examples.Templates.ShippingLabel.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <Version>2026.7.2</Version>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
