@@ -17,6 +17,13 @@ behaviour, so the two files can be read side by side.
 
 ### Fixed
 
+- Page breaks left graphics state unbalanced. The render pipeline wraps each
+  element in `SaveState`/`RestoreState`; when an element broke the page from
+  inside its own `Render`, the restore ran against the new page and the page the
+  element started on kept an unclosed `q` - an invalid content stream per ISO
+  32000-1 - and, in SVG export, an unclosed `<g>` that made the page fail to
+  parse as XML. `NewPage` now closes open graphics-state scopes on the outgoing
+  page and reopens them on the new one, as it already did for marked content.
 - SVG page export now positions glyphs the same way as `@bonniepdf/core`, which
   the shared specification pins because SVG is the artefact parity tooling
   compares. Embedded-font text is emitted as one `<text>` per font run carrying

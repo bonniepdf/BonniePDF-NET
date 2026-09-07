@@ -391,6 +391,9 @@ public class SvgCanvas : ICanvas
     /// </summary>
     public float Height { get; }
 
+    /// <inheritdoc />
+    public int GraphicsStateDepth => _stateDepth;
+
     /// <summary>
     /// Pushes graphics state (SVG: &lt;g&gt;)
     /// </summary>
