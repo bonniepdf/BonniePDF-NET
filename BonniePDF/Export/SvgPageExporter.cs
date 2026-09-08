@@ -138,7 +138,13 @@ internal static class SvgPageExporter
         if (recorder != null)
         {
             // Page sizes align with the emitted SVG pages.
-            recorder.SetPages(renderedPages.Take(limit).Select(p => (p.Size.Width, p.Size.Height)));
+            recorder.SetPages(renderedPages.Take(limit).Select(p => new LayoutSnapshot.PageSize
+            {
+                Width = p.Size.Width,
+                Height = p.Size.Height,
+                Color = p.PageColor.HasValue ? LayoutRecorder.ColorToHex(p.PageColor.Value) : null,
+                BackdropUnknown = p.PageBackdropUnknown
+            }));
             // Document-level accessibility/compliance context for the evaluator.
             string? metaTitle = document.Metadata?.Title;
             recorder.SetMeta(new SnapshotMeta

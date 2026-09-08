@@ -396,7 +396,13 @@ public static class PdfRenderPipeline
                 // Capture hyperlinks for this page index
                 Hyperlinks = ctx.PageHyperlinks.TryGetValue(i, out var hyperlinks)
                     ? hyperlinks
-                    : new List<Hyperlink>()
+                    : new List<Hyperlink>(),
+                PageColor = pageColor ?? settings.PageColor,
+                // A background element can paint anything, so a page carrying one
+                // has an unmodellable backdrop for contrast purposes.
+                PageBackdropUnknown =
+                    (pageDimensions.TryGetValue(i, out var backdropDims) && backdropDims.PageBackground != null)
+                    || settings.PageBackground != null
             };
 
             yield return output;

@@ -15,6 +15,37 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+### Added
+
+- The accessibility preflight now checks **text colour contrast** against the
+  WCAG 2.2 AA thresholds (4.5:1, or 3:1 for text at 18pt and above, or 14pt and
+  above when bold). `CompliancePreflight.Evaluate` reports
+  `contrast-insufficient` as a warning, with the measured ratio and the
+  threshold that applied, so the fix is a colour change rather than an
+  investigation.
+
+  Contrast is measured wherever the background can be determined from the
+  document model: text inside a `Container` with a fill, a table cell under its
+  row/header/footer colour, a `PageColor`, or the default white page. Where it
+  cannot — text over layered or freely drawn content, a page painted with a
+  background element, or anything partly transparent — the preflight reports
+  `contrast-unknown` (info) instead of assuming a colour. Reporting a confident
+  wrong verdict would be worse than reporting none.
+
+  These are the first findings that do not cite PDF/UA-1: ISO 14289-1 states no
+  numeric contrast requirement, so they carry `Standard = "WCAG 2.2"` and
+  `Clause = "WCAG 2.2 SC 1.4.3 (AA)"`. Existing findings are unchanged, and
+  because the new findings are warnings and info, `ComplianceReport.Passed`
+  keeps its meaning.
+
+  Supporting this, the layout snapshot moves to **schema version 4**: nodes
+  carry an optional `NodePaint` (text colour, size, weight, background fill,
+  alpha) and `LayoutSnapshot.PageSize` carries the page's resolved fill and
+  whether it paints a background element. Capture remains opt-in and
+  observational — output is byte-identical with and without it. The new
+  `Contrast` class exposes `Ratio`, `RelativeLuminance` and `RequiredRatio` for
+  callers that want the maths directly.
+
 ### Fixed
 
 - Page breaks left graphics state unbalanced. The render pipeline wraps each
