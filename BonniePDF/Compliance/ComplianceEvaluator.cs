@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using BonniePDF.Rendering;
 
@@ -11,8 +12,9 @@ namespace BonniePDF.Compliance;
 // A pure evaluator that walks an enriched LayoutSnapshot — the tree the
 // LayoutRecorder captures during a render pass, carrying each element's intrinsic
 // accessibility facts (NodeAccessibility) plus document-level context
-// (SnapshotMeta) — and reports per-element findings against the PDF/UA-1 rules
-// (ISO 14289-1).
+// (SnapshotMeta) plus what each element paints (NodePaint) — and reports
+// per-element findings against the PDF/UA-1 rules (ISO 14289-1) and the WCAG 2.2
+// AA contrast thresholds.
 //
 // Because BonniePDF *generates* the document, it knows the semantics of every element at authoring time and can
 // tell an author which element on which page is inaccessible and how to fix it,
@@ -44,9 +46,9 @@ public sealed class ComplianceFinding
     /// <summary>Stable rule identifier, e.g. "figure-missing-alt".</summary>
     public string Code { get; init; } = "";
     public ComplianceSeverity Severity { get; init; }
-    /// <summary>The standard the rule derives from. Currently always "PDF/UA-1".</summary>
+    /// <summary>The standard the rule derives from: "PDF/UA-1" or "WCAG 2.2".</summary>
     public string Standard { get; init; } = "PDF/UA-1";
-    /// <summary>Spec clause citation, e.g. "ISO 14289-1:2014 §7.3".</summary>
+    /// <summary>Clause citation within <see cref="Standard"/>, e.g. "ISO 14289-1:2014 §7.3".</summary>
     public string Clause { get; init; } = "";
     /// <summary>Human-readable, author-facing description of the problem.</summary>
     public string Message { get; init; } = "";
@@ -79,6 +81,19 @@ public sealed class ComplianceReport
 public static class CompliancePreflight
 {
     private const string Ua = "PDF/UA-1";
+
+    /// <summary>
+    /// WCAG 2.2. Contrast findings cite this rather than PDF/UA-1 because
+    /// ISO 14289-1 states <em>no numeric contrast requirement</em> — its §7.1 only
+    /// forbids conveying information by contrast or colour <em>alone</em>. The
+    /// 4.5:1 / 3:1 thresholds are WCAG's (SC 1.4.3), reaching PDF work via
+    /// EN 301 549 and the European Accessibility Act. Attributing them to an
+    /// ISO 14289 clause would be a false citation.
+    /// </summary>
+    private const string Wcag = "WCAG 2.2";
+
+    /// <summary>The clause both contrast rules cite.</summary>
+    private const string WcagContrastClause = "WCAG 2.2 SC 1.4.3 (AA)";
 
     /// <summary>
     /// Evaluates a layout snapshot and returns a per-element report. The rules are
@@ -142,7 +157,9 @@ public static class CompliancePreflight
         int headingCount = 0;
         int lastHeadingLevel = 0;
 
-        void Visit(LayoutNode node)
+        // Ancestors, nearest-first, are threaded through the walk because backdrop
+        // resolution is the one rule that needs to look upward.
+        void Visit(LayoutNode node, List<LayoutNode> ancestors)
         {
             NodeAccessibility? a11y = node.A11y;
             if (a11y != null)
@@ -156,9 +173,13 @@ public static class CompliancePreflight
                 }
                 if (string.Equals(a11y.Role, "Table", StringComparison.Ordinal)) CheckTableHeaders(node, findings);
             }
-            foreach (LayoutNode child in node.Children) Visit(child);
+            CheckContrast(node, ancestors, snapshot.Pages, findings);
+
+            var chain = new List<LayoutNode>(ancestors.Count + 1) { node };
+            chain.AddRange(ancestors);
+            foreach (LayoutNode child in node.Children) Visit(child, chain);
         }
-        Visit(snapshot.Root);
+        Visit(snapshot.Root, new List<LayoutNode>());
 
         if (headingCount == 0 && HasContent(snapshot.Root))
         {
@@ -187,6 +208,143 @@ public static class CompliancePreflight
             WarningCount = warningCount,
             InfoCount = infoCount
         };
+    }
+
+    /// <summary>
+    /// Resolves the colour painted behind a text node, walking ancestors
+    /// nearest-first per spec/08 §4.3.1.
+    ///
+    /// The important property of this method is that it is willing to say "I don't
+    /// know". A confident wrong verdict is worse than no verdict: it trains authors
+    /// to ignore the checker.
+    /// </summary>
+    private static (string? Hex, ContrastUnknownReason? Unknown) ResolveBackdrop(
+        List<LayoutNode> ancestors,
+        IReadOnlyList<LayoutSnapshot.PageSize> pages,
+        int? page)
+    {
+        foreach (LayoutNode ancestor in ancestors)
+        {
+            NodePaint? paint = ancestor.Paint;
+            if (paint == null) continue;
+
+            // An element that paints arbitrary content behind its children (layers,
+            // a drawing surface) makes everything below it unmeasurable.
+            if (paint.BackdropUnknown == true) return (null, ContrastUnknownReason.UnmodelledBackdrop);
+
+            if (paint.Background is { } background)
+            {
+                // A translucent fill composites with whatever is beneath it, which
+                // the snapshot does not model.
+                if (paint.BackgroundAlpha is { } alpha && alpha < 1f)
+                    return (null, ContrastUnknownReason.Translucent);
+                return (background, null);
+            }
+        }
+
+        // No coloured ancestor: fall through to the page.
+        LayoutSnapshot.PageSize? pageInfo =
+            page is int index && index >= 0 && index < pages.Count ? pages[index] : null;
+        if (pageInfo?.BackdropUnknown == true) return (null, ContrastUnknownReason.PageBackdrop);
+        if (pageInfo?.Color is { } pageColor) return (pageColor, null);
+
+        // PDF viewers render pages on white paper, so this is a defined default
+        // rather than a guess.
+        return ("#ffffff", null);
+    }
+
+    /// <summary>Compares a text node's colour to its resolved backdrop.</summary>
+    private static ContrastVerdict? EvaluateContrast(
+        LayoutNode node,
+        List<LayoutNode> ancestors,
+        IReadOnlyList<LayoutSnapshot.PageSize> pages)
+    {
+        NodePaint? paint = node.Paint;
+        if (paint?.Text is not { } textHex) return null;
+
+        if (paint.TextAlpha is { } textAlpha && textAlpha < 1f)
+            return ContrastVerdict.Indeterminate(ContrastUnknownReason.Translucent);
+
+        (string? backdropHex, ContrastUnknownReason? unknown) = ResolveBackdrop(ancestors, pages, PageOf(node));
+        if (unknown is { } reason) return ContrastVerdict.Indeterminate(reason);
+
+        // A malformed colour degrades to "unknown" rather than to a wrong verdict.
+        if (!Contrast.TryParseHexRgb(textHex, out var foreground) ||
+            !Contrast.TryParseHexRgb(backdropHex, out var background))
+        {
+            return ContrastVerdict.Indeterminate(ContrastUnknownReason.UnmodelledBackdrop);
+        }
+
+        double ratio = Contrast.Round(Contrast.Ratio(foreground, background));
+        double required = Contrast.RequiredRatio(paint.FontSize, paint.Bold == true);
+        return ContrastVerdict.Measured(ratio, required);
+    }
+
+    /// <summary>Author-facing explanation of why a backdrop could not be resolved.</summary>
+    private static string UnknownReasonText(ContrastUnknownReason reason) => reason switch
+    {
+        ContrastUnknownReason.PageBackdrop =>
+            "the page paints a background element rather than a flat colour",
+        ContrastUnknownReason.Translucent =>
+            "the text or its background is partly transparent, so the result depends on what is beneath",
+        _ => "it sits over layered or freely drawn content, so what is behind it is not a single colour"
+    };
+
+    /// <summary>
+    /// WCAG 2.2 SC 1.4.3 (AA) text contrast.
+    ///
+    /// Reported as a <em>warning</em>, not an error: <c>Passed</c> is defined as
+    /// <c>ErrorCount == 0</c>, so promoting contrast to an error would silently
+    /// change what <c>Passed</c> means for every existing consumer.
+    /// </summary>
+    private static void CheckContrast(
+        LayoutNode node,
+        List<LayoutNode> ancestors,
+        IReadOnlyList<LayoutSnapshot.PageSize> pages,
+        List<ComplianceFinding> output)
+    {
+        if (EvaluateContrast(node, ancestors, pages) is not { } verdict) return;
+
+        if (verdict.IsIndeterminate)
+        {
+            output.Add(new ComplianceFinding
+            {
+                Code = "contrast-unknown",
+                Severity = ComplianceSeverity.Info,
+                Standard = Wcag,
+                Clause = WcagContrastClause,
+                Message =
+                    $"{node.Type} text contrast could not be measured because " +
+                    $"{UnknownReasonText(verdict.Reason)}.",
+                FixHint =
+                    "Check this text against its background by eye, or place it over a " +
+                    "solid colour so the contrast can be measured automatically.",
+                NodeId = node.Id,
+                Role = node.A11y?.Role,
+                Page = PageOf(node)
+            });
+            return;
+        }
+
+        if (verdict.Passed) return;
+
+        output.Add(new ComplianceFinding
+        {
+            Code = "contrast-insufficient",
+            Severity = ComplianceSeverity.Warning,
+            Standard = Wcag,
+            Clause = WcagContrastClause,
+            Message =
+                $"{node.Type} text contrast is {verdict.Ratio.ToString("0.00", CultureInfo.InvariantCulture)}:1 " +
+                $"against its background, below the " +
+                $"{verdict.Required.ToString("0.##", CultureInfo.InvariantCulture)}:1 required at this text size.",
+            FixHint =
+                "Darken or lighten the text colour, or change its background, until the ratio reaches " +
+                $"{verdict.Required.ToString("0.##", CultureInfo.InvariantCulture)}:1.",
+            NodeId = node.Id,
+            Role = node.A11y?.Role,
+            Page = PageOf(node)
+        });
     }
 
     private static int? PageOf(LayoutNode node) => node.Rects.Count > 0 ? node.Rects[0].Page : (int?)null;

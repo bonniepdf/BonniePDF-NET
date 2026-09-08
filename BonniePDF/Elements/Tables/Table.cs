@@ -600,6 +600,13 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                          ?? (row.IsFooter ? FooterBackgroundColor : null)
                          ?? RowBackgroundColor;
 
+        // The cascade above is the only place a cell's effective fill is known —
+        // the cell element itself carries no BackgroundColor when the colour came
+        // from the row or the table. Hand it to the recorder so the contrast rules
+        // measure the cell's text against its real backdrop, not the page.
+        if (bgColor.HasValue)
+            ctx.LayoutRecorder?.AnnotatePaint(cell, LayoutRecorder.PaintForBackground(bgColor.Value));
+
         Color? textColor = cell.TextColor
                            ?? row.TextColor
                            ?? (row.IsHeader ? HeaderTextColor : null)

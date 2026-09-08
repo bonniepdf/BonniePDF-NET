@@ -28,11 +28,13 @@ namespace BonniePDF.Rendering;
 
 /// <summary>Schema version emitted in every snapshot, so consumers can feature-detect.
 /// v2 adds per-node <see cref="NodeAccessibility"/> (<c>A11y</c>) and
-/// <see cref="SnapshotMeta"/> (<c>Meta</c>); v1 consumers that ignore unknown fields
+/// <see cref="SnapshotMeta"/> (<c>Meta</c>); v3 adds <c>SourceId</c>; v4 adds
+/// per-node <see cref="NodePaint"/> (<c>Paint</c>) and the page backdrop facts on
+/// <see cref="LayoutSnapshot.PageSize"/>. Consumers that ignore unknown fields
 /// remain compatible.</summary>
 public static class LayoutSnapshotSchema
 {
-    public const int Version = 3;
+    public const int Version = 4;
 }
 
 /// <summary>A single rectangle an element occupied on one page (top-left origin, points).</summary>
@@ -91,6 +93,41 @@ public sealed class SnapshotMeta
     public string? Title { get; init; }
 }
 
+/// <summary>
+/// What an element paints, captured so the compliance preflight can evaluate
+/// colour contrast without a second render pass or any inspection of rendered
+/// output.
+///
+/// Colours are "#rrggbb" strings with alpha carried separately, so an opaque
+/// document produces no alpha values at all and fixtures stay readable across
+/// languages. Elements that paint nothing relevant produce no NodePaint.
+/// </summary>
+public sealed class NodePaint
+{
+    /// <summary>Resolved text colour, "#rrggbb"; null when the element paints no text.</summary>
+    public string? Text { get; set; }
+    /// <summary>Text alpha in [0,1); null when fully opaque.</summary>
+    public float? TextAlpha { get; set; }
+    /// <summary>The element's own resolved background fill, "#rrggbb"; null when it has none.</summary>
+    public string? Background { get; set; }
+    /// <summary>Background alpha in [0,1); null when fully opaque.</summary>
+    public float? BackgroundAlpha { get; set; }
+    /// <summary>Rendered text size in points; null when the element paints no text.</summary>
+    public float? FontSize { get; set; }
+    /// <summary>True when the resolved font weight is 700 or heavier.</summary>
+    public bool? Bold { get; set; }
+    /// <summary>
+    /// The node paints something behind its children that cannot be reduced to one
+    /// opaque colour — layers or a freely drawn surface. Descendant text is reported
+    /// as contrast-unknown rather than measured against a guess.
+    /// </summary>
+    public bool? BackdropUnknown { get; set; }
+
+    /// <summary>True when nothing was captured, so the node should carry no Paint.</summary>
+    internal bool IsEmpty =>
+        Text is null && Background is null && FontSize is null && BackdropUnknown is null;
+}
+
 /// <summary>One node in the layout tree: a rendered element and the area(s) it occupied.</summary>
 public sealed class LayoutNode
 {
@@ -106,6 +143,8 @@ public sealed class LayoutNode
     public IList<LayoutRect> Rects { get; } = new List<LayoutRect>();
     /// <summary>Intrinsic accessibility facts, when the element declares a role; null otherwise.</summary>
     public NodeAccessibility? A11y { get; set; }
+    /// <summary>Intrinsic colour/typography facts, when the element paints any; null otherwise.</summary>
+    public NodePaint? Paint { get; set; }
     public IList<LayoutNode> Children { get; } = new List<LayoutNode>();
 }
 
@@ -127,6 +166,10 @@ public sealed class LayoutSnapshot
     {
         public float Width { get; init; }
         public float Height { get; init; }
+        /// <summary>Resolved page fill as "#rrggbb", when one is set; null otherwise.</summary>
+        public string? Color { get; init; }
+        /// <summary>The page paints a background element, so its backdrop is unmodellable.</summary>
+        public bool BackdropUnknown { get; init; }
     }
 }
 
@@ -163,11 +206,20 @@ public sealed class LayoutRecorder
         _stack = new List<OpenFrame> { new() { Node = _root } };
     }
 
-    /// <summary>Records the page sizes (index-aligned with rendered pages).</summary>
-    public void SetPages(IEnumerable<(float Width, float Height)> pages)
+    /// <summary>Records the page sizes and backdrop facts (index-aligned with rendered pages).</summary>
+    public void SetPages(IEnumerable<LayoutSnapshot.PageSize> pages)
     {
         var list = new List<LayoutSnapshot.PageSize>();
-        foreach (var (w, h) in pages) list.Add(new LayoutSnapshot.PageSize { Width = w, Height = h });
+        foreach (LayoutSnapshot.PageSize page in pages)
+        {
+            list.Add(new LayoutSnapshot.PageSize
+            {
+                Width = page.Width,
+                Height = page.Height,
+                Color = page.Color,
+                BackdropUnknown = page.BackdropUnknown
+            });
+        }
         _pageSizes = list;
     }
 
@@ -182,11 +234,39 @@ public sealed class LayoutRecorder
 
         var node = new LayoutNode { Id = $"n{_nextId++}", Type = type, Name = name };
         node.A11y = AccessibilityOf(element, type);
+        node.Paint = PaintOf(element, type);
         _stack[^1].Node.Children.Add(node);
 
         var frame = new OpenFrame { Node = node, X = x, Width = width, Page = page, StartY = y };
         _stack.Add(frame);
         _open[element] = frame;
+    }
+
+    /// <summary>
+    /// Merges additional paint facts into an already-open node.
+    ///
+    /// Needed where the value a node paints is not one of its own properties: a
+    /// table cell's background comes from the header/footer/row cascade resolved
+    /// in the row renderer, so the cell element itself has no BackgroundColor to
+    /// read. Without this the cell would appear unpainted and its text would be
+    /// measured against the page instead of its actual fill.
+    ///
+    /// A no-op when no node is open for <paramref name="element"/>, so callers
+    /// need no guard.
+    /// </summary>
+    public void AnnotatePaint(object element, NodePaint paint)
+    {
+        if (!Capturing) return;
+        if (!_open.TryGetValue(element, out OpenFrame? frame)) return;
+
+        NodePaint target = frame.Node.Paint ??= new NodePaint();
+        if (paint.Text is not null) target.Text = paint.Text;
+        if (paint.TextAlpha is not null) target.TextAlpha = paint.TextAlpha;
+        if (paint.Background is not null) target.Background = paint.Background;
+        if (paint.BackgroundAlpha is not null) target.BackgroundAlpha = paint.BackgroundAlpha;
+        if (paint.FontSize is not null) target.FontSize = paint.FontSize;
+        if (paint.Bold is not null) target.Bold = paint.Bold;
+        if (paint.BackdropUnknown is not null) target.BackdropUnknown = paint.BackdropUnknown;
     }
 
     /// <summary>Closes a node. When <paramref name="complete"/> is false it stays open for resumption.</summary>
@@ -296,5 +376,67 @@ public sealed class LayoutRecorder
             HeadingLevel = headingLevel,
             ImageLike = ImageLikeTypes.Contains(type) ? true : (bool?)null
         };
+    }
+
+    /// <summary>
+    /// Element types that draw arbitrary content behind whatever is stacked on
+    /// them, so a descendant's backdrop cannot be reduced to one opaque colour.
+    /// Image-like elements are leaves — text is never their descendant — so they
+    /// are not listed here.
+    /// </summary>
+    private static readonly HashSet<string> UnmodelledBackdropTypes = new()
+    {
+        "Layers", "CanvasElement"
+    };
+
+    /// <summary>Formats a colour as "#rrggbb" (alpha is carried separately).</summary>
+    public static string ColorToHex(Core.Color color) =>
+        $"#{color.R:x2}{color.G:x2}{color.B:x2}";
+
+    /// <summary>Alpha in [0,1], rounded to 3 decimals so fixtures compare cleanly.</summary>
+    private static float AlphaOf(Core.Color color) =>
+        (float)Math.Round(color.ScA, 3, MidpointRounding.AwayFromZero);
+
+    /// <summary>Builds a <see cref="NodePaint"/> carrying just a resolved background colour,
+    /// for callers that compute a fill outside the element (see <see cref="AnnotatePaint"/>).</summary>
+    public static NodePaint PaintForBackground(Core.Color color)
+    {
+        var paint = new NodePaint { Background = ColorToHex(color) };
+        float alpha = AlphaOf(color);
+        if (alpha < 1f) paint.BackgroundAlpha = alpha;
+        return paint;
+    }
+
+    /// <summary>
+    /// Derives <see cref="NodePaint"/> from an element by reading its already
+    /// resolved text colour / size / weight and background fill — the same values
+    /// the canvas is about to draw with. Returns null when the element paints
+    /// nothing the contrast rules care about, so most nodes stay unannotated.
+    ///
+    /// Purely observational: it reads existing properties and never triggers layout.
+    /// </summary>
+    public static NodePaint? PaintOf(object element, string type)
+    {
+        var paint = new NodePaint();
+
+        if (element is Elements.Text.TextElementBase text)
+        {
+            paint.Text = ColorToHex(text.TextColor);
+            float textAlpha = AlphaOf(text.TextColor);
+            if (textAlpha < 1f) paint.TextAlpha = textAlpha;
+            paint.FontSize = text.FontSize;
+            if (text.Weight >= Typography.FontWeight.Bold) paint.Bold = true;
+        }
+
+        if (element is Elements.Layout.IBackgroundColor { BackgroundColor: { } background })
+        {
+            paint.Background = ColorToHex(background);
+            float backgroundAlpha = AlphaOf(background);
+            if (backgroundAlpha < 1f) paint.BackgroundAlpha = backgroundAlpha;
+        }
+
+        if (UnmodelledBackdropTypes.Contains(type)) paint.BackdropUnknown = true;
+
+        return paint.IsEmpty ? null : paint;
     }
 }
