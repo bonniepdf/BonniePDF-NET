@@ -284,7 +284,11 @@ public static class CourseCertificateExample
         VerticalStack verification = new() { Spacing = 3 };
         verification.Add(qrBox);
         verification.Add(Caption("Verify online", 6.5f));
-        verification.Add(Caption(data.Award.CertificateId, 6.5f, Faint));
+        // Muted, not Faint: this sits inside a Layers composition, so the
+        // preflight can't verify it - but Faint (Slate[400]) is 2.63:1 against
+        // the white it actually renders on, well under 4.5:1 at this tiny 6.5pt
+        // size.
+        verification.Add(Caption(data.Award.CertificateId, 6.5f, Muted));
 
         // The trailing spacer is deliberate, not decorative: the certificate
         // ID caption is wider than the QR code, and without room held clear

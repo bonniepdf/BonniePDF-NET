@@ -8,6 +8,7 @@ using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Export;
 using BonniePDF.Rendering;
+using BonniePDF.Typography;
 using Xunit;
 
 namespace BonniePDF.Tests.Compliance;
@@ -143,6 +144,33 @@ public sealed class ContrastPreflightTests
         Assert.Null(LayoutRecorder.PaintOf(new object(), "VerticalStack"));
     }
 
+    [Fact]
+    public void PaintOf_MarksBold_FromWeight()
+    {
+        var tb = new TextBlock { Text = "Body", FontSize = 11, TextColor = new Color(0x33, 0x33, 0x33) };
+        tb.Weight = FontWeight.Bold;
+        Assert.True(LayoutRecorder.PaintOf(tb, "TextBlock")!.Bold);
+    }
+
+    // Most examples in both catalogues (and Hyperlink, which exposes no Weight
+    // property at all) style bold by setting FontName directly to a bold
+    // PostScript name rather than through Weight - that idiom must be detected
+    // too, or link/text contrast is checked against the wrong threshold.
+    [Fact]
+    public void PaintOf_MarksBold_FromBoldPostScriptFontName_IndependentOfWeight()
+    {
+        var tb = new TextBlock { Text = "Body", FontSize = 11, TextColor = new Color(0x33, 0x33, 0x33), FontName = StandardFonts.HelveticaBold };
+        Assert.True(tb.Weight < FontWeight.Bold);
+        Assert.True(LayoutRecorder.PaintOf(tb, "TextBlock")!.Bold);
+    }
+
+    [Fact]
+    public void PaintOf_DoesNotMarkBold_ForRegularWeightFontName()
+    {
+        var tb = new TextBlock { Text = "Body", FontSize = 11, TextColor = new Color(0x33, 0x33, 0x33), FontName = StandardFonts.Helvetica };
+        Assert.Null(LayoutRecorder.PaintOf(tb, "TextBlock")!.Bold);
+    }
+
     // ── End to end ────────────────────────────────────────────────────────────
 
     [Fact]
@@ -244,7 +272,9 @@ public sealed class ContrastPreflightTests
         LayoutNode link = Walk(snapshot.Root).First(n => n.Type == "Hyperlink");
         Assert.Equal("#999999", link.Paint?.Text);
         Assert.Equal(11f, link.Paint?.FontSize);
-        // Hyperlink exposes no weight, so it is never reported bold.
+        // This link's FontName is the default (regular) Helvetica, so it is
+        // correctly not reported bold - see the Bold-via-FontName tests below
+        // for the case where it is.
         Assert.Null(link.Paint?.Bold);
     }
 
@@ -264,6 +294,27 @@ public sealed class ContrastPreflightTests
         Assert.NotNull(finding);
         Assert.Equal(ComplianceSeverity.Warning, finding!.Severity);
         Assert.Equal("WCAG 2.2", finding.Standard);
+    }
+
+    // Hyperlink exposes no Weight property at all - bold styling can only be
+    // authored by setting FontName to a bold PostScript name. Without that
+    // being recognised as bold, this 14pt link would be held to the 4.5:1
+    // regular-text threshold and wrongly flagged even though it clears the
+    // 3:1 large-text threshold it actually qualifies for.
+    [Fact]
+    public void AppliesLargeTextThreshold_ToABoldHyperlinkStyledViaFontName()
+    {
+        BonniePDF.Document doc = BaselineDocument();
+        doc.Add(new Hyperlink("https://example.com", "Terms and conditions")
+        {
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 14,
+            TextColor = new Color(0xe1, 0x71, 0x00), // 3.20:1 on white - passes 3:1, fails 4.5:1
+        });
+
+        ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
+
+        Assert.DoesNotContain(report.Findings, f => f.Code == "contrast-insufficient");
     }
 
     [Fact]

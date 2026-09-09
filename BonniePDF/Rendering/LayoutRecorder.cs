@@ -425,7 +425,7 @@ public sealed class LayoutRecorder
             float textAlpha = AlphaOf(text.TextColor);
             if (textAlpha < 1f) paint.TextAlpha = textAlpha;
             paint.FontSize = text.FontSize;
-            if (text.Weight >= Typography.FontWeight.Bold) paint.Bold = true;
+            if (text.Weight >= Typography.FontWeight.Bold || FontNameLooksBold(text.FontName)) paint.Bold = true;
         }
         else if (element is Core.Hyperlink link)
         {
@@ -433,11 +433,13 @@ public sealed class LayoutRecorder
             // carries its own TextColor/FontSize. Gating the text branch on the base
             // class alone would leave every link unannotated, and link text on a
             // coloured backdrop is exactly the contrast case authors get wrong.
-            // It exposes no weight, so `bold` is never set.
+            // It exposes no Weight property at all, so FontNameLooksBold is the
+            // only signal available for it.
             paint.Text = ColorToHex(link.TextColor);
             float linkAlpha = AlphaOf(link.TextColor);
             if (linkAlpha < 1f) paint.TextAlpha = linkAlpha;
             paint.FontSize = link.FontSize;
+            if (FontNameLooksBold(link.FontName)) paint.Bold = true;
         }
 
         if (element is Elements.Layout.IBackgroundColor { BackgroundColor: { } background })
@@ -451,4 +453,16 @@ public sealed class LayoutRecorder
 
         return paint.IsEmpty ? null : paint;
     }
+
+    /// <summary>
+    /// Secondary bold signal for elements styled by setting <c>FontName</c>
+    /// directly to a bold PostScript name (e.g. "Helvetica-Bold") rather than
+    /// through the Weight/FontFamily builder — the idiom most examples in this
+    /// codebase still use, and the only one <see cref="Core.Hyperlink"/> exposes
+    /// at all. Every bold standard-14 name contains "Bold" (see
+    /// <see cref="Typography.StandardFonts"/>), so a case-insensitive substring
+    /// check is a reliable fallback where <c>Weight</c> was never touched.
+    /// </summary>
+    private static bool FontNameLooksBold(string? fontName) =>
+        fontName is not null && fontName.Contains("Bold", StringComparison.OrdinalIgnoreCase);
 }

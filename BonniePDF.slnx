@@ -47,6 +47,20 @@
     <Project Path="Examples/BonniePDF.Examples.Templates.AnnualReport/BonniePDF.Examples.Templates.AnnualReport.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Integration.AsyncGeneration/BonniePDF.Examples.Integration.AsyncGeneration.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Integration.WebApi/BonniePDF.Examples.Integration.WebApi.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Elements.Barcodes/BonniePDF.Examples.Elements.Barcodes.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Elements.ColorPaletteSwatches/BonniePDF.Examples.Elements.ColorPaletteSwatches.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Elements.CrossReferences/BonniePDF.Examples.Elements.CrossReferences.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Elements.DataMatrix/BonniePDF.Examples.Elements.DataMatrix.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.AnnualReportCovers/BonniePDF.Examples.Templates.AnnualReportCovers.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.AttachedData/BonniePDF.Examples.Templates.AttachedData.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.EventTicket/BonniePDF.Examples.Templates.EventTicket.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.FacturXInvoice/BonniePDF.Examples.Templates.FacturXInvoice.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.FinancialDashboard/BonniePDF.Examples.Templates.FinancialDashboard.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.PatientSummary/BonniePDF.Examples.Templates.PatientSummary.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.RegionalInvoices/BonniePDF.Examples.Templates.RegionalInvoices.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.SaasInvoice/BonniePDF.Examples.Templates.SaasInvoice.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.ShippingLabel/BonniePDF.Examples.Templates.ShippingLabel.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Typography.AdvancedTypography/BonniePDF.Examples.Typography.AdvancedTypography.csproj" />
   </Folder>
 </Solution>
 

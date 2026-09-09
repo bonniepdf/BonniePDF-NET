@@ -15,6 +15,17 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+### Fixed
+
+- The accessibility preflight now detects bold text styled by setting
+  `FontName` directly to a bold PostScript name (`"Helvetica-Bold"`,
+  `"Times-BoldItalic"`, …), not only via the `Weight` property. That idiom is
+  how most examples in this repository author bold text, and the only one
+  `Hyperlink` exposes at all — without it, bold-but-large text was held to the
+  regular-text 4.5:1 WCAG threshold instead of the 3:1 large-text threshold it
+  actually qualifies for. This can only relax an existing finding (a lower
+  required ratio, never a higher one), so no prior finding becomes stricter.
+
 ### Added
 
 - `CompliancePreflight.Evaluate` takes a `CompliancePreflightOptions` overload
