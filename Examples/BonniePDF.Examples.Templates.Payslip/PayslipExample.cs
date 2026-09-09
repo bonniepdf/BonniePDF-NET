@@ -26,8 +26,12 @@ public static class PayslipExample
 {
     // ── Design tokens ─────────────────────────────────────────────────────────
     private static readonly Color Ink = ColorPalette.Slate[800];
-    private static readonly Color Muted = ColorPalette.Slate[500];
-    private static readonly Color Faint = ColorPalette.Slate[400];
+    // 600, not 500/400: both read against Panel/NetPanel (Slate-100/Blue-50) as
+    // well as the plain page, and 500 falls to 4.35-4.38:1 there while 400 never
+    // clears 4.5:1 anywhere (2.40-2.63:1). 600 clears 4.5:1 on every background
+    // this document uses.
+    private static readonly Color Muted = ColorPalette.Slate[600];
+    private static readonly Color Faint = ColorPalette.Slate[600];
     private static readonly Color Line = ColorPalette.Slate[200];
     private static readonly Color Panel = ColorPalette.Slate[100];
     private static readonly Color Brand = ColorPalette.Blue[600];

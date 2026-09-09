@@ -30,7 +30,9 @@ namespace BonniePDF.Examples.Templates.FacturXInvoice;
 public static class FacturXInvoiceExample
 {
     private static readonly Color Ink = ColorPalette.Slate[700];
-    private static readonly Color Muted = ColorPalette.Slate[500];
+    // 600, not 500: reads against tinted panels elsewhere in the document, and
+    // 500 falls to 4.35-4.38:1 there against the 4.5:1 WCAG AA threshold.
+    private static readonly Color Muted = ColorPalette.Slate[600];
     private static readonly Color HeaderBg = ColorPalette.Slate[100];
     private static readonly Color RuleCol = ColorPalette.Slate[200];
     private static readonly Color Accent = ColorPalette.Blue[800]; // EU-flag blue
@@ -230,15 +232,13 @@ public static class FacturXInvoiceExample
     private static Container Divider(Color color, float thickness = 0.6f) => new()
     {
         BackgroundColor = color,
-        Padding = new Thickness(0, thickness, 0, 0),
+        Height = thickness,
         Margin = new Thickness(0, 5, 0, 5),
-        Child = new TextBlock { Text = " ", FontSize = 1 },
     };
 
     private static Container AccentBar(Color color, float height = 5f) => new()
     {
         BackgroundColor = color,
-        Padding = new Thickness(0, height / 2f, 0, height / 2f),
-        Child = new TextBlock { Text = " ", FontSize = 1 },
+        Height = height,
     };
 }

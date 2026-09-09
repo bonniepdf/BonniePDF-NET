@@ -20,9 +20,12 @@ public static class UkDegreeTranscriptExample
 {
     private static readonly Color Navy = ColorPalette.Blue[900];
     private static readonly Color Ink = ColorPalette.Slate[700];
-    private static readonly Color Muted = ColorPalette.Slate[500];
+    // 600, not 500: reads against a Blue-50 panel elsewhere in the document, and
+    // 500 falls to 4.38:1 there against the 4.5:1 WCAG AA threshold.
+    private static readonly Color Muted = ColorPalette.Slate[600];
     private static readonly Color Rule = ColorPalette.Slate[200];
-    private static readonly Color Gold = ColorPalette.Amber[500];
+    // 700, not 500: bold 12pt text on white needs 4.5:1 and 500 falls to 2.13:1.
+    private static readonly Color Gold = ColorPalette.Amber[700];
 
     private static readonly Module[] Modules =
     [
@@ -105,9 +108,8 @@ public static class UkDegreeTranscriptExample
     private static Container BlueRule() => new()
     {
         BackgroundColor = Navy,
-        Padding = new Thickness(0, 1.5f, 0, 0),
+        Height = 1.5f,
         Margin = new Thickness(0, 0, 0, 16),
-        Child = new TextBlock { Text = " ", FontSize = 1 },
     };
 
     private static Grid StudentDetails()
@@ -135,14 +137,10 @@ public static class UkDegreeTranscriptExample
 
         VerticalStack stack = new();
         stack.Add(new TextBlock { Text = "AWARD", FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = Muted });
-        stack.Add(new TextBlock
-        {
-            Text = "Upper Second-Class Honours (2:1)",
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 16,
-            TextColor = Navy,
-            Margin = new Thickness(0, 2, 0, 2),
-        });
+        // The award is the transcript's primary heading (H1). Tagging it as the
+        // first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede any H2);
+        // the section headings below are H2. Styling is unchanged.
+        stack.Add(H1("Upper Second-Class Honours (2:1)"));
         stack.Add(new TextBlock
         {
             Text = $"Weighted average {weighted.ToString("0.0", CultureInfo.InvariantCulture)}%  -  {total} credits  -  FHEQ Level 6",
@@ -181,7 +179,9 @@ public static class UkDegreeTranscriptExample
                 Td(module.Code, TextAlignment.Left, Ink),
                 Td(module.Title, TextAlignment.Left, Ink),
                 Td(module.Credits.ToString(CultureInfo.InvariantCulture), TextAlignment.Right, Ink),
-                Td(module.Mark.ToString(CultureInfo.InvariantCulture) + "%", TextAlignment.Right, module.Mark >= 70 ? ColorPalette.Emerald[600] : Ink));
+                // Emerald[700], not [600]: regular-weight text on white needs
+                // 4.5:1 and 600 falls to 3.65:1.
+                Td(module.Mark.ToString(CultureInfo.InvariantCulture) + "%", TextAlignment.Right, module.Mark >= 70 ? ColorPalette.Emerald[700] : Ink));
         }
 
         return table;
@@ -210,6 +210,15 @@ public static class UkDegreeTranscriptExample
         row.Add(new Container { Child = qr, HorizontalAlignment = HorizontalAlignment.End }, 1);
         return row;
     }
+
+    private static Heading H1(string text) => new(text)
+    {
+        Level = 1,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 16,
+        TextColor = Navy,
+        Margin = new Thickness(0, 2, 0, 2),
+    };
 
     private static Heading H2(string text) => new(text)
     {

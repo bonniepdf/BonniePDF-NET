@@ -126,7 +126,8 @@ public static partial class DickensNovelTaggedExample
         {
             Text      = "Project Gutenberg Edition · eBook #98",
             FontSize  = 10,
-            TextColor = ColorPalette.Slate[400],
+            // 600, not 400: 400 never clears 4.5:1 as text (2.63:1 here).
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
         });
 

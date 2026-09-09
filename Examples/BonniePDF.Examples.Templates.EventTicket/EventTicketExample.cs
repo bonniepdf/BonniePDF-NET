@@ -26,7 +26,9 @@ public static class EventTicketExample
     private static readonly Color Cream = ColorPalette.Slate[100];
     private static readonly Color Mute = ColorPalette.Slate[400];
     private static readonly Color BodyCol = ColorPalette.Slate[300];
-    private static readonly Color Accent = ColorPalette.Violet[500];
+    // 400, not 500: this text reads against the dark stub panel, where 500 falls
+    // to 3.32:1 against the 4.5:1 WCAG AA threshold; 400 clears it (5.13:1).
+    private static readonly Color Accent = ColorPalette.Violet[400];
     private static readonly Color Stub = ColorPalette.Slate[800];
 
     public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)

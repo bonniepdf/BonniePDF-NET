@@ -27,8 +27,10 @@ public static class QuotationExample
 {
     // ── Design tokens ─────────────────────────────────────────────────────────
     private static readonly Color Ink = ColorPalette.Slate[800];
-    private static readonly Color Muted = ColorPalette.Slate[500];
-    private static readonly Color Faint = ColorPalette.Slate[400];
+    // 600, not 500/400: both fall short of 4.5:1 on this document's backgrounds
+    // (500 to 4.34:1 on a violet-tinted panel, 400 to 2.51-2.63:1 everywhere).
+    private static readonly Color Muted = ColorPalette.Slate[600];
+    private static readonly Color Faint = ColorPalette.Slate[600];
     private static readonly Color Line = ColorPalette.Slate[200];
     private static readonly Color Panel = ColorPalette.Slate[50];
     private static readonly Color Accent = ColorPalette.Violet[600];

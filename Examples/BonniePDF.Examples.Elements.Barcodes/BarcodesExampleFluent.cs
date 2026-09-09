@@ -33,6 +33,7 @@ public static class BarcodesExampleFluent
             {
                 settings.PageSize = PdfSize.A4;
                 settings.Margin = 50;
+                settings.Language = "en-GB";
             });
 
             doc.WithDefaultTextStyle(style => style

@@ -16,7 +16,7 @@ public static class EncryptionOwnerOnlyExample
 {
     public static Document Generate()
     {
-        DocumentSettings settings = new();
+        DocumentSettings settings = new() { Language = "en-GB" };
         settings.WithEncryption128(options => options
             .WithOwnerPassword("secret")
             .DenyAll()
@@ -25,6 +25,7 @@ public static class EncryptionOwnerOnlyExample
         );
 
         Document doc = new(settings);
+        doc.Metadata.Title = "Owner-Password-Only Encryption Example";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Add(new TextBlock
@@ -46,8 +47,8 @@ public static class EncryptionOwnerOnlyExample
             Margin = new Thickness(0, 10, 0, 5)
         });
 
-        doc.Add(new TextBlock { Text = "  - Low-quality printing: Allowed", TextColor = ColorPalette.Green[600] });
-        doc.Add(new TextBlock { Text = "  - Accessibility extraction: Allowed", TextColor = ColorPalette.Green[600] });
+        doc.Add(new TextBlock { Text = "  - Low-quality printing: Allowed", TextColor = ColorPalette.Green[700] });
+        doc.Add(new TextBlock { Text = "  - Accessibility extraction: Allowed", TextColor = ColorPalette.Green[700] });
         doc.Add(new TextBlock { Text = "  - Copying text: Denied", TextColor = ColorPalette.Red[600] });
         doc.Add(new TextBlock { Text = "  - Modifying: Denied", TextColor = ColorPalette.Red[600] });
         doc.Add(new TextBlock { Text = "  - High-quality printing: Denied", TextColor = ColorPalette.Red[600] });

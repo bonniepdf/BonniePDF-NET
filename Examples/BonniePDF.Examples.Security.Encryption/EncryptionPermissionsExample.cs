@@ -18,7 +18,7 @@ public static class EncryptionPermissionsExample
 {
     public static Document Generate()
     {
-        DocumentSettings settings = new();
+        DocumentSettings settings = new() { Language = "en-GB" };
         settings.WithEncryption128(options => options
             .WithUserPassword("user")
             .WithOwnerPassword("owner")
@@ -26,6 +26,7 @@ public static class EncryptionPermissionsExample
         );
 
         Document doc = new(settings);
+        doc.Metadata.Title = "Permission-Restricted Encryption Example";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Add(new TextBlock
@@ -41,8 +42,8 @@ public static class EncryptionPermissionsExample
             Margin = new Thickness(0, 20, 0, 10)
         });
 
-        doc.Add(new TextBlock { Text = "  - Printing: Allowed", TextColor = ColorPalette.Green[600] });
-        doc.Add(new TextBlock { Text = "  - Copying: Allowed", TextColor = ColorPalette.Green[600] });
+        doc.Add(new TextBlock { Text = "  - Printing: Allowed", TextColor = ColorPalette.Green[700] });
+        doc.Add(new TextBlock { Text = "  - Copying: Allowed", TextColor = ColorPalette.Green[700] });
         doc.Add(new TextBlock { Text = "  - Modifying: Denied", TextColor = ColorPalette.Red[600] });
         doc.Add(new TextBlock { Text = "  - Annotations: Denied", TextColor = ColorPalette.Red[600] });
 

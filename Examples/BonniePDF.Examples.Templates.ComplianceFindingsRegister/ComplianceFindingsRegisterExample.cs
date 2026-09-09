@@ -25,11 +25,14 @@ public static class ComplianceFindingsRegisterExample
 
     private static readonly Dictionary<Severity, SeverityStyle> SeverityStyles = new()
     {
+        // Badge is 700, not 600: white bold 9pt text on Orange/Amber/Green 600 falls
+        // to 3.20-3.60:1 against the 4.5:1 WCAG AA threshold. 700 clears it on all
+        // three (Red[600] already did, so it stays). Tint/Border are unaffected.
         [Severity.Critical] = new("CRITICAL", ColorPalette.Red[600], ColorPalette.Red[50], ColorPalette.Red[200]),
-        [Severity.High]     = new("HIGH",     ColorPalette.Orange[600], ColorPalette.Orange[50], ColorPalette.Orange[200]),
-        [Severity.Medium]   = new("MEDIUM",   ColorPalette.Amber[600], ColorPalette.Amber[50], ColorPalette.Amber[200]),
+        [Severity.High]     = new("HIGH",     ColorPalette.Orange[700], ColorPalette.Orange[50], ColorPalette.Orange[200]),
+        [Severity.Medium]   = new("MEDIUM",   ColorPalette.Amber[700], ColorPalette.Amber[50], ColorPalette.Amber[200]),
         [Severity.Low]      = new("LOW",      ColorPalette.Slate[500], ColorPalette.Slate[50], ColorPalette.Slate[200]),
-        [Severity.Resolved] = new("RESOLVED", ColorPalette.Green[600], ColorPalette.Green[50], ColorPalette.Green[200]),
+        [Severity.Resolved] = new("RESOLVED", ColorPalette.Green[700], ColorPalette.Green[50], ColorPalette.Green[200]),
     };
 
     private sealed record Finding(string Id, string Category, Severity Severity, string Title, string Description, string? Related = null);
@@ -134,7 +137,9 @@ public static class ComplianceFindingsRegisterExample
             Text      = finding.Category,
             FontName  = StandardFonts.HelveticaBold,
             FontSize  = 9,
-            TextColor = ColorPalette.Slate[500],
+            // 600, not 500: this card always sits on a coloured Tint (Red/Orange-50),
+            // and 500 falls to 4.35-4.49:1 against the 4.5:1 WCAG AA threshold there.
+            TextColor = ColorPalette.Slate[600],
         });
 
         body.Add(new TextBlock
@@ -152,7 +157,7 @@ public static class ComplianceFindingsRegisterExample
 
             var relatedLabel = new TextBlock
             {
-                Text = "Related:", FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = ColorPalette.Slate[500],
+                Text = "Related:", FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = ColorPalette.Slate[600],
             };
             relatedRow.Add(relatedLabel, relatedLabel.GetPreferredWidth());
 
@@ -162,7 +167,7 @@ public static class ComplianceFindingsRegisterExample
             };
             relatedRow.Add(relatedLink, relatedLink.GetPreferredWidth());
 
-            var onPage = new TextBlock { Text = "on page", FontSize = 9, TextColor = ColorPalette.Slate[500] };
+            var onPage = new TextBlock { Text = "on page", FontSize = 9, TextColor = ColorPalette.Slate[600] };
             relatedRow.Add(onPage, onPage.GetPreferredWidth());
 
             relatedRow.Add(new PageNumberOf(AnchorFor(finding.Related))
@@ -229,7 +234,7 @@ public static class ComplianceFindingsRegisterExample
             };
             row.Add(link, link.GetPreferredWidth());
 
-            var onPage = new TextBlock { Text = "page", FontSize = 10, TextColor = ColorPalette.Slate[500] };
+            var onPage = new TextBlock { Text = "page", FontSize = 10, TextColor = ColorPalette.Slate[600] };
             row.Add(onPage, onPage.GetPreferredWidth());
 
             row.Add(new PageNumberOf(AnchorFor(finding.Id))

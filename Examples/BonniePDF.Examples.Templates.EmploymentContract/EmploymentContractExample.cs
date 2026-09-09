@@ -28,7 +28,9 @@ public static class EmploymentContractExample
     // ── Design tokens ─────────────────────────────────────────────────────────
     private static readonly Color Ink = ColorPalette.Slate[800];
     private static readonly Color Muted = ColorPalette.Slate[500];
-    private static readonly Color Faint = ColorPalette.Slate[400];
+    // 600, not 400: 400 never clears 4.5:1 as text (2.51:1 on this document's
+    // background).
+    private static readonly Color Faint = ColorPalette.Slate[600];
     private static readonly Color Line = ColorPalette.Slate[200];
     private static readonly Color Panel = ColorPalette.Slate[50];
     private static readonly Color Accent = ColorPalette.Teal[700];
