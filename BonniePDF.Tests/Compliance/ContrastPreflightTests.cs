@@ -319,6 +319,68 @@ public sealed class ContrastPreflightTests
         Assert.DoesNotContain(report.Findings, f => f.Standard == "WCAG 2.2");
     }
 
+    // ── includeWcag / IncludeWcag ──────────────────────────────────────────────
+    // Mirrors the shared fixture compliance-preflight/contrast-suppressed: the WCAG
+    // family is a rule family the caller can switch off, and switching it off must
+    // remove the findings from the counts too — not merely from a rendered list.
+
+    /// <summary>The fixture document: mid-grey text on a light container fill.</summary>
+    private static LayoutSnapshot SuppressionFixture()
+    {
+        BonniePDF.Document doc = BaselineDocument();
+        var caption = new TextBlock { Text = "Muted caption", FontSize = 11, TextColor = new Color(0x99, 0x99, 0x99) };
+        doc.Add(new Container { Child = caption, BackgroundColor = new Color(0xf1, 0xf5, 0xf9) });
+        return Capture(doc);
+    }
+
+    [Fact]
+    public void RunsWcagRulesByDefault_SoTheSingleArgumentOverloadIsUnchanged()
+    {
+        ComplianceReport report = CompliancePreflight.Evaluate(SuppressionFixture());
+
+        Assert.Single(report.Findings.Where(f => f.Code == "contrast-insufficient"));
+        Assert.Equal(1, report.WarningCount);
+    }
+
+    [Fact]
+    public void IncludeWcagFalse_SuppressesEveryWcagFinding_AndItsContributionToTheCounts()
+    {
+        ComplianceReport report = CompliancePreflight.Evaluate(
+            SuppressionFixture(), new CompliancePreflightOptions { IncludeWcag = false });
+
+        Assert.DoesNotContain(report.Findings, f => f.Standard == "WCAG 2.2");
+        Assert.Equal(0, report.WarningCount);
+    }
+
+    [Fact]
+    public void IncludeWcagFalse_LeavesPdfUaFindingsAndPassedUntouched()
+    {
+        LayoutSnapshot snapshot = SuppressionFixture();
+        ComplianceReport on = CompliancePreflight.Evaluate(snapshot);
+        ComplianceReport off = CompliancePreflight.Evaluate(
+            snapshot, new CompliancePreflightOptions { IncludeWcag = false });
+
+        static string[] Ua(ComplianceReport r) =>
+            r.Findings.Where(f => f.Standard == "PDF/UA-1").Select(f => f.Code).ToArray();
+
+        Assert.Equal(Ua(on), Ua(off));
+        Assert.Equal(on.ErrorCount, off.ErrorCount);
+        Assert.Equal(on.Passed, off.Passed);
+    }
+
+    [Fact]
+    public void IncludeWcagFalse_IsExactlyTheUnfilteredReportMinusItsWcagFindings()
+    {
+        LayoutSnapshot snapshot = SuppressionFixture();
+        ComplianceReport on = CompliancePreflight.Evaluate(snapshot);
+        ComplianceReport off = CompliancePreflight.Evaluate(
+            snapshot, new CompliancePreflightOptions { IncludeWcag = false });
+
+        Assert.Equal(
+            on.Findings.Where(f => f.Standard != "WCAG 2.2").Select(f => f.Code).ToArray(),
+            off.Findings.Select(f => f.Code).ToArray());
+    }
+
     [Fact]
     public void CaptureStaysObservational_ByteIdenticalSvg()
     {

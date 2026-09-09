@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace BonniePDF.Compliance;
 
@@ -32,6 +33,7 @@ public enum ContrastUnknownReason
 }
 
 /// <summary>The outcome of comparing a text colour to its resolved backdrop.</summary>
+[StructLayout(LayoutKind.Auto)]
 public readonly struct ContrastVerdict
 {
     /// <summary>True when the backdrop could not be resolved; <see cref="Reason"/> says why.</summary>

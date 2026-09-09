@@ -62,6 +62,31 @@ public sealed class ComplianceFinding
     public int? Page { get; init; }
 }
 
+/// <summary>
+/// Selects which rule families run. It never changes how a rule that does run
+/// behaves, so a filtered report is always a subset of the unfiltered one.
+/// </summary>
+public sealed class CompliancePreflightOptions
+{
+    /// <summary>
+    /// Run the WCAG 2.2 contrast rules ("contrast-insufficient",
+    /// "contrast-unknown"). Defaults to <c>true</c>.
+    /// </summary>
+    /// <remarks>
+    /// With <c>false</c> those findings are absent from <see cref="ComplianceReport.Findings"/>
+    /// <em>and</em> from the counts, as if the document had no contrast problems; the
+    /// PDF/UA-1 rules are untouched, and <see cref="ComplianceReport.Passed"/> cannot
+    /// change because no WCAG rule emits an error.
+    /// <para>
+    /// The two families answer different questions — PDF/UA-1 findings are conformance
+    /// to a claim the document makes, contrast is an adjacent standard an author may be
+    /// tracking separately — and on a colour-rich document the contrast findings can
+    /// bury the structural ones.
+    /// </para>
+    /// </remarks>
+    public bool IncludeWcag { get; init; } = true;
+}
+
 /// <summary>The result of evaluating a snapshot.</summary>
 public sealed class ComplianceReport
 {
@@ -101,7 +126,17 @@ public static class CompliancePreflight
     /// answers "is this document accessible, and if not, where?" for any document.
     /// </summary>
     public static ComplianceReport Evaluate(LayoutSnapshot snapshot)
+        => Evaluate(snapshot, new CompliancePreflightOptions());
+
+    /// <summary>
+    /// Evaluates a layout snapshot, running only the rule families
+    /// <paramref name="options"/> selects. Passing default options is identical to
+    /// the single-argument overload.
+    /// </summary>
+    public static ComplianceReport Evaluate(LayoutSnapshot snapshot, CompliancePreflightOptions options)
     {
+        ArgumentNullException.ThrowIfNull(options);
+        bool includeWcag = options.IncludeWcag;
         var findings = new List<ComplianceFinding>();
         SnapshotMeta? meta = snapshot.Meta;
         bool tagged = (meta?.AccessibilityMode ?? 0) != 0;
@@ -173,7 +208,9 @@ public static class CompliancePreflight
                 }
                 if (string.Equals(a11y.Role, "Table", StringComparison.Ordinal)) CheckTableHeaders(node, findings);
             }
-            CheckContrast(node, ancestors, snapshot.Pages, findings);
+            // Suppression is at rule level: with the family off the contrast walk
+            // (and its backdrop resolution) never runs at all.
+            if (includeWcag) CheckContrast(node, ancestors, snapshot.Pages, findings);
 
             var chain = new List<LayoutNode>(ancestors.Count + 1) { node };
             chain.AddRange(ancestors);

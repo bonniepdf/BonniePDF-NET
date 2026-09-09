@@ -17,6 +17,18 @@ behaviour, so the two files can be read side by side.
 
 ### Added
 
+- `CompliancePreflight.Evaluate` takes a `CompliancePreflightOptions` overload
+  selecting which **rule families** run: `IncludeWcag = false` skips the WCAG 2.2
+  contrast rules entirely. The suppressed findings are absent from `Findings`
+  *and* from the counts, as if the document had no contrast problems; the
+  PDF/UA-1 findings are untouched, and `Passed` cannot change, because no WCAG
+  rule emits an error. The single-argument overload runs everything, unchanged.
+
+  The two families answer different questions — PDF/UA-1 findings are conformance
+  to a claim the document makes, contrast is an adjacent standard an author may
+  be tracking separately — and on a colour-rich document the contrast findings
+  can bury the structural ones.
+
 - The accessibility preflight now checks **text colour contrast** against the
   WCAG 2.2 AA thresholds (4.5:1, or 3:1 for text at 18pt and above, or 14pt and
   above when bold). `CompliancePreflight.Evaluate` reports
