@@ -88,27 +88,34 @@ public static class HyperlinksExample
             Margin = new Thickness(0, 0, 0, 8)
         });
 
-        // Green link
+        // Green link. Green[700], not [500]: Hyperlink exposes no bold/weight
+        // property for the compliance preflight to detect, so this always needs
+        // the regular-text 4.5:1 threshold regardless of FontName; [500] only
+        // reaches 2.22:1.
         doc.Add(new Hyperlink("https://microsoft.com", "Green Link")
         {
-            TextColor = ColorPalette.Green[500],
+            TextColor = ColorPalette.Green[700],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
-        // Larger font
+        // Larger font. Purple[600], not [500]: 16pt isn't large enough to relax the
+        // threshold (needs 18pt regular or 14pt bold), and [500] only reaches
+        // 4.12:1.
         doc.Add(new Hyperlink("https://google.com", "Large Purple Link")
         {
             FontSize = 16,
-            TextColor = ColorPalette.Purple[500],
+            TextColor = ColorPalette.Purple[600],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
-        // Bold link
+        // Bold link. Red[700], not the named Color.Red: FontName alone doesn't
+        // register as bold for Hyperlink (see above), so this needs 4.5:1 too, and
+        // pure red only reaches 4.00:1.
         doc.Add(new Hyperlink("https://stackoverflow.com", "Bold Red Link")
         {
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Color.Red,
+            TextColor = ColorPalette.Red[700],
             Margin = new Thickness(0, 0, 0, 16)
         });
 

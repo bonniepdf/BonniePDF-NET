@@ -29,6 +29,13 @@ public static class AnnualReportExample
     private static readonly Color Secondary = ColorPalette.Teal[500]; // teal accent
     private static readonly Color Tertiary = ColorPalette.Amber[400]; // warm gold accent
 
+    // Darker steps of Secondary/Tertiary for the KPI card value, which paints 24pt
+    // bold text on the Blue-50 card panel: the accent's own shade only clears 3:1
+    // large-text at Primary's depth (Secondary falls to 2.23:1, Tertiary to
+    // 1.58:1). The swatches/rule/border above keep the lighter brand trio.
+    private static readonly Color SecondaryText = ColorPalette.Teal[600];
+    private static readonly Color TertiaryText = ColorPalette.Amber[700];
+
     private static readonly Color CoverBg = ColorPalette.Blue[900];   // deepest primary tint - cover field
     private static readonly Color BandBg = ColorPalette.Blue[100];    // lightest primary tint - header/footer bands
     private static readonly Color Ink = ColorPalette.Slate[600];      // body copy
@@ -318,8 +325,8 @@ public static class AnnualReportExample
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 14 };
         row.Add(KpiCard("£2.4B", "Total revenue", Primary), 1);
-        row.Add(KpiCard("+18%", "Year-over-year growth", Secondary), 1);
-        row.Add(KpiCard("2.1M", "Daily active users", Tertiary), 1);
+        row.Add(KpiCard("+18%", "Year-over-year growth", SecondaryText), 1);
+        row.Add(KpiCard("2.1M", "Daily active users", TertiaryText), 1);
         return row;
     }
 
@@ -339,7 +346,9 @@ public static class AnnualReportExample
             Text = label,
             FontName = StandardFonts.Helvetica,
             FontSize = 10,
-            TextColor = ColorPalette.Slate[500],
+            // 600, not 500: this card sits on the Blue-50 panel, where 500 falls
+            // to 4.38:1 against the 4.5:1 WCAG AA threshold.
+            TextColor = ColorPalette.Slate[600],
         });
 
         return new Container

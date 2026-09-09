@@ -28,6 +28,7 @@ public static class HorizontalBarChartExample
 
         document.Settings.Version = PdfVersion.Pdf17;
         document.Settings.PdfAEnabled = true;
+        document.Settings.Language = "en-GB";
         document.Metadata.Title = "Horizontal Bar Chart Example";
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Regional sales ranking using a horizontal BarChart";

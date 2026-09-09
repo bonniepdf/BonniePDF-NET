@@ -56,7 +56,8 @@ public static class ColorPaletteExample
         Document doc = new(new DocumentSettings
         {
             PageSize = PdfSize.A4,
-            Margin = 36
+            Margin = 36,
+            Language = "en-GB"
         });
 
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);

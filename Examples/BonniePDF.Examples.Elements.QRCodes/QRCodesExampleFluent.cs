@@ -32,6 +32,7 @@ public static class QRCodesExampleFluent
             {
                 settings.PageSize = PdfSize.A4;
                 settings.Margin = 50;
+                settings.Language = "en-GB";
             });
 
             doc.WithDefaultTextStyle(style => style
@@ -108,7 +109,7 @@ public static class QRCodesExampleFluent
 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Low").Font(StandardFonts.HelveticaBold);
                             card.Item().AlignCenter().Text("~7% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
                         });
 
                         // Medium (15%)
@@ -122,7 +123,7 @@ public static class QRCodesExampleFluent
 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Medium").Font(StandardFonts.HelveticaBold);
                             card.Item().AlignCenter().Text("~15% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
                         });
 
                         // Quartile (25%)
@@ -136,7 +137,7 @@ public static class QRCodesExampleFluent
 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Quartile").Font(StandardFonts.HelveticaBold);
                             card.Item().AlignCenter().Text("~25% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
                         });
 
                         // High (30%)
@@ -150,7 +151,7 @@ public static class QRCodesExampleFluent
 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("High").Font(StandardFonts.HelveticaBold);
                             card.Item().AlignCenter().Text("~30% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
                         });
                     });
                     

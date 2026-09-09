@@ -23,6 +23,7 @@ public static class WebApiInvoiceExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = $"Invoice INV-{DateTime.Now.Year}-001";
@@ -82,6 +83,7 @@ public static class WebApiInvoiceExample
 
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.PdfAEnabled = true;
+        doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = $"Invoice {invoiceNumber}";

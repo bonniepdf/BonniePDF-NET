@@ -28,7 +28,9 @@ public static class ShelfLabelExample
     private static readonly Color Body = ColorPalette.Slate[600];
     private static readonly Color Muted = ColorPalette.Slate[500];
     private static readonly Color Rule = ColorPalette.Slate[200];
-    private static readonly Color Promo = ColorPalette.Rose[600];
+    // 700, not 600: this text reads against a Slate-50 panel, and 600 falls to
+    // 4.33:1 there against the 4.5:1 WCAG AA threshold.
+    private static readonly Color Promo = ColorPalette.Rose[700];
 
     public static Document Generate()
     {

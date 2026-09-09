@@ -28,6 +28,7 @@ public static class HorizontalGroupedBarChartExample
 
         document.Settings.Version = PdfVersion.Pdf17;
         document.Settings.PdfAEnabled = true;
+        document.Settings.Language = "en-GB";
         document.Metadata.Title = "Horizontal Grouped Bar Chart Example";
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Quarterly regional sales using a horizontal GroupedBarChart";

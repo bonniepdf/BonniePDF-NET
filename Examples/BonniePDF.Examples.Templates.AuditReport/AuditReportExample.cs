@@ -23,7 +23,9 @@ public static class AuditReportExample
 {
     private static readonly Color Primary = ColorPalette.Indigo[700];
     private static readonly Color Ink = ColorPalette.Slate[700];
-    private static readonly Color Muted = ColorPalette.Slate[500];
+    // 600, not 500: several usages read against the Indigo-50 KPI panel, and 500
+    // falls to 4.26:1 there against the 4.5:1 WCAG AA threshold.
+    private static readonly Color Muted = ColorPalette.Slate[600];
     private static readonly Color Rule = ColorPalette.Slate[200];
     private static readonly Color HeaderBg = ColorPalette.Slate[100];
 
@@ -75,9 +77,8 @@ public static class AuditReportExample
         doc.Add(new Container
         {
             BackgroundColor = Primary,
-            Padding = new Thickness(0, 3, 0, 0),
+            Height = 3,
             Margin = new Thickness(0, 0, 0, 14),
-            Child = ThinSpacer(),
         });
 
         doc.Add(Eyebrow("AUDIT REPORT - CONFIDENTIAL"));
@@ -106,7 +107,9 @@ public static class AuditReportExample
         kpis.AddRow(
             Kpi("82%", "Overall conformance", Primary),
             Kpi("71 / 93", "Controls implemented", Primary),
-            Kpi("12", "Open findings", ColorPalette.Amber[600]),
+            // 700, not 600: 600 falls to 2.86:1 against the Indigo-50 tile panel,
+            // below the 3:1 large-text threshold this 20pt bold value gets.
+            Kpi("12", "Open findings", ColorPalette.Amber[700]),
             Kpi("2", "Critical", ColorPalette.Rose[600]));
         doc.Add(kpis);
 
@@ -139,7 +142,9 @@ public static class AuditReportExample
                 Td(finding.Area, Ink),
                 Td(finding.Requirement, Muted),
                 SeverityCell(finding.Severity),
-                Td(finding.Status, string.Equals(finding.Status, "Remediated", StringComparison.Ordinal) ? ColorPalette.Emerald[600] : Ink));
+                // Emerald[700], not [600]: regular 9pt text on white needs 4.5:1 and
+                // 600 falls to 3.65:1.
+                Td(finding.Status, string.Equals(finding.Status, "Remediated", StringComparison.Ordinal) ? ColorPalette.Emerald[700] : Ink));
         }
 
         doc.Add(table);
@@ -315,15 +320,17 @@ public static class AuditReportExample
         TextColor = SeverityColor(severity),
     };
 
+    // Bold 9pt text painted directly on the white row background, so each shade
+    // has to clear 4.5:1 on its own - the 500-level series colour that reads fine
+    // as a chart fill is too light as text (Amber/Emerald 500 fall to 2.13/2.47:1,
+    // Blue 500 to 3.76:1). Critical's Rose[600] already cleared it (4.53:1).
     private static Color SeverityColor(Severity severity) => severity switch
     {
         Severity.Critical => ColorPalette.Rose[600],
-        Severity.High => ColorPalette.Amber[500],
-        Severity.Medium => ColorPalette.Blue[500],
-        _ => ColorPalette.Emerald[500],
+        Severity.High => ColorPalette.Amber[700],
+        Severity.Medium => ColorPalette.Blue[600],
+        _ => ColorPalette.Emerald[700],
     };
-
-    private static TextBlock ThinSpacer() => new() { Text = " ", FontSize = 1 };
 
     private enum Severity { Critical, High, Medium, Low }
 

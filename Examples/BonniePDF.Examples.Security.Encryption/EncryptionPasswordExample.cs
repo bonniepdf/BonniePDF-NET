@@ -16,10 +16,11 @@ public static class EncryptionPasswordExample
 {
     public static Document Generate()
     {
-        DocumentSettings settings = new();
+        DocumentSettings settings = new() { Language = "en-GB" };
         settings.WithPassword("demo123");
 
         Document doc = new(settings);
+        doc.Metadata.Title = "Password-Protected Encryption Example";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Add(new TextBlock

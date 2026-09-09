@@ -146,7 +146,8 @@ public static class TextDecorationExample
         {
             Text           = "Original Price: £199.99",
             FontSize       = 14,
-            TextColor      = ColorPalette.Slate[400],
+            // 600, not 400: 400 never clears 4.5:1 as text (2.63:1 here).
+            TextColor      = ColorPalette.Slate[600],
             TextDecoration = TextDecoration.Strikethrough,
             Margin         = new Thickness(0, 0, 0, 4),
         });
@@ -165,7 +166,9 @@ public static class TextDecorationExample
         {
             Text      = "You save £50.00!",
             FontSize  = 11,
-            TextColor = ColorPalette.Green[600],
+            // 700, not 600: 11pt regular text on white needs 4.5:1 and 600 falls
+            // to 3.22:1.
+            TextColor = ColorPalette.Green[700],
         });
 
         return doc;
