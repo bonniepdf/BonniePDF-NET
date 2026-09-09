@@ -60,6 +60,28 @@ behaviour, so the two files can be read side by side.
 
 ### Fixed
 
+- A `TableCell` with `ColumnSpan` greater than 1 no longer displaces the cells
+  after it. The row loop measured and placed each cell by its **index in the
+  row** rather than by the column it actually starts in, so once a cell spanned
+  more than one column every later cell in that row was drawn one column short
+  of its true position - overlapping the spanned cell - and took its width from
+  the wrong column, leaving the row short of the table's full width when the
+  weights were uneven. Both the row cursor and the width lookup now advance by
+  the number of columns each cell covers. Rows without a `ColumnSpan` are
+  unaffected: the starting column equals the cell index, and the arithmetic is
+  the same as before.
+
+- A `Table` with fewer declared column weights than a row actually fills no
+  longer fails to lay out. Column widths came from the constructor weights
+  alone, so a table built as `new Table()` produced an empty width array and
+  `MeasureRowHeight` threw `IndexOutOfRangeException` on the first cell; a table
+  built as `new Table(3)` with two-cell rows threw the same way on the second.
+  The declared weights are now extended with equal weights out to the widest row
+  - counting `ColumnSpan`, and across headers, rows and footers alike - so the
+  columns a row implies share the width evenly rather than being left without
+  one. Tables whose weights already cover every row are unaffected, their widths
+  being computed from the same weights as before.
+
 - Page breaks left graphics state unbalanced. The render pipeline wraps each
   element in `SaveState`/`RestoreState`; when an element broke the page from
   inside its own `Render`, the restore ran against the new page and the page the

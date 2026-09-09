@@ -56,6 +56,61 @@ public class TableTests
         Assert.Equal(300 - 2 * Pad, b.RenderedWidth, 3);
     }
 
+    [Fact]
+    public void ColumnWidths_AreInferredEvenlyWhenNoWeightsAreDeclared()
+    {
+        (RenderContext ctx, _) = MakeContext();
+        Probe a = new(), b = new();
+        Table t = new(); // no weights: two cells => two even columns
+        t.AddRow(a, b);
+        t.Render(ctx, 500);
+
+        Assert.Equal(Pad, a.RenderedX, 3);
+        Assert.Equal(250 - 2 * Pad, a.RenderedWidth, 3);
+        Assert.Equal(250 + Pad, b.RenderedX, 3);
+        Assert.Equal(250 - 2 * Pad, b.RenderedWidth, 3);
+    }
+
+    [Fact]
+    public void ColumnWidths_ExtendDeclaredWeightsWithEvenColumnsForExtraCells()
+    {
+        (RenderContext ctx, _) = MakeContext();
+        Probe a = new(), b = new();
+        Table t = new(3); // one weight, two cells => weights 3 and 1 over 400
+        t.AddRow(a, b);
+        t.Render(ctx, 400);
+
+        Assert.Equal(300 - 2 * Pad, a.RenderedWidth, 3);
+        Assert.Equal(300 + Pad, b.RenderedX, 3);
+        Assert.Equal(100 - 2 * Pad, b.RenderedWidth, 3);
+    }
+
+    [Fact]
+    public void ColumnWidths_CountSpansWhenInferringColumns()
+    {
+        (RenderContext ctx, _) = MakeContext();
+        Probe spanned = new();
+        Table t = new(); // a span-2 cell plus one more => three even columns of 100
+        t.AddRow(TableCell.From(spanned).WithColumnSpan(2), TableCell.From(new Probe()));
+        t.Render(ctx, 300);
+
+        Assert.Equal(200 - 2 * Pad, spanned.RenderedWidth, 3); // columns 0+1
+    }
+
+    [Fact]
+    public void ColumnWidths_WidenToTheWidestRowAcrossHeadersRowsAndFooters()
+    {
+        (RenderContext ctx, _) = MakeContext();
+        Probe only = new();
+        Table t = new();
+        t.AddRow(only);                                  // 1 cell
+        t.AddFooter(new Probe(), new Probe(), new Probe()); // 3 cells wins
+        t.Render(ctx, 300);
+
+        // The single-cell row still occupies just its own first column.
+        Assert.Equal(100 - 2 * Pad, only.RenderedWidth, 3);
+    }
+
     // --- Height measurement ---
 
     [Fact]
@@ -100,6 +155,35 @@ public class TableTests
         t.Render(ctx, 300);
 
         Assert.Equal(200 - 2 * Pad, spanned.RenderedWidth, 3); // columns 0+1
+    }
+
+    [Fact]
+    public void ColumnSpan_PlacesTheNextCellAfterTheCoveredColumns()
+    {
+        (RenderContext ctx, _) = MakeContext();
+        Probe spanned = new(), next = new();
+        Table t = new(1, 1, 1); // 300 => 100 / 100 / 100
+        t.AddRow(TableCell.From(spanned).WithColumnSpan(2), TableCell.From(next));
+        t.Render(ctx, 300);
+
+        Assert.Equal(Pad, spanned.RenderedX, 3);
+        Assert.Equal(200 - 2 * Pad, spanned.RenderedWidth, 3); // columns 0+1
+        Assert.Equal(200 + Pad, next.RenderedX, 3);            // starts after column 1
+        Assert.Equal(100 - 2 * Pad, next.RenderedWidth, 3);    // column 2
+    }
+
+    [Fact]
+    public void ColumnSpan_TakesTheNextCellsWidthFromItsOwnColumnNotItsCellIndex()
+    {
+        (RenderContext ctx, _) = MakeContext();
+        Probe spanned = new(), next = new();
+        Table t = new(1, 2, 3); // 600 => 100 / 200 / 300
+        t.AddRow(TableCell.From(spanned).WithColumnSpan(2), TableCell.From(next));
+        t.Render(ctx, 600);
+
+        Assert.Equal(300 - 2 * Pad, spanned.RenderedWidth, 3); // columns 0+1 = 100+200
+        Assert.Equal(300 + Pad, next.RenderedX, 3);
+        Assert.Equal(300 - 2 * Pad, next.RenderedWidth, 3);    // column 2, not column 1
     }
 
     // --- Cells share a row ---
