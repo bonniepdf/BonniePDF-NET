@@ -231,16 +231,11 @@ public static class FinancialStatementExample
     private static Container RuleLine(Color color, float thickness) => new()
     {
         BackgroundColor = color,
-        Padding = new Thickness(0, thickness / 2, 0, thickness / 2),
+        Height = thickness,
         Margin = new Thickness(0, 2, 0, 2),
-        Child = new TextBlock { Text = " ", FontSize = 1 },
     };
 
-    private static Container Gap(float height) => new()
-    {
-        Padding = new Thickness(0, height / 2, 0, height / 2),
-        Child = new TextBlock { Text = " ", FontSize = 1 },
-    };
+    private static Spacer Gap(float height) => new(height);
 
     private static StatementLine Section(string label) => new(label, null, null, null, Kind.Section, false);
 

@@ -67,9 +67,12 @@ public static class AnnualReportGeometricCoverExample
         doc.Add(CoverType());
 
         // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
+        // Amber[700], not [500]: the KPI card paints this as 24pt bold text on the
+        // Sky-50 tile, where [500] only reaches 2.00:1 against the 3:1 large-text
+        // threshold. The cover's own Accent (canvas fills above) is unaffected.
         CapabilitiesPage.Add(doc, new ReportBrand(
             Company, Year,
-            ColorPalette.Sky[700], ColorPalette.Amber[500], ColorPalette.Sky[50],
+            ColorPalette.Sky[700], ColorPalette.Amber[700], ColorPalette.Sky[50],
             SegmentColors));
 
         return doc;

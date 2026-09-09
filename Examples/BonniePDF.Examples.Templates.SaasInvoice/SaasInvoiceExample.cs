@@ -206,8 +206,7 @@ public static class SaasInvoiceExample
     private static Container Rule(float top) => new()
     {
         BackgroundColor = RuleCol,
-        Child = new TextBlock { Text = " ", FontSize = 0.5f },
-        Padding = new Thickness(0, 0.4f, 0, 0.4f),
+        Height = 0.8f,
         Margin = new Thickness(0, top, 0, 8),
     };
 }

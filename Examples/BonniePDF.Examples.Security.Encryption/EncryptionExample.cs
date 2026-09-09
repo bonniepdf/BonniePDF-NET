@@ -146,7 +146,8 @@ public static class EncryptionExample
         TextColor = ColorPalette.Blue[700],
     };
 
-    private static TextBlock Allowed(string text) => new() { Text = text, TextColor = ColorPalette.Green[600] };
+    // Green[700], not [600]: this text on white needs 4.5:1 and 600 falls to 3.22:1.
+    private static TextBlock Allowed(string text) => new() { Text = text, TextColor = ColorPalette.Green[700] };
 
     private static TextBlock Denied(string text) => new() { Text = text, TextColor = ColorPalette.Red[600] };
 
@@ -230,8 +231,8 @@ public static class EncryptionExample
             Margin = new Thickness(0, 20, 0, 10)
         });
 
-        doc.Add(new TextBlock { Text = "  - Printing: Allowed", TextColor = ColorPalette.Green[600] });
-        doc.Add(new TextBlock { Text = "  - Copying: Allowed", TextColor = ColorPalette.Green[600] });
+        doc.Add(new TextBlock { Text = "  - Printing: Allowed", TextColor = ColorPalette.Green[700] });
+        doc.Add(new TextBlock { Text = "  - Copying: Allowed", TextColor = ColorPalette.Green[700] });
         doc.Add(new TextBlock { Text = "  - Modifying: Denied", TextColor = ColorPalette.Red[600] });
         doc.Add(new TextBlock { Text = "  - Annotations: Denied", TextColor = ColorPalette.Red[600] });
 
@@ -284,8 +285,8 @@ public static class EncryptionExample
             Margin = new Thickness(0, 10, 0, 5)
         });
 
-        doc.Add(new TextBlock { Text = "  - Low-quality printing: Allowed", TextColor = ColorPalette.Green[600] });
-        doc.Add(new TextBlock { Text = "  - Accessibility extraction: Allowed", TextColor = ColorPalette.Green[600] });
+        doc.Add(new TextBlock { Text = "  - Low-quality printing: Allowed", TextColor = ColorPalette.Green[700] });
+        doc.Add(new TextBlock { Text = "  - Accessibility extraction: Allowed", TextColor = ColorPalette.Green[700] });
         doc.Add(new TextBlock { Text = "  - Copying text: Denied", TextColor = ColorPalette.Red[600] });
         doc.Add(new TextBlock { Text = "  - Modifying: Denied", TextColor = ColorPalette.Red[600] });
         doc.Add(new TextBlock { Text = "  - High-quality printing: Denied", TextColor = ColorPalette.Red[600] });

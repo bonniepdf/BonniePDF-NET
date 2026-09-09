@@ -44,6 +44,7 @@ public static class AttachedDataExample
             PageSize = PdfSize.A4,
             Margin = 48,
             Conformance = PdfAConformance.PdfA3b,
+            Language = "en-GB",
             DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(BodyCol),
         });
 

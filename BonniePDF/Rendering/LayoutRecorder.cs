@@ -427,6 +427,18 @@ public sealed class LayoutRecorder
             paint.FontSize = text.FontSize;
             if (text.Weight >= Typography.FontWeight.Bold) paint.Bold = true;
         }
+        else if (element is Core.Hyperlink link)
+        {
+            // Hyperlink paints text but does not derive from TextElementBase — it
+            // carries its own TextColor/FontSize. Gating the text branch on the base
+            // class alone would leave every link unannotated, and link text on a
+            // coloured backdrop is exactly the contrast case authors get wrong.
+            // It exposes no weight, so `bold` is never set.
+            paint.Text = ColorToHex(link.TextColor);
+            float linkAlpha = AlphaOf(link.TextColor);
+            if (linkAlpha < 1f) paint.TextAlpha = linkAlpha;
+            paint.FontSize = link.FontSize;
+        }
 
         if (element is Elements.Layout.IBackgroundColor { BackgroundColor: { } background })
         {

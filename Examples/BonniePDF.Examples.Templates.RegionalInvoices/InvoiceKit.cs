@@ -19,7 +19,9 @@ namespace BonniePDF.Examples.Templates.RegionalInvoices;
 internal static class InvoiceKit
 {
     public static readonly Color Ink = ColorPalette.Slate[700];
-    public static readonly Color Muted = ColorPalette.Slate[500];
+    // 600, not 500: reads against tinted panels in the invoices that use it, and
+    // 500 falls to 4.35-4.38:1 there against the 4.5:1 WCAG AA threshold.
+    public static readonly Color Muted = ColorPalette.Slate[600];
     public static readonly Color HeaderBg = ColorPalette.Slate[100];
     public static readonly Color Rule = ColorPalette.Slate[200];
 
@@ -92,17 +94,15 @@ internal static class InvoiceKit
     public static Container Divider(Color color, float thickness = 0.6f) => new()
     {
         BackgroundColor = color,
-        Padding = new Thickness(0, thickness, 0, 0),
+        Height = thickness,
         Margin = new Thickness(0, 5, 0, 5),
-        Child = new TextBlock { Text = " ", FontSize = 1 },
     };
 
     /// <summary>A full-width coloured accent bar - the top rule that anchors each invoice.</summary>
     public static Container AccentBar(Color color, float height = 5f) => new()
     {
         BackgroundColor = color,
-        Padding = new Thickness(0, height / 2f, 0, height / 2f),
-        Child = new TextBlock { Text = " ", FontSize = 1 },
+        Height = height,
     };
 }
 

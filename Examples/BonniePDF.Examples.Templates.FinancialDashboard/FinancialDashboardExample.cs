@@ -139,8 +139,7 @@ public static class FinancialDashboardExample
         doc.Add(new Container
         {
             BackgroundColor = Sand,
-            Padding = new Thickness(0, 0.75f, 0, 0),
-            Child = new TextBlock { Text = " ", FontSize = 1 }
+            Height = 0.75f,
         });
 
         // ════════════════════════════════════════════════════════════════════════
@@ -155,7 +154,7 @@ public static class FinancialDashboardExample
                 Text = "MONTHLY REVENUE  (£000s)",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 7,
-                TextColor = Terra
+                TextColor = Brown // Terra fails at 4.15:1 on Cream (needs 4.5:1)
             }
         });
 
@@ -200,8 +199,7 @@ public static class FinancialDashboardExample
         doc.Add(new Container
         {
             BackgroundColor = Sand,
-            Padding = new Thickness(0, 0.75f, 0, 0),
-            Child = new TextBlock { Text = " ", FontSize = 1 }
+            Height = 0.75f,
         });
 
         doc.Add(new Container
@@ -212,7 +210,7 @@ public static class FinancialDashboardExample
                 Text = "TOP PRODUCTS",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 7,
-                TextColor = Terra
+                TextColor = Brown // Terra fails at 4.15:1 on Cream (needs 4.5:1)
             }
         });
 

@@ -54,6 +54,7 @@ public static partial class DickensNovelExample
             Margin      = 72,
             Version     = PdfVersion.Pdf17,
             PdfAEnabled = true,
+            Language    = "en-GB",
             DisplayDocTitle = true,
             DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11).WithColor(ColorPalette.Slate[900]),
 
@@ -192,12 +193,16 @@ public static partial class DickensNovelExample
             Margin    = new Thickness(0, 0, 0, 40)
         });
 
+        // The ornamental rule and attribution lines below were Slate[300]/[400] -
+        // legible as decoration at a glance, but Slate[400] never clears 4.5:1 as
+        // text (2.51-2.63:1) and Slate[300] falls to 1.49:1. Slate[600] keeps the
+        // quiet title-page tone while meeting WCAG 2.2 AA.
         doc.Add(new TextBlock
         {
             Text      = "---------------",
             FontName  = StandardFonts.TimesRoman,
             FontSize  = 13,
-            TextColor = ColorPalette.Slate[400],
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
             Margin    = new Thickness(0, 0, 0, 40)
         });
@@ -217,7 +222,7 @@ public static partial class DickensNovelExample
             Text      = "Project Gutenberg Edition · eBook #98",
             FontName  = StandardFonts.TimesRoman,
             FontSize  = 10,
-            TextColor = ColorPalette.Slate[400],
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
             Margin    = new Thickness(0, 0, 0, 4)
         });
@@ -227,7 +232,7 @@ public static partial class DickensNovelExample
             Text      = "Public domain - free to read, copy, and share.",
             FontName  = StandardFonts.TimesItalic,
             FontSize  = 9,
-            TextColor = ColorPalette.Slate[400],
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         });
     }
@@ -244,7 +249,7 @@ public static partial class DickensNovelExample
             Text      = "---------------",
             FontName  = StandardFonts.TimesRoman,
             FontSize  = 11,
-            TextColor = ColorPalette.Slate[300],
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
             Margin    = new Thickness(0, 56, 0, 14)
         });
@@ -265,7 +270,7 @@ public static partial class DickensNovelExample
             Text      = "---------------",
             FontName  = StandardFonts.TimesRoman,
             FontSize  = 11,
-            TextColor = ColorPalette.Slate[300],
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
             Margin    = new Thickness(0, 0, 0, 32)
         });

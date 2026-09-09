@@ -141,9 +141,8 @@ public static class PublicLibraryMembershipLetterExample
         stack.Add(new Container
         {
             BackgroundColor = LibraryGreen,
-            Padding = new Thickness(0, 1.5f, 0, 0),
+            Height = 1.5f,
             Margin = new Thickness(0, 0, 0, 20),
-            Child = new TextBlock { Text = " ", FontSize = 1 },
         });
         return stack;
     }
