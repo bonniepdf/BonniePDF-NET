@@ -163,17 +163,23 @@ public static class AnnualReportGradientCoverExample
             Margin = new Thickness(0, 0, 0, 324),
         });
 
+        // Violet[100], not [200]/[300]: this footer sits near the foot of the
+        // page, where the background gradient has shifted to its brightest stop
+        // (#a800b7). Violet[300] is 3.38:1 there - well under 4.5:1 - and
+        // Violet[200] is only a rounding error above it (4.52:1). Violet[100],
+        // already used for the headline above, holds a comfortable 5.28:1 at
+        // that same point.
         stack.Add(new TextBlock("Prepared with BonniePDF")
         {
             FontSize = 10,
-            TextColor = ColorPalette.Violet[200],
+            TextColor = ColorPalette.Violet[100],
             Margin = new Thickness(0, 0, 0, 7),
         });
 
         stack.Add(new TextBlock($"Fiscal Year {Year} · Confidential")
         {
             FontSize = 10,
-            TextColor = ColorPalette.Violet[300],
+            TextColor = ColorPalette.Violet[100],
         });
 
         // Anchored to the foot of the page rather than positioned by a top padding

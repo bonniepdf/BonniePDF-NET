@@ -219,10 +219,12 @@ public static class AnnualReportGeometricCoverExample
             Margin = new Thickness(0, 0, 0, 240),
         });
 
+        // Slate[600], not [400]: this footer sits on the flat page background,
+        // where Slate[400] is 2.51:1 against the 4.5:1 WCAG AA threshold.
         stack.Add(new TextBlock($"Prepared with BonniePDF · Fiscal Year {Year}")
         {
             FontSize = 10,
-            TextColor = ColorPalette.Slate[400],
+            TextColor = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
         });
 
