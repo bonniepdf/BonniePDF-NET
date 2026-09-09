@@ -37,6 +37,7 @@ public static class LollipopChartExample
 
         document.Settings.Version = PdfVersion.Pdf17;
         document.Settings.PdfAEnabled = true;
+        document.Settings.Language = "en-GB";
 
         // Set document metadata
         document.Metadata.Title = "Lollipop Chart Example";

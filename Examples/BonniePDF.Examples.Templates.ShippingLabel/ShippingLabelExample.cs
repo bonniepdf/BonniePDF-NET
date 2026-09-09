@@ -150,8 +150,7 @@ public static class ShippingLabelExample
     private static Container HRule(float top, float bottom) => new()
     {
         BackgroundColor = LineCol,
-        Child = new TextBlock { Text = " ", FontSize = 0.5f },
-        Padding = new Thickness(0, 0.5f, 0, 0.5f),
+        Height = 1f,
         Margin = new Thickness(0, top, 0, bottom),
     };
 

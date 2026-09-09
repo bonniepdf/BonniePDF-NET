@@ -38,6 +38,7 @@ public static class LineChartExample
 
         document.Settings.Version = PdfVersion.Pdf17;
         document.Settings.PdfAEnabled = true;
+        document.Settings.Language = "en-GB";
 
         // Set document metadata
         document.Metadata.Title = "Line Chart Example";

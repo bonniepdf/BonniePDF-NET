@@ -27,6 +27,7 @@ public static class HorizontalLollipopChartExample
 
         document.Settings.Version = PdfVersion.Pdf17;
         document.Settings.PdfAEnabled = true;
+        document.Settings.Language = "en-GB";
         document.Metadata.Title = "Horizontal Lollipop Chart Example";
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Product revenue ranking using a horizontal LollipopChart";

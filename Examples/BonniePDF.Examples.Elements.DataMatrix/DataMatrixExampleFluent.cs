@@ -31,6 +31,7 @@ public static class DataMatrixExampleFluent
             {
                 settings.PageSize = PdfSize.A4;
                 settings.Margin = 50;
+                settings.Language = "en-GB";
             });
 
             doc.WithDefaultTextStyle(style => style
@@ -187,7 +188,7 @@ public static class DataMatrixExampleFluent
 
             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text(label).Font(StandardFonts.HelveticaBold);
             card.Item().AlignCenter().Text(detail).FontSize(9).TextColor(ColorPalette.Slate[500]);
-            card.Item().AlignCenter().Text(data).FontSize(8).TextColor(ColorPalette.Slate[400]).Margin(0, 4, 0, 0);
+            card.Item().AlignCenter().Text(data).FontSize(8).TextColor(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
         });
     }
 

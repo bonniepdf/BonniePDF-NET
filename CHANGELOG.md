@@ -60,6 +60,16 @@ behaviour, so the two files can be read side by side.
 
 ### Fixed
 
+- The accessibility preflight now measures contrast on **`Hyperlink`** text.
+  Paint capture derived a node's text colour and size only from
+  `TextElementBase`, and `Hyperlink` carries its own `TextColor`/`FontSize`
+  without deriving from it, so every link reached `CompliancePreflight.Evaluate`
+  unannotated and no link could ever be reported as low-contrast - the case
+  authors get wrong most often, since link text is routinely recoloured against
+  a tinted panel. `Hyperlink` exposes no weight, so it is never reported bold
+  and the 4.5:1 body threshold always applies. Nothing else about the element
+  changes: capture stays observational, and byte output is untouched.
+
 - A `TableCell` with `ColumnSpan` greater than 1 no longer displaces the cells
   after it. The row loop measured and placed each cell by its **index in the
   row** rather than by the column it actually starts in, so once a cell spanned

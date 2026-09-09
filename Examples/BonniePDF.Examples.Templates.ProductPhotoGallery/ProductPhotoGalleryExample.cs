@@ -181,12 +181,16 @@ public static class ProductPhotoGalleryExample
     {
         ColorPalette hue = TileHues[index % TileHues.Length];
 
+        // Amber[600] is the one shade in this cycle that falls short of 3:1 on its
+        // own [100] tint (2.87:1); every other hue already clears it at [600].
+        Color monogramColor = hue == ColorPalette.Amber ? ColorPalette.Amber[700] : hue[600];
+
         TextBlock monogram = new()
         {
             Text = product.Name[..1].ToUpperInvariant(),
             FontName = StandardFonts.HelveticaBold,
             FontSize = 40,
-            TextColor = hue[600],
+            TextColor = monogramColor,
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 40, 0, 0),
         };

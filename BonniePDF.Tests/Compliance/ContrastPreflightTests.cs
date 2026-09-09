@@ -230,6 +230,43 @@ public sealed class ContrastPreflightTests
     }
 
     [Fact]
+    public void CapturesHyperlinkPaint_ThoughItIsNotATextElementBase()
+    {
+        BonniePDF.Document doc = BaselineDocument();
+        doc.Add(new Hyperlink("https://example.com", "Terms and conditions")
+        {
+            FontSize = 11,
+            TextColor = new Color(0x99, 0x99, 0x99),
+        });
+
+        LayoutSnapshot snapshot = Capture(doc);
+
+        LayoutNode link = Walk(snapshot.Root).First(n => n.Type == "Hyperlink");
+        Assert.Equal("#999999", link.Paint?.Text);
+        Assert.Equal(11f, link.Paint?.FontSize);
+        // Hyperlink exposes no weight, so it is never reported bold.
+        Assert.Null(link.Paint?.Bold);
+    }
+
+    [Fact]
+    public void FlagsLowContrastHyperlinkText()
+    {
+        BonniePDF.Document doc = BaselineDocument();
+        doc.Add(new Hyperlink("https://example.com", "Terms and conditions")
+        {
+            FontSize = 11,
+            TextColor = new Color(0x99, 0x99, 0x99),
+        });
+
+        ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
+
+        ComplianceFinding? finding = report.Findings.FirstOrDefault(f => f.Code == "contrast-insufficient");
+        Assert.NotNull(finding);
+        Assert.Equal(ComplianceSeverity.Warning, finding!.Severity);
+        Assert.Equal("WCAG 2.2", finding.Standard);
+    }
+
+    [Fact]
     public void ReportsUnknown_WhenThePagePaintsABackgroundElement()
     {
         BonniePDF.Document doc = BaselineDocument();

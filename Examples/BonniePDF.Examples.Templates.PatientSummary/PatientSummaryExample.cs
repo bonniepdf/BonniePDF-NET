@@ -29,7 +29,10 @@ public static class PatientSummaryExample
     private static readonly Color Hairline = Color.FromHex("#e2e8f0"); // slate-200  card border / rules
     private static readonly Color Card = Color.FromHex("#ffffff");     // card surface
     private static readonly Color Tint = Color.FromHex("#f8fafc");     // slate-50   page tint
-    private static readonly Color Teal = Color.FromHex("#0d9488");     // patient band
+    // #0a7164, not #0d9488: this teal doubles as the band fill (behind white/Cream
+    // text) and as small status text on white, and #0d9488 only reaches 3.42-3.74:1
+    // either way, below the 4.5:1 WCAG AA threshold. #0a7164 clears it in both roles.
+    private static readonly Color Teal = Color.FromHex("#0a7164");     // patient band
     private static readonly Color Indigo = Color.FromHex("#4f46e5");   // vitals band
     private static readonly Color Rose = Color.FromHex("#e11d48");     // allergy band / alerts
     private static readonly Color Cream = Color.FromHex("#f1f5f9");    // band caption text

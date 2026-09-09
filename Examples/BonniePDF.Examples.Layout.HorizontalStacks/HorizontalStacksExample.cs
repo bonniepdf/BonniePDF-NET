@@ -95,7 +95,10 @@ public static class HorizontalStacksExample
             WidthDistribution = WidthDistribution.Weighted,
             Spacing           = 10,
         };
-        weightedStack.Add(Box("1×", ColorPalette.Slate[400]), 1f);
+        // 500, not 400: white text on Slate[400] falls to 2.63:1 against the
+        // 4.5:1 WCAG AA threshold; 500 clears it (4.76:1) and still reads lighter
+        // than the 600/800 boxes beside it.
+        weightedStack.Add(Box("1×", ColorPalette.Slate[500]), 1f);
         weightedStack.Add(Box("2×", ColorPalette.Slate[600]), 2f);
         weightedStack.Add(Box("3×", ColorPalette.Slate[800]), 3f);
         doc.Add(weightedStack);

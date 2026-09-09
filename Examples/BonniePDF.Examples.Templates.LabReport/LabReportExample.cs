@@ -20,11 +20,14 @@ public static class LabReportExample
 {
     private static readonly Color ClinicalBlue = Color.FromHex("#2563eb");
     private static readonly Color Ink = ColorPalette.Slate[700];
-    private static readonly Color Muted = ColorPalette.Slate[500];
+    // 600, not 500: reads against a tinted panel elsewhere in the document, and
+    // 500 falls to 4.38:1 there against the 4.5:1 WCAG AA threshold.
+    private static readonly Color Muted = ColorPalette.Slate[600];
     private static readonly Color Rule = ColorPalette.Slate[200];
     private static readonly Color HeaderBackground = ColorPalette.Slate[100];
     private static readonly Color High = ColorPalette.Rose[600];
-    private static readonly Color Low = ColorPalette.Amber[600];
+    // 700, not 600: this flag's text on white needs 4.5:1 and 600 falls to 3.20:1.
+    private static readonly Color Low = ColorPalette.Amber[700];
 
     private static readonly Panel[] Panels =
     [
@@ -136,9 +139,8 @@ public static class LabReportExample
     private static Container BlueRule() => new()
     {
         BackgroundColor = ClinicalBlue,
-        Padding = new Thickness(0, 1.5f, 0, 0),
+        Height = 1.5f,
         Margin = new Thickness(0, 6, 0, 16),
-        Child = new TextBlock { Text = " ", FontSize = 1 },
     };
 
     private static Grid InfoBlock()

@@ -156,9 +156,8 @@ public static class GrantAwardLetterExample
         stack.Add(new Container
         {
             BackgroundColor = Brand,
-            Padding = new Thickness(0, 1.5f, 0, 0),
+            Height = 1.5f,
             Margin = new Thickness(0, 0, 0, 20),
-            Child = SpacerLine(),
         });
         return stack;
     }
@@ -376,8 +375,6 @@ public static class GrantAwardLetterExample
         TextColor = color ?? Ink,
         Alignment = align,
     };
-
-    private static TextBlock SpacerLine() => new() { Text = " ", FontSize = 1 };
 
     private sealed record Money(string Label, string Amount, string Note);
 

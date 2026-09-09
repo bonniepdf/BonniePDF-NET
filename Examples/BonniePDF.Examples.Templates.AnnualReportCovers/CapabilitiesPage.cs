@@ -39,7 +39,9 @@ internal sealed record ReportBrand(
 internal static class CapabilitiesPage
 {
     private static readonly Color Ink = ColorPalette.Slate[700];
-    private static readonly Color Muted = ColorPalette.Slate[500];
+    // 600, not 500: this label sits on each cover's own brand.Tint panel, and 500
+    // falls to 4.26-4.47:1 there against the 4.5:1 WCAG AA threshold.
+    private static readonly Color Muted = ColorPalette.Slate[600];
     private static readonly Color Rule = ColorPalette.Slate[200];
 
     /// <summary>Appends the capabilities spread as a new page on <paramref name="doc"/>.</summary>

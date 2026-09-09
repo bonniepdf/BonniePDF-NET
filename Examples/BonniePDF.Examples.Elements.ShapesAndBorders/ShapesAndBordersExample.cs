@@ -123,9 +123,12 @@ public static class ShapesAndBordersExample
             Margin = new Thickness(0, 0, 0, 12)
         };
 
-        cardRow.Add(CreateCard("Feature A", "Rounded corners make UI elements feel modern and approachable.", ColorPalette.Blue[500], ColorPalette.Blue[50]), 1f);
-        cardRow.Add(CreateCard("Feature B", "Bezier curves approximate perfect quarter-circle arcs.", ColorPalette.Purple[500], Color.FromHex("#faf5ff")), 1f);
-        cardRow.Add(CreateCard("Feature C", "Works with backgrounds, borders, or both combined.", ColorPalette.Teal[500], Color.FromHex("#f0fdfa")), 1f);
+        // Each title is bold 14pt text on its own tint - Blue/Purple[500] and
+        // Teal[500] all fall short of 4.5:1 there (3.46/3.84/2.32:1); one step
+        // darker clears it in every case.
+        cardRow.Add(CreateCard("Feature A", "Rounded corners make UI elements feel modern and approachable.", ColorPalette.Blue[600], ColorPalette.Blue[50]), 1f);
+        cardRow.Add(CreateCard("Feature B", "Bezier curves approximate perfect quarter-circle arcs.", ColorPalette.Purple[600], Color.FromHex("#faf5ff")), 1f);
+        cardRow.Add(CreateCard("Feature C", "Works with backgrounds, borders, or both combined.", ColorPalette.Teal[700], Color.FromHex("#f0fdfa")), 1f);
 
         doc.Add(cardRow);
 

@@ -19,12 +19,18 @@ public static class BusinessInvoiceExample
 {
     // Brand accent color - a professional green similar to QuickBooks
     private static readonly Color AccentGreen = Color.FromHex("#0B9444");
+    // A darker step of AccentGreen for small/regular text painted in the brand
+    // colour (headers, labels): AccentGreen itself only clears 4.5:1 at the 28pt
+    // bold size of the "Invoice" heading (3.94:1 elsewhere on white, 3.51:1 on
+    // AccentGreenLight) - fine as a large-text accent, not as body-sized text.
+    private static readonly Color AccentGreenText = Color.FromHex("#097636");
     private static readonly Color AccentGreenLight = Color.FromHex("#E8F5EC");
     private static readonly Color HeaderGray = Color.FromHex("#F5F5F5");
     private static readonly Color BorderGray = Color.FromHex("#D9D9D9");
     private static readonly Color TextDark = Color.FromHex("#333333");
     private static readonly Color TextMedium = Color.FromHex("#555555");
-    private static readonly Color TextLight = Color.FromHex("#888888");
+    // #707070, not #888888: 3.54:1 on white, below the 4.5:1 WCAG AA threshold.
+    private static readonly Color TextLight = Color.FromHex("#707070");
 
     public static Document Generate()
     {
@@ -52,8 +58,7 @@ public static class BusinessInvoiceExample
         doc.Add(new Container
         {
             BackgroundColor = AccentGreen,
-            Padding = new Thickness(0, 4, 0, 4),
-            Child = new TextBlock { Text = " ", FontSize = 1 }
+            Height = 8,
         });
 
         // ============================================
@@ -244,9 +249,8 @@ public static class BusinessInvoiceExample
         doc.Add(new Container
         {
             BackgroundColor = AccentGreen,
-            Padding = new Thickness(0, 0.75f, 0, 0),
+            Height = 0.75f,
             Margin = new Thickness(0, 0, 0, 12),
-            Child = new TextBlock { Text = " ", FontSize = 1 }
         });
 
         // ============================================
@@ -330,12 +334,12 @@ public static class BusinessInvoiceExample
             new TextBlock
             {
                 Text = "Discount (early payment)", FontName = StandardFonts.Helvetica, FontSize = 9,
-                TextColor = AccentGreen
+                TextColor = AccentGreenText
             }.AlignLeft(),
             new TextBlock
             {
                 Text = "-$1,400.00", FontName = StandardFonts.Helvetica, FontSize = 9,
-                TextColor = AccentGreen
+                TextColor = AccentGreenText
             }.AlignRight()
         );
         totalsStack.Add(discountRow);
@@ -344,9 +348,8 @@ public static class BusinessInvoiceExample
         totalsStack.Add(new Container
         {
             BackgroundColor = TextDark,
-            Padding = new Thickness(0, 0.5f, 0, 0),
+            Height = 0.5f,
             Margin = new Thickness(0, 4, 0, 4),
-            Child = new TextBlock { Text = " ", FontSize = 1 }
         });
 
         // Total
@@ -396,9 +399,8 @@ public static class BusinessInvoiceExample
         doc.Add(new Container
         {
             BackgroundColor = AccentGreen,
-            Padding = new Thickness(0, 0.5f, 0, 0),
+            Height = 0.5f,
             Margin = new Thickness(0, 20, 0, 0),
-            Child = new TextBlock { Text = " ", FontSize = 1 }
         });
 
         doc.Add(new TextBlock
@@ -454,7 +456,7 @@ public static class BusinessInvoiceExample
             Text = "Bank Transfer",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 8,
-            TextColor = AccentGreen,
+            TextColor = AccentGreenText,
             Margin = new Thickness(0, 0, 0, 4)
         });
         // Each column's lines share one style and flow as a single paragraph.
@@ -467,7 +469,7 @@ public static class BusinessInvoiceExample
             Text = "Other Methods",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 8,
-            TextColor = AccentGreen,
+            TextColor = AccentGreenText,
             Margin = new Thickness(0, 0, 0, 4)
         });
         otherStack.Add(new TextBlock { Text = "PayPal: payments@example.com\nWise: @sample-company", FontSize = 8, TextColor = TextMedium });
@@ -479,7 +481,7 @@ public static class BusinessInvoiceExample
             Text = "Reference",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 8,
-            TextColor = AccentGreen,
+            TextColor = AccentGreenText,
             Margin = new Thickness(0, 0, 0, 4)
         });
         refStack.Add(new TextBlock { Text = "Please include invoice\nnumber with payment", FontSize = 8, TextColor = TextMedium });
