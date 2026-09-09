@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using BonniePDF.Core;
@@ -399,7 +400,9 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             float startX = ctx.CurrentX;
             float currentX = startX;
 
-            for (int i = 0; i < row.Cells.Length; i++)
+            // `col` tracks the column the cell starts in, which runs ahead of the
+            // cell index `i` once any cell in the row spans more than one column.
+            for (int i = 0, col = 0; i < row.Cells.Length; i++)
             {
                 TableCell cell = row.Cells[i];
 
@@ -408,10 +411,10 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 // resolves to TH instead of TD.
                 if (row.IsHeader && !cell.IsHeader) cell.IsHeader = true;
 
-                float colWidth = widths[i];
-                if (cell.ColumnSpan > 1)
-                    for (int j = 1; j < cell.ColumnSpan && i + j < widths.Length; j++)
-                        colWidth += widths[i + j];
+                int span = Math.Max(1, cell.ColumnSpan);
+                float colWidth = 0;
+                for (int j = 0; j < span && col + j < widths.Length; j++)
+                    colWidth += widths[col + j];
 
                 capture.OpenCell(cell, currentX, colWidth);
 
@@ -453,7 +456,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                     capture.CloseCell(cell);
                 }
 
-                currentX += widths[i];
+                currentX += colWidth;
+                col += span;
             }
 
             ctx.CurrentX = startX;
@@ -662,24 +666,64 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
     private float[] CalculateColumnWidths(float totalWidth)
     {
-        float totalWeight = _columnWeights.Sum();
-        return _columnWeights.Select(w => w / totalWeight * totalWidth).ToArray();
+        float[] weights = EffectiveColumnWeights();
+        float totalWeight = weights.Sum();
+        return weights.Select(w => w / totalWeight * totalWidth).ToArray();
+    }
+
+    /// <summary>
+    /// The declared column weights, extended with equal weights out to the widest
+    /// row. A table may be built with no weights at all, or with fewer than some
+    /// row actually fills; the columns those rows imply share the width evenly
+    /// rather than being left without one.
+    /// </summary>
+    private float[] EffectiveColumnWeights()
+    {
+        int columns = ColumnCount();
+        if (columns <= _columnWeights.Length) return _columnWeights;
+
+        var weights = new float[columns];
+        _columnWeights.CopyTo(weights, 0);
+        for (int i = _columnWeights.Length; i < columns; i++) weights[i] = 1f;
+        return weights;
+    }
+
+    /// <summary>
+    /// The number of columns the table spans: the declared weight count, widened
+    /// to the most columns any single row occupies once column spans are counted.
+    /// </summary>
+    private int ColumnCount()
+    {
+        int columns = _columnWeights.Length;
+
+        foreach (TableRow row in _headers.Concat(_rows).Concat(_footers))
+        {
+            int spanned = 0;
+            foreach (TableCell cell in row.Cells) spanned += Math.Max(1, cell.ColumnSpan);
+            if (spanned > columns) columns = spanned;
+        }
+
+        return columns;
     }
 
     private float MeasureRowHeight(TableRow row, float[] widths)
     {
         float maxHeight = row.MinHeight ?? 0;
 
-        for (int i = 0; i < row.Cells.Length; i++)
+        // `col` tracks the column the cell starts in, which runs ahead of the cell's
+        // position in the row once any cell in the row spans more than one column.
+        int col = 0;
+
+        foreach (TableCell cell in row.Cells)
         {
-            TableCell cell = row.Cells[i];
             Thickness padding = cell.Padding ?? row.Padding ?? new Thickness(CellPadding);
 
             // Calculate effective width considering column span
-            float cellWidth = widths[i];
-            if (cell.ColumnSpan > 1)
-                for (int j = 1; j < cell.ColumnSpan && i + j < widths.Length; j++)
-                    cellWidth += widths[i + j];
+            int span = Math.Max(1, cell.ColumnSpan);
+            float cellWidth = 0;
+            for (int j = 0; j < span && col + j < widths.Length; j++)
+                cellWidth += widths[col + j];
+            col += span;
 
             // Measure content height with padding
             float contentWidth = cellWidth - padding.Left - padding.Right;
