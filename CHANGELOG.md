@@ -48,6 +48,23 @@ behaviour, so the two files can be read side by side.
 
 ### Added
 
+- **`Container.FillHeight`** takes the body content height left on the current
+  page instead of sizing to content, and `.FillHeight()` on the fluent surface
+  does the same. This is the piece that was missing for the header / body /
+  footer page shape: the middle band is whatever the page chrome leaves over,
+  which an author cannot compute up front because both templates are functions
+  of the page number.
+
+  ```csharp
+  new Container { FillHeight = true, VerticalAlignment = VerticalAlignment.End, Child = body }
+  ```
+
+  An explicit `Height` wins outright, and fill never *shrinks* content — a
+  container whose child outgrows the space left keeps the child's height and
+  paginates normally. Measurement is unchanged: it reports the natural content
+  height, because a pure measure has no cursor to measure from. Fill re-resolves
+  after a page break, against the new page's own reserved band.
+
 - `CompliancePreflight.Evaluate` takes a `CompliancePreflightOptions` overload
   selecting which **rule families** run: `IncludeWcag = false` skips the WCAG 2.2
   contrast rules entirely. The suppressed findings are absent from `Findings`

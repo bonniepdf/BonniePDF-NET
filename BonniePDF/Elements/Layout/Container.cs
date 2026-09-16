@@ -61,6 +61,26 @@ public class Container : BorderedElementBase, IContentContainer
     public float? Height { get; set; }
 
     /// <summary>
+    /// When <c>true</c>, the container takes the body content height left on the
+    /// current page instead of sizing to its content. This is the primitive
+    /// behind the header / body / footer page shape: the middle band is whatever
+    /// the page chrome leaves over, a figure an author cannot compute up front
+    /// because both templates are functions of the page number.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Height"/> wins outright - fill is only consulted when no height
+    /// is pinned - and fill never <em>shrinks</em> content: a container whose
+    /// child is taller than the space left keeps the child's height and
+    /// paginates normally. Measurement is unaffected (it reports the natural
+    /// content height, because a pure measure has no cursor to measure from);
+    /// only arrangement expands. Combines with
+    /// <see cref="VerticalAlignment"/>: the slack fill creates is exactly the
+    /// space it gained, so <see cref="Layout.VerticalAlignment.End"/> anchors
+    /// content to the foot of the band.
+    /// </remarks>
+    public bool FillHeight { get; set; }
+
+    /// <summary>
     /// When <c>true</c> and <see cref="BorderedElementBase.CornerRadius"/> is
     /// positive, the container's content (background, border, and child) is
     /// clipped to the rounded-rectangle outline. This is what turns a
@@ -125,16 +145,40 @@ public class Container : BorderedElementBase, IContentContainer
         return childHeight + Padding.Top + Padding.Bottom + Border.VerticalWidth;
     }
 
+    /// <summary>
+    /// The arranged height for this render. A pinned <see cref="Height"/> wins
+    /// outright; <see cref="FillHeight"/> then expands to the body content height
+    /// left below the cursor, never below the natural content height. Resolved
+    /// here rather than in <see cref="MeasureContentHeight"/> because fill is a
+    /// property of <em>where</em> the container lands, and measurement has no
+    /// cursor - see the shared specification, "Layout &amp; Pagination" §3.1.
+    /// </summary>
+    private float ResolveHeight(RenderContext ctx, float effectiveWidth)
+    {
+        if (Height.HasValue) return Height.Value;
+
+        float natural = MeasureContentHeight(effectiveWidth);
+        if (!FillHeight) return natural;
+
+        return MathF.Max(natural, ctx.MaxY - ctx.CurrentY);
+    }
+
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
         // Use fixed width if specified, otherwise use available width
         float effectiveWidth = Width ?? contentWidth;
-        float containerHeight = Height ?? MeasureContentHeight(effectiveWidth);
+        float containerHeight = ResolveHeight(ctx, effectiveWidth);
 
         // PAGINATION CHECK:
         // Containers are tricky. If the *whole* container fits, render it.
         // If not, we trigger a new page here too, to keep borders intact.
-        if (ctx.CurrentY + containerHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop) ctx.NewPage();
+        if (ctx.CurrentY + containerHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop)
+        {
+            ctx.NewPage();
+            // Fill resolves per page: the band below the cursor on the new page
+            // is a different one, and may be measured against different chrome.
+            containerHeight = ResolveHeight(ctx, effectiveWidth);
+        }
 
         // Crisp-edge hint: render the subtree inside a crisp-edge region so
         // axis-aligned strokes/rects snap to the pixel grid on SVG export.

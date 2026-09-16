@@ -199,6 +199,22 @@ public static class ContainerStyleExtensions
         return container;
     }
 
+    /// <summary>
+    /// Takes the body content height left on the current page instead of sizing
+    /// to content - the middle band of a header / body / footer page.
+    /// </summary>
+    /// <remarks>
+    /// A fixed <see cref="Height(IContentContainer, float)"/> wins outright, and
+    /// fill never shrinks content below its natural height. See
+    /// <see cref="Container.FillHeight"/>.
+    /// </remarks>
+    public static IContentContainer FillHeight(this IContentContainer c)
+    {
+        var container = GetOrCreateContainer(c);
+        container.FillHeight = true;
+        return container;
+    }
+
     /// <summary>Sets a fixed width and height.</summary>
     public static IContentContainer Size(this IContentContainer c, float width, float height)
     {
