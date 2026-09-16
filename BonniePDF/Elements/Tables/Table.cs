@@ -244,7 +244,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             {
                 float headerHeight = MeasureRowHeight(headerRow, widths);
 
-                if (ctx.CurrentY + headerHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
+                if (ctx.CurrentY + headerHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop)
                 {
                     if (theadOpen && groupTagging != null) groupTagging!.Tree.End();
                     if (artifactOpen) ctx.Canvas.EndArtifact();
@@ -291,7 +291,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             float rowHeight = MeasureRowHeight(row, widths);
 
             // Pagination check
-            if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
+            if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop)
             {
                 if (tbodyOpen && groupTagging != null) groupTagging!.Tree.End();
                 _lastRowRendered = i - 1;
@@ -545,7 +545,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                     float rowHeight = MeasureRowHeight(row, widths);
 
                     // Pagination check
-                    if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin)
+                    if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop)
                     {
                         ctx.NewPage();
                         isFirstPage = false;
@@ -590,7 +590,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         float rowHeight = MeasureRowHeight(row, widths);
 
         // Pagination check
-        if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin) ctx.NewPage();
+        if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop) ctx.NewPage();
 
         RenderRowDirect(ctx, row, widths);
     }

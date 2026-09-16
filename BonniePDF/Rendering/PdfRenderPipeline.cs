@@ -41,6 +41,10 @@ public static class PdfRenderPipeline
 
         PdfSize orientedPageSize = settings.GetOrientedPageSize();
         RenderContext ctx = new(orientedPageSize, settings.Margin);
+        // Header/footer consume body content height (spec: Layout & Pagination
+        // §5.1). Installed before any layout so the very first page's cursor and
+        // break threshold already account for the chrome.
+        ctx.SetChromeReservation(ChromeReservationFactory.For(settings, ctx));
 
         PdfRenderResult result = new()
         {
@@ -72,9 +76,8 @@ public static class PdfRenderPipeline
 
             ctx.SwitchToPage(currentOutputIndex);
 
-            // Reset cursor position
-            ctx.CurrentX = pageMargin;
-            ctx.CurrentY = pageMargin;
+            // Reset cursor position to the top of this page's content band
+            ctx.ResetCursorToContentTop();
 
             // Calculate content width based on actual dimensions
             float contentWidth = pageWidth - pageMargin * 2;
@@ -164,8 +167,8 @@ public static class PdfRenderPipeline
             {
                 float elementHeight = element.MeasureHeight(contentWidth);
                 bool wouldOverflow = ctx.CurrentY + elementHeight > ctx.MaxY;
-                bool notAtTop = ctx.CurrentY > ctx.Margin;
-                bool wouldFitOnFreshPage = elementHeight <= ctx.MaxY - ctx.Margin;
+                bool notAtTop = ctx.CurrentY > ctx.ContentTop;
+                bool wouldFitOnFreshPage = elementHeight <= ctx.ContentHeight;
 
                 if (wouldOverflow && notAtTop && wouldFitOnFreshPage)
                 {
@@ -266,6 +269,11 @@ public static class PdfRenderPipeline
         // made after the document was created (e.g., doc.Settings.Orientation = Landscape)
         PdfSize orientedPageSize = settings.GetOrientedPageSize();
 
+        // Header/footer consume body content height (spec: Layout & Pagination
+        // §5.1). The context is supplied by the caller here, so the reservation
+        // is installed at the top of the run rather than at construction.
+        ctx.SetChromeReservation(ChromeReservationFactory.For(settings, ctx));
+
         // Track page dimensions for each rendered page
         Dictionary<int, RenderedPageDimensions> pageDimensions = new();
 
@@ -287,8 +295,7 @@ public static class PdfRenderPipeline
             ctx.Margin = pageMargin;
 
             ctx.SwitchToPage(currentOutputIndex);
-            ctx.CurrentX = pageMargin;
-            ctx.CurrentY = pageMargin;
+            ctx.ResetCursorToContentTop();
 
             // Calculate content width based on actual dimensions
             float contentWidth = pageWidth - pageMargin * 2;
@@ -306,7 +313,7 @@ public static class PdfRenderPipeline
             // Layout capture: wrap each input page's body content in a Page node so
             // the snapshot tree reads Document → Page → content. Overflow onto further
             // physical pages splits the Page node's rect via ctx.NewPage().
-            ctx.LayoutRecorder?.OpenNode(page, "Page", null, currentOutputIndex, pageMargin, pageMargin, contentWidth);
+            ctx.LayoutRecorder?.OpenNode(page, "Page", null, currentOutputIndex, pageMargin, ctx.CurrentY, contentWidth);
 
             // Render Elements with overflow support
             RenderElementsWithOverflow(page.Elements, ctx, contentWidth);
@@ -546,9 +553,13 @@ public static class PdfRenderPipeline
         ICanvas originalCanvas = ctx.Canvas;
         float originalX = ctx.CurrentX;
         float originalY = ctx.CurrentY;
+        bool originalSuspended = ctx.ChromeReservationSuspended;
 
         // Use fixed canvas for absolute positioning
         ctx.SetCanvas(ctx.GetFixedCanvas());
+        // A header is not laid out inside the band it reserves for the body:
+        // while the chrome itself paints, the content band is the margin box.
+        ctx.ChromeReservationSuspended = true;
 
         try
         {
@@ -583,7 +594,11 @@ public static class PdfRenderPipeline
                 return;
             }
             float footerHeight = footerElement.MeasureHeight(contentWidth);
-            float bandTop = ctx.PageSize.Height - ctx.Margin;
+            // Centred in the bottom margin band while it fits there, flush to
+            // the bottom page edge once it outgrows it - continuous at
+            // footerHeight == Margin, and it never runs off the page
+            // (spec: Layout & Pagination §5.1).
+            float bandTop = ctx.PageSize.Height - MathF.Max(ctx.Margin, footerHeight);
             ctx.CurrentX = startX;
             ctx.CurrentY = bandTop + MathF.Max(0f, (ctx.Margin - footerHeight) / 2f);
             if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
@@ -596,6 +611,7 @@ public static class PdfRenderPipeline
             ctx.SetCanvas(originalCanvas);
             ctx.CurrentX = originalX;
             ctx.CurrentY = originalY;
+            ctx.ChromeReservationSuspended = originalSuspended;
         }
     }
 

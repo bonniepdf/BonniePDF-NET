@@ -152,7 +152,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         if (linesThatFit >= remainingLines)
             return RenderLines(ctx, lines, startLine, lines.Count, contentWidth, localY);
 
-        bool notAtTop = ctx.CurrentY > ctx.Margin;
+        bool notAtTop = ctx.CurrentY > ctx.ContentTop;
 
         // Orphan control
         if (startLine == 0 && linesThatFit < MinLinesBeforeBreak && notAtTop)

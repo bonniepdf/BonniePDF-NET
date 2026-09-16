@@ -134,7 +134,7 @@ public class Container : BorderedElementBase, IContentContainer
         // PAGINATION CHECK:
         // Containers are tricky. If the *whole* container fits, render it.
         // If not, we trigger a new page here too, to keep borders intact.
-        if (ctx.CurrentY + containerHeight > ctx.MaxY && ctx.CurrentY > ctx.Margin) ctx.NewPage();
+        if (ctx.CurrentY + containerHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop) ctx.NewPage();
 
         // Crisp-edge hint: render the subtree inside a crisp-edge region so
         // axis-aligned strokes/rects snap to the pixel grid on SVG export.

@@ -124,7 +124,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
             return RenderLines(ctx, lines, startLine, lines.Count, contentWidth, localY);
         }
 
-        bool notAtTop = ctx.CurrentY > ctx.Margin;
+        bool notAtTop = ctx.CurrentY > ctx.ContentTop;
 
         // Orphan control: if this is the first chunk of this block on the current page
         // and too few lines would appear before the break, move the whole block

@@ -76,7 +76,7 @@ public class HorizontalStack : ElementBase, IStatefulElement
         float totalHeight = contentHeight + Margin.Top + Margin.Bottom;
 
         bool wouldOverflow = ctx.CurrentY + totalHeight > ctx.MaxY;
-        bool notAtTop = ctx.CurrentY > ctx.Margin;
+        bool notAtTop = ctx.CurrentY > ctx.ContentTop;
 
         if (wouldOverflow && notAtTop)
         {

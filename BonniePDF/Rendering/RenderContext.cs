@@ -65,7 +65,7 @@ public class RenderContext
         Margin = margin;
         Pages.Add(new StringBuilder());
         CurrentX = Margin;
-        CurrentY = Margin;
+        CurrentY = ContentTop;
 
         UpdateCanvas();
     }
@@ -189,10 +189,133 @@ public class RenderContext
     public float Margin { get; set; }
 
     /// <summary>
-    /// Gets the maximum Y coordinate before the bottom margin is reached.
-    /// Elements that exceed this value trigger a page break.
+    /// Per-page header/footer measurement, installed by the render pipeline via
+    /// <see cref="SetChromeReservation"/>. <c>null</c> for a document with no
+    /// page chrome, in which case the reservation is a constant zero and the
+    /// content band is the margin box.
     /// </summary>
-    public float MaxY => PageSize.Height - Margin;
+    private Func<int, ChromeReservation>? _chromeProvider;
+
+    /// <summary>Memoised per page index, so a template is measured once per page.</summary>
+    private readonly Dictionary<int, ChromeReservation> _chromeCache = new();
+
+    private ChromeReservation _chrome = ChromeReservation.None;
+
+    /// <summary>
+    /// While <c>true</c>, <see cref="ContentTop"/> and <see cref="MaxY"/> ignore
+    /// the chrome reservation. Set only while the engine paints the chrome
+    /// itself: a header is not laid out inside the band it reserves for the body.
+    /// </summary>
+    public bool ChromeReservationSuspended { get; set; }
+
+    /// <summary>
+    /// Installs (or clears) the per-page header/footer measurement.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately does not measure here: the pipeline assigns this run's page
+    /// size and margin per page and then switches to the page, which is what
+    /// triggers the first measurement against the right content width. Clearing
+    /// the memo keeps a context that is re-driven for a second pass - the
+    /// streaming pipeline's compositing loop, a TOC dry run - from reusing
+    /// heights measured against a different page size or margin.
+    /// See the shared specification, "Layout &amp; Pagination" §5.1.
+    /// </remarks>
+    public void SetChromeReservation(Func<int, ChromeReservation>? provider)
+    {
+        _chromeProvider = provider;
+        _chromeCache.Clear();
+        _chrome = ChromeReservation.None;
+    }
+
+    /// <summary>
+    /// Re-measures the current page's chrome. Called on every page switch and
+    /// every page break; the pipelines also call it after assigning a new page
+    /// size or margin, because those change the width the chrome is measured
+    /// against.
+    /// </summary>
+    public void RefreshChromeReservation()
+    {
+        if (_chromeProvider == null)
+        {
+            _chrome = ChromeReservation.None;
+            return;
+        }
+
+        if (!_chromeCache.TryGetValue(CurrentPageIndex, out ChromeReservation reservation))
+        {
+            reservation = _chromeProvider(CurrentPageIndex + 1);
+            _chromeCache[CurrentPageIndex] = reservation;
+        }
+
+        _chrome = reservation;
+        AssertUsableContentBand();
+    }
+
+    /// <summary>Measured header height for the current page, in points (zero when there is none).</summary>
+    public float ReservedHeaderHeight => _chrome.Header;
+
+    /// <summary>Measured footer height for the current page, in points (zero when there is none).</summary>
+    public float ReservedFooterHeight => _chrome.Footer;
+
+    /// <summary>
+    /// Gets the top of the body content band: <c>max(Margin, headerHeight)</c>.
+    /// Chrome that fits inside the top margin reserves nothing beyond the margin
+    /// the page already had, so this reduces to <see cref="Margin"/> for the
+    /// overwhelming majority of documents.
+    /// </summary>
+    public float ContentTop =>
+        ChromeReservationSuspended ? Margin : MathF.Max(Margin, _chrome.Header);
+
+    /// <summary>
+    /// Gets the bottom of the body content band:
+    /// <c>PageSize.Height - max(Margin, footerHeight)</c>.
+    /// </summary>
+    public float ContentBottom => ChromeReservationSuspended
+        ? PageSize.Height - Margin
+        : PageSize.Height - MathF.Max(Margin, _chrome.Footer);
+
+    /// <summary>
+    /// Gets the maximum Y coordinate before the bottom of the content band is
+    /// reached. Elements that exceed this value trigger a page break.
+    /// </summary>
+    public float MaxY => ContentBottom;
+
+    /// <summary>
+    /// Gets the usable body height on the current page: the full content band,
+    /// not just what is left below the cursor. Elements use it to ask "would
+    /// this fit on a fresh page at all?" before deciding to break rather than
+    /// split.
+    /// </summary>
+    public float ContentHeight => ContentBottom - ContentTop;
+
+    /// <summary>Moves the cursor to the top-left of the current page's body content band.</summary>
+    public void ResetCursorToContentTop()
+    {
+        CurrentX = Margin;
+        CurrentY = ContentTop;
+    }
+
+    /// <summary>
+    /// Honest failure rather than silent clipping: a header and footer that
+    /// between them consume the whole page leave nowhere for body content, and
+    /// every subsequent break decision would be made against a negative band.
+    /// </summary>
+    private void AssertUsableContentBand()
+    {
+        float top = MathF.Max(Margin, _chrome.Header);
+        float bottom = PageSize.Height - MathF.Max(Margin, _chrome.Footer);
+        if (bottom > top) return;
+
+        throw new InvalidOperationException(
+            $"Page {CurrentPageIndex + 1}: the header ({Round(_chrome.Header)}pt) and footer " +
+            $"({Round(_chrome.Footer)}pt) leave no room for content on a {Round(PageSize.Height)}pt-tall " +
+            $"page with a {Round(Margin)}pt margin. Reduce the header/footer height, reduce the margin, " +
+            "or use a larger page.");
+    }
+
+    /// <summary>Formats a point measurement for a diagnostic message (2 dp, no trailing zeros).</summary>
+    private static string Round(float value) =>
+        MathF.Round(value, 2).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Event raised when a new page is created.
@@ -392,8 +515,12 @@ public class RenderContext
 
         Pages.Add(new StringBuilder());
         CurrentPageIndex++;
-        CurrentX = Margin;
-        CurrentY = Margin;
+        // The new page measures its own chrome: header/footer templates are
+        // functions of the page number, so a taller header on page 2 moves page
+        // 2's content band down. Must precede the cursor reset, which reads
+        // ContentTop.
+        RefreshChromeReservation();
+        ResetCursorToContentTop();
         // MCIDs restart at 0 per PDF page (ISO 32000-1 §14.7.4).
         // Pass the new page index so any subsequent MCID can be paired
         // with its page for /Pg + /ParentTree emission later.
@@ -457,6 +584,7 @@ public class RenderContext
         // content as untagged real content (PDF/UA 7.1). MCIDs restart at 0
         // per page (ISO 32000-1 §14.7.4).
         Tagging?.ResetPage(index);
+        RefreshChromeReservation();
         UpdateCanvas();
     }
 

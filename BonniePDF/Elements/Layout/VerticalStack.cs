@@ -76,8 +76,8 @@ public class VerticalStack : ElementBase, IStatefulElement
                     {
                         float childHeight = child.MeasureHeight(contentWidth);
                         bool wouldOverflow = ctx.CurrentY + childHeight > ctx.MaxY;
-                        bool notAtTop = ctx.CurrentY > ctx.Margin;
-                        bool wouldFitOnFreshPage = childHeight <= ctx.MaxY - ctx.Margin;
+                        bool notAtTop = ctx.CurrentY > ctx.ContentTop;
+                        bool wouldFitOnFreshPage = childHeight <= ctx.ContentHeight;
 
                         if (wouldOverflow && notAtTop && wouldFitOnFreshPage)
                         {
@@ -149,7 +149,7 @@ public class VerticalStack : ElementBase, IStatefulElement
 
                         // Check if it fits on the current page
                         bool wouldOverflow = ctx.CurrentY + childHeight > ctx.MaxY;
-                        bool notAtTop = ctx.CurrentY > ctx.Margin;
+                        bool notAtTop = ctx.CurrentY > ctx.ContentTop;
 
                         if (wouldOverflow && notAtTop)
                         {
@@ -249,9 +249,9 @@ public class VerticalStack : ElementBase, IStatefulElement
             // IMPORTANT: Only trigger page break for elements that DON'T handle their own pagination.
             // Tables, nested VerticalStacks, and IStatefulElement handle pagination internally.
             bool canPaginateInternally = child is Table || child is VerticalStack || child is IStatefulElement;
-            bool elementFitsOnOnePage = childHeight <= ctx.MaxY - ctx.Margin;
+            bool elementFitsOnOnePage = childHeight <= ctx.ContentHeight;
             bool wouldOverflow = ctx.CurrentY + childHeight > ctx.MaxY;
-            bool notAtTop = ctx.CurrentY > ctx.Margin;
+            bool notAtTop = ctx.CurrentY > ctx.ContentTop;
 
             // Only force new page for small elements that don't fit
             // Large elements (like tables) handle their own pagination
