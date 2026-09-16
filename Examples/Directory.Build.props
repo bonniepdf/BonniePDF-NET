@@ -1,0 +1,14 @@
+<Project>
+
+  <!-- Chain to the repository-root Directory.Build.props (Version, analyzers).
+       MSBuild stops at the first Directory.Build.props it finds walking up, so
+       without this import every example project would silently lose those. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove($(MSBuildThisFile), $(MSBuildThisFileDirectory)../))" />
+
+  <ItemGroup>
+    <!-- Every example declares a licence tier. See ExampleLicenseSetup.cs for why
+         it is Evaluation, and why that is not a declaration on your behalf. -->
+    <Compile Include="$(MSBuildThisFileDirectory)ExampleLicenseSetup.cs" Link="ExampleLicenseSetup.cs" />
+  </ItemGroup>
+
+</Project>

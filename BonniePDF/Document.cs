@@ -12,6 +12,7 @@ using BonniePDF.Elements.Lists;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Export;
+using BonniePDF.Licensing;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Writers;
 
@@ -356,6 +357,7 @@ public class Document : IDisposable
     /// <param name="options">Export options; defaults are used when <c>null</c>.</param>
     public IReadOnlyList<string> GenerateSvgPages(SvgPageExportOptions? options = null)
     {
+        LicenseChecker.ValidateLicense();
         ApplyDefaultStyleToTree();
         return SvgPageExporter.Export(this, options);
     }
@@ -368,6 +370,7 @@ public class Document : IDisposable
     /// </summary>
     public SvgDocumentExport GenerateSvgDocument(SvgPageExportOptions? options = null)
     {
+        LicenseChecker.ValidateLicense();
         ApplyDefaultStyleToTree();
         return SvgPageExporter.ExportDocument(this, options);
     }
@@ -431,6 +434,7 @@ public class Document : IDisposable
     /// </summary>
     private void SaveInternal(string path)
     {
+        LicenseChecker.ValidateLicense();
         _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
@@ -444,6 +448,7 @@ public class Document : IDisposable
     /// </summary>
     private void SaveInternal(Stream stream, bool leaveOpen)
     {
+        LicenseChecker.ValidateLicense();
         _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
@@ -458,6 +463,7 @@ public class Document : IDisposable
     /// </summary>
     private async Task SaveInternalAsync(string path, CancellationToken cancellationToken)
     {
+        LicenseChecker.ValidateLicense();
         _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
@@ -472,6 +478,7 @@ public class Document : IDisposable
     /// </summary>
     private async Task SaveInternalAsync(Stream stream, bool leaveOpen, CancellationToken cancellationToken)
     {
+        LicenseChecker.ValidateLicense();
         _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();

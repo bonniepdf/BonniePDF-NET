@@ -11,8 +11,16 @@
     <Version>2026.7.2</Version>
     <Authors>BonniePDF</Authors>
     <!-- Custom source-available Community License for eligible use; paid use is
-         governed by the separately packed Commercial License Agreement. -->
+         governed by the separately packed Commercial License Agreement.
+         PackageLicenseFile, never PackageLicenseExpression: an expression must be an
+         OSI-listed SPDX identifier, and using one would misstate the terms. Software
+         composition scanners read the file and classify the package "commercial,
+         review required" rather than passing it silently, which is the point. -->
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <!-- Visual Studio shows an explicit accept-licence dialog at install time. The
+         obligation reaches whoever adds the package, before a line of code is
+         written - the packaging half of the runtime licence declaration. -->
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryUrl>https://github.com/bonniepdf/BonniePDF-NET</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>pdf;generation;charting;report</PackageTags>

@@ -15,37 +15,6 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
-### Fixed
-
-- **A page header or footer now reserves body content space.** Previously the
-  header and footer were painted into the margin band while body layout still
-  ran from the top margin to the bottom margin, so page chrome taller than the
-  margin silently overlapped the content underneath it. The body content band is
-  now inset per page by `Max(Margin, headerHeight)` at the top and
-  `Max(Margin, footerHeight)` at the bottom, on every page including pages
-  created by overflow — the cursor reset that accompanies a page break uses the
-  new page's own content top rather than the margin.
-
-  Chrome that fits inside its margin band reserves nothing beyond the margin the
-  page already had, so documents whose header and footer are shorter than the
-  margin — which is essentially all of them — produce byte-identical output. A
-  header or footer that outgrows the margin is also now flush against its own
-  page edge instead of being centred in a band it no longer fits, which is what
-  stops an oversized footer running off the bottom of the page.
-
-  A header and footer that between them leave no usable body height now throw an
-  `InvalidOperationException` naming the page and both measured heights, rather
-  than paginating against a content band of zero or negative height.
-
-- The accessibility preflight now detects bold text styled by setting
-  `FontName` directly to a bold PostScript name (`"Helvetica-Bold"`,
-  `"Times-BoldItalic"`, …), not only via the `Weight` property. That idiom is
-  how most examples in this repository author bold text, and the only one
-  `Hyperlink` exposes at all — without it, bold-but-large text was held to the
-  regular-text 4.5:1 WCAG threshold instead of the 3:1 large-text threshold it
-  actually qualifies for. This can only relax an existing finding (a lower
-  required ratio, never a higher one), so no prior finding becomes stricter.
-
 ### Added
 
 - **Any measurement can now be written in a unit.** Two spellings, both
@@ -101,6 +70,32 @@ behaviour, so the two files can be read side by side.
   height, because a pure measure has no cursor to measure from. Fill re-resolves
   after a page break, against the new page's own reserved band.
 
+- **Licence declaration.** Applications now declare which BonniePDF licence
+  applies to them, once at startup:
+  `BonniePdfLicense.Tier = LicenseTier.Community;` (or `Evaluation`,
+  `Professional`, `Enterprise`), or `BONNIEPDF_LICENSE=community` in the
+  environment. An in-code declaration takes precedence.
+
+  It is a **declaration, not an enforcement mechanism**: no licence key, no
+  activation, no network call, no telemetry, and no tier-dependent feature
+  gating. Every tier includes the complete feature set.
+
+  Generating a document without a declaration throws
+  `BonniePdfLicenseException` in an environment positively identified as
+  development, test, or CI, and otherwise writes a single warning to `Trace`
+  and standard error and continues — a production workload that never declared
+  a tier warns rather than failing. `LicenseTier.Evaluation` warns once.
+  Declaring any other tier is silent. The notice appears at most once per
+  process. `BONNIEPDF_LICENSE_ENFORCEMENT=throw|warn` moves it between fatal
+  and non-fatal; there is deliberately no way to switch it off.
+
+  The declared tier **never changes a byte of generated output** — no
+  watermark, no metadata field, no free-tier degradation — and the test suite
+  asserts byte-identical output across every tier.
+
+- `PackageRequireLicenseAcceptance` on the NuGet package, so the licence is
+  presented for explicit acceptance at install time.
+
 - `CompliancePreflight.Evaluate` takes a `CompliancePreflightOptions` overload
   selecting which **rule families** run: `IncludeWcag = false` skips the WCAG 2.2
   contrast rules entirely. The suppressed findings are absent from `Findings`
@@ -144,6 +139,35 @@ behaviour, so the two files can be read side by side.
 
 ### Fixed
 
+- **A page header or footer now reserves body content space.** Previously the
+  header and footer were painted into the margin band while body layout still
+  ran from the top margin to the bottom margin, so page chrome taller than the
+  margin silently overlapped the content underneath it. The body content band is
+  now inset per page by `Max(Margin, headerHeight)` at the top and
+  `Max(Margin, footerHeight)` at the bottom, on every page including pages
+  created by overflow — the cursor reset that accompanies a page break uses the
+  new page's own content top rather than the margin.
+
+  Chrome that fits inside its margin band reserves nothing beyond the margin the
+  page already had, so documents whose header and footer are shorter than the
+  margin — which is essentially all of them — produce byte-identical output. A
+  header or footer that outgrows the margin is also now flush against its own
+  page edge instead of being centred in a band it no longer fits, which is what
+  stops an oversized footer running off the bottom of the page.
+
+  A header and footer that between them leave no usable body height now throw an
+  `InvalidOperationException` naming the page and both measured heights, rather
+  than paginating against a content band of zero or negative height.
+
+- The accessibility preflight now detects bold text styled by setting
+  `FontName` directly to a bold PostScript name (`"Helvetica-Bold"`,
+  `"Times-BoldItalic"`, …), not only via the `Weight` property. That idiom is
+  how most examples in this repository author bold text, and the only one
+  `Hyperlink` exposes at all — without it, bold-but-large text was held to the
+  regular-text 4.5:1 WCAG threshold instead of the 3:1 large-text threshold it
+  actually qualifies for. This can only relax an existing finding (a lower
+  required ratio, never a higher one), so no prior finding becomes stricter.
+
 - The accessibility preflight now measures contrast on **`Hyperlink`** text.
   Paint capture derived a node's text colour and size only from
   `TextElementBase`, and `Hyperlink` carries its own `TextColor`/`FontSize`
@@ -183,30 +207,37 @@ behaviour, so the two files can be read side by side.
   32000-1 - and, in SVG export, an unclosed `<g>` that made the page fail to
   parse as XML. `NewPage` now closes open graphics-state scopes on the outgoing
   page and reopens them on the new one, as it already did for marked content.
+
 - SVG page export now positions glyphs the same way as `@bonniepdf/core`, which
   the shared specification pins because SVG is the artefact parity tooling
   compares. Embedded-font text is emitted as one `<text>` per font run carrying
   a per-glyph `x` list, replacing a `<tspan>` per glyph — identical geometry in
   roughly a third of the markup (a representative invoice page went from 50.8 KB
   to 20.7 KB of SVG body).
+
 - `DrawTextRotated` and `DrawTextJustified` now position embedded-font glyphs
   explicitly instead of emitting a plain run and leaving the spacing to the
   viewer. Rotated and justified text in an embedded face could previously land
   at positions the PDF did not use.
+
 - Rotated SVG text turned the opposite way to the PDF it previews. The PDF
   painter rotates counter-clockwise for a positive angle in PDF's y-up space;
   SVG is y-down, so the exporter now negates the angle. Watermarks were the
   visible case.
+
 - `DrawTextRotated` and `DrawTextJustified` hardcoded one branch of the baseline
   calculation instead of calling `BaselineY`, placing text incorrectly when
   `SvgCanvasOptions.PdfBaseline` was not at its default.
+
 - `DrawTextJustified` formatted coordinates and font size with the current
   culture, which emits a comma decimal separator — and so malformed SVG — on
   comma-decimal locales. It now formats invariantly like every other path.
+
 - Embedded families are now bound through a `style` attribute with a generic
   fallback rather than a bare `font-family` presentation attribute, so a host
   stylesheet's `* { font-family: inherit }` reset cannot override the face and
   text stays broadly correct if the `@font-face` fails to load.
+
 - Consolidated duplicated internal logic with no change in behaviour:
   letter/word spacing advance is now calculated in one place shared by the
   text elements and both canvases, the nested-list measure and render loops
