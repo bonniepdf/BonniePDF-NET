@@ -164,11 +164,17 @@ public readonly struct Color : IEquatable<Color>
     }
 
     /// <summary>
-    /// Converts the color to a hex string (e.g. "#FF0000").
+    /// Converts the color to a hex string (e.g. "#ff0000").
     /// </summary>
+    /// <remarks>
+    /// Lower case, matching the TypeScript implementation. The two emit this
+    /// string straight into SVG, which the shared specification names as the
+    /// artefact the conformance tooling compares, so the casing is part of the
+    /// contract rather than a formatting preference.
+    /// </remarks>
     public string ToHexString()
     {
-        return $"#{R:X2}{G:X2}{B:X2}";
+        return $"#{R:x2}{G:x2}{B:x2}";
     }
 
     public bool Equals(Color other)

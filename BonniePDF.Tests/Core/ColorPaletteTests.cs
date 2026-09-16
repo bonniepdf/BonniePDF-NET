@@ -10,10 +10,10 @@ public class ColorPaletteTests
     [Fact]
     public void Indexer_ReturnsExactTailwindSwatches()
     {
-        Assert.Equal("#FB2C36", ColorPalette.Red[500].ToHexString());
-        Assert.Equal("#1D293D", ColorPalette.Slate[800].ToHexString());
-        Assert.Equal("#EFF6FF", ColorPalette.Blue[50].ToHexString());
-        Assert.Equal("#4D0218", ColorPalette.Rose[950].ToHexString());
+        Assert.Equal("#fb2c36", ColorPalette.Red[500].ToHexString());
+        Assert.Equal("#1d293d", ColorPalette.Slate[800].ToHexString());
+        Assert.Equal("#eff6ff", ColorPalette.Blue[50].ToHexString());
+        Assert.Equal("#4d0218", ColorPalette.Rose[950].ToHexString());
     }
 
     [Fact]

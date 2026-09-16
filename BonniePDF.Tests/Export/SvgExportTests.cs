@@ -293,7 +293,7 @@ public class SvgExportTests
         };
 
         string svg = chart.ToSvg(data);
-        float rectY = ExtractYAttribute(svg, """width="14" height="14" fill="#4F46E5"/>""");
+        float rectY = ExtractYAttribute(svg, """width="14" height="14" fill="#4f46e5"/>""");
         float textY = ExtractYAttribute(svg, ".NET - 48</text>");
 
         Assert.True(Math.Abs(textY - rectY - 10.3f) < 0.001f);

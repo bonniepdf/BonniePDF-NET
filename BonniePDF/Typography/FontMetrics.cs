@@ -290,8 +290,17 @@ public static class FontMetrics
     {
         if (string.IsNullOrEmpty(text) || font == null) return 0;
 
-        float scale = fontSize / font.UnitsPerEm;
-        float width = 0;
+        // Accumulated in double, not float. Every glyph adds a scaled advance, so
+        // a single-precision running total compounds its own rounding error along
+        // the string. The measurement feeds layout, and layout coordinates are
+        // emitted rounded to three decimals: a right-aligned run measured a
+        // fraction of a thousandth short lands on the other side of that rounding
+        // from the TypeScript implementation, which accumulates in double. The
+        // font metrics are integers and the scale is an exact promotion, so this
+        // makes the two agree. The result narrows to float to keep the layout
+        // contract unchanged.
+        double scale = (double)fontSize / font.UnitsPerEm;
+        double width = 0;
 
         ushort prevGid = 0;
         bool hasPrev = false;
@@ -313,7 +322,7 @@ public static class FontMetrics
             hasPrev = true;
         }
 
-        return width;
+        return (float)width;
     }
 
     // =====================================================

@@ -266,12 +266,19 @@ public class SvgCanvas : ICanvas
     {
         string transformAttr = transform is null ? "" : $" transform=\"{transform}\"";
         var elements = new StringBuilder();
-        float cursor = startX;
+
+        // The advance cursor accumulates in double, not float. Every glyph adds a
+        // scaled advance to it, so a single-precision cursor compounds its own
+        // rounding error along the run: on a long numeric string it reached the
+        // third decimal and put the TypeScript exporter on 154.563 where this one
+        // said 154.562. The font metrics are integers and the scale is an exact
+        // promotion, so double here makes the two agree exactly.
+        double cursor = Q(startX);
 
         foreach (SvgTextRun run in runs)
         {
             TtfFont runFont = run.Font;
-            float scale = fontSize / runFont.UnitsPerEm;
+            double scale = (double)fontSize / runFont.UnitsPerEm;
             var xs = new List<string>();
             var chars = new StringBuilder();
 
@@ -352,11 +359,113 @@ public class SvgCanvas : ICanvas
     /// verbatim to preserve the legacy chart golden output.
     /// </summary>
     private string N(float v) => Options.Precision is int p
-        ? Math.Round((double)v, p).ToString(CultureInfo.InvariantCulture)
+        ? N((double)v)
         // SVG/XML numeric values must use '.' as the decimal separator regardless
         // of the host locale. Always format invariantly - emitting CurrentCulture
         // here produced malformed output (e.g. "595,276") on comma-decimal locales.
         : v.ToString(CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// Formats a double-precision coordinate.
+    /// </summary>
+    /// <remarks>
+    /// Rounds away from zero at a midpoint rather than to even. The TypeScript
+    /// exporter formats through <c>Number.prototype.toFixed</c>, which rounds
+    /// away from zero, and the two have to agree digit for digit: the shared
+    /// specification names SVG as the artefact the conformance tooling compares.
+    /// <c>Math.Round</c>'s default is banker's rounding, which does not.
+    /// </remarks>
+    private string N(double v)
+    {
+        if (Options.Precision is not int p) return v.ToString(CultureInfo.InvariantCulture);
+
+        string text = ToFixedTrimmed(v, p);
+
+        // "-0" is the one value where trimming can invert the sign's meaning.
+        return text is "-0" ? "0" : text;
+    }
+
+    /// <summary>
+    /// Formats <paramref name="v"/> to <paramref name="digits"/> decimal places
+    /// exactly as JavaScript's <c>Number(v.toFixed(digits))</c> does: the exact
+    /// binary value rounded half away from zero, with trailing zeros trimmed.
+    /// </summary>
+    /// <remarks>
+    /// Neither obvious shortcut agrees with <c>toFixed</c> across the board.
+    /// <c>ToString("F3")</c> rounds an exact midpoint to even, printing 114.062
+    /// where <c>toFixed</c> gives 114.063 - and glyph positions land on exact
+    /// midpoints routinely, because a scaled advance is a dyadic fraction.
+    /// Rounding through <c>decimal</c> fixes that but breaks the opposite case:
+    /// the double nearest 325.9505 is actually a shade below it, which
+    /// <c>toFixed</c> rounds down and a decimal conversion rounds up.
+    ///
+    /// So the exact decimal expansion is taken first - a double is a dyadic
+    /// rational, so it terminates, and .NET Core formats it exactly given enough
+    /// places - and the rounding decision is made on those digits, where the
+    /// midpoint case is unambiguous.
+    /// </remarks>
+    private static string ToFixedTrimmed(double v, int digits)
+    {
+        string exact = v.ToString(
+            "F" + (digits + ExactExpansionGuardDigits).ToString(CultureInfo.InvariantCulture),
+            CultureInfo.InvariantCulture);
+
+        bool negative = exact.StartsWith('-');
+        if (negative) exact = exact[1..];
+
+        int dot = exact.IndexOf('.', StringComparison.Ordinal);
+        // Digits either side of the point, as one string, so a carry can ripple
+        // from the fraction into the integer part without a special case.
+        var kept = new StringBuilder(exact[..dot]).Append(exact.AsSpan(dot + 1, digits));
+        bool roundUp = exact[dot + 1 + digits] >= '5';
+
+        if (roundUp)
+        {
+            int i = kept.Length - 1;
+            while (i >= 0)
+            {
+                if (kept[i] != '9') { kept[i]++; break; }
+                kept[i] = '0';
+                i--;
+            }
+
+            if (i < 0) kept.Insert(0, '1');
+        }
+
+        string all = kept.ToString();
+        string whole = all[..^digits];
+        string frac = all[^digits..].TrimEnd('0');
+
+        string text = frac.Length == 0 ? whole : whole + "." + frac;
+        return negative ? "-" + text : text;
+    }
+
+    /// <summary>
+    /// Places kept beyond the requested precision when taking a double's exact
+    /// decimal expansion. A double's fraction is at most 52 bits, so its exact
+    /// expansion has at most 52 fractional digits; this clears that.
+    /// </summary>
+    private const int ExactExpansionGuardDigits = 60;
+
+    /// <summary>
+    /// The numeric value <see cref="N(double)"/> would print, used as the origin
+    /// a glyph run accumulates from.
+    /// </summary>
+    /// <remarks>
+    /// The origin is emitted rounded, so accumulating from the unrounded value
+    /// makes every later glyph position inconsistent with the origin printed
+    /// beside it. Snapping first also removes the last parity difference against
+    /// the TypeScript exporter: this layout arithmetic is single-precision, so a
+    /// run origin arrives a fraction of a thousandth away from the one that
+    /// exporter computes, which was enough to flip whichever glyph in the run
+    /// happened to sit on a rounding boundary. Both exporters now start from the
+    /// same decimal.
+    /// </remarks>
+    private double Q(double v)
+    {
+        if (Options.Precision is not int || !double.IsFinite(v)) return v;
+        return double.Parse(N(v), CultureInfo.InvariantCulture);
+    }
 
     /// <summary>
     /// Computes the text baseline Y. PDF-parity mode places it a full em below
@@ -1123,6 +1232,42 @@ public class SvgCanvas : ICanvas
     public void ClosePageGroup()
     {
         if (IsMultiPageMode) _sb.AppendLf("</g>");
+    }
+
+    /// <summary>
+    /// Where a child canvas sits on its parent, for
+    /// <see cref="Rendering.RenderContext.FlushExternalCanvas"/> to composite it
+    /// with. A child bakes no offset into its own coordinates - it draws in its
+    /// own space and the parent translates the group.
+    /// </summary>
+    public float ChildOffsetX { get; set; }
+
+    /// <inheritdoc cref="ChildOffsetX"/>
+    public float ChildOffsetY { get; set; }
+
+    /// <summary>
+    /// The markup this canvas has buffered, with any groups it left open closed.
+    /// Used to composite a child canvas into its parent; unlike
+    /// <see cref="GetSvg"/> it adds no document or page scaffolding.
+    /// </summary>
+    public string GetInnerSvg()
+    {
+        while (_extraGroupDepth > 0)
+        {
+            _sb.AppendLf("</g>");
+            _extraGroupDepth--;
+        }
+
+        for (int i = 0; i < _stateDepth; i++) _sb.AppendLf("</g>");
+        _stateDepth = 0;
+
+        return _sb.ToString();
+    }
+
+    /// <summary>Appends already-formed markup, e.g. a composited child canvas.</summary>
+    public void AppendRawMarkup(string markup)
+    {
+        if (!string.IsNullOrEmpty(markup)) _sb.AppendLf(markup);
     }
 
     /// <summary>

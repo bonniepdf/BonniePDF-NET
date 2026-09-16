@@ -52,6 +52,7 @@ public class ChartElement(ChartBase chart, ChartData data) : ElementBase, IRoleP
 
         // Draw the chart using the ICanvas interface
         chart.Draw(canvas, data);
+        ctx.FlushExternalCanvas(canvas);
 
         // Advance Y position by the chart height
         ctx.CurrentY += chart.Height;
