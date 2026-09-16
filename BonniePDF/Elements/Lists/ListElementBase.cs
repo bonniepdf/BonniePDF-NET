@@ -143,7 +143,7 @@ public abstract class ListElementBase : TextElementBase
     /// <returns>True if a new page was created, false otherwise</returns>
     protected static bool CheckPageBreak(RenderContext ctx, ref float currentY, float lineHeight)
     {
-        if (!(currentY + lineHeight > ctx.MaxY) || !(currentY > ctx.Margin))
+        if (!(currentY + lineHeight > ctx.MaxY) || !(currentY > ctx.ContentTop))
         {
             return false;
         }

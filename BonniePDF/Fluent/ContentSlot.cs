@@ -62,7 +62,7 @@ internal class ContentSlot : ElementBase, IContentContainer, IStatefulElement
             // exactly like VerticalStack does for non-stateful elements.
             float childHeight = Child.MeasureHeight(contentWidth);
             bool wouldOverflow = ctx.CurrentY + childHeight > ctx.MaxY;
-            bool notAtTop = ctx.CurrentY > ctx.Margin;
+            bool notAtTop = ctx.CurrentY > ctx.ContentTop;
 
             if (wouldOverflow && notAtTop)
             {

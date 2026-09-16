@@ -19,7 +19,7 @@ public class PageBreak : ElementBase, IStatefulElement
         {
             _triggered = true;
             // Only issue a page break if we are not already at the top of the page
-            if (ctx.CurrentY > ctx.Margin)
+            if (ctx.CurrentY > ctx.ContentTop)
                 return RenderStatus.WrapRequired;
         }
 
