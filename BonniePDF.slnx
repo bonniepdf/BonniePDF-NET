@@ -61,6 +61,13 @@
     <Project Path="Examples/BonniePDF.Examples.Templates.SaasInvoice/BonniePDF.Examples.Templates.SaasInvoice.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.ShippingLabel/BonniePDF.Examples.Templates.ShippingLabel.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Typography.AdvancedTypography/BonniePDF.Examples.Typography.AdvancedTypography.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.TradeDocuments/BonniePDF.Examples.Templates.TradeDocuments.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.FieldService/BonniePDF.Examples.Templates.FieldService.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.BillOfCosts/BonniePDF.Examples.Templates.BillOfCosts.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.ExhibitBundleIndex/BonniePDF.Examples.Templates.ExhibitBundleIndex.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.PropertyParticulars/BonniePDF.Examples.Templates.PropertyParticulars.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.DischargeSummary/BonniePDF.Examples.Templates.DischargeSummary.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.Timesheet/BonniePDF.Examples.Templates.Timesheet.csproj" />
   </Folder>
 </Solution>
 
