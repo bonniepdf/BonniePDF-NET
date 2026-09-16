@@ -48,6 +48,42 @@ behaviour, so the two files can be read side by side.
 
 ### Added
 
+- **Any measurement can now be written in a unit.** Two spellings, both
+  resolving through `Units.ToPoints`, so there is one conversion table and no
+  rounding difference between them.
+
+  In an object initializer the unit travels as a call on the number, via the new
+  `Points()` / `Inches()` / `Cm()` / `Mm()` / `In(Unit)` extension methods on
+  `int`, `float`, and `double`:
+
+  ```csharp
+  new Container { Height = 1.Inches(), CornerRadius = 2.Mm(), Padding = new Thickness(10.Mm()) }
+  ```
+
+  In a fluent chain it is a second argument — a chain of verbs, so the unit
+  rides along with the value:
+
+  ```csharp
+  Pdf.Create(doc => doc.Page(page => page.Content()
+      .Height(1, Unit.Inch)
+      .Padding(10, Unit.Millimeter)));
+  ```
+
+  Unit-qualified overloads cover every fluent measurement verb: `Width`,
+  `Height`, `Size`, `CornerRadius`, `Padding` (all three arities), the six
+  per-side `Padding*` verbs, `Border` and the six per-side `Border*` verbs, and
+  the page's `Margin`.
+
+  `Units.Parse` / `Units.TryParse` additionally read a unit-suffixed token
+  (`"1in"`, `"10mm"`, `"2.5cm"`, `"72pt"`) for configuration-driven values;
+  `Parse` throws on an unrecognised unit rather than resolving to zero. A
+  document authored entirely in inches produces byte-identical output to the
+  same document in points.
+
+  Dimensionless numbers are deliberately excluded: `LineHeight` is a multiple of
+  the font size, `Opacity` a ratio, `RotationDegrees` an angle, and a weighted
+  column width a share rather than a distance.
+
 - **`Container.FillHeight`** takes the body content height left on the current
   page instead of sizing to content, and `.FillHeight()` on the fluent surface
   does the same. This is the piece that was missing for the header / body /
