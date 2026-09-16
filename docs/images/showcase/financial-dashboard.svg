@@ -4,7 +4,7 @@
 <text x="24 33.338 41.124 53.572 62.124 66.014 73.8 77.689 87.8 96.352 108.8 117.352 125.138 133.689" y="34" fill="#F4F1EF" font-size="14" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Sample Company</text>
 <text x="24 29.777 34.227 38.676 40.898 42.676 47.125 51.574 56.023 58.246 60.023 64.473 66.25 68.473 71.137 73.359 75.582 80.031 82.254 86.703 89.367 93.816 98.266 100.043 102.266 108.043 112.043 116.492 118.715 124.938 129.387 131.164" y="49.8" fill="#B99A88" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Confidential - Internal Use Only</text>
 <text x="662.556 672.668 679.898 683.51 690.74 697.97 705.2 712.43 716.042 723.983 727.594 735.535 742.765 750.706 757.936 761.548 768.778 772.39 776.002 785.39 792.62 800.561 808.502 813.561" y="33" fill="#F4F1EF" font-size="13" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Q2 2026 Financial Report</text>
-<text x="712.038 718.261 722.71 727.159 731.609 734.273 738.722 740.945 745.394 749.843 752.066 756.515 758.737 764.073 768.523 772.972 775.195 779.644 786.308 790.757 795.206 797.87 800.093 804.542 808.991 813.441" y="48.6" fill="#B99A88" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Generated 7 September 2026</text>
+<text x="707.589 713.812 718.261 722.71 727.159 729.823 734.273 736.495 740.945 745.394 747.616 752.066 756.515 758.737 764.073 768.523 772.972 775.195 779.644 786.308 790.757 795.206 797.87 800.093 804.542 808.991 813.441" y="48.6" fill="#B99A88" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Generated 10 September 2026</text>
 </g>
 <g>
 <text x="20 30.011 40.021 45.022 55.033 65.044" y="105.4" fill="#442714" font-size="18" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£2.41M</text>
@@ -24,94 +24,94 @@
 <text x="652.167 655.667 657.612 661.505 663.45 667.343" y="132.4" fill="#B94040" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">↓ 0.8%</text>
 </g>
 <g>
-<rect x="0" y="149.8" width="841.89" height="1.95" fill="#D2C8B7"/>
+<rect x="0" y="149.8" width="841.89" height="0.75" fill="#D2C8B7"/>
 </g>
 <g>
-<text x="24 29.831 35.276 40.331 44.607 49.662 53.295 57.838 59.783 64.838 69.507 74.176 78.845 83.9 88.955 93.624 95.569 97.514 99.845 103.738 107.631 111.524 115.417 119.31" y="172.75" fill="#956B51" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">MONTHLY REVENUE  (£000s)</text>
+<text x="24 29.831 35.276 40.331 44.607 49.662 53.295 57.838 59.783 64.838 69.507 74.176 78.845 83.9 88.955 93.624 95.569 97.514 99.845 103.738 107.631 111.524 115.417 119.31" y="171.55" fill="#805E48" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">MONTHLY REVENUE  (£000s)</text>
 </g>
 <g>
-<line x1="80" y1="320.15" x2="801.89" y2="320.15" stroke="#E0E0E0" stroke-width="0.5"/>
-<line x1="80" y1="290.15" x2="801.89" y2="290.15" stroke="#E0E0E0" stroke-width="0.5"/>
-<line x1="80" y1="260.15" x2="801.89" y2="260.15" stroke="#E0E0E0" stroke-width="0.5"/>
-<line x1="80" y1="230.15" x2="801.89" y2="230.15" stroke="#E0E0E0" stroke-width="0.5"/>
-<line x1="80" y1="200.15" x2="801.89" y2="200.15" stroke="#E0E0E0" stroke-width="0.5"/>
-<text x="60.877 66.438" y="355.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£0</text>
-<text x="55.315 60.877 66.438" y="325.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£50</text>
-<text x="49.754 55.315 60.877 66.438" y="295.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£100</text>
-<text x="49.754 55.315 60.877 66.438" y="265.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£150</text>
-<text x="49.754 55.315 60.877 66.438" y="235.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£200</text>
-<text x="49.754 55.315 60.877 66.438" y="205.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£250</text>
-<rect x="92.031" y="275.15" width="36.094" height="75" fill="#956B51"/>
-<rect x="152.189" y="262.55" width="36.094" height="87.6" fill="#956B51"/>
-<rect x="212.346" y="266.15" width="36.094" height="84" fill="#956B51"/>
-<rect x="272.504" y="245.15" width="36.094" height="105" fill="#956B51"/>
-<rect x="332.661" y="252.35" width="36.094" height="97.8" fill="#956B51"/>
-<rect x="392.819" y="236.15" width="36.094" height="114" fill="#956B51"/>
-<rect x="452.976" y="231.95" width="36.094" height="118.2" fill="#956B51"/>
-<rect x="513.134" y="240.95" width="36.094" height="109.2" fill="#956B51"/>
-<rect x="573.291" y="223.55" width="36.094" height="126.6" fill="#956B51"/>
-<rect x="633.449" y="214.55" width="36.094" height="135.6" fill="#956B51"/>
-<rect x="693.606" y="206.15" width="36.094" height="144" fill="#956B51"/>
-<rect x="753.764" y="210.35" width="36.094" height="139.8" fill="#956B51"/>
-<text x="103.405 107.854 112.303" y="268.15" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">125</text>
-<text x="163.562 168.012 172.461" y="255.55" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">146</text>
-<text x="223.72 228.169 232.618" y="259.15" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">140</text>
-<text x="283.877 288.327 292.776" y="238.15" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">175</text>
-<text x="344.035 348.484 352.933" y="245.35" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">163</text>
-<text x="404.192 408.642 413.091" y="229.15" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">190</text>
-<text x="464.35 468.799 473.248" y="224.95" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">197</text>
-<text x="524.507 528.957 533.406" y="233.95" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">182</text>
-<text x="584.962 589.411 593.266" y="216.55" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">211</text>
-<text x="644.822 649.271 653.721" y="207.55" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">226</text>
-<text x="704.98 709.429 713.878" y="199.15" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">240</text>
-<text x="765.137 769.586 774.036" y="203.35" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">233</text>
-<text x="102.017 107.017 112.579" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Jan</text>
-<text x="161.621 167.729 173.29" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Feb</text>
-<text x="221.783 230.113 235.674" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Mar</text>
-<text x="282.77 289.44 295.002" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Apr</text>
-<text x="341.263 349.593 355.154" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">May</text>
-<text x="402.805 407.805 413.366" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Jun</text>
-<text x="464.632 469.632 475.194" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Jul</text>
-<text x="522.285 528.955 534.516" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Aug</text>
-<text x="582.442 589.112 594.674" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Sep</text>
-<text x="643.718 651.496 656.496" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Oct</text>
-<text x="702.762 709.984 715.545" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Nov</text>
-<text x="762.919 770.141 775.703" y="375.15" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Dec</text>
+<line x1="80" y1="318.95" x2="801.89" y2="318.95" stroke="#E0E0E0" stroke-width="0.5"/>
+<line x1="80" y1="288.95" x2="801.89" y2="288.95" stroke="#E0E0E0" stroke-width="0.5"/>
+<line x1="80" y1="258.95" x2="801.89" y2="258.95" stroke="#E0E0E0" stroke-width="0.5"/>
+<line x1="80" y1="228.95" x2="801.89" y2="228.95" stroke="#E0E0E0" stroke-width="0.5"/>
+<line x1="80" y1="198.95" x2="801.89" y2="198.95" stroke="#E0E0E0" stroke-width="0.5"/>
+<text x="60.877 66.438" y="353.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£0</text>
+<text x="55.315 60.877 66.438" y="323.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£50</text>
+<text x="49.754 55.315 60.877 66.438" y="293.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£100</text>
+<text x="49.754 55.315 60.877 66.438" y="263.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£150</text>
+<text x="49.754 55.315 60.877 66.438" y="233.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£200</text>
+<text x="49.754 55.315 60.877 66.438" y="203.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">£250</text>
+<rect x="92.031" y="273.95" width="36.094" height="75" fill="#956B51"/>
+<rect x="152.189" y="261.35" width="36.094" height="87.6" fill="#956B51"/>
+<rect x="212.346" y="264.95" width="36.094" height="84" fill="#956B51"/>
+<rect x="272.504" y="243.95" width="36.094" height="105" fill="#956B51"/>
+<rect x="332.661" y="251.15" width="36.094" height="97.8" fill="#956B51"/>
+<rect x="392.819" y="234.95" width="36.094" height="114" fill="#956B51"/>
+<rect x="452.976" y="230.75" width="36.094" height="118.2" fill="#956B51"/>
+<rect x="513.134" y="239.75" width="36.094" height="109.2" fill="#956B51"/>
+<rect x="573.291" y="222.35" width="36.094" height="126.6" fill="#956B51"/>
+<rect x="633.449" y="213.35" width="36.094" height="135.6" fill="#956B51"/>
+<rect x="693.606" y="204.95" width="36.094" height="144" fill="#956B51"/>
+<rect x="753.764" y="209.15" width="36.094" height="139.8" fill="#956B51"/>
+<text x="103.405 107.854 112.303" y="266.95" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">125</text>
+<text x="163.562 168.012 172.461" y="254.35" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">146</text>
+<text x="223.72 228.169 232.618" y="257.95" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">140</text>
+<text x="283.877 288.327 292.776" y="236.95" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">175</text>
+<text x="344.035 348.484 352.933" y="244.15" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">163</text>
+<text x="404.192 408.642 413.091" y="227.95" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">190</text>
+<text x="464.35 468.799 473.248" y="223.75" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">197</text>
+<text x="524.507 528.957 533.406" y="232.75" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">182</text>
+<text x="584.962 589.411 593.266" y="215.35" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">211</text>
+<text x="644.822 649.271 653.721" y="206.35" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">226</text>
+<text x="704.98 709.429 713.878" y="197.95" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">240</text>
+<text x="765.137 769.586 774.036" y="202.15" fill="#956B51" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">233</text>
+<text x="102.017 107.017 112.579" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Jan</text>
+<text x="161.621 167.729 173.29" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Feb</text>
+<text x="221.783 230.113 235.674" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Mar</text>
+<text x="282.77 289.44 295.002" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Apr</text>
+<text x="341.263 349.593 355.154" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">May</text>
+<text x="402.805 407.805 413.366" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Jun</text>
+<text x="464.632 469.632 475.194" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Jul</text>
+<text x="522.285 528.955 534.516" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Aug</text>
+<text x="582.442 589.112 594.674" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Sep</text>
+<text x="643.718 651.496 656.496" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Oct</text>
+<text x="702.762 709.984 715.545" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Nov</text>
+<text x="762.919 770.141 775.703" y="373.95" fill="#666666" font-size="10" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Dec</text>
 <g shape-rendering="crispEdges">
-<line x1="80" y1="200.15" x2="80" y2="350.15" stroke="#666666" stroke-width="1"/>
-<line x1="80" y1="350.15" x2="801.89" y2="350.15" stroke="#666666" stroke-width="1"/>
+<line x1="80" y1="198.95" x2="80" y2="348.95" stroke="#666666" stroke-width="1"/>
+<line x1="80" y1="348.95" x2="801.89" y2="348.95" stroke="#666666" stroke-width="1"/>
 </g>
 </g>
 <g>
-<rect x="0" y="380.15" width="841.89" height="1.95" fill="#D2C8B7"/>
+<rect x="0" y="378.95" width="841.89" height="0.75" fill="#D2C8B7"/>
 </g>
 <g>
-<text x="24 28.149 33.594 38.137 40.082 44.75 49.806 55.25 60.306 65.361 70.416 74.692" y="403.1" fill="#956B51" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">TOP PRODUCTS</text>
+<text x="24 28.149 33.594 38.137 40.082 44.75 49.806 55.25 60.306 65.361 70.416 74.692" y="400.7" fill="#805E48" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">TOP PRODUCTS</text>
 </g>
 <g>
-<rect x="24" y="410.5" width="323.437" height="25.6" fill="#E8E0D8"/>
-<text x="32 37.336 40.449 45.336 50.223 55.109 59.559" y="426.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Product</text>
-<rect x="347.437" y="410.5" width="147.017" height="25.6" fill="#E8E0D8"/>
-<text x="466.453 472.231 477.117 479.34 482.004" y="426.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Units</text>
-<rect x="494.453" y="410.5" width="205.823" height="25.6" fill="#E8E0D8"/>
-<text x="658.929 664.706 669.155 673.605 678.054 682.941 687.827" y="426.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Revenue</text>
-<rect x="700.276" y="410.5" width="117.613" height="25.6" fill="#E8E0D8"/>
-<text x="783.667 790.331 794.78 797.894 802.78 805.003" y="426.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Margin</text>
-<text x="32 37.336 41.785 44.008 48.457 51.121 55.57 58.234 60.012 64.012 68.461 70.684 76.02 77.797 82.246" y="452.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Enterprise Plan</text>
-<text x="473.106 477.555 482.004" y="452.1" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">142</text>
-<text x="658.909 663.359 667.808 672.257 676.706 678.929 683.378 687.827" y="452.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£890,400</text>
-<text x="793.878 798.327 802.776" y="452.1" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">71%</text>
-<text x="32 37.336 40 44.449 46.672 52.008 53.785 58.234" y="477.7" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Pro Plan</text>
-<text x="466.434 470.883 473.106 477.555 482.004" y="477.7" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">1,204</text>
-<text x="658.909 663.359 667.808 672.257 676.706 678.929 683.378 687.827" y="477.7" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£722,400</text>
-<text x="793.878 798.327 802.776" y="477.7" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">64%</text>
-<text x="32 37.336 39.559 44.008 46.672 48.895 53.344 56.008 58.23 63.566 65.344 69.793" y="503.3" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Starter Plan</text>
-<text x="466.434 470.883 473.106 477.555 482.004" y="503.3" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">2,468</text>
-<text x="658.909 663.359 667.808 672.257 676.706 678.929 683.378 687.827" y="503.3" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£493,600</text>
-<text x="793.878 798.327 802.776" y="503.3" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">58%</text>
-<text x="32 37.336 41.785 46.234 48.898 53.348 57.797" y="528.9" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Add-ons</text>
-<text x="483.789" y="528.9" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">-</text>
-<text x="658.909 663.359 667.808 672.257 676.706 678.929 683.378 687.827" y="528.9" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£304,000</text>
-<text x="793.878 798.327 802.776" y="528.9" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">82%</text>
+<rect x="24" y="408.1" width="323.437" height="25.6" fill="#E8E0D8"/>
+<text x="32 37.336 40.449 45.336 50.223 55.109 59.559" y="424.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Product</text>
+<rect x="347.437" y="408.1" width="147.017" height="25.6" fill="#E8E0D8"/>
+<text x="466.453 472.231 477.117 479.34 482.004" y="424.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Units</text>
+<rect x="494.453" y="408.1" width="205.823" height="25.6" fill="#E8E0D8"/>
+<text x="658.929 664.706 669.155 673.605 678.054 682.941 687.827" y="424.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Revenue</text>
+<rect x="700.276" y="408.1" width="117.613" height="25.6" fill="#E8E0D8"/>
+<text x="783.667 790.331 794.78 797.894 802.78 805.003" y="424.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Margin</text>
+<text x="32 37.336 41.785 44.008 48.457 51.121 55.57 58.234 60.012 64.012 68.461 70.684 76.02 77.797 82.246" y="449.7" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Enterprise Plan</text>
+<text x="473.106 477.555 482.004" y="449.7" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">142</text>
+<text x="658.909 663.359 667.808 672.257 676.706 678.929 683.378 687.827" y="449.7" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£890,400</text>
+<text x="793.878 798.327 802.776" y="449.7" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">71%</text>
+<text x="32 37.336 40 44.449 46.672 52.008 53.785 58.234" y="475.3" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Pro Plan</text>
+<text x="466.434 470.883 473.106 477.555 482.004" y="475.3" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">1,204</text>
+<text x="658.909 663.359 667.808 672.257 676.706 678.929 683.378 687.827" y="475.3" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£722,400</text>
+<text x="793.878 798.327 802.776" y="475.3" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">64%</text>
+<text x="32 37.336 39.559 44.008 46.672 48.895 53.344 56.008 58.23 63.566 65.344 69.793" y="500.9" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Starter Plan</text>
+<text x="466.434 470.883 473.106 477.555 482.004" y="500.9" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">2,468</text>
+<text x="658.909 663.359 667.808 672.257 676.706 678.929 683.378 687.827" y="500.9" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£493,600</text>
+<text x="793.878 798.327 802.776" y="500.9" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">58%</text>
+<text x="32 37.336 41.785 46.234 48.898 53.348 57.797" y="526.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Add-ons</text>
+<text x="483.789" y="526.5" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">-</text>
+<text x="658.909 663.359 667.808 672.257 676.706 678.929 683.378 687.827" y="526.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£304,000</text>
+<text x="793.878 798.327 802.776" y="526.5" fill="#805E48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">82%</text>
 </g>
 </g></svg>
