@@ -74,6 +74,7 @@ public class CanvasElement : ElementBase, IRoleProvider, IAltTextProvider
             canvas.RestoreState();
         }
 
+        ctx.FlushExternalCanvas(canvas);
         ctx.CurrentY += CanvasHeight;
     }
 }

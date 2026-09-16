@@ -360,8 +360,17 @@ public class RenderContext
     public ICanvas GetCanvas(float x, float y)
     {
         if (IsSvgMode)
-            return new SvgCanvas(PageSize.Width, PageSize.Height, x, y, CurrentStream, false, ResolveEmbeddedFont)
+            // A positioned child canvas. It draws in its own coordinate space,
+            // into its own buffer, and records where it sits; FlushExternalCanvas
+            // composites it into the page inside a translate group. Baking the
+            // offset into every coordinate instead would put the same marks in
+            // the same place, but the TypeScript exporter emits the group, and
+            // the shared specification names SVG as the artefact the conformance
+            // tooling compares - so the structure is part of the contract.
+            return new SvgCanvas(PageSize.Width, PageSize.Height, 0, 0, null, false, ResolveEmbeddedFont)
             {
+                ChildOffsetX = x,
+                ChildOffsetY = y,
                 Options = SvgOptions,
                 FontUsageSink = TrackSvgFontUsage,
                 RegisterFontCallback = RegisterFont,
@@ -386,6 +395,38 @@ public class RenderContext
         }
         return pdfCanvas;
     }
+
+    /// <summary>
+    /// Composites a canvas obtained from <see cref="GetCanvas"/> into the
+    /// currently active canvas.
+    /// </summary>
+    /// <remarks>
+    /// Only the SVG path needs this. A PDF child canvas appends to the same
+    /// stream as it draws, with its offset already applied to each operator, so
+    /// there is nothing left to composite.
+    /// </remarks>
+    public void FlushExternalCanvas(ICanvas canvas)
+    {
+        if (!IsSvgMode || canvas is not SvgCanvas child || Canvas is not SvgCanvas page) return;
+
+        string inner = child.GetInnerSvg();
+        if (string.IsNullOrEmpty(inner)) return;
+
+        float tx = child.ChildOffsetX;
+        float ty = child.ChildOffsetY;
+        string open = tx != 0 || ty != 0
+            ? $"<g transform=\"translate({SvgNumber(tx)} {SvgNumber(ty)})\">"
+            : "<g>";
+        page.AppendRawMarkup(open + "\n" + inner + "</g>");
+    }
+
+    /// <summary>
+    /// Formats a translate component the way <see cref="SvgCanvas"/> formats a
+    /// coordinate, so a composited group's offset matches the numbers inside it.
+    /// </summary>
+    private string SvgNumber(float v) => SvgOptions.Precision is int p
+        ? Math.Round((double)v, p).ToString(System.Globalization.CultureInfo.InvariantCulture)
+        : v.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
     private string ResolveImageResource(ImageInfo info)
     {
@@ -552,9 +593,25 @@ public class RenderContext
     /// at specific positions regardless of the current cursor position.
     /// </summary>
     /// <returns>A canvas positioned at (0, 0) on the current page</returns>
+    /// <remarks>
+    /// In SVG mode this writes straight into the page stream rather than taking
+    /// the positioned-child route <see cref="GetCanvas"/> uses. It is the page's
+    /// own canvas at its own origin, not a child sitting somewhere on it, so
+    /// there is nothing to translate and no group to composite - and the
+    /// TypeScript exporter emits page chrome the same way, ungrouped.
+    /// </remarks>
     public ICanvas GetFixedCanvas()
     {
-        return GetCanvas(0, 0);
+        if (!IsSvgMode) return GetCanvas(0, 0);
+
+        return new SvgCanvas(PageSize.Width, PageSize.Height, 0, 0, CurrentStream, false, ResolveEmbeddedFont)
+        {
+            Options = SvgOptions,
+            FontUsageSink = TrackSvgFontUsage,
+            RegisterFontCallback = RegisterFont,
+            TextRunResolver = ResolveTextRuns,
+            IdAllocator = _svgIdAllocator
+        };
     }
 
     /// <summary>

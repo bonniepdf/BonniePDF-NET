@@ -667,8 +667,13 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     private float[] CalculateColumnWidths(float totalWidth)
     {
         float[] weights = EffectiveColumnWeights();
-        float totalWeight = weights.Sum();
-        return weights.Select(w => w / totalWeight * totalWidth).ToArray();
+        // Divided in double. The weights rarely sum to a power of two, so the
+        // quotient is not exactly representable and a single-precision division
+        // lands a fraction of a thousandth away from the TypeScript
+        // implementation's - which put a table header band on 56.618 against its
+        // 56.619 once the width was rounded for output.
+        double totalWeight = weights.Sum(w => (double)w);
+        return weights.Select(w => (float)(w / totalWeight * totalWidth)).ToArray();
     }
 
     /// <summary>

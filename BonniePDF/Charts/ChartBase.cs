@@ -149,6 +149,7 @@ public abstract class ChartBase : ElementBase, IRoleProvider, IAltTextProvider
 
         ICanvas canvas = ctx.GetCanvas(ctx.CurrentX, ctx.CurrentY);
         Draw(canvas);
+        ctx.FlushExternalCanvas(canvas);
         ctx.CurrentY += Height;
     }
 }

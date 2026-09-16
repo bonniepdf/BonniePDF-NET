@@ -15,6 +15,39 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+### Changed
+
+- **SVG export now agrees with the TypeScript implementation, element for
+  element.** The shared specification names SVG as the artefact the conformance
+  tooling compares, so four differences between the two exporters were defects
+  in that contract rather than formatting preferences:
+
+  - `Color.ToHexString()` returns lower case (`#ff0000`, not `#FF0000`),
+    matching TypeScript. This is a public method, so the change is visible to
+    callers that compare or display the string.
+  - A composited child canvas — a chart, or a `CanvasElement` — is emitted
+    inside a `<g transform="translate(…)">` group drawn in its own coordinate
+    space, rather than with the offset baked into every coordinate. Nothing
+    moves; the structure now matches.
+  - A glyph run accumulates its advance cursor in `double` rather than `float`,
+    from an origin rounded to the export precision. The single-precision cursor
+    compounded its own rounding error along a run, reaching the third decimal on
+    a long numeric string.
+  - SVG coordinates are formatted the way JavaScript's
+    `Number(v.toFixed(precision))` formats them: the exact binary value rounded
+    half away from zero. `ToString("F3")` rounds a midpoint to even, and glyph
+    positions land on exact midpoints routinely, because a scaled advance is a
+    dyadic fraction.
+
+  The fourth, `rx` without `ry` on a rounded rectangle, was already correct here
+  and is fixed on the TypeScript side.
+
+- **Text measurement and table column widths are computed in `double`.** Both
+  accumulated in `float`, which put a measured string and a divided column width
+  a fraction of a thousandth away from the TypeScript implementation's — enough
+  to land on the other side of the rounding used for output. Layout still
+  exchanges `float`, so no public signature changes.
+
 ### Added
 
 - **Any measurement can now be written in a unit.** Two spellings, both
