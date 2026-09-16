@@ -192,7 +192,7 @@ Current versions are source-available under the [BonniePDF Community License 1.0
 
 The Community licence is free for: evaluation of the complete core in non-production; personal and independent non-commercial projects; qualifying charity, education and research use; qualifying OSI-licensed open-source work; **and commercial production while the benefiting organisation's annual gross revenue is below US $1,000,000**, measured together with its affiliates. Where documents are produced for a client, the client is the benefiting organisation, not the contractor. Crossing the threshold allows ninety days to obtain a [commercial licence](./COMMERCIAL-LICENSE.txt).
 
-Professional covers one named legal entity with unlimited developers; Enterprise additionally covers the affiliates named in your Order. One paid core licence covers both .NET and TypeScript/JavaScript, with no document, server, deployment, or end-user fees. Digital signing is included with every paid core licence at no extra charge and is governed by its own agreement. See the [licensing overview](https://www.bonniepdf.dev/license/) for details.
+Professional covers one named legal entity with unlimited developers; Enterprise additionally covers the affiliates named in your Order. One paid core licence covers both .NET and TypeScript/JavaScript, with no document, server, deployment, or end-user fees. Digital signing is included with every paid core licence at no extra charge, under the same Commercial License Agreement; the signing packages are not covered by the Community License. See the [licensing overview](https://www.bonniepdf.dev/license/) for details.
 
 ### Declaring your licence
 
