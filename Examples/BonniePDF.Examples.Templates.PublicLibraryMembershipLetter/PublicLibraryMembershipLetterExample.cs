@@ -41,6 +41,9 @@ public static class PublicLibraryMembershipLetterExample
         new("Saturday", "10:00-16:00", "Main library only"),
     ];
 
+    private static readonly float[] MembershipColumns = [2.5f, 1f, 2.7f];
+    private static readonly float[] HoursColumns = [1.3f, 1f, 2.2f];
+
     public static Document Generate()
     {
         DateTime now = DateTime.Now;
@@ -79,10 +82,16 @@ public static class PublicLibraryMembershipLetterExample
             "any branch, online catalogue terminal, or through the library app."));
 
         doc.Add(StatusCallout());
-        doc.Add(H2("What you can borrow"));
-        doc.Add(InfoTable(Membership, LibraryInk, "Service", "Limit", "Notes"));
-        doc.Add(H2("Branch opening hours"));
-        doc.Add(InfoTable(OpeningHours, LibraryGreen, "Days", "Hours", "Availability"));
+
+        VerticalStack borrowStack = new() { BreakAllowed = false };
+        borrowStack.Add(H2("What you can borrow"));
+        borrowStack.Add(InfoTable(Membership, MembershipColumns, LibraryInk, "Service", "Limit", "Notes"));
+        doc.Add(borrowStack);
+
+        VerticalStack hoursStack = new() { BreakAllowed = false };
+        hoursStack.Add(H2("Branch opening hours"));
+        hoursStack.Add(InfoTable(OpeningHours, HoursColumns, LibraryGreen, "Days", "Hours", "Availability"));
+        doc.Add(hoursStack);
 
         AddHelpSections(doc);
 
@@ -198,9 +207,9 @@ public static class PublicLibraryMembershipLetterExample
         };
     }
 
-    private static Table InfoTable(InfoLine[] rows, Color headerColor, string first, string second, string third)
+    private static Table InfoTable(InfoLine[] rows, float[] columns, Color headerColor, string first, string second, string third)
     {
-        Table table = new(2.2f, 1, 2.2f)
+        Table table = new(columns)
         {
             CellPadding = 9,
             Border = new Border(0.75f),
