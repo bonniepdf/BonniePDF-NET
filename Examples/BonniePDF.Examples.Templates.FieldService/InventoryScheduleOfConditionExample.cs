@@ -218,37 +218,51 @@ public static class InventoryScheduleOfConditionExample
 
         // ── Room-by-room register ─────────────────────────────────────────────
 
-        doc.Add(H2("Room-by-room schedule"));
-
-        foreach (Room room in Rooms)
+        if (Rooms.Length == 0)
         {
-            doc.Add(H3(room.Name));
+            doc.Add(H2("Room-by-room schedule"));
+        }
+        else
+        {
+            bool firstRoom = true;
+            foreach (Room room in Rooms)
+            {
+                VerticalStack roomStack = new() { BreakAllowed = false };
+                if (firstRoom)
+                {
+                    roomStack.Add(H2("Room-by-room schedule"));
+                    firstRoom = false;
+                }
+                roomStack.Add(H3(room.Name));
 
-            Table table = new(3.1f, 1.1f, 1.3f, 4.2f, 0.95f)
-            {
-                CellPadding = 5,
-                Border = new Border(0.5f),
-                BorderColors = new BorderColors(Rule),
-                HeaderBackgroundColor = Accent,
-                HeaderTextColor = Color.White,
-            };
-            table.AddHeader(Th("Item"), Th("Condition"), Th("Cleanliness"), Th("Notes as found"), Th("Plate"));
-            foreach (Item item in room.Items)
-            {
-                table.AddRow(
-                    Td(item.Name),
-                    StatusCell(item.Condition, ConditionColour(item.Condition)),
-                    Td(item.Cleanliness, color: Muted),
-                    Td(item.Notes),
-                    Td(item.Evidence, color: Muted));
+                Table table = new(3.1f, 1.1f, 1.3f, 4.2f, 0.95f)
+                {
+                    CellPadding = 5,
+                    Border = new Border(0.5f),
+                    BorderColors = new BorderColors(Rule),
+                    HeaderBackgroundColor = Accent,
+                    HeaderTextColor = Color.White,
+                };
+                table.AddHeader(Th("Item"), Th("Condition"), Th("Cleanliness"), Th("Notes as found"), Th("Plate"));
+                foreach (Item item in room.Items)
+                {
+                    table.AddRow(
+                        Td(item.Name),
+                        StatusCell(item.Condition, ConditionColour(item.Condition)),
+                        Td(item.Cleanliness, color: Muted),
+                        Td(item.Notes),
+                        Td(item.Evidence, color: Muted));
+                }
+
+                roomStack.Add(table);
+                doc.Add(roomStack);
             }
-
-            doc.Add(table);
         }
 
         // ── Meters and keys ───────────────────────────────────────────────────
 
-        doc.Add(H2("Meter readings"));
+        VerticalStack metersStack = new() { BreakAllowed = false };
+        metersStack.Add(H2("Meter readings"));
 
         Table meters = new(1.4f, 1.6f, 1.6f, 2.4f)
         {
@@ -268,9 +282,11 @@ public static class InventoryScheduleOfConditionExample
                 Td(meter.Located, color: Muted));
         }
 
-        doc.Add(meters);
+        metersStack.Add(meters);
+        doc.Add(metersStack);
 
-        doc.Add(H2("Keys issued"));
+        VerticalStack keysStack = new() { BreakAllowed = false };
+        keysStack.Add(H2("Keys issued"));
 
         Table keys = new(3f, 1f, 1.6f)
         {
@@ -289,7 +305,8 @@ public static class InventoryScheduleOfConditionExample
                 Td(key.IssuedTo, color: Muted));
         }
 
-        doc.Add(keys);
+        keysStack.Add(keys);
+        doc.Add(keysStack);
 
         // ── Declarations ──────────────────────────────────────────────────────
 

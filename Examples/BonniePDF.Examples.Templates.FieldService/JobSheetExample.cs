@@ -220,8 +220,6 @@ public static class JobSheetExample
 
         // ── Parts ─────────────────────────────────────────────────────────────
 
-        doc.Add(H2("Parts and materials"));
-
         Table parts = new(1.3f, 3.1f, 0.7f, 1f, 1f, 0.9f)
         {
             CellPadding = 6,
@@ -244,14 +242,18 @@ public static class JobSheetExample
                     part.Fitted ? StatusDone : StatusLow));
         }
 
-        doc.Add(parts);
-
-        doc.Add(Body(
+        TextBlock partsNote = Body(
             "Parts carried but not fitted are returned to stock and are not charged. "
                 + "Totals below exclude VAT and are provisional until invoiced.",
             color: Muted,
             marginBottom: 6f,
-            size: 8.5f));
+            size: 8.5f);
+
+        VerticalStack partsStack = new() { BreakAllowed = false };
+        partsStack.Add(H2("Parts and materials"));
+        partsStack.Add(parts);
+        partsStack.Add(partsNote);
+        doc.Add(partsStack);
 
         // ── Totals ────────────────────────────────────────────────────────────
 
@@ -280,11 +282,10 @@ public static class JobSheetExample
 
         // ── Outstanding work ──────────────────────────────────────────────────
 
-        doc.Add(H2("Outstanding items and recommendations"));
-        doc.Add(Body(
+        TextBlock defectsIntro = Body(
             "The following were identified during the visit but fall outside the scope of this job. "
                 + "Each carries a reference so it can be quoted, scheduled, or accepted as a risk.",
-            color: Muted));
+            color: Muted);
 
         Table defects = new(0.7f, 3.4f, 1f, 3f)
         {
@@ -304,7 +305,11 @@ public static class JobSheetExample
                 Td(item.Action, color: Muted));
         }
 
-        doc.Add(defects);
+        VerticalStack defectsStack = new() { BreakAllowed = false };
+        defectsStack.Add(H2("Outstanding items and recommendations"));
+        defectsStack.Add(defectsIntro);
+        defectsStack.Add(defects);
+        doc.Add(defectsStack);
 
         doc.Add(Panel(
             "Next planned visit",
