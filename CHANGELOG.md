@@ -50,6 +50,14 @@ behaviour, so the two files can be read side by side.
 
 ### Added
 
+- **Pagination control primitives.** `EnsureSpace`, `PreventPageBreak`,
+  `ShowEntire`, `StopPaging`, `ShowIf` (with `ShowOnce` and `SkipOnce`) and
+  `Unconstrained` are single-child wrappers that decide whether and where their
+  child renders, and draw nothing themselves, so they compose with any element
+  and with each other. The traditional API takes them as elements; the fluent
+  API reaches them through `ContainerPaginationExtensions`, which wraps the rest
+  of the chain. TypeScript has the same set.
+
 - **Any measurement can now be written in a unit.** Two spellings, both
   resolving through `Units.ToPoints`, so there is one conversion table and no
   rounding difference between them.
