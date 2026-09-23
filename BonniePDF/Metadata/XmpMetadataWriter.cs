@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Xml;
 using BonniePDF.Configuration;
@@ -266,6 +267,6 @@ internal static class XmpMetadataWriter
     /// </summary>
     private static string FormatIso8601(DateTimeOffset date)
     {
-        return date.ToString(Iso8601Format);
+        return date.ToString(Iso8601Format, CultureInfo.InvariantCulture);
     }
 }
