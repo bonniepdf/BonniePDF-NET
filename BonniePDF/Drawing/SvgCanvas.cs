@@ -1166,17 +1166,34 @@ public class SvgCanvas : ICanvas
     /// approximated - unlike the PDF strip and ring fallbacks, which have to
     /// generate transformed geometry. An absent transform emits no attribute at
     /// all, so existing output stays byte-identical.
+    /// <para>
+    /// This canvas draws at an offset by adding it to every coordinate. A
+    /// gradient's own geometry is in paint space, where the offset does not
+    /// belong - <c>gradientTransform</c> would scale and rotate it along with the
+    /// paint - so with a transform the offset goes into the matrix's translation
+    /// instead, and <see cref="GradientOffset"/> leaves the geometry alone.
+    /// </para>
     /// </remarks>
     private string GradientTransformAttr(PaintTransform? transform)
     {
-        if (transform is not { } t || t.IsIdentity) return string.Empty;
-        return $" gradientTransform=\"matrix({N(t.A)} {N(t.B)} {N(t.C)} {N(t.D)} {N(t.E)} {N(t.F)})\"";
+        if (transform.IsIdentityOrAbsent()) return string.Empty;
+        PaintTransform t = transform!.Value;
+        return $" gradientTransform=\"matrix({N(t.A)} {N(t.B)} {N(t.C)} {N(t.D)} {N(t.E + _xOffset)} {N(t.F + _yOffset)})\"";
     }
+
+    /// <summary>
+    /// The offset to add to a gradient's own coordinates: the canvas offset when
+    /// the paint has no transform, and nothing when it has one, because
+    /// <see cref="GradientTransformAttr"/> then carries the offset itself.
+    /// </summary>
+    private (float X, float Y) GradientOffset(PaintTransform? transform) =>
+        transform.IsIdentityOrAbsent() ? (_xOffset, _yOffset) : (0f, 0f);
 
     private string EmitLinearGradientDef(LinearGradientPaint gradient)
     {
         string id = IdAllocator.NextGradId();
-        _sb.Append($"<defs><linearGradient id=\"{id}\" x1=\"{N(gradient.Start.X + _xOffset)}\" y1=\"{N(gradient.Start.Y + _yOffset)}\" x2=\"{N(gradient.End.X + _xOffset)}\" y2=\"{N(gradient.End.Y + _yOffset)}\" gradientUnits=\"userSpaceOnUse\"{GradientTransformAttr(gradient.Transform)}>");
+        (float ox, float oy) = GradientOffset(gradient.Transform);
+        _sb.Append($"<defs><linearGradient id=\"{id}\" x1=\"{N(gradient.Start.X + ox)}\" y1=\"{N(gradient.Start.Y + oy)}\" x2=\"{N(gradient.End.X + ox)}\" y2=\"{N(gradient.End.Y + oy)}\" gradientUnits=\"userSpaceOnUse\"{GradientTransformAttr(gradient.Transform)}>");
         foreach (GradientStop stop in gradient.Stops)
         {
             string offset = N(stop.Offset * 100f);
@@ -1194,12 +1211,13 @@ public class SvgCanvas : ICanvas
     private string EmitRadialGradientDef(RadialGradientPaint gradient)
     {
         string id = IdAllocator.NextGradId();
-        float cx = gradient.Center.X + _xOffset;
-        float cy = gradient.Center.Y + _yOffset;
+        (float ox, float oy) = GradientOffset(gradient.Transform);
+        float cx = gradient.Center.X + ox;
+        float cy = gradient.Center.Y + oy;
         string focalAttrs = "";
         if (gradient.Focal.HasValue)
         {
-            focalAttrs = $" fx=\"{N(gradient.Focal.Value.X + _xOffset)}\" fy=\"{N(gradient.Focal.Value.Y + _yOffset)}\"";
+            focalAttrs = $" fx=\"{N(gradient.Focal.Value.X + ox)}\" fy=\"{N(gradient.Focal.Value.Y + oy)}\"";
         }
         _sb.Append($"<defs><radialGradient id=\"{id}\" cx=\"{N(cx)}\" cy=\"{N(cy)}\" r=\"{N(gradient.Radius)}\"{focalAttrs} gradientUnits=\"userSpaceOnUse\"{GradientTransformAttr(gradient.Transform)}>");
         foreach (GradientStop stop in gradient.Stops)
