@@ -1290,8 +1290,9 @@ public class PdfCanvas : ICanvas
     /// alpha is honoured and the correction is what keeps the overlapping stack
     /// from compounding it.
     /// <para>
-    /// <paramref name="i"/> of <paramref name="bands"/>, or -1, asks for the
-    /// /Extend flood past either end.
+    /// <paramref name="i"/> of -1 asks for the /Extend flood before the near
+    /// end. (The far-end flood is painted uncorrected, beneath everything, so it
+    /// never comes here.)
     /// </para>
     /// </remarks>
     private Color? BandColor(IReadOnlyList<ShadingStop> stops, int i, int bands)
@@ -1456,10 +1457,15 @@ public class PdfCanvas : ICanvas
         // which is what the stack gives - and it is why the disc approximation
         // never had the problem.
 
-        // Past the far end, /Extend floods with the last stop's colour. Painted
-        // first, beneath the stack.
-        if (tMax > 1 && BandColor(stops, GradientFallbackBands, GradientFallbackBands) is { } far)
-            Quad(1 - 0.5 / GradientFallbackBands, tMax, far);
+        // Past the far end, /Extend floods with the last stop's colour. It is
+        // painted first, beneath the whole stack and across the whole range, at
+        // its sampled colour: nothing lies beneath it to correct for. Every
+        // band's correction assumes the band beyond it is already down, and for
+        // the outermost band that is this flood - so it has to be there wherever
+        // that band shows, not only past t=1. A ramp that fades to nothing floods
+        // with nothing and drops out, exactly as the radial rim flood does.
+        Color far = SampleNormalizedStops(stops, 1);
+        if (far.ScA > 0) Quad(tMin, tMax, far);
 
         for (int i = GradientFallbackBands - 1; i >= 0; i--)
         {
