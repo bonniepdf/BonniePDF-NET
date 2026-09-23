@@ -23,8 +23,20 @@ public sealed class SolidPaint(Color color) : Paint
 }
 
 /// <summary>A linear gradient between two points.</summary>
+/// <remarks>
+/// <see cref="Start"/> and <see cref="End"/> are in the paint's own coordinate
+/// space; <see cref="Transform"/>, when set, maps that space onto the canvas
+/// space where the paint is used. Leaving it null is identity and produces
+/// byte-identical output to a paint without one.
+/// </remarks>
 public sealed class LinearGradientPaint(Point start, Point end, params GradientStop[] stops) : Paint
 {
+    /// <summary>
+    /// Gets or initializes the transform mapping this paint's own coordinate
+    /// space onto the canvas space where it is used. Null means identity.
+    /// </summary>
+    public PaintTransform? Transform { get; init; }
+
     /// <summary>Gets the start point of the gradient.</summary>
     public Point Start { get; } = start;
 
@@ -36,8 +48,21 @@ public sealed class LinearGradientPaint(Point start, Point end, params GradientS
 }
 
 /// <summary>A radial gradient from a center point.</summary>
+/// <remarks>
+/// <see cref="Center"/>, <see cref="Radius"/> and <see cref="Focal"/> are in the
+/// paint's own coordinate space; <see cref="Transform"/>, when set, maps that
+/// space onto the canvas space where the paint is used. A non-uniform transform
+/// is what makes an elliptical gradient expressible - the paint itself carries a
+/// single radius.
+/// </remarks>
 public sealed class RadialGradientPaint(Point center, float radius, GradientStop[] stops, Point? focal = null) : Paint
 {
+    /// <summary>
+    /// Gets or initializes the transform mapping this paint's own coordinate
+    /// space onto the canvas space where it is used. Null means identity.
+    /// </summary>
+    public PaintTransform? Transform { get; init; }
+
     /// <summary>Gets the center point of the gradient.</summary>
     public Point Center { get; } = center;
 
