@@ -76,7 +76,7 @@ internal static class PdfSyntax
     {
         // PDF date format: D:YYYYMMDDHHmmSSOHH'mm'
         // where O is '+', '-', or 'Z', and HH'mm' is the UTC offset
-        string datePart = date.ToString("yyyyMMddHHmmss");
+        string datePart = date.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
         TimeSpan offset = date.Offset;
         if (offset == TimeSpan.Zero)
             return $"D:{datePart}Z";
