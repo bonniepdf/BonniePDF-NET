@@ -61,6 +61,56 @@ to the following conditions:
 
 ---
 
+## Data Matrix encoder
+
+- **Files:** `BonniePDF/Elements/Shapes/DataMatrixEncoder.cs`
+- **Upstream project:** [datalog/datamatrix-svg](https://github.com/datalog/datamatrix-svg)
+- **Licence:** MIT License
+- **Nature of use:** `DataMatrixEncoder.cs` is a C# port of the upstream `datamatrix.js`
+  Data Matrix (ECC200, ISO/IEC 16022) encoder. The encodation scheme selection
+  (ASCII, C40, Text, X12, EDIFACT, Base-256), the Reed-Solomon error correction
+  and the module placement originate from the upstream project. The upstream
+  SVG/DOM rendering layer is not used: BonniePDF draws the matrix as vector
+  rectangles through its own `DataMatrix` element. The TypeScript implementation
+  ports the same upstream source - see the
+  [TypeScript notices](https://github.com/BonniePDF/BonniePDF-TypeScript/blob/master/core/THIRD-PARTY-NOTICES.md).
+
+### Licence text
+
+The upstream `LICENSE` file:
+
+```
+MIT License
+
+Copyright (c) 2020 datalog
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+The upstream source file (`datamatrix.js`) additionally carries the notice:
+
+```
+Copyright (c) 2020 Constantine
+```
+
+---
+
 ## Liberation fonts
 
 - **Files:** `BonniePDF/Typography/Fonts/Liberation*.ttf` (Sans, Serif, Mono -
