@@ -309,6 +309,22 @@ public partial class GradientFallbackTests
     }
 
     [Fact]
+    public void NeverWritesAColourOutsideTheUnitRange()
+    {
+        // The backdrop correction solves for a colour, and the solution can fall
+        // outside [0, 1] when a translucent band sits over a differently coloured
+        // one. It is clamped back rather than written as a negative operand.
+        GradientStop[] mixed =
+        [
+            new(0f, Color.FromScRgb(1, 0, 0, 0.5f)),
+            new(0.5f, Color.FromScRgb(0, 0, 1, 1)),
+            new(1f, Color.FromScRgb(0, 1, 0, 0.25f))
+        ];
+        string content = FillWith(new RadialGradientPaint(new Point(50, 25), 40f, mixed));
+        Assert.DoesNotMatch(@"(?m)^.*-[\d.]+.* rg$", content);
+    }
+
+    [Fact]
     public void PaintsNothingForADegenerateAxis()
     {
         string content = FillWith(new LinearGradientPaint(new Point(10, 10), new Point(10, 10), Stops));

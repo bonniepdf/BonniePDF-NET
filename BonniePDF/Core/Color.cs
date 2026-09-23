@@ -53,9 +53,14 @@ public readonly struct Color : IEquatable<Color>
     /// Creates a Color from scRGB float values (0.0 - 1.0).
     /// Use this for high-precision color definition or when porting from legacy code.
     /// </summary>
+    /// <remarks>
+    /// Each component is clamped into [0, 1], as the byte constructor clamps into
+    /// [0, 255]. An out-of-range value has no meaning as a colour, and passed
+    /// through it would reach the content stream as an operand like <c>-0.02</c>.
+    /// </remarks>
     public static Color FromScRgb(float r, float g, float b, float a = 1.0f)
     {
-        return new Color(r, g, b, a);
+        return new Color(Math.Clamp(r, 0f, 1f), Math.Clamp(g, 0f, 1f), Math.Clamp(b, 0f, 1f), Math.Clamp(a, 0f, 1f));
     }
 
     /// <summary>
