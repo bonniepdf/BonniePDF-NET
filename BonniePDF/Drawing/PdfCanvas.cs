@@ -1082,17 +1082,21 @@ public class PdfCanvas : ICanvas
         if (gradient.End.X == gradient.Start.X && gradient.End.Y == gradient.Start.Y)
             return; // degenerate axis — nothing to paint
 
+        // A transform that collapses paint space leaves no space to interpret the
+        // shading's coordinates in, so the paint draws nothing at all.
+        if (PaintSpaceBBox(gradient.Transform) is not { } bbox) return;
+
         var request = new ShadingRequest
         {
             ShadingType = 2,
             Coords = new[] { gradient.Start.X, gradient.Start.Y, gradient.End.X, gradient.End.Y },
             Stops = NormalizeShadingStops(gradient.Stops),
             Extend = (true, true),
-            Bbox = CurrentPathBBox(),
+            Bbox = bbox,
             HasAlpha = HasAlpha(gradient.Stops)
         };
         ShadingResources? resolved = _shadingResolver?.Invoke(request);
-        if (resolved is { } r) EmitShading(r, fillRule);
+        if (resolved is { } r) EmitShading(r, fillRule, gradient.Transform);
         else FillPathWithLinearGradientStrips(gradient, fillRule);
     }
 
@@ -1103,7 +1107,7 @@ public class PdfCanvas : ICanvas
     /// and runs an identity stream CTM, so the shading needs that matrix re-applied
     /// here (it also aligns the soft-mask group, established under the same CTM).
     /// </summary>
-    private void EmitShading(ShadingResources resolved, FillRule fillRule)
+    private void EmitShading(ShadingResources resolved, FillRule fillRule, PaintTransform? paintTransform = null)
     {
         PdfOperators.SaveState(_stream);
 
@@ -1115,11 +1119,60 @@ public class PdfCanvas : ICanvas
 
         PdfOperators.ConcatMatrix(_stream, _ctm[0], -_ctm[1], _ctm[2], -_ctm[3],
             _ctm[4] + _xOffset, Height - _yOffset - _ctm[5]);
+
+        // The paint transform is concatenated after the canvas matrix, so the
+        // shading's /Coords are read in the paint's own space. A second `cm`
+        // rather than a pre-multiplied one keeps the canvas mapping
+        // byte-identical for the overwhelmingly common paint with no transform.
+        if (paintTransform is { } t && !t.IsIdentity)
+            PdfOperators.ConcatMatrix(_stream, t.A, t.B, t.C, t.D, t.E, t.F);
+
+        // The soft mask is set under the same CTM as the colour shading, so the
+        // mask's group aligns with it.
         if (resolved.SoftMaskGs != null)
             PdfOperators.SetGraphicsState(_stream, resolved.SoftMaskGs);
         PdfOperators.PaintShading(_stream, resolved.ShadingName);
 
         PdfOperators.RestoreState(_stream);
+    }
+
+    /// <summary>
+    /// The painted region's bounding box, in the paint's own space.
+    /// </summary>
+    /// <remarks>
+    /// A translucent gradient's soft mask is a form XObject whose <c>/BBox</c> is
+    /// in the form's space - which is paint space once a transform exists - so the
+    /// canvas box has to be mapped back through the inverse. Leaving it in canvas
+    /// space clips the mask wherever the transform moves content outside it, which
+    /// reads as a gradient fading to nothing at one edge.
+    ///
+    /// Returns null for a transform that cannot be inverted: it has collapsed
+    /// paint space, so there is nothing to paint.
+    /// </remarks>
+    /// <summary>
+    /// A point in a paint's own space, mapped to PDF page space.
+    /// </summary>
+    /// <remarks>
+    /// Used by the strip and ring fallbacks, which generate their geometry in
+    /// paint space so that a transform shears or scales the generated shapes
+    /// rather than only moving them.
+    /// </remarks>
+    private (float X, float Y) PaintToPdfPoint(PaintTransform? paintTransform, float x, float y)
+    {
+        if (paintTransform is not { } t || t.IsIdentity) return TransformPoint(x, y);
+        (float px, float py) = t.Apply(x, y);
+        return TransformPoint(px, py);
+    }
+
+    private float[]? PaintSpaceBBox(PaintTransform? paintTransform)
+    {
+        float[] canvasBox = CurrentPathBBox();
+        if (paintTransform is not { } t || t.IsIdentity) return canvasBox;
+        if (t.Invert() is not { } inverse) return null;
+
+        (float x0, float y0, float x1, float y1) =
+            inverse.MapBox(canvasBox[0], canvasBox[1], canvasBox[2], canvasBox[3]);
+        return [x0, y0, x1, y1];
     }
 
     private static bool HasAlpha(IReadOnlyList<GradientStop> stops)
@@ -1196,12 +1249,14 @@ public class PdfCanvas : ICanvas
         else
             PdfOperators.Clip(_stream);
 
-        // Calculate gradient direction and bounding box
-        var (sx, sy) = TransformPoint(gradient.Start.X, gradient.Start.Y);
-        var (ex, ey) = TransformPoint(gradient.End.X, gradient.End.Y);
+        // Geometry is generated in the paint's own space and mapped afterwards,
+        // which is what makes a sheared ramp come out sheared rather than merely
+        // rotated.
+        float sx = gradient.Start.X;
+        float sy = gradient.Start.Y;
 
-        float dx = ex - sx;
-        float dy = ey - sy;
+        float dx = gradient.End.X - sx;
+        float dy = gradient.End.Y - sy;
         float len = (float)Math.Sqrt(dx * dx + dy * dy);
         if (len < 0.001f) len = 1f;
 
@@ -1227,10 +1282,14 @@ public class PdfCanvas : ICanvas
             float cx1 = sx + dx * t1;
             float cy1 = sy + dy * t1;
 
-            PdfOperators.MoveTo(_stream, cx0 + px * extend, cy0 + py * extend);
-            PdfOperators.LineTo(_stream, cx1 + px * extend, cy1 + py * extend);
-            PdfOperators.LineTo(_stream, cx1 - px * extend, cy1 - py * extend);
-            PdfOperators.LineTo(_stream, cx0 - px * extend, cy0 - py * extend);
+            var a = PaintToPdfPoint(gradient.Transform, cx0 + px * extend, cy0 + py * extend);
+            var b = PaintToPdfPoint(gradient.Transform, cx1 + px * extend, cy1 + py * extend);
+            var c = PaintToPdfPoint(gradient.Transform, cx1 - px * extend, cy1 - py * extend);
+            var d = PaintToPdfPoint(gradient.Transform, cx0 - px * extend, cy0 - py * extend);
+            PdfOperators.MoveTo(_stream, a.X, a.Y);
+            PdfOperators.LineTo(_stream, b.X, b.Y);
+            PdfOperators.LineTo(_stream, c.X, c.Y);
+            PdfOperators.LineTo(_stream, d.X, d.Y);
             PdfOperators.ClosePath(_stream);
             PdfOperators.Fill(_stream);
         }
@@ -1247,17 +1306,19 @@ public class PdfCanvas : ICanvas
     private void FillPathWithRadialGradient(RadialGradientPaint gradient, FillRule fillRule)
     {
         Point inner = gradient.Focal ?? gradient.Center;
+        if (PaintSpaceBBox(gradient.Transform) is not { } bbox) return;
+
         var request = new ShadingRequest
         {
             ShadingType = 3,
             Coords = new[] { inner.X, inner.Y, 0f, gradient.Center.X, gradient.Center.Y, gradient.Radius },
             Stops = NormalizeShadingStops(gradient.Stops),
             Extend = (true, true),
-            Bbox = CurrentPathBBox(),
+            Bbox = bbox,
             HasAlpha = HasAlpha(gradient.Stops)
         };
         ShadingResources? resolved = _shadingResolver?.Invoke(request);
-        if (resolved is { } r) EmitShading(r, fillRule);
+        if (resolved is { } r) EmitShading(r, fillRule, gradient.Transform);
         else FillPathWithRadialGradientRings(gradient, fillRule);
     }
 
@@ -1277,8 +1338,9 @@ public class PdfCanvas : ICanvas
         else
             PdfOperators.Clip(_stream);
 
-        var (cx, cy) = TransformPoint(gradient.Center.X, gradient.Center.Y);
-        float radius = gradient.Radius * Math.Abs(_ctm[0]); // approximate scale
+        float cx = gradient.Center.X;
+        float cy = gradient.Center.Y;
+        float radius = gradient.Radius;
 
         // Draw rings from outside in so inner colors overwrite outer
         for (int i = rings - 1; i >= 0; i--)
@@ -1290,13 +1352,30 @@ public class PdfCanvas : ICanvas
             PdfOperators.SetFillColor(_stream, color);
 
             // Approximate circle with 4 bezier curves
+            // Control points are generated in paint space and mapped, which yields
+            // a true ellipse rather than an approximation of one: an affine image
+            // of a circle-approximating Bezier *is* the corresponding
+            // ellipse-approximating Bezier, because affine maps take Beziers to
+            // Beziers of the same degree.
             const float k = 0.552284749831f;
             float kr = k * r;
-            PdfOperators.MoveTo(_stream, cx + r, cy);
-            PdfOperators.CurveTo(_stream, cx + r, cy + kr, cx + kr, cy + r, cx, cy + r);
-            PdfOperators.CurveTo(_stream, cx - kr, cy + r, cx - r, cy + kr, cx - r, cy);
-            PdfOperators.CurveTo(_stream, cx - r, cy - kr, cx - kr, cy - r, cx, cy - r);
-            PdfOperators.CurveTo(_stream, cx + kr, cy - r, cx + r, cy - kr, cx + r, cy);
+            var p0 = PaintToPdfPoint(gradient.Transform, cx + r, cy);
+            var q1a = PaintToPdfPoint(gradient.Transform, cx + r, cy + kr);
+            var q1b = PaintToPdfPoint(gradient.Transform, cx + kr, cy + r);
+            var p1 = PaintToPdfPoint(gradient.Transform, cx, cy + r);
+            var q2a = PaintToPdfPoint(gradient.Transform, cx - kr, cy + r);
+            var q2b = PaintToPdfPoint(gradient.Transform, cx - r, cy + kr);
+            var p2 = PaintToPdfPoint(gradient.Transform, cx - r, cy);
+            var q3a = PaintToPdfPoint(gradient.Transform, cx - r, cy - kr);
+            var q3b = PaintToPdfPoint(gradient.Transform, cx - kr, cy - r);
+            var p3 = PaintToPdfPoint(gradient.Transform, cx, cy - r);
+            var q4a = PaintToPdfPoint(gradient.Transform, cx + kr, cy - r);
+            var q4b = PaintToPdfPoint(gradient.Transform, cx + r, cy - kr);
+            PdfOperators.MoveTo(_stream, p0.X, p0.Y);
+            PdfOperators.CurveTo(_stream, q1a.X, q1a.Y, q1b.X, q1b.Y, p1.X, p1.Y);
+            PdfOperators.CurveTo(_stream, q2a.X, q2a.Y, q2b.X, q2b.Y, p2.X, p2.Y);
+            PdfOperators.CurveTo(_stream, q3a.X, q3a.Y, q3b.X, q3b.Y, p3.X, p3.Y);
+            PdfOperators.CurveTo(_stream, q4a.X, q4a.Y, q4b.X, q4b.Y, p0.X, p0.Y);
             PdfOperators.ClosePath(_stream);
             PdfOperators.Fill(_stream);
         }

@@ -1158,10 +1158,25 @@ public class SvgCanvas : ICanvas
     // --- SVG gradient/stroke helpers ---
 
     /// <summary>Emits a &lt;linearGradient&gt; definition and returns its id.</summary>
+    /// <summary>
+    /// A paint transform as SVG's <c>gradientTransform</c>, or nothing when absent.
+    /// </summary>
+    /// <remarks>
+    /// SVG expresses this natively, so the export is exact rather than
+    /// approximated - unlike the PDF strip and ring fallbacks, which have to
+    /// generate transformed geometry. An absent transform emits no attribute at
+    /// all, so existing output stays byte-identical.
+    /// </remarks>
+    private string GradientTransformAttr(PaintTransform? transform)
+    {
+        if (transform is not { } t || t.IsIdentity) return string.Empty;
+        return $" gradientTransform=\"matrix({N(t.A)} {N(t.B)} {N(t.C)} {N(t.D)} {N(t.E)} {N(t.F)})\"";
+    }
+
     private string EmitLinearGradientDef(LinearGradientPaint gradient)
     {
         string id = IdAllocator.NextGradId();
-        _sb.Append($"<defs><linearGradient id=\"{id}\" x1=\"{N(gradient.Start.X + _xOffset)}\" y1=\"{N(gradient.Start.Y + _yOffset)}\" x2=\"{N(gradient.End.X + _xOffset)}\" y2=\"{N(gradient.End.Y + _yOffset)}\" gradientUnits=\"userSpaceOnUse\">");
+        _sb.Append($"<defs><linearGradient id=\"{id}\" x1=\"{N(gradient.Start.X + _xOffset)}\" y1=\"{N(gradient.Start.Y + _yOffset)}\" x2=\"{N(gradient.End.X + _xOffset)}\" y2=\"{N(gradient.End.Y + _yOffset)}\" gradientUnits=\"userSpaceOnUse\"{GradientTransformAttr(gradient.Transform)}>");
         foreach (GradientStop stop in gradient.Stops)
         {
             string offset = N(stop.Offset * 100f);
@@ -1186,7 +1201,7 @@ public class SvgCanvas : ICanvas
         {
             focalAttrs = $" fx=\"{N(gradient.Focal.Value.X + _xOffset)}\" fy=\"{N(gradient.Focal.Value.Y + _yOffset)}\"";
         }
-        _sb.Append($"<defs><radialGradient id=\"{id}\" cx=\"{N(cx)}\" cy=\"{N(cy)}\" r=\"{N(gradient.Radius)}\"{focalAttrs} gradientUnits=\"userSpaceOnUse\">");
+        _sb.Append($"<defs><radialGradient id=\"{id}\" cx=\"{N(cx)}\" cy=\"{N(cy)}\" r=\"{N(gradient.Radius)}\"{focalAttrs} gradientUnits=\"userSpaceOnUse\"{GradientTransformAttr(gradient.Transform)}>");
         foreach (GradientStop stop in gradient.Stops)
         {
             string offset = N(stop.Offset * 100f);
