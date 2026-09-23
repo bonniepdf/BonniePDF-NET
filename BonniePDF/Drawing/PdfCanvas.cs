@@ -1155,21 +1155,11 @@ public class PdfCanvas : ICanvas
     /// A point in a paint's own space, mapped to PDF page space.
     /// </summary>
     /// <remarks>
-    /// Used by the strip and ring fallbacks, which generate their geometry in
+    /// Used by the strip and disc fallbacks, which generate their geometry in
     /// paint space so that a transform shears or scales the generated shapes
-    /// rather than only moving them.
-    /// </remarks>
-    private (float X, float Y) PaintToPdfPoint(PaintTransform? paintTransform, float x, float y)
-    {
-        if (paintTransform is not { } t || t.IsIdentity) return TransformPoint(x, y);
-        (float px, float py) = t.Apply(x, y);
-        return TransformPoint(px, py);
-    }
-
-    /// <summary>
-    /// <see cref="PaintToPdfPoint"/> without narrowing. See
+    /// rather than only moving them. Computed without narrowing; see
     /// <see cref="TransformPointPrecise"/>.
-    /// </summary>
+    /// </remarks>
     private (double X, double Y) PaintToPdfPointPrecise(PaintTransform? paintTransform, double x, double y)
     {
         if (paintTransform is not { } t || t.IsIdentity) return TransformPointPrecise(x, y);
