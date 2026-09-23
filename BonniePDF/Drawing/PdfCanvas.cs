@@ -872,13 +872,9 @@ public class PdfCanvas : ICanvas
                 PdfOperators.RestoreState(_stream);
                 EndColorAlpha(solid.Color);
             }
-            else if (style.Paint is LinearGradientPaint linear)
+            else if (style.Paint is LinearGradientPaint or RadialGradientPaint)
             {
-                StrokePathWithLinearGradient(linear, style);
-            }
-            else if (style.Paint is RadialGradientPaint radial)
-            {
-                StrokePathWithRadialGradient(radial, style);
+                StrokePathWithGradient(style.Paint, style);
             }
         });
 
@@ -1085,36 +1081,6 @@ public class PdfCanvas : ICanvas
         LineJoin.Bevel => 2,
         _ => 0
     };
-
-    /// <summary>Interpolates between two colors at the given parameter t (0-1).</summary>
-    private static Color LerpColor(Color a, Color b, float t)
-    {
-        t = Math.Clamp(t, 0f, 1f);
-        return Color.FromScRgb(
-            a.ScR + (b.ScR - a.ScR) * t,
-            a.ScG + (b.ScG - a.ScG) * t,
-            a.ScB + (b.ScB - a.ScB) * t,
-            a.ScA + (b.ScA - a.ScA) * t);
-    }
-
-    /// <summary>Samples a color from gradient stops at the given offset (0-1).</summary>
-    private static Color SampleGradient(IReadOnlyList<GradientStop> stops, float offset)
-    {
-        if (stops.Count == 0) return Color.Black;
-        if (stops.Count == 1) return stops[0].Color;
-        offset = Math.Clamp(offset, 0f, 1f);
-
-        for (int i = 0; i < stops.Count - 1; i++)
-        {
-            if (offset <= stops[i + 1].Offset)
-            {
-                float range = stops[i + 1].Offset - stops[i].Offset;
-                float t = range > 0 ? (offset - stops[i].Offset) / range : 0;
-                return LerpColor(stops[i].Color, stops[i + 1].Color, t);
-            }
-        }
-        return stops[stops.Count - 1].Color;
-    }
 
     /// <summary>
     /// Fills the current path with a linear gradient. Prefers a native PDF Type-2
@@ -1716,96 +1682,178 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>
-    /// Strokes the current path with a linear gradient using per-segment color approximation.
+    /// Strokes the current path with a gradient, one straight segment at a time.
     /// </summary>
-    private void StrokePathWithLinearGradient(LinearGradientPaint gradient, StrokeStyle style)
+    /// <remarks>
+    /// Each subpath is flattened on its own - curves into short chords, a closed
+    /// subpath including its closing segment - and each segment is stroked in the
+    /// colour sampled at its midpoint. The midpoint is taken in the same space the
+    /// gradient's geometry is in, so a transformed canvas moves the ramp with the
+    /// path rather than distorting it, and the colour comes from the normalized
+    /// stops the fill paths sample.
+    /// <para>
+    /// A translucent segment is wrapped in its own <c>q</c>/<c>Q</c>, so its alpha
+    /// cannot leak into the opaque segments after it; an opaque segment needs
+    /// neither.
+    /// </para>
+    /// </remarks>
+    private void StrokePathWithGradient(Paint paint, StrokeStyle style)
     {
-        var (sx, sy) = TransformPoint(gradient.Start.X, gradient.Start.Y);
-        var (ex, ey) = TransformPoint(gradient.End.X, gradient.End.Y);
-        float gdx = ex - sx;
-        float gdy = ey - sy;
-        float glen = gdx * gdx + gdy * gdy;
-        if (glen < 0.001f) glen = 1f;
+        IReadOnlyList<GradientStop> gradientStops = paint switch
+        {
+            LinearGradientPaint linear => linear.Stops,
+            RadialGradientPaint radial => radial.Stops,
+            _ => throw new ArgumentException("Not a gradient paint.", nameof(paint)),
+        };
+        List<ShadingStop> stops = NormalizeShadingStops(gradientStops);
 
-        StrokePathWithGradientSegments(gradient.Stops, style,
-            (mx, my) => ((mx - sx) * gdx + (my - sy) * gdy) / glen);
-    }
-
-    /// <summary>
-    /// Strokes the current path with a radial gradient using per-segment color approximation.
-    /// </summary>
-    private void StrokePathWithRadialGradient(RadialGradientPaint gradient, StrokeStyle style)
-    {
-        var (cx, cy) = TransformPoint(gradient.Center.X, gradient.Center.Y);
-        float radius = gradient.Radius * Math.Abs(_ctm[0]);
-        if (radius < 0.001f) radius = 1f;
-
-        StrokePathWithGradientSegments(gradient.Stops, style,
-            (mx, my) => (float)Math.Sqrt((mx - cx) * (mx - cx) + (my - cy) * (my - cy)) / radius);
-    }
-
-    /// <summary>
-    /// Walks the current path stroking each segment in the gradient color
-    /// sampled at the segment's midpoint. <paramref name="offsetAtMidpoint"/>
-    /// maps a (transformed) midpoint to the gradient offset - a linear
-    /// projection for linear gradients, a normalised centre distance for
-    /// radial ones.
-    /// </summary>
-    private void StrokePathWithGradientSegments(IReadOnlyList<GradientStop> stops, StrokeStyle style,
-        Func<float, float, float> offsetAtMidpoint)
-    {
         PdfOperators.SaveState(_stream);
         ApplyStrokeSettings(style);
 
-        (float x, float y)? prev = null;
-        foreach (var (type, args) in _currentPath)
+        foreach (List<(double X, double Y)> polyline in LinearizeCurrentPath(200))
         {
-            switch (type)
+            for (int i = 0; i < polyline.Count - 1; i++)
             {
-                case 'M':
+                (double X, double Y) p0 = polyline[i];
+                (double X, double Y) p1 = polyline[i + 1];
+                double t = ProjectOntoGradient((p0.X + p1.X) / 2, (p0.Y + p1.Y) / 2, paint);
+                Color color = SampleNormalizedStops(stops, t);
+                (double X, double Y) s = TransformPointPrecise(p0.X, p0.Y);
+                (double X, double Y) e = TransformPointPrecise(p1.X, p1.Y);
+                bool translucent = color.ScA < 1f;
+                if (translucent)
                 {
-                    prev = TransformPoint(args[0], args[1]);
-                    break;
+                    PdfOperators.SaveState(_stream);
+                    ApplyColorAlpha(color);
                 }
-                case 'L':
-                {
-                    var cur = TransformPoint(args[0], args[1]);
-                    if (prev.HasValue)
-                    {
-                        float t = offsetAtMidpoint((prev.Value.x + cur.x) / 2f, (prev.Value.y + cur.y) / 2f);
-                        Color color = SampleGradient(stops, t);
-                        PdfOperators.SetStrokeColor(_stream, color);
-                        PdfOperators.MoveTo(_stream, prev.Value.x, prev.Value.y);
-                        PdfOperators.LineTo(_stream, cur.x, cur.y);
-                        PdfOperators.Stroke(_stream);
-                    }
-                    prev = cur;
-                    break;
-                }
-                case 'C':
-                {
-                    var cur = TransformPoint(args[4], args[5]);
-                    if (prev.HasValue)
-                    {
-                        var cp1 = TransformPoint(args[0], args[1]);
-                        var cp2 = TransformPoint(args[2], args[3]);
-                        float t = offsetAtMidpoint((prev.Value.x + cur.x) / 2f, (prev.Value.y + cur.y) / 2f);
-                        Color color = SampleGradient(stops, t);
-                        PdfOperators.SetStrokeColor(_stream, color);
-                        PdfOperators.MoveTo(_stream, prev.Value.x, prev.Value.y);
-                        PdfOperators.CurveTo(_stream, cp1.x, cp1.y, cp2.x, cp2.y, cur.x, cur.y);
-                        PdfOperators.Stroke(_stream);
-                    }
-                    prev = cur;
-                    break;
-                }
-                case 'H':
-                    prev = null;
-                    break;
+                PdfOperators.SetStrokeColor(_stream, color);
+                PdfOperators.StrokeLine(_stream, s.X, s.Y, e.X, e.Y);
+                if (translucent) PdfOperators.RestoreState(_stream);
             }
         }
 
         PdfOperators.RestoreState(_stream);
+    }
+
+    /// <summary>
+    /// The gradient parameter at a point: its projection onto a linear axis, or
+    /// its distance from a radial centre as a fraction of the radius. A
+    /// degenerate axis reads as the first stop, a zero radius as the last.
+    /// </summary>
+    private static double ProjectOntoGradient(double x, double y, Paint paint)
+    {
+        if (paint is LinearGradientPaint linear)
+        {
+            double dx = (double)linear.End.X - linear.Start.X;
+            double dy = (double)linear.End.Y - linear.Start.Y;
+            double lenSq = dx * dx + dy * dy;
+            if (lenSq == 0) return 0;
+            return ((x - linear.Start.X) * dx + (y - linear.Start.Y) * dy) / lenSq;
+        }
+
+        var radial = (RadialGradientPaint)paint;
+        if (radial.Radius <= 0) return 1;
+        double rx = x - radial.Center.X;
+        double ry = y - radial.Center.Y;
+        return Math.Sqrt(rx * rx + ry * ry) / radial.Radius;
+    }
+
+    /// <summary>
+    /// The current path as one polyline per subpath, in canvas space.
+    /// </summary>
+    /// <remarks>
+    /// A moveTo starts a new polyline rather than joining the previous one, and a
+    /// closePath adds the segment back to the subpath's start. Each curve becomes
+    /// <c>max(4, ceil(totalSegments / pathLength))</c> chords, where
+    /// <c>pathLength</c> counts path commands - a rectangle as the five
+    /// (move, three lines, close) it is made of, so the count is the same however
+    /// a canvas chooses to store one.
+    /// </remarks>
+    private List<List<(double X, double Y)>> LinearizeCurrentPath(int totalSegments)
+    {
+        int pathLength = 0;
+        foreach ((char type, _) in _currentPath) pathLength += type == 'R' ? 5 : 1;
+        int chords = Math.Max(4, (int)Math.Ceiling((double)totalSegments / Math.Max(1, pathLength)));
+
+        var polylines = new List<List<(double X, double Y)>>();
+        List<(double X, double Y)>? current = null;
+        double cx = 0, cy = 0, startX = 0, startY = 0;
+
+        void MoveTo(double x, double y)
+        {
+            cx = startX = x;
+            cy = startY = y;
+            current = [(x, y)];
+            polylines.Add(current);
+        }
+
+        List<(double X, double Y)> ContinueFromCurrentPoint()
+        {
+            if (current is null)
+            {
+                current = [(cx, cy)];
+                polylines.Add(current);
+            }
+            return current;
+        }
+
+        void LineTo(double x, double y)
+        {
+            cx = x;
+            cy = y;
+            ContinueFromCurrentPoint().Add((x, y));
+        }
+
+        void Close()
+        {
+            current?.Add((startX, startY));
+            current = null;
+            cx = startX;
+            cy = startY;
+        }
+
+        foreach ((char type, float[] a) in _currentPath)
+        {
+            switch (type)
+            {
+                case 'M':
+                    MoveTo(a[0], a[1]);
+                    break;
+                case 'L':
+                    LineTo(a[0], a[1]);
+                    break;
+                case 'C':
+                {
+                    List<(double X, double Y)> polyline = ContinueFromCurrentPoint();
+                    double c1x = a[0], c1y = a[1], c2x = a[2], c2y = a[3], ex = a[4], ey = a[5];
+                    for (int i = 1; i <= chords; i++)
+                    {
+                        double t = (double)i / chords;
+                        double u = 1 - t;
+                        polyline.Add((
+                            u * u * u * cx + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * ex,
+                            u * u * u * cy + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * ey));
+                    }
+                    cx = ex;
+                    cy = ey;
+                    break;
+                }
+                case 'R':
+                {
+                    double x = a[0], y = a[1], w = a[2], h = a[3];
+                    MoveTo(x, y);
+                    LineTo(x + w, y);
+                    LineTo(x + w, y + h);
+                    LineTo(x, y + h);
+                    Close();
+                    break;
+                }
+                case 'H':
+                    Close();
+                    break;
+            }
+        }
+        return polylines;
     }
 
     private void DrawWithColorAlpha(Color color, Action draw)
