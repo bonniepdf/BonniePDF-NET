@@ -50,6 +50,32 @@ public class PdfCanvas : ICanvas
     private int _artifactDepth;
 
     /// <summary>
+    /// Bands in the strip/disc approximation of a gradient that cannot be painted
+    /// as a native shading.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately fixed rather than derived from the painted area: deriving it
+    /// would make the byte output depend on layout arithmetic, and this path must
+    /// stay comparable across implementations. 100 bands is a 1% colour step, at or
+    /// below the visible banding threshold in 8-bit sRGB.
+    /// </remarks>
+    private const int GradientFallbackBands = 100;
+
+    /// <summary>
+    /// Control-point distance for approximating a quarter circle with one cubic
+    /// Bezier: 4/3 * (sqrt(2) - 1).
+    /// </summary>
+    /// <remarks>
+    /// Held as a double and written to full precision on purpose. A truncated
+    /// literal diverges in the last bits between implementations, and that shows up
+    /// as different operands for the same input.
+    /// </remarks>
+    private const double QuarterArc = 0.5522847498307933;
+
+    /// <summary>Fully transparent black; the implicit backdrop beyond a radial gradient's rim.</summary>
+    private static readonly Color Transparent = Color.FromScRgb(0, 0, 0, 0);
+
+    /// <summary>
     /// Creates a new PdfCanvas for writing to the specified PDF content stream.
     /// </summary>
     /// <param name="stream">The StringBuilder to write PDF commands to</param>
@@ -945,6 +971,25 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>
+    /// <see cref="TransformPoint(float,float)"/> without narrowing, for geometry a
+    /// caller generates in double.
+    /// </summary>
+    /// <remarks>
+    /// Widening the matrix's floats to double is exact, so this loses nothing and
+    /// keeps the generated point at full precision until the formatter rounds it.
+    /// The gradient approximations use it because they synthesise hundreds of points
+    /// from a Bezier constant and a band index, and a float round-trip on each one
+    /// prints a different last digit than the TypeScript implementation for the same
+    /// input.
+    /// </remarks>
+    private (double X, double Y) TransformPointPrecise(double x, double y)
+    {
+        double tx = _ctm[0] * x + _ctm[2] * y + _ctm[4];
+        double ty = _ctm[1] * x + _ctm[3] * y + _ctm[5];
+        return (tx + _xOffset, Height - (ty + _yOffset));
+    }
+
+    /// <summary>
     /// Emits the accumulated path commands to the PDF content stream,
     /// applying the local CTM transform and Y-flip to each point.
     /// </summary>
@@ -1086,18 +1131,22 @@ public class PdfCanvas : ICanvas
         // shading's coordinates in, so the paint draws nothing at all.
         if (PaintSpaceBBox(gradient.Transform) is not { } bbox) return;
 
+        List<ShadingStop> stops = NormalizeShadingStops(gradient.Stops);
         var request = new ShadingRequest
         {
             ShadingType = 2,
             Coords = new[] { gradient.Start.X, gradient.Start.Y, gradient.End.X, gradient.End.Y },
-            Stops = NormalizeShadingStops(gradient.Stops),
+            Stops = stops,
             Extend = (true, true),
             Bbox = bbox,
             HasAlpha = HasAlpha(gradient.Stops)
         };
         ShadingResources? resolved = _shadingResolver?.Invoke(request);
         if (resolved is { } r) EmitShading(r, fillRule, gradient.Transform);
-        else FillPathWithLinearGradientStrips(gradient, fillRule);
+        // The approximation samples the same normalized stops the shading would
+        // have, so switching between the two paths changes smoothness and nothing
+        // else, and unsorted input cannot make the two implementations disagree.
+        else FillPathWithLinearGradientStrips(gradient, fillRule, stops, bbox);
     }
 
     /// <summary>
@@ -1164,6 +1213,18 @@ public class PdfCanvas : ICanvas
         return TransformPoint(px, py);
     }
 
+    /// <summary>
+    /// <see cref="PaintToPdfPoint"/> without narrowing. See
+    /// <see cref="TransformPointPrecise"/>.
+    /// </summary>
+    private (double X, double Y) PaintToPdfPointPrecise(PaintTransform? paintTransform, double x, double y)
+    {
+        if (paintTransform is not { } t || t.IsIdentity) return TransformPointPrecise(x, y);
+        double px = t.A * x + t.C * y + t.E;
+        double py = t.B * x + t.D * y + t.F;
+        return TransformPointPrecise(px, py);
+    }
+
     private float[]? PaintSpaceBBox(PaintTransform? paintTransform)
     {
         float[] canvasBox = CurrentPathBBox();
@@ -1180,6 +1241,77 @@ public class PdfCanvas : ICanvas
         foreach (GradientStop s in stops)
             if (s.Color.ScA < 1f) return true;
         return false;
+    }
+
+    /// <summary>
+    /// Samples a colour from stops that are already normalized - sorted, clamped to
+    /// [0, 1] and padded so one sits at each end of the domain.
+    /// </summary>
+    /// <remarks>
+    /// Both approximations sample through here, so they agree with the native
+    /// shading they stand in for and neither has to decide what lies outside the
+    /// ramp: the padding guarantees the whole domain is covered.
+    /// </remarks>
+    private static Color SampleNormalizedStops(IReadOnlyList<ShadingStop> stops, double t)
+    {
+        if (stops.Count == 0) return Color.Black;
+        double tc = t < 0 ? 0 : t > 1 ? 1 : t;
+
+        for (int i = 0; i < stops.Count - 1; i++)
+        {
+            ShadingStop lo = stops[i];
+            ShadingStop hi = stops[i + 1];
+            if (tc > hi.Offset) continue;
+
+            double range = (double)hi.Offset - lo.Offset;
+            double f = range == 0 ? 0 : (tc - lo.Offset) / range;
+            return Color.FromScRgb(
+                (float)(lo.R + (hi.R - lo.R) * f),
+                (float)(lo.G + (hi.G - lo.G) * f),
+                (float)(lo.B + (hi.B - lo.B) * f),
+                (float)(lo.A + (hi.A - lo.A) * f));
+        }
+
+        ShadingStop last = stops[^1];
+        return Color.FromScRgb(last.R, last.G, last.B, last.A);
+    }
+
+    /// <summary>
+    /// Solves the (colour, alpha) a disc must be painted with so that, composited
+    /// with the source-over operator on top of a backdrop <paramref name="below"/>,
+    /// the visible result equals <paramref name="target"/>. Returns null when the
+    /// disc would add nothing - the backdrop already meets or exceeds the target
+    /// opacity at that radius.
+    /// </summary>
+    /// <remarks>
+    /// Derivation (premultiplied source-over, target = disc over below):
+    /// <code>
+    ///   Aout = a + Ab(1 - a)              =>  a = (At - Ab) / (1 - Ab)
+    ///   Aout*Cout = a*C + Ab*B(1 - a)     =>  C = (At*T - Ab*B(1 - a)) / a
+    /// </code>
+    /// where (T, At) is the target, (B, Ab) the backdrop and (C, a) the disc.
+    /// </remarks>
+    private static Color? CorrectOverDisc(Color target, Color below)
+    {
+        double at = target.ScA;
+        double ab = below.ScA;
+
+        // Backdrop is already opaque: can't composite under it, so just lay the
+        // opaque target colour on top (covers the realistic opaque-gradient case).
+        if (1 - ab < 1e-6) return Color.FromScRgb(target.ScR, target.ScG, target.ScB, 1f);
+
+        double a = (at - ab) / (1 - ab);
+        // a <= 0 means the target is *less* opaque than the backdrop - unreachable by
+        // stacking another disc on top, so skip it (e.g. a fully transparent rim).
+        if (a <= 1e-6) return null;
+
+        double inv = 1 - a;
+        // FromScRgb clamps each channel (and alpha) back into [0, 1].
+        return Color.FromScRgb(
+            (float)((at * target.ScR - ab * below.ScR * inv) / a),
+            (float)((at * target.ScG - ab * below.ScG * inv) / a),
+            (float)((at * target.ScB - ab * below.ScB * inv) / a),
+            (float)Math.Min(1, a));
     }
 
     /// <summary>Sorts/clamps stops and pads them so the run spans the full [0, 1] domain.</summary>
@@ -1233,13 +1365,17 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>
-    /// Fills the current path with a linear gradient using a strip-rendering approach:
-    /// clip to the path, then fill thin rectangles with interpolated colors. Fallback
-    /// for when a native shading can't be used.
+    /// Fills the current path with a linear gradient by clipping to the path and
+    /// filling abutting quads perpendicular to the gradient axis. Fallback for when
+    /// a native shading can't be used.
     /// </summary>
-    private void FillPathWithLinearGradientStrips(LinearGradientPaint gradient, FillRule fillRule)
+    /// <param name="gradient">The gradient to approximate.</param>
+    /// <param name="fillRule">The rule the path is clipped with.</param>
+    /// <param name="stops">The same normalized stops the native shading path builds.</param>
+    /// <param name="bbox">The current path's bounding box in paint space - the region the quads must cover.</param>
+    private void FillPathWithLinearGradientStrips(
+        LinearGradientPaint gradient, FillRule fillRule, List<ShadingStop> stops, float[] bbox)
     {
-        const int strips = 64;
         PdfOperators.SaveState(_stream);
 
         // Clip to the path
@@ -1252,40 +1388,55 @@ public class PdfCanvas : ICanvas
         // Geometry is generated in the paint's own space and mapped afterwards,
         // which is what makes a sheared ramp come out sheared rather than merely
         // rotated.
-        float sx = gradient.Start.X;
-        float sy = gradient.Start.Y;
+        double sx = gradient.Start.X;
+        double sy = gradient.Start.Y;
 
-        float dx = gradient.End.X - sx;
-        float dy = gradient.End.Y - sy;
-        float len = (float)Math.Sqrt(dx * dx + dy * dy);
-        if (len < 0.001f) len = 1f;
+        double dx = gradient.End.X - sx;
+        double dy = gradient.End.Y - sy;
+        double len = Math.Sqrt(dx * dx + dy * dy);
+        if (len == 0)
+        {
+            PdfOperators.RestoreState(_stream);
+            return;
+        }
 
         // Perpendicular direction for strip width
-        float px = -dy / len;
-        float py = dx / len;
+        double px = -dy / len;
+        double py = dx / len;
 
-        // Extend strips far enough to cover the clipped area
-        float extend = len + 500f; // generous extension
+        // Reach far enough either side of the axis to cover the clipped region,
+        // which is exactly the current path. Taking the greatest perpendicular
+        // distance to the path's corners is provably sufficient and needs nothing
+        // tuned - a constant multiple of the axis length is too short whenever the
+        // path is long across the axis, and an absolute constant is meaningless
+        // under a paint transform that scales.
+        double halfSpan = MaxPerpendicularReach(sx, sy, px, py, bbox);
 
-        for (int i = 0; i < strips; i++)
+        for (int i = 0; i < GradientFallbackBands; i++)
         {
-            float t0 = (float)i / strips;
-            float t1 = (float)(i + 1) / strips;
-            float tMid = (t0 + t1) / 2f;
+            double t0 = (double)i / GradientFallbackBands;
+            double t1 = (double)(i + 1) / GradientFallbackBands;
 
-            Color color = SampleGradient(gradient.Stops, tMid);
+            // The band's centre is its mean position, so a linear ramp reproduces
+            // exactly. Sampling an edge biases the whole ramp half a band.
+            Color color = SampleNormalizedStops(stops, (i + 0.5) / GradientFallbackBands);
+
+            // Strips abut, so nothing composites over anything and the sampled
+            // alpha is the alpha to paint. Unlike the disc case, no correction is
+            // needed.
+            ApplyColorAlpha(color);
             PdfOperators.SetFillColor(_stream, color);
 
             // Strip corners along the gradient direction
-            float cx0 = sx + dx * t0;
-            float cy0 = sy + dy * t0;
-            float cx1 = sx + dx * t1;
-            float cy1 = sy + dy * t1;
+            double cx0 = sx + dx * t0;
+            double cy0 = sy + dy * t0;
+            double cx1 = sx + dx * t1;
+            double cy1 = sy + dy * t1;
 
-            var a = PaintToPdfPoint(gradient.Transform, cx0 + px * extend, cy0 + py * extend);
-            var b = PaintToPdfPoint(gradient.Transform, cx1 + px * extend, cy1 + py * extend);
-            var c = PaintToPdfPoint(gradient.Transform, cx1 - px * extend, cy1 - py * extend);
-            var d = PaintToPdfPoint(gradient.Transform, cx0 - px * extend, cy0 - py * extend);
+            var a = PaintToPdfPointPrecise(gradient.Transform, cx0 + px * halfSpan, cy0 + py * halfSpan);
+            var b = PaintToPdfPointPrecise(gradient.Transform, cx0 - px * halfSpan, cy0 - py * halfSpan);
+            var c = PaintToPdfPointPrecise(gradient.Transform, cx1 - px * halfSpan, cy1 - py * halfSpan);
+            var d = PaintToPdfPointPrecise(gradient.Transform, cx1 + px * halfSpan, cy1 + py * halfSpan);
             PdfOperators.MoveTo(_stream, a.X, a.Y);
             PdfOperators.LineTo(_stream, b.X, b.Y);
             PdfOperators.LineTo(_stream, c.X, c.Y);
@@ -1295,6 +1446,30 @@ public class PdfCanvas : ICanvas
         }
 
         PdfOperators.RestoreState(_stream);
+    }
+
+    /// <summary>
+    /// The greatest perpendicular distance from the gradient axis to a corner of
+    /// <paramref name="bbox"/>, all in paint space.
+    /// </summary>
+    private static double MaxPerpendicularReach(double sx, double sy, double px, double py, float[] bbox)
+    {
+        double x0 = bbox[0];
+        double y0 = bbox[1];
+        double x1 = bbox[2];
+        double y1 = bbox[3];
+        double reach = 0;
+        Consider(x0, y0);
+        Consider(x1, y0);
+        Consider(x1, y1);
+        Consider(x0, y1);
+        return reach;
+
+        void Consider(double cx, double cy)
+        {
+            double d = Math.Abs((cx - sx) * px + (cy - sy) * py);
+            if (d > reach) reach = d;
+        }
     }
 
     /// <summary>
@@ -1308,27 +1483,50 @@ public class PdfCanvas : ICanvas
         Point inner = gradient.Focal ?? gradient.Center;
         if (PaintSpaceBBox(gradient.Transform) is not { } bbox) return;
 
+        List<ShadingStop> stops = NormalizeShadingStops(gradient.Stops);
         var request = new ShadingRequest
         {
             ShadingType = 3,
             Coords = new[] { inner.X, inner.Y, 0f, gradient.Center.X, gradient.Center.Y, gradient.Radius },
-            Stops = NormalizeShadingStops(gradient.Stops),
+            Stops = stops,
             Extend = (true, true),
             Bbox = bbox,
             HasAlpha = HasAlpha(gradient.Stops)
         };
         ShadingResources? resolved = _shadingResolver?.Invoke(request);
         if (resolved is { } r) EmitShading(r, fillRule, gradient.Transform);
-        else FillPathWithRadialGradientRings(gradient, fillRule);
+        else FillPathWithRadialGradientDiscs(gradient, fillRule, stops);
     }
 
     /// <summary>
-    /// Fills the current path with a radial gradient using concentric circle strips.
-    /// Fallback for when a native shading can't be used.
+    /// Fills the current path with a radial gradient as a stack of overlapping
+    /// discs, largest first. Fallback for when a native shading can't be used.
     /// </summary>
-    private void FillPathWithRadialGradientRings(RadialGradientPaint gradient, FillRule fillRule)
+    /// <remarks>
+    /// <para>
+    /// Overlapping full discs rather than abutting annuli is what keeps the result
+    /// smooth: each disc paints over the previous disc's antialiased edge, so no
+    /// hairline seam is left between bands.
+    /// </para>
+    /// <para>
+    /// The catch is translucency. Naively painting each disc at its raw sampled
+    /// alpha composites the overlapping discs (source-over) and compounds the
+    /// opacity far past the intended value. So each disc's alpha <em>and</em> colour
+    /// are pre-corrected: given what the larger discs beneath have already laid
+    /// down, solve for the (colour, alpha) that, composited over that backdrop,
+    /// yields the target sample exactly. For an opaque gradient this collapses to
+    /// "paint the target colour"; for a constant-colour fade - the ordinary glow -
+    /// it reproduces the alpha ramp precisely, and it is what lets this path render
+    /// translucency under PDF/A-1, where the alpha ExtGState is forced to 1.
+    /// </para>
+    /// <para>
+    /// The focal point is not honoured here - it has no analogue in a concentric
+    /// stack. That is a recorded limitation of the approximation.
+    /// </para>
+    /// </remarks>
+    private void FillPathWithRadialGradientDiscs(
+        RadialGradientPaint gradient, FillRule fillRule, List<ShadingStop> stops)
     {
-        const int rings = 64;
         PdfOperators.SaveState(_stream);
 
         // Clip to the path
@@ -1338,49 +1536,65 @@ public class PdfCanvas : ICanvas
         else
             PdfOperators.Clip(_stream);
 
-        float cx = gradient.Center.X;
-        float cy = gradient.Center.Y;
-        float radius = gradient.Radius;
+        double cx = gradient.Center.X;
+        double cy = gradient.Center.Y;
 
-        // Draw rings from outside in so inner colors overwrite outer
-        for (int i = rings - 1; i >= 0; i--)
+        for (int i = GradientFallbackBands - 1; i >= 0; i--)
         {
-            float t = (float)(i + 1) / rings;
-            float r = radius * t;
+            Color target = SampleNormalizedStops(stops, (i + 0.5) / GradientFallbackBands);
+            // Whatever the larger discs already painted at this radius equals the
+            // gradient sample one band further out (fully transparent past the rim).
+            Color below = i + 1 < GradientFallbackBands
+                ? SampleNormalizedStops(stops, (i + 1.5) / GradientFallbackBands)
+                : Transparent;
 
-            Color color = SampleGradient(gradient.Stops, t);
-            PdfOperators.SetFillColor(_stream, color);
+            if (CorrectOverDisc(target, below) is not { } disc) continue; // adds nothing visible
 
-            // Approximate circle with 4 bezier curves
-            // Control points are generated in paint space and mapped, which yields
-            // a true ellipse rather than an approximation of one: an affine image
-            // of a circle-approximating Bezier *is* the corresponding
-            // ellipse-approximating Bezier, because affine maps take Beziers to
-            // Beziers of the same degree.
-            const float k = 0.552284749831f;
-            float kr = k * r;
-            var p0 = PaintToPdfPoint(gradient.Transform, cx + r, cy);
-            var q1a = PaintToPdfPoint(gradient.Transform, cx + r, cy + kr);
-            var q1b = PaintToPdfPoint(gradient.Transform, cx + kr, cy + r);
-            var p1 = PaintToPdfPoint(gradient.Transform, cx, cy + r);
-            var q2a = PaintToPdfPoint(gradient.Transform, cx - kr, cy + r);
-            var q2b = PaintToPdfPoint(gradient.Transform, cx - r, cy + kr);
-            var p2 = PaintToPdfPoint(gradient.Transform, cx - r, cy);
-            var q3a = PaintToPdfPoint(gradient.Transform, cx - r, cy - kr);
-            var q3b = PaintToPdfPoint(gradient.Transform, cx - kr, cy - r);
-            var p3 = PaintToPdfPoint(gradient.Transform, cx, cy - r);
-            var q4a = PaintToPdfPoint(gradient.Transform, cx + kr, cy - r);
-            var q4b = PaintToPdfPoint(gradient.Transform, cx + r, cy - kr);
-            PdfOperators.MoveTo(_stream, p0.X, p0.Y);
-            PdfOperators.CurveTo(_stream, q1a.X, q1a.Y, q1b.X, q1b.Y, p1.X, p1.Y);
-            PdfOperators.CurveTo(_stream, q2a.X, q2a.Y, q2b.X, q2b.Y, p2.X, p2.Y);
-            PdfOperators.CurveTo(_stream, q3a.X, q3a.Y, q3b.X, q3b.Y, p3.X, p3.Y);
-            PdfOperators.CurveTo(_stream, q4a.X, q4a.Y, q4b.X, q4b.Y, p0.X, p0.Y);
-            PdfOperators.ClosePath(_stream);
+            double r = gradient.Radius * ((double)(i + 1) / GradientFallbackBands);
+            PdfOperators.SaveState(_stream);
+            ApplyColorAlpha(disc);
+            PdfOperators.SetFillColor(_stream, disc);
+            EmitCirclePath(cx, cy, r, gradient.Transform);
             PdfOperators.Fill(_stream);
+            PdfOperators.RestoreState(_stream);
         }
 
         PdfOperators.RestoreState(_stream);
+    }
+
+    /// <summary>
+    /// Emits a closed circle path (4 cubic-Bezier quadrants) in PDF user space.
+    /// </summary>
+    /// <remarks>
+    /// With a paint transform the control points are generated in paint space and
+    /// mapped, which yields a true ellipse rather than an approximation of one: an
+    /// affine image of a circle-approximating Bezier <em>is</em> the corresponding
+    /// ellipse-approximating Bezier, because affine maps take Beziers to Beziers of
+    /// the same degree.
+    /// </remarks>
+    private void EmitCirclePath(double cx, double cy, double r, PaintTransform? paintTransform)
+    {
+        double kr = r * QuarterArc;
+        (double X, double Y) At(double x, double y) => PaintToPdfPointPrecise(paintTransform, x, y);
+
+        var p0 = At(cx + r, cy);
+        var c1a = At(cx + r, cy + kr);
+        var c1b = At(cx + kr, cy + r);
+        var p1 = At(cx, cy + r);
+        var c2a = At(cx - kr, cy + r);
+        var c2b = At(cx - r, cy + kr);
+        var p2 = At(cx - r, cy);
+        var c3a = At(cx - r, cy - kr);
+        var c3b = At(cx - kr, cy - r);
+        var p3 = At(cx, cy - r);
+        var c4a = At(cx + kr, cy - r);
+        var c4b = At(cx + r, cy - kr);
+        PdfOperators.MoveTo(_stream, p0.X, p0.Y);
+        PdfOperators.CurveTo(_stream, c1a.X, c1a.Y, c1b.X, c1b.Y, p1.X, p1.Y);
+        PdfOperators.CurveTo(_stream, c2a.X, c2a.Y, c2b.X, c2b.Y, p2.X, p2.Y);
+        PdfOperators.CurveTo(_stream, c3a.X, c3a.Y, c3b.X, c3b.Y, p3.X, p3.Y);
+        PdfOperators.CurveTo(_stream, c4a.X, c4a.Y, c4b.X, c4b.Y, p0.X, p0.Y);
+        PdfOperators.ClosePath(_stream);
     }
 
     /// <summary>

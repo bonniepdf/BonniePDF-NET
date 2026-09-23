@@ -136,6 +136,22 @@ internal static class PdfOperators
             $"{PdfSyntax.FormatDecimal(x1)} {PdfSyntax.FormatDecimal(y1)} {PdfSyntax.FormatDecimal(x2)} {PdfSyntax.FormatDecimal(y2)} {PdfSyntax.FormatDecimal(x3)} {PdfSyntax.FormatDecimal(y3)} c");
 
     /// <summary>
+    /// <c>m</c>, from coordinates still in double. See <see cref="PdfSyntax.FormatDecimal(double)"/>
+    /// for why a caller that computes in double must not narrow before formatting.
+    /// </summary>
+    internal static void MoveTo(StringBuilder s, double x, double y)
+        => s.AppendLf($"{PdfSyntax.FormatDecimal(x)} {PdfSyntax.FormatDecimal(y)} m");
+
+    /// <summary><c>l</c>, from coordinates still in double.</summary>
+    internal static void LineTo(StringBuilder s, double x, double y)
+        => s.AppendLf($"{PdfSyntax.FormatDecimal(x)} {PdfSyntax.FormatDecimal(y)} l");
+
+    /// <summary><c>c</c>, from coordinates still in double.</summary>
+    internal static void CurveTo(StringBuilder s, double x1, double y1, double x2, double y2, double x3, double y3)
+        => s.AppendLf(
+            $"{PdfSyntax.FormatDecimal(x1)} {PdfSyntax.FormatDecimal(y1)} {PdfSyntax.FormatDecimal(x2)} {PdfSyntax.FormatDecimal(y2)} {PdfSyntax.FormatDecimal(x3)} {PdfSyntax.FormatDecimal(y3)} c");
+
+    /// <summary>
     /// <c>re</c> - Append a rectangle to the path.
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=227"/>
     /// </summary>

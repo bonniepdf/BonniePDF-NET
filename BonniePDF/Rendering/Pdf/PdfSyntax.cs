@@ -95,6 +95,21 @@ internal static class PdfSyntax
     }
 
     /// <summary>
+    /// Formats a double with the same "0.###" shape, without narrowing to float first.
+    /// </summary>
+    /// <remarks>
+    /// Geometry that is computed in double must be formatted from the double. A
+    /// float round-trip on the way to the formatter moves a value by up to ~1e-4 at
+    /// page scale, which is enough to carry it across a 0.0005 rounding boundary and
+    /// print a different last digit than the TypeScript implementation does for the
+    /// same input. Narrow at the sink boundary, not before the formatter.
+    /// </remarks>
+    internal static string FormatDecimal(double value)
+    {
+        return value.ToString("0.###", CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
     /// Formats a color as an RGB triplet (e.g., "0.5 0.5 0.5").
     /// Uses InvariantCulture to ensure consistent decimal separators across all locales.
     /// </summary>
