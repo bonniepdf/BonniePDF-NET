@@ -222,6 +222,15 @@ internal static class PdfOperators
             $"{PdfSyntax.FormatDecimal(x1)} {PdfSyntax.FormatDecimal(y1)} m {PdfSyntax.FormatDecimal(x2)} {PdfSyntax.FormatDecimal(y2)} l S");
 
     /// <summary>
+    /// <c>m l S</c>, from coordinates still in double. See
+    /// <see cref="PdfSyntax.FormatDecimal(double)"/> for why a caller that computes in
+    /// double must not narrow before formatting.
+    /// </summary>
+    internal static void StrokeLine(StringBuilder s, double x1, double y1, double x2, double y2)
+        => s.AppendLf(
+            $"{PdfSyntax.FormatDecimal(x1)} {PdfSyntax.FormatDecimal(y1)} m {PdfSyntax.FormatDecimal(x2)} {PdfSyntax.FormatDecimal(y2)} l S");
+
+    /// <summary>
     /// <c>f</c> - Fill the path using non-zero winding rule.
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=230"/>
     /// </summary>
