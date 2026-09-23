@@ -122,4 +122,36 @@ public partial class GradientStrokeTests
         }
         Assert.Equal(10, Segments(content));
     }
+
+    [Fact]
+    public void ReadsTheGradientThroughItsPaintTransform()
+    {
+        // The paint's own space is scaled 2x onto the canvas, so the canvas midpoint
+        // x=50 is x=25 in paint space: t=0.25, as a filled shape shows it.
+        var paint = new LinearGradientPaint(new Point(0, 0), new Point(100, 0), Stops)
+        {
+            Transform = new PaintTransform(2, 0, 0, 1, 0, 0),
+        };
+        string content = Stroke(paint, c =>
+        {
+            c.MoveTo(0, 0);
+            c.LineTo(100, 0);
+        });
+        Assert.Equal([0.25], Greys(content));
+    }
+
+    [Fact]
+    public void StrokesNothingThroughATransformThatCollapsesPaintSpace()
+    {
+        var paint = new RadialGradientPaint(new Point(0, 0), 10f, Stops)
+        {
+            Transform = new PaintTransform(1, 0, 0, 0, 0, 0),
+        };
+        string content = Stroke(paint, c =>
+        {
+            c.MoveTo(0, 0);
+            c.LineTo(100, 0);
+        });
+        Assert.Equal(0, Segments(content));
+    }
 }
