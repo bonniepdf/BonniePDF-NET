@@ -1277,6 +1277,33 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>
+    /// The colour band <paramref name="i"/> is painted with, given that the band
+    /// beyond it is already down. Null when it would add nothing visible.
+    /// </summary>
+    /// <remarks>
+    /// Whether the backdrop is corrected for depends on something the canvas can
+    /// actually tell: a shading resolver that <em>declined</em> this gradient did
+    /// so because it is translucent under PDF/A-1, where the alpha ExtGState is
+    /// forced to <c>/ca 1</c>. The correction solves for a (colour, <em>alpha</em>)
+    /// pair, so with the alpha discarded the corrected colour is simply the wrong
+    /// colour and the ramp comes out visibly distorted. With no resolver at all the
+    /// alpha is honoured and the correction is what keeps the overlapping stack
+    /// from compounding it.
+    /// <para>
+    /// <paramref name="i"/> of <paramref name="bands"/>, or -1, asks for the
+    /// /Extend flood past either end.
+    /// </para>
+    /// </remarks>
+    private Color? BandColor(IReadOnlyList<ShadingStop> stops, int i, int bands)
+    {
+        double At(int n) => n < 0 ? 0 : n >= bands ? 1 : (n + 0.5) / bands;
+
+        Color target = SampleNormalizedStops(stops, At(i));
+        if (_shadingResolver is not null) return target;
+        return CorrectOverDisc(target, SampleNormalizedStops(stops, At(i + 1)));
+    }
+
+    /// <summary>
     /// Solves the (colour, alpha) a disc must be painted with so that, composited
     /// with the source-over operator on top of a backdrop <paramref name="below"/>,
     /// the visible result equals <paramref name="target"/>. Returns null when the
@@ -1366,8 +1393,8 @@ public class PdfCanvas : ICanvas
 
     /// <summary>
     /// Fills the current path with a linear gradient by clipping to the path and
-    /// filling abutting quads perpendicular to the gradient axis. Fallback for when
-    /// a native shading can't be used.
+    /// filling an overlapping stack of quads perpendicular to the gradient axis.
+    /// Fallback for when a native shading can't be used.
     /// </summary>
     /// <param name="gradient">The gradient to approximate.</param>
     /// <param name="fillRule">The rule the path is clipped with.</param>
@@ -1411,23 +1438,45 @@ public class PdfCanvas : ICanvas
         // path is long across the axis, and an absolute constant is meaningless
         // under a paint transform that scales.
         double halfSpan = MaxPerpendicularReach(sx, sy, px, py, bbox);
+        // How far the path runs along the axis, which is what the shading's
+        // /Extend [true true] would flood. Beyond it there is nothing to paint.
+        (double tMin, double tMax) = AxisProjection(sx, sy, dx, dy, bbox);
 
-        for (int i = 0; i < GradientFallbackBands; i++)
+        // The bands are a stack painted from the far end back: each one reaches
+        // all the way to the near end, so every band completely covers the one
+        // before it.
+        //
+        // A hairline overlap is not enough, and measuring is what showed it. A
+        // renderer antialiases each quad's edges and composites the results, so
+        // two paths that each cover a boundary pixel ~60% leave it ~16% uncovered
+        // rather than filling it: coverage multiplies, it does not add. Abutting
+        // quads and narrowly overlapping ones both leave the page showing through
+        // along every boundary, which on any ramp that is not axis-aligned reads
+        // as a moire lattice. Only full coverage by a single path removes it,
+        // which is what the stack gives - and it is why the disc approximation
+        // never had the problem.
+
+        // Past the far end, /Extend floods with the last stop's colour. Painted
+        // first, beneath the stack.
+        if (tMax > 1 && BandColor(stops, GradientFallbackBands, GradientFallbackBands) is { } far)
+            Quad(1 - 0.5 / GradientFallbackBands, tMax, far);
+
+        for (int i = GradientFallbackBands - 1; i >= 0; i--)
         {
-            double t0 = (double)i / GradientFallbackBands;
-            double t1 = (double)(i + 1) / GradientFallbackBands;
+            if (BandColor(stops, i, GradientFallbackBands) is not { } band) continue; // adds nothing
+            Quad(tMin, (double)(i + 1) / GradientFallbackBands, band);
+        }
 
-            // The band's centre is its mean position, so a linear ramp reproduces
-            // exactly. Sampling an edge biases the whole ramp half a band.
-            Color color = SampleNormalizedStops(stops, (i + 0.5) / GradientFallbackBands);
+        // Before the near end, /Extend floods with the first stop's colour, over
+        // the innermost band.
+        if (tMin < 0 && BandColor(stops, -1, GradientFallbackBands) is { } near)
+            Quad(tMin, 0.5 / GradientFallbackBands, near);
 
-            // Strips abut, so nothing composites over anything and the sampled
-            // alpha is the alpha to paint. Unlike the disc case, no correction is
-            // needed.
-            ApplyColorAlpha(color);
-            PdfOperators.SetFillColor(_stream, color);
+        PdfOperators.RestoreState(_stream);
 
-            // Strip corners along the gradient direction
+        // One quad spanning t0..t1 along the axis and the full span across it.
+        void Quad(double t0, double t1, Color color)
+        {
             double cx0 = sx + dx * t0;
             double cy0 = sy + dy * t0;
             double cx1 = sx + dx * t1;
@@ -1437,15 +1486,18 @@ public class PdfCanvas : ICanvas
             var b = PaintToPdfPointPrecise(gradient.Transform, cx0 - px * halfSpan, cy0 - py * halfSpan);
             var c = PaintToPdfPointPrecise(gradient.Transform, cx1 - px * halfSpan, cy1 - py * halfSpan);
             var d = PaintToPdfPointPrecise(gradient.Transform, cx1 + px * halfSpan, cy1 + py * halfSpan);
+
+            PdfOperators.SaveState(_stream);
+            ApplyColorAlpha(color);
+            PdfOperators.SetFillColor(_stream, color);
             PdfOperators.MoveTo(_stream, a.X, a.Y);
             PdfOperators.LineTo(_stream, b.X, b.Y);
             PdfOperators.LineTo(_stream, c.X, c.Y);
             PdfOperators.LineTo(_stream, d.X, d.Y);
             PdfOperators.ClosePath(_stream);
             PdfOperators.Fill(_stream);
+            PdfOperators.RestoreState(_stream);
         }
-
-        PdfOperators.RestoreState(_stream);
     }
 
     /// <summary>
@@ -1473,6 +1525,40 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>
+    /// How far the path's bounding box runs along the gradient axis, as a <c>t</c>
+    /// range, widened to at least the ramp's own 0..1.
+    /// </summary>
+    /// <remarks>
+    /// This is what a native shading's <c>/Extend [true true]</c> covers. Without
+    /// it the approximation paints only 0..1 and leaves everything beyond the axis
+    /// unpainted, which shows up as bare wedges on any rotated or off-centre
+    /// gradient - the native path fills them.
+    /// </remarks>
+    private static (double TMin, double TMax) AxisProjection(
+        double sx, double sy, double dx, double dy, float[] bbox)
+    {
+        double lenSq = dx * dx + dy * dy;
+        double x0 = bbox[0];
+        double y0 = bbox[1];
+        double x1 = bbox[2];
+        double y1 = bbox[3];
+        double tMin = 0;
+        double tMax = 1;
+        Consider(x0, y0);
+        Consider(x1, y0);
+        Consider(x1, y1);
+        Consider(x0, y1);
+        return (tMin, tMax);
+
+        void Consider(double cx, double cy)
+        {
+            double t = ((cx - sx) * dx + (cy - sy) * dy) / lenSq;
+            if (t < tMin) tMin = t;
+            if (t > tMax) tMax = t;
+        }
+    }
+
+    /// <summary>
     /// Fills the current path with a radial gradient. Prefers a native PDF Type-3
     /// radial shading (see <see cref="EmitShading"/>); falls back to the concentric
     /// disc approximation when shadings can't be used (a translucent gradient under
@@ -1495,7 +1581,7 @@ public class PdfCanvas : ICanvas
         };
         ShadingResources? resolved = _shadingResolver?.Invoke(request);
         if (resolved is { } r) EmitShading(r, fillRule, gradient.Transform);
-        else FillPathWithRadialGradientDiscs(gradient, fillRule, stops);
+        else FillPathWithRadialGradientDiscs(gradient, fillRule, stops, bbox);
     }
 
     /// <summary>
@@ -1525,7 +1611,7 @@ public class PdfCanvas : ICanvas
     /// </para>
     /// </remarks>
     private void FillPathWithRadialGradientDiscs(
-        RadialGradientPaint gradient, FillRule fillRule, List<ShadingStop> stops)
+        RadialGradientPaint gradient, FillRule fillRule, List<ShadingStop> stops, float[] bbox)
     {
         PdfOperators.SaveState(_stream);
 
@@ -1539,16 +1625,42 @@ public class PdfCanvas : ICanvas
         double cx = gradient.Center.X;
         double cy = gradient.Center.Y;
 
+        // Past the rim, /Extend floods the rest of the path with the last stop's
+        // colour - which the native shading does and this approximation used not
+        // to, leaving a bare disc where the shading fills the whole clipped
+        // region. Painted first, with nothing beneath it, and overlapped by the
+        // stack. For a ramp that fades to nothing the flood is transparent and
+        // drops out, which is also what the native shading shows.
+        Color rim = SampleNormalizedStops(stops, 1);
+        if (rim.ScA > 0)
+        {
+            var a = PaintToPdfPointPrecise(gradient.Transform, bbox[0], bbox[1]);
+            var b = PaintToPdfPointPrecise(gradient.Transform, bbox[2], bbox[1]);
+            var c = PaintToPdfPointPrecise(gradient.Transform, bbox[2], bbox[3]);
+            var d = PaintToPdfPointPrecise(gradient.Transform, bbox[0], bbox[3]);
+
+            PdfOperators.SaveState(_stream);
+            ApplyColorAlpha(rim);
+            PdfOperators.SetFillColor(_stream, rim);
+            PdfOperators.MoveTo(_stream, a.X, a.Y);
+            PdfOperators.LineTo(_stream, b.X, b.Y);
+            PdfOperators.LineTo(_stream, c.X, c.Y);
+            PdfOperators.LineTo(_stream, d.X, d.Y);
+            PdfOperators.ClosePath(_stream);
+            PdfOperators.Fill(_stream);
+            PdfOperators.RestoreState(_stream);
+        }
+
         for (int i = GradientFallbackBands - 1; i >= 0; i--)
         {
-            Color target = SampleNormalizedStops(stops, (i + 0.5) / GradientFallbackBands);
-            // Whatever the larger discs already painted at this radius equals the
-            // gradient sample one band further out (fully transparent past the rim).
-            Color below = i + 1 < GradientFallbackBands
-                ? SampleNormalizedStops(stops, (i + 1.5) / GradientFallbackBands)
-                : Transparent;
-
-            if (CorrectOverDisc(target, below) is not { } disc) continue; // adds nothing visible
+            // Beneath this disc is the band one step further out, or - at the
+            // outermost band - the /Extend flood, whose colour BandColor also
+            // gives. Past the rim with no flood (a ramp that fades to nothing)
+            // there is nothing beneath at all.
+            Color? candidate = i + 1 < GradientFallbackBands || rim.ScA > 0
+                ? BandColor(stops, i, GradientFallbackBands)
+                : CorrectOverDisc(SampleNormalizedStops(stops, (i + 0.5) / GradientFallbackBands), Transparent);
+            if (candidate is not { } disc) continue; // adds nothing visible
 
             double r = gradient.Radius * ((double)(i + 1) / GradientFallbackBands);
             PdfOperators.SaveState(_stream);
