@@ -12,7 +12,7 @@ namespace BonniePDF.Tests.Drawing;
 
 /// <summary>
 /// When a gradient cannot be painted as a native PDF shading, PdfCanvas
-/// approximates it: a linear ramp becomes abutting quads perpendicular to its
+/// approximates it: a linear ramp becomes a stack of overlapping quads across its
 /// axis, a radial one a stack of overlapping discs.
 /// </summary>
 /// <remarks>
@@ -92,7 +92,7 @@ public partial class GradientFallbackTests
     private static List<double> GreyLevels(string content) => Values(GreyFill(), content, "v");
 
     [Fact]
-    public void ApproximatesALinearGradientWith100AbuttingQuads()
+    public void ApproximatesALinearGradientWithAStackOf100Bands()
     {
         // Fixed at 100 rather than derived from the painted area: deriving it would
         // make the bytes depend on layout arithmetic, which this path cannot afford.
@@ -172,7 +172,7 @@ public partial class GradientFallbackTests
         // One moveTo for the far flood and one per band, all at the same near end.
         // (The clip path contributes
         // none here: this implementation spells an axis-aligned rectangle `re`, per
-        // the note in ApproximatesALinearGradientWith100AbuttingQuads.)
+        // the note in ApproximatesALinearGradientWithAStackOf100Bands.)
         List<double> starts = Values(SegmentStartX(), content, "x");
         Assert.Equal(101, starts.Count);
         Assert.Single(starts.Distinct());
