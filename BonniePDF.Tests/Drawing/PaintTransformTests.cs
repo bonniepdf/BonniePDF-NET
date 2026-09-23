@@ -204,4 +204,34 @@ public class PaintTransformTests
 
         Assert.DoesNotContain("gradientTransform", canvas.GetSvg(), System.StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Svg_CarriesTheCanvasOffsetInTheMatrixNotInThePaintGeometry()
+    {
+        // The canvas offset is a canvas-space translation. Added to the gradient's
+        // own coordinates it would pass through gradientTransform and be scaled
+        // with them: here x1 would become 2 * (0 + 10) = 20 on the page, not 10.
+        var canvas = new SvgCanvas(200, 100, xOffset: 10, yOffset: 20);
+        canvas.BeginPath();
+        canvas.AddRect(0, 0, 100, 50);
+        canvas.FillCurrentPath(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), Stops)
+        {
+            Transform = new PaintTransform(2, 0, 0, 1, 5, 6)
+        });
+
+        string svg = canvas.GetSvg();
+        Assert.Contains("x1=\"0\" y1=\"0\" x2=\"100\" y2=\"0\"", svg, System.StringComparison.Ordinal);
+        Assert.Contains("gradientTransform=\"matrix(2 0 0 1 15 26)\"", svg, System.StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Svg_StillOffsetsAGradientWithoutATransform()
+    {
+        var canvas = new SvgCanvas(200, 100, xOffset: 10, yOffset: 20);
+        canvas.BeginPath();
+        canvas.AddRect(0, 0, 100, 50);
+        canvas.FillCurrentPath(new RadialGradientPaint(new Point(50, 25), 25f, Stops));
+
+        Assert.Contains("cx=\"60\" cy=\"45\"", canvas.GetSvg(), System.StringComparison.Ordinal);
+    }
 }
