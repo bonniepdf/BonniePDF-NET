@@ -1157,7 +1157,6 @@ public class SvgCanvas : ICanvas
 
     // --- SVG gradient/stroke helpers ---
 
-    /// <summary>Emits a &lt;linearGradient&gt; definition and returns its id.</summary>
     /// <summary>
     /// A paint transform as SVG's <c>gradientTransform</c>, or nothing when absent.
     /// </summary>
@@ -1189,6 +1188,7 @@ public class SvgCanvas : ICanvas
     private (float X, float Y) GradientOffset(PaintTransform? transform) =>
         transform.IsIdentityOrAbsent() ? (_xOffset, _yOffset) : (0f, 0f);
 
+    /// <summary>Emits a &lt;linearGradient&gt; definition and returns its id.</summary>
     private string EmitLinearGradientDef(LinearGradientPaint gradient)
     {
         string id = IdAllocator.NextGradId();
