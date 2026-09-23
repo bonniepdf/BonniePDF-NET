@@ -1104,7 +1104,7 @@ public class PdfCanvas : ICanvas
             Coords = new[] { gradient.Start.X, gradient.Start.Y, gradient.End.X, gradient.End.Y },
             Stops = stops,
             Extend = (true, true),
-            Bbox = bbox,
+            Bbox = Array.ConvertAll(bbox, v => (float)v),
             HasAlpha = HasAlpha(gradient.Stops)
         };
         ShadingResources? resolved = _shadingResolver?.Invoke(request);
@@ -1190,16 +1190,35 @@ public class PdfCanvas : ICanvas
     ///
     /// Returns null for a transform that cannot be inverted: it has collapsed
     /// paint space, so there is nothing to paint.
+    ///
+    /// Computed in double, like the geometry the fallbacks derive from it, and
+    /// narrowed only where it enters a <see cref="ShadingRequest"/>. Inverting in
+    /// float would move the box by enough to change printed digits the
+    /// TypeScript implementation computes in double.
     /// </remarks>
-    private float[]? PaintSpaceBBox(PaintTransform? paintTransform)
+    private double[]? PaintSpaceBBox(PaintTransform? paintTransform)
     {
         float[] canvasBox = CurrentPathBBox();
-        if (paintTransform is not { } t || t.IsIdentity) return canvasBox;
-        if (t.Invert() is not { } inverse) return null;
+        if (paintTransform.IsIdentityOrAbsent())
+            return [canvasBox[0], canvasBox[1], canvasBox[2], canvasBox[3]];
+        if (InvertPrecise(paintTransform!.Value) is not { } inverse) return null;
 
-        (float x0, float y0, float x1, float y1) =
-            inverse.MapBox(canvasBox[0], canvasBox[1], canvasBox[2], canvasBox[3]);
-        return [x0, y0, x1, y1];
+        double minX = double.PositiveInfinity, minY = double.PositiveInfinity;
+        double maxX = double.NegativeInfinity, maxY = double.NegativeInfinity;
+        foreach ((double x, double y) in new (double, double)[]
+                 {
+                     (canvasBox[0], canvasBox[1]), (canvasBox[2], canvasBox[1]),
+                     (canvasBox[2], canvasBox[3]), (canvasBox[0], canvasBox[3]),
+                 })
+        {
+            double mx = inverse.A * x + inverse.C * y + inverse.E;
+            double my = inverse.B * x + inverse.D * y + inverse.F;
+            minX = Math.Min(minX, mx);
+            minY = Math.Min(minY, my);
+            maxX = Math.Max(maxX, mx);
+            maxY = Math.Max(maxY, my);
+        }
+        return [minX, minY, maxX, maxY];
     }
 
     private static bool HasAlpha(IReadOnlyList<GradientStop> stops)
@@ -1368,7 +1387,7 @@ public class PdfCanvas : ICanvas
     /// <param name="stops">The same normalized stops the native shading path builds.</param>
     /// <param name="bbox">The current path's bounding box in paint space - the region the quads must cover.</param>
     private void FillPathWithLinearGradientStrips(
-        LinearGradientPaint gradient, FillRule fillRule, List<ShadingStop> stops, float[] bbox)
+        LinearGradientPaint gradient, FillRule fillRule, List<ShadingStop> stops, double[] bbox)
     {
         PdfOperators.SaveState(_stream);
 
@@ -1476,7 +1495,7 @@ public class PdfCanvas : ICanvas
     /// The greatest perpendicular distance from the gradient axis to a corner of
     /// <paramref name="bbox"/>, all in paint space.
     /// </summary>
-    private static double MaxPerpendicularReach(double sx, double sy, double px, double py, float[] bbox)
+    private static double MaxPerpendicularReach(double sx, double sy, double px, double py, double[] bbox)
     {
         double x0 = bbox[0];
         double y0 = bbox[1];
@@ -1507,7 +1526,7 @@ public class PdfCanvas : ICanvas
     /// gradient - the native path fills them.
     /// </remarks>
     private static (double TMin, double TMax) AxisProjection(
-        double sx, double sy, double dx, double dy, float[] bbox)
+        double sx, double sy, double dx, double dy, double[] bbox)
     {
         double lenSq = dx * dx + dy * dy;
         double x0 = bbox[0];
@@ -1548,7 +1567,7 @@ public class PdfCanvas : ICanvas
             Coords = new[] { inner.X, inner.Y, 0f, gradient.Center.X, gradient.Center.Y, gradient.Radius },
             Stops = stops,
             Extend = (true, true),
-            Bbox = bbox,
+            Bbox = Array.ConvertAll(bbox, v => (float)v),
             HasAlpha = HasAlpha(gradient.Stops)
         };
         ShadingResources? resolved = _shadingResolver?.Invoke(request);
@@ -1583,7 +1602,7 @@ public class PdfCanvas : ICanvas
     /// </para>
     /// </remarks>
     private void FillPathWithRadialGradientDiscs(
-        RadialGradientPaint gradient, FillRule fillRule, List<ShadingStop> stops, float[] bbox)
+        RadialGradientPaint gradient, FillRule fillRule, List<ShadingStop> stops, double[] bbox)
     {
         PdfOperators.SaveState(_stream);
 
