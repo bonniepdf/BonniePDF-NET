@@ -97,8 +97,9 @@ public partial class GradientFallbackTests
         // Fixed at 100 rather than derived from the painted area: deriving it would
         // make the bytes depend on layout arithmetic, which this path cannot afford.
         string content = FillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), Stops));
-        Assert.Equal(100, Count(content, "f\n"));
-        Assert.Equal(100, GreyLevels(content).Count);
+        // 100 bands plus the far /Extend flood beneath them.
+        Assert.Equal(101, Count(content, "f\n"));
+        Assert.Equal(101, GreyLevels(content).Count);
         Assert.DoesNotContain("/Sh", content, StringComparison.Ordinal);
 
         // Note: how the *clip* path spells a rectangle is deliberately not asserted
@@ -152,10 +153,11 @@ public partial class GradientFallbackTests
         // what .NET's rings used to do.
         string content = FillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), Stops));
         List<double> greys = GreyLevels(content);
-        Assert.Equal(100, greys.Count);
-        // Painted from the far end back, so the first fill is the last band.
-        Assert.Equal(0.995, greys[0], 4);
-        Assert.Equal(0.005, greys[99], 4);
+        Assert.Equal(101, greys.Count);
+        // The far flood comes first, then the bands from the far end back.
+        Assert.Equal(1d, greys[0]);
+        Assert.Equal(0.995, greys[1], 4);
+        Assert.Equal(0.005, greys[100], 4);
     }
 
     [Fact]
@@ -167,11 +169,12 @@ public partial class GradientFallbackTests
         // multiplies, it does not add, and the gaps read as a moire lattice on any
         // ramp that is not axis-aligned. Every band therefore reaches the near end.
         string content = FillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), Stops));
-        // One moveTo per band, all at the same near end. (The clip path contributes
+        // One moveTo for the far flood and one per band, all at the same near end.
+        // (The clip path contributes
         // none here: this implementation spells an axis-aligned rectangle `re`, per
         // the note in ApproximatesALinearGradientWith100AbuttingQuads.)
         List<double> starts = Values(SegmentStartX(), content, "x");
-        Assert.Equal(100, starts.Count);
+        Assert.Equal(101, starts.Count);
         Assert.Single(starts.Distinct());
     }
 
@@ -190,19 +193,20 @@ public partial class GradientFallbackTests
         ];
         var paint = new LinearGradientPaint(new Point(0, 0), new Point(100, 0), translucent);
 
-        static (double R, double B) FirstOf(string content)
+        static (double R, double B) OutermostBand(string content)
         {
-            Match m = AnyFill().Match(content);
+            Match m = AnyFill().Matches(content)[1];
             return (double.Parse(m.Groups["r"].Value, CultureInfo.InvariantCulture),
                 double.Parse(m.Groups["b"].Value, CultureInfo.InvariantCulture));
         }
 
-        // Band 99 is painted first and sampled at t=0.995: essentially the last stop.
-        (double R, double B) declined = FirstOf(FillWith(paint, declines: true));
+        // Band 99 is painted next after the far flood and sampled at t=0.995:
+        // essentially the last stop.
+        (double R, double B) declined = OutermostBand(FillWith(paint, declines: true));
         Assert.Equal(0.005, declined.R, 2);
         Assert.Equal(0.995, declined.B, 2);
         // With the alpha honoured the same band is corrected for what lies beneath.
-        Assert.NotEqual(declined, FirstOf(FillWith(paint)));
+        Assert.NotEqual(declined, OutermostBand(FillWith(paint)));
     }
 
     [Fact]
@@ -218,6 +222,56 @@ public partial class GradientFallbackTests
         // The flood is painted first and carries the last stop's colour.
         Assert.Contains("1 1 1 rg", content[..content.IndexOf("f\n", StringComparison.Ordinal)],
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ReproducesARampThatEndsTranslucentRatherThanTransparent()
+    {
+        // Every band is corrected for the band beyond it, and the band beyond the
+        // outermost one is the far flood. The flood therefore has to lie beneath the
+        // whole stack: when it covered only t >= 1, a ramp ending at alpha 0.5
+        // composited to the same result as one ending at 0 - near-transparent at the
+        // far end, and nothing at all past it.
+        GradientStop[] ramp =
+        [
+            new(0f, Color.FromScRgb(1, 0, 0, 1)),
+            new(1f, Color.FromScRgb(1, 0, 0, 0.5f))
+        ];
+        var stream = new StringBuilder();
+        var canvas = new PdfCanvas(
+            stream,
+            pageHeight: 1000,
+            alphaGraphicsStateResolver: a => "/GS_" + a.ToString("R", CultureInfo.InvariantCulture));
+        canvas.BeginPath();
+        canvas.AddRect(0, 0, 150, 50);
+        canvas.FillCurrentPath(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), ramp));
+
+        // Composite the emitted quads source-over along the axis.
+        var fills = new List<(double Alpha, double Lo, double Hi)>();
+        double alpha = 1;
+        var xs = new List<double>();
+        foreach (string line in stream.ToString().Split('\n'))
+        {
+            string[] tok = line.Trim().Split(' ');
+            string op = tok[^1];
+            if (op == "Q") alpha = 1;
+            else if (op == "gs" && tok[0].StartsWith("/GS_", StringComparison.Ordinal))
+                alpha = double.Parse(tok[0][4..], CultureInfo.InvariantCulture);
+            else if (op is "m" or "l") xs.Add(double.Parse(tok[0], CultureInfo.InvariantCulture));
+            else if (op == "f")
+            {
+                fills.Add((alpha, xs.Min(), xs.Max()));
+                xs.Clear();
+            }
+            else if (op is "n" or "W" or "re") xs.Clear();
+        }
+
+        double Composite(double x) =>
+            fills.Where(f => x >= f.Lo && x <= f.Hi).Aggregate(0d, (a, f) => f.Alpha + a * (1 - f.Alpha));
+
+        foreach (double x in new[] { 5, 25, 50, 75, 95, 99.5 })
+            Assert.Equal(1 - 0.5 * (x / 100), Composite(x), 0.005);
+        Assert.Equal(0.5, Composite(125), 4);
     }
 
     [Fact]
@@ -282,8 +336,9 @@ public partial class GradientFallbackTests
         ];
         string content = FillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), inset));
         List<double> greys = GreyLevels(content);
-        Assert.Equal(1d, greys[0]);   // flat white above 0.75 (far band, painted first)
-        Assert.Equal(0d, greys[99]);  // flat black below 0.25
-        Assert.Equal(0.49, greys[50], 2);
+        Assert.Equal(1d, greys[0]);   // the far flood, painted first
+        Assert.Equal(1d, greys[1]);   // flat white above 0.75 (far band)
+        Assert.Equal(0d, greys[100]); // flat black below 0.25
+        Assert.Equal(0.49, greys[51], 2);
     }
 }
