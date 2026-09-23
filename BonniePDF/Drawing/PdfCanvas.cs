@@ -1690,7 +1690,9 @@ public class PdfCanvas : ICanvas
     /// colour sampled at its midpoint. The midpoint is taken in the same space the
     /// gradient's geometry is in, so a transformed canvas moves the ramp with the
     /// path rather than distorting it, and the colour comes from the normalized
-    /// stops the fill paths sample.
+    /// stops the fill paths sample. With a paint transform the midpoint is mapped
+    /// back into the paint's own space first, exactly as the fills read their
+    /// geometry there; a transform that cannot be inverted paints nothing.
     /// <para>
     /// A translucent segment is wrapped in its own <c>q</c>/<c>Q</c>, so its alpha
     /// cannot leak into the opaque segments after it; an opaque segment needs
@@ -1705,6 +1707,13 @@ public class PdfCanvas : ICanvas
             RadialGradientPaint radial => radial.Stops,
             _ => throw new ArgumentException("Not a gradient paint.", nameof(paint)),
         };
+        PaintTransform? transform = paint is LinearGradientPaint l ? l.Transform : ((RadialGradientPaint)paint).Transform;
+        (double A, double B, double C, double D, double E, double F)? toPaintSpace = null;
+        if (!transform.IsIdentityOrAbsent())
+        {
+            toPaintSpace = InvertPrecise(transform!.Value);
+            if (toPaintSpace is null) return;
+        }
         List<ShadingStop> stops = NormalizeShadingStops(gradientStops);
 
         PdfOperators.SaveState(_stream);
@@ -1716,7 +1725,11 @@ public class PdfCanvas : ICanvas
             {
                 (double X, double Y) p0 = polyline[i];
                 (double X, double Y) p1 = polyline[i + 1];
-                double t = ProjectOntoGradient((p0.X + p1.X) / 2, (p0.Y + p1.Y) / 2, paint);
+                double mx = (p0.X + p1.X) / 2;
+                double my = (p0.Y + p1.Y) / 2;
+                if (toPaintSpace is { } inv)
+                    (mx, my) = (inv.A * mx + inv.C * my + inv.E, inv.B * mx + inv.D * my + inv.F);
+                double t = ProjectOntoGradient(mx, my, paint);
                 Color color = SampleNormalizedStops(stops, t);
                 (double X, double Y) s = TransformPointPrecise(p0.X, p0.Y);
                 (double X, double Y) e = TransformPointPrecise(p1.X, p1.Y);
@@ -1733,6 +1746,25 @@ public class PdfCanvas : ICanvas
         }
 
         PdfOperators.RestoreState(_stream);
+    }
+
+    /// <summary>
+    /// The inverse of a paint transform, computed in double, or null when it is
+    /// not invertible.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="PaintTransform.Invert"/> works in float, the precision of the
+    /// public type. Geometry derived from the inverse is formatted from double,
+    /// so the inverse has to be double too, or a float round-trip moves values
+    /// across a rounding boundary the TypeScript implementation does not cross.
+    /// </remarks>
+    private static (double A, double B, double C, double D, double E, double F)? InvertPrecise(PaintTransform t)
+    {
+        double a = t.A, b = t.B, c = t.C, d = t.D, e = t.E, f = t.F;
+        double determinant = a * d - b * c;
+        if (determinant == 0 || !double.IsFinite(determinant)) return null;
+        return (d / determinant, -b / determinant, -c / determinant, a / determinant,
+            (c * f - d * e) / determinant, (b * e - a * f) / determinant);
     }
 
     /// <summary>
