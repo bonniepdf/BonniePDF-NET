@@ -1152,19 +1152,6 @@ public class PdfCanvas : ICanvas
     }
 
     /// <summary>
-    /// The painted region's bounding box, in the paint's own space.
-    /// </summary>
-    /// <remarks>
-    /// A translucent gradient's soft mask is a form XObject whose <c>/BBox</c> is
-    /// in the form's space - which is paint space once a transform exists - so the
-    /// canvas box has to be mapped back through the inverse. Leaving it in canvas
-    /// space clips the mask wherever the transform moves content outside it, which
-    /// reads as a gradient fading to nothing at one edge.
-    ///
-    /// Returns null for a transform that cannot be inverted: it has collapsed
-    /// paint space, so there is nothing to paint.
-    /// </remarks>
-    /// <summary>
     /// A point in a paint's own space, mapped to PDF page space.
     /// </summary>
     /// <remarks>
@@ -1191,6 +1178,19 @@ public class PdfCanvas : ICanvas
         return TransformPointPrecise(px, py);
     }
 
+    /// <summary>
+    /// The painted region's bounding box, in the paint's own space.
+    /// </summary>
+    /// <remarks>
+    /// A translucent gradient's soft mask is a form XObject whose <c>/BBox</c> is
+    /// in the form's space - which is paint space once a transform exists - so the
+    /// canvas box has to be mapped back through the inverse. Leaving it in canvas
+    /// space clips the mask wherever the transform moves content outside it, which
+    /// reads as a gradient fading to nothing at one edge.
+    ///
+    /// Returns null for a transform that cannot be inverted: it has collapsed
+    /// paint space, so there is nothing to paint.
+    /// </remarks>
     private float[]? PaintSpaceBBox(PaintTransform? paintTransform)
     {
         float[] canvasBox = CurrentPathBBox();
