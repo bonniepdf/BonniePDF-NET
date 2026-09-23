@@ -98,15 +98,36 @@ internal static class PdfSyntax
     /// Formats a double with the same "0.###" shape, without narrowing to float first.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Geometry that is computed in double must be formatted from the double. A
     /// float round-trip on the way to the formatter moves a value by up to ~1e-4 at
     /// page scale, which is enough to carry it across a 0.0005 rounding boundary and
     /// print a different last digit than the TypeScript implementation does for the
     /// same input. Narrow at the sink boundary, not before the formatter.
+    /// </para>
+    /// <para>
+    /// The rounding has to match too. A custom format string such as "0.###"
+    /// first rounds a double to 15 significant digits, so 779.6924999999999
+    /// becomes 779.6925 and then prints 779.693. The standard "F3" format rounds
+    /// the exact binary value, as TypeScript's <c>toFixed(3)</c> does, and prints
+    /// 779.692 - except on an exact tie, which "F3" rounds to even and
+    /// <c>toFixed</c> rounds away from zero. A double can only sit exactly
+    /// halfway between two thousandths when sixteen times it is an odd integer
+    /// (a tie is an odd number of two-thousandths, and only the ones that reduce
+    /// to sixteenths are representable), so that case is rounded away from zero
+    /// explicitly. Trailing zeros, a bare point and a negative zero are then
+    /// trimmed exactly as the TypeScript formatter trims them.
+    /// </para>
     /// </remarks>
     internal static string FormatDecimal(double value)
     {
-        return value.ToString("0.###", CultureInfo.InvariantCulture);
+        double sixteenths = value * 16; // exact: a power-of-two scale
+        if (Math.Floor(sixteenths) == sixteenths && Math.Abs(sixteenths % 2) == 1)
+            value = Math.CopySign(Math.Floor(Math.Abs(value) * 1000 + 0.5), value) / 1000;
+
+        string s = value.ToString("F3", CultureInfo.InvariantCulture);
+        if (s.Contains('.', StringComparison.Ordinal)) s = s.TrimEnd('0').TrimEnd('.');
+        return s == "-0" ? "0" : s;
     }
 
     /// <summary>
