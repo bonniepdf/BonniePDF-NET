@@ -1,0 +1,40 @@
+{
+  "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
+  "mapping": "svg-engine-dotnet",
+  "source": {
+    "commit": "0a5693738fce522311c9e7bffa42bd019efef499",
+    "dirty": false
+  },
+  "files": {
+    "Emitter.cs": "610b642a1b741caa47e6ac00012a71a321a1dd5c0f4b9900a8921fdc81e8371f",
+    "Fonts/FontFace.cs": "c22b4195c46e56153e26a684f929ad57fe91ed54a1f8756851636aafb616a84a",
+    "Fonts/FontSet.cs": "e8d916352f0180df4b4ca8dc19e1459a5d843f06d7429a84b8b200d7b77822e9",
+    "Fonts/Kerning.cs": "fcf1b23adbfc2d793ae5b2395106014eb445bab2add7a2d998bfb8b3d1870267",
+    "Fonts/TrueTypeFace.cs": "8910bd4ab5fe9acdfdc771f20e8072698eb61da3ddaa2b826136b1dbbc2acea2",
+    "Geometry/Matrix.cs": "1191255c2be67dac89052854bfdfd0ce75bc8c608a02516d8981934ceaf769a6",
+    "Ir/BoundingBox.cs": "02b28e797e75291e767b2f476421209dbb45ab941e2917a8d0094cab4ac600ae",
+    "Ir/Clipping.cs": "82f5160c650bc265cb32846a55dce47a5f42ffc80915c58ca1bdf1891f210892",
+    "Ir/Dom.cs": "2eac37175eea60511ae08ae672896736826e83a94c7e181c4d6fa761cf476360",
+    "Ir/Gradients.cs": "36ca843b8ca05addd253e3dff8e6d421172d122a90166d8d45fdc40f7c9d7b84",
+    "Ir/IrBuilder.cs": "bb78e58316cedd6f39ecf882b786fe04d2fb7104676f72534b886fb11c5c4437",
+    "Ir/Raster.cs": "092b7af4be6e55791c72b654f096453245a8ab0587f96a9cb5ac5d1807af16b9",
+    "Ir/Shapes.cs": "178eeac513e2278e4486d5b12898c6841f89968ccfea2fb618a7d0a529e157be",
+    "Ir/TextLayout.cs": "6528dac3fdca5742c1840390cce9f8bdf149d4aaf27e258e606475490015154e",
+    "Ir/Types.cs": "a3f4d4420e3892519cebd688b894cf00d7a9b9dc8c986c0442e389feb1633ae7",
+    "Parsers/Length.cs": "8498728dfc91ad95e52ecc0af2660d10818dd0c5aa01d6c809eb71ad00b723fd",
+    "Parsers/NamedColors.cs": "d7dcd7fc6b07bba4ab975d677a0793defe1422aac382f7178f680f446d2b9875",
+    "Parsers/NumberScanner.cs": "22bd796987767ec1b32b4701925fbaddb8b77ea2775280c3c14f6c7b0e4c4b7c",
+    "Parsers/PaintRef.cs": "4f1113534cb3b5e91ec8bb7e63892644398f986d4314e25e397faeba7a0086be",
+    "Parsers/PathData.cs": "5129235c9f06f258f4674906a5bacaff0051ce41c5a29720eb7c4eb7a21f34d5",
+    "Parsers/SvgParseException.cs": "33acb09a78d4ebf81de6477ab549c2f014e2477301d58268d8f5718a7d8ba413",
+    "Parsers/Transform.cs": "6193fab3df554074b236cfc42a49baf6883cd09c05f528bfca1575e8a92447d2",
+    "Parsers/ViewBox.cs": "98b61022f65148468187817c29a034779694c7c64b87ea8a1de549eed8e90e03",
+    "Sink/Geometry.cs": "9f5a2d461bbec79c0a6719f3448dba16f89b463eec634416c518ded221576393",
+    "Sink/IVectorSink.cs": "845128cf21d7d8ead40cbfdd70c86f2045b45ffceaac8af12218df13480e84c9",
+    "Sink/Paint.cs": "79e2361c15d626477c8891e4bb3827190290fa81d328e211697611f4b7aa974c",
+    "Sink/SinkImage.cs": "ac7c9547aafc66be5cba97484261e4623920b95f844760beb3ec91d5819255b6",
+    "Sink/StrokeStyle.cs": "32a761f526c831b36dc99588bc6a67532df2e9dc489d20d05935364b6b7a1c71",
+    "SvgImporter.cs": "53376432128a20d7411792562f237360eda74d5a4b081ebc1e97adcef23a8caf",
+    "Xml/SvgXmlReader.cs": "141a910b523cc5b6c119dc4cd2e8f02762c523bf3de2618c58bce472b98b50ee"
+  }
+}
