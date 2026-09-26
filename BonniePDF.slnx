@@ -19,6 +19,7 @@
     <Project Path="Examples/BonniePDF.Examples.Typography.RichTextStyles/BonniePDF.Examples.Typography.RichTextStyles.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Typography.Alignment/BonniePDF.Examples.Typography.Alignment.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Typography.TextDecorations/BonniePDF.Examples.Typography.TextDecorations.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Elements.FlagsOfTheWorld/BonniePDF.Examples.Elements.FlagsOfTheWorld.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Elements.Hyperlinks/BonniePDF.Examples.Elements.Hyperlinks.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Elements.Images/BonniePDF.Examples.Elements.Images.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Elements.Lists/BonniePDF.Examples.Elements.Lists.csproj" />
