@@ -525,11 +525,14 @@ public static class ImageLoader
             int colorPos = 0;
             int alphaPos = 0;
 
+            // The previous defiltered scanline lives across rows: the Up, Average and
+            // Paeth filters read it, and row 0 sees zeros.
+            byte[] prevScanline = new byte[scanlineLength];
+
             for (int y = 0; y < info.Height; y++)
             {
                 // Skip filter byte
                 byte filter = decompressedData[srcPos++];
-                byte[] prevScanline = new byte[scanlineLength];
                 byte[] currScanline = new byte[scanlineLength];
 
                 // Read and defilter the scanline

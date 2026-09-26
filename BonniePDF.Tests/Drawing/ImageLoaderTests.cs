@@ -8,7 +8,7 @@ public class ImageLoaderTests
     private const string TestImagePath = @"BonniePDF.Examples\img\owl.jpg";
 
     // Helper: Create a minimal valid JPEG byte array
-    private static byte[] CreateMinimalJpeg()
+    internal static byte[] CreateMinimalJpeg()
     {
         // Minimal JPEG: SOI (FFD8) + SOF0 marker with dimensions + EOI (FFD9)
         return new byte[]
@@ -242,6 +242,113 @@ public class ImageLoaderTests
         // Should have width * height * components bytes
         int expectedSize = image.Width * image.Height * image.Components;
         Assert.Equal(expectedSize, image.Data.Length);
+    }
+
+    // A deterministic RGBA pattern with real variation in both axes, so the Up,
+    // Average and Paeth filters (which read the row above) can't decode correctly
+    // by accident.
+    internal static byte Sample(int x, int y, int channel) =>
+        (byte)((x * 37 + y * 91 + channel * 53 + (x * y) % 29) & 0xFF);
+
+    // Encodes a Width x Height RGBA PNG, filtering row y with filterOf(y). Written
+    // independently of the loader: it applies the forward PNG filters per the spec.
+    internal static byte[] BuildFilteredRgbaPng(int width, int height, Func<int, byte> filterOf)
+    {
+        const int bpp = 4;
+        int rowBytes = width * bpp;
+        byte[] prev = new byte[rowBytes];
+        var raw = new List<byte>();
+
+        for (int y = 0; y < height; y++)
+        {
+            byte[] cur = new byte[rowBytes];
+            for (int x = 0; x < width; x++)
+                for (int c = 0; c < bpp; c++)
+                    cur[x * bpp + c] = Sample(x, y, c);
+
+            byte filter = filterOf(y);
+            raw.Add(filter);
+            for (int i = 0; i < rowBytes; i++)
+            {
+                int a = i >= bpp ? cur[i - bpp] : 0;
+                int b = prev[i];
+                int cc = i >= bpp ? prev[i - bpp] : 0;
+                int predictor = filter switch
+                {
+                    0 => 0,
+                    1 => a,
+                    2 => b,
+                    3 => (a + b) / 2,
+                    _ => Paeth(a, b, cc),
+                };
+                raw.Add((byte)(cur[i] - predictor));
+            }
+            prev = cur;
+        }
+
+        using var zlib = new MemoryStream();
+        using (var z = new System.IO.Compression.ZLibStream(zlib, System.IO.Compression.CompressionLevel.Optimal, leaveOpen: true))
+            z.Write(raw.ToArray());
+
+        using var png = new MemoryStream();
+        png.Write(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 });
+        void Chunk(string type, byte[] data)
+        {
+            byte[] len = BitConverter.GetBytes(data.Length); Array.Reverse(len);
+            png.Write(len);
+            byte[] body = System.Text.Encoding.ASCII.GetBytes(type).Concat(data).ToArray();
+            png.Write(body);
+            uint crc = 0xFFFFFFFF;
+            foreach (byte v in body)
+            {
+                crc ^= v;
+                for (int k = 0; k < 8; k++) crc = (crc & 1) != 0 ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
+            }
+            byte[] crcBytes = BitConverter.GetBytes(~crc); Array.Reverse(crcBytes);
+            png.Write(crcBytes);
+        }
+
+        byte[] w = BitConverter.GetBytes(width); Array.Reverse(w);
+        byte[] h = BitConverter.GetBytes(height); Array.Reverse(h);
+        Chunk("IHDR", w.Concat(h).Concat(new byte[] { 8, 6, 0, 0, 0 }).ToArray());
+        Chunk("IDAT", zlib.ToArray());
+        Chunk("IEND", Array.Empty<byte>());
+        return png.ToArray();
+    }
+
+    private static int Paeth(int a, int b, int c)
+    {
+        int p = a + b - c, pa = Math.Abs(p - a), pb = Math.Abs(p - b), pc = Math.Abs(p - c);
+        return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+    }
+
+    [Theory]
+    [InlineData(0, "None")]
+    [InlineData(1, "Sub")]
+    [InlineData(2, "Up")]
+    [InlineData(3, "Average")]
+    [InlineData(4, "Paeth")]
+    [InlineData(5, "rows cycling through every filter")]
+    public void LoadPng_Rgba_DefiltersEveryFilterType(int filter, string description)
+    {
+        _ = description;
+        const int width = 23, height = 17;
+        byte[] png = BuildFilteredRgbaPng(width, height, y => (byte)(filter == 5 ? y % 5 : filter));
+
+        var image = ImageLoader.LoadPng(png);
+
+        Assert.True(image.HasAlpha);
+        Assert.Equal(3, image.Components);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int pixel = y * width + x;
+                for (int c = 0; c < 3; c++)
+                    Assert.Equal(Sample(x, y, c), image.Data[pixel * 3 + c]);
+                Assert.Equal(Sample(x, y, 3), image.AlphaData[pixel]);
+            }
+        }
     }
 
     // Note: Tests for grayscale, RGBA, indexed color, and alpha channel separation

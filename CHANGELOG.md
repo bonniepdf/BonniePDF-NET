@@ -229,6 +229,15 @@ behaviour, so the two files can be read side by side.
 
 ### Fixed
 
+- **PNG images with an alpha channel decoded wrongly when their rows used the
+  Up, Average or Paeth filter.** The loader reset its record of the previous row
+  for every row of an RGBA or grey-plus-alpha PNG, so those filters were applied
+  against a row of zeros and the image came out speckled and mis-coloured, with a
+  damaged soft mask. Photographs and logos exported by real encoders use these
+  filters heavily; the hand-built and filter-None images the tests used did not.
+  Alpha PNGs now decode to the original pixels for every filter type, matching
+  the TypeScript implementation, which was already correct.
+
 - **A page header or footer now reserves body content space.** Previously the
   header and footer were painted into the margin band while body layout still
   ran from the top margin to the bottom margin, so page chrome taller than the
