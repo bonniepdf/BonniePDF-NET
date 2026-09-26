@@ -27,6 +27,7 @@ public class PdfCanvas : ICanvas
     private readonly Func<float, string> _alphaGraphicsStateResolver;
     private readonly Func<string, string, IList<ResolvedTextRun>>? _textRunResolver;
     private readonly Action? _reportUntaggedImage;
+    private readonly Action<ImageInfo, float, float>? _imagePlacementTracker;
     private readonly Func<ShadingRequest, ShadingResources?>? _shadingResolver;
     private readonly StringBuilder _stream;
     private readonly float _xOffset;
@@ -98,7 +99,8 @@ public class PdfCanvas : ICanvas
         Func<float, string>? alphaGraphicsStateResolver = null,
         Func<string, string, IList<ResolvedTextRun>>? textRunResolver = null,
         Action? reportUntaggedImage = null,
-        Func<ShadingRequest, ShadingResources?>? shadingResolver = null)
+        Func<ShadingRequest, ShadingResources?>? shadingResolver = null,
+        Action<ImageInfo, float, float>? imagePlacementTracker = null)
     {
         _stream = stream;
         Height = pageHeight;
@@ -113,6 +115,7 @@ public class PdfCanvas : ICanvas
         _alphaGraphicsStateResolver = alphaGraphicsStateResolver ?? (alpha => $"/GS_ALPHA_{(int)Math.Round(alpha * 10000)}");
         _textRunResolver = textRunResolver;
         _reportUntaggedImage = reportUntaggedImage;
+        _imagePlacementTracker = imagePlacementTracker;
         _shadingResolver = shadingResolver;
     }
 
@@ -429,6 +432,11 @@ public class PdfCanvas : ICanvas
     {
         // Resolve the image resource name (e.g., /I1)
         string imageName = _imageResolver(image);
+
+        // Tell the resource registry how large the image is actually painted, on the page, so it
+        // can decide how many pixels the embedded copy needs.
+        _imagePlacementTracker?.Invoke(image, width * MathF.Sqrt(_ctm[0] * _ctm[0] + _ctm[1] * _ctm[1]),
+            height * MathF.Sqrt(_ctm[2] * _ctm[2] + _ctm[3] * _ctm[3]));
 
         // Calculate PDF coordinates (Bottom-Left origin)
         // PDF Y is bottom-left. x,y is top-left.

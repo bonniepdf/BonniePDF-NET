@@ -348,7 +348,7 @@ public class RenderContext
         {
             var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
                 ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage,
-                RegisterShading);
+                RegisterShading, Resources.NoteImagePlacement);
             if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
             Canvas = pdfCanvas;
         }
@@ -382,7 +382,7 @@ public class RenderContext
 
         var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource,
             ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage,
-            RegisterShading);
+            RegisterShading, Resources.NoteImagePlacement);
         if (Tagging != null)
         {
             pdfCanvas.SetTaggingContext(Tagging);

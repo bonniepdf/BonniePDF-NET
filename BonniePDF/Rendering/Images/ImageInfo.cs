@@ -29,6 +29,12 @@ public class ImageInfo
     /// <summary>Number of color components (3=RGB, 4=CMYK, 1=Gray)</summary>
     public int Components { get; set; } = 3;
 
+    /// <summary>
+    /// Set by the placing element: embed this image at its source resolution, whatever the
+    /// document's resolution cap. Not part of the decoded image.
+    /// </summary>
+    public bool KeepResolution { get; set; }
+
     /// <summary>Whether the image has transparency (alpha channel)</summary>
     public bool HasAlpha { get; set; }
 

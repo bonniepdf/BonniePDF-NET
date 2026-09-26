@@ -17,6 +17,23 @@ behaviour, so the two files can be read side by side.
 
 ### Added
 
+- **Images are reduced to the resolution their printed size can use.** An image
+  used to be embedded at its source resolution however small it was drawn: a
+  2658 x 512 logo placed 175 pt wide was stored at about 1,090 pixels per inch,
+  173 KB of a 178 KB invoice. `DocumentSettings.MaxImageDpi` (default 288)
+  now caps that. When a PNG carries at least 1.5 times the pixels its drawn size
+  needs at the cap, the embedded copy is reduced to `floor(drawn size in points
+  x cap / 72)` pixels per axis, never enlarged. The reduction is an exact area
+  average in integer arithmetic with premultiplied alpha, so both
+  implementations produce identical pixels; it never re-encodes an image
+  lossily. The same invoice is 21 KB. An image used more than once is embedded
+  once, sized for its largest use. Set `MaxImageDpi` to `null` to embed every image
+  as it is, or set `Image.KeepResolution` on an image to exempt that image (one exempt
+  placement exempts a shared image everywhere it is used). JPEG, indexed-colour
+  and 16-bit images are always embedded as they are, and `Document.Diagnostics` carries an
+  `image.resampled` or `image.passed-through` entry for each image the cap
+  looked at, so an unexpectedly large file can be traced to its image.
+
 - **The `Svg` element draws an SVG document as vector content.** Paths,
   fills, strokes, gradients, clips and text drawn as glyph outlines go through
   the page's canvas like any other drawing, so the result stays sharp at any
