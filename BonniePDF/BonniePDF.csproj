@@ -10,7 +10,7 @@
     <Description>BonniePDF is a high-performance, zero-dependency PDF generation engine for .NET. Engineered for speed and compliance, it features an intuitive Fluent API for building complex documents, reports, integrated charting, and native PDF/A support.</Description>
     <Version>2026.7.2</Version>
     <Authors>CodeFocus Limited</Authors>
-    <Copyright>Copyright (c) 2026 CodeFocus Limited</Copyright>
+    <Copyright>Copyright © 2026 CodeFocus Limited</Copyright>
     <!-- Custom source-available Community License for eligible use; paid use is
          governed by the separately packed Commercial License Agreement.
          PackageLicenseFile, never PackageLicenseExpression: an expression must be an
