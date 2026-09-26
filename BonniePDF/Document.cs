@@ -8,6 +8,7 @@ using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Media;
 using BonniePDF.Elements.Lists;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
@@ -359,6 +360,7 @@ public class Document : IDisposable
     {
         LicenseChecker.ValidateLicense();
         ApplyDefaultStyleToTree();
+        PrepareSvgElements();
         return SvgPageExporter.Export(this, options);
     }
 
@@ -372,15 +374,17 @@ public class Document : IDisposable
     {
         LicenseChecker.ValidateLicense();
         ApplyDefaultStyleToTree();
+        PrepareSvgElements();
         return SvgPageExporter.ExportDocument(this, options);
     }
 
     /// <summary>Asynchronous sibling of <see cref="GenerateSvgDocument"/>.</summary>
-    public Task<SvgDocumentExport> GenerateSvgDocumentAsync(SvgPageExportOptions? options = null,
+    public async Task<SvgDocumentExport> GenerateSvgDocumentAsync(SvgPageExportOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(GenerateSvgDocument(options));
+        await PrepareSvgElementsAsync(cancellationToken).ConfigureAwait(false);
+        return GenerateSvgDocument(options);
     }
 
     /// <summary>
@@ -403,31 +407,29 @@ public class Document : IDisposable
 
     /// <summary>
     /// Asynchronous sibling of <see cref="GenerateSvgPages"/>. SVG export is
-    /// CPU-bound and runs synchronously; this overload exists for API symmetry
-    /// and cancellation support.
+    /// CPU-bound and runs synchronously, after calling any registered
+    /// <see cref="DocumentSettings.SvgRasterizer"/> the document's SVG elements need.
     /// </summary>
-    public Task<IReadOnlyList<string>> GenerateSvgPagesAsync(SvgPageExportOptions? options = null,
+    public async Task<IReadOnlyList<string>> GenerateSvgPagesAsync(SvgPageExportOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(GenerateSvgPages(options));
+        await PrepareSvgElementsAsync(cancellationToken).ConfigureAwait(false);
+        return GenerateSvgPages(options);
     }
 
     /// <summary>Asynchronous sibling of <see cref="GenerateSvgPage"/>.</summary>
-    public Task<string> GenerateSvgPageAsync(int pageIndex, SvgPageExportOptions? options = null,
+    public async Task<string> GenerateSvgPageAsync(int pageIndex, SvgPageExportOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(GenerateSvgPage(pageIndex, options));
+        await PrepareSvgElementsAsync(cancellationToken).ConfigureAwait(false);
+        return GenerateSvgPage(pageIndex, options);
     }
 
     /// <summary>Asynchronous sibling of <see cref="GenerateFirstPageSvg"/>.</summary>
     public Task<string> GenerateFirstPageSvgAsync(SvgPageExportOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(GenerateFirstPageSvg(options));
-    }
+        CancellationToken cancellationToken = default) => GenerateSvgPageAsync(0, options, cancellationToken);
 
     /// <summary>
     /// Internal implementation of Save that generates the PDF to a file
@@ -438,6 +440,7 @@ public class Document : IDisposable
         _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
+        PrepareSvgElements();
         using PdfWriter writer = new(path, Settings.Version);
         var serializer = new PdfDocumentSerializer(this, _diagnostics);
         serializer.Serialize(writer);
@@ -452,6 +455,7 @@ public class Document : IDisposable
         _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
+        PrepareSvgElements();
         using PdfWriter writer = new(stream, leaveOpen, Settings.Version);
         var serializer = new PdfDocumentSerializer(this, _diagnostics);
         serializer.Serialize(writer);
@@ -467,6 +471,7 @@ public class Document : IDisposable
         _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
+        await PrepareSvgElementsAsync(cancellationToken).ConfigureAwait(false);
         AsyncPdfWriter writer = new(path, Settings.Version);
         await using var _ = writer.ConfigureAwait(false);
         var serializer = new PdfDocumentSerializer(this, _diagnostics);
@@ -482,10 +487,60 @@ public class Document : IDisposable
         _diagnostics.Clear();
         ValidateSettings();
         ApplyDefaultStyleToTree();
+        await PrepareSvgElementsAsync(cancellationToken).ConfigureAwait(false);
         AsyncPdfWriter writer = new(stream, leaveOpen, Settings.Version);
         await using var _ = writer.ConfigureAwait(false);
         var serializer = new PdfDocumentSerializer(this, _diagnostics);
         await serializer.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Parses every <see cref="Svg"/> element before layout. One the registered
+    /// rasterizer would draw differently fails here, since only the async path can
+    /// call it.
+    /// </summary>
+    private void PrepareSvgElements()
+    {
+        bool rasterizerRegistered = Settings.SvgRasterizer is not null;
+        foreach (Svg svg in CollectSvgElements())
+            svg.Prepare(rasterizerRegistered);
+    }
+
+    /// <summary>
+    /// Parses every <see cref="Svg"/> element before layout, rasterizing what needs it.
+    /// Sequentially and in document order, so a rasterizer sees a deterministic
+    /// sequence of calls.
+    /// </summary>
+    private async Task PrepareSvgElementsAsync(CancellationToken cancellationToken)
+    {
+        foreach (Svg svg in CollectSvgElements())
+            await svg.PrepareAsync(Settings.SvgRasterizer, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>Every <see cref="Svg"/> element, once each, in document order.</summary>
+    private List<Svg> CollectSvgElements()
+    {
+        var found = new List<Svg>();
+        var seen = new HashSet<IElement>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
+        void Walk(IElement? element)
+        {
+            if (element is null || !seen.Add(element)) return;
+            if (element is Svg svg) found.Add(svg);
+            foreach (IElement child in element.GetChildren()) Walk(child);
+        }
+
+        foreach (Page page in _pages)
+            foreach (IElement element in page.Elements)
+                Walk(element);
+
+        // Calling each template with both page parities discovers alternating content.
+        foreach (int pageNumber in (ReadOnlySpan<int>)[1, 2])
+        {
+            Walk(Settings.HeaderTemplate?.Invoke(pageNumber));
+            Walk(Settings.FooterTemplate?.Invoke(pageNumber));
+        }
+
+        return found;
     }
 
     /// <summary>

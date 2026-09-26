@@ -132,6 +132,17 @@ public static class ContainerElementExtensions
         return c.Element(image);
     }
 
+    /// <summary>
+    /// Adds an SVG file drawn as vector content. Returns the Svg for further
+    /// configuration; for markup, add <c>new Svg { SvgData = ... }</c> with
+    /// <c>Element</c>.
+    /// </summary>
+    public static Svg Svg(this IContentContainer c, string path)
+    {
+        var svg = new Svg { FilePath = path };
+        return c.Element(svg);
+    }
+
     // --- Shapes ---
 
     /// <summary>

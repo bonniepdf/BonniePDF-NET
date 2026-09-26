@@ -440,7 +440,19 @@ public class PdfCanvas : ICanvas
         DrawAsArtifactFallback(() =>
         {
             PdfOperators.SaveState(_stream);
-            PdfOperators.Translate(_stream, pdfX, pdfY);
+            if (IsIdentityCtm())
+            {
+                PdfOperators.Translate(_stream, pdfX, pdfY);
+            }
+            else
+            {
+                // Under a transform, the image is placed in the canvas's own space: the
+                // transform, then the box's bottom-left corner with y pointing up.
+                PdfOperators.ConcatMatrix(_stream, _ctm[0], -_ctm[1], _ctm[2], -_ctm[3],
+                    _ctm[4] + _xOffset, Height - _yOffset - _ctm[5]);
+                PdfOperators.ConcatMatrix(_stream, 1, 0, 0, -1, x, y + height);
+            }
+
             // Combine EXIF orientation with the display-size scale into a
             // single cm matrix. For orientation 1 (the common case) this is
             // [width 0 0 height 0 0], byte-identical to a plain Scale, so
@@ -1050,20 +1062,43 @@ public class PdfCanvas : ICanvas
         }
     }
 
+    /// <summary>True while no transform is in effect.</summary>
+    private bool IsIdentityCtm() =>
+        _ctm[0] == 1f && _ctm[1] == 0f && _ctm[2] == 0f && _ctm[3] == 1f && _ctm[4] == 0f && _ctm[5] == 0f;
+
     /// <summary>Returns true when the local CTM has no rotation or skew (b and c are zero).</summary>
     private bool IsAxisAligned()
         => Math.Abs(_ctm[1]) < 1e-6f && Math.Abs(_ctm[2]) < 1e-6f;
 
     /// <summary>Applies stroke settings (line width, cap, join, dash, miter) to the PDF state.</summary>
+    /// <remarks>
+    /// A stroke's width and dash lengths are in user space, like its points; the points
+    /// are transformed at emit time, so these are scaled here. The scale is the square
+    /// root of the transform's absolute determinant: exact for uniform scaling and
+    /// rotation, and the geometric mean of the axis scales for a non-uniform transform.
+    /// Under a transform that does not scale, they are written unchanged.
+    /// </remarks>
     private void ApplyStrokeSettings(StrokeStyle style)
     {
-        PdfOperators.SetLineWidth(_stream, style.Width);
+        float k = MathF.Sqrt(MathF.Abs(_ctm[0] * _ctm[3] - _ctm[1] * _ctm[2]));
+        PdfOperators.SetLineWidth(_stream, k == 1f ? style.Width : style.Width * k);
         PdfOperators.SetLineCap(_stream, MapLineCap(style.LineCap));
         PdfOperators.SetLineJoin(_stream, MapLineJoin(style.LineJoin));
         if (style.MiterLimit != 10f)
             PdfOperators.SetMiterLimit(_stream, style.MiterLimit);
         if (style.DashPattern is { Length: > 0 })
-            PdfOperators.SetDashPattern(_stream, style.DashPattern, style.DashOffset);
+        {
+            if (k == 1f)
+            {
+                PdfOperators.SetDashPattern(_stream, style.DashPattern, style.DashOffset);
+            }
+            else
+            {
+                float[] dashes = new float[style.DashPattern.Length];
+                for (int i = 0; i < dashes.Length; i++) dashes[i] = style.DashPattern[i] * k;
+                PdfOperators.SetDashPattern(_stream, dashes, style.DashOffset * k);
+            }
+        }
     }
 
     private static int MapLineCap(LineCap cap) => cap switch

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Text;
@@ -310,6 +311,20 @@ public class DocumentSettings
     /// </para>
     /// </summary>
     public PageLabel? PageLabel { get; set; }
+
+    /// <summary>
+    /// Renders SVG markup to PNG bytes, or null for none.
+    /// </summary>
+    /// <remarks>
+    /// With one set, an <see cref="Elements.Media.Svg"/> element whose
+    /// <see cref="Elements.Media.Svg.StrictUnsupportedFeatures"/> is false draws what the
+    /// SVG importer cannot draw as vector content - filters, masks, stylesheets, ... -
+    /// as images in their place, instead of skipping them. BonniePDF rasterizes nothing
+    /// itself: any renderer will do. It is called on the async generate paths only; a
+    /// synchronous generate whose document would need it fails rather than drawing
+    /// something different.
+    /// </remarks>
+    public Func<string, Task<byte[]>>? SvgRasterizer { get; set; }
 
     /// <summary>
     /// Gets the actual page size with orientation applied

@@ -94,6 +94,24 @@ public static class FontFamilyResolver
     }
 
     /// <summary>
+    /// Resolves a family name as <see cref="Resolve"/> does, but only when the name is
+    /// known: a registered custom family, a standard family, or one of their aliases.
+    /// Returns null rather than falling back to Helvetica, and never treats the name
+    /// as a file path.
+    /// </summary>
+    /// <remarks>
+    /// For callers that must not substitute a font nobody chose, such as imported SVG,
+    /// whose <c>font-family</c> lists fall through to the next name instead.
+    /// </remarks>
+    public static string? ResolveKnown(string family, FontWeight weight, bool italic)
+    {
+        bool isBold = weight >= FontWeight.SemiBold;
+        if (CustomFamilies.TryGetValue(family, out FontFamilyDefinition? definition))
+            return definition.GetVariant(isBold, italic);
+        return StandardFonts.TryGetValue((ResolveAlias(family), isBold, italic), out string? fontName) ? fontName : null;
+    }
+
+    /// <summary>
     /// Registers a custom font family with paths to its variant TTF files.
     /// </summary>
     public static void RegisterFamily(string familyName, FontFamilyDefinition definition)
