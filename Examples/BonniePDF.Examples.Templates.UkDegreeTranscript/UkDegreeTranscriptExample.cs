@@ -57,7 +57,7 @@ public static class UkDegreeTranscriptExample
             Language = "en-GB",
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"University of Wessexbridge  -  Transcript 20458812  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                Text = $"Sample University  -  Transcript 20458812  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8,
                 TextColor = Muted,
@@ -66,9 +66,9 @@ public static class UkDegreeTranscriptExample
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Ink);
 
         Document doc = new(settings);
-        doc.Metadata.Title = "Academic Transcript - Alexandra R. Bennett";
-        doc.Metadata.Author = "University of Wessexbridge";
-        doc.Metadata.Subject = "Official degree transcript with UK honours classification (fictional).";
+        doc.Metadata.Title = "Academic Transcript - Sample Student";
+        doc.Metadata.Author = "Sample University";
+        doc.Metadata.Subject = "Official degree transcript with UK honours classification (sample).";
 
         doc.Add(Header());
         doc.Add(BlueRule());
@@ -86,7 +86,7 @@ public static class UkDegreeTranscriptExample
         Grid header = new(2.4f, 1) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 0, 0, 6) };
 
         VerticalStack uni = new();
-        uni.Add(new TextBlock { Text = "UNIVERSITY OF WESSEXBRIDGE", FontName = StandardFonts.HelveticaBold, FontSize = 16, TextColor = Navy });
+        uni.Add(new TextBlock { Text = "SAMPLE UNIVERSITY", FontName = StandardFonts.HelveticaBold, FontSize = 16, TextColor = Navy });
         uni.Add(new TextBlock { Text = "Founded 1887 - Registrar's Office", FontSize = 9, TextColor = Muted, Margin = new Thickness(0, 2, 0, 0) });
 
         header.AddRow(
@@ -116,13 +116,13 @@ public static class UkDegreeTranscriptExample
     {
         Grid details = new(1, 1) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 0, 0, 18) };
         VerticalStack left = new();
-        left.Add(Kv("Student", "Alexandra R. Bennett"));
+        left.Add(Kv("Student", "Sample Student"));
         left.Add(Kv("Student ID", "20458812"));
         left.Add(Kv("Date of birth", "14 March 2003"));
 
         VerticalStack right = new();
         right.Add(Kv("Programme", "BSc (Hons) Computer Science"));
-        right.Add(Kv("Awarding body", "University of Wessexbridge"));
+        right.Add(Kv("Awarding body", "Sample University"));
         right.Add(Kv("Date conferred", "15 July 2026"));
 
         details.AddRow(left, right);
@@ -192,13 +192,13 @@ public static class UkDegreeTranscriptExample
         VerticalStack text = new();
         text.Add(H2("Verification"));
         text.Add(Body(
-            "This is an official record issued by the University of Wessexbridge. Scan the code or visit " +
-            "verify.wessexbridge.ac.uk and enter transcript reference 20458812 to confirm authenticity. " +
+            "This is an official record issued by Sample University. Scan the code or visit " +
+            "verify.sample-university.example and enter transcript reference 20458812 to confirm authenticity. " +
             "The grading scheme is defined in the University Academic Regulations."));
 
         QRCode qr = new()
         {
-            Data = "https://verify.wessexbridge.ac.uk/t/20458812",
+            Data = "https://verify.sample-university.example/t/20458812",
             Size = 92,
             QuietZone = 1,
             ErrorCorrection = QrErrorCorrection.Quartile,

@@ -85,7 +85,7 @@ public static class GrantAwardLetterExample
         doc.Add(AddressBlock());
 
         doc.Add(H1("Decision on your grant application", "decision"));
-        doc.Add(Body("Dear Ms Adeyemi,", bold: true, mb: 8));
+        doc.Add(Body("Dear Sample Recipient,", bold: true, mb: 8));
         doc.Add(Body(
             "We are pleased to tell you that your application to the Sample Community Fund has been " +
             "successful. This letter explains what we have awarded, how your grant is paid, when it " +
@@ -173,7 +173,7 @@ public static class GrantAwardLetterExample
 
         // One TextBlock with hard line breaks: the address tags as a single
         // paragraph under PDF/UA instead of five.
-        TextBlock addr = Body("Ms R. Adeyemi\nRiverside Youth Music Project\n14 Canalside Walk\nWestford\nWF3 2LP", mb: 0);
+        TextBlock addr = Body("Sample Recipient\nSample Community Project\n14 Sample Walk\nSample Town\nST3 2LP", mb: 0);
 
         VerticalStack meta = new();
         meta.Add(Body("Issued 4 August 2026", align: TextAlignment.Right, mb: 0));

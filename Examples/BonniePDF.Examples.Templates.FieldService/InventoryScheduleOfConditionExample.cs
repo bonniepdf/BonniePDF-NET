@@ -35,8 +35,8 @@ public static class InventoryScheduleOfConditionExample
     private const string Property = "14 Sample Road, Sample Town, ST4 7QN";
     private const string PropertyType = "Two-bedroom first-floor flat, unfurnished with white goods";
     private const string LandlordAgent = "Sample Lettings Ltd";
-    private const string Clerk = "D. Novak — Inventory Clerk (IC-0092)";
-    private const string Tenant = "K. Aliyev";
+    private const string Clerk = "Sample Clerk — Inventory Clerk (IC-0092)";
+    private const string Tenant = "Sample Tenant";
     private const string InspectionType = "Check-in";
     private const string Weather = "Dry, 16°C — all rooms inspected in daylight";
 

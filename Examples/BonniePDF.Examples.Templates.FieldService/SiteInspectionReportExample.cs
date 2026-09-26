@@ -40,7 +40,7 @@ public static class SiteInspectionReportExample
     private const string Site = "Sample Site B — Building 4";
     private const string Client = "Sample Client Ltd";
     private const string Contractor = "Sample Contractor Ltd";
-    private const string Inspector = "J. Mensah — Site Manager";
+    private const string Inspector = "Sample Inspector — Site Manager";
     private const string Weather = "Dry, 14°C, light wind";
 
     private static readonly DateTime Inspected = new(2026, 9, 8);
@@ -234,8 +234,8 @@ public static class SiteInspectionReportExample
         doc.Add(SignatureRow(
         [
             SignatureSlot("Inspected by", Inspector, ShortDate(Inspected)),
-            SignatureSlot("Received — principal contractor", "T. Bergström — Project Manager"),
-            SignatureSlot("Client representative", "R. Whitfield — Facilities Manager"),
+            SignatureSlot("Received — principal contractor", "Sample Manager — Project Manager"),
+            SignatureSlot("Client representative", "Sample Manager — Facilities Manager"),
         ]));
 
         doc.Add(Body(

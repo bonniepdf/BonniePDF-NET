@@ -69,7 +69,7 @@ public static class PatientSummaryExample
 
         // ── 1. Patient card (teal bleed band) ─────────────────────────────────
         VerticalStack idLine = new();
-        idLine.Add(Tb("Eleanor M. Whitfield", 15, Color.White, bold: true));
+        idLine.Add(Tb("Sample Patient", 15, Color.White, bold: true));
         idLine.Add(Tb("MRN 00482931  ·  DOB 14 Mar 1979  ·  Female", 9, Cream, top: 5));
 
         Container patientBand = new()
@@ -81,7 +81,7 @@ public static class PatientSummaryExample
 
         VerticalStack detailsLeft = new();
         detailsLeft.Add(DetailRow("Blood type", "O positive"));
-        detailsLeft.Add(DetailRow("Primary GP", "Dr. A. Okafor"));
+        detailsLeft.Add(DetailRow("Primary GP", "Dr. A. Sample"));
         detailsLeft.Add(DetailRow("Phone", "+44 7700 900482"));
 
         VerticalStack detailsRight = new();

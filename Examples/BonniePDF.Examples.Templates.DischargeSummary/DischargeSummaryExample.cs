@@ -35,8 +35,8 @@ public static class DischargeSummaryExample
     private const string DateOfBirth = "14 Mar 1958";
     private const string Address = "Sample Address, Sample Town, ST2 6PL";
     private const string Ward = "Sample Ward 6 — Cardiology";
-    private const string Consultant = "Dr S. Rahman — Consultant Cardiologist";
-    private const string PreparedBy = "Dr A. Lindqvist — Registrar";
+    private const string Consultant = "Dr S. Sample — Consultant Cardiologist";
+    private const string PreparedBy = "Dr A. Sample — Registrar";
     private const string GpPractice = "Sample Medical Practice, Sample Town";
     private const string Method = "Emergency admission via the emergency department";
     private const string Destination = "Discharged home, independent";

@@ -162,7 +162,7 @@ public static class FacturXInvoiceExample
 
         Container payCell = Labelled(
             "PAYMENT",
-            Lines(Muted, "IBAN: DE21 1001 0000 0012 3456 78", "BIC: PBNKDEFFXXX", "Deutsche Postbank, Berlin"),
+            Lines(Muted, "IBAN: DE21 1001 0000 0012 3456 78", "BIC: SMPLDEFFXXX", "Sample Bank, Berlin"),
             Accent);
         payCell.Padding = new Thickness(0, 0, 20, 0);
 

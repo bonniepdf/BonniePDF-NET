@@ -62,7 +62,7 @@ public static class AuditReportExample
 
         Document doc = new(settings);
         doc.Metadata.Title = "Data Protection & Information Security Audit - AR-2026-014";
-        doc.Metadata.Author = "Aegis Assurance LLP";
+        doc.Metadata.Author = "Sample Assurance LLP";
         doc.Metadata.Subject = "GDPR (EU/UK) and ISO/IEC 27001:2022 audit report (fictional).";
 
         AddTitlePage(doc, longDate);
@@ -93,7 +93,7 @@ public static class AuditReportExample
         meta.Add(MetaItem("Report ref", "AR-2026-014"), 1);
         meta.Add(MetaItem("Audit period", "Apr-Jun 2026"), 1);
         meta.Add(MetaItem("Issued", longDate), 1);
-        meta.Add(MetaItem("Auditor", "Aegis Assurance LLP"), 1);
+        meta.Add(MetaItem("Auditor", "Sample Assurance LLP"), 1);
         doc.Add(meta);
 
         doc.Add(H2("Executive summary"));

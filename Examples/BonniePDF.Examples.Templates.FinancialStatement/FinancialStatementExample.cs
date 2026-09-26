@@ -111,7 +111,7 @@ public static class FinancialStatementExample
         doc.Add(RuleLine(Rule, 0.6f));
         foreach (StatementLine line in Position) doc.Add(RenderLine(line));
         doc.Add(Gap(12));
-        doc.Add(Sub("These financial statements were approved by the Board of Directors and authorised for issue on 20 June 2026, and are signed on its behalf by A. Whitfield, Director."));
+        doc.Add(Sub("These financial statements were approved by the Board of Directors and authorised for issue on 20 June 2026, and are signed on its behalf by Sample Director, Director."));
 
         return doc;
     }
