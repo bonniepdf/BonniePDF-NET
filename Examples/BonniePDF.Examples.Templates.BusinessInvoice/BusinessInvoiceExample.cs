@@ -126,7 +126,7 @@ public static class BusinessInvoiceExample
         });
         // One TextBlock with hard line breaks: the address tags as a single
         // paragraph under PDF/UA instead of four.
-        billToStack.Add(new TextBlock { Text = "Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701" });
+        billToStack.Add(new TextBlock { Text = "Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701" });
 
         // Ship To column
         VerticalStack shipToStack = new();
@@ -138,7 +138,7 @@ public static class BusinessInvoiceExample
             TextColor = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        shipToStack.Add(new TextBlock { Text = "Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701" });
+        shipToStack.Add(new TextBlock { Text = "Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701" });
 
         // Details column
         VerticalStack detailsStack = new();
@@ -460,7 +460,7 @@ public static class BusinessInvoiceExample
             Margin = new Thickness(0, 0, 0, 4)
         });
         // Each column's lines share one style and flow as a single paragraph.
-        bankStack.Add(new TextBlock { Text = "Chase Bank\nRouting: 021000021\nAccount: ****7842", FontSize = 8, TextColor = TextMedium });
+        bankStack.Add(new TextBlock { Text = "Sample Bank\nRouting: 021000021\nAccount: ****7842", FontSize = 8, TextColor = TextMedium });
 
         // Other payment
         VerticalStack otherStack = new();

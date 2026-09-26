@@ -61,7 +61,7 @@ public static class LabReportExample
             Language = "en-GB",
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"CONFIDENTIAL - Patient: WESTON, Harold (Patient ID CGH-9434765919)  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                Text = $"CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8,
                 TextColor = Muted,
@@ -71,8 +71,8 @@ public static class LabReportExample
 
         Document doc = new(settings);
         doc.Metadata.Title = "Laboratory Report - specimen L26-118842";
-        doc.Metadata.Author = "City General Hospital Pathology Services";
-        doc.Metadata.Subject = "Pathology laboratory report with reference ranges and flags (fictional).";
+        doc.Metadata.Author = "Sample Hospital Pathology Services";
+        doc.Metadata.Subject = "Pathology laboratory report with reference ranges and flags (sample).";
 
         doc.Add(Header());
         doc.Add(BlueRule());
@@ -102,7 +102,7 @@ public static class LabReportExample
         VerticalStack org = new();
         org.Add(new TextBlock
         {
-            Text = "City General Hospital Pathology Services",
+            Text = "Sample Hospital Pathology Services",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
             TextColor = ClinicalBlue,
@@ -155,11 +155,11 @@ public static class LabReportExample
 
         VerticalStack patient = new();
         patient.Add(SectionLabel("PATIENT"));
-        patient.Add(KeyValue("Name", "WESTON, Harold"));
+        patient.Add(KeyValue("Name", "SAMPLE, Harold"));
         patient.Add(KeyValue("Date of birth", "02 Nov 1951 (74y)"));
         patient.Add(KeyValue("Sex", "Male"));
-        patient.Add(KeyValue("Patient ID", "CGH-9434765919"));
-        patient.Add(KeyValue("Hospital no.", "CGH-2208814"));
+        patient.Add(KeyValue("Patient ID", "SH-9434765919"));
+        patient.Add(KeyValue("Hospital no.", "SH-2208814"));
 
         VerticalStack specimen = new();
         specimen.Add(SectionLabel("SPECIMEN"));
@@ -167,7 +167,7 @@ public static class LabReportExample
         specimen.Add(KeyValue("Collected", "06 Jul 2026 08:14"));
         specimen.Add(KeyValue("Received", "06 Jul 2026 09:02"));
         specimen.Add(KeyValue("Reported", "06 Jul 2026 11:37"));
-        specimen.Add(KeyValue("Requested by", "Dr A. Kaur, Ward 12"));
+        specimen.Add(KeyValue("Requested by", "Dr A. Sample, Ward 12"));
 
         info.AddRow(patient, specimen);
         return info;

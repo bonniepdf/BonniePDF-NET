@@ -37,8 +37,8 @@ public static class PermitToWorkExample
     private const string Site = "Sample Site B — Building 4, Plant room 2";
     private const string Project = "Sample Project — Phase 2 fit-out";
     private const string Contractor = "Sample Contractor Ltd";
-    private const string IssuedBy = "M. Delgado — Authorised Person (AP-118)";
-    private const string AcceptedBy = "A. Okafor — Supervising Engineer (Eng. 4471)";
+    private const string IssuedBy = "Sample Issuer — Authorised Person (AP-118)";
+    private const string AcceptedBy = "Sample Engineer — Supervising Engineer (Eng. 4471)";
     private const string RiskAssessment = "RA-2026-0117 rev. C";
     private const string MethodStatement = "MS-2026-0088 rev. B";
 
@@ -103,19 +103,19 @@ public static class PermitToWorkExample
             "Electrical — lighting and power, plant room 2",
             "DB-2B ways 4, 6, 8",
             "Locked off, personal padlock, caution notice applied",
-            "A. Okafor"),
+            "Sample Engineer"),
         new(
             "I-2",
             "Fire detection — zone 14",
             "Panel FP-1, zone isolate",
             "Zone isolated at panel, building manager informed",
-            "M. Delgado"),
+            "Sample Issuer"),
         new(
             "I-3",
             "Heating — LTHW flow and return to AHU-04",
             "Valves V-204 / V-205",
             "Valves closed, chained, and tagged",
-            "A. Okafor"),
+            "Sample Engineer"),
     ];
 
     private static readonly string[] Precautions =
@@ -233,9 +233,9 @@ public static class PermitToWorkExample
             HeaderTextColor = Color.White,
         };
         gas.AddHeader(Th("Measurement"), Th("Reading"), Th("Acceptable range"), Th("Result"), Th("Tested by"));
-        gas.AddRow(Td("Oxygen"), Td("20.9 %"), Td("19.5 – 23.5 %", color: Muted), Pass(), Td("M. Delgado"));
-        gas.AddRow(Td("Flammable gas (LEL)"), Td("0 %"), Td("< 10 %", color: Muted), Pass(), Td("M. Delgado"));
-        gas.AddRow(Td("Carbon monoxide"), Td("0 ppm"), Td("< 30 ppm", color: Muted), Pass(), Td("M. Delgado"));
+        gas.AddRow(Td("Oxygen"), Td("20.9 %"), Td("19.5 – 23.5 %", color: Muted), Pass(), Td("Sample Issuer"));
+        gas.AddRow(Td("Flammable gas (LEL)"), Td("0 %"), Td("< 10 %", color: Muted), Pass(), Td("Sample Issuer"));
+        gas.AddRow(Td("Carbon monoxide"), Td("0 ppm"), Td("< 30 ppm", color: Muted), Pass(), Td("Sample Issuer"));
         doc.Add(gas);
 
         doc.Add(Body(

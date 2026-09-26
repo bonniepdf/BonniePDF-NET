@@ -33,7 +33,7 @@ public static class JobSheetExample
     private const string JobNumber = "JOB-2026-04817";
     private const string OrderReference = "PO 55-2026-0912";
     private const string Priority = "P2 — Same working day";
-    private const string Engineer = "A. Okafor (Eng. 4471)";
+    private const string Engineer = "Sample Engineer (Eng. 4471)";
     private const string Client = "Sample Client Ltd";
     private const string Site = "Sample Site B — Building 4, Level 2";
     private const string Asset = "AHU-04 — Air handling unit, plant room 2";
@@ -48,10 +48,10 @@ public static class JobSheetExample
 
     private static readonly LabourLine[] Labour =
     [
-        new("Attendance and fault diagnosis", "A. Okafor", 1.5m, 68m),
-        new("Bearing replacement — supply fan", "A. Okafor", 2.25m, 68m),
-        new("Belt tension and alignment check", "A. Okafor", 0.5m, 68m),
-        new("Run-up test and handover", "A. Okafor", 0.75m, 68m),
+        new("Attendance and fault diagnosis", "Sample Engineer", 1.5m, 68m),
+        new("Bearing replacement — supply fan", "Sample Engineer", 2.25m, 68m),
+        new("Belt tension and alignment check", "Sample Engineer", 0.5m, 68m),
+        new("Run-up test and handover", "Sample Engineer", 0.75m, 68m),
     ];
 
     private sealed record PartLine(string Code, string Description, int Quantity, decimal UnitPrice, bool Fitted);
@@ -332,7 +332,7 @@ public static class JobSheetExample
         doc.Add(SignatureRow(
         [
             SignatureSlot("Attending engineer", Engineer, ShortDate(Completed)),
-            SignatureSlot("Customer representative", "R. Whitfield — Facilities Manager"),
+            SignatureSlot("Customer representative", "Sample Manager — Facilities Manager"),
         ]));
 
         doc.Add(Body(

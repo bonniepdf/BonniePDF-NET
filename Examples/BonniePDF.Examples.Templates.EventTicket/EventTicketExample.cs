@@ -77,7 +77,7 @@ public static class EventTicketExample
             TextColor = Cream,
             Margin = new Thickness(0, 0, 0, 3),
         });
-        info.Add(Tb("Main Stage, Victoria Park, London", 10, BodyCol, bottom: 12));
+        info.Add(Tb("Main Stage, Sample Park, Sample City", 10, BodyCol, bottom: 12));
 
         Grid facts = new(1f, 1f, 1f) { Border = Border.None, CellPadding = 0 };
         facts.AddRow(
@@ -114,7 +114,7 @@ public static class EventTicketExample
 
         QRCode qr = new()
         {
-            Data = "https://tix.aurora.example/t/ASF26-4471-XK",
+            Data = "https://tix.sample.example/t/ASF26-4471-XK",
             Size = 96,
             QuietZone = 1,
             ErrorCorrection = QrErrorCorrection.Quartile,

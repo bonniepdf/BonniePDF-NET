@@ -33,8 +33,8 @@ public static class PurchaseOrderExample
     private const string Incoterms = "DAP — Sample Distribution Centre";
     private const string Requisition = "REQ-2026-1188";
     private const string CostCentre = "CC-4420 — Facilities";
-    private const string RaisedBy = "L. Fontaine — Buyer";
-    private const string ApprovedBy = "H. Yusuf — Head of Procurement";
+    private const string RaisedBy = "Sample Buyer — Buyer";
+    private const string ApprovedBy = "Sample Manager — Head of Procurement";
 
     private static readonly DateTime Raised = new(2026, 9, 2);
     private static readonly DateTime Required = new(2026, 9, 23);

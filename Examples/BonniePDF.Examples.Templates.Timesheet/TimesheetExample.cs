@@ -29,9 +29,9 @@ namespace BonniePDF.Examples.Templates.Timesheet;
 public static class TimesheetExample
 {
     private const string Reference = "TS-2026-W37-0114";
-    private const string Consultant = "N. Bartoli — Senior Consultant";
+    private const string Consultant = "Sample Consultant — Senior Consultant";
     private const string EmployeeId = "EMP-0114";
-    private const string Approver = "H. Yusuf — Engagement Manager";
+    private const string Approver = "Sample Manager — Engagement Manager";
     private const decimal ContractedHours = 37.5m;
     private const decimal UtilisationTarget = 0.8m;
 
