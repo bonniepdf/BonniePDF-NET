@@ -229,6 +229,38 @@ behaviour, so the two files can be read side by side.
 
 ### Fixed
 
+- **`CurrentPageNumber()` and `TotalPages()` printed their placeholders.** In
+  `page.Footer().Text(t => { t.CurrentPageNumber(); t.Span(" / "); t.TotalPages(); })`
+  the footer read `{{CurrentPage}} / {{TotalPages}}`, because `RichText` did not
+  substitute the page tokens that `TextBlock` does. It now does: the current page
+  number is filled in as each page is drawn, and the total is a deferred object that
+  resolves once the whole document is laid out, exactly as in a `TextBlock`. Each
+  token reserves the width of two digits in layout, and alignment corrects for the
+  page number's real width. Rich text with no tokens is unchanged.
+- **Rich text sized by its container no longer wraps.** A container that gives a text
+  its own preferred width as the maximum (a centred footer, an auto-width column)
+  could wrap the last word onto a second line: preferred width summed whole span
+  widths, while line breaking measures word by word, and the two disagree by
+  float rounding and by trailing spaces. Preferred width now comes from the same
+  word flow that breaks lines. A centred "Page 1 of 2" footer stays on one line.
+
+- **Styling on a fluent rich-text span was silently dropped.** In
+  `container.Text(t => { t.Span("Label: ").Bold(); t.Span("value"); })` the
+  `.Bold()`, `.FontColor()`, `.FontFamily()` and every other span modifier
+  ran after the span had already been copied, so they changed nothing and the
+  text came out as one run in the default style. The same applied to `Line`,
+  `CurrentPageNumber` and `TotalPages`. Spans now take their final style. A
+  regression from the change that made rich text snapshot span styles.
+- **`DefaultTextStyle` did not apply to fluent rich text.** `page.DefaultTextStyle(...)`
+  reached `Text("...")` but not `Text(t => ...)`, which kept its own Helvetica 12
+  default. Rich text now starts from the page's default style, and a span still
+  overrides it field by field.
+- **A footer whose content is in a container was not drawn.** `page.Footer().AlignCenter().Text(...)`,
+  or any padded or aligned footer, produced nothing: a container checks that it
+  fits above the bottom margin, the footer sits inside the bottom margin, so it
+  broke the page in the middle of painting the footer and lost the content.
+  Header and footer chrome no longer paginates.
+
 - **PNG images with an alpha channel decoded wrongly when their rows used the
   Up, Average or Paeth filter.** The loader reset its record of the previous row
   for every row of an RGBA or grey-plus-alpha PNG, so those filters were applied

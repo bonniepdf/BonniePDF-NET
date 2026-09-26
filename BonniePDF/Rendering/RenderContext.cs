@@ -524,6 +524,12 @@ public class RenderContext
     /// </summary>
     public void NewPage()
     {
+        // Header and footer chrome is painted at a fixed position in the margin band, which lies
+        // outside the body's content area. An element in it that checks "does this fit?" (a
+        // Container, say) would see the band as overflow and break the page in the middle of
+        // painting the chrome, losing the content. Chrome never paginates.
+        if (ChromeReservationSuspended) return;
+
         // Layout capture: the Y where content stopped on the outgoing page, taken
         // before the reset below so open nodes can close their rect at the boundary.
         float outgoingBottomY = CurrentY;
