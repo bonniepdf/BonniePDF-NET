@@ -118,77 +118,7 @@ public class Image : ElementBase, IRoleProvider, IAltTextProvider
         ImageInfo info = GetImageInfo();
 
         // Display dimensions account for EXIF orientation (5-8 swap W/H).
-        float nativeWidth = info.DisplayWidth;
-        float nativeHeight = info.DisplayHeight;
-        float aspectRatio = nativeWidth / nativeHeight;
-
-        // Use specified width or available width
-        float targetWidth = Width ?? availableWidth;
-        float targetHeight = Height ?? (MaintainAspectRatio ? targetWidth / aspectRatio : nativeHeight);
-
-        displayWidth = targetWidth;
-        displayHeight = targetHeight;
-
-        // Apply fit mode
-        switch (FitMode)
-        {
-            case ImageFitMode.Contain:
-                // Scale to fit within bounds, maintain aspect ratio
-                if (Width.HasValue && Height.HasValue)
-                {
-                    float widthRatio = Width.Value / nativeWidth;
-                    float heightRatio = Height.Value / nativeHeight;
-                    float scale = Math.Min(widthRatio, heightRatio);
-                    displayWidth = nativeWidth * scale;
-                    displayHeight = nativeHeight * scale;
-                }
-                else if (Width.HasValue)
-                {
-                    displayWidth = Width.Value;
-                    displayHeight = displayWidth / aspectRatio;
-                }
-                else if (Height.HasValue)
-                {
-                    displayHeight = Height.Value;
-                    displayWidth = displayHeight * aspectRatio;
-                }
-
-                break;
-
-            case ImageFitMode.Cover:
-                // Scale to fill bounds, maintain aspect ratio, crop if needed
-                if (Width.HasValue && Height.HasValue)
-                {
-                    float widthRatio = Width.Value / nativeWidth;
-                    float heightRatio = Height.Value / nativeHeight;
-                    float scale = Math.Max(widthRatio, heightRatio);
-                    displayWidth = nativeWidth * scale;
-                    displayHeight = nativeHeight * scale;
-                }
-
-                break;
-
-            case ImageFitMode.Fill:
-                // Stretch to fill, ignore aspect ratio
-                displayWidth = Width ?? availableWidth;
-                displayHeight = Height ?? nativeHeight;
-                break;
-
-            case ImageFitMode.FitHeight:
-                // Scale to fit height, maintain aspect ratio
-                if (Height.HasValue)
-                {
-                    displayHeight = Height.Value;
-                    displayWidth = displayHeight * aspectRatio;
-                }
-
-                break;
-
-            case ImageFitMode.ActualSize:
-                // Use native dimensions (1 pixel = 1 point)
-                displayWidth = nativeWidth;
-                displayHeight = nativeHeight;
-                break;
-        }
+        (displayWidth, displayHeight) = ImageBox.Resolve(
+            Width, Height, FitMode, MaintainAspectRatio, info.DisplayWidth, info.DisplayHeight, availableWidth);
     }
 }

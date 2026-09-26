@@ -21,7 +21,7 @@ public class BonniePdfCanvasSinkTests
     {
         const string svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\">" +
                            "<path d=\"M1 1 L9 9\" stroke=\"#0000ff\" stroke-width=\"2\" fill=\"none\"/></svg>";
-        Assert.Equal("q\nq\n2 w\n0 J\n0 j\n4 M\n0 0 1 RG\n2 998 m\n18 982 l\nS\nQ\nQ\n", Draw(svg, 20, 20));
+        Assert.Equal("q\nq\n4 w\n0 J\n0 j\n4 M\n0 0 1 RG\n2 998 m\n18 982 l\nS\nQ\nQ\n", Draw(svg, 20, 20));
     }
 
     [Fact]

@@ -84,6 +84,19 @@ public class PdfCanvasParityTests
     }
 
     [Fact]
+    public void ScalesAStrokesWidthAndDashesWithTheTransformLikeItsPoints()
+    {
+        string Stroke(Action<PdfCanvas> transform) => Draw(c =>
+        {
+            transform(c);
+            LinePath(c);
+            c.StrokeCurrentPath(new StrokeStyle { Paint = Color.Black, Width = 1.5f, DashPattern = [2, 1], DashOffset = 0.5f });
+        });
+        Assert.Equal("q\n3 w\n0 J\n0 j\n[4 2] 1 d\n0 0 0 RG\n0 1000 m\n20 980 l\nS\nQ\n", Stroke(c => c.Scale(2, 2)));
+        Assert.Equal("q\n1.5 w\n0 J\n0 j\n[2 1] 0.5 d\n0 0 0 RG\n5 995 m\n15 985 l\nS\nQ\n", Stroke(c => c.Translate(5, 5)));
+    }
+
+    [Fact]
     public void WritesNothingForAnEmptyPath() =>
         Assert.Equal(string.Empty, Draw(c =>
         {

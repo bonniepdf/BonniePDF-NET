@@ -168,7 +168,7 @@ byte[] bytes = await document.GenerateBytesAsync();
 | Text                  | Standard PDF fonts, embedded TrueType/OpenType fonts with subsetting, Unicode, rich text, alignment, decoration and fallback fonts      |
 | Tables and lists      | Weighted columns, styled cells, repeating headers, ordered/unordered lists and nested content                                           |
 | Charts                | Bar, grouped bar, line, area, pie, lollipop and dot-plot charts rendered as PDF vectors or exported as SVG                              |
-| Images and codes      | JPEG, PNG with alpha, contain/cover/fill modes, image masking, QR, Data Matrix and linear barcodes                                      |
+| Images and codes      | JPEG, PNG with alpha, SVG drawn as vectors, contain/cover/fill modes, image masking, QR, Data Matrix and linear barcodes                                      |
 | Standards             | PDF/A-1 through PDF/A-4, PDF/UA-1 tagging, XMP metadata, output intents and compliance preflight                                        |
 | Security and exchange | AES-256 encryption, permissions, attachments and Factur-X/ZUGFeRD e-invoices                                                            |
 | Runtime               | .NET 8+, sync and async generation, no native dependencies                                                                              |
