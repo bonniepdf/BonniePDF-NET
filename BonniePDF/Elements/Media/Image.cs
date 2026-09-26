@@ -31,6 +31,13 @@ public class Image : ElementBase, IRoleProvider, IAltTextProvider
     public bool MaintainAspectRatio { get; set; } = true;
 
     /// <summary>
+    /// When <c>true</c>, the image is embedded at its source resolution regardless of
+    /// <see cref="Configuration.DocumentSettings.MaxImageDpi"/>. If the same image is placed
+    /// more than once, one placement with this set keeps the whole embedded copy at full resolution.
+    /// </summary>
+    public bool KeepResolution { get; set; }
+
+    /// <summary>
     /// Alternate text description for accessibility. When the document
     /// opts into <c>AccessibilityMode.PdfUa1</c>, this populates the
     /// <c>/Alt</c> entry on the structure element wrapping the image.
@@ -80,6 +87,7 @@ public class Image : ElementBase, IRoleProvider, IAltTextProvider
 
         // Calculate display dimensions
         CalculateDimensions(contentWidth, out float displayWidth, out float displayHeight);
+        info.KeepResolution = KeepResolution;
 
         // Calculate position (Screen coordinates)
         float x = ctx.CurrentX;

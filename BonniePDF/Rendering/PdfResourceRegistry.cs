@@ -495,8 +495,7 @@ public class PdfResourceRegistry
     /// </summary>
     public int RegisterImage(ImageInfo info)
     {
-        byte[] dataToHash = info.OriginalData != null && info.OriginalData.Length > 0 ? info.OriginalData : info.Data;
-        string key = "img_" + ComputeHash(dataToHash);
+        string key = ImageKey(info);
 
         if (!ImageIdMap.TryGetValue(key, out int existingImageId))
         {
@@ -508,6 +507,95 @@ public class PdfResourceRegistry
 
         return existingImageId;
     }
+
+    /// <summary>
+    /// The resolution cap for embedded images, in pixels per inch; <c>null</c> embeds every image
+    /// at its source resolution. Wired from the document's settings.
+    /// </summary>
+    public int? MaxImageDpi { get; set; }
+
+    /// <summary>The largest size each image is painted at, per axis of the stored pixels.</summary>
+    private sealed class ImagePlacements
+    {
+        public long MaxWidthMilliPoints;
+        public long MaxHeightMilliPoints;
+        public bool KeepResolution;
+    }
+
+    private readonly ConcurrentDictionary<string, ImagePlacements> _imagePlacements = new();
+
+    /// <summary>
+    /// Records that <paramref name="image"/> is painted <paramref name="widthPoints"/> x
+    /// <paramref name="heightPoints"/> on the page (its display size, already scaled by any
+    /// transform). One embedded copy serves every placement, so it keeps the largest size asked
+    /// of it, and one placement that keeps full resolution keeps it for all of them.
+    /// </summary>
+    public void NoteImagePlacement(ImageInfo image, float widthPoints, float heightPoints)
+    {
+        // Lengths are along the stored pixel axes: EXIF orientations 5-8 swap them for display.
+        (float storedWidth, float storedHeight) = image.Orientation is >= 5 and <= 8
+            ? (heightPoints, widthPoints)
+            : (widthPoints, heightPoints);
+
+        long widthMilli = (long)Math.Round((double)storedWidth * 1000, MidpointRounding.AwayFromZero);
+        long heightMilli = (long)Math.Round((double)storedHeight * 1000, MidpointRounding.AwayFromZero);
+
+        ImagePlacements placements = _imagePlacements.GetOrAdd(ImageKey(image), _ => new ImagePlacements());
+        lock (placements)
+        {
+            placements.MaxWidthMilliPoints = Math.Max(placements.MaxWidthMilliPoints, widthMilli);
+            placements.MaxHeightMilliPoints = Math.Max(placements.MaxHeightMilliPoints, heightMilli);
+            placements.KeepResolution |= image.KeepResolution;
+        }
+    }
+
+    /// <summary>
+    /// Returns the image to embed for <paramref name="key"/>: the source itself, or a reduced copy
+    /// when the resolution cap applies. Decided from pixel counts and placement sizes alone, so the
+    /// sync and async write paths, and the other language implementation, agree.
+    /// </summary>
+    private ImageInfo PrepareImageForWrite(string key, ImageInfo info)
+    {
+        if (MaxImageDpi is not int dpi || !_imagePlacements.TryGetValue(key, out ImagePlacements? placed))
+            return info;
+        if (placed.KeepResolution || placed.MaxWidthMilliPoints <= 0 || placed.MaxHeightMilliPoints <= 0)
+            return info;
+
+        int targetWidth = ImageResampler.TargetLength(placed.MaxWidthMilliPoints, dpi, info.Width);
+        int targetHeight = ImageResampler.TargetLength(placed.MaxHeightMilliPoints, dpi, info.Height);
+        if (!ImageResampler.ShouldResample(info.Width, info.Height, targetWidth, targetHeight))
+            return info;
+
+        string ppi(long pixels, long milliPoints) =>
+            (pixels * 72000 / milliPoints).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        string drawn = $"{placed.MaxWidthMilliPoints / 1000.0:0.##} x {placed.MaxHeightMilliPoints / 1000.0:0.##} pt";
+
+        if (!ImageResampler.IsEligible(info, out string reason))
+        {
+            Diagnostics.Add(new Core.Diagnostic(Core.DiagnosticSeverity.Info, Core.DiagnosticCategory.Image,
+                $"image.passed-through: {info.Width}x{info.Height} px drawn {drawn} " +
+                $"(about {ppi(info.Width, placed.MaxWidthMilliPoints)} ppi, cap {dpi}); embedded as it is: {reason}.", key));
+            return info;
+        }
+
+        ImageInfo reduced = ImageResampler.Resample(info, targetWidth, targetHeight);
+        long samplesPerPixel = info.Components + (info.HasAlpha ? 1 : 0);
+        long saved = ((long)info.Width * info.Height - (long)targetWidth * targetHeight) * samplesPerPixel;
+        Diagnostics.Add(new Core.Diagnostic(Core.DiagnosticSeverity.Info, Core.DiagnosticCategory.Image,
+            $"image.resampled: {info.Width}x{info.Height} -> {targetWidth}x{targetHeight} px, drawn {drawn} " +
+            $"(about {ppi(info.Width, placed.MaxWidthMilliPoints)} -> {ppi(targetWidth, placed.MaxWidthMilliPoints)} ppi), " +
+            $"{saved.ToString(System.Globalization.CultureInfo.InvariantCulture)} fewer raw bytes.", key));
+        return reduced;
+    }
+
+    private readonly System.Runtime.CompilerServices.ConditionalWeakTable<ImageInfo, string> _imageKeys = new();
+
+    /// <summary>The content-hash key for an image, computed once per decoded image.</summary>
+    private string ImageKey(ImageInfo info) => _imageKeys.GetValue(info, i =>
+    {
+        byte[] dataToHash = i.OriginalData != null && i.OriginalData.Length > 0 ? i.OriginalData : i.Data;
+        return "img_" + ComputeHash(dataToHash);
+    });
 
     private static string ComputeHash(byte[] data)
     {
@@ -676,7 +764,7 @@ public class PdfResourceRegistry
             int internalId = ImageIdMap[key];
             string resourceName = GetImageResourceName(internalId);
 
-            imageWriter.WriteImage(pdfObjectId, info, resourceName);
+            imageWriter.WriteImage(pdfObjectId, PrepareImageForWrite(key, info), resourceName);
         }
 
         // 3. Write Deferred XObjects
@@ -868,7 +956,7 @@ public class PdfResourceRegistry
             int internalId = ImageIdMap[key];
             string resourceName = GetImageResourceName(internalId);
 
-            await imageWriter.WriteImageAsync(pdfObjectId, info, resourceName, cancellationToken).ConfigureAwait(false);
+            await imageWriter.WriteImageAsync(pdfObjectId, PrepareImageForWrite(key, info), resourceName, cancellationToken).ConfigureAwait(false);
         }
 
         // 3. Write Deferred XObjects

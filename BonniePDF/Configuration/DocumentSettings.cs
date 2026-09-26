@@ -110,6 +110,24 @@ public class DocumentSettings
     public PageOrientation Orientation { get; set; } = PageOrientation.Portrait;
 
     /// <summary>
+    /// The most pixels per inch an embedded PNG image is kept at (default: 288). An image that
+    /// carries more pixels than its printed size can use is reduced to this resolution when the
+    /// document is written, by an exact area average that never re-encodes the image lossily and
+    /// never enlarges it. <c>null</c> embeds every image at its source resolution. JPEG, indexed
+    /// and 16-bit images are always embedded as they are; <see cref="Core.Diagnostic"/> entries
+    /// in <see cref="Document.Diagnostics"/> report what was reduced and what was passed through.
+    /// </summary>
+    public int? MaxImageDpi
+    {
+        get => _maxImageDpi;
+        set => _maxImageDpi = value is < 1
+            ? throw new ArgumentOutOfRangeException(nameof(value), value, "MaxImageDpi must be at least 1, or null for no cap.")
+            : value;
+    }
+
+    private int? _maxImageDpi = 288;
+
+    /// <summary>
     /// The margin size in points for all pages (default: 50)
     /// </summary>
     public float Margin { get; set; } = 50;
