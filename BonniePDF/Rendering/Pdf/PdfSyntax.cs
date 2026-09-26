@@ -91,7 +91,11 @@ internal static class PdfSyntax
     /// </summary>
     internal static string FormatDecimal(float value)
     {
-        return value.ToString("0.###", CultureInfo.InvariantCulture);
+        // A negative zero - a zero matrix entry negated, or a tiny negative value
+        // rounded away - prints as "0", as it does in the TypeScript implementation
+        // and in the double overload below.
+        string s = value.ToString("0.###", CultureInfo.InvariantCulture);
+        return s == "-0" ? "0" : s;
     }
 
     /// <summary>

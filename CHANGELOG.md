@@ -30,6 +30,11 @@ behaviour, so the two files can be read side by side.
 
 ### Changed
 
+- **The PDF canvas no longer writes a negative zero.** A gradient fill's matrix
+  could print `-0` where the TypeScript implementation prints `0`; both now
+  write the same bytes for fills and strokes, pinned by the same tests in both
+  suites. Pages look the same.
+
 - **SVG export now agrees with the TypeScript implementation, element for
   element.** The shared specification names SVG as the artefact the conformance
   tooling compares, so four differences between the two exporters were defects
