@@ -208,22 +208,18 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     }
 
     /// <summary>
-    /// 
+    /// The width the text takes on one line, with no wrapping. Measured by the same word flow that
+    /// breaks lines, so a container that hands this width back as the maximum can never wrap the text
+    /// (summing whole span widths instead disagrees by float rounding, and by trailing spaces, and
+    /// wrapped a centred "Page 1 of 2" footer onto two lines).
     /// </summary>
-    /// <returns></returns>
     protected override float GetPreferredContentWidth()
     {
-        // Measure the total width of all spans without wrapping
-        float totalWidth = 0;
-        foreach (TextSpan span in _spans)
-        {
-            TextStyle resolved = ResolveStyle(span.Style);
-            totalWidth += FontMetrics.GetStringWidth(
-                span.Text ?? "", resolved.EffectiveFontName, resolved.EffectiveFontSize)
-                + StyleSpacing(span.Text ?? "", resolved);
-        }
+        float widest = 0;
+        foreach (RichTextLine line in ComputeLines(float.PositiveInfinity))
+            widest = Math.Max(widest, line.TotalWidth);
 
-        return totalWidth;
+        return widest;
     }
 
     protected override float MeasureContentHeight(float contentWidth)
@@ -425,9 +421,10 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
                         ? prevResolvedStyle
                         : resolved;
 
+                    string measuredPart = Measured(part);
                     float partWidth = FontMetrics.GetStringWidth(
-                        part, resolved.EffectiveFontName, resolved.EffectiveFontSize)
-                        + StyleSpacing(part, resolved);
+                        measuredPart, resolved.EffectiveFontName, resolved.EffectiveFontSize)
+                        + StyleSpacing(measuredPart, resolved);
                     float spaceWidth = hasLeadingSpace
                         ? FontMetrics.GetStringWidth(" ", spaceStyle.EffectiveFontName, spaceStyle.EffectiveFontSize)
                           + StyleSpacing(" ", spaceStyle)
@@ -490,15 +487,20 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     {
         if (line.Runs.Count == 0) return;
 
+        // Layout reserved two digits for each page token; alignment uses the width the line really
+        // has on this page (the current page number may be one digit or three). Equal to
+        // line.TotalWidth for a line with no tokens.
+        float lineWidth = ActualLineWidth(ctx, line);
+
         // Calculate starting X based on alignment
         float startX = baseX;
         switch (Alignment)
         {
             case TextAlignment.Center:
-                startX += (contentWidth - line.TotalWidth) / 2;
+                startX += (contentWidth - lineWidth) / 2;
                 break;
             case TextAlignment.Right:
-                startX += contentWidth - line.TotalWidth;
+                startX += contentWidth - lineWidth;
                 break;
         }
 
@@ -513,7 +515,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
                     if (c == ' ') spaceCount++;
 
             if (spaceCount > 0)
-                extraWordSpacing = (contentWidth - line.TotalWidth) / spaceCount;
+                extraWordSpacing = (contentWidth - lineWidth) / spaceCount;
         }
 
         float currentX = startX;
@@ -530,7 +532,9 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             // Draw background highlight if specified
             if (style.BackgroundColor.HasValue)
             {
-                float runWidth = MeasureRunWidth(run, extraWordSpacing);
+                float runWidth = HasPageToken(run.Text)
+                    ? ActualRunWidth(ctx, run)
+                    : MeasureRunWidth(run, extraWordSpacing);
                 ctx.Canvas.FillRect(currentX, y, runWidth, line.Height, style.BackgroundColor.Value);
             }
 
@@ -550,6 +554,15 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             if (useJustify && extraWordSpacing > 0 && run.Text.Contains(' '))
             {
                 currentX = DrawJustifiedRun(ctx, run, currentX, runY, line.Height, extraWordSpacing);
+            }
+            else if (HasPageToken(run.Text))
+            {
+                float runWidth = DrawTokenText(ctx, run.Text, currentX, runY, style);
+
+                if (style.Decoration != TextDecoration.None)
+                    DrawRunDecorations(ctx, style, currentX, runY, runWidth, fontSize);
+
+                currentX += runWidth;
             }
             else
             {
@@ -597,8 +610,16 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
             if (!string.IsNullOrEmpty(word))
             {
-                ctx.Canvas.DrawText(currentX, y, word, color, fontSize, fontName, TextAlignment.Left);
-                float wordWidth = FontMetrics.GetStringWidth(word, fontName, fontSize) + StyleSpacing(word, style);
+                float wordWidth;
+                if (HasPageToken(word))
+                {
+                    wordWidth = DrawTokenText(ctx, word, currentX, y, style);
+                }
+                else
+                {
+                    ctx.Canvas.DrawText(currentX, y, word, color, fontSize, fontName, TextAlignment.Left);
+                    wordWidth = FontMetrics.GetStringWidth(word, fontName, fontSize) + StyleSpacing(word, style);
+                }
 
                 if (style.Decoration != TextDecoration.None)
                     DrawRunDecorations(ctx, style, currentX, y, wordWidth, fontSize);
@@ -640,6 +661,95 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         return TextSpacing.GetWidth(text, style.LetterSpacing ?? 0, style.WordSpacing ?? 0);
     }
 
+    // --- Page tokens ---
+    //
+    // {{CurrentPage}} and {{TotalPages}} in a span's text behave as they do in a TextBlock: the current
+    // page number is substituted when the line is drawn, the total page count is drawn as a deferred
+    // object that resolves once the whole document has been laid out, and layout reserves the width of
+    // two digits for each. Text with no token takes the original code path untouched.
+
+    private static bool HasPageToken(string text) =>
+        text.Contains("{{", StringComparison.Ordinal) &&
+        (text.Contains(TextElementBase.CurrentPageToken, StringComparison.Ordinal) ||
+         text.Contains(TextElementBase.TotalPagesToken, StringComparison.Ordinal));
+
+    /// <summary>The text as layout measures it: each page token counts as two digits.</summary>
+    private static string Measured(string text) =>
+        HasPageToken(text)
+            ? text.Replace(TextElementBase.TotalPagesToken, "00").Replace(TextElementBase.CurrentPageToken, "00")
+            : text;
+
+    private static string WithCurrentPage(RenderContext ctx, string text) =>
+        text.Replace(TextElementBase.CurrentPageToken,
+            (ctx.CurrentPageIndex + 1).ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+    /// <summary>A run's advance on this page: the real current page number, two digits for the total.</summary>
+    private static float ActualRunWidth(RenderContext ctx, StyledRun run)
+    {
+        string actual = WithCurrentPage(ctx, run.Text).Replace(TextElementBase.TotalPagesToken, "00");
+        return FontMetrics.GetStringWidth(actual, run.Style.EffectiveFontName, run.Style.EffectiveFontSize)
+            + StyleSpacing(actual, run.Style);
+    }
+
+    /// <summary>
+    /// The line's width on this page. Layout measured each page token as two digits; the current page
+    /// number may be shorter or longer, so alignment corrects by the difference. Exactly
+    /// <see cref="RichTextLine.TotalWidth"/> when no run holds a token.
+    /// </summary>
+    private static float ActualLineWidth(RenderContext ctx, RichTextLine line)
+    {
+        float width = line.TotalWidth;
+        foreach (StyledRun run in line.Runs)
+        {
+            if (string.IsNullOrEmpty(run.Text) || !HasPageToken(run.Text)) continue;
+            width += ActualRunWidth(ctx, run) - MeasureRunWidth(run, 0);
+        }
+
+        return width;
+    }
+
+    /// <summary>
+    /// Draws text that holds page tokens at (<paramref name="x"/>, <paramref name="y"/>) and returns
+    /// its advance. The total page count is a deferred object, exactly as in a TextBlock.
+    /// </summary>
+    private static float DrawTokenText(RenderContext ctx, string text, float x, float y, TextStyle style)
+    {
+        string fontName = style.EffectiveFontName;
+        float fontSize = style.EffectiveFontSize;
+        Color color = style.EffectiveColor;
+
+        string[] parts = WithCurrentPage(ctx, text).Split(new[] { TextElementBase.TotalPagesToken }, StringSplitOptions.None);
+        float currentX = x;
+
+        for (int i = 0; i < parts.Length; i++)
+        {
+            string part = parts[i];
+            if (part.Length > 0)
+            {
+                ctx.Canvas.DrawText(currentX, y, part, color, fontSize, fontName, TextAlignment.Left);
+                currentX += FontMetrics.GetStringWidth(part, fontName, fontSize) + StyleSpacing(part, style);
+            }
+
+            if (i == parts.Length - 1) continue;
+
+            if (ctx.IsSvgMode)
+            {
+                if (ctx.Canvas is BonniePDF.Drawing.SvgCanvas svgCanvas)
+                    svgCanvas.DrawDeferredTotalPages(currentX, y, color, fontSize, fontName);
+                else
+                    ctx.Canvas.DrawText(currentX, y, "00", color, fontSize, fontName, TextAlignment.Left);
+            }
+            else
+            {
+                ctx.Canvas.DrawFormXObject(ctx.RegisterDeferredXObject(fontName, fontSize, color), currentX, y);
+            }
+
+            currentX += FontMetrics.GetStringWidth("00", fontName, fontSize) + StyleSpacing("00", style);
+        }
+
+        return currentX - x;
+    }
+
     // --- Helpers ---
 
     private TextStyle ResolveStyle(TextStyle? spanStyle)
@@ -650,9 +760,10 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
     private static float MeasureRunWidth(StyledRun run, float extraWordSpacing)
     {
+        string measured = Measured(run.Text);
         float baseWidth = FontMetrics.GetStringWidth(
-            run.Text, run.Style.EffectiveFontName, run.Style.EffectiveFontSize)
-            + StyleSpacing(run.Text, run.Style);
+            measured, run.Style.EffectiveFontName, run.Style.EffectiveFontSize)
+            + StyleSpacing(measured, run.Style);
 
         if (extraWordSpacing > 0)
         {
