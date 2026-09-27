@@ -24,13 +24,19 @@ public sealed class TextDescriptor
     private readonly List<(PartKind Kind, string Text, TextStyle? Style)> _parts = [];
 
     private TextAlignment _alignment = TextAlignment.Left;
+    private bool _alignmentExplicit;
 
     /// <summary>The rich text this descriptor describes, with every span's final style.</summary>
     internal RichText RichText
     {
         get
         {
-            var richText = new RichText { Alignment = _alignment };
+            // Only pass Alignment along when Align()/AlignCenter()/etc. was actually called: assigning it
+            // unconditionally would mark the built RichText's Alignment as explicit even when the author
+            // never touched it, silently defeating the ambient text-alignment fallback from an enclosing
+            // Container (spec 01 "Document Model" §3.2).
+            var richText = new RichText();
+            if (_alignmentExplicit) richText.Alignment = _alignment;
 
             // RichText carries its own default style and does not look at the page's, so hand it the
             // page default (DefaultTextStyle) here, the way a TextBlock picks it up when it is created.
@@ -67,6 +73,7 @@ public sealed class TextDescriptor
     public TextDescriptor Align(TextAlignment alignment)
     {
         _alignment = alignment;
+        _alignmentExplicit = true;
         return this;
     }
 

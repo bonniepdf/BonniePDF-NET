@@ -246,6 +246,18 @@ behaviour, so the two files can be read side by side.
 
 ### Fixed
 
+- **A `Container`'s horizontal alignment now reaches wrapped text.** `x.Item().AlignCenter().Text("...")`
+  centred a one-line title (block positioning of a child narrower than the container) but silently left a
+  paragraph long enough to wrap flush left, because there was no narrower child box left to position once
+  the text filled the container. A `Container` whose `HorizontalAlignment` is `Start`/`Center`/`End` now
+  also establishes that as the **ambient horizontal text alignment** for descendant `TextBlock`/`Heading`/
+  `RichText` that set no `Alignment` of their own, through any nesting depth, the way CSS `text-align`
+  cascades — an explicit `Alignment` on the text element still always wins, and a nested `Container` can
+  set its own ambient for its own subtree. `HorizontalStack.Alignment` is a different, cross-axis concept
+  (vertical positioning of row children) and does not feed this. A fluent `.Text(t => ...)` rich-text
+  builder that never called `.Align*()` no longer marks the built `RichText`'s alignment as explicit
+  either, which had been silently defeating this same fallback for anything routed through it.
+
 - **A table's own border was never drawn.** `table.Border(...)` (`table.border`) applies a border to
   every cell, but a cell's own border is never null, so it always shadowed the table's and the setting did
   nothing. A cell that sets a border uses it; every other cell now takes the table's.
