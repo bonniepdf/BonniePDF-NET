@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout.Pagination;
+using BonniePDF.Elements.Tables;
 using BonniePDF.Fluent;
 using BonniePDF.Fluent.Descriptors;
 using BonniePDF.Rendering;
@@ -12,7 +14,7 @@ namespace BonniePDF.Elements.Layout;
 /// A container element that supports padding, background color, and borders.
 /// Implements IContentContainer to participate in fluent API chains.
 /// </summary>
-public class Container : BorderedElementBase, IContentContainer
+public class Container : BorderedElementBase, IContentContainer, IStatefulElement
 {
     public IElement? Child { get; set; }
 
@@ -123,26 +125,198 @@ public class Container : BorderedElementBase, IContentContainer
     /// </summary>
     public VerticalAlignment? VerticalAlignment { get; set; }
 
+    // --- Splitting across pages ---
+    //
+    // A container is a box drawn around its child. When the child can split across pages (a table, a
+    // column, a paragraph) and the whole box does not fit, the box splits with it: each page carries a
+    // fragment, with the top border and padding on the first fragment only and the bottom padding and
+    // border on the last, so padding, borders and backgrounds are transparent to the child's own
+    // pagination. A container that fits, or whose child cannot split, is drawn whole exactly as before.
+
+    /// <summary>Number of fragments already drawn; greater than zero while a split render is in progress.</summary>
+    private int _fragments;
+
+    private bool CanSplit =>
+        Child is IStatefulElement && !Height.HasValue && !FillHeight && CornerRadius <= 0;
+
+    /// <inheritdoc />
+    public RenderStatus RenderStateful(RenderContext ctx, float width)
+    {
+        if (_fragments == 0)
+        {
+            bool overflows = ctx.CurrentY + MeasureHeight(width) > ctx.MaxY;
+            if (!overflows || !CanSplit)
+            {
+                // Whole, on this page, or on a fresh one: what an atomic box has always done.
+                if (overflows && ctx.CurrentY > ctx.ContentTop) return RenderStatus.WrapRequired;
+                Render(ctx, width);
+                return RenderStatus.Complete;
+            }
+        }
+
+        return RenderFragment(ctx, width);
+    }
+
+    /// <inheritdoc />
+    public void ResetState()
+    {
+        _fragments = 0;
+        if (Child is IStatefulElement stateful) stateful.ResetState();
+    }
+
+    private RenderStatus RenderFragment(RenderContext ctx, float width)
+    {
+        bool first = _fragments == 0;
+        var stateful = (IStatefulElement)Child!;
+        float entryX = ctx.CurrentX;
+        float entryY = ctx.CurrentY;
+
+        float effectiveWidth = Width ?? GetContentWidth(width);
+        if (first) ctx.CurrentY += Margin.Top;
+        float boxX = ctx.CurrentX + Margin.Left;
+        float boxTop = ctx.CurrentY;
+
+        Core.Border inset = ChildInset;
+        bool frame = AbsorbsTable;
+        float childWidth = effectiveWidth - Padding.Left - Padding.Right - inset.HorizontalWidth;
+        float childX = boxX + inset.Left + Padding.Left;
+        var align = HorizontalAlignment;
+        if (align == BonniePDF.Core.HorizontalAlignment.Center || align == BonniePDF.Core.HorizontalAlignment.End)
+        {
+            float preferred = Child!.GetPreferredWidth();
+            if (preferred > 0 && preferred < childWidth)
+            {
+                float slack = childWidth - preferred;
+                childX += align == BonniePDF.Core.HorizontalAlignment.Center ? slack / 2f : slack;
+                childWidth = preferred;
+            }
+        }
+
+        ctx.CurrentX = childX;
+        ctx.CurrentY = boxTop + (first ? inset.Top + Padding.Top : 0);
+
+        // The box is drawn after the child, once its height is known, and moved behind it.
+        var stream = ctx.CurrentStream;
+        int pageIndex = ctx.CurrentPageIndex;
+        int mark = stream.Length;
+
+        RenderStatus status;
+        ChildTagToken token = ChildTagging.BeginChildTag(ctx, Child!);
+        try
+        {
+            status = stateful.RenderStateful(ctx, childWidth);
+        }
+        finally
+        {
+            ChildTagging.EndChildTag(ctx, token);
+            ctx.CurrentX = entryX;
+        }
+
+        if (status == RenderStatus.WrapRequired)
+        {
+            // Nothing fitted on this page, so nothing was drawn: the caller starts a fresh page and asks again.
+            ctx.CurrentY = entryY;
+            return RenderStatus.WrapRequired;
+        }
+
+        bool last = status == RenderStatus.Complete;
+        float bottom = ctx.CurrentY + (last ? Padding.Bottom + inset.Bottom : 0);
+        float height = bottom - boxTop;
+
+        if (ReferenceEquals(ctx.CurrentStream, stream) && ctx.CurrentPageIndex == pageIndex)
+        {
+            int decorationStart = stream.Length;
+            if (BackgroundColor.HasValue)
+                DrawBackground(ctx, boxX, boxTop, effectiveWidth, height, BackgroundColor.Value);
+            // The background goes behind the content; a table's frame stays on top of it.
+            if (!frame && Border.HasAnyBorder)
+                DrawBorder(ctx, boxX, boxTop, effectiveWidth, height,
+                    new Core.Border(Border.Left, first ? Border.Top : 0, Border.Right, last ? Border.Bottom : 0), BorderColors);
+
+            if (stream.Length > decorationStart)
+            {
+                string decoration = stream.ToString(decorationStart, stream.Length - decorationStart);
+                stream.Length = decorationStart;
+                stream.Insert(mark, decoration);
+            }
+
+            // A table's frame is its outer edge, so every page's fragment of it is a complete rectangle: the
+            // bottom edge under the last row on this page, and the top edge over the first (or repeated header)
+            // row on the next.
+            if (frame && Border.HasAnyBorder)
+                DrawBorder(ctx, boxX, boxTop, effectiveWidth, height, Border, BorderColors);
+        }
+
+        ctx.CurrentY = bottom;
+        if (last)
+        {
+            ctx.CurrentY += Margin.Bottom;
+            _fragments = 0;
+            stateful.ResetState();
+        }
+        else
+        {
+            _fragments++;
+        }
+
+        return status;
+    }
+
+    // --- Frame absorption ---
+    //
+    // A bordered container whose child is a table (seen through wrappers that only pass a child along) is
+    // the table's frame: its border is centred on the table's outer edge, the table is not inset by it, and
+    // the border is painted over the table. The frame and the outermost cell edges then coincide, so the
+    // frame wins them, instead of the two sitting side by side as a double line.
+
+    private bool AbsorbsTable
+    {
+        get
+        {
+            if (!Border.HasAnyBorder || CornerRadius > 0) return false;
+            IElement? current = Child;
+            while (true)
+            {
+                switch (current)
+                {
+                    case Table:
+                        return true;
+                    case BonniePDF.Fluent.ContentSlot { Child: not null } slot:
+                        current = slot.Child;
+                        break;
+                    case PaginationWrapperBase { Child: not null } wrapper:
+                        current = wrapper.Child;
+                        break;
+                    default:
+                        return false;
+                }
+            }
+        }
+    }
+
+    /// <summary>The border width the child is inset by: none when the border is a table's frame.</summary>
+    private Core.Border ChildInset => AbsorbsTable ? new Core.Border(0) : Border;
+
     protected override float GetPreferredContentWidth()
     {
         if (Width.HasValue)
             return Width.Value;
 
         float childWidth = Child?.GetPreferredWidth() ?? 0;
-        return childWidth + Padding.Left + Padding.Right + Border.HorizontalWidth;
+        return childWidth + Padding.Left + Padding.Right + ChildInset.HorizontalWidth;
     }
 
     protected override float MeasureContentHeight(float contentWidth)
     {
         // Use fixed width if specified, otherwise use available width
         float effectiveWidth = Width ?? contentWidth;
-        float childContentWidth = effectiveWidth - Padding.Left - Padding.Right - Border.HorizontalWidth;
+        float childContentWidth = effectiveWidth - Padding.Left - Padding.Right - ChildInset.HorizontalWidth;
 
         // Use fixed height if specified, otherwise measure child height
         if (Height.HasValue) return Height.Value;
 
         float childHeight = Child == null ? 0 : Child.MeasureHeight(childContentWidth);
-        return childHeight + Padding.Top + Padding.Bottom + Border.VerticalWidth;
+        return childHeight + Padding.Top + Padding.Bottom + ChildInset.VerticalWidth;
     }
 
     /// <summary>
@@ -158,6 +332,11 @@ public class Container : BorderedElementBase, IContentContainer
         if (Height.HasValue) return Height.Value;
 
         float natural = MeasureContentHeight(effectiveWidth);
+
+        // Inside a table cell the outermost container fills the row, so its border and background span the
+        // row, however tall the neighbouring cells are.
+        if (ReferenceEquals(ctx.CellStretchTarget, this)) natural = MathF.Max(natural, ctx.CellStretchHeight);
+
         if (!FillHeight) return natural;
 
         return MathF.Max(natural, ctx.MaxY - ctx.CurrentY);
@@ -211,6 +390,11 @@ public class Container : BorderedElementBase, IContentContainer
 
     private void RenderClippedContent(RenderContext ctx, float effectiveWidth, float containerHeight)
     {
+        Core.Border inset = ChildInset;
+        bool frame = AbsorbsTable;
+        float boxX = ctx.CurrentX;
+        float boxY = ctx.CurrentY;
+
         if (BackgroundColor.HasValue || Border.HasAnyBorder)
         {
             float rectX = ctx.CurrentX;
@@ -219,7 +403,8 @@ public class Container : BorderedElementBase, IContentContainer
             if (BackgroundColor.HasValue)
                 DrawBackground(ctx, rectX, ctx.CurrentY, rectWidth, containerHeight, BackgroundColor.Value);
 
-            if (Border.HasAnyBorder)
+            // A table's frame is painted after the table, over its outer edge.
+            if (Border.HasAnyBorder && !frame)
                 DrawBorder(ctx, rectX, ctx.CurrentY, rectWidth, containerHeight, Border, BorderColors);
         }
 
@@ -239,10 +424,10 @@ public class Container : BorderedElementBase, IContentContainer
         // by Border.Left/Top as well - otherwise the child hugs the outer top-left
         // edge and the reserved space piles up as a visible gap at the right and
         // bottom edges (the border no longer "lines up" with the content).
-        ctx.CurrentX += Border.Left + Padding.Left;
-        ctx.CurrentY += Border.Top + Padding.Top;
+        ctx.CurrentX += inset.Left + Padding.Left;
+        ctx.CurrentY += inset.Top + Padding.Top;
 
-        float childWidth = effectiveWidth - Padding.Left - Padding.Right - Border.HorizontalWidth;
+        float childWidth = effectiveWidth - Padding.Left - Padding.Right - inset.HorizontalWidth;
 
         // Horizontal alignment: when the child is narrower than the available
         // inner width, position it within that width rather than pinning it left.
@@ -264,7 +449,7 @@ public class Container : BorderedElementBase, IContentContainer
         var vAlign = VerticalAlignment;
         if (vAlign == BonniePDF.Core.VerticalAlignment.Center || vAlign == BonniePDF.Core.VerticalAlignment.End)
         {
-            float innerHeight = containerHeight - Padding.Top - Padding.Bottom - Border.VerticalWidth;
+            float innerHeight = containerHeight - Padding.Top - Padding.Bottom - inset.VerticalWidth;
             float slack = innerHeight - Child.MeasureHeight(childWidth);
             if (slack > 0)
                 ctx.CurrentY += vAlign == BonniePDF.Core.VerticalAlignment.Center ? slack / 2f : slack;
@@ -291,7 +476,7 @@ public class Container : BorderedElementBase, IContentContainer
         if (yAfterChildRender == yBeforeChildRender)
         {
             float childHeight = Child.MeasureHeight(childWidth);
-            ctx.CurrentY = yBeforePadding + Border.Top + Padding.Top + childHeight;
+            ctx.CurrentY = yBeforePadding + inset.Top + Padding.Top + childHeight;
         }
 
         ctx.CurrentY += Padding.Bottom;
@@ -302,5 +487,7 @@ public class Container : BorderedElementBase, IContentContainer
         {
             ctx.CurrentY = expectedBottom;
         }
+
+        if (frame) DrawBorder(ctx, boxX, boxY, effectiveWidth, containerHeight, Border, BorderColors);
     }
 }

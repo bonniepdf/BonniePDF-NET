@@ -209,6 +209,17 @@ public class RenderContext
     public bool ChromeReservationSuspended { get; set; }
 
     /// <summary>
+    /// While a table draws a cell whose content is a <see cref="BonniePDF.Elements.Layout.Container"/>
+    /// (seen through pass-through wrappers), that container. It fills <see cref="CellStretchHeight"/>, so a
+    /// border or background applied to a cell's content spans the whole row rather than only the cell's own
+    /// text. <c>null</c> everywhere else; no other container is affected.
+    /// </summary>
+    public BonniePDF.Elements.Layout.Container? CellStretchTarget { get; set; }
+
+    /// <summary>The height <see cref="CellStretchTarget"/> fills: the row height less the cell's padding.</summary>
+    public float CellStretchHeight { get; set; }
+
+    /// <summary>
     /// Installs (or clears) the per-page header/footer measurement.
     /// </summary>
     /// <remarks>

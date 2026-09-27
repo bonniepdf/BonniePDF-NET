@@ -246,6 +246,36 @@ behaviour, so the two files can be read side by side.
 
 ### Fixed
 
+- **A table's own border was never drawn.** `table.Border(...)` (`table.border`) applies a border to
+  every cell, but a cell's own border is never null, so it always shadowed the table's and the setting did
+  nothing. A cell that sets a border uses it; every other cell now takes the table's.
+- **A table's cell borders are drawn once per shared edge.** Adjacent cells each drew the edge they share, so
+  every internal edge was stroked twice. The earlier cell (left, upper) now draws it, and the later cell draws it
+  only when its own border is more prominent (wider, then darker) and so paints over it. A 2 x 2 grid is 12
+  strokes rather than 16, and cells with different borders show the more prominent line where they meet.
+- **A bordered container around a table is now the table's frame.** The container's border used to be drawn
+  before the table and the table inset inside it, so the frame and the outermost cell edges sat side by side as
+  a double line. The border is now centred on the table's outer edge, the table is not inset, and the border is
+  painted over it, so the frame wins the outer edges. Every other bordered container is unchanged.
+
+- **A table inside padding, a border, a background or a row now splits across pages.**
+  Wrapping a tall table, column or paragraph in `Container` styling (`Padding`, `Border`, `Background`) used to turn it into an
+  unsplittable box: the whole thing jumped to a fresh page, leaving the page it
+  should have started on empty, and a `Row` did the same. A box whose child can split
+  now splits with it. Each page carries a fragment of the box, with the top border and
+  padding on the first fragment and the bottom border and padding on the last, and its
+  background drawn behind that page's content. A `Row` whose items can split lets each
+  paginate independently, side by side, until all are done. A box or row that fits, or
+  whose items cannot split, is drawn whole exactly as before, and a box with a fixed or
+  filling height, or rounded corners, is still unsplittable.
+
+- **A border or background on a table cell's content now spans the whole row.** The
+  container a cell's content is wrapped in was drawn at the height of its own text, so
+  a short cell beside a tall one, or an empty one, was drawn as a short box and the grid
+  came out ragged: the borders and shading of one row had three different heights. The
+  container that is the cell's own content now fills the row. Containers nested deeper in
+  the cell, and cells styled through the table's own cell properties, are unchanged.
+
 - **Only the last one-sided padding, margin or border call in a chain took effect.**
   `PaddingTop`, `PaddingBottom`, `PaddingLeft`, `PaddingRight`, `PaddingHorizontal`,
   `PaddingVertical`, the `Margin` equivalents, and `BorderTop`, `BorderBottom`,
@@ -402,37 +432,7 @@ behaviour, so the two files can be read side by side.
   moved to a common base, and `GroupedBarChartElement` derives from
   `ChartElement` rather than repeating it. The SVG painter previously skipped
   a wider set of control characters than the PDF painter when measuring
-  spacing; both now use the same rule, so SVG and PDF output agree.- **A table's own border was never drawn.** `table.Border(...)` (`table.border`) applies a border to
-  every cell, but a cell's own border is never null, so it always shadowed the table's and the setting did
-  nothing. A cell that sets a border uses it; every other cell now takes the table's.
-- **A table's cell borders are drawn once per shared edge.** Adjacent cells each drew the edge they share, so
-  every internal edge was stroked twice. The earlier cell (left, upper) now draws it, and the later cell draws it
-  only when its own border is more prominent (wider, then darker) and so paints over it. A 2 x 2 grid is 12
-  strokes rather than 16, and cells with different borders show the more prominent line where they meet.
-- **A bordered container around a table is now the table's frame.** The container's border used to be drawn
-  before the table and the table inset inside it, so the frame and the outermost cell edges sat side by side as
-  a double line. The border is now centred on the table's outer edge, the table is not inset, and the border is
-  painted over it, so the frame wins the outer edges. Every other bordered container is unchanged.
-
-- **A table inside padding, a border, a background or a row now splits across pages.**
-  Wrapping a tall table, column or paragraph in `Container` styling (`Padding`, `Border`, `Background`) used to turn it into an
-  unsplittable box: the whole thing jumped to a fresh page, leaving the page it
-  should have started on empty, and a `Row` did the same. A box whose child can split
-  now splits with it. Each page carries a fragment of the box, with the top border and
-  padding on the first fragment and the bottom border and padding on the last, and its
-  background drawn behind that page's content. A `Row` whose items can split lets each
-  paginate independently, side by side, until all are done. A box or row that fits, or
-  whose items cannot split, is drawn whole exactly as before, and a box with a fixed or
-  filling height, or rounded corners, is still unsplittable.
-
-- **A border or background on a table cell's content now spans the whole row.** The
-  container a cell's content is wrapped in was drawn at the height of its own text, so
-  a short cell beside a tall one, or an empty one, was drawn as a short box and the grid
-  came out ragged: the borders and shading of one row had three different heights. The
-  container that is the cell's own content now fills the row. Containers nested deeper in
-  the cell, and cells styled through the table's own cell properties, are unchanged.
-
-
+  spacing; both now use the same rule, so SVG and PDF output agree.
 
 ## 2026.7.2
 
