@@ -10,6 +10,25 @@ namespace BonniePDF.Fluent.Extensions;
 /// </summary>
 public static class ContainerStyleExtensions
 {
+    // A one-sided setter changes only its own side or sides. The others keep what earlier calls set, so
+    // .PaddingVertical(7).PaddingHorizontal(3) and .BorderBottom(1).BorderTop(1) accumulate.
+
+    private static void SetPadding(Container c, float? left = null, float? top = null, float? right = null, float? bottom = null) =>
+        c.Padding = new Thickness(left ?? c.Padding.Left, top ?? c.Padding.Top, right ?? c.Padding.Right, bottom ?? c.Padding.Bottom);
+
+    private static void SetMargin(Container c, float? left = null, float? top = null, float? right = null, float? bottom = null) =>
+        c.Margin = new Core.Thickness(left ?? c.Margin.Left, top ?? c.Margin.Top, right ?? c.Margin.Right, bottom ?? c.Margin.Bottom);
+
+    private static void SetBorderSides(Container c, Color color, float? left = null, float? top = null, float? right = null, float? bottom = null)
+    {
+        c.Border = new Core.Border(left ?? c.Border.Left, top ?? c.Border.Top, right ?? c.Border.Right, bottom ?? c.Border.Bottom);
+        c.BorderColors = new BorderColors(
+            left.HasValue ? color : c.BorderColors.Left,
+            top.HasValue ? color : c.BorderColors.Top,
+            right.HasValue ? color : c.BorderColors.Right,
+            bottom.HasValue ? color : c.BorderColors.Bottom);
+    }
+
     private static Container GetOrCreateContainer(IContentContainer c)
     {
         if (c is Container existingContainer && existingContainer.Child == null)
@@ -53,7 +72,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer PaddingTop(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Padding = new Thickness(0, value, 0, 0);
+        SetPadding(container, top: value);
         return container;
     }
 
@@ -61,7 +80,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer PaddingBottom(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Padding = new Thickness(0, 0, 0, value);
+        SetPadding(container, bottom: value);
         return container;
     }
 
@@ -69,7 +88,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer PaddingLeft(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Padding = new Thickness(value, 0, 0, 0);
+        SetPadding(container, left: value);
         return container;
     }
 
@@ -77,7 +96,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer PaddingRight(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Padding = new Thickness(0, 0, value, 0);
+        SetPadding(container, right: value);
         return container;
     }
 
@@ -85,7 +104,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer PaddingHorizontal(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Padding = new Thickness(value, 0, value, 0);
+        SetPadding(container, left: value, right: value);
         return container;
     }
 
@@ -93,7 +112,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer PaddingVertical(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Padding = new Thickness(0, value, 0, value);
+        SetPadding(container, top: value, bottom: value);
         return container;
     }
 
@@ -131,8 +150,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer BorderBottom(this IContentContainer c, float width, Color? color = null)
     {
         var container = GetOrCreateContainer(c);
-        container.Border = Core.Border.BottomOnly(width);
-        container.BorderColors = new BorderColors(color ?? Color.Black);
+        SetBorderSides(container, color ?? Color.Black, bottom: width);
         return container;
     }
 
@@ -140,8 +158,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer BorderTop(this IContentContainer c, float width, Color? color = null)
     {
         var container = GetOrCreateContainer(c);
-        container.Border = Core.Border.TopOnly(width);
-        container.BorderColors = new BorderColors(color ?? Color.Black);
+        SetBorderSides(container, color ?? Color.Black, top: width);
         return container;
     }
 
@@ -149,8 +166,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer BorderLeft(this IContentContainer c, float width, Color? color = null)
     {
         var container = GetOrCreateContainer(c);
-        container.Border = Core.Border.LeftOnly(width);
-        container.BorderColors = new BorderColors(color ?? Color.Black);
+        SetBorderSides(container, color ?? Color.Black, left: width);
         return container;
     }
 
@@ -158,8 +174,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer BorderRight(this IContentContainer c, float width, Color? color = null)
     {
         var container = GetOrCreateContainer(c);
-        container.Border = Core.Border.RightOnly(width);
-        container.BorderColors = new BorderColors(color ?? Color.Black);
+        SetBorderSides(container, color ?? Color.Black, right: width);
         return container;
     }
 
@@ -167,8 +182,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer BorderHorizontal(this IContentContainer c, float width, Color? color = null)
     {
         var container = GetOrCreateContainer(c);
-        container.Border = Core.Border.VerticalSides(width);
-        container.BorderColors = new BorderColors(color ?? Color.Black);
+        SetBorderSides(container, color ?? Color.Black, left: width, right: width);
         return container;
     }
 
@@ -176,8 +190,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer BorderVertical(this IContentContainer c, float width, Color? color = null)
     {
         var container = GetOrCreateContainer(c);
-        container.Border = Core.Border.HorizontalSides(width);
-        container.BorderColors = new BorderColors(color ?? Color.Black);
+        SetBorderSides(container, color ?? Color.Black, top: width, bottom: width);
         return container;
     }
 
@@ -299,7 +312,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer MarginTop(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Margin = new Core.Thickness(0, value, 0, 0);
+        SetMargin(container, top: value);
         return container;
     }
 
@@ -307,7 +320,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer MarginBottom(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Margin = new Core.Thickness(0, 0, 0, value);
+        SetMargin(container, bottom: value);
         return container;
     }
 
@@ -315,7 +328,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer MarginLeft(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Margin = new Core.Thickness(value, 0, 0, 0);
+        SetMargin(container, left: value);
         return container;
     }
 
@@ -323,7 +336,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer MarginRight(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Margin = new Core.Thickness(0, 0, value, 0);
+        SetMargin(container, right: value);
         return container;
     }
 
@@ -331,7 +344,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer MarginHorizontal(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Margin = new Core.Thickness(value, 0, value, 0);
+        SetMargin(container, left: value, right: value);
         return container;
     }
 
@@ -339,7 +352,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer MarginVertical(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Margin = new Core.Thickness(0, value, 0, value);
+        SetMargin(container, top: value, bottom: value);
         return container;
     }
 
