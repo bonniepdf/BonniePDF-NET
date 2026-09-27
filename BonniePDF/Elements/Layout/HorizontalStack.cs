@@ -17,6 +17,10 @@ public class HorizontalStack : ElementBase, IStatefulElement
     // State tracking for multipage rendering
     private bool _rendered;
 
+    // While a row is split across pages: how many fragments are drawn, and which items have finished.
+    private int _fragments;
+    private bool[]? _done;
+
     /// <summary>
     /// Spacing between children (in points)
     /// </summary>
@@ -64,30 +68,120 @@ public class HorizontalStack : ElementBase, IStatefulElement
 
     /// <summary>
     /// Renders this horizontal stack with state tracking for pagination.
-    /// HorizontalStack is treated as atomic - all children render together on one page.
-    /// If the stack doesn't fit, it requests a new page rather than splitting.
+    /// A row that fits is drawn whole. A row that does not fit, and has an item that can split across pages
+    /// (a table, a column, a paragraph), splits: each page carries the next piece of every unfinished item,
+    /// side by side from the same top, until all are done. A row of items that cannot split moves to a
+    /// fresh page as a whole.
     /// </summary>
     public RenderStatus RenderStateful(RenderContext ctx, float width)
     {
-        if (_rendered) return RenderStatus.Complete;
-
-        float contentWidth = GetContentWidth(width);
-        float contentHeight = MeasureContentHeight(contentWidth);
-        float totalHeight = contentHeight + Margin.Top + Margin.Bottom;
-
-        bool wouldOverflow = ctx.CurrentY + totalHeight > ctx.MaxY;
-        bool notAtTop = ctx.CurrentY > ctx.ContentTop;
-
-        if (wouldOverflow && notAtTop)
+        if (_fragments == 0)
         {
-            // Doesn't fit but would fit on a fresh page - request new page
+            if (_rendered) return RenderStatus.Complete;
+
+            float contentWidth = GetContentWidth(width);
+            float contentHeight = MeasureContentHeight(contentWidth);
+            float totalHeight = contentHeight + Margin.Top + Margin.Bottom;
+
+            bool wouldOverflow = ctx.CurrentY + totalHeight > ctx.MaxY;
+            bool notAtTop = ctx.CurrentY > ctx.ContentTop;
+
+            if (!wouldOverflow || !CanSplit)
+            {
+                if (wouldOverflow && notAtTop)
+                {
+                    // Doesn't fit but would fit on a fresh page - request new page
+                    return RenderStatus.WrapRequired;
+                }
+
+                // Fits on this page, or we're at top of page (render anyway to avoid infinite loop)
+                Render(ctx, width);
+                _rendered = true;
+                return RenderStatus.Complete;
+            }
+        }
+
+        return RenderFragment(ctx, width);
+    }
+
+    private bool CanSplit => !Height.HasValue && _children.Exists(c => c is IStatefulElement);
+
+    private RenderStatus RenderFragment(RenderContext ctx, float width)
+    {
+        bool first = _fragments == 0;
+        _done ??= new bool[_children.Count];
+        float entryX = ctx.CurrentX;
+        float entryY = ctx.CurrentY;
+
+        (List<float> childWidths, _) = CalculateChildWidths(GetContentWidth(width));
+        if (first) ctx.CurrentY += Margin.Top;
+        float startY = ctx.CurrentY;
+        float x = ctx.CurrentX + Margin.Left;
+        float endY = startY;
+        bool progress = false;
+        bool allDone = true;
+
+        for (int i = 0; i < _children.Count; i++)
+        {
+            IElement child = _children[i];
+            if (!_done[i])
+            {
+                ctx.CurrentX = x;
+                ctx.CurrentY = startY;
+                ChildTagToken token = ChildTagging.BeginChildTag(ctx, child);
+                try
+                {
+                    if (child is IStatefulElement stateful)
+                    {
+                        RenderStatus status = stateful.RenderStateful(ctx, childWidths[i]);
+                        if (status != RenderStatus.WrapRequired)
+                        {
+                            progress |= status == RenderStatus.Complete || ctx.CurrentY > startY;
+                            endY = Math.Max(endY, ctx.CurrentY);
+                        }
+
+                        if (status == RenderStatus.Complete) _done[i] = true;
+                    }
+                    else
+                    {
+                        // An item that cannot split is drawn once, with the first piece.
+                        child.Render(ctx, childWidths[i]);
+                        endY = Math.Max(endY, startY + child.MeasureHeight(childWidths[i]));
+                        progress = true;
+                        _done[i] = true;
+                    }
+                }
+                finally
+                {
+                    ChildTagging.EndChildTag(ctx, token);
+                }
+            }
+
+            if (!_done[i]) allDone = false;
+            x += childWidths[i] + Spacing;
+        }
+
+        ctx.CurrentX = entryX;
+
+        if (!progress)
+        {
+            // Nothing fitted on this page: the caller starts a fresh page and asks again.
+            ctx.CurrentY = entryY;
             return RenderStatus.WrapRequired;
         }
 
-        // Fits on this page, or we're at top of page (render anyway to avoid infinite loop)
-        Render(ctx, width);
-        _rendered = true;
-        return RenderStatus.Complete;
+        ctx.CurrentY = endY;
+        if (allDone)
+        {
+            ctx.CurrentY += Margin.Bottom;
+            _rendered = true;
+            _fragments = 0;
+            _done = null;
+            return RenderStatus.Complete;
+        }
+
+        _fragments++;
+        return RenderStatus.Overflow;
     }
 
     /// <summary>
@@ -96,6 +190,8 @@ public class HorizontalStack : ElementBase, IStatefulElement
     public void ResetState()
     {
         _rendered = false;
+        _fragments = 0;
+        _done = null;
 
         foreach (IElement child in _children)
             if (child is IStatefulElement statefulChild)

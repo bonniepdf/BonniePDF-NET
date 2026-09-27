@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Layout.Pagination;
 using BonniePDF.Elements.Text;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Tagging;
@@ -329,6 +330,94 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     {
         _lastRowRendered = -1;
         _headersPending = true;
+        _bottomsAbove = null;
+        _edgePlan.Clear();
+    }
+
+    // --- Border collapse ---
+    //
+    // Two adjacent cells share an edge: the right edge of the left cell is the left edge of the right cell,
+    // and the bottom edge of a cell is the top edge of the cell below it. Each shared edge is drawn once.
+    // The cell earlier in reading order (the left one, the upper one) always draws it; the later cell draws
+    // it only when its own border is more prominent, and so paints over the earlier one: the wider line
+    // wins, then the darker, and a tie goes to the earlier cell.
+
+    private readonly Dictionary<TableCell, (bool DrawLeft, bool DrawTop)> _edgePlan = new();
+
+    // The bottom edge of each column in the row above, on the page being drawn; null when there is none.
+    private (float Width, Color? Color)[]? _bottomsAbove;
+    private int _bottomsAbovePage = -1;
+
+    // A cell that sets any border of its own uses it; every other cell takes the table's. (A cell's border is
+    // never null, so falling back only when it is unset would never use the table's at all.)
+    private (Border Border, BorderColors Colors) EdgesOf(TableCell cell) =>
+        cell.Border.HasAnyBorder ? (cell.Border, cell.BorderColors) : (Border, BorderColors);
+
+    /// <summary>The width a side actually draws at: nothing when it has no colour.</summary>
+    private static float Drawn(float width, Color? color) => color.HasValue ? width : 0;
+
+    /// <summary>True when the first edge is strictly more prominent than the second.</summary>
+    private static bool Outranks(float widthA, Color? colorA, float widthB, Color? colorB)
+    {
+        float a = Drawn(widthA, colorA);
+        float b = Drawn(widthB, colorB);
+        if (a != b) return a > b;
+        if (a == 0 || !colorA.HasValue || !colorB.HasValue) return false;
+        return Luminance(colorA.Value) < Luminance(colorB.Value);
+    }
+
+    private static float Luminance(Color c) => 0.2126f * c.R + 0.7152f * c.G + 0.0722f * c.B;
+
+    private void PlanRowEdges(RenderContext ctx, TableRow row, float[] widths)
+    {
+        _edgePlan.Clear();
+        bool aboveKnown = _bottomsAbove != null && _bottomsAbovePage == ctx.CurrentPageIndex;
+
+        (Border Border, BorderColors Colors)? previous = null;
+        int col = 0;
+        foreach (TableCell cell in row.Cells)
+        {
+            (Border border, BorderColors colors) = EdgesOf(cell);
+            int span = Math.Max(1, cell.ColumnSpan);
+
+            bool drawLeft = previous is not { } left ||
+                Outranks(border.Left, colors.Left, left.Border.Right, left.Colors.Right);
+
+            bool drawTop = true;
+            if (aboveKnown)
+            {
+                // Against the most prominent bottom edge among the columns this cell covers.
+                (float Width, Color? Color) strongest = default;
+                for (int j = 0; j < span && col + j < _bottomsAbove!.Length; j++)
+                {
+                    (float Width, Color? Color) above = _bottomsAbove[col + j];
+                    if (Outranks(above.Width, above.Color, strongest.Width, strongest.Color)) strongest = above;
+                }
+
+                drawTop = Outranks(border.Top, colors.Top, strongest.Width, strongest.Color);
+            }
+
+            _edgePlan[cell] = (drawLeft, drawTop);
+            previous = (border, colors);
+            col += span;
+        }
+    }
+
+    private void RecordRowBottoms(RenderContext ctx, TableRow row, float[] widths)
+    {
+        var bottoms = new (float Width, Color? Color)[widths.Length];
+        int col = 0;
+        foreach (TableCell cell in row.Cells)
+        {
+            (Border border, BorderColors colors) = EdgesOf(cell);
+            int span = Math.Max(1, cell.ColumnSpan);
+            for (int j = 0; j < span && col + j < bottoms.Length; j++)
+                bottoms[col + j] = (Drawn(border.Bottom, colors.Bottom), colors.Bottom);
+            col += span;
+        }
+
+        _bottomsAbove = bottoms;
+        _bottomsAbovePage = ctx.CurrentPageIndex;
     }
 
     /// <summary>
@@ -381,6 +470,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     private void RenderRowDirect(RenderContext ctx, TableRow row, float[] widths)
     {
         float rowHeight = MeasureRowHeight(row, widths);
+        PlanRowEdges(ctx, row, widths);
 
         var tagging = ctx.Tagging;
         // Data tables tag TR/TH/TD; presentation (layout) tables tag each cell's
@@ -461,6 +551,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             }
 
             ctx.CurrentX = startX;
+            RecordRowBottoms(ctx, row, widths);
             ctx.CurrentY += rowHeight;
         }
         finally
@@ -619,9 +710,6 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
         Thickness padding = cell.Padding ?? row.Padding ?? new Thickness(CellPadding);
 
-        Border? cellBorder = cell.Border;
-        BorderColors? cellBorderColors = cell.BorderColors;
-
         // Apply text color to TextBlock content if specified
         IElement content = cell.Content;
         if (textColor.HasValue && content is TextBlock tb)
@@ -649,18 +737,62 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         ctx.CurrentY += padding.Top;
 
         float contentWidth = width - padding.Left - padding.Right;
-        content.Render(ctx, contentWidth);
+        ctx.CellStretchTarget = StretchableContainer(content);
+        ctx.CellStretchHeight = rowHeight - padding.Top - padding.Bottom;
+        try
+        {
+            content.Render(ctx, contentWidth);
+        }
+        finally
+        {
+            ctx.CellStretchTarget = null;
+        }
 
         // Restore X and Y positions
         ctx.CurrentX = originalX;
         ctx.CurrentY = yBeforeCell; // Restore Y so next cell starts at same position
 
         // Draw border
-        if (cellBorder.HasValue || Border.HasAnyBorder)
+        (Border effectiveBorder, BorderColors effectiveBorderColors) = EdgesOf(cell);
+        if (effectiveBorder.HasAnyBorder)
         {
-            Border effectiveBorder = cellBorder ?? Border;
-            BorderColors effectiveBorderColors = cellBorderColors ?? BorderColors;
+
+            // A shared edge is drawn once, by the cell that wins it (PlanRowEdges).
+            if (_edgePlan.TryGetValue(cell, out (bool DrawLeft, bool DrawTop) plan))
+            {
+                effectiveBorder = new Border(
+                    plan.DrawLeft ? effectiveBorder.Left : 0,
+                    plan.DrawTop ? effectiveBorder.Top : 0,
+                    effectiveBorder.Right,
+                    effectiveBorder.Bottom);
+            }
+
             DrawBorder(ctx, x, ctx.CurrentY, width, rowHeight, effectiveBorder, effectiveBorderColors);
+        }
+    }
+
+    /// <summary>
+    /// The container that is the cell's own content, looking through the wrappers that only pass a child
+    /// along (the fluent slot, the pagination primitives), or <c>null</c> when the content is anything else.
+    /// </summary>
+    private static Container? StretchableContainer(IElement content)
+    {
+        IElement current = content;
+        while (true)
+        {
+            switch (current)
+            {
+                case Container container:
+                    return container;
+                case BonniePDF.Fluent.ContentSlot { Child: not null } slot:
+                    current = slot.Child;
+                    break;
+                case PaginationWrapperBase { Child: not null } wrapper:
+                    current = wrapper.Child;
+                    break;
+                default:
+                    return null;
+            }
         }
     }
 
