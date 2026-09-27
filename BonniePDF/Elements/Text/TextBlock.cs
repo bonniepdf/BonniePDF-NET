@@ -24,7 +24,23 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     // State tracking for multipage rendering
     private int _lastLineRendered = -1;
     public required string Text { get; set; }
-    public TextAlignment Alignment { get; set; } = TextAlignment.Left;
+    private TextAlignment _alignment = TextAlignment.Left;
+    private bool _alignmentExplicit;
+
+    /// <summary>
+    /// Paragraph alignment. When not set explicitly, an enclosing <see cref="Layout.Container"/> whose
+    /// <c>HorizontalAlignment</c> is Start/Center/End supplies an ambient default instead of the plain
+    /// Left below (spec 01 "Document Model" §3.2); see <see cref="EffectiveAlignment"/>.
+    /// </summary>
+    public TextAlignment Alignment
+    {
+        get => _alignment;
+        set { _alignment = value; _alignmentExplicit = true; }
+    }
+
+    /// <summary>The alignment this render actually uses: the explicit value, or the render context's ambient.</summary>
+    private TextAlignment EffectiveAlignment(RenderContext ctx) =>
+        _alignmentExplicit ? _alignment : ctx.AmbientHorizontalTextAlignment ?? TextAlignment.Left;
 
     /// <summary>
     /// Line clamp: maximum number of lines to render. When set and the text
@@ -277,7 +293,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
             {
                 float lineWidth = MeasureTextWidth(line);
                 float decoX = baseX;
-                switch (Alignment)
+                switch (EffectiveAlignment(ctx))
                 {
                     case TextAlignment.Center:
                         decoX += (contentWidth - lineWidth) / 2;
@@ -293,7 +309,8 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         }
 
         // Determine effective alignment: justified text uses left for the last line
-        bool useJustify = Alignment == TextAlignment.Justify && !isLastLine && line.Contains(' ');
+        TextAlignment alignment = EffectiveAlignment(ctx);
+        bool useJustify = alignment == TextAlignment.Justify && !isLastLine && line.Contains(' ');
 
         if (useJustify)
         {
@@ -305,7 +322,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         else
         {
             // For justified last lines, fall back to left alignment
-            TextAlignment effectiveAlign = Alignment == TextAlignment.Justify ? TextAlignment.Left : Alignment;
+            TextAlignment effectiveAlign = alignment == TextAlignment.Justify ? TextAlignment.Left : alignment;
 
             float x = baseX;
             if (effectiveAlign == TextAlignment.Center)
@@ -374,9 +391,10 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 
         // 2. Determine Start X
         float startX = baseX;
-        if (Alignment == TextAlignment.Center)
+        TextAlignment alignment = EffectiveAlignment(ctx);
+        if (alignment == TextAlignment.Center)
             startX += (contentWidth - totalLineWidth) / 2;
-        else if (Alignment == TextAlignment.Right) startX += contentWidth - totalLineWidth;
+        else if (alignment == TextAlignment.Right) startX += contentWidth - totalLineWidth;
 
         // 3. Draw Parts
         string[] parts = line.Split(new[] { TotalPagesToken }, StringSplitOptions.None);

@@ -31,7 +31,23 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Text alignment for the paragraph.
     /// </summary>
-    public TextAlignment Alignment { get; set; } = TextAlignment.Left;
+    private TextAlignment _alignment = TextAlignment.Left;
+    private bool _alignmentExplicit;
+
+    /// <summary>
+    /// Paragraph alignment. When not set explicitly, an enclosing <see cref="Layout.Container"/> whose
+    /// <c>HorizontalAlignment</c> is Start/Center/End supplies an ambient default instead of the plain
+    /// Left below (spec 01 "Document Model" §3.2); see <see cref="EffectiveAlignment"/>.
+    /// </summary>
+    public TextAlignment Alignment
+    {
+        get => _alignment;
+        set { _alignment = value; _alignmentExplicit = true; }
+    }
+
+    /// <summary>The alignment this render actually uses: the explicit value, or the render context's ambient.</summary>
+    private TextAlignment EffectiveAlignment(RenderContext ctx) =>
+        _alignmentExplicit ? _alignment : ctx.AmbientHorizontalTextAlignment ?? TextAlignment.Left;
 
     /// <summary>
     /// Default style inherited by all spans. Span-level styles override these values.
@@ -493,8 +509,9 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         float lineWidth = ActualLineWidth(ctx, line);
 
         // Calculate starting X based on alignment
+        TextAlignment alignment = EffectiveAlignment(ctx);
         float startX = baseX;
-        switch (Alignment)
+        switch (alignment)
         {
             case TextAlignment.Center:
                 startX += (contentWidth - lineWidth) / 2;
@@ -506,7 +523,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
         // For justify, calculate extra space per space character
         float extraWordSpacing = 0;
-        bool useJustify = Alignment == TextAlignment.Justify && !isLastLine;
+        bool useJustify = alignment == TextAlignment.Justify && !isLastLine;
         if (useJustify)
         {
             int spaceCount = 0;

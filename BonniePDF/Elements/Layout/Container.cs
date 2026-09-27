@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BonniePDF.Core;
 using BonniePDF.Elements.Layout.Pagination;
 using BonniePDF.Elements.Tables;
+using BonniePDF.Elements.Text;
 using BonniePDF.Fluent;
 using BonniePDF.Fluent.Descriptors;
 using BonniePDF.Rendering;
@@ -139,6 +140,19 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
     private bool CanSplit =>
         Child is IStatefulElement && !Height.HasValue && !FillHeight && CornerRadius <= 0;
 
+    /// <summary>
+    /// The ambient horizontal text alignment a given <see cref="HorizontalAlignment"/> establishes for
+    /// descendant text (spec 01 "Document Model" §3.2). Start/Center/End map to Left/Center/Right; Stretch
+    /// and unset (null) return null, leaving whatever ambient an enclosing container established untouched.
+    /// </summary>
+    private static TextAlignment? AmbientTextAlignmentFor(BonniePDF.Core.HorizontalAlignment? alignment) => alignment switch
+    {
+        BonniePDF.Core.HorizontalAlignment.Start => TextAlignment.Left,
+        BonniePDF.Core.HorizontalAlignment.Center => TextAlignment.Center,
+        BonniePDF.Core.HorizontalAlignment.End => TextAlignment.Right,
+        _ => null,
+    };
+
     /// <inheritdoc />
     public RenderStatus RenderStateful(RenderContext ctx, float width)
     {
@@ -202,12 +216,16 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
 
         RenderStatus status;
         ChildTagToken token = ChildTagging.BeginChildTag(ctx, Child!);
+        TextAlignment? savedAmbient = ctx.AmbientHorizontalTextAlignment;
+        TextAlignment? newAmbient = AmbientTextAlignmentFor(HorizontalAlignment);
+        if (newAmbient.HasValue) ctx.AmbientHorizontalTextAlignment = newAmbient;
         try
         {
             status = stateful.RenderStateful(ctx, childWidth);
         }
         finally
         {
+            ctx.AmbientHorizontalTextAlignment = savedAmbient;
             ChildTagging.EndChildTag(ctx, token);
             ctx.CurrentX = entryX;
         }
@@ -460,12 +478,16 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         // content (PDF/UA 7.1); suppressed automatically inside /Artifact regions.
         float yBeforeChildRender = ctx.CurrentY;
         ChildTagToken token = ChildTagging.BeginChildTag(ctx, Child);
+        TextAlignment? savedAmbient = ctx.AmbientHorizontalTextAlignment;
+        TextAlignment? newAmbient = AmbientTextAlignmentFor(HorizontalAlignment);
+        if (newAmbient.HasValue) ctx.AmbientHorizontalTextAlignment = newAmbient;
         try
         {
             Child.Render(ctx, childWidth);
         }
         finally
         {
+            ctx.AmbientHorizontalTextAlignment = savedAmbient;
             ChildTagging.EndChildTag(ctx, token);
         }
         float yAfterChildRender = ctx.CurrentY;

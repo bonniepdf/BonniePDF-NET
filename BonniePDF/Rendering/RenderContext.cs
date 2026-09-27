@@ -5,6 +5,7 @@ using System.Text;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
+using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Pdf;
 using BonniePDF.Rendering.Tagging;
@@ -207,6 +208,14 @@ public class RenderContext
     /// itself: a header is not laid out inside the band it reserves for the body.
     /// </summary>
     public bool ChromeReservationSuspended { get; set; }
+
+    /// <summary>
+    /// The horizontal text alignment a <see cref="BonniePDF.Elements.Layout.Container"/> establishes for
+    /// descendant text that sets no alignment of its own (spec 01 "Document Model" §3.2). <c>null</c> means
+    /// no ambient is in effect: unset text stays at its own default (Left). Scoped to the container's
+    /// subtree by the container itself, which restores the value it found on the way in.
+    /// </summary>
+    public TextAlignment? AmbientHorizontalTextAlignment { get; set; }
 
     /// <summary>
     /// While a table draws a cell whose content is a <see cref="BonniePDF.Elements.Layout.Container"/>
