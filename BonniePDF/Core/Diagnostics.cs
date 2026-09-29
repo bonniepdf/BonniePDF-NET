@@ -23,6 +23,11 @@ public enum DiagnosticCategory
     Platform,
     Render,
     Attachment,
+    /// <summary>
+    /// A conformance claim the honest-claim guard withheld; <see cref="Diagnostic.Source"/>
+    /// is the claim's token, for example <c>"pdf/a-2a"</c> or <c>"pdf/ua-1"</c>.
+    /// </summary>
+    Compliance,
 }
 
 /// <summary>
