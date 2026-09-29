@@ -61,13 +61,12 @@ public class HardeningTests
     // ── 2. PDF/A + PDF/UA combined ──────────────────────────────────
 
     [Fact]
-    public void Fixture02_PdfAClaimSuppressed_WhenStandardFontsAreUsed()
+    public void Fixture02_PdfAAndPdfUaClaimsSuppressed_WhenStandardFontsAreNotEmbedded()
     {
-        // PDF/A-1b §6.3.4 forbids non-embedded fonts. When the caller
-        // asks for PDF/A but uses any of the standard 14 (Helvetica
-        // here), the serializer drops the PDF/A claim rather than
-        // emitting an invalid one. PDF/UA-1 still ships because it has
-        // no font-embedding requirement.
+        // PDF/A-1b §6.3.4 and PDF/UA-1 §7.21.4.1 both forbid non-embedded
+        // fonts. When no font can be embedded for the standard Helvetica,
+        // the serializer withholds both claims rather than emitting invalid
+        // ones. The tagging itself is kept (spec 04 §8.2).
         // Simulate a no-fonts environment: clear bundled fonts AND disable the OS
         // system-font fallback so no TTF is available for the standard Helvetica name.
         // The serializer must drop the PDF/A claim rather than emit an invalid one.
@@ -87,8 +86,8 @@ public class HardeningTests
             // PDF/A claim and OutputIntent are suppressed (honest about what we ship).
             Assert.DoesNotContain("pdfaid:part", pdf);
             Assert.DoesNotContain("/OutputIntents", pdf);
-            // PDF/UA-1 plumbing is unaffected.
-            Assert.Contains("pdfuaid:part", pdf);
+            // So is the PDF/UA-1 claim; the tagging is unaffected.
+            Assert.DoesNotContain("pdfuaid:part", pdf);
             Assert.Contains("/StructTreeRoot", pdf);
             Assert.Contains("/MarkInfo << /Marked true >>", pdf);
         }

@@ -105,9 +105,17 @@ public class MetadataWriter
     /// <param name="id">The object ID for the XMP metadata dictionary.</param>
     /// <param name="metadata">The document metadata.</param>
     /// <param name="settings">The document settings, read for PdfAEnabled and Accessibility.</param>
-    public void WriteXmpMetadata(int id, DocumentMetadata metadata, DocumentSettings settings)
+    public void WriteXmpMetadata(int id, DocumentMetadata metadata, DocumentSettings settings) =>
+        WriteXmpMetadata(id, metadata, settings, settings.Conformance, settings.Accessibility == AccessibilityMode.PdfUa1);
+
+    /// <summary>
+    /// Writes XMP metadata claiming <paramref name="conformance"/> and, when
+    /// <paramref name="claimPdfUa"/> is set, PDF/UA-1: the claims the honest-claim
+    /// guard left standing, which can be fewer than <paramref name="settings"/> requests.
+    /// </summary>
+    public void WriteXmpMetadata(int id, DocumentMetadata metadata, DocumentSettings settings, PdfAConformance conformance, bool claimPdfUa)
     {
-        var blocks = BuildConformanceBlocks(settings);
+        var blocks = BuildConformanceBlocks(settings, conformance, claimPdfUa);
         string xmpXml = XmpMetadataWriter.GenerateXmpXml(metadata, blocks);
         byte[] xmpBytes = Encoding.UTF8.GetBytes(xmpXml);
 
@@ -124,9 +132,13 @@ public class MetadataWriter
     /// <summary>
     /// Writes XMP metadata to the PDF document asynchronously.
     /// </summary>
-    public async Task WriteXmpMetadataAsync(int id, DocumentMetadata metadata, DocumentSettings settings, CancellationToken cancellationToken = default)
+    public Task WriteXmpMetadataAsync(int id, DocumentMetadata metadata, DocumentSettings settings, CancellationToken cancellationToken = default) =>
+        WriteXmpMetadataAsync(id, metadata, settings, settings.Conformance, settings.Accessibility == AccessibilityMode.PdfUa1, cancellationToken);
+
+    /// <summary>Asynchronous sibling of <see cref="WriteXmpMetadata(int, DocumentMetadata, DocumentSettings, PdfAConformance, bool)"/>.</summary>
+    public async Task WriteXmpMetadataAsync(int id, DocumentMetadata metadata, DocumentSettings settings, PdfAConformance conformance, bool claimPdfUa, CancellationToken cancellationToken = default)
     {
-        var blocks = BuildConformanceBlocks(settings);
+        var blocks = BuildConformanceBlocks(settings, conformance, claimPdfUa);
         string xmpXml = XmpMetadataWriter.GenerateXmpXml(metadata, blocks);
         byte[] xmpBytes = Encoding.UTF8.GetBytes(xmpXml);
 
@@ -145,19 +157,19 @@ public class MetadataWriter
     /// and PDF/UA-1; ZUGFeRD/Factur-X will register here too once
     /// implemented.
     /// </summary>
-    private static IReadOnlyList<XmpConformanceBlock> BuildConformanceBlocks(DocumentSettings settings)
+    private static IReadOnlyList<XmpConformanceBlock> BuildConformanceBlocks(DocumentSettings settings, PdfAConformance conformance, bool claimPdfUa)
     {
         var blocks = new List<XmpConformanceBlock>(3);
-        var pdfA = XmpConformanceBlock.ForPdfA(settings.Conformance);
+        var pdfA = XmpConformanceBlock.ForPdfA(conformance);
         if (pdfA != null) blocks.Add(pdfA);
-        if (settings.Accessibility == AccessibilityMode.PdfUa1) blocks.Add(XmpConformanceBlock.PdfUa1());
+        if (claimPdfUa) blocks.Add(XmpConformanceBlock.PdfUa1());
 
         // ZUGFeRD / Factur-X: only claim it on a PDF/A-3 document. Gating on
         // the (possibly guard-reset) Conformance means a suppressed PDF/A
         // claim also suppresses the fx block - Factur-X without PDF/A-3 is
         // meaningless, so the honest-claim guard cascades for free.
         if (settings.FacturX != null &&
-            settings.Conformance is PdfAConformance.PdfA3b or PdfAConformance.PdfA3a)
+            conformance is PdfAConformance.PdfA3b or PdfAConformance.PdfA3a)
         {
             blocks.Add(XmpConformanceBlock.FacturX(settings.FacturX));
         }

@@ -209,23 +209,10 @@ public class PdfDocumentSerializer
         // 4. Post-Processing (Write Resources)
         string globalResources = ctx.Resources.WriteResources(writer, pageIds.Count);
 
-        // ── Honest PDF/A claim ─────────────────────────────────────
-        // Settings.PdfAEnabled is opt-in, but PDF/A-1b §6.3.4 forbids
-        // non-embedded fonts. When the caller asked for PDF/A but the
-        // document references any of the standard 14 (which we don't
-        // embed), we silently drop the claim: no pdfaid block in XMP,
-        // no OutputIntent. The document is still a valid PDF - it just
-        // doesn't lie about being PDF/A-1b. To actually deliver PDF/A
-        // the caller must register a real TTF.
-        //
-        // Implemented by demoting Settings.PdfAEnabled to the effective
-        // value (rather than threading a separate flag through the
-        // remaining writes); mirrors the DisplayDocTitle = true
-        // mutation we do for PDF/UA-1.
-        if (_document.Settings.PdfAEnabled && ctx.Resources.HasNonEmbeddedStandardFont())
-        {
-            _document.Settings.PdfAEnabled = false;
-        }
+        // ── Honest claims (spec 04 §8) ──────────────────────────────
+        // Decide which of the requested claims this generation can honour,
+        // now that we know which fonts were embedded.
+        HonestClaims claims = EvaluateHonestClaims(ctx.Resources);
 
         // 5. Write the global Resources object that every page references.
         // Written as an indirect object so individual pages can satisfy
@@ -249,7 +236,7 @@ public class PdfDocumentSerializer
         // ISO 19005-4 clauses 6.1.3-4/5 prohibit the legacy trailer /Info
         // dictionary (except for a narrow PieceInfo/ModDate case). PDF/A-4
         // metadata lives in XMP, so omit /Info entirely for the effective claim.
-        if (_document.Settings.Conformance == PdfAConformance.PdfA4)
+        if (claims.Conformance == PdfAConformance.PdfA4)
         {
             documentInfoId = 0;
         }
@@ -268,13 +255,11 @@ public class PdfDocumentSerializer
             writer.WriteViewerPreferences(catalogOptions.ViewerPrefsId, _document.Settings);
         }
 
-        bool effectivePdfA = _document.Settings.PdfAEnabled && !ctx.Resources.HasNonEmbeddedStandardFont();
-
         // Write XMP Metadata for PDF 1.7 and 2.0
         if (_document.Settings.Version == PdfVersion.Pdf17 || _document.Settings.Version == PdfVersion.Pdf20)
         {
             catalogOptions.XmpMetadataId = writer.GetNewId();
-            metadataWriter.WriteXmpMetadata(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings);
+            metadataWriter.WriteXmpMetadata(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings, claims.Conformance, claims.PdfUa);
         }
 
         // Write Bookmarks for PDF 1.7
@@ -286,10 +271,10 @@ public class PdfDocumentSerializer
         }
 
         // Write PDF/A Output Intents (PDF/A-1/2/3 on PDF 1.7, PDF/A-4 on PDF 2.0)
-        if (effectivePdfA && (_document.Settings.Version == PdfVersion.Pdf17 || _document.Settings.Version == PdfVersion.Pdf20))
+        if (claims.NeedsOutputIntent && (_document.Settings.Version == PdfVersion.Pdf17 || _document.Settings.Version == PdfVersion.Pdf20))
         {
             ComplianceWriter complianceWriter = new(writer);
-            catalogOptions.PdfAEnabled = true;
+            catalogOptions.PdfAEnabled = claims.PdfA;
             int iccProfileId = writer.GetNewId();
             complianceWriter.WriteIccProfile(iccProfileId);
             int outputIntentId = writer.GetNewId();
@@ -499,12 +484,8 @@ public class PdfDocumentSerializer
         // 4. Post-Processing (Write Resources)
         string globalResources = await ctx.Resources.WriteResourcesAsync(writer, pageIds.Count, cancellationToken).ConfigureAwait(false);
 
-        // Drop the PDF/A claim if any standard-14 font slipped
-        // through unembedded - see the sync path for the rationale.
-        if (_document.Settings.PdfAEnabled && ctx.Resources.HasNonEmbeddedStandardFont())
-        {
-            _document.Settings.PdfAEnabled = false;
-        }
+        // Honest claims - see the sync path.
+        HonestClaims claims = EvaluateHonestClaims(ctx.Resources);
 
         // 5. Write the global Resources object (see sync path for rationale).
         await writer.WriteRawObjectAsync(resourcesId, globalResources, cancellationToken).ConfigureAwait(false);
@@ -523,7 +504,7 @@ public class PdfDocumentSerializer
         MetadataWriter metadataWriter = new(writer);
         // PDF/A-4 metadata is carried by XMP; see the sync path for the
         // ISO 19005-4 /Info restriction.
-        if (_document.Settings.Conformance == PdfAConformance.PdfA4)
+        if (claims.Conformance == PdfAConformance.PdfA4)
         {
             documentInfoId = 0;
         }
@@ -542,13 +523,11 @@ public class PdfDocumentSerializer
             await writer.WriteViewerPreferencesAsync(catalogOptions.ViewerPrefsId, _document.Settings, cancellationToken).ConfigureAwait(false);
         }
 
-        bool effectivePdfA = _document.Settings.PdfAEnabled && !ctx.Resources.HasNonEmbeddedStandardFont();
-
         // Write XMP Metadata for PDF 1.7 and 2.0
         if (_document.Settings.Version == PdfVersion.Pdf17 || _document.Settings.Version == PdfVersion.Pdf20)
         {
             catalogOptions.XmpMetadataId = writer.GetNewId();
-            await metadataWriter.WriteXmpMetadataAsync(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings, cancellationToken).ConfigureAwait(false);
+            await metadataWriter.WriteXmpMetadataAsync(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings, claims.Conformance, claims.PdfUa, cancellationToken).ConfigureAwait(false);
         }
 
         // Write Bookmarks for PDF 1.7
@@ -560,10 +539,10 @@ public class PdfDocumentSerializer
         }
 
         // Write PDF/A Output Intents (PDF/A-1/2/3 on PDF 1.7, PDF/A-4 on PDF 2.0)
-        if (effectivePdfA && (_document.Settings.Version == PdfVersion.Pdf17 || _document.Settings.Version == PdfVersion.Pdf20))
+        if (claims.NeedsOutputIntent && (_document.Settings.Version == PdfVersion.Pdf17 || _document.Settings.Version == PdfVersion.Pdf20))
         {
             ComplianceWriter complianceWriter = new(writer);
-            catalogOptions.PdfAEnabled = true;
+            catalogOptions.PdfAEnabled = claims.PdfA;
             int iccProfileId = writer.GetNewId();
             await complianceWriter.WriteIccProfileAsync(iccProfileId, cancellationToken).ConfigureAwait(false);
             int outputIntentId = writer.GetNewId();
@@ -615,6 +594,61 @@ public class PdfDocumentSerializer
         if (encryptId > 0) await writer.WriteEncryptDictionaryAsync(encryptId, cancellationToken).ConfigureAwait(false);
 
         await writer.CloseAsync(catalogId, documentInfoId, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>The claims one generation makes, after the honest-claim guard.</summary>
+    private sealed record HonestClaims(PdfAConformance Conformance, bool PdfUa, bool NeedsOutputIntent)
+    {
+        public bool PdfA => Conformance != PdfAConformance.None;
+    }
+
+    /// <summary>
+    /// The honest-claim guard (spec 04 §8). PDF/A and PDF/UA-1 both require every
+    /// font to be embedded, so when a standard-14 reference could not be, both
+    /// claims are withheld for this generation and each is reported as a
+    /// <see cref="DiagnosticCategory.Compliance"/> warning. Tagging is kept. The
+    /// document's settings are not modified, so a later generation with the fonts
+    /// available carries the full claims.
+    /// </summary>
+    private HonestClaims EvaluateHonestClaims(PdfResourceRegistry resources)
+    {
+        DocumentSettings settings = _document.Settings;
+        IReadOnlyList<string> unembedded = resources.GetNonEmbeddedStandardFonts();
+        bool fontsUnembedded = unembedded.Count > 0;
+        bool pdfUaRequested = settings.Accessibility == AccessibilityMode.PdfUa1;
+        bool pdfA = settings.PdfAEnabled && !fontsUnembedded;
+        bool pdfUa = pdfUaRequested && !fontsUnembedded;
+
+        string fonts = fontsUnembedded ? string.Join(", ", unembedded) : "standard-14 fonts";
+        const string remedy =
+            "Register the Liberation fonts (or use embeddable fonts) and generate again to keep the claim. " +
+            "The rest of the document is unchanged.";
+        if (settings.PdfAEnabled && !pdfA)
+        {
+            string token = PdfAToken(settings.Conformance);
+            _diagnostics.AddWarning(DiagnosticCategory.Compliance,
+                $"The {token} claim was withheld: these fonts could not be embedded: {fonts}. {remedy}", token);
+        }
+        if (pdfUaRequested && !pdfUa)
+        {
+            _diagnostics.AddWarning(DiagnosticCategory.Compliance,
+                $"The pdf/ua-1 claim was withheld: these fonts could not be embedded: {fonts}. " +
+                $"The document is still tagged. {remedy}", "pdf/ua-1");
+        }
+
+        // Spec 04 §7: under PDF/A the OutputIntent goes with the claim; a PDF/UA-only
+        // document always carries one, for colour management rather than as a claim.
+        bool needsOutputIntent = pdfA || (pdfUaRequested && !settings.PdfAEnabled);
+        return new HonestClaims(pdfA ? settings.Conformance : PdfAConformance.None, pdfUa, needsOutputIntent);
+    }
+
+    /// <summary><c>PdfA2a</c> → <c>pdf/a-2a</c>, <c>PdfA4</c> → <c>pdf/a-4</c>: the claim's spec token.</summary>
+    private static string PdfAToken(PdfAConformance conformance)
+    {
+        string name = conformance.ToString();
+        return name.StartsWith("PdfA", StringComparison.Ordinal)
+            ? "pdf/a-" + name.Substring(4).ToLowerInvariant()
+            : "none";
     }
 
     private bool UsesEmbeddedStandardFonts() =>

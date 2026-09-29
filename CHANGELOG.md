@@ -15,6 +15,30 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+### Fixed
+
+- **A PDF/UA-1 claim is no longer made over fonts that were not embedded.**
+  PDF/UA-1 requires every font to be embedded, as PDF/A does. When the
+  standard-14 fonts cannot be embedded (the bundled Liberation fonts were removed
+  and no system font was allowed), the PDF/A claim was already withheld, but the
+  `pdfuaid` claim was still written. It is now withheld too. The document is still
+  tagged: the structure tree, `/Lang` and `/MarkInfo` are unchanged; only the claim
+  goes.
+- **A withheld conformance claim is now reported.** Each withheld claim adds one
+  `Warning` to `Document.Diagnostics`, in the new `DiagnosticCategory.Compliance`,
+  with `Source` set to the claim (`"pdf/a-2a"`, `"pdf/ua-1"`, …) and a message
+  naming the fonts that could not be embedded.
+- **Generating no longer changes the document's settings.** Withholding the PDF/A
+  claim used to set `Settings.PdfAEnabled = false`, which reset `Conformance` to
+  `None` for good: generating the same document again, even with the fonts
+  available, produced no PDF/A claim. The claims are now decided per generation.
+  As a consequence, attachments on such a document are gated by the PDF/A level it
+  requested, as in the TypeScript implementation.
+- **A PDF/UA-only document now carries an OutputIntent.** The specification writes
+  one for colour management whenever PDF/UA-1 is requested without PDF/A, and the
+  TypeScript implementation always has; this implementation wrote it only for
+  PDF/A. PDF/UA-only output gains an sRGB ICC profile and an `/OutputIntents` entry.
+
 ### Added
 
 - **The SVG document export carries a version and its compliance report, and

@@ -234,15 +234,19 @@ public class PdfResourceRegistry
     /// won't be aliased to a TTF and isn't already an embedded-font
     /// path will be written via <c>WriteType1Font</c> (non-embedded).
     /// </summary>
-    public bool HasNonEmbeddedStandardFont()
+    public bool HasNonEmbeddedStandardFont() => GetNonEmbeddedStandardFonts().Count > 0;
+
+    /// <summary>The standard-14 font references that will be written without embedding.</summary>
+    public IReadOnlyList<string> GetNonEmbeddedStandardFonts()
     {
+        var result = new List<string>();
         foreach (string fontIdentifier in FontNameMap.Keys)
         {
             if (FontAliasMap.ContainsKey(fontIdentifier)) continue;
             if (IsEmbeddedFont(fontIdentifier)) continue;
-            return true;
+            result.Add(fontIdentifier);
         }
-        return false;
+        return result;
     }
 
     private string RegisterEmbeddedFontFromBytes(byte[] bytes, string key)
