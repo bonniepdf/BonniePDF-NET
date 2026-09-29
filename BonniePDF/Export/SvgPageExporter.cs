@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using BonniePDF.Compliance;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
 using BonniePDF.Drawing;
@@ -18,16 +19,37 @@ namespace BonniePDF.Export;
 /// document used, so a host can render the pages with the exact fonts BonniePDF
 /// laid them out with.
 /// </summary>
+/// <remarks>
+/// <see cref="ToJson"/> writes the export in the form a previewer reads, so a
+/// document rendered on a server can be shown in a browser. The TypeScript
+/// implementation produces the same JSON for the same document.
+/// </remarks>
 public sealed class SvgDocumentExport
 {
-    public SvgDocumentExport(IReadOnlyList<string> pages, string fontFaceCss, Rendering.LayoutSnapshot? snapshot = null)
+    /// <summary>
+    /// The version of the export format, written as <c>version</c>. It changes
+    /// only for a breaking change to the export's shape; the embedded snapshot
+    /// carries its own version.
+    /// </summary>
+    public const int CurrentVersion = 1;
+
+    public SvgDocumentExport(
+        IReadOnlyList<string> pages,
+        string fontFaceCss,
+        Rendering.LayoutSnapshot? snapshot = null,
+        ComplianceReport? report = null)
     {
         Pages = pages;
         FontFaceCss = fontFaceCss;
         Snapshot = snapshot;
+        Report = report;
     }
 
-    /// <summary>One standalone SVG string per page.</summary>
+    /// <summary>The export format version; see <see cref="CurrentVersion"/>.</summary>
+    public int Version { get; } = CurrentVersion;
+
+    /// <summary>One standalone SVG string per page, in page order. Each root
+    /// carries <c>width</c>, <c>height</c> and <c>viewBox</c> in PDF points.</summary>
     public IReadOnlyList<string> Pages { get; }
 
     /// <summary><c>&lt;style&gt;</c>-ready <c>@font-face</c> rules, or <c>""</c> when the
@@ -41,6 +63,30 @@ public sealed class SvgDocumentExport
     /// top-left, points coordinate space as the SVG.
     /// </summary>
     public Rendering.LayoutSnapshot? Snapshot { get; }
+
+    /// <summary>
+    /// The compliance report for <see cref="Snapshot"/>, present exactly when the
+    /// snapshot is. Equal to <see cref="CompliancePreflight.Evaluate(Rendering.LayoutSnapshot)"/>
+    /// with default options, so every rule family runs, WCAG included; filter by
+    /// <see cref="ComplianceFinding.Standard"/> to hide one. Attached here so the
+    /// report always comes from the same engine as the snapshot it describes,
+    /// even when it is read in another process.
+    /// </summary>
+    public ComplianceReport? Report { get; }
+
+    /// <summary>
+    /// Writes the export as JSON: camelCase keys, unset values omitted rather
+    /// than written as <c>null</c>, severities as <c>"error"</c> /
+    /// <c>"warning"</c> / <c>"info"</c>. A browser previewer loads the result
+    /// directly, for example from an HTTP response.
+    /// </summary>
+    /// <remarks>
+    /// Like JavaScript's <c>JSON.stringify</c>, the output does not escape
+    /// <c>&lt;</c>, <c>&gt;</c> or <c>&amp;</c>, which keeps SVG markup compact.
+    /// It is therefore JSON for a response body or a file. Do not paste it
+    /// unescaped into an HTML <c>&lt;script&gt;</c> element.
+    /// </remarks>
+    public string ToJson() => SvgDocumentExportJson.Write(this);
 }
 
 /// <summary>
@@ -151,13 +197,16 @@ internal static class SvgPageExporter
             {
                 AccessibilityMode = (int)settings.Accessibility,
                 Conformance = settings.Conformance.ToString(),
-                Language = settings.Language,
+                Language = string.IsNullOrEmpty(settings.Language) ? null : settings.Language,
                 Title = string.IsNullOrEmpty(metaTitle) ? null : metaTitle
             });
             snapshot = recorder.Snapshot();
         }
 
-        return new SvgDocumentExport(results, BuildFontFaceCss(ctx.SvgFontUsage), snapshot);
+        // Evaluated over the finished snapshot. The evaluator is pure, and neither
+        // the snapshot nor any page changes.
+        ComplianceReport? report = snapshot is null ? null : CompliancePreflight.Evaluate(snapshot);
+        return new SvgDocumentExport(results, BuildFontFaceCss(ctx.SvgFontUsage), snapshot, report);
     }
 
     /// <summary>

@@ -17,6 +17,22 @@ behaviour, so the two files can be read side by side.
 
 ### Added
 
+- **The SVG document export carries a version and its compliance report, and
+  writes itself as JSON.** `GenerateSvgDocument()` / `GenerateSvgDocumentAsync()`
+  now return `Version` (currently `1`, also `SvgDocumentExport.CurrentVersion`),
+  and with `CaptureLayout = true` they also return `Report`: the result of
+  `CompliancePreflight.Evaluate(snapshot)` with default options, so a host no
+  longer runs the check itself, and the report always comes from the same engine
+  as the snapshot. The new `ToJson()` writes the export in the form a browser
+  previewer loads directly, for example from an HTTP response: camelCase keys, no
+  `null` values, severities as `"error"` / `"warning"` / `"info"`, single-precision
+  values in their shortest form. It produces the same JSON as the TypeScript
+  implementation's `JSON.stringify(result)` for the same document. Like that, it
+  leaves `<`, `>` and `&` unescaped to keep SVG markup compact, so it is JSON for a
+  response body or a file, not for pasting into an HTML `<script>` element. Without
+  `CaptureLayout` neither `Snapshot` nor `Report` is present. An empty
+  `Settings.Language` is now recorded in the snapshot as absent rather than as `""`.
+
 - **Images are reduced to the resolution their printed size can use.** An image
   used to be embedded at its source resolution however small it was drawn: a
   2658 x 512 logo placed 175 pt wide was stored at about 1,090 pixels per inch,
