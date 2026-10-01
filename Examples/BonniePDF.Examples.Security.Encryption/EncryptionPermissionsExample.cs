@@ -33,7 +33,7 @@ public static class EncryptionPermissionsExample
         {
             Text = "Document with Permission Restrictions",
             FontSize = 24,
-            TextColor = ColorPalette.Blue[700]
+            Color = ColorPalette.Blue[700]
         });
 
         doc.Add(new TextBlock
@@ -42,10 +42,10 @@ public static class EncryptionPermissionsExample
             Margin = new Thickness(0, 20, 0, 10)
         });
 
-        doc.Add(new TextBlock { Text = "  - Printing: Allowed", TextColor = ColorPalette.Green[700] });
-        doc.Add(new TextBlock { Text = "  - Copying: Allowed", TextColor = ColorPalette.Green[700] });
-        doc.Add(new TextBlock { Text = "  - Modifying: Denied", TextColor = ColorPalette.Red[600] });
-        doc.Add(new TextBlock { Text = "  - Annotations: Denied", TextColor = ColorPalette.Red[600] });
+        doc.Add(new TextBlock { Text = "  - Printing: Allowed", Color = ColorPalette.Green[700] });
+        doc.Add(new TextBlock { Text = "  - Copying: Allowed", Color = ColorPalette.Green[700] });
+        doc.Add(new TextBlock { Text = "  - Modifying: Denied", Color = ColorPalette.Red[600] });
+        doc.Add(new TextBlock { Text = "  - Annotations: Denied", Color = ColorPalette.Red[600] });
 
         doc.Add(new TextBlock
         {

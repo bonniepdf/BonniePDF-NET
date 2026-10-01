@@ -191,7 +191,7 @@ public static class FacturXInvoiceExample
             Text = text,
             FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
             FontSize = size,
-            TextColor = color ?? Ink,
+            Color = color ?? Ink,
             Alignment = align,
         };
         if (margin.HasValue)

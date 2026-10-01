@@ -203,7 +203,7 @@ public static class AnnualReportExample
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = bold ? 12 : 10,
-        TextColor = color,
+        Color = color,
         Alignment = align,
     };
 
@@ -248,7 +248,7 @@ public static class AnnualReportExample
         Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 13,
-        TextColor = ColorPalette.Teal[300],
+        Color = ColorPalette.Teal[300],
         Margin = new Thickness(0, 0, 0, 12),
     };
 
@@ -258,7 +258,7 @@ public static class AnnualReportExample
         Level = 1,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 42,
-        TextColor = Color.White,
+        Color = Color.White,
     };
 
     /// <summary>Three joined segments in the brand trio, sitting under the cover title.</summary>
@@ -277,7 +277,7 @@ public static class AnnualReportExample
         Text = text,
         FontName = StandardFonts.Helvetica,
         FontSize = 16,
-        TextColor = ColorPalette.Blue[200],
+        Color = ColorPalette.Blue[200],
     };
 
     private static TextBlock CoverCredit(string text) => new()
@@ -285,7 +285,7 @@ public static class AnnualReportExample
         Text = text,
         FontName = StandardFonts.Helvetica,
         FontSize = 10,
-        TextColor = ColorPalette.Blue[300],
+        Color = ColorPalette.Blue[300],
         Margin = new Thickness(0, 0, 0, 4),
     };
 
@@ -296,7 +296,7 @@ public static class AnnualReportExample
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 20,
-        TextColor = HeadingColor,
+        Color = HeadingColor,
         Margin = new Thickness(0, 0, 0, 12),
     };
 
@@ -305,7 +305,7 @@ public static class AnnualReportExample
         Level = 3,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 14,
-        TextColor = ColorPalette.Blue[700],
+        Color = ColorPalette.Blue[700],
         Margin = new Thickness(0, 18, 0, 8),
     };
 
@@ -314,7 +314,7 @@ public static class AnnualReportExample
         Text = text,
         FontName = StandardFonts.Helvetica,
         FontSize = 11,
-        TextColor = Ink,
+        Color = Ink,
         Alignment = TextAlignment.Justify,
         Margin = new Thickness(0, 0, 0, 12),
     };
@@ -338,7 +338,7 @@ public static class AnnualReportExample
             Text = value,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = accent,
+            Color = accent,
             Margin = new Thickness(0, 0, 0, 4),
         });
         stack.Add(new TextBlock
@@ -348,7 +348,7 @@ public static class AnnualReportExample
             FontSize = 10,
             // 600, not 500: this card sits on the Blue-50 panel, where 500 falls
             // to 4.38:1 against the 4.5:1 WCAG AA threshold.
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
         });
 
         return new Container

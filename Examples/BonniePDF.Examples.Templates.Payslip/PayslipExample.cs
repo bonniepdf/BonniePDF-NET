@@ -75,7 +75,7 @@ public static class PayslipExample
                 Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 6.5f,
-                TextColor = Faint,
+                Color = Faint,
                 Alignment = TextAlignment.Center,
             },
         };
@@ -229,7 +229,7 @@ public static class PayslipExample
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = size,
-        TextColor = color ?? Ink,
+        Color = color ?? Ink,
         Alignment = align,
     };
 

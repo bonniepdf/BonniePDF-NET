@@ -111,14 +111,14 @@ public static class EmploymentContractExample
                 Text = $"{data.Reference} · {data.Employer.Name} and {data.Employee.Name}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7f,
-                TextColor = Faint,
+                Color = Faint,
             },
             FooterTemplate = pageNumber => new TextBlock
             {
                 Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7f,
-                TextColor = Faint,
+                Color = Faint,
                 Alignment = TextAlignment.Center,
             },
         };
@@ -179,7 +179,7 @@ public static class EmploymentContractExample
             TocIdentifier = "title",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 17f,
-            TextColor = Accent,
+            Color = Accent,
         };
 
         TextBlock reference = Text($"Agreement reference {data.Reference}", size: 8.5f, color: Muted);
@@ -278,7 +278,7 @@ public static class EmploymentContractExample
             NumberFormat = NumberFormat.Decimal,
             FontName = StandardFonts.Helvetica,
             FontSize = 9.5f,
-            TextColor = Ink,
+            Color = Ink,
             ItemSpacing = 5,
             Indent = 16,
         };
@@ -372,7 +372,7 @@ public static class EmploymentContractExample
         TocIdentifier = id,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 11.5f,
-        TextColor = Accent,
+        Color = Accent,
         Margin = new Thickness(0, 4, 0, 6),
     };
 
@@ -383,7 +383,7 @@ public static class EmploymentContractExample
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = size,
-        TextColor = color ?? Ink,
+        Color = color ?? Ink,
         Alignment = align,
     };
 

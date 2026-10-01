@@ -34,7 +34,7 @@ public static class AdvancedTypographyExample
             TocIdentifier = "title",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 14),
         });
 
@@ -45,7 +45,7 @@ public static class AdvancedTypographyExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            Color = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6),
         });
 
@@ -86,7 +86,7 @@ public static class AdvancedTypographyExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            Color = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6),
         });
 
@@ -96,8 +96,8 @@ public static class AdvancedTypographyExample
             Text = "Overlined section marker",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 13,
-            TextColor = ColorPalette.Slate[800],
-            TextDecoration = TextDecoration.Overline,
+            Color = ColorPalette.Slate[800],
+            Decoration = TextDecoration.Overline,
             DecorationColor = ColorPalette.Blue[500],
             DecorationThickness = 1.5f,
             Margin = new Thickness(0, 0, 0, 8),
@@ -134,42 +134,42 @@ public static class AdvancedTypographyExample
         doc.Add(new Heading("Letter & word spacing")
         {
             TocIdentifier = "spacing", Level = 2, FontName = StandardFonts.HelveticaBold, FontSize = 14,
-            TextColor = ColorPalette.Slate[700], Margin = new Thickness(0, 0, 0, 6),
+            Color = ColorPalette.Slate[700], Margin = new Thickness(0, 0, 0, 6),
         });
         doc.Add(new TextBlock
         {
             Text = "WIDE TRACKING FOR EMPHASIS", FontName = StandardFonts.HelveticaBold, FontSize = 12,
-            TextColor = ColorPalette.Slate[800], LetterSpacing = 3, Margin = new Thickness(0, 0, 0, 4),
+            Color = ColorPalette.Slate[800], LetterSpacing = 3, Margin = new Thickness(0, 0, 0, 4),
         });
         doc.Add(new TextBlock
         {
             Text = "Airy   word   spacing   opens   the   line.", FontSize = 12,
-            TextColor = ColorPalette.Slate[700], WordSpacing = 4, Margin = new Thickness(0, 0, 0, 16),
+            Color = ColorPalette.Slate[700], WordSpacing = 4, Margin = new Thickness(0, 0, 0, 16),
         });
 
         // ── Line clamp ──
         doc.Add(new Heading("Line clamp")
         {
             TocIdentifier = "clamp", Level = 2, FontName = StandardFonts.HelveticaBold, FontSize = 14,
-            TextColor = ColorPalette.Slate[700], Margin = new Thickness(0, 0, 0, 6),
+            Color = ColorPalette.Slate[700], Margin = new Thickness(0, 0, 0, 6),
         });
         doc.Add(new TextBlock
         {
             Text = "This description is clamped to two lines: however much copy the product team writes, the card stays a fixed height and the overflow is replaced with an ellipsis so the layout never breaks.",
-            FontSize = 12, TextColor = ColorPalette.Slate[700], MaxLines = 2, Margin = new Thickness(0, 0, 0, 16),
+            FontSize = 12, Color = ColorPalette.Slate[700], MaxLines = 2, Margin = new Thickness(0, 0, 0, 16),
         });
 
         // ── Paragraph controls ──
         doc.Add(new Heading("Paragraph indent & spacing")
         {
             TocIdentifier = "paragraphs", Level = 2, FontName = StandardFonts.HelveticaBold, FontSize = 14,
-            TextColor = ColorPalette.Slate[700], Margin = new Thickness(0, 0, 0, 6),
+            Color = ColorPalette.Slate[700], Margin = new Thickness(0, 0, 0, 6),
         });
         doc.Add(new TextBlock
         {
             Text = "The first line of each paragraph is indented and a little air is inserted between paragraphs, the way a printed book sets body copy.\n" +
                    "This second paragraph shows the inter-paragraph spacing and the matching first-line indent, all resolved during layout without manual spacers.",
-            FontSize = 12, TextColor = ColorPalette.Slate[700], FirstLineIndent = 24, ParagraphSpacing = 8,
+            FontSize = 12, Color = ColorPalette.Slate[700], FirstLineIndent = 24, ParagraphSpacing = 8,
         });
 
         return doc;

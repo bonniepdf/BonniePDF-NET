@@ -49,7 +49,7 @@ public static class QRCodesExampleFluent
                         .Text("QR Code Generator (Fluent API)")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(24)
-                        .TextColor(ColorPalette.Slate[800])
+                        .Color(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 20);
 
                     col.Item()
@@ -108,8 +108,8 @@ public static class QRCodesExampleFluent
                                 .AltText("QR code linking to https://github.com/bonniepdf with low error correction");
 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Low").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~7% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text("~7% restoration").FontSize(9).Color(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
                         });
 
                         // Medium (15%)
@@ -122,8 +122,8 @@ public static class QRCodesExampleFluent
                                 .AltText("QR code linking to https://github.com/bonniepdf with medium error correction");
 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Medium").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~15% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text("~15% restoration").FontSize(9).Color(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
                         });
 
                         // Quartile (25%)
@@ -136,8 +136,8 @@ public static class QRCodesExampleFluent
                                 .AltText("QR code linking to https://github.com/bonniepdf with quartile error correction");
 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Quartile").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~25% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text("~25% restoration").FontSize(9).Color(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
                         });
 
                         // High (30%)
@@ -150,8 +150,8 @@ public static class QRCodesExampleFluent
                                 .AltText("QR code linking to https://github.com/bonniepdf with high error correction");
 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("High").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~30% restoration").FontSize(9).TextColor(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).TextColor(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text("~30% restoration").FontSize(9).Color(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
                         });
                     });
                     
@@ -173,7 +173,7 @@ public static class QRCodesExampleFluent
                                 .ForegroundColor(ColorPalette.Blue[700])
                                 .QuietZone(2)
                                 .AltText("QR code encoding telephone number +1234567890");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("tel:+1234567890").FontSize(9).TextColor(ColorPalette.Slate[500]);
+                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("tel:+1234567890").FontSize(9).Color(ColorPalette.Slate[500]);
                         });
 
                         // Custom Colors
@@ -186,7 +186,7 @@ public static class QRCodesExampleFluent
                                 .BackgroundColor(ColorPalette.Rose[50])
                                 .QuietZone(2)
                                 .AltText("QR code encoding email address mailto:hello@example.com");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("mailto:hello@example.com").FontSize(9).TextColor(ColorPalette.Slate[500]);
+                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("mailto:hello@example.com").FontSize(9).Color(ColorPalette.Slate[500]);
                         });
 
                         // Transparent Background
@@ -203,7 +203,7 @@ public static class QRCodesExampleFluent
                                 .DrawBackground(false) // Let the container's background show through
                                 .QuietZone(2)
                                 .AltText("QR code encoding Wi-Fi network credentials for MyNetwork");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("WIFI:S:MyNetwork;...").FontSize(9).TextColor(ColorPalette.Slate[500]);
+                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("WIFI:S:MyNetwork;...").FontSize(9).Color(ColorPalette.Slate[500]);
                         });
                     });
                 });
@@ -219,7 +219,7 @@ public static class QRCodesExampleFluent
             .Text(title)
             .Font(StandardFonts.HelveticaBold)
             .FontSize(16)
-            .TextColor(ColorPalette.Indigo[600])
+            .Color(ColorPalette.Indigo[600])
             .Margin(0, 0, 0, 10);
     }
 }

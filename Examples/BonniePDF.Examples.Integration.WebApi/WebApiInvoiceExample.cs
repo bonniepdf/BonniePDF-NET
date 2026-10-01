@@ -35,7 +35,7 @@ public static class WebApiInvoiceExample
             Text = $"INVOICE #INV-{DateTime.Now.Year}-001",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 20,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -95,7 +95,7 @@ public static class WebApiInvoiceExample
             Text = $"INVOICE #{invoiceNumber}",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 20,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 

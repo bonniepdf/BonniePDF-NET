@@ -68,7 +68,7 @@ public static class ProductPhotoGalleryExample
                     Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                     FontName = StandardFonts.Helvetica,
                     FontSize = 9,
-                    TextColor = ColorPalette.Slate[400],
+                    Color = ColorPalette.Slate[400],
                     Alignment = TextAlignment.Right,
                 };
                 return footer;
@@ -88,7 +88,7 @@ public static class ProductPhotoGalleryExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Ink,
+            Color = Ink,
             Margin = new Thickness(0, 0, 0, 4),
         };
         doc.Add(h1);
@@ -97,7 +97,7 @@ public static class ProductPhotoGalleryExample
         {
             Text = "Homeware & lighting - selected pieces from the new season.",
             FontSize = 12,
-            TextColor = Muted,
+            Color = Muted,
             Margin = new Thickness(0, 0, 0, 18),
         });
 
@@ -134,7 +134,7 @@ public static class ProductPhotoGalleryExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 12,
-            TextColor = Ink,
+            Color = Ink,
             Margin = new Thickness(0, 6, 0, 0),
         };
         body.Add(name);
@@ -147,14 +147,14 @@ public static class ProductPhotoGalleryExample
         {
             Text = product.Sku,
             FontSize = 9,
-            TextColor = Muted,
+            Color = Muted,
         }, 1f);
         meta.Add(new TextBlock
         {
             Text = product.Price,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 12,
-            TextColor = Accent,
+            Color = Accent,
             Alignment = TextAlignment.Right,
         }, 1f);
         body.Add(meta);
@@ -163,7 +163,7 @@ public static class ProductPhotoGalleryExample
         {
             Text = product.Blurb,
             FontSize = 9.5f,
-            TextColor = Body,
+            Color = Body,
         });
 
         return new Container
@@ -190,7 +190,7 @@ public static class ProductPhotoGalleryExample
             Text = product.Name[..1].ToUpperInvariant(),
             FontName = StandardFonts.HelveticaBold,
             FontSize = 40,
-            TextColor = monogramColor,
+            Color = monogramColor,
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 40, 0, 0),
         };

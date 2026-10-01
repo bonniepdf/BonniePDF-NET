@@ -36,7 +36,7 @@ public static class WatermarkConfidentialExample
         {
             Text = "CONFIDENTIAL",
             FontSize = 60,
-            TextColor = Color.Red,
+            Color = Color.Red,
             Opacity = 0.08f,
             RotationDegrees = -55
         };
@@ -46,7 +46,7 @@ public static class WatermarkConfidentialExample
             Text = $"Financial Performance Report Q4 {DateTime.Now.Year}",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 22,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -75,7 +75,7 @@ public static class WatermarkConfidentialExample
                    "authorized recipients. Unauthorized disclosure or distribution is prohibited.",
             FontName = StandardFonts.TimesItalic,
             FontSize = 10,
-            TextColor = ColorPalette.Slate[500],
+            Color = ColorPalette.Slate[500],
             Margin = new Thickness(0, 20, 0, 0)
         });
         return doc;
@@ -90,7 +90,7 @@ public static class WatermarkConfidentialExample
                 Text = text,
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 11,
-                TextColor = Color.White
+                Color = Color.White
             },
             BackgroundColor = ColorPalette.Slate[700],
             Padding = new Thickness(8, 6, 8, 6)
@@ -106,7 +106,7 @@ public static class WatermarkConfidentialExample
                 Text = text,
                 FontName = StandardFonts.Helvetica,
                 FontSize = 11,
-                TextColor = ColorPalette.Slate[600]
+                Color = ColorPalette.Slate[600]
             },
             Padding = new Thickness(8, 5, 8, 5),
             Border = new Border(0.5f),

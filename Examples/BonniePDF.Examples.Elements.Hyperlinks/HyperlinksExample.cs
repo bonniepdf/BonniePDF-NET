@@ -41,7 +41,7 @@ public static class HyperlinksExample
             TocIdentifier = "title",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -53,7 +53,7 @@ public static class HyperlinksExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -78,7 +78,7 @@ public static class HyperlinksExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -94,7 +94,7 @@ public static class HyperlinksExample
         // reaches 2.22:1.
         doc.Add(new Hyperlink("https://microsoft.com", "Green Link")
         {
-            TextColor = ColorPalette.Green[700],
+            Color = ColorPalette.Green[700],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -104,7 +104,7 @@ public static class HyperlinksExample
         doc.Add(new Hyperlink("https://google.com", "Large Purple Link")
         {
             FontSize = 16,
-            TextColor = ColorPalette.Purple[600],
+            Color = ColorPalette.Purple[600],
             Margin = new Thickness(0, 0, 0, 8)
         });
 
@@ -115,7 +115,7 @@ public static class HyperlinksExample
         {
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Red[700],
+            Color = ColorPalette.Red[700],
             Margin = new Thickness(0, 0, 0, 16)
         });
 
@@ -127,7 +127,7 @@ public static class HyperlinksExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600]
+            Color = ColorPalette.Slate[600]
         });
 
         doc.Add(new TextBlock { Text = "Text before link.", FontSize = 10 });

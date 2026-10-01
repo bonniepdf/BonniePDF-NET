@@ -32,8 +32,8 @@ public static class PieChartExample
             FooterTemplate = pageNumber =>
             {
                 HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.Add(new TextBlock { Text = "BonniePDF - Pie Chart", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500] }, null);
-                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                stack.Add(new TextBlock { Text = "BonniePDF - Pie Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] }, null);
+                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
                 return stack;
             }
         });
@@ -52,7 +52,7 @@ public static class PieChartExample
         {
             Text = $"Monthly Sales Report {DateTime.Now.Year}",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -60,7 +60,7 @@ public static class PieChartExample
         {
             Text = "Donut chart with legend and total value in the centre",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 

@@ -41,7 +41,7 @@ public static class WatermarkDraftExample
             Text = "DRAFT",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 120,
-            TextColor = ColorPalette.Slate[400],
+            Color = ColorPalette.Slate[400],
             Opacity = 0.12f,
             RotationDegrees = -45
         };
@@ -55,7 +55,7 @@ public static class WatermarkDraftExample
             Text = "SAMPLE COMPANY",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 11,
-            TextColor = ColorPalette.Blue[200],
+            Color = ColorPalette.Blue[200],
             Margin = new Thickness(0, 0, 0, 6)
         });
         bannerStack.Add(new TextBlock
@@ -63,7 +63,7 @@ public static class WatermarkDraftExample
             Text = "Product Strategy Proposal",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 26,
-            TextColor = ColorPalette.Slate[50]
+            Color = ColorPalette.Slate[50]
         });
 
         doc.Add(new Container
@@ -90,7 +90,7 @@ public static class WatermarkDraftExample
                        "Please do not share this document outside the review team.",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 11,
-                TextColor = ColorPalette.Amber[800],
+                Color = ColorPalette.Amber[800],
                 Alignment = TextAlignment.Justify
             }
         });
@@ -101,7 +101,7 @@ public static class WatermarkDraftExample
                    "the proposed initiative, its objectives, and the resourcing required to deliver it.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify
         });
 
@@ -112,7 +112,7 @@ public static class WatermarkDraftExample
             Text = "Section 1: Executive Summary",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = ColorPalette.Blue[800],
+            Color = ColorPalette.Blue[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -125,7 +125,7 @@ public static class WatermarkDraftExample
                    "budget allocation of two million dollars across engineering and operations teams.",
             FontName = StandardFonts.Helvetica,
             FontSize = 11,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify,
             Margin = new Thickness(0, 0, 0, 12)
         });
@@ -137,7 +137,7 @@ public static class WatermarkDraftExample
                    "to review progress against milestones and address any blockers or scope changes.",
             FontName = StandardFonts.Helvetica,
             FontSize = 11,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify
         });
 
@@ -146,7 +146,7 @@ public static class WatermarkDraftExample
             Text = "Section 2: Expected Outcomes",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = ColorPalette.Blue[800],
+            Color = ColorPalette.Blue[800],
             Margin = new Thickness(0, 18, 0, 12)
         });
 
@@ -158,7 +158,7 @@ public static class WatermarkDraftExample
                    "captured during the discovery phase and reported to the steering committee.",
             FontName = StandardFonts.Helvetica,
             FontSize = 11,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify
         });
 

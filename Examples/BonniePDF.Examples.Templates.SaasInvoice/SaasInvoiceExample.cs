@@ -189,7 +189,7 @@ public static class SaasInvoiceExample
             Text = content,
             FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
             FontSize = size,
-            TextColor = color,
+            Color = color,
         };
         if (align.HasValue) t.Alignment = align.Value;
         if (bottom > 0) t.Margin = new Thickness(0, 0, 0, bottom);

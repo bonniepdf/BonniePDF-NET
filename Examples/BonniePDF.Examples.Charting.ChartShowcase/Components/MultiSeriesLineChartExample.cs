@@ -39,14 +39,14 @@ public static class MultiSeriesLineChartExample
                     Text = "BonniePDF - Multi-Series Line Chart",
                     FontName = StandardFonts.Helvetica,
                     FontSize = 10,
-                    TextColor = ColorPalette.Slate[500]
+                    Color = ColorPalette.Slate[500]
                 }, null);
                 stack.Add(new TextBlock
                 {
                     Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                     FontName = StandardFonts.Helvetica,
                     FontSize = 10,
-                    TextColor = ColorPalette.Slate[500],
+                    Color = ColorPalette.Slate[500],
                     Alignment = TextAlignment.Right
                 }, 1f);
                 return stack;
@@ -69,7 +69,7 @@ public static class MultiSeriesLineChartExample
         {
             Text = "Multi-Series Line Chart: Year-over-Year Comparison",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 0, 0, 8)
         });
@@ -78,7 +78,7 @@ public static class MultiSeriesLineChartExample
         {
             Text = $"Comparing {year - 1} and {year} revenue with a shared axis",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 0, 0, 20)
         });

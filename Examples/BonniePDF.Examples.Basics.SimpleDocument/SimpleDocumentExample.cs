@@ -58,7 +58,7 @@ public static class SimpleDocumentExample
             Level = 1,
             FontName = heading,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -75,7 +75,7 @@ public static class SimpleDocumentExample
             Level = 2,
             FontName = heading,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            Color = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -112,7 +112,7 @@ public static class SimpleDocumentExample
             Level = 2,
             FontName = heading,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[700],
+            Color = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -132,7 +132,7 @@ public static class SimpleDocumentExample
             Level = 1,
             FontName = heading,
             FontSize = 20,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -151,7 +151,7 @@ public static class SimpleDocumentExample
             Level = 1,
             FontName = heading,
             FontSize = 16,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 50, 0, 0)
         });

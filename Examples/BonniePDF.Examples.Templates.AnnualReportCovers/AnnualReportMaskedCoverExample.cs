@@ -52,7 +52,7 @@ public static class AnnualReportMaskedCoverExample
             PageBackground = pageNumber => pageNumber == 1
                 ? new CanvasElement((canvas, w, h) => DrawCover(canvas, w, h, heroImage))
                 {
-                    CanvasHeight = PdfSize.A4.Height,
+                    DrawHeight = PdfSize.A4.Height,
                     IsDecorative = true,
                 }
                 : null,
@@ -122,7 +122,7 @@ public static class AnnualReportMaskedCoverExample
         {
             FontName = StandardFonts.HelveticaBold,
             FontSize = 15,
-            TextColor = ColorPalette.Emerald[200],
+            Color = ColorPalette.Emerald[200],
             Margin = new Thickness(0, 0, 0, 6),
         });
 
@@ -132,7 +132,7 @@ public static class AnnualReportMaskedCoverExample
             FontName = StandardFonts.HelveticaBold,
             FontSize = 46,
             LineHeight = 1f,
-            TextColor = Color.White,
+            Color = Color.White,
             Margin = new Thickness(0, 0, 0, 18),
         });
 
@@ -148,14 +148,14 @@ public static class AnnualReportMaskedCoverExample
         stack.Add(new TextBlock("Building resilient infrastructure across three continents")
         {
             FontSize = 13,
-            TextColor = ColorPalette.Emerald[100],
+            Color = ColorPalette.Emerald[100],
             Margin = new Thickness(0, 0, 0, 106),
         });
 
         stack.Add(new TextBlock($"Prepared with BonniePDF · Fiscal Year {Year}")
         {
             FontSize = 10,
-            TextColor = ColorPalette.Emerald[200],
+            Color = ColorPalette.Emerald[200],
         });
 
         // Anchored to the foot of the page rather than positioned by a top padding

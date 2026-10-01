@@ -112,7 +112,7 @@ public static class ComplianceFindingsRegisterExample
                 Text      = style.Label,
                 FontName  = StandardFonts.HelveticaBold,
                 FontSize  = 9,
-                TextColor = Color.White,
+                Color = Color.White,
                 Alignment = TextAlignment.Center,
             },
         };
@@ -129,7 +129,7 @@ public static class ComplianceFindingsRegisterExample
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 12,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
         });
 
         body.Add(new TextBlock
@@ -139,14 +139,14 @@ public static class ComplianceFindingsRegisterExample
             FontSize  = 9,
             // 600, not 500: this card always sits on a coloured Tint (Red/Orange-50),
             // and 500 falls to 4.35-4.49:1 against the 4.5:1 WCAG AA threshold there.
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
         });
 
         body.Add(new TextBlock
         {
             Text      = finding.Description,
             FontSize  = 10.5f,
-            TextColor = ColorPalette.Slate[700],
+            Color = ColorPalette.Slate[700],
         });
 
         // Optional "Related: F-XXX on page N" cross-reference - a clickable
@@ -157,22 +157,22 @@ public static class ComplianceFindingsRegisterExample
 
             var relatedLabel = new TextBlock
             {
-                Text = "Related:", FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = ColorPalette.Slate[600],
+                Text = "Related:", FontName = StandardFonts.HelveticaBold, FontSize = 9, Color = ColorPalette.Slate[600],
             };
             relatedRow.Add(relatedLabel, relatedLabel.GetPreferredWidth());
 
             var relatedLink = new SectionLink(finding.Related, AnchorFor(finding.Related))
             {
-                FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = ColorPalette.Blue[700],
+                FontName = StandardFonts.HelveticaBold, FontSize = 9, Color = ColorPalette.Blue[700],
             };
             relatedRow.Add(relatedLink, relatedLink.GetPreferredWidth());
 
-            var onPage = new TextBlock { Text = "on page", FontSize = 9, TextColor = ColorPalette.Slate[600] };
+            var onPage = new TextBlock { Text = "on page", FontSize = 9, Color = ColorPalette.Slate[600] };
             relatedRow.Add(onPage, onPage.GetPreferredWidth());
 
             relatedRow.Add(new PageNumberOf(AnchorFor(finding.Related))
             {
-                FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = ColorPalette.Slate[600],
+                FontName = StandardFonts.HelveticaBold, FontSize = 9, Color = ColorPalette.Slate[600],
             });
 
             body.Add(relatedRow);
@@ -212,7 +212,7 @@ public static class ComplianceFindingsRegisterExample
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 13,
-            TextColor     = ColorPalette.Red[800],
+            Color     = ColorPalette.Red[800],
             Margin        = new Thickness(0, 0, 0, 2),
         });
 
@@ -220,7 +220,7 @@ public static class ComplianceFindingsRegisterExample
         {
             Text      = $"{critical.Count} critical findings require immediate remediation:",
             FontSize  = 10,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Margin    = new Thickness(0, 0, 0, 4),
         });
 
@@ -230,16 +230,16 @@ public static class ComplianceFindingsRegisterExample
 
             var link = new SectionLink($"{finding.Id} - {finding.Title}", AnchorFor(finding.Id))
             {
-                FontName = StandardFonts.HelveticaBold, FontSize = 10, TextColor = ColorPalette.Blue[700],
+                FontName = StandardFonts.HelveticaBold, FontSize = 10, Color = ColorPalette.Blue[700],
             };
             row.Add(link, link.GetPreferredWidth());
 
-            var onPage = new TextBlock { Text = "page", FontSize = 10, TextColor = ColorPalette.Slate[600] };
+            var onPage = new TextBlock { Text = "page", FontSize = 10, Color = ColorPalette.Slate[600] };
             row.Add(onPage, onPage.GetPreferredWidth());
 
             row.Add(new PageNumberOf(AnchorFor(finding.Id))
             {
-                FontName = StandardFonts.HelveticaBold, FontSize = 10, TextColor = ColorPalette.Slate[700],
+                FontName = StandardFonts.HelveticaBold, FontSize = 10, Color = ColorPalette.Slate[700],
             });
 
             inner.Add(row);
@@ -283,7 +283,7 @@ public static class ComplianceFindingsRegisterExample
                     Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
                     FontName  = StandardFonts.Helvetica,
                     FontSize  = 9,
-                    TextColor = ColorPalette.Slate[400],
+                    Color = ColorPalette.Slate[400],
                     Alignment = TextAlignment.Right,
                 },
             },
@@ -295,7 +295,7 @@ public static class ComplianceFindingsRegisterExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 22,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 10),
         });
 

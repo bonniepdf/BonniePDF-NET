@@ -41,7 +41,7 @@ public static class ShapesAndBordersExample
             Text = "Rounded Rectangles",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -59,7 +59,7 @@ public static class ShapesAndBordersExample
             {
                 Text = "A container with 8pt corner radius and a light blue background.",
                 FontSize = 12,
-                TextColor = ColorPalette.Blue[800]
+                Color = ColorPalette.Blue[800]
             }
         });
 
@@ -74,7 +74,7 @@ public static class ShapesAndBordersExample
             {
                 Text = "A container with a larger 16pt corner radius. The arcs become more pronounced as the radius increases.",
                 FontSize = 12,
-                TextColor = ColorPalette.Green[800]
+                Color = ColorPalette.Green[800]
             }
         });
 
@@ -109,7 +109,7 @@ public static class ShapesAndBordersExample
             {
                 Text = "Rounded border combined with a background fill - great for alert boxes and callouts.",
                 FontSize = 12,
-                TextColor = Color.FromHex("#92400e")
+                Color = Color.FromHex("#92400e")
             }
         });
 
@@ -147,7 +147,7 @@ public static class ShapesAndBordersExample
         {
             Text = "Chaining: .Padding(16).Background(...).Rounded(12).Border(...)",
             FontSize = 11,
-            TextColor = ColorPalette.Slate[500],
+            Color = ColorPalette.Slate[500],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -196,7 +196,7 @@ public static class ShapesAndBordersExample
                 Text = "Success! Your document has been generated successfully.",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 12,
-                TextColor = ColorPalette.Green[800]
+                Color = ColorPalette.Green[800]
             }
         });
 
@@ -214,7 +214,7 @@ public static class ShapesAndBordersExample
                 Text = "Warning: Please review the document before sending.",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 12,
-                TextColor = Color.FromHex("#854d0e")
+                Color = Color.FromHex("#854d0e")
             }
         });
 
@@ -232,7 +232,7 @@ public static class ShapesAndBordersExample
                 Text = "Error: Unable to process the request. Please try again.",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 12,
-                TextColor = Color.FromHex("#991b1b")
+                Color = Color.FromHex("#991b1b")
             }
         });
 
@@ -250,7 +250,7 @@ public static class ShapesAndBordersExample
                 Text = "Info: Rounded corners are built from four Bezier arcs using k=0.5523.",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 12,
-                TextColor = ColorPalette.Blue[800]
+                Color = ColorPalette.Blue[800]
             },
         });
         return doc;
@@ -264,7 +264,7 @@ public static class ShapesAndBordersExample
             Text = title,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = accentColor,
+            Color = accentColor,
             Margin = new Thickness(0, 0, 0, 6)
         });
         content.Add(new TextBlock
@@ -272,7 +272,7 @@ public static class ShapesAndBordersExample
             Text = description,
             FontName = StandardFonts.Helvetica,
             FontSize = 10,
-            TextColor = ColorPalette.Slate[600]
+            Color = ColorPalette.Slate[600]
         });
 
         return new Container
@@ -293,7 +293,7 @@ public static class ShapesAndBordersExample
             Text = title,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Indigo[600],
+            Color = ColorPalette.Indigo[600],
             Margin = new Thickness(0, 12, 0, 6)
         };
     }

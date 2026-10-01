@@ -68,7 +68,7 @@ public static class UkVatInvoiceExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = Accent,
+            Color = Accent,
             Alignment = TextAlignment.Right,
         });
         titleStack.Add(Cell($"INV-UK-{year}-0311", color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0)));

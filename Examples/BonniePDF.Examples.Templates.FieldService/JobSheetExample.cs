@@ -353,7 +353,7 @@ public static class JobSheetExample
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
         row.Add(
-            new TextBlock { Text = left, FontName = StandardFonts.Helvetica, FontSize = 7.5f, TextColor = Muted },
+            new TextBlock { Text = left, FontName = StandardFonts.Helvetica, FontSize = 7.5f, Color = Muted },
             2);
         row.Add(
             new TextBlock
@@ -361,7 +361,7 @@ public static class JobSheetExample
                 Text = right,
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7.5f,
-                TextColor = Muted,
+                Color = Muted,
                 Alignment = TextAlignment.Right,
             },
             2);
@@ -376,7 +376,7 @@ public static class JobSheetExample
             Text = value,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = accent,
+            Color = accent,
             Margin = new Thickness(0, 0, 0, 2),
         });
         stack.Add(new TextBlock
@@ -384,7 +384,7 @@ public static class JobSheetExample
             Text = label,
             FontName = StandardFonts.Helvetica,
             FontSize = 8,
-            TextColor = Muted,
+            Color = Muted,
         });
 
         return new Container
@@ -407,7 +407,7 @@ public static class JobSheetExample
                 Text = label,
                 FontName = strong ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
                 FontSize = strong ? 10 : 9,
-                TextColor = strong ? Ink : Muted,
+                Color = strong ? Ink : Muted,
             },
             2);
         row.Add(
@@ -416,7 +416,7 @@ public static class JobSheetExample
                 Text = value,
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = strong ? 11 : 9,
-                TextColor = strong ? Accent : Ink,
+                Color = strong ? Accent : Ink,
                 Alignment = TextAlignment.Right,
             },
             1.2f);

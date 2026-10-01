@@ -78,7 +78,7 @@ public static class BusinessInvoiceExample
             Text = "SAMPLE COMPANY INC.",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 20,
-            TextColor = TextDark,
+            Color = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
         // The address lines share one style, so they flow as a single paragraph.
@@ -93,7 +93,7 @@ public static class BusinessInvoiceExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 28,
-            TextColor = AccentGreen,
+            Color = AccentGreen,
             Alignment = TextAlignment.Right
         });
 
@@ -121,7 +121,7 @@ public static class BusinessInvoiceExample
             Text = "Bill to",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9,
-            TextColor = TextDark,
+            Color = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
         // One TextBlock with hard line breaks: the address tags as a single
@@ -135,7 +135,7 @@ public static class BusinessInvoiceExample
             Text = "Ship to",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9,
-            TextColor = TextDark,
+            Color = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
         shipToStack.Add(new TextBlock { Text = "Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701" });
@@ -147,7 +147,7 @@ public static class BusinessInvoiceExample
             Text = "Details",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9,
-            TextColor = TextDark,
+            Color = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
         AddDetailRow(detailsStack, "Invoice #", $"{DateTime.Now.Year}-001");
@@ -179,27 +179,27 @@ public static class BusinessInvoiceExample
             new TextBlock
             {
                 Text = "Product / Service", FontName = StandardFonts.HelveticaBold, FontSize = 9,
-                TextColor = TextDark
+                Color = TextDark
             }.AlignLeft(),
             new TextBlock
             {
                 Text = "Description", FontName = StandardFonts.HelveticaBold, FontSize = 9,
-                TextColor = TextDark
+                Color = TextDark
             }.AlignLeft(),
             new TextBlock
             {
                 Text = "Qty / Hrs", FontName = StandardFonts.HelveticaBold, FontSize = 9,
-                TextColor = TextDark
+                Color = TextDark
             }.AlignCenter(),
             new TextBlock
             {
                 Text = "Rate", FontName = StandardFonts.HelveticaBold, FontSize = 9,
-                TextColor = TextDark
+                Color = TextDark
             }.AlignRight(),
             new TextBlock
             {
                 Text = "Amount", FontName = StandardFonts.HelveticaBold, FontSize = 9,
-                TextColor = TextDark
+                Color = TextDark
             }.AlignRight()
         );
 
@@ -218,27 +218,27 @@ public static class BusinessInvoiceExample
                 new TextBlock
                 {
                     Text = item.Service, FontName = StandardFonts.Helvetica, FontSize = 9,
-                    TextColor = TextMedium
+                    Color = TextMedium
                 }.AlignLeft(),
                 new TextBlock
                 {
                     Text = item.Desc, FontName = StandardFonts.Helvetica, FontSize = 9,
-                    TextColor = TextLight
+                    Color = TextLight
                 }.AlignLeft(),
                 new TextBlock
                 {
                     Text = item.Qty.ToString(), FontName = StandardFonts.Helvetica, FontSize = 9,
-                    TextColor = TextMedium
+                    Color = TextMedium
                 }.AlignCenter(),
                 new TextBlock
                 {
                     Text = $"${item.Price:N2}", FontName = StandardFonts.Helvetica, FontSize = 9,
-                    TextColor = TextMedium
+                    Color = TextMedium
                 }.AlignRight(),
                 new TextBlock
                 {
                     Text = $"${lineTotal:N2}", FontName = StandardFonts.Helvetica, FontSize = 9,
-                    TextColor = TextDark
+                    Color = TextDark
                 }.AlignRight()
             );
         }
@@ -273,7 +273,7 @@ public static class BusinessInvoiceExample
             Text = "Customer message",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9,
-            TextColor = TextDark,
+            Color = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
         // The three greeting lines share one style and flow as a single paragraph
@@ -294,12 +294,12 @@ public static class BusinessInvoiceExample
             new TextBlock
             {
                 Text = "Subtotal", FontName = StandardFonts.Helvetica, FontSize = 9,
-                TextColor = TextMedium
+                Color = TextMedium
             }.AlignLeft(),
             new TextBlock
             {
                 Text = $"${subtotal:N2}", FontName = StandardFonts.Helvetica, FontSize = 9,
-                TextColor = TextDark
+                Color = TextDark
             }.AlignRight()
         );
         totalsStack.Add(subtotalRow);
@@ -314,12 +314,12 @@ public static class BusinessInvoiceExample
             new TextBlock
             {
                 Text = "Sales tax (8.25%)", FontName = StandardFonts.Helvetica, FontSize = 9,
-                TextColor = TextMedium
+                Color = TextMedium
             }.AlignLeft(),
             new TextBlock
             {
                 Text = $"${tax:N2}", FontName = StandardFonts.Helvetica, FontSize = 9,
-                TextColor = TextDark
+                Color = TextDark
             }.AlignRight()
         );
         totalsStack.Add(taxRow);
@@ -334,12 +334,12 @@ public static class BusinessInvoiceExample
             new TextBlock
             {
                 Text = "Discount (early payment)", FontName = StandardFonts.Helvetica, FontSize = 9,
-                TextColor = AccentGreenText
+                Color = AccentGreenText
             }.AlignLeft(),
             new TextBlock
             {
                 Text = "-$1,400.00", FontName = StandardFonts.Helvetica, FontSize = 9,
-                TextColor = AccentGreenText
+                Color = AccentGreenText
             }.AlignRight()
         );
         totalsStack.Add(discountRow);
@@ -363,12 +363,12 @@ public static class BusinessInvoiceExample
             new TextBlock
             {
                 Text = "Total", FontName = StandardFonts.HelveticaBold, FontSize = 14,
-                TextColor = TextDark
+                Color = TextDark
             }.AlignLeft(),
             new TextBlock
             {
                 Text = $"${totalDue:N2}", FontName = StandardFonts.HelveticaBold, FontSize = 14,
-                TextColor = TextDark
+                Color = TextDark
             }.AlignRight()
         );
         totalsStack.Add(totalRow);
@@ -408,7 +408,7 @@ public static class BusinessInvoiceExample
             Text = "Thank you for your business  |  hello@example.com  |  www.example.com",
             FontName = StandardFonts.Helvetica,
             FontSize = 8,
-            TextColor = TextLight,
+            Color = TextLight,
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 8, 0, 0)
         });
@@ -430,12 +430,12 @@ public static class BusinessInvoiceExample
             new TextBlock
             {
                 Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 9,
-                TextColor = TextDark
+                Color = TextDark
             }.AlignLeft(),
             new TextBlock
             {
                 Text = value, FontName = StandardFonts.Helvetica, FontSize = 9,
-                TextColor = TextMedium
+                Color = TextMedium
             }.AlignLeft()
         );
         stack.Add(row);
@@ -456,11 +456,11 @@ public static class BusinessInvoiceExample
             Text = "Bank Transfer",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 8,
-            TextColor = AccentGreenText,
+            Color = AccentGreenText,
             Margin = new Thickness(0, 0, 0, 4)
         });
         // Each column's lines share one style and flow as a single paragraph.
-        bankStack.Add(new TextBlock { Text = "Sample Bank\nRouting: 021000021\nAccount: ****7842", FontSize = 8, TextColor = TextMedium });
+        bankStack.Add(new TextBlock { Text = "Sample Bank\nRouting: 021000021\nAccount: ****7842", FontSize = 8, Color = TextMedium });
 
         // Other payment
         VerticalStack otherStack = new();
@@ -469,10 +469,10 @@ public static class BusinessInvoiceExample
             Text = "Other Methods",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 8,
-            TextColor = AccentGreenText,
+            Color = AccentGreenText,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        otherStack.Add(new TextBlock { Text = "PayPal: payments@example.com\nWise: @sample-company", FontSize = 8, TextColor = TextMedium });
+        otherStack.Add(new TextBlock { Text = "PayPal: payments@example.com\nWise: @sample-company", FontSize = 8, Color = TextMedium });
 
         // Reference
         VerticalStack refStack = new();
@@ -481,10 +481,10 @@ public static class BusinessInvoiceExample
             Text = "Reference",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 8,
-            TextColor = AccentGreenText,
+            Color = AccentGreenText,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        refStack.Add(new TextBlock { Text = "Please include invoice\nnumber with payment", FontSize = 8, TextColor = TextMedium });
+        refStack.Add(new TextBlock { Text = "Please include invoice\nnumber with payment", FontSize = 8, Color = TextMedium });
 
         paymentTable.AddRow(
             bankStack,

@@ -63,7 +63,7 @@ public static class ImagesExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 24,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 8),
         });
 
@@ -193,7 +193,7 @@ public static class ImagesExample
         Level         = 2,
         FontName      = StandardFonts.HelveticaBold,
         FontSize      = 15,
-        TextColor     = ColorPalette.Indigo[600],
+        Color     = ColorPalette.Indigo[600],
         Margin        = new Thickness(0, 14, 0, 6),
     };
 
@@ -201,7 +201,7 @@ public static class ImagesExample
     {
         Text      = text,
         FontSize  = 10,
-        TextColor = ColorPalette.Slate[500],
+        Color = ColorPalette.Slate[500],
         Margin    = new Thickness(0, 0, 0, 6),
     };
 

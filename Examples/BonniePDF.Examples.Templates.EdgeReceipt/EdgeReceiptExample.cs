@@ -54,7 +54,7 @@ public static class EdgeReceiptExample
             Level = 1,
             FontName = StandardFonts.CourierBold,
             FontSize = 13,
-            TextColor = Ink,
+            Color = Ink,
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 0, 0, 3),
         });
@@ -134,7 +134,7 @@ public static class EdgeReceiptExample
             Text = text,
             FontName = StandardFonts.Courier,
             FontSize = size,
-            TextColor = color ?? Mute,
+            Color = color ?? Mute,
             Alignment = TextAlignment.Center,
         };
         if (marginTop > 0)
@@ -162,7 +162,7 @@ public static class EdgeReceiptExample
         Text = text,
         FontName = bold ? StandardFonts.CourierBold : StandardFonts.Courier,
         FontSize = size,
-        TextColor = Ink,
+        Color = Ink,
         Alignment = align,
     };
 
@@ -171,7 +171,7 @@ public static class EdgeReceiptExample
         Text = "- - - - - - - - - - - - - - - -",
         FontName = StandardFonts.Courier,
         FontSize = 9,
-        TextColor = Mute,
+        Color = Mute,
         Alignment = TextAlignment.Center,
         Margin = new Thickness(0, 5, 0, 5),
     };

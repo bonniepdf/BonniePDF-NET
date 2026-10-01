@@ -71,7 +71,7 @@ public static class ColorPaletteExample
             Text = "ColorPalette",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = ColorPalette.Slate[800]
+            Color = ColorPalette.Slate[800]
         });
 
         doc.Add(new TextBlock
@@ -79,7 +79,7 @@ public static class ColorPaletteExample
             Text = "Every Tailwind v4 ramp in the palette - 22 colours × 11 shades, drawn as ColorPalette[name][shade].",
             FontName = StandardFonts.Helvetica,
             FontSize = 9,
-            TextColor = ColorPalette.Slate[500],
+            Color = ColorPalette.Slate[500],
             Margin = new Thickness(0, 4, 0, 8)
         });
 
@@ -148,7 +148,7 @@ public static class ColorPaletteExample
             Text = name,
             FontName = StandardFonts.Helvetica,
             FontSize = 9,
-            TextColor = ColorPalette.Slate[600]
+            Color = ColorPalette.Slate[600]
         }
     };
 
@@ -160,7 +160,7 @@ public static class ColorPaletteExample
         Text = label,
         FontName = StandardFonts.Helvetica,
         FontSize = 7,
-        TextColor = ColorPalette.Slate[500],
+        Color = ColorPalette.Slate[500],
         Alignment = TextAlignment.Center
     };
 }

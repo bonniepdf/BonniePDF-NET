@@ -50,7 +50,7 @@ public static class BarcodesExampleFluent
                         .Text("1D Barcodes (Fluent API)")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(24)
-                        .TextColor(ColorPalette.Slate[800])
+                        .Color(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 16);
 
                     col.Item()
@@ -112,13 +112,13 @@ public static class BarcodesExampleFluent
             .Text(title)
             .Font(StandardFonts.HelveticaBold)
             .FontSize(15)
-            .TextColor(ColorPalette.Indigo[600])
+            .Color(ColorPalette.Indigo[600])
             .Margin(0, 0, 0, 8);
 
         col.Item()
             .Text(description)
             .FontSize(10)
-            .TextColor(ColorPalette.Slate[600])
+            .Color(ColorPalette.Slate[600])
             .Margin(0, 0, 0, 12);
 
         col.Item()

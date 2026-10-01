@@ -68,7 +68,7 @@ public static class GrantAwardLetterExample
                 Text = $"SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any funding body  |  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7.5f,
-                TextColor = Muted,
+                Color = Muted,
                 Alignment = TextAlignment.Center,
             },
         };
@@ -138,7 +138,7 @@ public static class GrantAwardLetterExample
             Text = "Sample Community Fund",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = Color.White,
+            Color = Color.White,
         },
     };
 
@@ -150,7 +150,7 @@ public static class GrantAwardLetterExample
             Text = "Grants & Awards Service",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 12,
-            TextColor = Ink,
+            Color = Ink,
             Margin = new Thickness(0, 0, 0, 2),
         });
         stack.Add(new Container
@@ -190,13 +190,13 @@ public static class GrantAwardLetterExample
         details.AddRow(DetailStack(DecisionDetails[2]), DetailStack(DecisionDetails[3]));
 
         VerticalStack stack = new();
-        stack.Add(new TextBlock { Text = "Our decision", FontSize = 11, TextColor = Muted });
+        stack.Add(new TextBlock { Text = "Our decision", FontSize = 11, Color = Muted });
         stack.Add(new TextBlock
         {
             Text = "Awarded",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 28,
-            TextColor = Award,
+            Color = Award,
             Margin = new Thickness(0, 2, 0, 10),
         });
         stack.Add(details);
@@ -242,7 +242,7 @@ public static class GrantAwardLetterExample
         {
             FontName = StandardFonts.Helvetica,
             FontSize = 10.5f,
-            TextColor = BodyText,
+            Color = BodyText,
             BulletColor = Brand,
             ItemSpacing = 4,
             Margin = new Thickness(0, 0, 0, 22),
@@ -262,7 +262,7 @@ public static class GrantAwardLetterExample
             Text = "Time limit",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 11,
-            TextColor = Ink,
+            Color = Ink,
         });
         stack.Add(new TextBlock
         {
@@ -270,7 +270,7 @@ public static class GrantAwardLetterExample
                    "release your first instalment. This is a fictional sample and does not provide legal " +
                    "or financial advice.",
             FontSize = 10,
-            TextColor = BodyText,
+            Color = BodyText,
         });
 
         return new Container
@@ -295,7 +295,7 @@ public static class GrantAwardLetterExample
                    "and not an official record.",
             FontName = StandardFonts.HelveticaOblique,
             FontSize = 8.5f,
-            TextColor = Muted,
+            Color = Muted,
             Alignment = TextAlignment.Center,
         },
     };
@@ -306,7 +306,7 @@ public static class GrantAwardLetterExample
         Level = 1,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 22,
-        TextColor = Ink,
+        Color = Ink,
         Margin = new Thickness(0, 0, 0, 12),
     };
 
@@ -316,7 +316,7 @@ public static class GrantAwardLetterExample
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 15,
-        TextColor = Ink,
+        Color = Ink,
         Margin = new Thickness(0, 6, 0, 8),
     };
 
@@ -327,7 +327,7 @@ public static class GrantAwardLetterExample
             Text = text,
             FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
             FontSize = size,
-            TextColor = color ?? BodyText,
+            Color = color ?? BodyText,
             Margin = new Thickness(0, 0, 0, mb),
         };
         if (align.HasValue)
@@ -346,14 +346,14 @@ public static class GrantAwardLetterExample
             Text = item.Label.ToUpperInvariant(),
             FontName = StandardFonts.HelveticaBold,
             FontSize = 8,
-            TextColor = BrandDark,
+            Color = BrandDark,
         });
         stack.Add(new TextBlock
         {
             Text = item.Value,
             FontName = StandardFonts.Helvetica,
             FontSize = 10.5f,
-            TextColor = Ink,
+            Color = Ink,
         });
         return stack;
     }
@@ -363,7 +363,7 @@ public static class GrantAwardLetterExample
         Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 11,
-        TextColor = Color.White,
+        Color = Color.White,
         Alignment = align,
     };
 
@@ -372,7 +372,7 @@ public static class GrantAwardLetterExample
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = 11,
-        TextColor = color ?? Ink,
+        Color = color ?? Ink,
         Alignment = align,
     };
 

@@ -45,7 +45,7 @@ public static class BookPageLayoutExample
                     Text      = "THE ARCHITECTURE OF CONSCIOUSNESS",
                     FontName  = StandardFonts.TimesItalic,
                     FontSize  = 8,
-                    TextColor = ColorPalette.Slate[400],
+                    Color = ColorPalette.Slate[400],
                     Alignment = TextAlignment.Center,
                 },
                 // Viewer page counter starts at 42; footer text matches.
@@ -55,7 +55,7 @@ public static class BookPageLayoutExample
                     Text      = (pageNum + 41).ToString(),
                     FontName  = StandardFonts.TimesBold,
                     FontSize  = 10,
-                    TextColor = ColorPalette.Slate[500],
+                    Color = ColorPalette.Slate[500],
                     Alignment = TextAlignment.Center,
                 },
             },
@@ -68,7 +68,7 @@ public static class BookPageLayoutExample
             Text      = "CHAPTER III",
             FontName  = StandardFonts.TimesBold,
             FontSize  = 11,
-            TextColor = ColorPalette.Slate[700],
+            Color = ColorPalette.Slate[700],
             Alignment = TextAlignment.Center,
             Margin    = new Thickness(0, 0, 0, 6),
         });
@@ -79,7 +79,7 @@ public static class BookPageLayoutExample
             Level         = 1,
             FontName      = StandardFonts.TimesBold,
             FontSize      = 18,
-            TextColor     = ColorPalette.Slate[900],
+            Color     = ColorPalette.Slate[900],
             Alignment     = TextAlignment.Center,
             Margin        = new Thickness(0, 0, 0, 20),
         });
@@ -126,14 +126,14 @@ public static class BookPageLayoutExample
             Text      = "But then –",
             FontName  = StandardFonts.TimesBold,
             FontSize  = 11,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
         });
         emphStack.Add(new TextBlock
         {
             Text      = "he continued, his voice dropping to a conspiratorial whisper –",
             FontName  = StandardFonts.TimesItalic,
             FontSize  = 11,
-            TextColor = ColorPalette.Slate[700],
+            Color = ColorPalette.Slate[700],
         });
         doc.Add(emphStack);
 
@@ -161,7 +161,7 @@ public static class BookPageLayoutExample
                         "modified, and in some cases, completely redesigned.",
             FontName  = StandardFonts.TimesItalic,
             FontSize  = 10,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify,
         });
 
@@ -193,7 +193,7 @@ public static class BookPageLayoutExample
                         "Some discoveries are too dangerous. Some architectures, once revealed, cannot be unseen.”",
             FontName  = StandardFonts.TimesRoman,
             FontSize  = 11,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Justify,
             Margin    = new Thickness(0, 0, 0, 10),
         });
@@ -208,7 +208,7 @@ public static class BookPageLayoutExample
             Text      = text,
             FontName  = fontName ?? StandardFonts.TimesRoman,
             FontSize  = 11,
-            TextColor = color ?? ColorPalette.Slate[800],
+            Color = color ?? ColorPalette.Slate[800],
             Alignment = TextAlignment.Justify,
             Margin    = new Thickness(0, 0, 0, 10),
         });

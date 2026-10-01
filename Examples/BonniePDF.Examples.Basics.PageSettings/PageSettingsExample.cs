@@ -23,7 +23,7 @@ public static class PageSettingsExample
                 Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken} - BonniePDF Standard Formats",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 9,
-                TextColor = ColorPalette.Slate[400],
+                Color = ColorPalette.Slate[400],
                 Alignment = TextAlignment.Center
             }
         });
@@ -67,10 +67,10 @@ public static class PageSettingsExample
                     Text = $"{formatName} ({orientation})",
                     FontName = StandardFonts.HelveticaBold,
                     FontSize = 28,
-                    TextColor = ColorPalette.Slate[800]
+                    Color = ColorPalette.Slate[800]
                 });
 
-                content.Add(new TextBlock { Text = "Technical Specifications", FontSize = 14, TextColor = ColorPalette.Slate[500] });
+                content.Add(new TextBlock { Text = "Technical Specifications", FontSize = 14, Color = ColorPalette.Slate[500] });
                 content.Add(new Line { Color = ColorPalette.Slate[200], Thickness = 1 });
 
                 // Data Table Simulation
@@ -91,7 +91,7 @@ public static class PageSettingsExample
             Text = $"{label.PadRight(15)} {value}",
             FontName = StandardFonts.Courier, // Monospace for alignment
             FontSize = 11,
-            TextColor = ColorPalette.Slate[600]
+            Color = ColorPalette.Slate[600]
         };
     }
 }

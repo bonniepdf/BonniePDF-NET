@@ -61,7 +61,7 @@ public static class VerticalStackOverflowExample
                     Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
                     FontName  = StandardFonts.Helvetica,
                     FontSize  = 9,
-                    TextColor = ColorPalette.Slate[400],
+                    Color = ColorPalette.Slate[400],
                     Alignment = TextAlignment.Right,
                 },
             },
@@ -73,7 +73,7 @@ public static class VerticalStackOverflowExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 22,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 10),
         });
 

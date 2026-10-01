@@ -40,7 +40,7 @@ public static class ChartShowcaseExample
                     Text = "BonniePDF Charting Examples",
                     FontName = StandardFonts.Helvetica,
                     FontSize = 10,
-                    TextColor = ColorPalette.Slate[500]
+                    Color = ColorPalette.Slate[500]
                 }, null); // Auto width
 
                 // Right: Page Numbers (weighted to fill remaining space, right-aligned within that space)
@@ -49,7 +49,7 @@ public static class ChartShowcaseExample
                     Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                     FontName = StandardFonts.Helvetica,
                     FontSize = 10,
-                    TextColor = ColorPalette.Slate[500],
+                    Color = ColorPalette.Slate[500],
                     Alignment = TextAlignment.Right
                 }, 1f); // Takes all remaining space and right-aligns within it
 
@@ -110,7 +110,7 @@ public static class ChartShowcaseExample
         {
             Text = "Bar Chart: Monthly Sales Report",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -118,7 +118,7 @@ public static class ChartShowcaseExample
         {
             Text = "Vertical bars with grid lines and value labels",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -158,7 +158,7 @@ public static class ChartShowcaseExample
         {
             Text = "Grouped Bar Chart: Quarterly Revenue",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -166,7 +166,7 @@ public static class ChartShowcaseExample
         {
             Text = "Comparison of three product lines across all months",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -223,7 +223,7 @@ public static class ChartShowcaseExample
         {
             Text = "Line Chart: Monthly Revenue Trends",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -231,7 +231,7 @@ public static class ChartShowcaseExample
         {
             Text = "Connected data points with markers and value labels",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -279,7 +279,7 @@ public static class ChartShowcaseExample
         {
             Text = "Multi-Series Line Chart: Year-over-Year Comparison",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -287,7 +287,7 @@ public static class ChartShowcaseExample
         {
             Text = $"Comparing {DateTime.Now.Year - 1} and {DateTime.Now.Year} revenue with multiple series",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -375,7 +375,7 @@ public static class ChartShowcaseExample
         {
             Text = "Area Chart: Monthly Sales Performance",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -383,7 +383,7 @@ public static class ChartShowcaseExample
         {
             Text = "Filled area under the line with configurable opacity",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -431,7 +431,7 @@ public static class ChartShowcaseExample
         {
             Text = "Lollipop Chart: Quarterly Metrics",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -439,7 +439,7 @@ public static class ChartShowcaseExample
         {
             Text = "Stems with circular heads - clear and minimal bar alternative",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -487,7 +487,7 @@ public static class ChartShowcaseExample
         {
             Text = "Dot Plot Chart: Product Performance",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -495,7 +495,7 @@ public static class ChartShowcaseExample
         {
             Text = "Circular markers positioned along a value axis",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -542,7 +542,7 @@ public static class ChartShowcaseExample
         {
             Text = $"Pie Chart: Monthly Sales {DateTime.Now.Year}",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -550,7 +550,7 @@ public static class ChartShowcaseExample
         {
             Text = "Donut chart with legend and total value in the centre",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 

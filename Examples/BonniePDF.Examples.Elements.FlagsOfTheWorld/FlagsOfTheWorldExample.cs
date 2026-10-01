@@ -90,7 +90,7 @@ public static class FlagsOfTheWorldExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 24,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 8),
         });
 
@@ -123,7 +123,7 @@ public static class FlagsOfTheWorldExample
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 15,
-            TextColor     = ColorPalette.Indigo[600],
+            Color     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 0, 0, 6),
         });
 
@@ -131,7 +131,7 @@ public static class FlagsOfTheWorldExample
         {
             Text      = "The flag of Mexico is 356 paths and four gradients. Zoom in: the eagle, the serpent and every feather stay " +
                         "crisp at any scale.",
-            TextColor = ColorPalette.Slate[500],
+            Color = ColorPalette.Slate[500],
             Margin    = new Thickness(0, 0, 0, 10),
         });
 
@@ -152,7 +152,7 @@ public static class FlagsOfTheWorldExample
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 15,
-            TextColor     = ColorPalette.Indigo[600],
+            Color     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 16, 0, 6),
         });
 
@@ -160,7 +160,7 @@ public static class FlagsOfTheWorldExample
         {
             Text      = "Flag artwork: flag-icons 7.2.3 (MIT licence), https://github.com/lipis/flag-icons.",
             FontSize  = 9,
-            TextColor = ColorPalette.Slate[500],
+            Color = ColorPalette.Slate[500],
         });
     }
 
@@ -190,7 +190,7 @@ public static class FlagsOfTheWorldExample
         {
             Text      = flag.Name,
             FontSize  = 9,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
         });
 

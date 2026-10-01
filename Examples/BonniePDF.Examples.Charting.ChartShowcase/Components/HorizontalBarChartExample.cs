@@ -37,7 +37,7 @@ public static class HorizontalBarChartExample
         {
             Text = "Regional Sales Performance",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 10));
 
@@ -45,7 +45,7 @@ public static class HorizontalBarChartExample
         {
             Text = "Full-year revenue by region - horizontal orientation suits ranked comparisons",
             FontSize = 13,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -59,12 +59,12 @@ public static class HorizontalBarChartExample
                     Color = Color.FromHex(ChartColors.Indigo),
                     DataPoints =
                     [
-                        new ChartDataPoint { Label = "North East",  Value = 142000, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "North West",  Value = 187000, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Midlands",    Value = 203000, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "East Anglia", Value = 96000,  LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "South East",  Value = 261000, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "South West",  Value = 118000, LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "North East",  Value = 142000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "North West",  Value = 187000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Midlands",    Value = 203000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "East Anglia", Value = 96000,  LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "South East",  Value = 261000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "South West",  Value = 118000, LabelFormat = "N0" },
                     ]
                 }
             ],

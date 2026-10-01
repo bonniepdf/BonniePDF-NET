@@ -87,7 +87,7 @@ public static class ShelfLabelExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = Ink,
+            Color = Ink,
             Margin = new Thickness(0, 0, 0, 1),
         });
         info.Add(Tb("1 kg  -  Milled in the UK", 9, Body));
@@ -184,7 +184,7 @@ public static class ShelfLabelExample
             Text = content,
             FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
             FontSize = size,
-            TextColor = color,
+            Color = color,
         };
         if (align.HasValue) block.Alignment = align.Value;
         if (bottom > 0) block.Margin = new Thickness(0, 0, 0, bottom);

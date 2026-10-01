@@ -357,7 +357,7 @@ public static class InventoryScheduleOfConditionExample
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
         row.Add(
-            new TextBlock { Text = left, FontName = StandardFonts.Helvetica, FontSize = 7.5f, TextColor = Muted },
+            new TextBlock { Text = left, FontName = StandardFonts.Helvetica, FontSize = 7.5f, Color = Muted },
             2.5f);
         row.Add(
             new TextBlock
@@ -365,7 +365,7 @@ public static class InventoryScheduleOfConditionExample
                 Text = right,
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7.5f,
-                TextColor = Muted,
+                Color = Muted,
                 Alignment = TextAlignment.Right,
             },
             2);
@@ -380,7 +380,7 @@ public static class InventoryScheduleOfConditionExample
             Text = value,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = accent,
+            Color = accent,
             Margin = new Thickness(0, 0, 0, 2),
         });
         stack.Add(new TextBlock
@@ -388,7 +388,7 @@ public static class InventoryScheduleOfConditionExample
             Text = label,
             FontName = StandardFonts.Helvetica,
             FontSize = 8,
-            TextColor = Muted,
+            Color = Muted,
         });
 
         return new Container

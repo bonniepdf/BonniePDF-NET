@@ -52,7 +52,7 @@ public static class HorizontalStacksExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 22,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 12),
         });
 
@@ -133,7 +133,7 @@ public static class HorizontalStacksExample
                 Text      = caption,
                 FontName  = StandardFonts.HelveticaBold,
                 FontSize  = 11,
-                TextColor = ColorPalette.Slate[600],
+                Color = ColorPalette.Slate[600],
                 Margin    = new Thickness(0, 8, 0, 4),
             });
 
@@ -148,7 +148,7 @@ public static class HorizontalStacksExample
             {
                 row.Add(new Container
                 {
-                    Child           = new TextBlock { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 11, TextColor = Color.White },
+                    Child           = new TextBlock { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 11, Color = Color.White },
                     Padding         = new Thickness(12, 6, 12, 6),
                     BackgroundColor = bg,
                     Height          = boxHeight,
@@ -186,8 +186,8 @@ public static class HorizontalStacksExample
                 Spacing           = 10,
                 Margin            = new Thickness(0, 0, 0, 6),
             };
-            row.Add(new TextBlock { Text = key,   FontName = StandardFonts.HelveticaBold, TextColor = ColorPalette.Slate[700] }, 1f);
-            row.Add(new TextBlock { Text = value, TextColor = ColorPalette.Slate[800] }, 3f);
+            row.Add(new TextBlock { Text = key,   FontName = StandardFonts.HelveticaBold, Color = ColorPalette.Slate[700] }, 1f);
+            row.Add(new TextBlock { Text = value, Color = ColorPalette.Slate[800] }, 3f);
             doc.Add(row);
         }
 
@@ -233,7 +233,7 @@ public static class HorizontalStacksExample
             Text      = label,
             FontName  = StandardFonts.HelveticaBold,
             FontSize  = 11,
-            TextColor = Color.White,
+            Color = Color.White,
         },
     };
 
@@ -243,7 +243,7 @@ public static class HorizontalStacksExample
         Level         = 2,
         FontName      = StandardFonts.HelveticaBold,
         FontSize      = 14,
-        TextColor     = ColorPalette.Indigo[600],
+        Color     = ColorPalette.Indigo[600],
         Margin        = new Thickness(0, topMargin, 0, 8),
     };
 }

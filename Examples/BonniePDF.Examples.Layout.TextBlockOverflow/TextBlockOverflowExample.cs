@@ -59,7 +59,7 @@ public static class TextBlockOverflowExample
                     Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
                     FontName  = StandardFonts.Helvetica,
                     FontSize  = 9,
-                    TextColor = ColorPalette.Slate[400],
+                    Color = ColorPalette.Slate[400],
                     Alignment = TextAlignment.Right,
                 },
             },
@@ -71,7 +71,7 @@ public static class TextBlockOverflowExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 24,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 12),
         });
 
@@ -93,7 +93,7 @@ public static class TextBlockOverflowExample
                 Level         = 2,
                 FontName      = StandardFonts.HelveticaBold,
                 FontSize      = 14,
-                TextColor     = ColorPalette.Indigo[600],
+                Color     = ColorPalette.Indigo[600],
                 Margin        = new Thickness(0, 16, 0, 6),
             });
 

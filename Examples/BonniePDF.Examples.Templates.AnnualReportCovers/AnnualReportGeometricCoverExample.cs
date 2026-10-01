@@ -53,7 +53,7 @@ public static class AnnualReportGeometricCoverExample
             PageBackground = pageNumber => pageNumber == 1
                 ? new CanvasElement((canvas, w, h) => DrawCover(canvas, w, h, badgeImage))
                 {
-                    CanvasHeight = PdfSize.A4.Height,
+                    DrawHeight = PdfSize.A4.Height,
                     IsDecorative = true,
                 }
                 : null,
@@ -193,7 +193,7 @@ public static class AnnualReportGeometricCoverExample
         {
             FontName = StandardFonts.HelveticaBold,
             FontSize = 15,
-            TextColor = ColorPalette.Amber[600],
+            Color = ColorPalette.Amber[600],
             Alignment = TextAlignment.Center,
         });
 
@@ -203,7 +203,7 @@ public static class AnnualReportGeometricCoverExample
             FontName = StandardFonts.HelveticaBold,
             FontSize = 44,
             LineHeight = 1f,
-            TextColor = Ink,
+            Color = Ink,
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 0, 0, 48),
         });
@@ -211,7 +211,7 @@ public static class AnnualReportGeometricCoverExample
         stack.Add(new TextBlock("Stewardship, growth, and long-term value")
         {
             FontSize = 13,
-            TextColor = ColorPalette.Slate[500],
+            Color = ColorPalette.Slate[500],
             Alignment = TextAlignment.Center,
             // The block is anchored to the foot of the page, so this gap is what
             // sets how far the type sits below the badge: the eyebrow was clearing
@@ -224,7 +224,7 @@ public static class AnnualReportGeometricCoverExample
         stack.Add(new TextBlock($"Prepared with BonniePDF · Fiscal Year {Year}")
         {
             FontSize = 10,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
         });
 
