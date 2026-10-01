@@ -88,3 +88,7 @@ dotnet run --project Examples/BonniePDF.Examples.Basics.SimpleDocument
 
 - The **spec** is the authority, not the other language's source. If a change here would force a behavioural divergence from the spec (and therefore from TypeScript), surface it — it likely needs a spec change applied to both implementations.
 - `README.md` and the public API XML docs are the authoritative user-facing description. Keep them in sync with public-API changes.
+
+## The public surface is curated
+
+The assembly exposes its API, not its plumbing. A new type or member is `internal` until it has a documented purpose for a caller; the compiler then rejects any public member that exposes an internal type. `BonniePDF.Tests/Api/PublicSurfaceTests` fails if a type the specification lists as internal becomes public again. `InternalsVisibleTo` lets the test project reach internals; examples and consumers see only the public surface.

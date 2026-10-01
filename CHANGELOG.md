@@ -15,8 +15,73 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+### Changed
+
+- **`Document.ToByteArray()` and `ToByteArrayAsync()` are removed.** They were `[Obsolete]` aliases of `GenerateBytes()` and `GenerateBytesAsync()`; TypeScript removed its counterparts in the same release, so the two implementations agree.
+- **The chart examples no longer use a label format outside the number grammar.** `LabelFormat = "'£'#,##0"` throws `FormatException` when the chart is drawn; the examples use `"N0"`, and show the currency on the axis with `Prefix`.
+
+- **One spelling for a text colour, decoration, weight and italic.**
+  `TextColor` is `Color` (on `TextElementBase`, `Hyperlink`, `TableCell`, `TableRow`,
+  `VisualToc` and `Watermark`), `TextDecoration` is `Decoration`, `Weight` is
+  `FontWeight` and `IsItalic` is `Italic` (on `TextElementBase` and `TextStyle`),
+  matching `TextStyle`, the naming map and TypeScript. The extension method
+  `TextColor(...)` on `TextBlock` and `TableCell` is `Color(...)`, and
+  `TableCell.WithTextColor` and `TableRow.WithTextColor` are `WithColor`. Compound
+  names (`HeaderTextColor`) are unchanged. There are no aliases for the old names.
+- **`CanvasElement.CanvasWidth` and `CanvasHeight` are `DrawWidth` and `DrawHeight`**,
+  as in TypeScript and the element catalogue.
+
+- **The assembly exposes its API and not its plumbing.** About 60 types that were
+  public by accident are now `internal`: the PDF writers (`PdfWriter`, `AsyncPdfWriter`,
+  `FontWriter`, ...), `PdfDocumentSerializer`, the image and TrueType readers, the
+  encryption and tagging helpers, the shading and layout-recording types, and the
+  licence environment classifiers. Members of public types that only the engine used
+  (`RenderContext.Resources`, `RenderContext.Tagging`, the parsed font on
+  `DocumentFontFace` and `FallbackFont`, ...) are `internal` too. Code that used one of
+  these will stop compiling; everything the documentation and examples use is unchanged.
+  A test now fails if an internal type becomes public again.
+
+- **`DocumentDefinition.Validate` refuses `settings` combinations that generation refuses.**
+  A definition that asks for PDF/A with encryption, AES-256 on PDF 1.4, an "a" level
+  without `accessibility: "pdf/ua-1"`, PDF/UA-1 on PDF 2.0 (which includes PDF/A-4),
+  or bookmarks on PDF 1.4 is now reported as `incompatible-settings` when it is read,
+  instead of throwing later when the document is generated. The rules are data in the
+  format description and both implementations evaluate the same list.
+
+- **Chart text is formatted by one culture-invariant grammar, and now matches
+  TypeScript.** Chart labels used the machine's regional settings: the y-axis and the
+  pie total changed with them (`4,000` on en-US, `4.000` on de-DE, `4 000` on fr-FR),
+  and `C` printed `¤` under the invariant culture. They now use a fixed grammar:
+  `G` (the default: the shortest exact decimal, no grouping), `F<n>` (fixed
+  decimals), `N<n>` (fixed decimals, grouped in thousands) and `P<n>` (times 100,
+  then `%`, with no space), `n` from 0 to 15, `.` for decimals and `,` for thousands
+  always. Rounding is half away from zero. **A format outside this grammar, such as
+  `C0`, `E2`, `D` or a custom pattern, now throws `FormatException` when the chart is
+  drawn**, naming the grammar (`D` already threw, and `C` was culture-dependent);
+  currency belongs in the axis `Prefix` and `Suffix`. The axis stays grouped, now
+  always with commas. `ChartNumberFormat.Format` and `ChartNumberFormat.IsSupported`
+  are public. The TypeScript implementation makes the same change and gains the
+  `labelFormat` and `totalValueFormat` support it lacked.
+
 ### Fixed
 
+- **`DefinitionException` derives from `BonniePdfException`**, so one `catch` handles
+  input the library rejects.
+- **`SaveAsync` with an already-cancelled token no longer creates the file.**
+- **`ImageFormat` no longer lists `Bmp` and `Gif`.** Neither was ever loaded.
+
+- **AES-256 encryption and bookmarks are accepted on PDF 2.0.** `ValidateSettings`
+  required `PdfVersion.Pdf17` exactly, so a PDF/A-4 document with bookmarks, or an
+  AES-256 document with `Settings.Version = PdfVersion.Pdf20`, generated in
+  TypeScript and threw here. Both features now accept `Pdf17` and `Pdf20`, as the
+  specification says ("PDF 1.7 or later").
+
+- **The same document writes its fonts in the same order every time.** Font objects were
+  written in the enumeration order of a concurrent dictionary keyed by font name, which follows
+  the hashes of the names: different in every process, and, for a font added with `doc.Fonts.Add`,
+  different in every document. A document with two or more fonts could therefore produce PDFs whose
+  bytes differed although its content did not. Fonts are now written in the order they were first
+  used.
 - **A PDF/UA-1 claim is no longer made over fonts that were not embedded.**
   PDF/UA-1 requires every font to be embedded, as PDF/A does. When the
   standard-14 fonts cannot be embedded (the bundled Liberation fonts were removed
@@ -40,6 +105,89 @@ behaviour, so the two files can be read side by side.
   PDF/A. PDF/UA-only output gains an sRGB ICC profile and an `/OutputIntents` entry.
 
 ### Added
+
+- **`SvgPageExportOptions.ShapeRendering`** (`SvgShapeRendering`: `Auto`,
+  `OptimizeSpeed`, `CrispEdges`, `GeometricPrecision`) writes the root
+  `shape-rendering` attribute of an exported page, as TypeScript's
+  `shapeRendering` does. `Auto`, the default, writes nothing.
+- **`DefinitionIssue.Since`**, the minor version that introduced an item the reader
+  knows but the document's version does not include, when the reader can tell.
+
+- **Documents can be built from JSON.** `Document.FromDefinitionAsync(json, options)` (and
+  `FromDefinition`) reads a Document Definition, a versioned, language-neutral JSON
+  description of a whole document (settings, metadata, pages, every element including charts,
+  fonts and other resources), and returns a `Document`. `DocumentDefinition.Validate(json)`
+  checks it first and returns every problem at once, each with a JSON Pointer path and a stable
+  code (`unknown-type`, `invalid-value`, `dangling-reference`, …), without constructing
+  anything; reading throws a `DefinitionException` carrying the same list. Nothing in a
+  definition can run code, open a file or fetch a URL: an image or font is embedded as base64 or
+  named by a `ref` that the host resolves through `DefinitionReadOptions.Resources`, and
+  encryption passwords are supplied through `Passwords`, never stored. Input size, nesting depth
+  and element count are limited, and a document written for a newer minor version than this
+  release reads is refused with each unrecognised item listed, unless `BestEffort` is set.
+  `DocumentDefinition.SupportedVersions` states the range this release reads (1.0). The
+  TypeScript implementation gains `fromDefinition` in step with this, as a separate
+  `@bonniepdf/core/definition` entry.
+
+- **Documents can be written as JSON.** `doc.ToDefinition()` returns a `DefinitionWriteResult`
+  (`Definition`, a `JsonObject`; `Notes`; and `ToJson()`): the same Document Definition
+  `FromDefinitionAsync` reads, so the document you read back renders identically. Values equal to
+  their defaults are left out, lengths are points, colours are hex (or palette tokens with
+  `WritePaletteTokens`) and every enumeration is its token, so writing what was written changes
+  nothing. Images, fonts and attachments become entries of `resources`, named `image-1`, `font-1`,
+  … and shared when the bytes are identical; set `ResourceRef` to name a resource your code can
+  supply again and the definition carries that `ref` and a `sha256` instead of the bytes. A
+  construct a definition cannot express (a function-valued page template, a `ShowIf` predicate, an
+  `Svg` generator, a custom element) makes `ToDefinition` throw a `DefinitionException` that lists
+  every one; `OnUnrepresentable = DefinitionUnrepresentable.Drop` leaves them out and returns a
+  `dropped` note for each. Encryption is written without its passwords, with a `secret-omitted`
+  note. A text property the author never set (font, size, colour, line height, alignment, a list's
+  bullet colour) is not written, so the document's default text style and an enclosing
+  container's alignment still apply after the round trip. `MaxImageDpi = null` (no cap) is
+  written as `"unlimited"`, which is also what a definition says to read it back. Attachments in a definition may now carry
+  `creationDate` and `modificationDate`. The TypeScript implementation gains
+  `Document.toDefinition` in step with this.
+
+- **A document can carry its own fonts.** `doc.Fonts.Add(bytes, family:, weight:,
+  italic:)` adds a face to that document, and a document holds any number of
+  families with any number of weights and styles each. Family, weight and italic
+  are read from the font unless you give them. An element's `FontFamily`, `Weight`
+  and `IsItalic` (and a `TextStyle`, the document's `DefaultTextStyle` and the
+  family names in an imported SVG) resolve against the document's faces first, then
+  the global registrations, then the standard fonts. Style is matched first, then
+  weight in the CSS font-matching order, so a family with only regular and bold
+  still answers semi-bold and medium. Nothing added to one document is visible to
+  another, including one generated at the same time on another thread, and the
+  global registries are not touched, so two documents can use different files under
+  the same family name. A face is embedded and subset as any other TrueType font.
+  When a face lacks a glyph, the document's other faces are tried before the global
+  fallback fonts. `face.FontName` selects a face anywhere an element takes a font
+  name. `TtfFont` gains `WeightClass` and `SelectionItalic`. The TypeScript
+  implementation gains `doc.fonts` in step with this.
+
+- **Elements can be marked with a source id.** `DebugSource.Mark(element, sourceId)`
+  attaches an opaque id to an element, or to the `Document`, and returns it
+  unchanged; `DebugSource.Of(element)` reads it back. A marked element's id appears
+  as `SourceId` on its node in the layout snapshot (and as `sourceId` in the export's
+  JSON), so a preview can map a rendered box back to the source that produced it. The
+  Document's mark also applies to the snapshot's root and to the page created with
+  the document. The first mark wins, an empty id is ignored, and the id never reaches
+  the PDF or the SVG: a marked and an unmarked document generate identical bytes.
+  `LayoutNode.SourceId` is now settable. The TypeScript implementation already had
+  this as `markDebugSource` and `debugSourceOf`.
+
+- **Page templates can be built from elements.** `PageTemplate.FromElements(@default:,
+  firstPage:, odd:, even:)` returns a template for `HeaderTemplate`, `FooterTemplate`,
+  `PageBackground` or `PageForeground` without writing a lambda. For page *n* it
+  returns the first present of `firstPage` (page 1 only), then `odd` or `even` by
+  parity, then `default`, and nothing when none applies. At least one member is
+  required, or it throws `ArgumentException`. The same element is used on every page
+  it covers, so `{{CurrentPage}}` and `{{TotalPages}}` are how one footer shows a
+  different number on each. The result is an ordinary `Func<int, IElement?>`, and
+  output is byte-identical to the equivalent hand-written one.
+  `PageTemplate.TryGetElements(template, out elements)` reads the members back, and
+  returns `false` for a lambda you wrote yourself. The TypeScript implementation
+  gains `pageTemplate` in step with this.
 
 - **The SVG document export carries a version and its compliance report, and
   writes itself as JSON.** `GenerateSvgDocument()` / `GenerateSvgDocumentAsync()`
