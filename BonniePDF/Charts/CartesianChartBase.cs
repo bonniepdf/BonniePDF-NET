@@ -359,7 +359,7 @@ public abstract class CartesianChartBase : ChartBase
             {
                 float x = LeftPadding + i * stepWidth;
                 decimal value = minValue + i * stepValue;
-                string label = $"{data.YAxis.Prefix}{value:N0}{data.YAxis.Suffix}";
+                string label = $"{data.YAxis.Prefix}{ChartNumberFormat.Format(value, "N0")}{data.YAxis.Suffix}";
                 canvas.DrawText(x, baselineY + 8, label, AxisColor, AxisLabelFontSize, FontFamily,
                     TextAlignment.Center);
             }
@@ -372,7 +372,7 @@ public abstract class CartesianChartBase : ChartBase
             {
                 float y = baselineY - i * stepHeight;
                 decimal value = minValue + i * stepValue;
-                string label = $"{data.YAxis.Prefix}{value:N0}{data.YAxis.Suffix}";
+                string label = $"{data.YAxis.Prefix}{ChartNumberFormat.Format(value, "N0")}{data.YAxis.Suffix}";
                 canvas.DrawText(LeftPadding - 8, y - AxisLabelFontSize / 2, label, AxisColor, AxisLabelFontSize,
                     FontFamily, TextAlignment.Right);
             }

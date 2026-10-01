@@ -91,8 +91,8 @@ public class PieChart : ChartBase
     public float TotalValueFontSize { get; set; } = 16;
 
     /// <summary>
-    /// Format string for the total value.
-    /// When null (default), the raw numeric total is displayed.
+    /// Number format for the total: <c>G</c> (default), <c>F&lt;n&gt;</c>, <c>N&lt;n&gt;</c> or <c>P&lt;n&gt;</c>.
+    /// Culture-invariant; see <see cref="ChartNumberFormat"/>. Anything else throws when the chart is drawn.
     /// </summary>
     public string? TotalValueFormat { get; set; }
 
@@ -332,8 +332,7 @@ public class PieChart : ChartBase
 
         if (ShowTotal)
         {
-            string format = TotalValueFormat ?? "G";
-            string totalText = $"{TotalLabel}: {total.ToString(format)}";
+            string totalText = $"{TotalLabel}: {ChartNumberFormat.Format(total, TotalValueFormat)}";
             float textX = layout.LegendX + LegendBoxSize + LegendBoxTextGap;
             float totalY = layout.LegendStartY + dataPoints.Count * LegendItemHeight + TotalRowGap;
             canvas.DrawText(textX, totalY, totalText, LegendTextColor, LegendFontSize, FontFamily, TextAlignment.Left);
