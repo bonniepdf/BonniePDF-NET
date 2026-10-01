@@ -173,7 +173,7 @@ public class ChartTaggingTests
             canvas.FillRect(0, 0, width, height, BonniePDF.Core.ColorPalette.Slate[200]))
         {
             AltText = "A filled sample rectangle.",
-            CanvasHeight = 40,
+            DrawHeight = 40,
         }))));
 
         AssertNoArtifactInsideTaggedContent(pdf);

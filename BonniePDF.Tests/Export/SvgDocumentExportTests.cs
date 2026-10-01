@@ -38,7 +38,7 @@ public partial class SvgDocumentExportTests
         doc.Metadata.Title = "Contrast fixture";
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
-        var caption = new TextBlock { Text = "Muted caption", FontSize = 11, TextColor = new Color(0x99, 0x99, 0x99) };
+        var caption = new TextBlock { Text = "Muted caption", FontSize = 11, Color = new Color(0x99, 0x99, 0x99) };
         doc.Add(new Container { Child = caption, BackgroundColor = new Color(0xf1, 0xf5, 0xf9) });
         return doc;
     }

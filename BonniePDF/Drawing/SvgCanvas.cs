@@ -30,7 +30,7 @@ namespace BonniePDF.Drawing;
 /// work both rely on.
 /// </para>
 /// </summary>
-public class SvgIdAllocator
+internal class SvgIdAllocator
 {
     private int _clipId;
     private int _gradId;
@@ -45,7 +45,7 @@ public class SvgIdAllocator
 /// In multipage mode, each page is wrapped in a group with id="pageN" and
 /// translated vertically to stack pages.
 /// </summary>
-public class SvgCanvas : ICanvas
+internal class SvgCanvas : ICanvas
 {
     private readonly StringBuilder _sb;
     private readonly float _xOffset;

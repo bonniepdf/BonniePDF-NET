@@ -8,7 +8,7 @@ namespace BonniePDF.Rendering.Images;
 /// A helper class for reading big-endian binary data from a stream.
 /// TTF files and other binary formats use big-endian byte order, while C# uses little-endian.
 /// </summary>
-public sealed class BigEndianReader : IDisposable
+internal sealed class BigEndianReader : IDisposable
 {
     private readonly BinaryReader _reader;
 

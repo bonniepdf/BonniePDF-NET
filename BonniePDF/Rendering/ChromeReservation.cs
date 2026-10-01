@@ -16,7 +16,7 @@ namespace BonniePDF.Rendering;
 /// reservation), for the normative rule these numbers feed.
 /// </remarks>
 [StructLayout(LayoutKind.Auto)]
-public readonly record struct ChromeReservation(float Header, float Footer)
+internal readonly record struct ChromeReservation(float Header, float Footer)
 {
     /// <summary>The reservation for a page with no header and no footer.</summary>
     public static readonly ChromeReservation None = new(0f, 0f);

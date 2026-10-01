@@ -16,6 +16,7 @@ using BonniePDF.Export;
 using BonniePDF.Licensing;
 using BonniePDF.Rendering;
 using BonniePDF.Rendering.Writers;
+using BonniePDF.Typography;
 
 namespace BonniePDF;
 
@@ -89,6 +90,71 @@ public class Document : IDisposable
     public DocumentSettings Settings { get; set; }
 
     /// <summary>
+    /// The fonts that belong to this document: any number of families and faces. Nothing added
+    /// here is visible to another document, and the global font registries are unchanged. A
+    /// family named here is resolved before the global and standard ones.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// doc.Fonts.Add(regularBytes, family: "Inter");
+    /// doc.Fonts.Add(boldBytes, family: "Inter", weight: FontWeight.Bold);
+    /// doc.Add(new TextBlock { Text = "Hello", FontFamily = "Inter", FontWeight = FontWeight.Bold });
+    /// </code>
+    /// </example>
+    public DocumentFonts Fonts { get; } = new();
+
+    /// <summary>
+    /// Builds a document from a Document Definition given as JSON text. The definition is validated
+    /// completely first; if it has any problem this throws a <see cref="Definition.DefinitionException"/>
+    /// that lists them all, and nothing is constructed.
+    /// </summary>
+    /// <remarks>
+    /// Resources with a <c>ref</c> are supplied by the host through
+    /// <see cref="Definition.DefinitionReadOptions.Resources"/>; the reader never opens a path or fetches a
+    /// URL itself.
+    /// </remarks>
+    public static async Task<Document> FromDefinitionAsync(string json, Definition.DefinitionReadOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        options ??= new Definition.DefinitionReadOptions();
+        Definition.DefinitionValidationResult result = Definition.DocumentDefinition.Validate(json, options);
+        if (!result.IsValid) throw new Definition.DefinitionException(result.Errors);
+        return await Definition.DefinitionReader.ReadAsync(result.Definition!.Value, options, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>Builds a document from a Document Definition that has already been parsed.</summary>
+    public static async Task<Document> FromDefinitionAsync(System.Text.Json.JsonElement definition, Definition.DefinitionReadOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        options ??= new Definition.DefinitionReadOptions();
+        Definition.DefinitionValidationResult result = Definition.DocumentDefinition.Validate(definition, options);
+        if (!result.IsValid) throw new Definition.DefinitionException(result.Errors);
+        return await Definition.DefinitionReader.ReadAsync(result.Definition!.Value, options, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Builds a document from a Document Definition given as JSON text, waiting for any resources the host
+    /// supplies. See <see cref="FromDefinitionAsync(string, Definition.DefinitionReadOptions?, CancellationToken)"/>.
+    /// </summary>
+    public static Document FromDefinition(string json, Definition.DefinitionReadOptions? options = null) =>
+        FromDefinitionAsync(json, options).GetAwaiter().GetResult();
+
+    /// <summary>
+    /// Writes this document as a Document Definition: JSON data, with a note for anything the writer had to say.
+    /// Reading it back with <see cref="FromDefinitionAsync(string, Definition.DefinitionReadOptions?, CancellationToken)"/>
+    /// gives a document that renders identically.
+    /// </summary>
+    /// <remarks>
+    /// A construct a definition cannot express (a function-valued page template, a <c>ShowIf</c> predicate, a custom
+    /// element, an <c>Svg</c> generator) makes this throw a <see cref="Definition.DefinitionException"/> that lists
+    /// every one; pass <see cref="Definition.DefinitionUnrepresentable.Drop"/> to leave them out and receive a
+    /// <c>dropped</c> note for each instead. Encryption is written without its passwords, which the host supplies
+    /// again on reading.
+    /// </remarks>
+    /// <param name="options">What to do with what cannot be written, and how to write resources.</param>
+    /// <returns>The definition and its notes.</returns>
+    public Definition.DefinitionWriteResult ToDefinition(Definition.DefinitionWriteOptions? options = null) =>
+        Definition.DefinitionWriter.Write(this, options);
+
+    /// <summary>
     /// Gets the pages in this document
     /// </summary>
     public IReadOnlyList<Page> Pages => _pages.AsReadOnly();
@@ -102,11 +168,28 @@ public class Document : IDisposable
     /// dropped at save time with a diagnostic, keeping the conformance claim
     /// honest.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// doc.Attachments.Add(new FileAttachment("data.csv", bytes, AttachmentRelationship.Data, "text/csv"));
+    /// Console.WriteLine(doc.Attachments.Count); // 1
+    /// </code>
+    /// </example>
     public IList<FileAttachment> Attachments => _attachments;
 
     /// <summary>
     /// Embeds a file into the document. Returns this document for chaining.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// doc.Attach(new FileAttachment
+    /// {
+    ///     FileName = "invoice.xml",
+    ///     Content = xmlBytes,
+    ///     Relationship = AttachmentRelationship.Alternative,
+    ///     MediaType = "text/xml",
+    /// });
+    /// </code>
+    /// </example>
     public Document Attach(FileAttachment attachment)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -119,6 +202,11 @@ public class Document : IDisposable
     /// Embeds a file into the document from a name and bytes. Returns this
     /// document for chaining.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// doc.Attach("data.csv", bytes, AttachmentRelationship.Data, "text/csv");
+    /// </code>
+    /// </example>
     public Document Attach(string fileName, byte[] content,
         AttachmentRelationship relationship = AttachmentRelationship.Unspecified,
         string? mediaType = null)
@@ -136,6 +224,13 @@ public class Document : IDisposable
     /// <summary>
     /// Adds an element to the current page
     /// </summary>
+    /// <example>
+    /// <code>
+    /// var doc = new Document();
+    /// doc.Add(new TextBlock("Quarterly report") { FontSize = 20 });
+    /// doc.Add(new TextBlock("Prepared by Operations"));
+    /// </code>
+    /// </example>
     public void Add(IElement element)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -152,6 +247,11 @@ public class Document : IDisposable
     /// <summary>
     /// Adds multiple elements to the current page
     /// </summary>
+    /// <example>
+    /// <code>
+    /// doc.AddRange([new TextBlock("One"), new TextBlock("Two"), new TextBlock("Three")]);
+    /// </code>
+    /// </example>
     public void AddRange(IEnumerable<IElement> elements)
     {
         ArgumentNullException.ThrowIfNull(elements);
@@ -161,6 +261,14 @@ public class Document : IDisposable
     /// <summary>
     /// Adds a new page to the document
     /// </summary>
+    /// <example>
+    /// <code>
+    /// var doc = new Document();
+    /// doc.Add(new TextBlock("First page"));
+    /// doc.AddPage(); // start a new page
+    /// doc.Add(new TextBlock("Second page"));
+    /// </code>
+    /// </example>
     public Page AddPage()
     {
         PdfSize orientedPageSize = Settings.GetOrientedPageSize();
@@ -274,6 +382,11 @@ public class Document : IDisposable
     /// </summary>
     /// <param name="path">The path to save the PDF to</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
+    /// <example>
+    /// <code>
+    /// await doc.SaveAsync("report.pdf");
+    /// </code>
+    /// </example>
     public async Task SaveAsync(string path, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(path))
@@ -310,6 +423,11 @@ public class Document : IDisposable
     /// <summary>
     /// Serializes the document to PDF bytes.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// byte[] bytes = doc.GenerateBytes();
+    /// </code>
+    /// </example>
     public byte[] GenerateBytes()
     {
         MemoryStream ms = new();
@@ -321,6 +439,16 @@ public class Document : IDisposable
     /// Asynchronously serializes the document to PDF bytes.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
+    /// <example>
+    /// <code>
+    /// byte[] bytes = await doc.GenerateBytesAsync();
+    ///
+    /// // Cancel with a CancellationToken:
+    /// using var cts = new CancellationTokenSource();
+    /// Task&lt;byte[]&gt; pending = doc.GenerateBytesAsync(cts.Token);
+    /// cts.Cancel();
+    /// </code>
+    /// </example>
     public async Task<byte[]> GenerateBytesAsync(CancellationToken cancellationToken = default)
     {
         MemoryStream ms = new();
@@ -330,21 +458,6 @@ public class Document : IDisposable
             return ms.ToArray();
         }
     }
-
-    /// <summary>
-    /// Alias for <see cref="GenerateBytes"/>, kept for source compatibility with earlier
-    /// releases. Prefer <see cref="GenerateBytes"/> for new code.
-    /// </summary>
-    [Obsolete("Use GenerateBytes() instead.")]
-    public byte[] ToByteArray() => GenerateBytes();
-
-    /// <summary>
-    /// Alias for <see cref="GenerateBytesAsync(CancellationToken)"/>, kept for source
-    /// compatibility with earlier releases. Has no cancellation support; prefer
-    /// <see cref="GenerateBytesAsync(CancellationToken)"/> for new code.
-    /// </summary>
-    [Obsolete("Use GenerateBytesAsync(CancellationToken) instead.")]
-    public Task<byte[]> ToByteArrayAsync() => GenerateBytesAsync();
 
     // ─── SVG page export ────────────────────────────────────────────────
 
@@ -410,6 +523,11 @@ public class Document : IDisposable
     /// CPU-bound and runs synchronously, after calling any registered
     /// <see cref="DocumentSettings.SvgRasterizer"/> the document's SVG elements need.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// IReadOnlyList&lt;string&gt; pages = await doc.GenerateSvgPagesAsync(new SvgPageExportOptions { MaxPages = 1 });
+    /// </code>
+    /// </example>
     public async Task<IReadOnlyList<string>> GenerateSvgPagesAsync(SvgPageExportOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -467,6 +585,7 @@ public class Document : IDisposable
     /// </summary>
     private async Task SaveInternalAsync(string path, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         LicenseChecker.ValidateLicense();
         _diagnostics.Clear();
         ValidateSettings();
@@ -483,6 +602,7 @@ public class Document : IDisposable
     /// </summary>
     private async Task SaveInternalAsync(Stream stream, bool leaveOpen, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         LicenseChecker.ValidateLicense();
         _diagnostics.Clear();
         ValidateSettings();
@@ -592,13 +712,13 @@ public class Document : IDisposable
                 "PDF/A mode cannot be combined with encryption. Disable encryption or PDF/A.");
         }
 
-        // AES-256 requires PDF 1.7
+        // AES-256 requires PDF 1.7 or later
         if (Settings.IsEncrypted &&
             Settings.Encryption!.Algorithm == Security.Models.EncryptionAlgorithm.AES_256 &&
-            Settings.Version != PdfVersion.Pdf17)
+            Settings.Version != PdfVersion.Pdf17 && Settings.Version != PdfVersion.Pdf20)
         {
             throw new InvalidOperationException(
-                "AES-256 encryption requires PdfVersion.Pdf17. Set Settings.Version = PdfVersion.Pdf17.");
+                "AES-256 encryption requires PdfVersion.Pdf17 or PdfVersion.Pdf20. Set Settings.Version accordingly.");
         }
 
         // PDF/A version requirements. Silently upgrade rather than throw -
@@ -642,11 +762,11 @@ public class Document : IDisposable
                 "PDF/UA-1 output is only supported with PdfVersion.Pdf17. PDF/UA-2 for PdfVersion.Pdf20 is not implemented yet.");
         }
 
-        // Bookmarks require PDF 1.7
-        if (Settings.HasBookmarks && Settings.Version != PdfVersion.Pdf17)
+        // Bookmarks require PDF 1.7 or later
+        if (Settings.HasBookmarks && Settings.Version != PdfVersion.Pdf17 && Settings.Version != PdfVersion.Pdf20)
         {
             throw new InvalidOperationException(
-                "Bookmarks require PdfVersion.Pdf17. Set Settings.Version = PdfVersion.Pdf17.");
+                "Bookmarks require PdfVersion.Pdf17 or PdfVersion.Pdf20. Set Settings.Version accordingly.");
         }
     }
 

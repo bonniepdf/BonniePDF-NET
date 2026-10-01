@@ -72,7 +72,7 @@ public class RenderContext
     }
 
     /// <summary>Low-level SVG canvas options threaded into every <see cref="SvgCanvas"/> this context creates.</summary>
-    public SvgRenderOptions SvgOptions { get; } = SvgRenderOptions.Legacy;
+    internal SvgRenderOptions SvgOptions { get; } = SvgRenderOptions.Legacy;
 
     /// <summary>
     /// Shared across every <see cref="SvgCanvas"/> this context creates (main
@@ -88,7 +88,7 @@ public class RenderContext
     /// Gets the shared PDF resource registry that tracks fonts, images, and other PDF resources
     /// for the document being rendered.
     /// </summary>
-    public PdfResourceRegistry Resources { get; } = new();
+    internal PdfResourceRegistry Resources { get; } = new();
 
     /// <summary>
     /// Gets or sets whether PDF/A compliance is enabled.
@@ -124,7 +124,7 @@ public class RenderContext
     /// Stores hyperlinks per page index
     /// Key: page index, Value: list of hyperlinks on that page
     /// </summary>
-    public IDictionary<int, List<Hyperlink>> PageHyperlinks { get; } = new ConcurrentDictionary<int, List<Hyperlink>>();
+    internal IDictionary<int, List<Hyperlink>> PageHyperlinks { get; } = new ConcurrentDictionary<int, List<Hyperlink>>();
 
     /// <summary>
     /// Stores the resolved page numbers for Table of Contents entries.
@@ -145,14 +145,14 @@ public class RenderContext
     /// context so each per-page <see cref="PdfCanvas"/> gets it via
     /// <see cref="UpdateCanvas"/>.
     /// </summary>
-    public TaggingContext? Tagging { get; set; }
+    internal TaggingContext? Tagging { get; set; }
 
     /// <summary>
     /// Optional layout-snapshot recorder. Attached only when a caller opted into
     /// <c>CaptureLayout</c> (currently the SVG exporter). When null, all capture
     /// is a guarded no-op and output is byte-identical to the un-instrumented path.
     /// </summary>
-    public LayoutRecorder? LayoutRecorder { get; set; }
+    internal LayoutRecorder? LayoutRecorder { get; set; }
 
     /// <summary>
     /// Gets whether the context is in SVG rendering mode.
@@ -240,7 +240,7 @@ public class RenderContext
     /// heights measured against a different page size or margin.
     /// See the shared specification, "Layout &amp; Pagination" §5.1.
     /// </remarks>
-    public void SetChromeReservation(Func<int, ChromeReservation>? provider)
+    internal void SetChromeReservation(Func<int, ChromeReservation>? provider)
     {
         _chromeProvider = provider;
         _chromeCache.Clear();
@@ -477,7 +477,7 @@ public class RenderContext
 
     /// <summary>Per embedded font (keyed by PDF font name): the resolved face and
     /// every code point drawn with it, for building minimal SVG font subsets.</summary>
-    public IReadOnlyDictionary<string, (TtfFont Font, HashSet<int> CodePoints)> SvgFontUsage => _svgFontUsage;
+    internal IReadOnlyDictionary<string, (TtfFont Font, HashSet<int> CodePoints)> SvgFontUsage => _svgFontUsage;
 
     /// <summary>
     /// Records the characters in <paramref name="text"/> as used by the specified font,
@@ -525,7 +525,7 @@ public class RenderContext
     /// gradients), returning the resource names to reference, or <c>null</c> to fall
     /// back to the strip/disc approximation (translucent gradient under PDF/A-1).
     /// </summary>
-    public ShadingResources? RegisterShading(ShadingRequest request) => Resources.RegisterShading(request);
+    internal ShadingResources? RegisterShading(ShadingRequest request) => Resources.RegisterShading(request);
 
     /// <summary>
     /// Returns <c>true</c> if the given font identifier refers to an embedded TrueType font
@@ -537,7 +537,7 @@ public class RenderContext
     /// Returns the <see cref="EmbeddedFontInfo"/> for a font loaded from the given file path,
     /// loading and caching it on first access.
     /// </summary>
-    public EmbeddedFontInfo? GetEmbeddedFont(string filePath) => Resources.GetEmbeddedFont(filePath);
+    internal EmbeddedFontInfo? GetEmbeddedFont(string filePath) => Resources.GetEmbeddedFont(filePath);
 
     /// <summary>
     /// Creates a new page and resets the cursor position
@@ -690,7 +690,7 @@ public class RenderContext
     /// <summary>
     /// Registers a hyperlink for the current page
     /// </summary>
-    public void RegisterHyperlink(Hyperlink hyperlink)
+    internal void RegisterHyperlink(Hyperlink hyperlink)
     {
         if (!PageHyperlinks.ContainsKey(CurrentPageIndex)) PageHyperlinks[CurrentPageIndex] = new List<Hyperlink>();
         PageHyperlinks[CurrentPageIndex].Add(hyperlink);
@@ -706,7 +706,7 @@ public class RenderContext
 /// <summary>
 /// Information about a deferred Form XObject to be generated at the end of the document.
 /// </summary>
-public class DeferredXObjectInfo
+internal class DeferredXObjectInfo
 {
     /// <summary>Gets or sets the PDF resource name (e.g. <c>/XO1</c>) assigned to this XObject.</summary>
     public required string ResourceName { get; set; }

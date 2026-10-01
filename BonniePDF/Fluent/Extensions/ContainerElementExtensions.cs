@@ -217,7 +217,7 @@ public static class ContainerElementExtensions
     /// </summary>
     public static CanvasElement Canvas(this IContentContainer c, float height, Action<ICanvas, float, float> handler)
     {
-        var canvas = new CanvasElement(handler) { CanvasHeight = height };
+        var canvas = new CanvasElement(handler) { DrawHeight = height };
         return c.Element(canvas);
     }
 

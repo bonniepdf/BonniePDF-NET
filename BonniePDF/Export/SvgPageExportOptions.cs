@@ -28,6 +28,27 @@ public enum SvgTextMode
 }
 
 /// <summary>
+/// The root <c>shape-rendering</c> hint of exported SVG.
+/// </summary>
+public enum SvgShapeRendering
+{
+    /// <summary>The SVG default: antialiased curves and charts look smooth (default).</summary>
+    Auto,
+
+    /// <summary>Favour speed over precision.</summary>
+    OptimizeSpeed,
+
+    /// <summary>
+    /// Snap shapes to the device pixel grid, so abutting module rectangles in barcodes, QR and Data Matrix
+    /// leave no faint antialiasing seams. Text is governed by <c>text-rendering</c> and is unaffected.
+    /// </summary>
+    CrispEdges,
+
+    /// <summary>Favour geometric accuracy over speed.</summary>
+    GeometricPrecision
+}
+
+/// <summary>
 /// Options controlling how a document page is exported to SVG.
 ///
 /// All members have sensible defaults that produce compact, deterministic,
@@ -43,6 +64,12 @@ public sealed class SvgPageExportOptions
 
     /// <summary>How text should be represented. Defaults to <see cref="SvgTextMode.Text"/>.</summary>
     public SvgTextMode TextMode { get; init; } = SvgTextMode.Text;
+
+    /// <summary>
+    /// Value for the root <c>shape-rendering</c> attribute. Defaults to <see cref="SvgShapeRendering.Auto"/>, which
+    /// writes no attribute. Set <see cref="SvgShapeRendering.CrispEdges"/> for pages dominated by pixel-grid graphics.
+    /// </summary>
+    public SvgShapeRendering ShapeRendering { get; init; } = SvgShapeRendering.Auto;
 
     /// <summary>Include SVG <c>&lt;a&gt;</c> wrappers for PDF hyperlinks where possible. Defaults to <c>false</c>.</summary>
     public bool IncludeLinks { get; init; }

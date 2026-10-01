@@ -20,7 +20,7 @@ public class TextStyle
     /// <summary>
     /// Font weight (100-900). Normal = 400, Bold = 700.
     /// </summary>
-    public FontWeight Weight { get; set; } = FontWeight.Normal;
+    public FontWeight FontWeight { get; set; } = FontWeight.Normal;
 
     /// <summary>
     /// Whether the text should be rendered in italic/oblique style.
@@ -99,7 +99,7 @@ public class TextStyle
     /// </summary>
     public string? ResolvedFontName =>
         FontFamily != null
-            ? FontFamilyResolver.Resolve(FontFamily, Weight, Italic)
+            ? FontFamilyResolver.Resolve(FontFamily, FontWeight, Italic)
             : null;
 
     /// <summary>
@@ -113,7 +113,7 @@ public class TextStyle
         return new TextStyle
         {
             FontFamily = FontFamily ?? baseStyle.FontFamily,
-            Weight = Weight != FontWeight.Normal || FontFamily != null ? Weight : baseStyle.Weight,
+            FontWeight = FontWeight != FontWeight.Normal || FontFamily != null ? FontWeight : baseStyle.FontWeight,
             Italic = Italic || (FontFamily == null && baseStyle.Italic),
             FontSize = FontSize ?? baseStyle.FontSize,
             Color = Color ?? baseStyle.Color,
@@ -148,7 +148,7 @@ public class TextStyle
     /// (e.g. Bold with no family → "Helvetica-Bold", not plain "Helvetica").
     /// </summary>
     public string EffectiveFontName =>
-        FontFamilyResolver.Resolve(FontFamily ?? "Helvetica", Weight, Italic);
+        FontFamilyResolver.Resolve(FontFamily ?? "Helvetica", FontWeight, Italic);
 
     /// <summary>
     /// Returns an independent copy of this style.
@@ -169,21 +169,21 @@ public class TextStyle
     /// <summary>Sets font weight to Bold (700)</summary>
     public TextStyle Bold()
     {
-        Weight = FontWeight.Bold;
+        FontWeight = FontWeight.Bold;
         return this;
     }
 
     /// <summary>Sets font weight to Light (300)</summary>
     public TextStyle Light()
     {
-        Weight = FontWeight.Light;
+        FontWeight = FontWeight.Light;
         return this;
     }
 
     /// <summary>Sets font weight to Thin (100)</summary>
     public TextStyle Thin()
     {
-        Weight = FontWeight.Thin;
+        FontWeight = FontWeight.Thin;
         return this;
     }
 
@@ -218,7 +218,7 @@ public class TextStyle
     /// <summary>Sets the font weight</summary>
     public TextStyle WithWeight(FontWeight weight)
     {
-        Weight = weight;
+        FontWeight = weight;
         return this;
     }
 

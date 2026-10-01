@@ -18,7 +18,7 @@ namespace BonniePDF.Drawing;
 /// Handles the critical Y-axis coordinate transformation from Screen Coordinates (Top-Left origin) to PDF Coordinates
 /// (Bottom-Left origin).
 /// </summary>
-public class PdfCanvas : ICanvas
+internal class PdfCanvas : ICanvas
 {
     private readonly Func<string, TtfFont?> _embeddedFontResolver;
     private readonly Func<string, string> _fontResolver;

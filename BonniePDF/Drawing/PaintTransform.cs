@@ -92,7 +92,7 @@ public readonly record struct PaintTransform(float A, float B, float C, float D,
 }
 
 /// <summary>Helpers for an optional paint transform.</summary>
-public static class PaintTransformExtensions
+internal static class PaintTransformExtensions
 {
     /// <summary>True when the transform is absent or has no effect.</summary>
     public static bool IsIdentityOrAbsent(this PaintTransform? transform) =>

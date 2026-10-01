@@ -204,7 +204,7 @@ public class RichTextTests
     [Fact]
     public void RunMerging_KeepsDifferentStyledSpansSeparate()
     {
-        TextStyle bold = new() { Weight = FontWeight.Bold };
+        TextStyle bold = new() { FontWeight = FontWeight.Bold };
         (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
         new RichText().Span("Hello", bold).Span("World").Render(ctx, 500);
         Assert.Equal(new[] { "Hello", "World" }, canvas.Texts.Select(t => t.Text));
@@ -316,7 +316,7 @@ public class RichTextTests
         TextStyle b = a.Clone();
         Assert.Equal(10, b.FontSize);
         Assert.Equal(Color.Red, b.Color);
-        Assert.Equal(FontWeight.Bold, b.Weight);
+        Assert.Equal(FontWeight.Bold, b.FontWeight);
         Assert.True(b.Italic);
 
         // Mutating the original must not touch the clone.

@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Export;
@@ -12,8 +13,11 @@ namespace BonniePDF.Tests.Export;
 //
 // NOTE: written without a .NET toolchain in the authoring environment; run this
 // before considering the .NET mirror landed.
-public class LayoutSnapshotTests
+public partial class LayoutSnapshotTests
 {
+    [GeneratedRegex(@"/ID \[[^\]]*\]|/(?:CreationDate|ModDate) \([^)]*\)")]
+    private static partial Regex TrailerId();
+
     private static IEnumerable<LayoutNode> Walk(LayoutNode node)
     {
         yield return node;
@@ -164,5 +168,70 @@ public class LayoutSnapshotTests
 
         Assert.Equal(off.Pages, on.Pages);
         Assert.Equal(off.FontFaceCss, on.FontFaceCss);
+    }
+
+    [Fact]
+    public void CarriesOpaqueSourceIds_OnlyForMarkedElements()
+    {
+        var doc = new BonniePDF.Document();
+        // The innermost mark wins: an outer call returning the same element does not replace it.
+        TextBlock marked = DebugSource.Mark(DebugSource.Mark(new TextBlock { Text = "Marked", FontSize = 14 }, "src:test-title"), "src:outer-factory");
+        doc.Add(marked);
+        doc.Add(new TextBlock { Text = "Unmarked", FontSize = 11 });
+
+        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot!;
+
+        List<LayoutNode> nodes = Walk(snapshot.Root).Where(n => n.Type == "TextBlock").ToList();
+        Assert.Equal("src:test-title", nodes[0].SourceId);
+        Assert.Null(nodes[1].SourceId);
+    }
+
+    [Fact]
+    public void IgnoresAnEmptySourceId()
+    {
+        var doc = new BonniePDF.Document();
+        doc.Add(DebugSource.Mark(new TextBlock { Text = "Empty", FontSize = 14 }, ""));
+
+        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot!;
+
+        Assert.Null(Walk(snapshot.Root).Single(n => n.Type == "TextBlock").SourceId);
+    }
+
+    [Fact]
+    public void MapsTheDocumentRootAndItsAutoCreatedPage_ToTheDocumentDeclaration()
+    {
+        BonniePDF.Document doc = DebugSource.Mark(new BonniePDF.Document(), "src:document-declaration");
+        doc.Add(new TextBlock { Text = "First page", FontSize = 14 });
+        doc.AddPage().Add(new TextBlock { Text = "Second page", FontSize = 14 });
+
+        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot!;
+
+        Assert.Equal("src:document-declaration", snapshot.Root.SourceId);
+        Assert.Equal("src:document-declaration", snapshot.Root.Children[0].SourceId);
+        Assert.Null(snapshot.Root.Children[1].SourceId);
+    }
+
+    [Fact]
+    public void SourceIds_NeverReachThePdfOrTheSvg()
+    {
+        static (byte[] Pdf, string Svg) Render(bool marked)
+        {
+            var doc = new BonniePDF.Document();
+            TextBlock text = new() { Text = "Same either way", FontSize = 14 };
+            doc.Add(marked ? DebugSource.Mark(text, "src:only-in-the-snapshot") : text);
+            if (marked) DebugSource.Mark(doc, "src:document");
+            string svg = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Pages[0];
+            return (doc.GenerateBytes(), svg);
+        }
+
+        // The trailer's /ID is random per generation; nothing else may differ.
+        static string MaskId(byte[] pdf) => TrailerId().Replace(System.Text.Encoding.Latin1.GetString(pdf), "/ID []");
+
+        (byte[] pdfA, string svgA) = Render(false);
+        (byte[] pdfB, string svgB) = Render(true);
+
+        Assert.Equal(MaskId(pdfA), MaskId(pdfB));
+        Assert.Equal(svgA, svgB);
+        Assert.DoesNotContain("src:", svgB);
     }
 }

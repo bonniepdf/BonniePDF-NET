@@ -40,34 +40,34 @@ public class CanvasElement : ElementBase, IRoleProvider, IAltTextProvider
     /// fills the available content width; a positive value fixes the width and
     /// is clamped to the space available.
     /// </summary>
-    public float CanvasWidth { get; set; }
+    public float DrawWidth { get; set; }
 
     /// <summary>Fixed height for the canvas element in points.</summary>
-    public float CanvasHeight { get; set; } = 100f;
+    public float DrawHeight { get; set; } = 100f;
 
     /// <inheritdoc />
-    protected override float GetPreferredContentWidth() => CanvasWidth;
+    protected override float GetPreferredContentWidth() => DrawWidth;
 
     /// <inheritdoc />
-    protected override float MeasureContentHeight(float contentWidth) => CanvasHeight;
+    protected override float MeasureContentHeight(float contentWidth) => DrawHeight;
 
     /// <inheritdoc />
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
         ICanvas canvas = ctx.GetCanvas(ctx.CurrentX, ctx.CurrentY);
 
-        // CanvasWidth 0 means "fill what is available"; a positive value fixes
+        // DrawWidth 0 means "fill what is available"; a positive value fixes
         // the width but never overflows the column.
-        float drawWidth = CanvasWidth > 0 ? Math.Min(CanvasWidth, contentWidth) : contentWidth;
+        float drawWidth = DrawWidth > 0 ? Math.Min(DrawWidth, contentWidth) : contentWidth;
 
         canvas.SaveState();
         canvas.BeginPath();
-        canvas.AddRect(0, 0, drawWidth, CanvasHeight);
+        canvas.AddRect(0, 0, drawWidth, DrawHeight);
         canvas.ClipToCurrentPath();
 
         try
         {
-            _drawHandler(canvas, drawWidth, CanvasHeight);
+            _drawHandler(canvas, drawWidth, DrawHeight);
         }
         finally
         {
@@ -75,6 +75,6 @@ public class CanvasElement : ElementBase, IRoleProvider, IAltTextProvider
         }
 
         ctx.FlushExternalCanvas(canvas);
-        ctx.CurrentY += CanvasHeight;
+        ctx.CurrentY += DrawHeight;
     }
 }

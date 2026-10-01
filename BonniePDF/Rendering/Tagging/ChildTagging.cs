@@ -10,7 +10,7 @@ namespace BonniePDF.Rendering.Tagging;
 /// <c>false</c> means the child declared no role and nothing was opened.
 /// </summary>
 [StructLayout(LayoutKind.Auto)]
-public readonly struct ChildTagToken
+internal readonly struct ChildTagToken
 {
     /// <summary>Whether an /Artifact region was opened.</summary>
     public bool IsArtifact { get; init; }
@@ -25,7 +25,7 @@ public readonly struct ChildTagToken
 /// page-level elements. Shared by every layout container that renders children
 /// itself (stacks, Container, …).
 /// </summary>
-public static class ChildTagging
+internal static class ChildTagging
 {
     /// <summary>
     /// Opens the marked-content / structure scope for a child element about to be

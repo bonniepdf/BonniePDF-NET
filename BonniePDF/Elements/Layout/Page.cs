@@ -50,7 +50,7 @@ public class Page
     /// renderer takes <see cref="DocumentSettings.Margin"/> instead, so settings
     /// assigned after the document was constructed still reach the first page.
     /// </summary>
-    internal bool HasExplicitMargin { get; }
+    internal bool HasExplicitMargin { get; set; }
 
     /// <summary>
     /// Gets the elements on this page

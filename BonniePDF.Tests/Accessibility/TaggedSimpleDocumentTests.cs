@@ -53,7 +53,7 @@ public class TaggedSimpleDocumentTests
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -62,7 +62,7 @@ public class TaggedSimpleDocumentTests
             Text = "This document opts into PDF/UA-1 tagging by setting Settings.Accessibility = AccessibilityMode.PdfUa1.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[700],
+            Color = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 8),
         });
 
@@ -71,7 +71,7 @@ public class TaggedSimpleDocumentTests
             Text = "Existing elements tag themselves automatically - no semantic verbs required.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[700],
+            Color = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -81,7 +81,7 @@ public class TaggedSimpleDocumentTests
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 8),
         });
 

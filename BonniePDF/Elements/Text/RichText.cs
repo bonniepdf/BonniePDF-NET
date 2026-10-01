@@ -34,6 +34,10 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     private TextAlignment _alignment = TextAlignment.Left;
     private bool _alignmentExplicit;
 
+    internal bool AlignmentIsExplicit => _alignmentExplicit;
+
+    internal IReadOnlyList<TextSpan> SpanList => _spans;
+
     /// <summary>
     /// Paragraph alignment. When not set explicitly, an enclosing <see cref="Layout.Container"/> whose
     /// <c>HorizontalAlignment</c> is Start/Center/End supplies an ambient default instead of the plain
@@ -91,6 +95,14 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Adds a text span with a style configured via callback.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// var rich = new RichText();
+    /// rich.Span("Payment due within ");
+    /// rich.Span("30 days", s =&gt; s.Bold());
+    /// rich.Span(" of the invoice date, or ", s =&gt; s.Underline());
+    /// </code>
+    /// </example>
     public RichText Span(string text, Action<TextStyle> configure)
     {
         TextStyle style = new();

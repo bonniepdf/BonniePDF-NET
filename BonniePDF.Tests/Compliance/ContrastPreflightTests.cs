@@ -99,7 +99,7 @@ public sealed class ContrastPreflightTests
     [Fact]
     public void PaintOf_CapturesTextColourAndSize()
     {
-        var tb = new TextBlock { Text = "Body", FontSize = 11, TextColor = new Color(0x33, 0x33, 0x33) };
+        var tb = new TextBlock { Text = "Body", FontSize = 11, Color = new Color(0x33, 0x33, 0x33) };
         NodePaint? paint = LayoutRecorder.PaintOf(tb, "TextBlock");
         Assert.NotNull(paint);
         Assert.Equal("#333333", paint!.Text);
@@ -147,8 +147,8 @@ public sealed class ContrastPreflightTests
     [Fact]
     public void PaintOf_MarksBold_FromWeight()
     {
-        var tb = new TextBlock { Text = "Body", FontSize = 11, TextColor = new Color(0x33, 0x33, 0x33) };
-        tb.Weight = FontWeight.Bold;
+        var tb = new TextBlock { Text = "Body", FontSize = 11, Color = new Color(0x33, 0x33, 0x33) };
+        tb.FontWeight = FontWeight.Bold;
         Assert.True(LayoutRecorder.PaintOf(tb, "TextBlock")!.Bold);
     }
 
@@ -159,15 +159,15 @@ public sealed class ContrastPreflightTests
     [Fact]
     public void PaintOf_MarksBold_FromBoldPostScriptFontName_IndependentOfWeight()
     {
-        var tb = new TextBlock { Text = "Body", FontSize = 11, TextColor = new Color(0x33, 0x33, 0x33), FontName = StandardFonts.HelveticaBold };
-        Assert.True(tb.Weight < FontWeight.Bold);
+        var tb = new TextBlock { Text = "Body", FontSize = 11, Color = new Color(0x33, 0x33, 0x33), FontName = StandardFonts.HelveticaBold };
+        Assert.True(tb.FontWeight < FontWeight.Bold);
         Assert.True(LayoutRecorder.PaintOf(tb, "TextBlock")!.Bold);
     }
 
     [Fact]
     public void PaintOf_DoesNotMarkBold_ForRegularWeightFontName()
     {
-        var tb = new TextBlock { Text = "Body", FontSize = 11, TextColor = new Color(0x33, 0x33, 0x33), FontName = StandardFonts.Helvetica };
+        var tb = new TextBlock { Text = "Body", FontSize = 11, Color = new Color(0x33, 0x33, 0x33), FontName = StandardFonts.Helvetica };
         Assert.Null(LayoutRecorder.PaintOf(tb, "TextBlock")!.Bold);
     }
 
@@ -197,7 +197,7 @@ public sealed class ContrastPreflightTests
     public void FlagsPaleGreyTextOnWhitePage()
     {
         BonniePDF.Document doc = BaselineDocument();
-        doc.Add(new TextBlock { Text = "Barely visible", FontSize = 11, TextColor = new Color(0xcc, 0xcc, 0xcc) });
+        doc.Add(new TextBlock { Text = "Barely visible", FontSize = 11, Color = new Color(0xcc, 0xcc, 0xcc) });
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
 
@@ -217,7 +217,7 @@ public sealed class ContrastPreflightTests
     public void ContrastIsAWarning_SoTheReportStillPasses()
     {
         BonniePDF.Document doc = BaselineDocument();
-        doc.Add(new TextBlock { Text = "Barely visible", FontSize = 11, TextColor = new Color(0xcc, 0xcc, 0xcc) });
+        doc.Add(new TextBlock { Text = "Barely visible", FontSize = 11, Color = new Color(0xcc, 0xcc, 0xcc) });
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
 
@@ -232,7 +232,7 @@ public sealed class ContrastPreflightTests
         // White text: fine on the dark container it actually sits on, and hopeless
         // against the white page it would be measured against if the ancestor walk
         // did not work.
-        var label = new TextBlock { Text = "On a dark card", FontSize = 11, TextColor = new Color(255, 255, 255) };
+        var label = new TextBlock { Text = "On a dark card", FontSize = 11, Color = new Color(255, 255, 255) };
         doc.Add(new Container { Child = label, BackgroundColor = new Color(0x11, 0x22, 0x33) });
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
@@ -247,7 +247,7 @@ public sealed class ContrastPreflightTests
         // A dark row fill set on the table, which the cell element itself never carries.
         var table = new Table { RowBackgroundColor = new Color(0x1f, 0x2a, 0x37) };
         table.AddRow(
-            new TextBlock { Text = "Light on dark", FontSize = 11, TextColor = new Color(255, 255, 255) },
+            new TextBlock { Text = "Light on dark", FontSize = 11, Color = new Color(255, 255, 255) },
             new TextBlock { Text = "Second", FontSize = 11 });
         doc.Add(table);
 
@@ -264,7 +264,7 @@ public sealed class ContrastPreflightTests
         doc.Add(new Hyperlink("https://example.com", "Terms and conditions")
         {
             FontSize = 11,
-            TextColor = new Color(0x99, 0x99, 0x99),
+            Color = new Color(0x99, 0x99, 0x99),
         });
 
         LayoutSnapshot snapshot = Capture(doc);
@@ -285,7 +285,7 @@ public sealed class ContrastPreflightTests
         doc.Add(new Hyperlink("https://example.com", "Terms and conditions")
         {
             FontSize = 11,
-            TextColor = new Color(0x99, 0x99, 0x99),
+            Color = new Color(0x99, 0x99, 0x99),
         });
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
@@ -309,7 +309,7 @@ public sealed class ContrastPreflightTests
         {
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = new Color(0xe1, 0x71, 0x00), // 3.20:1 on white - passes 3:1, fails 4.5:1
+            Color = new Color(0xe1, 0x71, 0x00), // 3.20:1 on white - passes 3:1, fails 4.5:1
         });
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
@@ -338,7 +338,7 @@ public sealed class ContrastPreflightTests
     public void ReportsUnknown_ForTranslucentText_RatherThanCompositing()
     {
         BonniePDF.Document doc = BaselineDocument();
-        doc.Add(new TextBlock { Text = "Half there", FontSize = 11, TextColor = new Color(0x33, 0x33, 0x33, 100) });
+        doc.Add(new TextBlock { Text = "Half there", FontSize = 11, Color = new Color(0x33, 0x33, 0x33, 100) });
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
 
@@ -367,10 +367,10 @@ public sealed class ContrastPreflightTests
         var grey = new Color(0x94, 0x94, 0x94); // ~3.1:1 on white
 
         BonniePDF.Document small = BaselineDocument();
-        small.Add(new TextBlock { Text = "Small grey", FontSize = 11, TextColor = grey });
+        small.Add(new TextBlock { Text = "Small grey", FontSize = 11, Color = grey });
 
         BonniePDF.Document large = BaselineDocument();
-        large.Add(new TextBlock { Text = "Large grey", FontSize = 24, TextColor = grey });
+        large.Add(new TextBlock { Text = "Large grey", FontSize = 24, Color = grey });
 
         ComplianceReport smallReport = CompliancePreflight.Evaluate(Capture(small));
         ComplianceReport largeReport = CompliancePreflight.Evaluate(Capture(large));
@@ -416,7 +416,7 @@ public sealed class ContrastPreflightTests
     private static LayoutSnapshot SuppressionFixture()
     {
         BonniePDF.Document doc = BaselineDocument();
-        var caption = new TextBlock { Text = "Muted caption", FontSize = 11, TextColor = new Color(0x99, 0x99, 0x99) };
+        var caption = new TextBlock { Text = "Muted caption", FontSize = 11, Color = new Color(0x99, 0x99, 0x99) };
         doc.Add(new Container { Child = caption, BackgroundColor = new Color(0xf1, 0xf5, 0xf9) });
         return Capture(doc);
     }
@@ -475,7 +475,7 @@ public sealed class ContrastPreflightTests
         static BonniePDF.Document Build()
         {
             BonniePDF.Document doc = BaselineDocument();
-            var label = new TextBlock { Text = "On a card", FontSize = 11, TextColor = new Color(0x33, 0x33, 0x33) };
+            var label = new TextBlock { Text = "On a card", FontSize = 11, Color = new Color(0x33, 0x33, 0x33) };
             doc.Add(new Container { Child = label, BackgroundColor = new Color(0xee, 0xee, 0xee) });
             return doc;
         }

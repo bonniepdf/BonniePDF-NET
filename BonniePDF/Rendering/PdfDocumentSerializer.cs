@@ -20,7 +20,7 @@ namespace BonniePDF.Rendering;
 /// Orchestrates the process of rendering a Document and writing it to a PDF file.
 /// Separates the low-level serialization logic from the high-level Document API.
 /// </summary>
-public class PdfDocumentSerializer
+internal class PdfDocumentSerializer
 {
     private readonly Document _document;
     private readonly DiagnosticsCollector _diagnostics;
@@ -41,7 +41,7 @@ public class PdfDocumentSerializer
     /// </summary>
     public void Serialize(IPdfWriter writer)
     {
-        using IDisposable fontScope = FontMetrics.BeginDocumentScope(UsesEmbeddedStandardFonts());
+        using IDisposable fontScope = FontMetrics.BeginDocumentScope(UsesEmbeddedStandardFonts(), _document.Fonts);
 
         // 0. Set up encryption if configured
         int encryptId = 0;
@@ -330,7 +330,7 @@ public class PdfDocumentSerializer
     /// </summary>
     public async Task SerializeAsync(IAsyncPdfWriter writer, CancellationToken cancellationToken)
     {
-        using IDisposable fontScope = FontMetrics.BeginDocumentScope(UsesEmbeddedStandardFonts());
+        using IDisposable fontScope = FontMetrics.BeginDocumentScope(UsesEmbeddedStandardFonts(), _document.Fonts);
 
         // 0. Set up encryption if configured
         int encryptId = 0;

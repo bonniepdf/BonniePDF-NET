@@ -8,13 +8,13 @@ namespace BonniePDF.Rendering.Pdf;
 
 /// <summary>One gradient stop, pre-resolved to straight RGBA components in [0, 1].</summary>
 [StructLayout(LayoutKind.Auto)]
-public readonly record struct ShadingStop(float Offset, float R, float G, float B, float A);
+internal readonly record struct ShadingStop(float Offset, float R, float G, float B, float A);
 
 /// <summary>
 /// A request to emit a native PDF gradient shading — axial (<c>/ShadingType 2</c>,
 /// linear) or radial (<c>/ShadingType 3</c>).
 /// </summary>
-public sealed class ShadingRequest
+internal sealed class ShadingRequest
 {
     /// <summary><c>2</c> = axial (linear), <c>3</c> = radial.</summary>
     public int ShadingType { get; init; }
@@ -52,7 +52,7 @@ public sealed class ShadingRequest
 /// carries the RGB, the alpha shading carries the opacity as a gray level
 /// (white = opaque, black = transparent).
 /// </summary>
-public static class GradientShading
+internal static class GradientShading
 {
     /// <summary>Inline shading dictionary carrying the gradient's RGB colour.</summary>
     public static string BuildColorShadingDict(ShadingRequest req)

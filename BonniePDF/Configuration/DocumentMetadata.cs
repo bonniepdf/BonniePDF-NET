@@ -66,12 +66,30 @@ public class DocumentMetadata
     /// <summary>
     /// The date and time the document was created, including timezone offset
     /// </summary>
-    public DateTimeOffset? CreationDate { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? CreationDate
+    {
+        get => _creationDate;
+        set { _creationDate = value; CreationDateIsBuiltIn = false; }
+    }
+
+    private DateTimeOffset? _creationDate = DateTimeOffset.UtcNow;
+
+    /// <summary>True while the date is the one the metadata gave itself; a tool copying the document must not turn "now" into a chosen date.</summary>
+    internal bool CreationDateIsBuiltIn { get; private set; } = true;
 
     /// <summary>
     /// The date and time the document was last modified, including timezone offset
     /// </summary>
-    public DateTimeOffset? ModifiedDate { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? ModifiedDate
+    {
+        get => _modifiedDate;
+        set { _modifiedDate = value; ModifiedDateIsBuiltIn = false; }
+    }
+
+    private DateTimeOffset? _modifiedDate = DateTimeOffset.UtcNow;
+
+    /// <summary>True while the date is the one the metadata gave itself.</summary>
+    internal bool ModifiedDateIsBuiltIn { get; private set; } = true;
 
     /// <summary>
     /// Indicates whether document-level trapping has been applied for professional printing.

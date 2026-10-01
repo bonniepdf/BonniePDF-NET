@@ -34,7 +34,7 @@ namespace BonniePDF.Licensing;
 ///   </description></item>
 /// </list>
 /// </remarks>
-public static class LicenseChecker
+internal static class LicenseChecker
 {
     /// <summary>Whether the one-time notice has already been decided for this process.</summary>
     private static int _checked;

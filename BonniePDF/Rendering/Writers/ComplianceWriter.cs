@@ -11,7 +11,7 @@ namespace BonniePDF.Rendering.Writers;
 /// <summary>
 /// Writes PDF/A compliance objects (ICC Profiles, Output Intents) to PDF.
 /// </summary>
-public class ComplianceWriter
+internal class ComplianceWriter
 {
     private readonly IPdfWriter? _writer;
     private readonly IAsyncPdfWriter? _asyncWriter;

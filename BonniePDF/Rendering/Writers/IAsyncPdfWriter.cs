@@ -11,7 +11,7 @@ namespace BonniePDF.Rendering.Writers;
 /// <summary>
 /// Interface for async PDF writers
 /// </summary>
-public interface IAsyncPdfWriter : IAsyncDisposable
+internal interface IAsyncPdfWriter : IAsyncDisposable
 {
     /// <summary>
     /// Gets or sets the encryptor for this writer. When set, streams are encrypted.

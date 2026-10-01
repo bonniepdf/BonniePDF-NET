@@ -10,7 +10,7 @@ namespace BonniePDF.Rendering.Writers;
 /// <summary>
 /// Writes PDF navigation objects (Outlines/Bookmarks) to PDF.
 /// </summary>
-public class NavigationWriter
+internal class NavigationWriter
 {
     // Exactly one is non-null, depending on which constructor was used - see
     // StructureTreeWriter for the same pattern.

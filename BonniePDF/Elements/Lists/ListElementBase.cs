@@ -197,7 +197,7 @@ public abstract class ListElementBase : TextElementBase
                 {
                     // Non-tagged: original behaviour - marker drawn on every wrapped line
                     renderMarker(markerX, localY);
-                    ctx.Canvas.DrawText(textX, localY, line, TextColor, FontSize, FontName, TextAlignment.Left);
+                    ctx.Canvas.DrawText(textX, localY, line, Color, FontSize, FontName, TextAlignment.Left);
                 }
                 else
                 {
@@ -217,7 +217,7 @@ public abstract class ListElementBase : TextElementBase
 
                     // Each wrapped line gets its own MCID, all recorded under LBody
                     ctx.Canvas.BeginMarkedContent("LBody");
-                    ctx.Canvas.DrawText(textX, localY, line, TextColor, FontSize, FontName, TextAlignment.Left);
+                    ctx.Canvas.DrawText(textX, localY, line, Color, FontSize, FontName, TextAlignment.Left);
                     ctx.Canvas.EndMarkedContent();
                 }
 

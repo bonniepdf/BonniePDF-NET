@@ -21,7 +21,7 @@ public class TableRow : IBackgroundColor, IRoleProvider
     /// <summary>
     /// TextBlock color for this row (applied to cells without their own text color)
     /// </summary>
-    public Color? TextColor { get; set; }
+    public Color? Color { get; set; }
 
     /// <summary>
     /// Custom padding for this row (applied to cells without their own padding)
@@ -99,9 +99,9 @@ public class TableRow : IBackgroundColor, IRoleProvider
     /// <summary>
     /// Sets the text color for this row
     /// </summary>
-    public TableRow WithTextColor(Color color)
+    public TableRow WithColor(Color color)
     {
-        TextColor = color;
+        Color = color;
         return this;
     }
 

@@ -13,7 +13,7 @@ namespace BonniePDF.Rendering.Tagging;
 /// <see cref="Lang"/>, <see cref="Title"/>) is written into the PDF
 /// structure dictionary when set.
 /// </summary>
-public sealed class StructureElement
+internal sealed class StructureElement
 {
     /// <summary>
     /// Creates a new structure element with the given role. Parent is

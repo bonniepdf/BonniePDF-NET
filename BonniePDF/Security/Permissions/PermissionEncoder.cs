@@ -4,7 +4,7 @@ namespace BonniePDF.Security.Permissions;
 /// Encodes PDF permissions into the integer format required by the /P entry
 /// in the encryption dictionary, following PDF Reference 1.4 specifications.
 /// </summary>
-public static class PermissionEncoder
+internal static class PermissionEncoder
 {
     /// <summary>
     /// Reserved bits that must always be set to 1 in the permissions value.

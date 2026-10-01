@@ -27,6 +27,8 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     private TextAlignment _alignment = TextAlignment.Left;
     private bool _alignmentExplicit;
 
+    internal bool AlignmentIsExplicit => _alignmentExplicit;
+
     /// <summary>
     /// Paragraph alignment. When not set explicitly, an enclosing <see cref="Layout.Container"/> whose
     /// <c>HorizontalAlignment</c> is Start/Center/End supplies an ambient default instead of the plain
@@ -289,7 +291,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         {
             DrawLineWithTokens(ctx, line, contentWidth, y, baseX);
             // Decorations for token lines use the measured width
-            if (TextDecoration != TextDecoration.None)
+            if (Decoration != TextDecoration.None)
             {
                 float lineWidth = MeasureTextWidth(line);
                 float decoX = baseX;
@@ -314,9 +316,9 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 
         if (useJustify)
         {
-            ctx.Canvas.DrawTextJustified(baseX, y, line, TextColor, FontSize, FontName, contentWidth);
+            ctx.Canvas.DrawTextJustified(baseX, y, line, Color, FontSize, FontName, contentWidth);
 
-            if (TextDecoration != TextDecoration.None)
+            if (Decoration != TextDecoration.None)
                 DrawDecorations(ctx, baseX, y, contentWidth);
         }
         else
@@ -330,9 +332,9 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
             else if (effectiveAlign == TextAlignment.Right)
                 x += contentWidth;
 
-            ctx.Canvas.DrawText(x, y, line, TextColor, FontSize, FontName, effectiveAlign);
+            ctx.Canvas.DrawText(x, y, line, Color, FontSize, FontName, effectiveAlign);
 
-            if (TextDecoration != TextDecoration.None)
+            if (Decoration != TextDecoration.None)
             {
                 float lineWidth = MeasureTextWidth(line);
                 float decoX = baseX;
@@ -362,21 +364,21 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         // Line thickness scales with font size (typical: 1/18th of font size, min 0.5pt)
         // unless an explicit DecorationThickness is set.
         float thickness = DecorationThickness ?? Math.Max(0.5f, FontSize / 18f);
-        Color color = DecorationColor ?? TextColor;
+        Color color = DecorationColor ?? Color;
 
-        if (TextDecoration.HasFlag(TextDecoration.Overline))
+        if (Decoration.HasFlag(TextDecoration.Overline))
         {
             // Overline: drawn above the text, just over the cap height.
             DecorationPainter.Paint(ctx.Canvas, x, y + FontSize * 0.15f, width, color, thickness, DecorationStyle);
         }
 
-        if (TextDecoration.HasFlag(TextDecoration.Underline))
+        if (Decoration.HasFlag(TextDecoration.Underline))
         {
             // Underline: drawn below the baseline (~fontSize/7 below).
             DecorationPainter.Paint(ctx.Canvas, x, y + FontSize + FontSize / 7f, width, color, thickness, DecorationStyle);
         }
 
-        if (TextDecoration.HasFlag(TextDecoration.Strikethrough))
+        if (Decoration.HasFlag(TextDecoration.Strikethrough))
         {
             // Strikethrough: drawn at approximately half the cap height.
             DecorationPainter.Paint(ctx.Canvas, x, y + FontSize * 0.55f, width, color, thickness, DecorationStyle);
@@ -409,7 +411,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
                 // Draw normal text
                 // Since 'part' has no tokens, MeasureTextWidth(part) gives actual width
                 // We draw Left-aligned at currentX
-                ctx.Canvas.DrawText(currentX, y, part, TextColor, FontSize, FontName, TextAlignment.Left);
+                ctx.Canvas.DrawText(currentX, y, part, Color, FontSize, FontName, TextAlignment.Left);
                 currentX += MeasureTextWidth(part);
             }
 
@@ -422,13 +424,13 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
                 if (ctx.IsSvgMode)
                 {
                     if (ctx.Canvas is SvgCanvas svgCanvas)
-                        svgCanvas.DrawDeferredTotalPages(currentX, y, TextColor, FontSize, FontName);
+                        svgCanvas.DrawDeferredTotalPages(currentX, y, Color, FontSize, FontName);
                     else
-                        ctx.Canvas.DrawText(currentX, y, "00", TextColor, FontSize, FontName, TextAlignment.Left);
+                        ctx.Canvas.DrawText(currentX, y, "00", Color, FontSize, FontName, TextAlignment.Left);
                 }
                 else
                 {
-                    string resourceName = ctx.RegisterDeferredXObject(FontName, FontSize, TextColor);
+                    string resourceName = ctx.RegisterDeferredXObject(FontName, FontSize, Color);
                     // DrawFormXObject draws at x, y (top-left of form)
                     // Our text rendering uses y as top of line (approx baseline logic inside DrawText)
                     // The XObject content uses "0 -FontSize Td", so drawing at y works.

@@ -50,7 +50,7 @@ public static class TextBlockExtensions
     /// </summary>
     public static TextBlock Underline(this TextBlock b)
     {
-        b.TextDecoration |= TextDecoration.Underline;
+        b.Decoration |= TextDecoration.Underline;
         return b;
     }
 
@@ -59,7 +59,7 @@ public static class TextBlockExtensions
     /// </summary>
     public static TextBlock Strikethrough(this TextBlock b)
     {
-        b.TextDecoration |= TextDecoration.Strikethrough;
+        b.Decoration |= TextDecoration.Strikethrough;
         return b;
     }
 
@@ -90,7 +90,7 @@ public static class TextBlockExtensions
     /// </summary>
     public static TextBlock FontWeight(this TextBlock b, FontWeight weight)
     {
-        b.Weight = weight;
+        b.FontWeight = weight;
         return b;
     }
 
@@ -100,7 +100,7 @@ public static class TextBlockExtensions
     /// </summary>
     public static TextBlock Bold(this TextBlock b)
     {
-        b.Weight = Typography.FontWeight.Bold;
+        b.FontWeight = Typography.FontWeight.Bold;
         return b;
     }
 
@@ -110,7 +110,7 @@ public static class TextBlockExtensions
     /// </summary>
     public static TextBlock Light(this TextBlock b)
     {
-        b.Weight = Typography.FontWeight.Light;
+        b.FontWeight = Typography.FontWeight.Light;
         return b;
     }
 
@@ -120,16 +120,16 @@ public static class TextBlockExtensions
     /// </summary>
     public static TextBlock Italic(this TextBlock b)
     {
-        b.IsItalic = true;
+        b.Italic = true;
         return b;
     }
 
     /// <summary>
     /// Sets the text color for the text block
     /// </summary>
-    public static TextBlock TextColor(this TextBlock b, Color color)
+    public static TextBlock Color(this TextBlock b, Color color)
     {
-        b.TextColor = color;
+        b.Color = color;
         return b;
     }
 }

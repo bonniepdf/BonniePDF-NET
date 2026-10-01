@@ -23,7 +23,7 @@ namespace BonniePDF.Rendering.Writers;
 /// synchronously, which can cause thread pool starvation.
 /// Use SimplePdfWriter for synchronous operations, AsyncPdfWriter for async operations.
 /// </summary>
-public class AsyncPdfWriter : IAsyncPdfWriter
+internal class AsyncPdfWriter : IAsyncPdfWriter
 {
     private static readonly Encoding Iso88591 = Encoding.GetEncoding("ISO-8859-1");
     private readonly FileStream? _fs;

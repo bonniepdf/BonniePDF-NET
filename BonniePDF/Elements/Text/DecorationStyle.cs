@@ -29,7 +29,7 @@ public enum DecorationStyle
 /// the TypeScript <c>paintDecorationLine</c> so both implementations produce the
 /// same segments.
 /// </summary>
-public static class DecorationPainter
+internal static class DecorationPainter
 {
     /// <summary>
     /// Paints a horizontal decoration line from <paramref name="x"/> to
