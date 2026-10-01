@@ -16,13 +16,13 @@ public class ChartDataPoint
     public decimal Value { get; set; }
 
     /// <summary>
-    /// Standard .NET format string to use for FormattedValue (e.g., "C0", "P1", "N2").
-    /// Defaults to "G" (General).
+    /// Number format for <see cref="FormattedValue"/>: <c>G</c> (default), <c>F&lt;n&gt;</c>, <c>N&lt;n&gt;</c> or <c>P&lt;n&gt;</c>.
+    /// Culture-invariant; see <see cref="ChartNumberFormat"/>. Anything else throws when the chart is drawn.
     /// </summary>
     public string LabelFormat { get; set; } = "G";
 
     /// <summary>
     /// Gets the formatted value string based on Value and LabelFormat.
     /// </summary>
-    public string FormattedValue => Value.ToString(LabelFormat, System.Globalization.CultureInfo.InvariantCulture);
+    public string FormattedValue => ChartNumberFormat.Format(Value, LabelFormat);
 }
