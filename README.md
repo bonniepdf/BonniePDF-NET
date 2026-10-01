@@ -120,7 +120,7 @@ document.Add(new Heading("Quarterly report")
     Level = 1,
     FontName = StandardFonts.HelveticaBold,
     FontSize = 24,
-    TextColor = ColorPalette.Slate[800]
+    Color = ColorPalette.Slate[800]
 });
 
 document.Add(new TextBlock
