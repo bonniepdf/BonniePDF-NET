@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -22,7 +23,7 @@ namespace BonniePDF.Rendering;
 /// non-embedded (standard Type1) fonts, in which case the text is emitted as a
 /// literal string rather than glyph IDs.
 /// </summary>
-public sealed class ResolvedTextRun
+internal sealed class ResolvedTextRun
 {
     /// <summary>PDF resource name (e.g. <c>/F1</c>) of the font for this run.</summary>
     public required string ResourceName { get; init; }
@@ -41,7 +42,7 @@ public sealed class ResolvedTextRun
 /// Manages PDF resources (fonts, images, XObjects) for a document.
 /// Tracks used resources during rendering and handles their serialization.
 /// </summary>
-public class PdfResourceRegistry
+internal class PdfResourceRegistry
 {
     private static readonly Random _random = new();
 
@@ -155,7 +156,14 @@ public class PdfResourceRegistry
     public string RegisterFont(string fontIdentifier)
     {
         // (A) Direct TTF/OTF file path
-        if (IsEmbeddedFont(fontIdentifier)) return RegisterEmbeddedFont(fontIdentifier);
+        if (IsEmbeddedFont(fontIdentifier))
+        {
+            // A face the document carries itself is in memory already (spec 16).
+            byte[]? documentFontBytes = FontMetrics.GetDocumentFontBytes(fontIdentifier);
+            return documentFontBytes is not null
+                ? RegisterEmbeddedFontFromBytes(documentFontBytes, fontIdentifier)
+                : RegisterEmbeddedFont(fontIdentifier);
+        }
 
         // (B) Already registered as a virtual (bytes-based) font
         string virtualKey = $"virtual:{fontIdentifier}";
@@ -236,11 +244,23 @@ public class PdfResourceRegistry
     /// </summary>
     public bool HasNonEmbeddedStandardFont() => GetNonEmbeddedStandardFonts().Count > 0;
 
+    /// <summary>
+    /// The fonts in the order they were first used, which is the order of their <c>/F&lt;n&gt;</c> resource names.
+    /// <see cref="FontNameMap"/> is a concurrent dictionary, and its enumeration order follows the hashes of its keys:
+    /// different in every process, and for a document font different in every document (its name carries the
+    /// document's serial). Writing in that order made the same document produce differently ordered font objects.
+    /// </summary>
+    private IEnumerable<KeyValuePair<string, string>> FontsInRegistrationOrder() =>
+        FontNameMap
+            .OrderBy(entry => int.TryParse(entry.Value.AsSpan(2), NumberStyles.None, CultureInfo.InvariantCulture, out int number) ? number : int.MaxValue)
+            .ThenBy(entry => entry.Key, StringComparer.Ordinal)
+            .ToList();
+
     /// <summary>The standard-14 font references that will be written without embedding.</summary>
     public IReadOnlyList<string> GetNonEmbeddedStandardFonts()
     {
         var result = new List<string>();
-        foreach (string fontIdentifier in FontNameMap.Keys)
+        foreach (string fontIdentifier in FontsInRegistrationOrder().Select(e => e.Key))
         {
             if (FontAliasMap.ContainsKey(fontIdentifier)) continue;
             if (IsEmbeddedFont(fontIdentifier)) continue;
@@ -434,7 +454,9 @@ public class PdfResourceRegistry
         // candidates (index 0 is the primary and has no FallbackFont entry).
         var candidates = new List<ShaperFont> { new() { FontIdentifier = primaryFontIdentifier, Font = primaryFont } };
         var fallbackByIndex = new List<FallbackFont?> { null };
-        foreach (FallbackFont fb in FontManager.GetFallbackFonts())
+        // The document's own faces come first, then the global registrations (spec 16 §4).
+        IEnumerable<FallbackFont> documentFallbacks = FontMetrics.ActiveDocumentFonts?.FallbackFonts() ?? [];
+        foreach (FallbackFont fb in documentFallbacks.Concat(FontManager.GetFallbackFonts()))
         {
             if (fb.Font == primaryFont) continue;
             candidates.Add(new ShaperFont { FontIdentifier = $"{FallbackPrefix}{fb.Key}", Font = fb.Font });
@@ -725,7 +747,7 @@ public class PdfResourceRegistry
         ImageWriter imageWriter = new(writer) { Conformance = Conformance };
 
         // 1. Write Fonts
-        foreach (KeyValuePair<string, string> fontEntry in FontNameMap)
+        foreach (KeyValuePair<string, string> fontEntry in FontsInRegistrationOrder())
         {
             string fontIdentifier = fontEntry.Key;
 
@@ -810,7 +832,7 @@ public class PdfResourceRegistry
 
         // 4. Build Resource String
         List<string> fontRefs = new();
-        foreach (KeyValuePair<string, string> fontEntry in FontNameMap)
+        foreach (KeyValuePair<string, string> fontEntry in FontsInRegistrationOrder())
         {
             string fontIdentifier = fontEntry.Key;
             string resourceName = fontEntry.Value;
@@ -917,7 +939,7 @@ public class PdfResourceRegistry
         ImageWriter imageWriter = new(writer) { Conformance = Conformance };
 
         // 1. Write Fonts
-        foreach (KeyValuePair<string, string> fontEntry in FontNameMap)
+        foreach (KeyValuePair<string, string> fontEntry in FontsInRegistrationOrder())
         {
             string fontIdentifier = fontEntry.Key;
 
@@ -1002,7 +1024,7 @@ public class PdfResourceRegistry
 
         // 4. Build Resource String
         List<string> fontRefs = new();
-        foreach (KeyValuePair<string, string> fontEntry in FontNameMap)
+        foreach (KeyValuePair<string, string> fontEntry in FontsInRegistrationOrder())
         {
             string fontIdentifier = fontEntry.Key;
             string resourceName = fontEntry.Value;
@@ -1157,4 +1179,4 @@ public class PdfResourceRegistry
 /// <param name="ShadingName">The <c>/Shading</c> resource name (e.g. <c>/Sh1</c>) for the <c>sh</c> operator.</param>
 /// <param name="SoftMaskGs">The luminosity soft-mask <c>/ExtGState</c> name (e.g. <c>/GSsm1</c>), or <c>null</c> for an opaque gradient.</param>
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
-public readonly record struct ShadingResources(string ShadingName, string? SoftMaskGs);
+internal readonly record struct ShadingResources(string ShadingName, string? SoftMaskGs);

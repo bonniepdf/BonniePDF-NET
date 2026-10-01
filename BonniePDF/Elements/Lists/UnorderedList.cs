@@ -14,6 +14,8 @@ public class UnorderedList : ListElementBase
     private readonly List<UnorderedList> _nestedLists = [];
     private Color? _bulletColor;
 
+    internal bool BulletColorIsExplicit => _bulletColor is not null;
+
     /// <summary>
     /// Bullet style for the list (Disc, Circle, Square, Dash, Custom)
     /// </summary>
@@ -29,7 +31,7 @@ public class UnorderedList : ListElementBase
     /// </summary>
     public Color BulletColor
     {
-        get => _bulletColor ?? TextColor;
+        get => _bulletColor ?? Color;
         set => _bulletColor = value;
     }
 
@@ -43,6 +45,13 @@ public class UnorderedList : ListElementBase
     /// <summary>
     /// Adds a text item to this list
     /// </summary>
+    /// <example>
+    /// <code>
+    /// var list = new UnorderedList();
+    /// list.AddItem("First point");
+    /// list.AddItem("Second point");
+    /// </code>
+    /// </example>
     public void AddItem(string item)
     {
         _items.Add(item ?? string.Empty);

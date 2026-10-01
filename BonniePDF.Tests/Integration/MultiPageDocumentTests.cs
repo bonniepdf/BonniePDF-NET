@@ -33,7 +33,7 @@ public class MultiPageDocumentTests : IntegrationTestBase
                 FontSize = 24,
                 FontName = StandardFonts.HelveticaBold,
                 Alignment = TextAlignment.Center,
-                TextColor = ColorPalette.Blue[900]
+                Color = ColorPalette.Blue[900]
             });
 
             doc.Add(new TextBlock
@@ -262,14 +262,14 @@ public class MultiPageDocumentTests : IntegrationTestBase
                 Text = "Enterprise Report - Confidential",
                 FontSize = 10,
                 Alignment = TextAlignment.Center,
-                TextColor = ColorPalette.Slate[500]
+                Color = ColorPalette.Slate[500]
             },
             FooterTemplate = pageNumber => new TextBlock
             {
                 Text = $"Page {pageNumber}",
                 FontSize = 10,
                 Alignment = TextAlignment.Center,
-                TextColor = ColorPalette.Slate[500]
+                Color = ColorPalette.Slate[500]
             }
         }))
         {

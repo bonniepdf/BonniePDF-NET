@@ -23,7 +23,7 @@ public enum BaselineAlignment
 /// vertical offset. Mirrors the TypeScript <c>BaselineAlignment</c> module so both
 /// implementations shift super/subscript spans identically.
 /// </summary>
-public static class BaselineShiftResolver
+internal static class BaselineShiftResolver
 {
     /// <summary>
     /// Fraction of the font size a superscript is raised by when no explicit

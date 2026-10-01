@@ -6,7 +6,7 @@ namespace BonniePDF.Rendering.Writers;
 /// Options for writing the PDF catalog dictionary.
 /// Groups optional object IDs that may be referenced from the catalog.
 /// </summary>
-public class CatalogOptions
+internal class CatalogOptions
 {
     /// <summary>
     /// The viewer preferences object ID (0 if none).

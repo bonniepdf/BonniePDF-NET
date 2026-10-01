@@ -49,26 +49,34 @@ public abstract class TextElementBase : ElementBase
         if (defaultStyle != null) ApplyDefaultStyle(defaultStyle);
     }
 
+    // What a definition writer needs to know: which values were set, rather than defaulted or supplied by
+    // DefaultTextStyle, because a default written as if it had been chosen would stop the cascade.
+    internal bool FontIsExplicit => _fontExplicit;
+    internal bool FontIsChosenByFamily => _fontFamily != null;
+    internal bool FontSizeIsExplicit => _fontSizeExplicit;
+    internal bool TextColorIsExplicit => _textColorExplicit;
+    internal bool LineHeightIsExplicit => _lineHeightExplicit;
+
     private void ApplyDefaultStyle(TextStyle style)
     {
         if (style.FontFamily != null)
             FontFamily = style.FontFamily;
-        if (style.Weight != FontWeight.Normal)
-            Weight = style.Weight;
+        if (style.FontWeight != FontWeight.Normal)
+            FontWeight = style.FontWeight;
         if (style.Italic)
-            IsItalic = true;
+            Italic = true;
         if (style.FontSize.HasValue)
             FontSize = style.FontSize.Value;
         if (style.Color.HasValue)
-            TextColor = style.Color.Value;
+            Color = style.Color.Value;
         if (style.Decoration != TextDecoration.None)
-            TextDecoration = style.Decoration;
+            Decoration = style.Decoration;
     }
 
     /// <summary>
     /// Font family name (e.g. "Helvetica", "Times", "Arial") for weight/italic resolution.
     /// When set, FontName is automatically resolved via FontFamilyResolver using
-    /// the current Weight and IsItalic values.
+    /// the current FontWeight and Italic values.
     /// </summary>
     public string? FontFamily
     {
@@ -85,7 +93,7 @@ public abstract class TextElementBase : ElementBase
     /// When FontFamily is set, triggers automatic resolution.
     /// When FontFamily is not set, uses the current FontName as the base family for resolution.
     /// </summary>
-    public FontWeight Weight
+    public FontWeight FontWeight
     {
         get => _weight;
         set
@@ -101,7 +109,7 @@ public abstract class TextElementBase : ElementBase
     /// When FontFamily is set, triggers automatic resolution.
     /// When FontFamily is not set, uses the current FontName as the base family for resolution.
     /// </summary>
-    public bool IsItalic
+    public bool Italic
     {
         get => _isItalic;
         set
@@ -115,12 +123,19 @@ public abstract class TextElementBase : ElementBase
     /// <summary>
     /// The resolved PDF font name used for rendering.
     /// Can be set directly (e.g. "Helvetica-Bold") for backward compatibility,
-    /// or resolved automatically from FontFamily + Weight + IsItalic.
+    /// or resolved automatically from FontFamily + FontWeight + Italic.
     /// Setting this directly clears FontFamily.
     /// </summary>
     public string FontName
     {
-        get => _fontName;
+        get
+        {
+            // While a document with its own fonts is being generated, a family is resolved against
+            // them (spec 16 §4). Otherwise the name resolved when the family was set stands.
+            if (_fontFamily != null && FontMetrics.ActiveDocumentFonts != null)
+                return FontFamilyResolver.Resolve(_fontFamily, _weight, _isItalic);
+            return _fontName;
+        }
         set
         {
             _fontName = value;
@@ -141,7 +156,7 @@ public abstract class TextElementBase : ElementBase
     /// <summary>
     /// TextBlock color for rendering
     /// </summary>
-    public Color TextColor
+    public Color Color
     {
         get => _textColor;
         set { _textColor = value; _textColorExplicit = true; }
@@ -150,10 +165,10 @@ public abstract class TextElementBase : ElementBase
     /// <summary>
     /// Text decoration (underline, strikethrough, overline, or a combination)
     /// </summary>
-    public TextDecoration TextDecoration { get; set; } = TextDecoration.None;
+    public TextDecoration Decoration { get; set; } = TextDecoration.None;
 
     /// <summary>
-    /// Colour of the decoration lines. Null = use <see cref="TextColor"/>, the default.
+    /// Colour of the decoration lines. Null = use <see cref="Color"/>, the default.
     /// </summary>
     public Color? DecorationColor { get; set; }
 
@@ -176,7 +191,7 @@ public abstract class TextElementBase : ElementBase
     public float WordSpacing { get; set; }
 
     /// <summary>
-    /// Resolves FontName from FontFamily + Weight + IsItalic via FontFamilyResolver.
+    /// Resolves FontName from FontFamily + FontWeight + Italic via FontFamilyResolver.
     /// Falls back to the current FontName as the base family when FontFamily is not set,
     /// enabling .Bold() and .Italic() to work without an explicit .Font() call.
     /// </summary>
@@ -217,7 +232,7 @@ public abstract class TextElementBase : ElementBase
             if (style.FontFamily != null)
             {
                 _fontFamily = style.FontFamily;
-                if (style.Weight != FontWeight.Normal) _weight = style.Weight;
+                if (style.FontWeight != FontWeight.Normal) _weight = style.FontWeight;
                 if (style.Italic) _isItalic = true;
                 ResolveFontName();
             }

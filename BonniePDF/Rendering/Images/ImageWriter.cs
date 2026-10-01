@@ -14,7 +14,7 @@ namespace BonniePDF.Rendering.Images;
 /// Writes image XObjects to PDF
 /// Supports both synchronous (IPdfWriter) and asynchronous (IAsyncPdfWriter) operations.
 /// </summary>
-public class ImageWriter
+internal class ImageWriter
 {
     private readonly IAsyncPdfWriter? _asyncWriter;
     private readonly IPdfWriter? _writer;

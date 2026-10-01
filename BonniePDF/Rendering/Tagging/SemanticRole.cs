@@ -119,7 +119,7 @@ public enum SemanticRole
 /// Helpers for projecting <see cref="SemanticRole"/> values to the
 /// strings used in PDF structure dictionaries.
 /// </summary>
-public static class SemanticRoleExtensions
+internal static class SemanticRoleExtensions
 {
     /// <summary>
     /// Returns the PDF tag name for the role (e.g. <c>"H1"</c>,

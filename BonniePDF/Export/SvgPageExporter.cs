@@ -109,7 +109,7 @@ internal static class SvgPageExporter
         DocumentSettings settings = document.Settings;
         bool embedStandardFonts = settings.Conformance != PdfAConformance.None ||
                                   settings.Accessibility == AccessibilityMode.PdfUa1;
-        using IDisposable fontScope = FontMetrics.BeginDocumentScope(embedStandardFonts);
+        using IDisposable fontScope = FontMetrics.BeginDocumentScope(embedStandardFonts, document.Fonts);
 
         var svgOptions = new SvgRenderOptions
         {
@@ -201,6 +201,18 @@ internal static class SvgPageExporter
                 Title = string.IsNullOrEmpty(metaTitle) ? null : metaTitle
             });
             snapshot = recorder.Snapshot();
+
+            // The Document is represented by a synthetic root, and its constructor-created first
+            // Page has no separate declaration, so both navigate to the Document's own source.
+            // Explicitly added pages keep their own (or no) attribution.
+            string? documentSourceId = DebugSource.Of(document);
+            if (documentSourceId is not null)
+            {
+                snapshot.Root.SourceId = documentSourceId;
+                LayoutNode? automaticPage = snapshot.Root.Children.FirstOrDefault(n => n.Type == "Page");
+                if (automaticPage is not null && automaticPage.SourceId is null)
+                    automaticPage.SourceId = documentSourceId;
+            }
         }
 
         // Evaluated over the finished snapshot. The evaluator is pure, and neither
@@ -331,6 +343,16 @@ internal static class SvgPageExporter
 
         StringBuilder sb = new();
         sb.Append($"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{w}\" height=\"{h}\" viewBox=\"0 0 {w} {h}\"");
+        if (options.ShapeRendering != SvgShapeRendering.Auto)
+        {
+            string token = options.ShapeRendering switch
+            {
+                SvgShapeRendering.OptimizeSpeed => "optimizeSpeed",
+                SvgShapeRendering.CrispEdges => "crispEdges",
+                _ => "geometricPrecision",
+            };
+            sb.Append($" shape-rendering=\"{token}\"");
+        }
 
         string groupAttrs = "";
         if (options.IncludeAccessibilityMetadata)

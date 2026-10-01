@@ -71,7 +71,7 @@ public class Hyperlink : IElement, IRoleProvider
     /// <summary>
     /// Gets or sets the text color for the link
     /// </summary>
-    public Color TextColor { get; set; } = Color.Blue;
+    public Color Color { get; set; } = Color.Blue;
 
     /// <summary>
     /// Gets or sets the margin around the hyperlink
@@ -163,7 +163,7 @@ public class Hyperlink : IElement, IRoleProvider
             if (lineWidth > maxWidth)
                 maxWidth = lineWidth;
 
-            ctx.Canvas.DrawText(ctx.CurrentX + Margin.Left, localY, line, TextColor, FontSize, FontName,
+            ctx.Canvas.DrawText(ctx.CurrentX + Margin.Left, localY, line, Color, FontSize, FontName,
                 Elements.Text.TextAlignment.Left);
 
             localY += LineHeight;

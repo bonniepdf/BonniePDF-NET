@@ -14,14 +14,14 @@ namespace BonniePDF.Drawing;
 /// and <see cref="SvgCanvas"/> emit the same curve for the same input, and so the
 /// TypeScript implementation has a single set of numbers to mirror.
 /// </summary>
-public static class EllipseGeometry
+internal static class EllipseGeometry
 {
     /// <summary>4/3*(sqrt(2) - 1) - the circular Bezier approximation constant.</summary>
     public const float Kappa = 0.5522847498f;
 
     /// <summary>One cubic segment: two control points and an end point.</summary>
     [StructLayout(LayoutKind.Auto)]
-    public readonly record struct EllipseSegment(
+    internal readonly record struct EllipseSegment(
         float C1X, float C1Y, float C2X, float C2Y, float X, float Y);
 
     /// <summary>

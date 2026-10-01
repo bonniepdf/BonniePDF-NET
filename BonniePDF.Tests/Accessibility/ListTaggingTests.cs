@@ -173,8 +173,8 @@ public class ListTaggingTests
         using var ms = new MemoryStream();
         doc.Save(ms, true);
 
-        Assert.Equal(ColorPalette.Slate[700], orderedInner.TextColor);
-        Assert.Equal(ColorPalette.Slate[700], unorderedInner.TextColor);
+        Assert.Equal(ColorPalette.Slate[700], orderedInner.Color);
+        Assert.Equal(ColorPalette.Slate[700], unorderedInner.Color);
         Assert.Equal(ColorPalette.Slate[700], unorderedInner.BulletColor);
     }
 
@@ -193,7 +193,7 @@ public class ListTaggingTests
         using var ms = new MemoryStream();
         doc.Save(ms, true);
 
-        Assert.Equal(ColorPalette.Slate[700], inner.TextColor);
+        Assert.Equal(ColorPalette.Slate[700], inner.Color);
         Assert.Equal(Color.Red, inner.BulletColor);
     }
 

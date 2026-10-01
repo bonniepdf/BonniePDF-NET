@@ -16,7 +16,7 @@ namespace BonniePDF.Rendering.Writers;
 /// <see cref="PdfVersion"/>). Manages object writing, offset tracking, and
 /// the cross-reference table. Supports optional encryption of stream contents.
 /// </summary>
-public class PdfWriter : IPdfWriter, IDisposable
+internal class PdfWriter : IPdfWriter, IDisposable
 {
     // ISO-8859-1 (Latin-1) encoding for PDF streams
     // This matches WinAnsiEncoding used by standard PDF fonts and ensures

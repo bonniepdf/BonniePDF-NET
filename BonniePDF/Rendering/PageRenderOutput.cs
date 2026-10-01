@@ -7,7 +7,7 @@ namespace BonniePDF.Rendering;
 /// <summary>
 /// Data emitted for a single rendered page
 /// </summary>
-public class PageRenderOutput
+internal class PageRenderOutput
 {
     public required string ContentStream { get; set; }
     public PdfSize Size { get; set; }

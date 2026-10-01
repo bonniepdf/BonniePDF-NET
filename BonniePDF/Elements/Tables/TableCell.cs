@@ -18,7 +18,7 @@ public class TableCell : BorderedElementBase, IRoleProvider
     /// <summary>
     /// TextBlock color for this cell
     /// </summary>
-    public Color? TextColor { get; set; }
+    public Color? Color { get; set; }
 
     /// <summary>
     /// Custom padding for this cell (overrides table default if set)
@@ -92,9 +92,9 @@ public class TableCell : BorderedElementBase, IRoleProvider
     /// <summary>
     /// Sets the text color for this cell
     /// </summary>
-    public TableCell WithTextColor(Color color)
+    public TableCell WithColor(Color color)
     {
-        TextColor = color;
+        Color = color;
         return this;
     }
 

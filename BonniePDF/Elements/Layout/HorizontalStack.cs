@@ -14,6 +14,8 @@ public class HorizontalStack : ElementBase, IStatefulElement
     private readonly List<IElement> _children = [];
     private readonly List<float?> _widths = [];
 
+    internal IReadOnlyList<float?> Weights => _widths;
+
     // State tracking for multipage rendering
     private bool _rendered;
 

@@ -36,7 +36,7 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Gets or sets the text color used for TOC entries.
     /// </summary>
-    public Color TextColor { get; set; } = Color.Black;
+    public Color Color { get; set; } = Color.Black;
 
     private int _lastRenderedIndex = -1;
 
@@ -199,12 +199,12 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
         }
 
         // Draw heading text
-        ctx.Canvas.DrawText(ctx.CurrentX, y, identifier, TextColor, FontSize, FontName, TextAlignment.Left);
+        ctx.Canvas.DrawText(ctx.CurrentX, y, identifier, Color, FontSize, FontName, TextAlignment.Left);
 
         // Draw page number
         float pageNumWidth = FontMetrics.GetStringWidth(pageNumStr, FontName, FontSize);
         float pageNumX = ctx.CurrentX + contentWidth - pageNumWidth;
-        ctx.Canvas.DrawText(pageNumX, y, pageNumStr, TextColor, FontSize, FontName, TextAlignment.Left);
+        ctx.Canvas.DrawText(pageNumX, y, pageNumStr, Color, FontSize, FontName, TextAlignment.Left);
 
         // Draw dotted leader
         float textWidth = FontMetrics.GetStringWidth(identifier, FontName, FontSize);
@@ -218,7 +218,7 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
             float currentDotX = startDotX;
             while (currentDotX + dotWidth <= endDotX)
             {
-                ctx.Canvas.DrawText(currentDotX, y, dot, TextColor, FontSize, FontName, TextAlignment.Left);
+                ctx.Canvas.DrawText(currentDotX, y, dot, Color, FontSize, FontName, TextAlignment.Left);
                 currentDotX += dotWidth * 2; // Spacing between dots
             }
         }

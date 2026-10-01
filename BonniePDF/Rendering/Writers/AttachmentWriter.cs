@@ -18,7 +18,7 @@ namespace BonniePDF.Rendering.Writers;
 /// <c>/Names</c>. The filespec object IDs are returned so the caller can list
 /// them in the catalog's <c>/AF</c> associated-files array (PDF/A-3 Â§6.8).
 /// </summary>
-public class AttachmentWriter
+internal class AttachmentWriter
 {
     private readonly IPdfWriter? _writer;
     private readonly IAsyncPdfWriter? _asyncWriter;
@@ -41,7 +41,7 @@ public class AttachmentWriter
     /// as <c>/Names &lt;&lt; /EmbeddedFiles N 0 R &gt;&gt;</c>) and the filespec
     /// object IDs for the catalog's <c>/AF</c> array.
     /// </summary>
-    public readonly record struct Result(int NamesEmbeddedFilesId, IList<int> AssociatedFileIds);
+    internal readonly record struct Result(int NamesEmbeddedFilesId, IList<int> AssociatedFileIds);
 
     /// <summary>
     /// Writes every attachment and the enclosing name tree. Returns a

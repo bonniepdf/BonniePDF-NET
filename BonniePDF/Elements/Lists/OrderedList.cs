@@ -31,6 +31,13 @@ public class OrderedList : ListElementBase
     /// <summary>
     /// Adds a text item to this list
     /// </summary>
+    /// <example>
+    /// <code>
+    /// var list = new OrderedList { NumberFormat = NumberFormat.LowerRoman };
+    /// list.AddItem("Preliminaries");
+    /// list.AddItem("Main text");
+    /// </code>
+    /// </example>
     public void AddItem(string item)
     {
         _items.Add(item ?? string.Empty);
@@ -77,7 +84,7 @@ public class OrderedList : ListElementBase
                 (x, y) =>
                 {
                     // Draw number
-                    ctx.Canvas.DrawText(x, y, numberText + ".", TextColor, FontSize, FontName, TextAlignment.Left);
+                    ctx.Canvas.DrawText(x, y, numberText + ".", Color, FontSize, FontName, TextAlignment.Left);
                 },
                 numberWidth
             );

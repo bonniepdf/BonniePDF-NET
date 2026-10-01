@@ -174,10 +174,11 @@ public sealed partial class LicenseDeclarationTests : IDisposable
     }
 
     [Theory]
-    [InlineData(LicenseEnvironmentKind.Production)]
-    [InlineData(LicenseEnvironmentKind.Unknown)]
-    public void WarnsRatherThanThrowingWhenUndeclaredOutsideDevelopment(LicenseEnvironmentKind environment)
+    [InlineData("Production")]
+    [InlineData("Unknown")]
+    public void WarnsRatherThanThrowingWhenUndeclaredOutsideDevelopment(string environmentName)
     {
+        var environment = Enum.Parse<LicenseEnvironmentKind>(environmentName);
         (Exception? thrown, string warnings) = RunCheck(environment);
 
         Assert.Null(thrown);
@@ -185,11 +186,12 @@ public sealed partial class LicenseDeclarationTests : IDisposable
     }
 
     [Theory]
-    [InlineData(LicenseEnvironmentKind.Development)]
-    [InlineData(LicenseEnvironmentKind.Production)]
-    [InlineData(LicenseEnvironmentKind.Unknown)]
-    public void WarnsForTheEvaluationTier(LicenseEnvironmentKind environment)
+    [InlineData("Development")]
+    [InlineData("Production")]
+    [InlineData("Unknown")]
+    public void WarnsForTheEvaluationTier(string environmentName)
     {
+        var environment = Enum.Parse<LicenseEnvironmentKind>(environmentName);
         BonniePdfLicense.Tier = LicenseTier.Evaluation;
 
         (Exception? thrown, string warnings) = RunCheck(environment);
@@ -200,17 +202,18 @@ public sealed partial class LicenseDeclarationTests : IDisposable
     }
 
     [Theory]
-    [InlineData(LicenseTier.Community, LicenseEnvironmentKind.Development)]
-    [InlineData(LicenseTier.Community, LicenseEnvironmentKind.Production)]
-    [InlineData(LicenseTier.Community, LicenseEnvironmentKind.Unknown)]
-    [InlineData(LicenseTier.Professional, LicenseEnvironmentKind.Development)]
-    [InlineData(LicenseTier.Professional, LicenseEnvironmentKind.Production)]
-    [InlineData(LicenseTier.Professional, LicenseEnvironmentKind.Unknown)]
-    [InlineData(LicenseTier.Enterprise, LicenseEnvironmentKind.Development)]
-    [InlineData(LicenseTier.Enterprise, LicenseEnvironmentKind.Production)]
-    [InlineData(LicenseTier.Enterprise, LicenseEnvironmentKind.Unknown)]
-    public void IsSilentForDeclaredPaidAndCommunityTiers(LicenseTier tier, LicenseEnvironmentKind environment)
+    [InlineData(LicenseTier.Community, "Development")]
+    [InlineData(LicenseTier.Community, "Production")]
+    [InlineData(LicenseTier.Community, "Unknown")]
+    [InlineData(LicenseTier.Professional, "Development")]
+    [InlineData(LicenseTier.Professional, "Production")]
+    [InlineData(LicenseTier.Professional, "Unknown")]
+    [InlineData(LicenseTier.Enterprise, "Development")]
+    [InlineData(LicenseTier.Enterprise, "Production")]
+    [InlineData(LicenseTier.Enterprise, "Unknown")]
+    public void IsSilentForDeclaredPaidAndCommunityTiers(LicenseTier tier, string environmentName)
     {
+        var environment = Enum.Parse<LicenseEnvironmentKind>(environmentName);
         BonniePdfLicense.Tier = tier;
 
         (Exception? thrown, string warnings) = RunCheck(environment);
@@ -235,10 +238,11 @@ public sealed partial class LicenseDeclarationTests : IDisposable
     }
 
     [Theory]
-    [InlineData(LicenseEnvironmentKind.Production)]
-    [InlineData(LicenseEnvironmentKind.Unknown)]
-    public void UpgradesAWarningToAThrowWhenSetToThrow(LicenseEnvironmentKind environment)
+    [InlineData("Production")]
+    [InlineData("Unknown")]
+    public void UpgradesAWarningToAThrowWhenSetToThrow(string environmentName)
     {
+        var environment = Enum.Parse<LicenseEnvironmentKind>(environmentName);
         Environment.SetEnvironmentVariable(EnforcementVariable, "throw");
 
         (Exception? thrown, _) = RunCheck(environment);

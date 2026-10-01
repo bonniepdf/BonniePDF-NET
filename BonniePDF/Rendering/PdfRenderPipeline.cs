@@ -20,7 +20,7 @@ namespace BonniePDF.Rendering;
 /// that can then be written by either sync or async writers.
 /// Supports stateful elements (IStatefulElement) that can flow across page boundaries.
 /// </summary>
-public static class PdfRenderPipeline
+internal static class PdfRenderPipeline
 {
     /// <summary>
     /// Renders all pages and produces a PdfRenderResult containing all the data
@@ -478,7 +478,7 @@ public static class PdfRenderPipeline
         // to 1.0 and a real transparency would render as solid text. Simulate the
         // faint watermark by blending the colour toward white instead. PDF/A-2/3/4
         // keep their real /ca alpha, so no blending is needed there.
-        Color fillColor = wm.TextColor;
+        Color fillColor = wm.Color;
         bool isPdfA1 = settings.Conformance is PdfAConformance.PdfA1b or PdfAConformance.PdfA1a;
         if (isPdfA1 && wm.Opacity < 1.0f)
         {
@@ -520,7 +520,7 @@ public static class PdfRenderPipeline
     {
         float cx = pageWidth / 2f;
         float cy = pageHeight / 2f;
-        string hex = wm.TextColor.ToHexString();
+        string hex = wm.Color.ToHexString();
         string text = XmlEscape.EscapeXml(wm.Text);
 
         // rotate() in SVG is clockwise-positive; the layout model treats positive

@@ -10,7 +10,7 @@ namespace BonniePDF.Rendering.Tagging;
 /// PDF object graph: assign object IDs on enter, populate <c>/K</c>
 /// arrays on leave.
 /// </summary>
-public interface IStructureVisitor
+internal interface IStructureVisitor
 {
     /// <summary>Called when traversal enters <paramref name="element"/>,
     /// before any of its children are visited.</summary>

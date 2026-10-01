@@ -138,7 +138,7 @@ public sealed class LayoutNode
     /// <summary>Optional author-supplied name/key; null when unset.</summary>
     public string? Name { get; init; }
     /// <summary>Optional opaque source ID supplied by an editor integration.</summary>
-    public string? SourceId { get; init; }
+    public string? SourceId { get; set; }
     /// <summary>The rectangles this node occupied — one per page it touched (may be empty).</summary>
     public IList<LayoutRect> Rects { get; } = new List<LayoutRect>();
     /// <summary>Intrinsic accessibility facts, when the element declares a role; null otherwise.</summary>
@@ -178,7 +178,7 @@ public sealed class LayoutSnapshot
 /// header and the TypeScript reference for the lifecycle contract. Mirrors
 /// <c>LayoutRecorder</c> in the TypeScript core.
 /// </summary>
-public sealed class LayoutRecorder
+internal sealed class LayoutRecorder
 {
     private sealed class OpenFrame
     {
@@ -232,7 +232,7 @@ public sealed class LayoutRecorder
         if (!Capturing) return;
         if (_open.ContainsKey(element)) return; // resumed segment of an open element
 
-        var node = new LayoutNode { Id = $"n{_nextId++}", Type = type, Name = name };
+        var node = new LayoutNode { Id = $"n{_nextId++}", Type = type, Name = name, SourceId = DebugSource.Of(element) };
         node.A11y = AccessibilityOf(element, type);
         node.Paint = PaintOf(element, type);
         _stack[^1].Node.Children.Add(node);
@@ -421,22 +421,22 @@ public sealed class LayoutRecorder
 
         if (element is Elements.Text.TextElementBase text)
         {
-            paint.Text = ColorToHex(text.TextColor);
-            float textAlpha = AlphaOf(text.TextColor);
+            paint.Text = ColorToHex(text.Color);
+            float textAlpha = AlphaOf(text.Color);
             if (textAlpha < 1f) paint.TextAlpha = textAlpha;
             paint.FontSize = text.FontSize;
-            if (text.Weight >= Typography.FontWeight.Bold || FontNameLooksBold(text.FontName)) paint.Bold = true;
+            if (text.FontWeight >= Typography.FontWeight.Bold || FontNameLooksBold(text.FontName)) paint.Bold = true;
         }
         else if (element is Core.Hyperlink link)
         {
             // Hyperlink paints text but does not derive from TextElementBase — it
-            // carries its own TextColor/FontSize. Gating the text branch on the base
+            // carries its own Color/FontSize. Gating the text branch on the base
             // class alone would leave every link unannotated, and link text on a
             // coloured backdrop is exactly the contrast case authors get wrong.
             // It exposes no Weight property at all, so FontNameLooksBold is the
             // only signal available for it.
-            paint.Text = ColorToHex(link.TextColor);
-            float linkAlpha = AlphaOf(link.TextColor);
+            paint.Text = ColorToHex(link.Color);
+            float linkAlpha = AlphaOf(link.Color);
             if (linkAlpha < 1f) paint.TextAlpha = linkAlpha;
             paint.FontSize = link.FontSize;
             if (FontNameLooksBold(link.FontName)) paint.Bold = true;

@@ -13,7 +13,7 @@ namespace BonniePDF.Rendering.Tagging;
 /// root already open and at the top of the stack - every element added
 /// is a descendant of Document.
 /// </summary>
-public sealed class StructureTreeBuilder
+internal sealed class StructureTreeBuilder
 {
     private readonly Stack<StructureElement> _stack;
     private readonly StructureElement _root;

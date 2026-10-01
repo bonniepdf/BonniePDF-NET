@@ -15,7 +15,7 @@ namespace BonniePDF.Rendering.Tagging;
 /// the context is null and the canvas's
 /// <c>BeginMarkedContent/EndMarkedContent</c> calls are no-ops.
 /// </summary>
-public sealed class TaggingContext
+internal sealed class TaggingContext
 {
     private int _nextMcidOnPage;
     private readonly Stack<string> _openRoles = new();

@@ -15,7 +15,7 @@ namespace BonniePDF.Rendering.Writers;
 /// Writes font objects to PDF, handling both standard Type1 fonts and embedded TrueType fonts.
 /// Supports both synchronous (IPdfWriter) and asynchronous (IAsyncPdfWriter) operations.
 /// </summary>
-public class FontWriter
+internal class FontWriter
 {
     // Exactly one is non-null, depending on which constructor was used - see
     // StructureTreeWriter for the same pattern.

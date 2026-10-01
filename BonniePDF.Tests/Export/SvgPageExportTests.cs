@@ -46,6 +46,23 @@ public class SvgPageExportTests
         Assert.Contains("height=\"", svg, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData(SvgShapeRendering.OptimizeSpeed, "optimizeSpeed")]
+    [InlineData(SvgShapeRendering.CrispEdges, "crispEdges")]
+    [InlineData(SvgShapeRendering.GeometricPrecision, "geometricPrecision")]
+    public void ShapeRendering_IsWrittenOnTheRootAfterTheViewBox(SvgShapeRendering mode, string token)
+    {
+        string svg = SimpleDoc().GenerateFirstPageSvg(new SvgPageExportOptions { ShapeRendering = mode });
+        Assert.Matches($"^<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"[^\"]+\" height=\"[^\"]+\" viewBox=\"[^\"]+\" shape-rendering=\"{token}\"", svg);
+    }
+
+    [Fact]
+    public void ShapeRendering_DefaultWritesNoAttribute()
+    {
+        string svg = SimpleDoc().GenerateFirstPageSvg();
+        Assert.DoesNotContain("shape-rendering", svg.Split('>')[0], StringComparison.Ordinal);
+    }
+
     [Fact]
     public void FirstPageSvg_ContainsTextContent()
     {
@@ -175,8 +192,8 @@ public class SvgPageExportTests
     {
         var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "Body" });
-        doc.Settings.HeaderTemplate = pageNum => new TextBlock { Text = $"Header {pageNum}", FontSize = 9, TextColor = ColorPalette.Slate[500] };
-        doc.Settings.FooterTemplate = pageNum => new TextBlock { Text = $"Footer {pageNum}", FontSize = 9, TextColor = ColorPalette.Slate[500] };
+        doc.Settings.HeaderTemplate = pageNum => new TextBlock { Text = $"Header {pageNum}", FontSize = 9, Color = ColorPalette.Slate[500] };
+        doc.Settings.FooterTemplate = pageNum => new TextBlock { Text = $"Footer {pageNum}", FontSize = 9, Color = ColorPalette.Slate[500] };
         string svg = doc.GenerateFirstPageSvg();
         Assert.Contains("Header 1", svg, StringComparison.Ordinal);
         Assert.Contains("Footer 1", svg, StringComparison.Ordinal);

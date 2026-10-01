@@ -124,7 +124,7 @@ public class AdvancedTypographyTests
     public void Overline_EmitsStrokedLine()
     {
         using var doc = new BonniePDF.Document();
-        doc.Add(new TextBlock { Text = "Overlined heading", TextDecoration = TextDecoration.Overline });
+        doc.Add(new TextBlock { Text = "Overlined heading", Decoration = TextDecoration.Overline });
         string content = AllContentStreams(Render(doc));
         Assert.Matches(@"l\s+S", content);
     }
@@ -208,14 +208,14 @@ public class AdvancedTypographyTests
     public void WavyUnderline_EmitsManySegmentsVsOneForSolid()
     {
         using var solid = new BonniePDF.Document();
-        solid.Add(new TextBlock { Text = "Underlined", TextDecoration = TextDecoration.Underline });
+        solid.Add(new TextBlock { Text = "Underlined", Decoration = TextDecoration.Underline });
         int solidStrokes = Count(AllContentStreams(Render(solid)), "l S");
 
         using var wavy = new BonniePDF.Document();
         wavy.Add(new TextBlock
         {
             Text = "Underlined",
-            TextDecoration = TextDecoration.Underline,
+            Decoration = TextDecoration.Underline,
             DecorationStyle = DecorationStyle.Wavy,
         });
         int wavyStrokes = Count(AllContentStreams(Render(wavy)), "l S");

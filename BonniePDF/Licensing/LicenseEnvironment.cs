@@ -7,7 +7,7 @@ namespace BonniePDF.Licensing;
 /// <summary>
 /// How the licence check classifies the runtime it is hosted in.
 /// </summary>
-public enum LicenseEnvironmentKind
+internal enum LicenseEnvironmentKind
 {
     /// <summary>No positive evidence either way. Never fatal.</summary>
     Unknown,
@@ -28,7 +28,7 @@ public enum LicenseEnvironmentKind
 /// can assert the whole matrix without mutating process state — and the ambient
 /// reader can be defensive without that defensiveness obscuring the rule it feeds.
 /// </remarks>
-public readonly struct EnvironmentSignals : IEquatable<EnvironmentSignals>
+internal readonly struct EnvironmentSignals : IEquatable<EnvironmentSignals>
 {
     /// <summary>Creates a signal record.</summary>
     public EnvironmentSignals(string? hostEnvironment, string? ci, bool testRunner, bool debuggerAttached)
@@ -82,7 +82,7 @@ public readonly struct EnvironmentSignals : IEquatable<EnvironmentSignals>
 /// a missed throw costs one conversation. So "I don't know" resolves to
 /// <see cref="LicenseEnvironmentKind.Unknown"/>, and that never throws.
 /// </remarks>
-public static class LicenseEnvironment
+internal static class LicenseEnvironment
 {
     /// <summary>
     /// Assembly-name prefixes that identify a hosting test framework.

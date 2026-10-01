@@ -54,6 +54,10 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         _columnWeights = columnWeights;
     }
 
+    internal IReadOnlyList<float> ColumnWeights => _columnWeights;
+    internal IReadOnlyList<TableRow> HeaderRows => _headers;
+    internal IReadOnlyList<TableRow> FooterRows => _footers;
+
     /// <summary>
     /// Default padding for all cells
     /// </summary>
@@ -115,6 +119,11 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Adds a header row to the table
     /// </summary>
+    /// <example>
+    /// <code>
+    /// table.AddHeader(new TextBlock("Item"), new TextBlock("Qty"), new TextBlock("Price"));
+    /// </code>
+    /// </example>
     public void AddHeader(params IElement[] cells)
     {
         TableRow row = TableRow.From(cells).AsHeader();
@@ -146,6 +155,11 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Adds a footer row to the table
     /// </summary>
+    /// <example>
+    /// <code>
+    /// table.AddFooter(new TextBlock("Total"), new TextBlock("4"), new TextBlock("£48.00"));
+    /// </code>
+    /// </example>
     public void AddFooter(params IElement[] cells)
     {
         TableRow row = TableRow.From(cells).AsFooter();
@@ -174,6 +188,11 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     /// Adds a data row to the table
     /// Accepts IElement elements (including TableCell which implements IElement)
     /// </summary>
+    /// <example>
+    /// <code>
+    /// table.AddRow(new TextBlock("Widget"), new TextBlock("4"), new TextBlock("£12.00"));
+    /// </code>
+    /// </example>
     public void AddRow(params IElement[] cells)
     {
         TableRow row = TableRow.From(cells);
@@ -702,8 +721,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         if (bgColor.HasValue)
             ctx.LayoutRecorder?.AnnotatePaint(cell, LayoutRecorder.PaintForBackground(bgColor.Value));
 
-        Color? textColor = cell.TextColor
-                           ?? row.TextColor
+        Color? color = cell.Color
+                           ?? row.Color
                            ?? (row.IsHeader ? HeaderTextColor : null)
                            ?? (row.IsFooter ? FooterTextColor : null)
                            ?? RowTextColor;
@@ -712,7 +731,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
         // Apply text color to TextBlock content if specified
         IElement content = cell.Content;
-        if (textColor.HasValue && content is TextBlock tb)
+        if (color.HasValue && content is TextBlock tb)
         {
             // Create a copy with the text color applied
             tb = new TextBlock
@@ -720,7 +739,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 Text = tb.Text,
                 FontName = tb.FontName,
                 FontSize = tb.FontSize,
-                TextColor = textColor.Value,
+                Color = color.Value,
                 Alignment = tb.Alignment
             };
             content = tb;

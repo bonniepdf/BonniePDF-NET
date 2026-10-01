@@ -12,7 +12,7 @@ namespace BonniePDF.Rendering.Writers;
 /// <summary>
 /// Writes metadata objects (DocumentInfo and XMP) to PDF.
 /// </summary>
-public class MetadataWriter
+internal class MetadataWriter
 {
     private readonly IPdfWriter? _writer;
     private readonly IAsyncPdfWriter? _asyncWriter;

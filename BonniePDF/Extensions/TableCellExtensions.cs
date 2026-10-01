@@ -29,9 +29,9 @@ public static class TableCellExtensions
     /// <summary>
     /// Sets the text color for a TableCell
     /// </summary>
-    public static TableCell TextColor(this TableCell c, Color color)
+    public static TableCell Color(this TableCell c, Color color)
     {
-        c.TextColor = color;
+        c.Color = color;
         return c;
     }
 

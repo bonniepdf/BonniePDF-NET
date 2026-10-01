@@ -49,7 +49,7 @@ internal sealed class BonniePdfFontProvider : IFontProvider
         string? resolved = FontFamilyResolver.ResolveKnown(family, (FontWeight)weight, italic);
         if (resolved is not null)
         {
-            return FontManager.GetBytesForStandardFont(resolved) ?? ReadFile(resolved);
+            return FontMetrics.GetDocumentFontBytes(resolved) ?? FontManager.GetBytesForStandardFont(resolved) ?? ReadFile(resolved);
         }
 
         bool bold = weight >= 600;

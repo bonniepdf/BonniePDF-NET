@@ -29,7 +29,7 @@ namespace BonniePDF.Rendering.Writers;
 ///     close+reopen fix runs).</description></item>
 /// </list>
 /// </summary>
-public sealed class StructureTreeWriter
+internal sealed class StructureTreeWriter
 {
     // Exactly one of these is non-null, depending on which constructor was used;
     // the sync members (Write/WriteSubtree/...) only ever run on an instance built

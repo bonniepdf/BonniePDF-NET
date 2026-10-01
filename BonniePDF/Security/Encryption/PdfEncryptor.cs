@@ -10,7 +10,7 @@ namespace BonniePDF.Security.Encryption;
 /// Handles encryption of streams and generation of the encryption dictionary.
 /// Supports RC4 (40/128-bit) and AES-256 encryption.
 /// </summary>
-public sealed class PdfEncryptor
+internal sealed class PdfEncryptor
 {
     // Exactly one is non-null, based on _isAes256, set once in every constructor.
     private readonly PdfEncryptionKey? _key;
