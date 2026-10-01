@@ -5,7 +5,7 @@ namespace BonniePDF.Typography;
 /// <summary>
 /// Contains all information about an embedded TrueType font
 /// </summary>
-public class EmbeddedFontInfo
+internal class EmbeddedFontInfo
 {
     /// <summary>
     /// The parsed TrueType font

@@ -10,7 +10,7 @@ namespace BonniePDF.Typography.TrueType;
 /// Creates a subset TrueType font containing only the glyphs that are actually used.
 /// This significantly reduces embedded font size in PDFs.
 /// </summary>
-public class TtfSubsetter
+internal class TtfSubsetter
 {
     private readonly TtfFont _font;
     private readonly byte[] _originalData;

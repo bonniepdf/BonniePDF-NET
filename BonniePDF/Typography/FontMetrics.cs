@@ -45,6 +45,7 @@ public static class FontMetrics
     private sealed class DocumentAliasScope(bool embedStandardFonts)
     {
         public bool EmbedStandardFonts { get; } = embedStandardFonts;
+        public DocumentFonts? DocumentFonts { get; set; }
         public Dictionary<string, string> PathAliases { get; } = new(GlobalFontPathAliases, StringComparer.OrdinalIgnoreCase);
         public Dictionary<string, TtfFont> InstanceAliases { get; } = new(GlobalFontInstanceAliases, StringComparer.OrdinalIgnoreCase);
     }
@@ -66,12 +67,27 @@ public static class FontMetrics
     /// Embedded standard-font substitutes are resolved lazily on the first
     /// measurement, before layout makes a wrapping or pagination decision.
     /// </summary>
-    internal static IDisposable BeginDocumentScope(bool embedStandardFonts)
+    internal static IDisposable BeginDocumentScope(bool embedStandardFonts, DocumentFonts? documentFonts = null)
     {
         DocumentAliasScope? previous = CurrentDocumentScope.Value;
-        CurrentDocumentScope.Value = new DocumentAliasScope(embedStandardFonts);
+        var scope = new DocumentAliasScope(embedStandardFonts);
+        if (documentFonts is { IsEmpty: false })
+        {
+            scope.DocumentFonts = documentFonts;
+            // Measurement runs before any resource is registered, so the faces' parsed fonts are
+            // known to it from the start, under the same names the elements carry.
+            foreach (DocumentFontFace face in documentFonts.Faces) scope.InstanceAliases[face.FontName] = face.Font;
+        }
+        CurrentDocumentScope.Value = scope;
         return new DocumentAliasScopeLease(previous);
     }
+
+    /// <summary>The document fonts of the render pass in progress, if that document has any.</summary>
+    internal static DocumentFonts? ActiveDocumentFonts => CurrentDocumentScope.Value?.DocumentFonts;
+
+    /// <summary>Bytes of a document font by its font name, within the render pass in progress.</summary>
+    internal static byte[]? GetDocumentFontBytes(string fontName) =>
+        ActiveDocumentFonts?.FaceForFontName(fontName)?.Bytes;
 
     /// <summary>
     /// Registers a logical font name alias pointing to a specific TTF file path.
@@ -93,7 +109,7 @@ public static class FontMetrics
     /// Used when the font was loaded from bytes (e.g., bundled Liberation Sans) rather than a
     /// file path, so file-based caching is bypassed entirely.
     /// </summary>
-    public static void RegisterFontInstance(string logicalName, TtfFont font)
+    internal static void RegisterFontInstance(string logicalName, TtfFont font)
     {
         DocumentAliasScope? scope = CurrentDocumentScope.Value;
         if (scope != null)
@@ -286,7 +302,7 @@ public static class FontMetrics
     /// embedded fonts because it accounts for kern pairs.
     /// Returns 0 if font is null or text is empty.
     /// </summary>
-    public static float GetKernedStringWidth(string text, TtfFont font, float fontSize)
+    internal static float GetKernedStringWidth(string text, TtfFont font, float fontSize)
     {
         if (string.IsNullOrEmpty(text) || font == null) return 0;
 
@@ -426,7 +442,7 @@ public static class FontMetrics
     /// <summary>
     /// Simple TTF font reader that extracts character widths for ASCII characters
     /// </summary>
-    public class SimpleTtfReader
+    internal class SimpleTtfReader
     {
         // We only care about ASCII 32-126 for this simple engine.
         // Returns an array where index 0 is space (32), index 1 is '!', etc.

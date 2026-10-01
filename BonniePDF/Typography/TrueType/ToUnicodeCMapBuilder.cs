@@ -11,7 +11,7 @@ namespace BonniePDF.Typography.TrueType;
 /// Maps glyph IDs to Unicode code points, enabling copy/paste functionality.
 /// Supports the full Unicode range including supplementary planes (emoji, CJK Extension B+).
 /// </summary>
-public class ToUnicodeCMapBuilder
+internal class ToUnicodeCMapBuilder
 {
     private readonly List<(ushort glyphId, int unicode)> _mappings = new();
 

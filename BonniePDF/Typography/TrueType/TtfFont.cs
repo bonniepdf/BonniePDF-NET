@@ -11,7 +11,7 @@ namespace BonniePDF.Typography.TrueType;
 /// TrueType font parser for PDF embedding.
 /// Parses all tables required for font embedding and text extraction.
 /// </summary>
-public class TtfFont
+internal class TtfFont
 {
     private readonly Dictionary<int, ushort> _charToGlyph = new(); // Unicode codepoint -> GID
 
@@ -76,6 +76,12 @@ public class TtfFont
 
     /// <summary>Font subfamily (e.g., "Regular", "Bold")</summary>
     public string FontSubfamily { get; private set; } = "Regular";
+
+    /// <summary>OS/2 <c>usWeightClass</c> (1-1000), or null when the font has no OS/2 table.</summary>
+    public int? WeightClass { get; private set; }
+
+    /// <summary>OS/2 <c>fsSelection</c> ITALIC (bit 0) or OBLIQUE (bit 9) flag; false without an OS/2 table.</summary>
+    public bool SelectionItalic { get; private set; }
 
     /// <summary>Units per em (typically 1000 or 2048)</summary>
     public int UnitsPerEm { get; private set; } = 1000;
@@ -532,6 +538,9 @@ public class TtfFont
         }
 
         // Calculate StemV from weight class (rough estimate)
+        WeightClass = usWeightClass is >= 1 and <= 1000 ? usWeightClass : null;
+        SelectionItalic = (fsSelection & 1) != 0 || (fsSelection & 0x200) != 0;
+
         StemV = 50 + usWeightClass / 10;
 
         // Build PDF flags

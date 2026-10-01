@@ -17,7 +17,7 @@ public sealed class FallbackFont
     public required byte[] Bytes { get; init; }
 
     /// <summary>Parsed font, for glyph-coverage probing.</summary>
-    public required TtfFont Font { get; init; }
+    internal TtfFont Font { get; init; } = null!;
 }
 
 /// <summary>

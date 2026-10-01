@@ -21,7 +21,7 @@ namespace BonniePDF.Typography;
 ///     path agrees.</description></item>
 /// </list>
 /// </remarks>
-public static class TextEncoding
+internal static class TextEncoding
 {
     /// <summary>
     /// Code points that carry the Unicode <c>Default_Ignorable_Code_Point</c>
