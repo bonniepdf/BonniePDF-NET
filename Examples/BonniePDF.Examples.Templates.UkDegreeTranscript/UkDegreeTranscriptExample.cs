@@ -60,7 +60,7 @@ public static class UkDegreeTranscriptExample
                 Text = $"Sample University  -  Transcript 20458812  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8,
-                TextColor = Muted,
+                Color = Muted,
             },
         };
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Ink);
@@ -86,8 +86,8 @@ public static class UkDegreeTranscriptExample
         Grid header = new(2.4f, 1) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 0, 0, 6) };
 
         VerticalStack uni = new();
-        uni.Add(new TextBlock { Text = "SAMPLE UNIVERSITY", FontName = StandardFonts.HelveticaBold, FontSize = 16, TextColor = Navy });
-        uni.Add(new TextBlock { Text = "Founded 1887 - Registrar's Office", FontSize = 9, TextColor = Muted, Margin = new Thickness(0, 2, 0, 0) });
+        uni.Add(new TextBlock { Text = "SAMPLE UNIVERSITY", FontName = StandardFonts.HelveticaBold, FontSize = 16, Color = Navy });
+        uni.Add(new TextBlock { Text = "Founded 1887 - Registrar's Office", FontSize = 9, Color = Muted, Margin = new Thickness(0, 2, 0, 0) });
 
         header.AddRow(
             uni,
@@ -98,7 +98,7 @@ public static class UkDegreeTranscriptExample
                     Text = "ACADEMIC TRANSCRIPT",
                     FontName = StandardFonts.HelveticaBold,
                     FontSize = 12,
-                    TextColor = Gold,
+                    Color = Gold,
                     Alignment = TextAlignment.Right,
                 },
             });
@@ -136,7 +136,7 @@ public static class UkDegreeTranscriptExample
                           (double)Modules.Where(m => m.Level >= 5).Sum(m => (m.Level == 6 ? 2 : 1) * m.Credits);
 
         VerticalStack stack = new();
-        stack.Add(new TextBlock { Text = "AWARD", FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = Muted });
+        stack.Add(new TextBlock { Text = "AWARD", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Muted });
         // The award is the transcript's primary heading (H1). Tagging it as the
         // first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede any H2);
         // the section headings below are H2. Styling is unchanged.
@@ -145,7 +145,7 @@ public static class UkDegreeTranscriptExample
         {
             Text = $"Weighted average {weighted.ToString("0.0", CultureInfo.InvariantCulture)}%  -  {total} credits  -  FHEQ Level 6",
             FontSize = 9,
-            TextColor = Ink,
+            Color = Ink,
         });
 
         return new Container
@@ -216,7 +216,7 @@ public static class UkDegreeTranscriptExample
         Level = 1,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 16,
-        TextColor = Navy,
+        Color = Navy,
         Margin = new Thickness(0, 2, 0, 2),
     };
 
@@ -225,7 +225,7 @@ public static class UkDegreeTranscriptExample
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 13,
-        TextColor = Navy,
+        Color = Navy,
         Margin = new Thickness(0, 4, 0, 8),
     };
 
@@ -234,7 +234,7 @@ public static class UkDegreeTranscriptExample
         Text = text,
         FontName = StandardFonts.Helvetica,
         FontSize = 9.5f,
-        TextColor = Ink,
+        Color = Ink,
         Alignment = TextAlignment.Justify,
         Margin = new Thickness(0, 0, 12, 0),
     };
@@ -242,8 +242,8 @@ public static class UkDegreeTranscriptExample
     private static HorizontalStack Kv(string label, string value)
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 0, 0, 5) };
-        row.Add(new TextBlock { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = Muted }, 2);
-        row.Add(new TextBlock { Text = value, FontSize = 10, TextColor = Ink }, 3);
+        row.Add(new TextBlock { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 9, Color = Muted }, 2);
+        row.Add(new TextBlock { Text = value, FontSize = 10, Color = Ink }, 3);
         return row;
     }
 
@@ -252,7 +252,7 @@ public static class UkDegreeTranscriptExample
         Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 9,
-        TextColor = Color.White,
+        Color = Color.White,
         Alignment = align,
     };
 
@@ -261,7 +261,7 @@ public static class UkDegreeTranscriptExample
         Text = text,
         FontName = StandardFonts.Helvetica,
         FontSize = 9.5f,
-        TextColor = color,
+        Color = color,
         Alignment = align,
     };
 

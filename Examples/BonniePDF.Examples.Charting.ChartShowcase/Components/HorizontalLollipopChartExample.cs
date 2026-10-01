@@ -36,7 +36,7 @@ public static class HorizontalLollipopChartExample
         {
             Text = "Product Revenue Ranking",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 10));
 
@@ -44,7 +44,7 @@ public static class HorizontalLollipopChartExample
         {
             Text = "Year-to-date revenue per product line - lollipop style reduces ink without losing clarity",
             FontSize = 13,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -58,14 +58,14 @@ public static class HorizontalLollipopChartExample
                     Color = Color.FromHex(ChartColors.Violet),
                     DataPoints =
                     [
-                        new ChartDataPoint { Label = "Product A", Value = 45000,  LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Product B", Value = 62000,  LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Product C", Value = 38500,  LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Product D", Value = 71000,  LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Product E", Value = 55000,  LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Product F", Value = 83000,  LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Product G", Value = 49000,  LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Product H", Value = 91000,  LabelFormat = "'£'#,##0" },
+                        new ChartDataPoint { Label = "Product A", Value = 45000,  LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product B", Value = 62000,  LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product C", Value = 38500,  LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product D", Value = 71000,  LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product E", Value = 55000,  LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product F", Value = 83000,  LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product G", Value = 49000,  LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product H", Value = 91000,  LabelFormat = "N0" },
                     ]
                 }
             ],

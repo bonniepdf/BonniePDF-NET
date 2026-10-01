@@ -64,7 +64,7 @@ public static class OutpatientAppointmentLetterExample
                 Text = $"SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any health service provider  |  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7.5f,
-                TextColor = Muted,
+                Color = Muted,
                 Alignment = TextAlignment.Center,
             },
         };
@@ -85,7 +85,7 @@ public static class OutpatientAppointmentLetterExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 25,
-            TextColor = Ink,
+            Color = Ink,
             Margin = new Thickness(0, 0, 0, 14),
         });
 
@@ -108,7 +108,7 @@ public static class OutpatientAppointmentLetterExample
         {
             FontName = StandardFonts.Helvetica,
             FontSize = 10.5f,
-            TextColor = BodyText,
+            Color = BodyText,
             BulletColor = Blue,
             ItemSpacing = 4,
             Margin = new Thickness(0, 0, 0, 18),
@@ -139,13 +139,13 @@ public static class OutpatientAppointmentLetterExample
             Text = "Sample Healthcare",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 21,
-            TextColor = BlueDark,
+            Color = BlueDark,
         });
-        brand.Add(new TextBlock { Text = "Outpatient services", FontSize = 10, TextColor = Muted });
+        brand.Add(new TextBlock { Text = "Outpatient services", FontSize = 10, Color = Muted });
 
         VerticalStack reference = new() { Spacing = 3 };
-        reference.Add(new TextBlock { Text = "Issued 1 August 2026", FontSize = 9.5f, TextColor = Muted, Alignment = TextAlignment.Right });
-        reference.Add(new TextBlock { Text = "Reference SAMPLE-OP-1042", FontSize = 9.5f, TextColor = Muted, Alignment = TextAlignment.Right });
+        reference.Add(new TextBlock { Text = "Issued 1 August 2026", FontSize = 9.5f, Color = Muted, Alignment = TextAlignment.Right });
+        reference.Add(new TextBlock { Text = "Reference SAMPLE-OP-1042", FontSize = 9.5f, Color = Muted, Alignment = TextAlignment.Right });
 
         masthead.AddRow(brand, reference);
         return masthead;
@@ -161,7 +161,7 @@ public static class OutpatientAppointmentLetterExample
             Text = "SAMPLE DOCUMENT - FICTIONAL DATA",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9,
-            TextColor = Color.White,
+            Color = Color.White,
             Alignment = TextAlignment.Center,
         },
     };
@@ -180,7 +180,7 @@ public static class OutpatientAppointmentLetterExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = BlueDark,
+            Color = BlueDark,
         });
         stack.Add(details);
 
@@ -203,14 +203,14 @@ public static class OutpatientAppointmentLetterExample
             Text = "If you feel unwell before the appointment",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 11,
-            TextColor = Ink,
+            Color = Ink,
         });
         stack.Add(new TextBlock
         {
             Text = "Use the appropriate local healthcare service for advice. This sample letter does not " +
                    "provide medical or emergency guidance.",
             FontSize = 10,
-            TextColor = BodyText,
+            Color = BodyText,
         });
 
         return new Container
@@ -234,7 +234,7 @@ public static class OutpatientAppointmentLetterExample
                    "locations and contact details are fictional. Not issued by any health service provider.",
             FontName = StandardFonts.HelveticaOblique,
             FontSize = 8.5f,
-            TextColor = Muted,
+            Color = Muted,
             Alignment = TextAlignment.Center,
         },
     };
@@ -245,7 +245,7 @@ public static class OutpatientAppointmentLetterExample
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 16,
-        TextColor = Ink,
+        Color = Ink,
         Margin = new Thickness(0, 0, 0, 8),
     };
 
@@ -254,7 +254,7 @@ public static class OutpatientAppointmentLetterExample
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = 11,
-        TextColor = BodyText,
+        Color = BodyText,
         Margin = new Thickness(0, 0, 0, mb),
     };
 
@@ -266,14 +266,14 @@ public static class OutpatientAppointmentLetterExample
             Text = item.Label.ToUpperInvariant(),
             FontName = StandardFonts.HelveticaBold,
             FontSize = 8,
-            TextColor = BlueDark,
+            Color = BlueDark,
         });
         stack.Add(new TextBlock
         {
             Text = item.Value,
             FontName = StandardFonts.Helvetica,
             FontSize = 10.5f,
-            TextColor = Ink,
+            Color = Ink,
         });
         return stack;
     }

@@ -71,14 +71,14 @@ public static class FinancialDashboardExample
             Text = "Sample Company",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = Cream
+            Color = Cream
         });
         companyStack.Add(new TextBlock
         {
             Text = "Confidential - Internal Use Only",
             FontName = StandardFonts.Helvetica,
             FontSize = 8,
-            TextColor = HeaderMute,
+            Color = HeaderMute,
             Margin = new Thickness(0, 5, 0, 0)
         });
 
@@ -88,7 +88,7 @@ public static class FinancialDashboardExample
             Text = title,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 13,
-            TextColor = Cream,
+            Color = Cream,
             Alignment = TextAlignment.Right
         });
         reportStack.Add(new TextBlock
@@ -96,7 +96,7 @@ public static class FinancialDashboardExample
             Text = generated,
             FontName = StandardFonts.Helvetica,
             FontSize = 8,
-            TextColor = HeaderMute,
+            Color = HeaderMute,
             Alignment = TextAlignment.Right,
             Margin = new Thickness(0, 5, 0, 0)
         });
@@ -154,7 +154,7 @@ public static class FinancialDashboardExample
                 Text = "MONTHLY REVENUE  (£000s)",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 7,
-                TextColor = Brown // Terra fails at 4.15:1 on Cream (needs 4.5:1)
+                Color = Brown // Terra fails at 4.15:1 on Cream (needs 4.5:1)
             }
         });
 
@@ -210,7 +210,7 @@ public static class FinancialDashboardExample
                 Text = "TOP PRODUCTS",
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 7,
-                TextColor = Brown // Terra fails at 4.15:1 on Cream (needs 4.5:1)
+                Color = Brown // Terra fails at 4.15:1 on Cream (needs 4.5:1)
             }
         });
 
@@ -224,10 +224,10 @@ public static class FinancialDashboardExample
         };
 
         productTable.AddHeader(
-            new TextBlock { Text = "Product", FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = Espresso, Alignment = TextAlignment.Left },
-            new TextBlock { Text = "Units", FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = Espresso, Alignment = TextAlignment.Right },
-            new TextBlock { Text = "Revenue", FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = Espresso, Alignment = TextAlignment.Right },
-            new TextBlock { Text = "Margin", FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = Espresso, Alignment = TextAlignment.Right }
+            new TextBlock { Text = "Product", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Left },
+            new TextBlock { Text = "Units", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Right },
+            new TextBlock { Text = "Revenue", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Right },
+            new TextBlock { Text = "Margin", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Right }
         );
 
         var products = new[]
@@ -241,10 +241,10 @@ public static class FinancialDashboardExample
         foreach (var p in products)
         {
             productTable.AddRow(
-                new TextBlock { Text = p.Name, FontName = StandardFonts.Helvetica, FontSize = 8, TextColor = Espresso, Alignment = TextAlignment.Left },
-                new TextBlock { Text = p.Units, FontName = StandardFonts.Helvetica, FontSize = 8, TextColor = Brown, Alignment = TextAlignment.Right },
-                new TextBlock { Text = p.Revenue, FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = Espresso, Alignment = TextAlignment.Right },
-                new TextBlock { Text = p.Margin, FontName = StandardFonts.Helvetica, FontSize = 8, TextColor = Brown, Alignment = TextAlignment.Right }
+                new TextBlock { Text = p.Name, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Left },
+                new TextBlock { Text = p.Units, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Brown, Alignment = TextAlignment.Right },
+                new TextBlock { Text = p.Revenue, FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Right },
+                new TextBlock { Text = p.Margin, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Brown, Alignment = TextAlignment.Right }
             );
         }
 
@@ -265,14 +265,14 @@ public static class FinancialDashboardExample
             Text = value,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = Espresso
+            Color = Espresso
         });
         stack.Add(new TextBlock
         {
             Text = label,
             FontName = StandardFonts.Helvetica,
             FontSize = 7,
-            TextColor = Brown,
+            Color = Brown,
             Margin = new Thickness(0, 4, 0, 0)
         });
         stack.Add(new TextBlock
@@ -280,7 +280,7 @@ public static class FinancialDashboardExample
             Text = delta,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 7,
-            TextColor = deltaColor,
+            Color = deltaColor,
             Margin = new Thickness(0, 4, 0, 0)
         });
 

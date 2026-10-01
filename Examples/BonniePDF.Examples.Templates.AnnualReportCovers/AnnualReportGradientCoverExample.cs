@@ -45,7 +45,7 @@ public static class AnnualReportGradientCoverExample
             PageBackground = pageNumber => pageNumber == 1
                 ? new CanvasElement(DrawCover)
                 {
-                    CanvasHeight = PdfSize.A4.Height,
+                    DrawHeight = PdfSize.A4.Height,
                     IsDecorative = true,
                 }
                 : null,
@@ -134,7 +134,7 @@ public static class AnnualReportGradientCoverExample
         {
             FontName = StandardFonts.HelveticaBold,
             FontSize = 15,
-            TextColor = Color.White,
+            Color = Color.White,
             Margin = new Thickness(36, 0, 0, 108),
         });
 
@@ -142,7 +142,7 @@ public static class AnnualReportGradientCoverExample
         {
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16,
-            TextColor = ColorPalette.Fuchsia[200],
+            Color = ColorPalette.Fuchsia[200],
             Margin = new Thickness(0, 0, 0, 8),
         });
 
@@ -152,14 +152,14 @@ public static class AnnualReportGradientCoverExample
             FontName = StandardFonts.HelveticaBold,
             FontSize = 52,
             LineHeight = 1f,
-            TextColor = Color.White,
+            Color = Color.White,
             Margin = new Thickness(0, 0, 0, 70),
         });
 
         stack.Add(new TextBlock("Designing the systems that power tomorrow")
         {
             FontSize = 14,
-            TextColor = ColorPalette.Violet[100],
+            Color = ColorPalette.Violet[100],
             Margin = new Thickness(0, 0, 0, 324),
         });
 
@@ -172,14 +172,14 @@ public static class AnnualReportGradientCoverExample
         stack.Add(new TextBlock("Prepared with BonniePDF")
         {
             FontSize = 10,
-            TextColor = ColorPalette.Violet[100],
+            Color = ColorPalette.Violet[100],
             Margin = new Thickness(0, 0, 0, 7),
         });
 
         stack.Add(new TextBlock($"Fiscal Year {Year} · Confidential")
         {
             FontSize = 10,
-            TextColor = ColorPalette.Violet[100],
+            Color = ColorPalette.Violet[100],
         });
 
         // Anchored to the foot of the page rather than positioned by a top padding

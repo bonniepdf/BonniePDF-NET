@@ -49,7 +49,7 @@ public static class CustomFontExample
             Level         = 1,
             FontName      = font,
             FontSize      = 22,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 10),
         });
 
@@ -157,7 +157,7 @@ public static class CustomFontExample
             Level         = 2,
             FontName      = BundledFont.SansPath,
             FontSize      = 13,
-            TextColor     = ColorPalette.Indigo[600],
+            Color     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 12, 0, 6),
         });
     }

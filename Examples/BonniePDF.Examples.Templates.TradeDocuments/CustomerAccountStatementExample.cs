@@ -209,7 +209,7 @@ public static class CustomerAccountStatementExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 21,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 4),
         });
         titleStack.Add(Cell($"{GbDate(PeriodFrom)} to {GbDate(PeriodTo)}", color: Muted));

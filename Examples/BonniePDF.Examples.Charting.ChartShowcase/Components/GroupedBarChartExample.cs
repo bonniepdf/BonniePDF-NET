@@ -42,7 +42,7 @@ public static class GroupedBarChartExample
         {
             Text = "Quarterly Revenue by Product Line",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -50,7 +50,7 @@ public static class GroupedBarChartExample
         {
             Text = "Comparison of three product lines across all months",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 

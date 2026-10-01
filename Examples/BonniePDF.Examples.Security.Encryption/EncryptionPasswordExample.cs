@@ -27,7 +27,7 @@ public static class EncryptionPasswordExample
         {
             Text = "Password Protected Document",
             FontSize = 24,
-            TextColor = ColorPalette.Blue[700]
+            Color = ColorPalette.Blue[700]
         });
 
         doc.Add(new TextBlock
@@ -40,7 +40,7 @@ public static class EncryptionPasswordExample
         {
             Text = "Password: demo123",
             FontSize = 14,
-            TextColor = ColorPalette.Red[600]
+            Color = ColorPalette.Red[600]
         });
 
         doc.Add(new TextBlock

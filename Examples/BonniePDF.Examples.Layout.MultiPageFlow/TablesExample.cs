@@ -113,7 +113,7 @@ public static class TablesExample
                 {
                     Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
                     FontSize  = 9,
-                    TextColor = ColorPalette.Slate[400],
+                    Color = ColorPalette.Slate[400],
                     Alignment = TextAlignment.Right,
                 },
             },
@@ -127,7 +127,7 @@ public static class TablesExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 20,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 10),
         });
 
@@ -154,9 +154,9 @@ public static class TablesExample
         {
             Color bg = rowIndex++ % 2 == 0 ? Color.White : ColorPalette.Slate[50];
             table.AddRow(
-                new TableCell { Content = new TextBlock { Text = dept, FontSize = 10, TextColor = ColorPalette.Slate[600] }, BackgroundColor = bg },
-                new TableCell { Content = new TextBlock { Text = name, FontSize = 10, TextColor = ColorPalette.Slate[800] }, BackgroundColor = bg },
-                new TableCell { Content = new TextBlock { Text = role, FontSize = 10, TextColor = ColorPalette.Slate[600] }, BackgroundColor = bg });
+                new TableCell { Content = new TextBlock { Text = dept, FontSize = 10, Color = ColorPalette.Slate[600] }, BackgroundColor = bg },
+                new TableCell { Content = new TextBlock { Text = name, FontSize = 10, Color = ColorPalette.Slate[800] }, BackgroundColor = bg },
+                new TableCell { Content = new TextBlock { Text = role, FontSize = 10, Color = ColorPalette.Slate[600] }, BackgroundColor = bg });
         }
 
         doc.Add(table);
@@ -169,7 +169,7 @@ public static class TablesExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 20,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 20, 0, 10),
         });
 
@@ -181,7 +181,7 @@ public static class TablesExample
                 Level         = 2,
                 FontName      = StandardFonts.HelveticaBold,
                 FontSize      = 14,
-                TextColor     = ColorPalette.Slate[700],
+                Color     = ColorPalette.Slate[700],
                 Margin        = new Thickness(0, 14, 0, 6),
             });
 

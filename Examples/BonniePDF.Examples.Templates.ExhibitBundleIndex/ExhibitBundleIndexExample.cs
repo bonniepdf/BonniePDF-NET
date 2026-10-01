@@ -172,7 +172,7 @@ public static class ExhibitBundleIndexExample
                 {
                     FontName = StandardFonts.HelveticaBold,
                     FontSize = 12,
-                    TextColor = Accent,
+                    Color = Accent,
                 },
                 4);
 
@@ -183,7 +183,7 @@ public static class ExhibitBundleIndexExample
             {
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 9,
-                TextColor = Ink,
+                Color = Ink,
             });
             heading.Add(pageRow, 1.4f);
             doc.Add(heading);
@@ -262,7 +262,7 @@ public static class ExhibitBundleIndexExample
             {
                 FontName = StandardFonts.Helvetica,
                 FontSize = 9,
-                TextColor = Accent,
+                Color = Accent,
                 Margin = new Thickness(0, 18, 0, 0),
             });
         }

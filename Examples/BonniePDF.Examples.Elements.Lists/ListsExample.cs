@@ -152,7 +152,7 @@ public static class ListsExample
         {
             BulletStyle = BulletStyle.Square,
             BulletColor = Color.Red,
-            TextColor   = ColorPalette.Slate[700],
+            Color   = ColorPalette.Slate[700],
             FontSize    = 12,
             ItemSpacing = 6,
         };
@@ -186,7 +186,7 @@ public static class ListsExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 22,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 10),
         });
     }
@@ -199,7 +199,7 @@ public static class ListsExample
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 14,
-            TextColor     = ColorPalette.Indigo[600],
+            Color     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 14, 0, 6),
         });
     }

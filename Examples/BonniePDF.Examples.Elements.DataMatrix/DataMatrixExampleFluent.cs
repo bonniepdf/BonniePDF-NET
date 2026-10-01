@@ -48,7 +48,7 @@ public static class DataMatrixExampleFluent
                         .Text("Data Matrix Generator (Fluent API)")
                         .Font(StandardFonts.HelveticaBold)
                         .FontSize(24)
-                        .TextColor(ColorPalette.Slate[800])
+                        .Color(ColorPalette.Slate[800])
                         .Margin(0, 0, 0, 20);
 
                     col.Item()
@@ -138,7 +138,7 @@ public static class DataMatrixExampleFluent
                                 .ForegroundColor(ColorPalette.Blue[700])
                                 .QuietZone(2)
                                 .AltText("Data matrix encoding ID-7782");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("ID-7782").FontSize(9).TextColor(ColorPalette.Slate[500]);
+                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("ID-7782").FontSize(9).Color(ColorPalette.Slate[500]);
                         });
 
                         // Custom Background
@@ -151,7 +151,7 @@ public static class DataMatrixExampleFluent
                                 .BackgroundColor(ColorPalette.Rose[50])
                                 .QuietZone(2)
                                 .AltText("Data matrix encoding BATCH-44");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("BATCH-44").FontSize(9).TextColor(ColorPalette.Slate[500]);
+                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("BATCH-44").FontSize(9).Color(ColorPalette.Slate[500]);
                         });
 
                         // High Contrast (transparent, container background shows through)
@@ -168,7 +168,7 @@ public static class DataMatrixExampleFluent
                                 .DrawBackground(false)
                                 .QuietZone(2)
                                 .AltText("Data matrix encoding A-1029");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("A-1029").FontSize(9).TextColor(ColorPalette.Slate[500]);
+                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("A-1029").FontSize(9).Color(ColorPalette.Slate[500]);
                         });
                     });
                 });
@@ -187,8 +187,8 @@ public static class DataMatrixExampleFluent
                 .AltText($"Data matrix encoding {data}");
 
             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text(label).Font(StandardFonts.HelveticaBold);
-            card.Item().AlignCenter().Text(detail).FontSize(9).TextColor(ColorPalette.Slate[500]);
-            card.Item().AlignCenter().Text(data).FontSize(8).TextColor(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
+            card.Item().AlignCenter().Text(detail).FontSize(9).Color(ColorPalette.Slate[500]);
+            card.Item().AlignCenter().Text(data).FontSize(8).Color(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
         });
     }
 
@@ -203,7 +203,7 @@ public static class DataMatrixExampleFluent
                 .AltText($"Rectangular data matrix encoding {data}");
 
             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text(label).Font(StandardFonts.HelveticaBold);
-            card.Item().AlignCenter().Text(data).FontSize(9).TextColor(ColorPalette.Slate[500]);
+            card.Item().AlignCenter().Text(data).FontSize(9).Color(ColorPalette.Slate[500]);
         });
     }
 
@@ -213,7 +213,7 @@ public static class DataMatrixExampleFluent
             .Text(title)
             .Font(StandardFonts.HelveticaBold)
             .FontSize(16)
-            .TextColor(ColorPalette.Indigo[600])
+            .Color(ColorPalette.Indigo[600])
             .Margin(0, 0, 0, 10);
     }
 }

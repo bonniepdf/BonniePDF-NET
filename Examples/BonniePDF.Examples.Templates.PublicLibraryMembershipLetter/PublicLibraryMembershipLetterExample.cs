@@ -62,7 +62,7 @@ public static class PublicLibraryMembershipLetterExample
                 Text = $"Sample Libraries  -  Ref NBL-4471-208823  -  Page {pageNumber}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8,
-                TextColor = LibrarySecondary,
+                Color = LibrarySecondary,
             },
         };
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(LibraryInk);
@@ -117,7 +117,7 @@ public static class PublicLibraryMembershipLetterExample
             Text = "This document is available in Braille, large print, audio and other formats. " +
                    "Contact Membership Services to request an alternative format.",
             FontSize = 9.5f,
-            TextColor = LibrarySecondary,
+            Color = LibrarySecondary,
             Margin = new Thickness(0, 18, 0, 0),
         });
     }
@@ -132,7 +132,7 @@ public static class PublicLibraryMembershipLetterExample
             Text = "Sample Libraries",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
-            TextColor = Color.White,
+            Color = Color.White,
         },
     };
 
@@ -144,7 +144,7 @@ public static class PublicLibraryMembershipLetterExample
             Text = "Membership Services",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 12,
-            TextColor = LibraryInk,
+            Color = LibraryInk,
             Margin = new Thickness(0, 0, 0, 2),
         });
         stack.Add(new Container
@@ -180,20 +180,20 @@ public static class PublicLibraryMembershipLetterExample
     private static Container StatusCallout()
     {
         VerticalStack stack = new();
-        stack.Add(new TextBlock { Text = "Membership status", FontSize = 11, TextColor = LibrarySecondary });
+        stack.Add(new TextBlock { Text = "Membership status", FontSize = 11, Color = LibrarySecondary });
         stack.Add(new TextBlock
         {
             Text = "Active",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 28,
-            TextColor = LibraryInk,
+            Color = LibraryInk,
             Margin = new Thickness(0, 2, 0, 2),
         });
         stack.Add(new TextBlock
         {
             Text = "Borrow, renew, and reserve items from today",
             FontSize = 11,
-            TextColor = LibrarySecondary,
+            Color = LibrarySecondary,
         });
 
         return new Container
@@ -236,7 +236,7 @@ public static class PublicLibraryMembershipLetterExample
         Level = 1,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 22,
-        TextColor = LibraryInk,
+        Color = LibraryInk,
         Margin = new Thickness(0, 0, 0, 12),
     };
 
@@ -245,7 +245,7 @@ public static class PublicLibraryMembershipLetterExample
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 15,
-        TextColor = LibraryInk,
+        Color = LibraryInk,
         Margin = new Thickness(0, 6, 0, 8),
     };
 
@@ -256,7 +256,7 @@ public static class PublicLibraryMembershipLetterExample
             Text = text,
             FontName = StandardFonts.Helvetica,
             FontSize = size,
-            TextColor = color ?? LibraryInk,
+            Color = color ?? LibraryInk,
             Margin = new Thickness(0, 0, 0, mb),
         };
         if (align.HasValue)
@@ -272,7 +272,7 @@ public static class PublicLibraryMembershipLetterExample
         Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 11,
-        TextColor = Color.White,
+        Color = Color.White,
         Alignment = TextAlignment.Left,
     };
 
@@ -281,7 +281,7 @@ public static class PublicLibraryMembershipLetterExample
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = 11,
-        TextColor = color ?? LibraryInk,
+        Color = color ?? LibraryInk,
         Alignment = align,
     };
 

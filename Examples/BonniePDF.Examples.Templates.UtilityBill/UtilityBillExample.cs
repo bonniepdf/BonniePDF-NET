@@ -123,7 +123,7 @@ public static class UtilityBillExample
             TocIdentifier = "bill",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 16f,
-            TextColor = AccentDeep,
+            Color = AccentDeep,
         };
 
         VerticalStack identity = new() { Spacing = 2 };
@@ -296,7 +296,7 @@ public static class UtilityBillExample
         canvas.StrokeCurrentPath(new StrokeStyle { Paint = Color.FromHex("#94a3b8"), Width = 0.75f, DashPattern = [3, 3] });
     })
     {
-        CanvasHeight = 10,
+        DrawHeight = 10,
         IsDecorative = true,
         Margin = new Thickness(0, 6, 0, 6),
     };
@@ -356,7 +356,7 @@ public static class UtilityBillExample
         TocIdentifier = id,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 11f,
-        TextColor = Ink,
+        Color = Ink,
         Margin = new Thickness(0, 0, 0, 6),
     };
 
@@ -377,7 +377,7 @@ public static class UtilityBillExample
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = size,
-        TextColor = color ?? Ink,
+        Color = color ?? Ink,
         Alignment = align,
     };
 

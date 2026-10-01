@@ -376,7 +376,7 @@ public static class PermitToWorkExample
             },
             0.35f);
         row.Add(
-            new TextBlock { Text = text, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = Ink },
+            new TextBlock { Text = text, FontName = StandardFonts.Helvetica, FontSize = 9, Color = Ink },
             12);
         return row;
     }
@@ -387,7 +387,7 @@ public static class PermitToWorkExample
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
         row.Add(
-            new TextBlock { Text = left, FontName = StandardFonts.Helvetica, FontSize = 7.5f, TextColor = color },
+            new TextBlock { Text = left, FontName = StandardFonts.Helvetica, FontSize = 7.5f, Color = color },
             3);
         row.Add(
             new TextBlock
@@ -395,7 +395,7 @@ public static class PermitToWorkExample
                 Text = right,
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7.5f,
-                TextColor = Muted,
+                Color = Muted,
                 Alignment = TextAlignment.Right,
             },
             1.5f);

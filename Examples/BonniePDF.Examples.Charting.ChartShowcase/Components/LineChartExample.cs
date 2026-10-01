@@ -30,8 +30,8 @@ public static class LineChartExample
             FooterTemplate = pageNumber =>
             {
                 HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.Add(new TextBlock { Text = "BonniePDF - Line Chart", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500] }, null);
-                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                stack.Add(new TextBlock { Text = "BonniePDF - Line Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] }, null);
+                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
                 return stack;
             }
         });
@@ -50,7 +50,7 @@ public static class LineChartExample
         {
             Text = "Monthly Revenue Trends",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -58,7 +58,7 @@ public static class LineChartExample
         {
             Text = "Connected data points with markers and value labels",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 

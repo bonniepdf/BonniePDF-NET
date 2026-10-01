@@ -32,7 +32,7 @@ public static class EncryptionOwnerOnlyExample
         {
             Text = "Open Without Password (Restricted)",
             FontSize = 24,
-            TextColor = ColorPalette.Blue[700]
+            Color = ColorPalette.Blue[700]
         });
 
         doc.Add(new TextBlock
@@ -47,18 +47,18 @@ public static class EncryptionOwnerOnlyExample
             Margin = new Thickness(0, 10, 0, 5)
         });
 
-        doc.Add(new TextBlock { Text = "  - Low-quality printing: Allowed", TextColor = ColorPalette.Green[700] });
-        doc.Add(new TextBlock { Text = "  - Accessibility extraction: Allowed", TextColor = ColorPalette.Green[700] });
-        doc.Add(new TextBlock { Text = "  - Copying text: Denied", TextColor = ColorPalette.Red[600] });
-        doc.Add(new TextBlock { Text = "  - Modifying: Denied", TextColor = ColorPalette.Red[600] });
-        doc.Add(new TextBlock { Text = "  - High-quality printing: Denied", TextColor = ColorPalette.Red[600] });
+        doc.Add(new TextBlock { Text = "  - Low-quality printing: Allowed", Color = ColorPalette.Green[700] });
+        doc.Add(new TextBlock { Text = "  - Accessibility extraction: Allowed", Color = ColorPalette.Green[700] });
+        doc.Add(new TextBlock { Text = "  - Copying text: Denied", Color = ColorPalette.Red[600] });
+        doc.Add(new TextBlock { Text = "  - Modifying: Denied", Color = ColorPalette.Red[600] });
+        doc.Add(new TextBlock { Text = "  - High-quality printing: Denied", Color = ColorPalette.Red[600] });
 
         doc.Add(new TextBlock
         {
             Text = "Owner password: secret",
             FontSize = 14,
             Margin = new Thickness(0, 20, 0, 0),
-            TextColor = ColorPalette.Red[600]
+            Color = ColorPalette.Red[600]
         });
         return doc;
     }

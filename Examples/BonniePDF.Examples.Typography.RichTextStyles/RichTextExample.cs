@@ -50,7 +50,7 @@ public static class RichTextExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 22,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 10),
         });
 
@@ -162,7 +162,7 @@ public static class RichTextExample
 
         Section(doc, "Reusable Styles", "s-reusable");
 
-        TextStyle labelStyle = new() { FontFamily = StandardFonts.Helvetica, Weight = FontWeight.Bold, Color = ColorPalette.Slate[800]  };
+        TextStyle labelStyle = new() { FontFamily = StandardFonts.Helvetica, FontWeight = FontWeight.Bold, Color = ColorPalette.Slate[800]  };
         TextStyle valueStyle = new() { FontFamily = StandardFonts.Helvetica,                               Color = ColorPalette.Indigo[600] };
         TextStyle unitStyle  = new() { FontFamily = StandardFonts.Helvetica, FontSize   = 9,               Color = ColorPalette.Slate[400]  };
 
@@ -223,7 +223,7 @@ public static class RichTextExample
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 13,
-            TextColor     = ColorPalette.Indigo[600],
+            Color     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 14, 0, 6),
         });
     }

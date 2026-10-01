@@ -29,8 +29,8 @@ public static class LollipopChartExample
             FooterTemplate = pageNumber =>
             {
                 HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.Add(new TextBlock { Text = "BonniePDF - Lollipop Chart", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500] }, null);
-                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                stack.Add(new TextBlock { Text = "BonniePDF - Lollipop Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] }, null);
+                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
                 return stack;
             }
         });
@@ -49,7 +49,7 @@ public static class LollipopChartExample
         {
             Text = "Quarterly Performance Metrics",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -57,7 +57,7 @@ public static class LollipopChartExample
         {
             Text = "Stems with circular heads - clear and minimal bar alternative",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -71,10 +71,10 @@ public static class LollipopChartExample
                 {
                     DataPoints =
                     [
-                        new ChartDataPoint { Label = "Q1", Value = 4500, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Q2", Value = 6200, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Q3", Value = 8500, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Q4", Value = 11500, LabelFormat = "'£'#,##0" }
+                        new ChartDataPoint { Label = "Q1", Value = 4500, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Q2", Value = 6200, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Q3", Value = 8500, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Q4", Value = 11500, LabelFormat = "N0" }
                     ]
                 }
             ],

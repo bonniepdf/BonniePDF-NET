@@ -32,14 +32,14 @@ public static class WebApiStreamingExample
             Text = "Monthly Sales Report",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
         doc.Add(new TextBlock
         {
             Text = $"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-            TextColor = ColorPalette.Slate[500]
+            Color = ColorPalette.Slate[500]
         });
         return doc;
     }
@@ -64,14 +64,14 @@ public static class WebApiStreamingExample
             Text = "Monthly Sales Report",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
         doc.Add(new TextBlock
         {
             Text = $"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-            TextColor = ColorPalette.Slate[500]
+            Color = ColorPalette.Slate[500]
         });
 
         // Save to the provided stream without closing it

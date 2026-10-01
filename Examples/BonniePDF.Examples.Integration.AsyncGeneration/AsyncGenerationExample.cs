@@ -36,7 +36,7 @@ public static class AsyncGenerationExample
             Text = "Async PDF Generation",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800]
+            Color = ColorPalette.Slate[800]
         });
 
         // Uses DefaultTextStyle (Helvetica, 11, Slate600)
@@ -76,7 +76,7 @@ public static class AsyncGenerationExample
             Text = "In-Memory PDF Generation",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800]
+            Color = ColorPalette.Slate[800]
         });
 
         doc.Add(new TextBlock
@@ -84,7 +84,7 @@ public static class AsyncGenerationExample
             Text = "This PDF was generated entirely in memory without touching the disk.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[600]
+            Color = ColorPalette.Slate[600]
         });
 
         // Save to MemoryStream asynchronously
@@ -111,7 +111,7 @@ public static class AsyncGenerationExample
             Text = "Cancellable PDF Generation",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800]
+            Color = ColorPalette.Slate[800]
         });
 
         doc.Add(new TextBlock
@@ -119,7 +119,7 @@ public static class AsyncGenerationExample
             Text = "This PDF generation can be cancelled using the cancellation token.",
             FontName = StandardFonts.Helvetica,
             FontSize = 12,
-            TextColor = ColorPalette.Slate[600]
+            Color = ColorPalette.Slate[600]
         });
 
         // Save with cancellation token

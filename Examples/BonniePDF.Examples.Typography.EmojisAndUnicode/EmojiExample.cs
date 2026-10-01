@@ -54,7 +54,7 @@ public static class EmojiExample
             Level         = 1,
             FontName      = textFont,
             FontSize      = 20,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 8),
         });
 
@@ -147,7 +147,7 @@ public static class EmojiExample
             TocIdentifier = tocId,
             Level         = 2,
             FontSize      = 13,
-            TextColor     = ColorPalette.Indigo[600],
+            Color     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 12, 0, 4),
         });
     }
@@ -155,12 +155,12 @@ public static class EmojiExample
     private static void BmpSection(Document doc, string title, string tocId, string content, string font)
     {
         Section(doc, title, tocId);
-        doc.Add(new TextBlock { Text = content, FontName = font, FontSize = 12, TextColor = ColorPalette.Slate[600], Margin = new Thickness(0, 0, 0, 4) });
+        doc.Add(new TextBlock { Text = content, FontName = font, FontSize = 12, Color = ColorPalette.Slate[600], Margin = new Thickness(0, 0, 0, 4) });
     }
 
     private static void EmojiSection(Document doc, string title, string tocId, string content, string font)
     {
         Section(doc, title, tocId);
-        doc.Add(new TextBlock { Text = content, FontName = font, FontSize = 20, TextColor = ColorPalette.Slate[800], Margin = new Thickness(0, 0, 0, 4) });
+        doc.Add(new TextBlock { Text = content, FontName = font, FontSize = 20, Color = ColorPalette.Slate[800], Margin = new Thickness(0, 0, 0, 4) });
     }
 }

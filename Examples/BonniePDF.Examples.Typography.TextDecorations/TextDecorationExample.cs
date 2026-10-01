@@ -49,7 +49,7 @@ public static class TextDecorationExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 22,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 10),
         });
 
@@ -67,7 +67,7 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text           = "This text has an underline applied. Underlines can mark emphasis, hyperlinks, or headings in informal documents.",
-            TextDecoration = TextDecoration.Underline,
+            Decoration = TextDecoration.Underline,
             Margin         = new Thickness(0, 0, 0, 10),
         });
 
@@ -78,7 +78,7 @@ public static class TextDecorationExample
         doc.Add(new TextBlock
         {
             Text           = "This text has a strikethrough applied. Strikethrough visually signals content that has been withdrawn, revised, or superseded.",
-            TextDecoration = TextDecoration.Strikethrough,
+            Decoration = TextDecoration.Strikethrough,
             Margin         = new Thickness(0, 0, 0, 10),
         });
 
@@ -90,7 +90,7 @@ public static class TextDecorationExample
         {
             Text           = "Both decorations can be applied simultaneously. TextDecoration is a set of flags — combine them with the | operator: " +
                              "TextDecoration.Underline | TextDecoration.Strikethrough.",
-            TextDecoration = TextDecoration.Underline | TextDecoration.Strikethrough,
+            Decoration = TextDecoration.Underline | TextDecoration.Strikethrough,
             Margin         = new Thickness(0, 0, 0, 10),
         });
 
@@ -110,7 +110,7 @@ public static class TextDecorationExample
             doc.Add(new TextBlock
             {
                 Text           = text,
-                TextDecoration = TextDecoration.Underline,
+                Decoration = TextDecoration.Underline,
                 Alignment      = align,
                 Margin         = new Thickness(0, 0, 0, 8),
             });
@@ -126,7 +126,7 @@ public static class TextDecorationExample
             {
                 Text           = $"Underline at {size}pt",
                 FontSize       = size,
-                TextDecoration = TextDecoration.Underline,
+                Decoration = TextDecoration.Underline,
                 Margin         = new Thickness(0, 0, 0, 6),
             });
         }
@@ -147,8 +147,8 @@ public static class TextDecorationExample
             Text           = "Original Price: £199.99",
             FontSize       = 14,
             // 600, not 400: 400 never clears 4.5:1 as text (2.63:1 here).
-            TextColor      = ColorPalette.Slate[600],
-            TextDecoration = TextDecoration.Strikethrough,
+            Color      = ColorPalette.Slate[600],
+            Decoration = TextDecoration.Strikethrough,
             Margin         = new Thickness(0, 0, 0, 4),
         });
 
@@ -157,8 +157,8 @@ public static class TextDecorationExample
             Text           = "Sale Price: £149.99",
             FontName       = StandardFonts.HelveticaBold,
             FontSize       = 18,
-            TextColor      = Color.Red,
-            TextDecoration = TextDecoration.Underline,
+            Color      = Color.Red,
+            Decoration = TextDecoration.Underline,
             Margin         = new Thickness(0, 0, 0, 4),
         });
 
@@ -168,7 +168,7 @@ public static class TextDecorationExample
             FontSize  = 11,
             // 700, not 600: 11pt regular text on white needs 4.5:1 and 600 falls
             // to 3.22:1.
-            TextColor = ColorPalette.Green[700],
+            Color = ColorPalette.Green[700],
         });
 
         return doc;
@@ -182,7 +182,7 @@ public static class TextDecorationExample
             Level         = 2,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 14,
-            TextColor     = ColorPalette.Indigo[600],
+            Color     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 12, 0, 6),
         });
     }

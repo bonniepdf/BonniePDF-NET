@@ -36,7 +36,7 @@ public static class WebApiBasicExample
             Text = "PDF from Web API",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -53,7 +53,7 @@ public static class WebApiBasicExample
             Text = "Benefits of this approach:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
         features.Add(new TextBlock { Text = "• No temporary files on disk" });
@@ -90,7 +90,7 @@ public static class WebApiBasicExample
             Text = "PDF from Web API",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12)
         });
 
@@ -107,7 +107,7 @@ public static class WebApiBasicExample
             Text = "Benefits of this approach:",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 6)
         });
         features.Add(new TextBlock { Text = "• No temporary files on disk" });

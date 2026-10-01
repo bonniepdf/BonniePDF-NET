@@ -80,7 +80,7 @@ public static class FinancialStatementExample
                 Text = $"Sample Company Ltd  -  Company no. 07741122  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8,
-                TextColor = Muted,
+                Color = Muted,
             },
         };
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Ink);
@@ -125,7 +125,7 @@ public static class FinancialStatementExample
                 Text = line.Label,
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 10,
-                TextColor = Navy,
+                Color = Navy,
                 Margin = new Thickness(0, 8, 0, 4),
             };
         }
@@ -142,7 +142,7 @@ public static class FinancialStatementExample
             Text = line.Label,
             FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
             FontSize = 10,
-            TextColor = bold ? Navy : Ink,
+            Color = bold ? Navy : Ink,
             Margin = line.Indent ? new Thickness(14, 0, 0, 0) : new Thickness(),
         };
 
@@ -179,7 +179,7 @@ public static class FinancialStatementExample
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = 10,
-        TextColor = color,
+        Color = color,
         Alignment = align,
     };
 
@@ -195,7 +195,7 @@ public static class FinancialStatementExample
         Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 11,
-        TextColor = Muted,
+        Color = Muted,
         Margin = new Thickness(0, 0, 0, 4),
     };
 
@@ -205,7 +205,7 @@ public static class FinancialStatementExample
         Level = 1,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 22,
-        TextColor = Navy,
+        Color = Navy,
         Margin = new Thickness(0, 0, 0, 4),
     };
 
@@ -215,7 +215,7 @@ public static class FinancialStatementExample
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 14,
-        TextColor = Navy,
+        Color = Navy,
         Margin = new Thickness(0, 4, 0, 8),
     };
 
@@ -224,7 +224,7 @@ public static class FinancialStatementExample
         Text = text,
         FontName = StandardFonts.Helvetica,
         FontSize = 9,
-        TextColor = Muted,
+        Color = Muted,
         Margin = new Thickness(0, 0, 0, 3),
     };
 

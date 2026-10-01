@@ -52,7 +52,7 @@ internal static class FieldKit
         Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 8.5f,
-        TextColor = color ?? Accent,
+        Color = color ?? Accent,
         Margin = new Thickness(0, 0, 0, 4),
     };
 
@@ -61,7 +61,7 @@ internal static class FieldKit
         Level = 1,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 21,
-        TextColor = HeadingColor,
+        Color = HeadingColor,
         Margin = new Thickness(0, 0, 0, 6),
     };
 
@@ -70,7 +70,7 @@ internal static class FieldKit
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 13,
-        TextColor = Accent,
+        Color = Accent,
         Margin = new Thickness(0, 14, 0, 8),
     };
 
@@ -79,7 +79,7 @@ internal static class FieldKit
         Level = 3,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 10.5f,
-        TextColor = HeadingColor,
+        Color = HeadingColor,
         Margin = new Thickness(0, 8, 0, 5),
     };
 
@@ -94,7 +94,7 @@ internal static class FieldKit
             Text = text,
             FontName = StandardFonts.Helvetica,
             FontSize = size,
-            TextColor = color ?? Ink,
+            Color = color ?? Ink,
             Margin = new Thickness(0, marginTop, 0, marginBottom),
         };
 
@@ -104,7 +104,7 @@ internal static class FieldKit
         Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 8.5f,
-        TextColor = Color.White,
+        Color = Color.White,
     };
 
     /// <summary>Table body cell.</summary>
@@ -113,7 +113,7 @@ internal static class FieldKit
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = size,
-        TextColor = color ?? Ink,
+        Color = color ?? Ink,
     };
 
     // ── Structure ─────────────────────────────────────────────────────────────
@@ -135,7 +135,7 @@ internal static class FieldKit
             Text = label.ToUpperInvariant(),
             FontName = StandardFonts.HelveticaBold,
             FontSize = 6.5f,
-            TextColor = Muted,
+            Color = Muted,
             Margin = new Thickness(0, 0, 0, 2),
         });
         stack.Add(new TextBlock
@@ -143,7 +143,7 @@ internal static class FieldKit
             Text = value,
             FontName = StandardFonts.Helvetica,
             FontSize = 9.5f,
-            TextColor = Ink,
+            Color = Ink,
         });
         return stack;
     }
@@ -180,7 +180,7 @@ internal static class FieldKit
             Text = title,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9.5f,
-            TextColor = accent ?? Accent,
+            Color = accent ?? Accent,
             Margin = new Thickness(0, 0, 0, 4),
         });
         foreach (IElement child in children)
@@ -208,7 +208,7 @@ internal static class FieldKit
             Text = text,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 8,
-            TextColor = color,
+            Color = color,
         },
     };
 
@@ -230,7 +230,7 @@ internal static class FieldKit
             Text = role.ToUpperInvariant(),
             FontName = StandardFonts.HelveticaBold,
             FontSize = 6.5f,
-            TextColor = Muted,
+            Color = Muted,
             Margin = new Thickness(0, 0, 0, 18),
         });
 
@@ -247,14 +247,14 @@ internal static class FieldKit
             Text = name,
             FontName = StandardFonts.Helvetica,
             FontSize = 9,
-            TextColor = Ink,
+            Color = Ink,
         });
         stack.Add(new TextBlock
         {
             Text = dated is not null ? $"Date: {dated}" : "Date:",
             FontName = StandardFonts.Helvetica,
             FontSize = 8,
-            TextColor = Muted,
+            Color = Muted,
             Margin = new Thickness(0, 3, 0, 0),
         });
         return stack;

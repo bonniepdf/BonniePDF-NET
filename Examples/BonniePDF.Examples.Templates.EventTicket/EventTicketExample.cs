@@ -74,7 +74,7 @@ public static class EventTicketExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 19,
-            TextColor = Cream,
+            Color = Cream,
             Margin = new Thickness(0, 0, 0, 3),
         });
         info.Add(Tb("Main Stage, Sample Park, Sample City", 10, BodyCol, bottom: 12));
@@ -175,7 +175,7 @@ public static class EventTicketExample
             Text = content,
             FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
             FontSize = size,
-            TextColor = color,
+            Color = color,
         };
         if (align.HasValue) t.Alignment = align.Value;
         if (bottom > 0) t.Margin = new Thickness(0, 0, 0, bottom);

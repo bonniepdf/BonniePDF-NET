@@ -64,7 +64,7 @@ public static class HeadersFootersExample
                 Text      = $"BonniePDF - Headers & Footers - Page {pageNum}",
                 FontName  = StandardFonts.Helvetica,
                 FontSize  = 9,
-                TextColor = ColorPalette.Slate[500],
+                Color = ColorPalette.Slate[500],
                 Alignment = TextAlignment.Center,
             },
             FooterTemplate = pageNum => new TextBlock
@@ -72,7 +72,7 @@ public static class HeadersFootersExample
                 Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
                 FontName  = StandardFonts.Helvetica,
                 FontSize  = 9,
-                TextColor = ColorPalette.Slate[400],
+                Color = ColorPalette.Slate[400],
                 Alignment = TextAlignment.Center,
             },
         })
@@ -92,7 +92,7 @@ public static class HeadersFootersExample
             Level         = 1,
             FontName      = StandardFonts.HelveticaBold,
             FontSize      = 22,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 14),
         });
 
@@ -112,7 +112,7 @@ public static class HeadersFootersExample
                 Level         = 2,
                 FontName      = StandardFonts.HelveticaBold,
                 FontSize      = 14,
-                TextColor     = ColorPalette.Indigo[600],
+                Color     = ColorPalette.Indigo[600],
                 Margin        = new Thickness(0, 14, 0, 6),
             });
 

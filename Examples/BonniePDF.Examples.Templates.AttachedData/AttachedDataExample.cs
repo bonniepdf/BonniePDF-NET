@@ -39,6 +39,7 @@ public static class AttachedDataExample
 
     public static Document Generate()
     {
+        #region settings
         Document doc = new(new DocumentSettings
         {
             PageSize = PdfSize.A4,
@@ -51,10 +52,12 @@ public static class AttachedDataExample
         doc.Metadata.Title = "Quarterly revenue 2026";
         doc.Metadata.Author = "BonniePDF";
         doc.Metadata.Subject = "PDF/A-3 Report with Embedded Data";
+        #endregion settings
 
         doc.Add(Tb("Quarterly revenue - 2026", 18, Ink, bold: true, bottom: 4));
         doc.Add(Tb("The source data for this report is embedded as quarterly-revenue.csv.", 9, Mute, bottom: 16));
 
+        #region table
         Table table = new(2f, 2f, 2f) { Border = Border.None, CellPadding = 6 };
         // Real tabular data → a proper header row (emits TH cells for assistive tech).
         table.AddHeader(
@@ -69,8 +72,10 @@ public static class AttachedDataExample
                 Tb(customers.ToString(), 10, BodyCol, align: TextAlignment.Right));
         }
         doc.Add(table);
+        #endregion table
 
         // ── Embed the source data as an attachment ────────────────
+        #region attach
         doc.Attach(new FileAttachment
         {
             FileName = "quarterly-revenue.csv",
@@ -79,6 +84,7 @@ public static class AttachedDataExample
             MediaType = "text/csv",
             Description = "Source data for the quarterly revenue report",
         });
+        #endregion attach
 
         return doc;
     }
@@ -100,7 +106,7 @@ public static class AttachedDataExample
             Text = content,
             FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
             FontSize = size,
-            TextColor = color,
+            Color = color,
         };
         if (align.HasValue) t.Alignment = align.Value;
         if (bottom > 0) t.Margin = new Thickness(0, 0, 0, bottom);

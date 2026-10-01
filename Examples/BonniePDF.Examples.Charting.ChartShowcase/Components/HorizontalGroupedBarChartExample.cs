@@ -37,7 +37,7 @@ public static class HorizontalGroupedBarChartExample
         {
             Text = "Quarterly Sales by Region",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 10));
 
@@ -45,7 +45,7 @@ public static class HorizontalGroupedBarChartExample
         {
             Text = "Three product lines compared across four quarters - horizontal grouped layout",
             FontSize = 13,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 

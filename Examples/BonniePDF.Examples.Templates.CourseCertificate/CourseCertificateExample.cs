@@ -132,9 +132,9 @@ public static class CourseCertificateExample
         }
     })
     {
-        // CanvasWidth 0 (the default) means "fill the width available", which is
+        // DrawWidth 0 (the default) means "fill the width available", which is
         // what makes the frame span the content area.
-        CanvasHeight = FrameHeight,
+        DrawHeight = FrameHeight,
         IsDecorative = true,
     };
 
@@ -183,8 +183,8 @@ public static class CourseCertificateExample
         canvas.DrawText(cx - monogramWidth / 2, cy - fontSize / 2, monogram, Accent, fontSize, StandardFonts.TimesBold, 0);
     })
     {
-        CanvasWidth = 52,
-        CanvasHeight = 52,
+        DrawWidth = 52,
+        DrawHeight = 52,
         IsDecorative = true,
     };
 
@@ -219,7 +219,7 @@ public static class CourseCertificateExample
             TocIdentifier = "certificate",
             FontName = StandardFonts.TimesBold,
             FontSize = 26f,
-            TextColor = Ink,
+            Color = Ink,
             Alignment = TextAlignment.Center,
             Margin = new Thickness(0, 0, 0, 4),
         });
@@ -325,7 +325,7 @@ public static class CourseCertificateExample
         Text = content,
         FontName = font ?? StandardFonts.TimesRoman,
         FontSize = size,
-        TextColor = color ?? Ink,
+        Color = color ?? Ink,
         Alignment = align,
     };
 

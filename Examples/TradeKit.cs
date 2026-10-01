@@ -49,7 +49,7 @@ internal static class TradeKit
             Text = text,
             FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
             FontSize = size,
-            TextColor = color ?? Ink,
+            Color = color ?? Ink,
             Alignment = align,
             Margin = new Thickness(0, marginTop, 0, marginBottom),
         };
@@ -80,7 +80,7 @@ internal static class TradeKit
         Level = 1,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 21,
-        TextColor = Heading,
+        Color = Heading,
         Margin = new Thickness(0, 0, 0, 4),
     };
 
@@ -89,7 +89,7 @@ internal static class TradeKit
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 13,
-        TextColor = color ?? Accent,
+        Color = color ?? Accent,
         Margin = new Thickness(0, 16, 0, 8),
     };
 
@@ -98,7 +98,7 @@ internal static class TradeKit
         Level = 3,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 10.5f,
-        TextColor = Heading,
+        Color = Heading,
         Margin = new Thickness(0, 10, 0, 5),
     };
 

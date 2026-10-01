@@ -62,7 +62,7 @@ public static class EmbeddedFontMetricsExample
             Level         = 1,
             FontName      = sansBoldPath,
             FontSize      = 22,
-            TextColor     = ColorPalette.Slate[800],
+            Color     = ColorPalette.Slate[800],
             Margin        = new Thickness(0, 0, 0, 16),
         });
 
@@ -119,7 +119,7 @@ public static class EmbeddedFontMetricsExample
             Level         = 2,
             FontName      = fontPath,
             FontSize      = 13,
-            TextColor     = ColorPalette.Indigo[600],
+            Color     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 0, 0, 6),
             Alignment     = alignment,
         });

@@ -109,7 +109,7 @@ public static class QuotationExample
                 Text = $"{Sample.Reference.QuoteNumber} · Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7f,
-                TextColor = Faint,
+                Color = Faint,
                 Alignment = TextAlignment.Center,
             },
         };
@@ -148,7 +148,7 @@ public static class QuotationExample
             TocIdentifier = "quotation",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 15f,
-            TextColor = Accent,
+            Color = Accent,
         });
         identity.Add(Text(data.Supplier.Address, size: 7.5f, color: Muted));
         identity.Add(Text(data.Supplier.Registration, size: 7.5f, color: Faint));
@@ -200,7 +200,7 @@ public static class QuotationExample
             NumberFormat = NumberFormat.Decimal,
             FontName = StandardFonts.Helvetica,
             FontSize = 9f,
-            TextColor = Ink,
+            Color = Ink,
             ItemSpacing = 4,
         };
         foreach (string item in data.Scope)
@@ -250,7 +250,7 @@ public static class QuotationExample
             {
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8f,
-                TextColor = Ink,
+                Color = Ink,
                 BulletColor = promoted ? Accent : Muted,
                 ItemSpacing = 3.5f,
             };
@@ -342,7 +342,7 @@ public static class QuotationExample
         {
             FontName = StandardFonts.Helvetica,
             FontSize = 8.5f,
-            TextColor = Muted,
+            Color = Muted,
             BulletColor = Faint,
             ItemSpacing = 4,
         };
@@ -402,7 +402,7 @@ public static class QuotationExample
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = size,
-        TextColor = color ?? Ink,
+        Color = color ?? Ink,
         Alignment = align,
     };
 
@@ -417,7 +417,7 @@ public static class QuotationExample
         TocIdentifier = id,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 11f,
-        TextColor = Ink,
+        Color = Ink,
         Margin = new Thickness(0, 0, 0, 6),
     };
 

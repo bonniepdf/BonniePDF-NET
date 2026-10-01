@@ -146,7 +146,7 @@ public static class PatientSummaryExample
             Text = content,
             FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
             FontSize = size,
-            TextColor = color,
+            Color = color,
         };
         if (align.HasValue) t.Alignment = align.Value;
         if (top > 0) t.Margin = new Thickness(0, top, 0, 0);

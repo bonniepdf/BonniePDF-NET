@@ -56,7 +56,7 @@ internal static class CapabilitiesPage
             Text = "INSIDE THE REPORT",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9,
-            TextColor = brand.Accent,
+            Color = brand.Accent,
             Margin = new Thickness(0, 0, 0, 4),
         });
         // A real H2 under the cover's H1: the section title carries structure, not
@@ -66,7 +66,7 @@ internal static class CapabilitiesPage
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 22,
-            TextColor = brand.Primary,
+            Color = brand.Primary,
             Margin = new Thickness(0, 0, 0, 6),
         });
         content.Add(new TextBlock
@@ -75,7 +75,7 @@ internal static class CapabilitiesPage
                 + "them: headline metrics, trend and mix charts, and an audited summary table.",
             FontName = StandardFonts.Helvetica,
             FontSize = 10,
-            TextColor = Muted,
+            Color = Muted,
             Margin = new Thickness(0, 0, 0, 18),
         });
 
@@ -110,7 +110,7 @@ internal static class CapabilitiesPage
             Level = 3,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 11,
-            TextColor = brand.Accent,
+            Color = brand.Accent,
             Margin = new Thickness(0, 0, 0, 8),
         });
         content.Add(FinancialTable(brand.Primary));
@@ -131,7 +131,7 @@ internal static class CapabilitiesPage
             Text = value,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 22,
-            TextColor = accent,
+            Color = accent,
             Margin = new Thickness(0, 0, 0, 3),
         });
         stack.Add(new TextBlock
@@ -139,7 +139,7 @@ internal static class CapabilitiesPage
             Text = label,
             FontName = StandardFonts.Helvetica,
             FontSize = 9,
-            TextColor = Muted,
+            Color = Muted,
         });
         return new Container
         {
@@ -158,7 +158,7 @@ internal static class CapabilitiesPage
             Text = title,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 11,
-            TextColor = accent,
+            Color = accent,
             Margin = new Thickness(0, 0, 0, 8),
         });
         stack.Add(body);
@@ -267,7 +267,7 @@ internal static class CapabilitiesPage
         Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 9,
-        TextColor = Color.White,
+        Color = Color.White,
         Alignment = align,
     };
 
@@ -276,7 +276,7 @@ internal static class CapabilitiesPage
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = 9,
-        TextColor = color,
+        Color = color,
         Alignment = align,
     };
 }

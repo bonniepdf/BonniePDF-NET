@@ -29,8 +29,8 @@ public static class AreaChartExample
             FooterTemplate = pageNumber =>
             {
                 HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.Add(new TextBlock { Text = "BonniePDF - Area Chart", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500] }, null);
-                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                stack.Add(new TextBlock { Text = "BonniePDF - Area Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] }, null);
+                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
                 return stack;
             }
         });
@@ -49,7 +49,7 @@ public static class AreaChartExample
         {
             Text = "Monthly Sales Performance",
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -57,7 +57,7 @@ public static class AreaChartExample
         {
             Text = "Filled area under the line with configurable opacity",
             FontSize = 14,
-            TextColor = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         }.Padding(0, 0, 0, 20));
 
@@ -71,18 +71,18 @@ public static class AreaChartExample
                 {
                     DataPoints =
                     [
-                        new ChartDataPoint { Label = "Jan", Value = 4500, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Feb", Value = 6200, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Mar", Value = 5800, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Apr", Value = 7200, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "May", Value = 8500, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Jun", Value = 9100, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Jul", Value = 8200, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Aug", Value = 7800, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Sep", Value = 9500, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Oct", Value = 10200, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Nov", Value = 11500, LabelFormat = "'£'#,##0" },
-                        new ChartDataPoint { Label = "Dec", Value = 12800, LabelFormat = "'£'#,##0" }
+                        new ChartDataPoint { Label = "Jan", Value = 4500, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Feb", Value = 6200, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Mar", Value = 5800, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Apr", Value = 7200, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "May", Value = 8500, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Jun", Value = 9100, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Jul", Value = 8200, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Aug", Value = 7800, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Sep", Value = 9500, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Oct", Value = 10200, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Nov", Value = 11500, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Dec", Value = 12800, LabelFormat = "N0" }
                     ]
                 }
             ],

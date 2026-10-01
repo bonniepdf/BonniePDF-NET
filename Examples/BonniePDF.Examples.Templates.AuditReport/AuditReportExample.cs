@@ -227,8 +227,8 @@ public static class AuditReportExample
     private static HorizontalStack BandRow(string left, string right, Color rightColor)
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
-        row.Add(new TextBlock { Text = left, FontName = StandardFonts.Helvetica, FontSize = 8, TextColor = Muted }, 3);
-        row.Add(new TextBlock { Text = right, FontName = StandardFonts.HelveticaBold, FontSize = 8, TextColor = rightColor, Alignment = TextAlignment.Right }, 2);
+        row.Add(new TextBlock { Text = left, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Muted }, 3);
+        row.Add(new TextBlock { Text = right, FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = rightColor, Alignment = TextAlignment.Right }, 2);
         return row;
     }
 
@@ -237,7 +237,7 @@ public static class AuditReportExample
         Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 9,
-        TextColor = Primary,
+        Color = Primary,
         Margin = new Thickness(0, 0, 0, 4),
     };
 
@@ -246,7 +246,7 @@ public static class AuditReportExample
         Level = 1,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 22,
-        TextColor = ColorPalette.Slate[800],
+        Color = ColorPalette.Slate[800],
         Margin = new Thickness(0, 0, 0, 6),
     };
 
@@ -255,7 +255,7 @@ public static class AuditReportExample
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 14,
-        TextColor = Primary,
+        Color = Primary,
         Margin = new Thickness(0, 8, 0, 8),
     };
 
@@ -264,7 +264,7 @@ public static class AuditReportExample
         Text = text,
         FontName = StandardFonts.Helvetica,
         FontSize = 10,
-        TextColor = color ?? Ink,
+        Color = color ?? Ink,
         Alignment = TextAlignment.Justify,
         Margin = new Thickness(0, 0, 0, mb),
     };
@@ -272,16 +272,16 @@ public static class AuditReportExample
     private static VerticalStack MetaItem(string label, string value)
     {
         VerticalStack stack = new();
-        stack.Add(new TextBlock { Text = label.ToUpperInvariant(), FontName = StandardFonts.HelveticaBold, FontSize = 7, TextColor = Muted, Margin = new Thickness(0, 0, 0, 2) });
-        stack.Add(new TextBlock { Text = value, FontName = StandardFonts.Helvetica, FontSize = 10, TextColor = Ink });
+        stack.Add(new TextBlock { Text = label.ToUpperInvariant(), FontName = StandardFonts.HelveticaBold, FontSize = 7, Color = Muted, Margin = new Thickness(0, 0, 0, 2) });
+        stack.Add(new TextBlock { Text = value, FontName = StandardFonts.Helvetica, FontSize = 10, Color = Ink });
         return stack;
     }
 
     private static Container Kpi(string value, string label, Color accent)
     {
         VerticalStack stack = new();
-        stack.Add(new TextBlock { Text = value, FontName = StandardFonts.HelveticaBold, FontSize = 20, TextColor = accent, Margin = new Thickness(0, 0, 0, 3) });
-        stack.Add(new TextBlock { Text = label, FontName = StandardFonts.Helvetica, FontSize = 8.5f, TextColor = Muted });
+        stack.Add(new TextBlock { Text = value, FontName = StandardFonts.HelveticaBold, FontSize = 20, Color = accent, Margin = new Thickness(0, 0, 0, 3) });
+        stack.Add(new TextBlock { Text = label, FontName = StandardFonts.Helvetica, FontSize = 8.5f, Color = Muted });
         return new Container { BackgroundColor = ColorPalette.Indigo[50], Padding = new Thickness(14, 12, 14, 12), Child = stack };
     }
 
@@ -293,7 +293,7 @@ public static class AuditReportExample
             Text = title,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 11,
-            TextColor = Primary,
+            Color = Primary,
             Margin = new Thickness(0, 0, 0, 8),
         });
         stack.Add(chart);
@@ -308,16 +308,16 @@ public static class AuditReportExample
         };
     }
 
-    private static TextBlock Th(string text) => new() { Text = text, FontName = StandardFonts.HelveticaBold, FontSize = 9, TextColor = Color.White };
+    private static TextBlock Th(string text) => new() { Text = text, FontName = StandardFonts.HelveticaBold, FontSize = 9, Color = Color.White };
 
-    private static TextBlock Td(string text, Color color) => new() { Text = text, FontName = StandardFonts.Helvetica, FontSize = 9, TextColor = color };
+    private static TextBlock Td(string text, Color color) => new() { Text = text, FontName = StandardFonts.Helvetica, FontSize = 9, Color = color };
 
     private static TextBlock SeverityCell(Severity severity) => new()
     {
         Text = severity.ToString(),
         FontName = StandardFonts.HelveticaBold,
         FontSize = 9,
-        TextColor = SeverityColor(severity),
+        Color = SeverityColor(severity),
     };
 
     // Bold 9pt text painted directly on the white row background, so each shade

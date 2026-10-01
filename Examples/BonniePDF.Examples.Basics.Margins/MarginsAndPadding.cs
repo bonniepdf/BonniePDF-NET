@@ -35,7 +35,7 @@ public static class MarginsAndPadding
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 20,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 6)
         });
 
@@ -105,7 +105,7 @@ public static class MarginsAndPadding
                 Text = "Image 100x60",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 10,
-                TextColor = ColorPalette.Amber[900],
+                Color = ColorPalette.Amber[900],
                 Alignment = TextAlignment.Center
             },
             Padding = new Thickness(6)
@@ -167,7 +167,7 @@ public static class MarginsAndPadding
             {
                 Text = "Item 1 in stack",
                 FontSize = 10,
-                TextColor = ColorPalette.Green[800]
+                Color = ColorPalette.Green[800]
             }
         });
 
@@ -180,7 +180,7 @@ public static class MarginsAndPadding
             {
                 Text = "Item 2 in stack (with top margin)",
                 FontSize = 10,
-                TextColor = ColorPalette.Purple[800]
+                Color = ColorPalette.Purple[800]
             }
         });
 
@@ -193,7 +193,7 @@ public static class MarginsAndPadding
             {
                 Text = "Item 3 in stack (with top margin)",
                 FontSize = 10,
-                TextColor = ColorPalette.Red[800]
+                Color = ColorPalette.Red[800]
             }
         });
 
@@ -207,7 +207,7 @@ public static class MarginsAndPadding
                 "so a 12pt bottom margin above an 8pt top margin leaves a 20pt gap.",
             FontName = StandardFonts.HelveticaOblique,
             FontSize = 10,
-            TextColor = ColorPalette.Slate[500]
+            Color = ColorPalette.Slate[500]
         });
         return doc;
     }
@@ -219,7 +219,7 @@ public static class MarginsAndPadding
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 14,
-        TextColor = ColorPalette.Slate[700],
+        Color = ColorPalette.Slate[700],
         Margin = new Thickness(0, 8, 0, 4)
     };
 
@@ -232,14 +232,14 @@ public static class MarginsAndPadding
             Text = heading,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 10,
-            TextColor = ColorPalette.Slate[700]
+            Color = ColorPalette.Slate[700]
         });
         column.Add(demo);
         column.Add(new TextBlock
         {
             Text = caption,
             FontSize = 9,
-            TextColor = ColorPalette.Slate[500]
+            Color = ColorPalette.Slate[500]
         });
         return column;
     }
@@ -253,7 +253,7 @@ public static class MarginsAndPadding
         {
             Text = "content",
             FontSize = 10,
-            TextColor = ColorPalette.Slate[50],
+            Color = ColorPalette.Slate[50],
             Alignment = TextAlignment.Center
         }
     };

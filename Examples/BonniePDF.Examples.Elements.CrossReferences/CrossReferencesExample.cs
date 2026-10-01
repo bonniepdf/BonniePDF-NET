@@ -50,7 +50,7 @@ public static class CrossReferencesExample
             TocIdentifier = "title",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 24,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -69,7 +69,7 @@ public static class CrossReferencesExample
             Level = 2,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 15,
-            TextColor = ColorPalette.Slate[800],
+            Color = ColorPalette.Slate[800],
             Margin = new Thickness(0, 0, 0, 8),
         });
 
@@ -80,17 +80,17 @@ public static class CrossReferencesExample
             {
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 13,
-                TextColor = ColorPalette.Blue[600],
+                Color = ColorPalette.Blue[600],
                 Margin = new Thickness(0, 0, 0, 2),
             });
 
             // "begins on page N" - a label + a live PageNumberOf on one row.
-            var label = new TextBlock { Text = "begins on page", FontSize = 11, TextColor = ColorPalette.Slate[500] };
+            var label = new TextBlock { Text = "begins on page", FontSize = 11, Color = ColorPalette.Slate[500] };
             var pageRef = new PageNumberOf(id)
             {
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 11,
-                TextColor = ColorPalette.Slate[700],
+                Color = ColorPalette.Slate[700],
             };
 
             var row = new HorizontalStack { Spacing = 4, Margin = new Thickness(16, 0, 0, 10) };
@@ -114,7 +114,7 @@ public static class CrossReferencesExample
                 Level = 2,
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 18,
-                TextColor = ColorPalette.Slate[800],
+                Color = ColorPalette.Slate[800],
                 Margin = new Thickness(0, 0, 0, 8),
             });
 
@@ -124,7 +124,7 @@ public static class CrossReferencesExample
             doc.Add(new SectionLink("< Back to Contents", "contents")
             {
                 FontSize = 12,
-                TextColor = ColorPalette.Blue[600],
+                Color = ColorPalette.Blue[600],
             });
         }
 

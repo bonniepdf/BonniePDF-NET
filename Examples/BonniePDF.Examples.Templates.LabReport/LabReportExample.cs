@@ -64,7 +64,7 @@ public static class LabReportExample
                 Text = $"CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8,
-                TextColor = Muted,
+                Color = Muted,
             },
         };
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Ink);
@@ -105,20 +105,20 @@ public static class LabReportExample
             Text = "Sample Hospital Pathology Services",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 14,
-            TextColor = ClinicalBlue,
+            Color = ClinicalBlue,
         });
         org.Add(new TextBlock
         {
             Text = "Department of Laboratory Medicine - Haematology & Clinical Chemistry",
             FontSize = 9,
-            TextColor = Muted,
+            Color = Muted,
             Margin = new Thickness(0, 2, 0, 0),
         });
         org.Add(new TextBlock
         {
             Text = "UKAS Medical Laboratory 8842 - accredited to ISO 15189",
             FontSize = 8,
-            TextColor = Muted,
+            Color = Muted,
             Margin = new Thickness(0, 1, 0, 0),
         });
 
@@ -128,7 +128,7 @@ public static class LabReportExample
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 13,
-            TextColor = Ink,
+            Color = Ink,
             Alignment = TextAlignment.Right,
         };
 
@@ -219,14 +219,14 @@ public static class LabReportExample
             Text = "Dr S. Patel, Consultant Haematologist (electronically authorised)",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 10,
-            TextColor = Ink,
+            Color = Ink,
             Margin = new Thickness(0, 2, 0, 2),
         });
         stack.Add(new TextBlock
         {
             Text = "Reported 06 Jul 2026 11:37  -  Analyser: Sysmex XN-1000 / Roche cobas c503",
             FontSize = 8.5f,
-            TextColor = Muted,
+            Color = Muted,
         });
 
         return new Container
@@ -246,7 +246,7 @@ public static class LabReportExample
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 13,
-        TextColor = ClinicalBlue,
+        Color = ClinicalBlue,
         Margin = new Thickness(0, 4, 0, 6),
     };
 
@@ -255,7 +255,7 @@ public static class LabReportExample
         Text = text,
         FontName = StandardFonts.Helvetica,
         FontSize = 9.5f,
-        TextColor = Ink,
+        Color = Ink,
         Alignment = TextAlignment.Justify,
         Margin = new Thickness(0, 0, 0, 10),
     };
@@ -265,7 +265,7 @@ public static class LabReportExample
         Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 8,
-        TextColor = ClinicalBlue,
+        Color = ClinicalBlue,
         Margin = new Thickness(0, 0, 0, 6),
     };
 
@@ -281,13 +281,13 @@ public static class LabReportExample
             Text = label,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9,
-            TextColor = Muted,
+            Color = Muted,
         }, 2);
         row.Add(new TextBlock
         {
             Text = value,
             FontSize = 9.5f,
-            TextColor = Ink,
+            Color = Ink,
         }, 3);
         return row;
     }
@@ -297,7 +297,7 @@ public static class LabReportExample
         Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 9,
-        TextColor = Ink,
+        Color = Ink,
         Alignment = align,
     };
 
@@ -306,7 +306,7 @@ public static class LabReportExample
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
         FontSize = 9.5f,
-        TextColor = color,
+        Color = color,
         Alignment = align,
     };
 
