@@ -1,0 +1,27 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/pdfa4-with-ua1",
+    "description": "PDF/A-4 is PDF 2.0, so it cannot be combined with PDF/UA-1.",
+    "spec": "15 §5.2"
+  },
+  "_expect": {
+    "valid": false,
+    "rule": "ua1-needs-pdf17"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "conformance": "pdf/a-4",
+    "accessibility": "pdf/ua-1"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

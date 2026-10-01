@@ -1,0 +1,128 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/page-chrome",
+    "description": "Declarative page chrome. The footer has a default plus an even-page override; the header has only a first-page element. For page n the element is the first present of firstPage (n = 1), odd/even, default (15 §5.1). Three pages of content force pages 2 and 3 to exist.",
+    "spec": "15 §5.1; 01 §4",
+    "requires": "prerequisite P1 (pageTemplate factory, 01 §4.0): built in both cores"
+  },
+  "_expect": {
+    "pages": 3,
+    "chrome": {
+      "header": {
+        "1": "Northwind — Confidential",
+        "2": null,
+        "3": null
+      },
+      "footer": {
+        "1": "Page 1 of 3",
+        "2": "Even: 2 / 3",
+        "3": "Page 3 of 3"
+      }
+    },
+    "pdfSha256": null,
+    "canonical": {
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "pageChrome": {
+          "header": {
+            "firstPage": {
+              "type": "TextBlock",
+              "text": "Northwind — Confidential",
+              "alignment": "right"
+            }
+          },
+          "footer": {
+            "default": {
+              "type": "TextBlock",
+              "text": "Page {{CurrentPage}} of {{TotalPages}}",
+              "alignment": "center"
+            },
+            "even": {
+              "type": "TextBlock",
+              "text": "Even: {{CurrentPage}} / {{TotalPages}}",
+              "alignment": "center"
+            }
+          }
+        }
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "First"
+            }
+          ]
+        },
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Second"
+            }
+          ]
+        },
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Third"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "pageChrome": {
+      "header": {
+        "firstPage": {
+          "type": "TextBlock",
+          "text": "Northwind — Confidential",
+          "alignment": "right"
+        }
+      },
+      "footer": {
+        "default": {
+          "type": "TextBlock",
+          "text": "Page {{CurrentPage}} of {{TotalPages}}",
+          "alignment": "center"
+        },
+        "even": {
+          "type": "TextBlock",
+          "text": "Even: {{CurrentPage}} / {{TotalPages}}",
+          "alignment": "center"
+        }
+      }
+    }
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "First"
+        }
+      ]
+    },
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Second"
+        }
+      ]
+    },
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Third"
+        }
+      ]
+    }
+  ]
+}

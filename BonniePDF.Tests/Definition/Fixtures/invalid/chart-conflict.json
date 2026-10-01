@@ -1,0 +1,57 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/chart-conflict",
+    "description": "A chart's own title, xAxis and yAxis and the copies inside `data` may both be given, but must agree: the reader would otherwise have to choose, and a stored file would say something the PDF does not show. Equal values (compared as JSON, key order ignored) are fine.",
+    "spec": "15 §8.9"
+  },
+  "_expectErrors": [
+    {
+      "path": "/pages/0/content/0",
+      "code": "conflicting-keys"
+    },
+    {
+      "path": "/pages/0/content/0",
+      "code": "conflicting-keys"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "LineChart",
+          "altText": "conflict",
+          "title": "Revenue",
+          "yAxis": {
+            "prefix": "$",
+            "maxValue": 100
+          },
+          "data": {
+            "title": "Sales",
+            "yAxis": {
+              "maxValue": 100,
+              "prefix": "£"
+            },
+            "xAxis": {
+              "legend": "Quarter"
+            },
+            "series": [
+              {
+                "dataPoints": [
+                  {
+                    "label": "a",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          "xAxis": {
+            "legend": "Quarter"
+          }
+        }
+      ]
+    }
+  ]
+}

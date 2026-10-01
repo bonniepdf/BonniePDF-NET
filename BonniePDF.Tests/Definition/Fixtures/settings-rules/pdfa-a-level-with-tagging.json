@@ -1,0 +1,27 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/pdfa-a-level-with-tagging",
+    "description": "An \"a\" level with PDF/UA-1 is valid and lands on PDF 1.7.",
+    "spec": "15 §5.2"
+  },
+  "_expect": {
+    "valid": true,
+    "pdfVersion": "pdf-1.7"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "conformance": "pdf/a-2a",
+    "accessibility": "pdf/ua-1"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/minimal",
+    "description": "The smallest legal definition: version stamps and one page with one paragraph. Everything else takes its default on read. Pins that settings, metadata and resources are optional and that `pages[0]` is the document's auto-created first page.",
+    "spec": "15 §2, §7"
+  },
+  "_expect": {
+    "pages": 1,
+    "text": [
+      "Hello"
+    ],
+    "roundTrip": true,
+    "canonical": {
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ]
+    },
+    "pdfSha256": null
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

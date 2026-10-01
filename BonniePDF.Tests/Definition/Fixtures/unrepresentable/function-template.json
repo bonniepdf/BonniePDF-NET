@@ -1,0 +1,69 @@
+{
+  "_fixture": {
+    "id": "document-definition/unrepresentable/function-template",
+    "description": "A DOCUMENT (not a definition) whose footerTemplate is a function and which holds a CanvasElement. toDefinition is strict by default: it fails, listing both nodes with locations, and writes nothing. With onUnrepresentable 'drop' it returns a definition of the rest plus one `dropped` note each; that result is not a faithful copy and the round-trip guarantee does not apply. Each core builds the document from `recipe` in its own idiom.",
+    "spec": "15 §11"
+  },
+  "recipe": {
+    "settings": {
+      "footerTemplate": "function of the page number returning TextBlock('Page N')"
+    },
+    "pages": [
+      {
+        "content": [
+          {
+            "type": "TextBlock",
+            "text": "Kept"
+          },
+          {
+            "type": "CanvasElement",
+            "drawHeight": 80,
+            "draw": "any drawing callback"
+          }
+        ]
+      }
+    ]
+  },
+  "_expectNotes": {
+    "strict": {
+      "fails": true,
+      "issues": [
+        {
+          "path": "/settings/footerTemplate",
+          "code": "unrepresentable"
+        },
+        {
+          "path": "/pages/0/content/1",
+          "code": "unrepresentable"
+        }
+      ]
+    },
+    "drop": {
+      "fails": false,
+      "notes": [
+        {
+          "path": "/settings/footerTemplate",
+          "code": "dropped"
+        },
+        {
+          "path": "/pages/0/content/1",
+          "code": "dropped"
+        }
+      ],
+      "definition": {
+        "version": 1,
+        "minorVersion": 0,
+        "pages": [
+          {
+            "content": [
+              {
+                "type": "TextBlock",
+                "text": "Kept"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

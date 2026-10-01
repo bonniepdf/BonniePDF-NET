@@ -28,6 +28,9 @@
 
   <ItemGroup>
     <None Include="image.png" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The shared Document Definition conformance fixtures, generated from the specification. -->
+    <None Include="Definition\Fixtures\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Api\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

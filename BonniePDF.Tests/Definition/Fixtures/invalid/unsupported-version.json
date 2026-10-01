@@ -1,0 +1,20 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/unsupported-version",
+    "description": "A newer major version is refused, naming the version found and the range supported; never a parse error or a partial result.",
+    "spec": "15 §12.2; 14 §7.1 rule 6"
+  },
+  "_expectErrors": [
+    {
+      "path": "/version",
+      "code": "unsupported-version"
+    }
+  ],
+  "version": 2,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": []
+    }
+  ]
+}

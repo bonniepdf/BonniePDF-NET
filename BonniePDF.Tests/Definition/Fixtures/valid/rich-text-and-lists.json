@@ -1,0 +1,110 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/rich-text-and-lists",
+    "description": "RichText spans with per-span TextStyle (which uses `color`, as a text element does: 15 §8.2), a structural line break as opposed to a raw \\n inside a span, and a list holding two string items and a nested list of the same type (a list's items are strings or nested lists of the same type: 15 §8.5).",
+    "spec": "15 §8.4, §8.5; 03 RichText"
+  },
+  "_expect": {
+    "pages": 1,
+    "roundTrip": true,
+    "pdfSha256": null,
+    "canonical": {
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "RichText",
+              "spans": [
+                {
+                  "text": "Total due: "
+                },
+                {
+                  "text": "$1,240.00",
+                  "style": {
+                    "fontWeight": "bold",
+                    "color": "#c10007"
+                  }
+                },
+                {
+                  "lineBreak": true
+                },
+                {
+                  "text": "Pay within 30 days.\nThank you."
+                }
+              ],
+              "defaultStyle": {
+                "fontSize": 12
+              }
+            },
+            {
+              "type": "UnorderedList",
+              "items": [
+                "A plain item",
+                "Another item",
+                {
+                  "type": "UnorderedList",
+                  "items": [
+                    "nested one",
+                    "nested two"
+                  ],
+                  "bulletStyle": "circle"
+                }
+              ],
+              "bulletStyle": "dash"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "RichText",
+          "defaultStyle": {
+            "fontSize": 12
+          },
+          "spans": [
+            {
+              "text": "Total due: "
+            },
+            {
+              "text": "$1,240.00",
+              "style": {
+                "fontWeight": "bold",
+                "color": "red-700"
+              }
+            },
+            {
+              "lineBreak": true
+            },
+            {
+              "text": "Pay within 30 days.\nThank you."
+            }
+          ]
+        },
+        {
+          "type": "UnorderedList",
+          "bulletStyle": "dash",
+          "items": [
+            "A plain item",
+            "Another item",
+            {
+              "type": "UnorderedList",
+              "bulletStyle": "circle",
+              "items": [
+                "nested one",
+                "nested two"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

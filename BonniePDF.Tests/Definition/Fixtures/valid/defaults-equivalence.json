@@ -1,0 +1,59 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/defaults-equivalence",
+    "description": "Two spacers, one stating Spacer's defaults and one omitting them; a stack stating VerticalStack's default spacing. Both cores read them to the same document, and the canonical write omits every value equal to its spec default (15 §3.3).",
+    "spec": "15 §3.3, §14; 03 §1"
+  },
+  "_expect": {
+    "canonical": {
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "VerticalStack",
+              "children": [
+                {
+                  "type": "Spacer"
+                },
+                {
+                  "type": "Spacer"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "pdfSha256": null
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "pageSize": "a4",
+    "orientation": "portrait",
+    "margin": 50
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "VerticalStack",
+          "spacing": 0,
+          "breakAllowed": true,
+          "margin": 0,
+          "children": [
+            {
+              "type": "Spacer",
+              "height": 0
+            },
+            {
+              "type": "Spacer"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

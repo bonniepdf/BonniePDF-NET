@@ -1,0 +1,41 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/list-items",
+    "description": "A list item must be a string or a nested list of the same type. An element is invalid-type, and a nested list of the other kind is invalid-value.",
+    "spec": "15 §8.5"
+  },
+  "_expectErrors": [
+    {
+      "path": "/pages/0/content/0/items/1",
+      "code": "invalid-type"
+    },
+    {
+      "path": "/pages/0/content/0/items/2/type",
+      "code": "invalid-value"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "UnorderedList",
+          "items": [
+            "fine",
+            {
+              "type": "TextBlock",
+              "text": "not a string"
+            },
+            {
+              "type": "OrderedList",
+              "items": [
+                "wrong kind"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

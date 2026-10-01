@@ -1,0 +1,25 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/unknown-type",
+    "description": "The vocabulary is closed: a type outside the catalogue fails before anything renders, and the error is located by path.",
+    "spec": "15 §4, §12.4"
+  },
+  "_expectErrors": [
+    {
+      "path": "/pages/0/content/0",
+      "code": "unknown-type"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "SparklyHeading",
+          "text": "Nope"
+        }
+      ]
+    }
+  ]
+}

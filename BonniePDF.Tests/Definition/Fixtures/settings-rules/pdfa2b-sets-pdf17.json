@@ -1,0 +1,27 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/pdfa2b-sets-pdf17",
+    "description": "PDF/A-2b sets the PDF version to 1.7, even from 2.0.",
+    "spec": "15 §5.2"
+  },
+  "_expect": {
+    "valid": true,
+    "pdfVersion": "pdf-1.7"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "conformance": "pdf/a-2b",
+    "pdfVersion": "pdf-2.0"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}
