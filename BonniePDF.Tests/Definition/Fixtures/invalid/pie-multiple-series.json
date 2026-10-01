@@ -1,0 +1,47 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/pie-multiple-series",
+    "description": "A pie chart uses series[0] only. The code API silently ignores the rest; a validator must not, or a stored file says something the PDF does not show.",
+    "spec": "15 §8.9"
+  },
+  "_expectErrors": [
+    {
+      "path": "/pages/0/content/0/data/series",
+      "code": "invalid-value"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "PieChart",
+          "altText": "Two series",
+          "data": {
+            "series": [
+              {
+                "name": "A",
+                "dataPoints": [
+                  {
+                    "label": "x",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "name": "B",
+                "dataPoints": [
+                  {
+                    "label": "x",
+                    "value": 2
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

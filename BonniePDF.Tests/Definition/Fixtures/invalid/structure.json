@@ -1,0 +1,92 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/structure",
+    "description": "Structural errors: a required key missing (TextBlock.text), a required choice over-specified (Hyperlink uri and targetPageIndex), keys that cannot coexist (fontName and fontFamily), a duplicate id, and references to nothing (a resource, an anchor, a page beyond the last, a heading identifier no Heading carries).",
+    "spec": "15 §4.1, §8.4, §8.8, §12.4"
+  },
+  "_expectErrors": [
+    {
+      "path": "/pages/0/content/0",
+      "code": "missing-required"
+    },
+    {
+      "path": "/pages/0/content/1",
+      "code": "exactly-one-of"
+    },
+    {
+      "path": "/pages/0/content/2",
+      "code": "conflicting-keys"
+    },
+    {
+      "path": "/pages/0/content/4/id",
+      "code": "duplicate-id"
+    },
+    {
+      "path": "/pages/0/content/5/resource",
+      "code": "dangling-reference"
+    },
+    {
+      "path": "/pages/0/content/6/anchorTarget",
+      "code": "dangling-reference"
+    },
+    {
+      "path": "/pages/0/content/7/targetPageIndex",
+      "code": "dangling-reference"
+    },
+    {
+      "path": "/pages/0/content/8/headingIdentifiers/0",
+      "code": "dangling-reference"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock"
+        },
+        {
+          "type": "Hyperlink",
+          "text": "both",
+          "uri": "https://example.com",
+          "targetPageIndex": 0
+        },
+        {
+          "type": "TextBlock",
+          "text": "x",
+          "fontName": "Helvetica",
+          "fontFamily": "Arial"
+        },
+        {
+          "type": "Spacer",
+          "id": "a"
+        },
+        {
+          "type": "Spacer",
+          "id": "a"
+        },
+        {
+          "type": "Image",
+          "resource": "missing-logo"
+        },
+        {
+          "type": "SectionLink",
+          "text": "see",
+          "anchorTarget": "nowhere"
+        },
+        {
+          "type": "Hyperlink",
+          "text": "far",
+          "targetPageIndex": 9
+        },
+        {
+          "type": "VisualToc",
+          "headingIdentifiers": [
+            "absent"
+          ]
+        }
+      ]
+    }
+  ]
+}

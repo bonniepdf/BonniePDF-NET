@@ -1,0 +1,28 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/aes256-on-default-version",
+    "description": "AES-256 needs PDF 1.7 or later; the default is 1.4.",
+    "spec": "15 §5.2"
+  },
+  "_expect": {
+    "valid": false,
+    "rule": "aes256-needs-pdf17"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "encryption": {
+      "algorithm": "aes-256"
+    }
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/pdfa-with-encryption",
+    "description": "PDF/A cannot be combined with encryption.",
+    "spec": "15 §5.2"
+  },
+  "_expect": {
+    "valid": false,
+    "rule": "pdfa-excludes-encryption"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "conformance": "pdf/a-2b",
+    "encryption": {
+      "algorithm": "rc4-128"
+    }
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

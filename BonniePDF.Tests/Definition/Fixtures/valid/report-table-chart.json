@@ -1,0 +1,294 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/report-table-chart",
+    "description": "A one-page report. Pins: palette tokens and hex colours; length tokens ('2cm') normalising to points on write; all four spacing forms; table sugar (columns/header/rows/footer, a string cell, a TableCell object with columnSpan); a LineChart with data, axis and series style; node ids; PDF/A-2a with PDF/UA-1.",
+    "spec": "15 §3, §8.6, §8.9, §4.1"
+  },
+  "_expect": {
+    "pages": 1,
+    "ids": [
+      "title",
+      "summary",
+      "revenue",
+      "revenue-trend"
+    ],
+    "canonicalLengths": {
+      "/pages/0/content/0/margin": {
+        "bottom": 12
+      },
+      "/settings/margin": 56.693
+    },
+    "roundTrip": true,
+    "pdfSha256": null,
+    "canonical": {
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "margin": 56.69291338582677,
+        "conformance": "pdf/a-2a",
+        "accessibility": "pdf/ua-1",
+        "language": "en-GB",
+        "defaultTextStyle": {
+          "fontFamily": "Helvetica",
+          "fontSize": 11,
+          "color": "#314158"
+        }
+      },
+      "metadata": {
+        "title": "Quarterly Revenue Report",
+        "author": "Northwind Analytics"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "Heading",
+              "id": "title",
+              "margin": {
+                "bottom": 12
+              },
+              "fontSize": 24,
+              "text": "Quarterly Revenue Report",
+              "tocIdentifier": "title"
+            },
+            {
+              "type": "TextBlock",
+              "id": "summary",
+              "margin": {
+                "top": 8,
+                "bottom": 8
+              },
+              "text": "Revenue grew in every operating region."
+            },
+            {
+              "type": "Table",
+              "id": "revenue",
+              "border": 0.5,
+              "borderColors": {
+                "top": "#cad5e2",
+                "right": "#cad5e2",
+                "bottom": "#cad5e2",
+                "left": "#cad5e2"
+              },
+              "columns": [
+                2,
+                1,
+                1
+              ],
+              "header": [
+                [
+                  "Region",
+                  "Revenue",
+                  "Growth"
+                ]
+              ],
+              "rows": [
+                [
+                  "North America",
+                  "$4.2m",
+                  "12%"
+                ],
+                [
+                  "Europe",
+                  "$3.1m",
+                  "9%"
+                ]
+              ],
+              "footer": [
+                [
+                  {
+                    "type": "TableCell",
+                    "content": "Total: $7.3m",
+                    "columnSpan": 3
+                  }
+                ]
+              ],
+              "cellPadding": 6,
+              "headerBackgroundColor": "#e2e8f0"
+            },
+            {
+              "type": "Spacer",
+              "height": 17.007874015748033
+            },
+            {
+              "type": "LineChart",
+              "id": "revenue-trend",
+              "data": {
+                "series": [
+                  {
+                    "name": "Northwind",
+                    "color": "#4f39f6",
+                    "dataPoints": [
+                      {
+                        "label": "Q1",
+                        "value": 3.1
+                      },
+                      {
+                        "label": "Q2",
+                        "value": 3.5
+                      },
+                      {
+                        "label": "Q3",
+                        "value": 3.9
+                      },
+                      {
+                        "label": "Q4",
+                        "value": 4.2
+                      }
+                    ]
+                  }
+                ]
+              },
+              "title": "Revenue by quarter",
+              "width": 480,
+              "height": 240,
+              "altText": "Revenue rose in every quarter of 2026, from $3.1m to $4.2m.",
+              "yAxis": {
+                "prefix": "$",
+                "suffix": "m",
+                "maxValue": 5
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "$schema": "https://bonniepdf.dev/schema/document-definition/1.0.json",
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "pageSize": "a4",
+    "margin": "2cm",
+    "conformance": "pdf/a-2a",
+    "accessibility": "pdf/ua-1",
+    "language": "en-GB",
+    "defaultTextStyle": {
+      "fontFamily": "Helvetica",
+      "fontSize": 11,
+      "color": "slate-700"
+    }
+  },
+  "metadata": {
+    "title": "Quarterly Revenue Report",
+    "author": "Northwind Analytics"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "Heading",
+          "id": "title",
+          "text": "Quarterly Revenue Report",
+          "level": 1,
+          "tocIdentifier": "title",
+          "fontSize": 24,
+          "margin": {
+            "bottom": 12
+          }
+        },
+        {
+          "type": "TextBlock",
+          "id": "summary",
+          "text": "Revenue grew in every operating region.",
+          "margin": [
+            0,
+            8
+          ]
+        },
+        {
+          "type": "Table",
+          "id": "revenue",
+          "columns": [
+            2,
+            1,
+            1
+          ],
+          "cellPadding": 6,
+          "border": {
+            "width": 0.5,
+            "color": "slate-300"
+          },
+          "headerBackgroundColor": "#e2e8f0",
+          "header": [
+            [
+              "Region",
+              "Revenue",
+              "Growth"
+            ]
+          ],
+          "rows": [
+            [
+              "North America",
+              "$4.2m",
+              "12%"
+            ],
+            [
+              "Europe",
+              "$3.1m",
+              "9%"
+            ]
+          ],
+          "footer": [
+            [
+              {
+                "type": "TableCell",
+                "content": "Total: $7.3m",
+                "columnSpan": 3
+              }
+            ]
+          ]
+        },
+        {
+          "type": "Spacer",
+          "height": "6mm"
+        },
+        {
+          "type": "LineChart",
+          "id": "revenue-trend",
+          "title": "Revenue by quarter",
+          "altText": "Revenue rose in every quarter of 2026, from $3.1m to $4.2m.",
+          "width": 480,
+          "height": 240,
+          "yAxis": {
+            "prefix": "$",
+            "suffix": "m",
+            "minValue": 0,
+            "maxValue": 5,
+            "stepCount": 5
+          },
+          "data": {
+            "series": [
+              {
+                "name": "Northwind",
+                "color": "indigo-600",
+                "style": {
+                  "lineWidth": 2,
+                  "showMarkers": true
+                },
+                "dataPoints": [
+                  {
+                    "label": "Q1",
+                    "value": 3.1
+                  },
+                  {
+                    "label": "Q2",
+                    "value": 3.5
+                  },
+                  {
+                    "label": "Q3",
+                    "value": 3.9
+                  },
+                  {
+                    "label": "Q4",
+                    "value": 4.2
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

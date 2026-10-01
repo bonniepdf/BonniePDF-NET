@@ -1,0 +1,28 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/pdfa2b-with-ua1-on-pdf20",
+    "description": "PDF/A-2b lowers the version to 1.7 before PDF/UA-1 is checked, so the pair is valid.",
+    "spec": "15 §5.2"
+  },
+  "_expect": {
+    "valid": true,
+    "pdfVersion": "pdf-1.7"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "conformance": "pdf/a-2b",
+    "accessibility": "pdf/ua-1",
+    "pdfVersion": "pdf-2.0"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/pdfa-a-level-without-tagging",
+    "description": "An \"a\" level of PDF/A needs tagged output.",
+    "spec": "15 §5.2"
+  },
+  "_expect": {
+    "valid": false,
+    "rule": "pdfa-a-levels-need-tagging"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "conformance": "pdf/a-2a"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

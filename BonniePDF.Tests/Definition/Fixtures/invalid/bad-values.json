@@ -1,0 +1,51 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/bad-values",
+    "description": "Every value error is returned in one pass, each located. An unknown token, a malformed colour (which the code API would silently turn black), a malformed length, a null, and a wrong JSON type. Nothing is constructed.",
+    "spec": "15 §3.2, §3.3, §12.1"
+  },
+  "_expectErrors": [
+    {
+      "path": "/settings/conformance",
+      "code": "invalid-value"
+    },
+    {
+      "path": "/pages/0/content/0/color",
+      "code": "invalid-value"
+    },
+    {
+      "path": "/pages/0/content/0/fontSize",
+      "code": "invalid-value"
+    },
+    {
+      "path": "/pages/0/content/0/italic",
+      "code": "invalid-type"
+    },
+    {
+      "path": "/pages/0/content/1/height",
+      "code": "invalid-value"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "conformance": "pdf/a-9z"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "x",
+          "color": "ff00aa",
+          "fontSize": "12furlongs",
+          "italic": "yes"
+        },
+        {
+          "type": "Spacer",
+          "height": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/bookmarks-on-default-version",
+    "description": "Bookmarks need PDF 1.7 or later.",
+    "spec": "15 §5.2"
+  },
+  "_expect": {
+    "valid": false,
+    "rule": "bookmarks-need-pdf17"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "bookmarks": [
+      {
+        "title": "Start",
+        "pageIndex": 0
+      }
+    ]
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}
