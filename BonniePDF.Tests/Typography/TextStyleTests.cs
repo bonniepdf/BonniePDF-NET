@@ -44,15 +44,15 @@ public class TextStyleTests
     [Fact]
     public void MergeWith_ExplicitNonNormalWeightWins()
     {
-        TextStyle span = new() { Weight = FontWeight.Bold };
-        Assert.Equal(FontWeight.Bold, span.MergeWith(new TextStyle()).Weight);
+        TextStyle span = new() { FontWeight = FontWeight.Bold };
+        Assert.Equal(FontWeight.Bold, span.MergeWith(new TextStyle()).FontWeight);
     }
 
     [Fact]
     public void MergeWith_NormalWeightWithNoFamilyInheritsBaseWeight()
     {
-        TextStyle merged = new TextStyle().MergeWith(new TextStyle { Weight = FontWeight.Bold });
-        Assert.Equal(FontWeight.Bold, merged.Weight);
+        TextStyle merged = new TextStyle().MergeWith(new TextStyle { FontWeight = FontWeight.Bold });
+        Assert.Equal(FontWeight.Bold, merged.FontWeight);
     }
 
     [Fact]
@@ -61,8 +61,8 @@ public class TextStyleTests
         // Specifying a family means "use my own weight" — even if it is Normal —
         // so a bold base must NOT bleed into a span that picked a different family.
         TextStyle span = new() { FontFamily = "Times" };
-        TextStyle merged = span.MergeWith(new TextStyle { Weight = FontWeight.Bold });
-        Assert.Equal(FontWeight.Normal, merged.Weight);
+        TextStyle merged = span.MergeWith(new TextStyle { FontWeight = FontWeight.Bold });
+        Assert.Equal(FontWeight.Normal, merged.FontWeight);
     }
 
     // --- Italic precedence ---
@@ -131,10 +131,10 @@ public class TextStyleTests
     [Fact]
     public void EffectiveFontName_MapsWeightAndItalicToStandard14VariantsWithNoFamily()
     {
-        Assert.Equal("Helvetica-Bold", new TextStyle { Weight = FontWeight.Bold }.EffectiveFontName);
+        Assert.Equal("Helvetica-Bold", new TextStyle { FontWeight = FontWeight.Bold }.EffectiveFontName);
         Assert.Equal("Helvetica-Oblique", new TextStyle { Italic = true }.EffectiveFontName);
         Assert.Equal("Helvetica-BoldOblique",
-            new TextStyle { Weight = FontWeight.Bold, Italic = true }.EffectiveFontName);
+            new TextStyle { FontWeight = FontWeight.Bold, Italic = true }.EffectiveFontName);
     }
 
     [Fact]
@@ -149,9 +149,9 @@ public class TextStyleTests
     [Fact]
     public void Fluent_WeightShortcutsSetWeight()
     {
-        Assert.Equal(FontWeight.Bold, new TextStyle().Bold().Weight);
-        Assert.Equal(FontWeight.Light, new TextStyle().Light().Weight);
-        Assert.Equal(FontWeight.Thin, new TextStyle().Thin().Weight);
+        Assert.Equal(FontWeight.Bold, new TextStyle().Bold().FontWeight);
+        Assert.Equal(FontWeight.Light, new TextStyle().Light().FontWeight);
+        Assert.Equal(FontWeight.Thin, new TextStyle().Thin().FontWeight);
     }
 
     [Fact]
@@ -161,7 +161,7 @@ public class TextStyleTests
         Assert.Equal(18, new TextStyle().WithSize(18).FontSize);
         Assert.Equal(Color.Red, new TextStyle().WithColor(Color.Red).Color);
         Assert.Equal(ColorPalette.Amber[400], new TextStyle().WithBackground(ColorPalette.Amber[400]).BackgroundColor);
-        Assert.Equal(FontWeight.Bold, new TextStyle().WithWeight(FontWeight.Bold).Weight);
+        Assert.Equal(FontWeight.Bold, new TextStyle().WithWeight(FontWeight.Bold).FontWeight);
         Assert.Equal("Times", new TextStyle().WithFamily("Times").FontFamily);
         Assert.Equal(1.5f, new TextStyle().WithLineHeight(1.5f).LineHeight);
     }

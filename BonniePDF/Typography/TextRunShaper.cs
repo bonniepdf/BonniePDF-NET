@@ -5,7 +5,7 @@ using BonniePDF.Typography.TrueType;
 namespace BonniePDF.Typography;
 
 /// <summary>A font the shaper may select glyphs from.</summary>
-public sealed class ShaperFont
+internal sealed class ShaperFont
 {
     /// <summary>Opaque identifier the caller uses to resolve a resource name + tracker.</summary>
     public required string FontIdentifier { get; init; }
@@ -15,7 +15,7 @@ public sealed class ShaperFont
 }
 
 /// <summary>A maximal substring renderable by a single candidate font.</summary>
-public sealed class ShapedRun
+internal sealed class ShapedRun
 {
     /// <summary>Index into the candidate list passed to <see cref="TextRunShaper.ShapeTextRuns"/> (0 = primary).</summary>
     public int FontIndex { get; init; }
@@ -25,7 +25,7 @@ public sealed class ShapedRun
 }
 
 /// <summary>Result of <see cref="TextRunShaper.ShapeTextRuns"/>.</summary>
-public sealed class ShapeResult
+internal sealed class ShapeResult
 {
     /// <summary>The runs, in source order, each renderable by a single font.</summary>
     public IList<ShapedRun> Runs { get; } = new List<ShapedRun>();
@@ -39,7 +39,7 @@ public sealed class ShapeResult
 /// primary font (<c>candidates[0]</c>) and falling back to later candidates for
 /// code points the primary lacks.
 /// </summary>
-public static class TextRunShaper
+internal static class TextRunShaper
 {
     /// <summary>
     /// Splits <paramref name="text"/> into runs, each renderable by a single

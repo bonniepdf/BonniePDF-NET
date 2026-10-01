@@ -282,7 +282,7 @@ public class FontEmbeddingTests : IntegrationTestBase
                 {
                     Text = $"This text is {colorNames[i]}",
                     FontSize = 14,
-                    TextColor = colors[i],
+                    Color = colors[i],
                     Margin = new Thickness(0, 5, 0, 5)
                 });
             }

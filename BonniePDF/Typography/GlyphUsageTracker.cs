@@ -11,7 +11,7 @@ namespace BonniePDF.Typography;
 /// Used for generating ToUnicode CMap and future font subsetting.
 /// Supports the full Unicode range (BMP + supplementary planes).
 /// </summary>
-public class GlyphUsageTracker
+internal class GlyphUsageTracker
 {
     private readonly TtfFont _font;
     private readonly HashSet<int> _usedCodepoints = new();

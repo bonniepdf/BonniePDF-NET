@@ -117,7 +117,7 @@ public class FontEmbeddingAndTextStyleTests
     public void DefaultTextStyle_AppliedToUnstyledElements()
     {
         var tb = new TextBlock { Text = "Hello" };
-        // Do NOT set FontSize or TextColor - leave them at defaults
+        // Do NOT set FontSize or Color - leave them at defaults
         Generate(doc =>
         {
             doc.Settings.DefaultTextStyle = new TextStyle().WithSize(11).WithColor(ColorPalette.Slate[600]);
@@ -125,7 +125,7 @@ public class FontEmbeddingAndTextStyleTests
         });
         // After Save (which calls ApplyDefaultStyleToTree), defaults should be applied
         Assert.Equal(11f, tb.FontSize);
-        Assert.Equal(ColorPalette.Slate[600], tb.TextColor);
+        Assert.Equal(ColorPalette.Slate[600], tb.Color);
     }
 
     [Fact]

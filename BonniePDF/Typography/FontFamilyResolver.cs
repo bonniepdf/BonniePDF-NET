@@ -68,6 +68,13 @@ public static class FontFamilyResolver
     {
         if (string.IsNullOrEmpty(family)) return Typography.StandardFonts.Helvetica;
 
+        // A font name a document made for one of its faces is already resolved.
+        if (DocumentFonts.IsDocumentFontName(family)) return family;
+
+        // The document's own fonts come first (spec 16 §4).
+        DocumentFontFace? documentFace = FontMetrics.ActiveDocumentFonts?.Resolve(family, weight, italic);
+        if (documentFace is not null) return documentFace.FontName;
+
         // If the family is already a fully-qualified standard font name, return it directly
         if (IsStandardFontName(family)) return family;
 
@@ -105,6 +112,8 @@ public static class FontFamilyResolver
     /// </remarks>
     public static string? ResolveKnown(string family, FontWeight weight, bool italic)
     {
+        DocumentFontFace? documentFace = FontMetrics.ActiveDocumentFonts?.Resolve(family, weight, italic);
+        if (documentFace is not null) return documentFace.FontName;
         bool isBold = weight >= FontWeight.SemiBold;
         if (CustomFamilies.TryGetValue(family, out FontFamilyDefinition? definition))
             return definition.GetVariant(isBold, italic);
