@@ -88,10 +88,11 @@ public static class EmploymentContractExample
                 "The Employer may terminate without notice in cases of gross misconduct.",
             ]),
         ],
-        // Verified against the rendered sample: clauses 1-2 sit on page 1,
-        // clauses 3-5 on page 2, and the page break puts the schedule and
-        // execution on page 3.
-        Outline: new OutlinePages(Particulars: 0, Definitions: 0, Clauses: [0, 0, 1, 1, 1], Schedule: 2, Execution: 2),
+        // Verified against the rendered sample: clause 1 sits on page 1 and
+        // clauses 2-5 on page 2 (each clause is kept whole, so clause 2 moves
+        // over rather than leaving its heading behind), and the page break puts
+        // the schedule and execution on page 3.
+        Outline: new OutlinePages(Particulars: 0, Definitions: 0, Clauses: [0, 1, 1, 1, 1], Schedule: 2, Execution: 2),
         Locale: "en-GB");
 
     public static Document Generate() => BuildDocument(Sample, CreateSettings(Sample));
@@ -263,7 +264,7 @@ public static class EmploymentContractExample
     /// </summary>
     private static VerticalStack ClauseSection(Clause item, int index)
     {
-        VerticalStack stack = new() { Margin = new Thickness(0, 0, 0, 14) };
+        VerticalStack stack = new() { Margin = new Thickness(0, 0, 0, 14), BreakAllowed = false };
         stack.Add(SectionHeading($"{index + 1}.  {item.Heading}", $"clause-{index + 1}"));
 
         if (item.Intro is not null)

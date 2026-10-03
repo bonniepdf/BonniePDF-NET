@@ -65,6 +65,8 @@ behaviour, so the two files can be read side by side.
 
 ### Fixed
 
+- **A heading, figure or table inside a pagination wrapper keeps its structure tag.** `EnsureSpace`, `PreventPageBreak`, `ShowEntire`, `ShowIf`, `ShowOnce`, `SkipOnce`, `StopPaging` and `Unconstrained` rendered their child without opening its semantic role, so a `Heading` wrapped in one dropped out of the structure tree (and out of the bookmarks and contents that read it) in a PDF/UA-1 document. The wrapper now opens the child's role as a stack or `Container` does.
+
 - **`DefinitionException` derives from `BonniePdfException`**, so one `catch` handles
   input the library rejects.
 - **`SaveAsync` with an already-cancelled token no longer creates the file.**
@@ -105,6 +107,8 @@ behaviour, so the two files can be read side by side.
   PDF/A. PDF/UA-only output gains an sRGB ICC profile and an `/OutputIntents` entry.
 
 ### Added
+
+- **A text block can keep its indentation.** By default a `TextBlock` drops the leading spaces of each line, which flattens source code and any other text whose indentation means something. `PreserveWhitespace = true` keeps every space, including leading and repeated ones, and wraps by code point at the last space that fits (or mid-token when there is none), so a long line never overflows. Tabs are not expanded. `Heading` and `PageNumberOf` inherit it; list items and `RichText` do not take it. It is also a Document Definition key. Example: `new TextBlock { Text = source, FontName = StandardFonts.Courier, PreserveWhitespace = true }`.
 
 - **`SvgPageExportOptions.ShapeRendering`** (`SvgShapeRendering`: `Auto`,
   `OptimizeSpeed`, `CrispEdges`, `GeometricPrecision`) writes the root

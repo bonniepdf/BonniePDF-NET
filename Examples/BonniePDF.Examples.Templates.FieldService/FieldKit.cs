@@ -2,6 +2,7 @@ using System.Globalization;
 using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Layout.Pagination;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 
@@ -260,6 +261,15 @@ internal static class FieldKit
         return stack;
     }
 
+    /// <summary>
+    /// Keeps a heading with the start of whatever it introduces: the heading moves to the next
+    /// page unless <paramref name="minHeight"/> points of room remain below it.
+    /// </summary>
+    public static EnsureSpace KeepWithNext(Heading heading, float minHeight = 120f)
+    {
+        return new EnsureSpace(minHeight, heading);
+    }
+
     /// <summary>A row of signature slots, evenly weighted.</summary>
     public static HorizontalStack SignatureRow(IEnumerable<IElement> slots)
     {
@@ -268,6 +278,8 @@ internal static class FieldKit
             WidthDistribution = WidthDistribution.Weighted,
             Spacing = 22,
             Margin = new Thickness(0, 10, 0, 4),
+            // A signature row is never split between pages.
+            BreakAllowed = false,
         };
         foreach (IElement s in slots)
         {

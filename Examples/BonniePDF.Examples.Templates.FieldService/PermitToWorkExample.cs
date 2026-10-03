@@ -222,7 +222,9 @@ public static class PermitToWorkExample
 
         // ── Atmospheric test ──────────────────────────────────────────────────
 
-        doc.Add(H2("Atmospheric test record"));
+        // The test record stays whole: a gas reading split from its heading or its note cannot be trusted at a glance.
+        VerticalStack atmosphere = new() { BreakAllowed = false };
+        atmosphere.Add(H2("Atmospheric test record"));
 
         Table gas = new(2.2f, 1.2f, 1.4f, 1.2f, 1.6f)
         {
@@ -236,13 +238,14 @@ public static class PermitToWorkExample
         gas.AddRow(Td("Oxygen"), Td("20.9 %"), Td("19.5 – 23.5 %", color: Muted), Pass(), Td("Sample Issuer"));
         gas.AddRow(Td("Flammable gas (LEL)"), Td("0 %"), Td("< 10 %", color: Muted), Pass(), Td("Sample Issuer"));
         gas.AddRow(Td("Carbon monoxide"), Td("0 ppm"), Td("< 30 ppm", color: Muted), Pass(), Td("Sample Issuer"));
-        doc.Add(gas);
+        atmosphere.Add(gas);
 
-        doc.Add(Body(
+        atmosphere.Add(Body(
             $"Instrument SN-4471-B, calibration due 14 Nov 2026. Tested at {Clock(ValidFrom)} on "
                 + $"{ShortDate(ValidFrom)}. Re-test required after any break in work longer than 30 minutes.",
             color: Muted,
             size: 8.5f));
+        doc.Add(atmosphere);
 
         // ── Isolations ────────────────────────────────────────────────────────
 

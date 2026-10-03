@@ -184,7 +184,7 @@ The repository includes veraPDF-backed validation coverage for supported PDF/A a
 - Browse runnable projects in [`Examples/`](./Examples/).
 - Explore every document in the [live example gallery](https://www.bonniepdf.dev/examples).
 - Read the [.NET documentation](https://www.bonniepdf.dev/docs/dotnet/getting-started).
-- See the [ASP.NET integration examples](./Examples/BonniePDF.Examples.Integration.WebApi/).
+- See the [ASP.NET server endpoint example](./Examples/BonniePDF.Examples.Integration.ServerEndpoint/).
 
 ## Licence
 

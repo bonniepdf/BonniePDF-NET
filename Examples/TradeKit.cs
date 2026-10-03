@@ -2,6 +2,7 @@ using System.Globalization;
 using BonniePDF.Core;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Layout;
+using BonniePDF.Elements.Layout.Pagination;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
 
@@ -101,6 +102,15 @@ internal static class TradeKit
         Color = Heading,
         Margin = new Thickness(0, 10, 0, 5),
     };
+
+    /// <summary>
+    /// Keeps a heading with the start of whatever it introduces: the heading moves to the next
+    /// page unless <paramref name="minHeight"/> points of room remain below it.
+    /// </summary>
+    public static EnsureSpace KeepWithNext(Heading heading, float minHeight = 120f)
+    {
+        return new EnsureSpace(minHeight, heading);
+    }
 
     /// <summary>The full-width accent rule at the top of each document.</summary>
     public static Container AccentBar(Color? color = null, float height = 4f) => new()

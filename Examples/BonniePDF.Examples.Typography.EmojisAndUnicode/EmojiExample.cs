@@ -1,5 +1,6 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Typography;
@@ -77,9 +78,10 @@ public static class EmojiExample
         BmpSection(doc, "Currency Symbols", "s-currency",
             "€  £  ¥  ¢  ₹  ₩  ₿  ₪  ₫  ₽", textFont);
 
-        Section(doc, "Greek Alphabet", "s-greek");
-        doc.Add(new TextBlock { Text = "α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ τ υ φ χ ψ ω", FontSize = 12, Margin = new Thickness(0, 0, 0, 2) });
-        doc.Add(new TextBlock { Text = "Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω", FontSize = 12, Margin = new Thickness(0, 0, 0, 4) });
+        VerticalStack greek = Section("Greek Alphabet", "s-greek");
+        greek.Add(new TextBlock { Text = "α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ τ υ φ χ ψ ω", FontSize = 12, Margin = new Thickness(0, 0, 0, 2) });
+        greek.Add(new TextBlock { Text = "Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω", FontSize = 12, Margin = new Thickness(0, 0, 0, 4) });
+        doc.Add(greek);
 
         BmpSection(doc, "Cyrillic", "s-cyrillic",
             "А Б В Г Д Е Ж З И К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я", textFont);
@@ -109,9 +111,9 @@ public static class EmojiExample
 
         // ── Mixed content ──────────────────────────────────────────────────────
 
-        Section(doc, "Mixed Content", "s-mixed");
+        VerticalStack mixed = Section("Mixed Content", "s-mixed");
 
-        doc.Add(new TextBlock
+        mixed.Add(new TextBlock
         {
             Text   = "Emoji appear inline with regular text using RichText spans — Latin text keeps its " +
                      "text-font metrics while each emoji span switches to the emoji font:",
@@ -131,18 +133,24 @@ public static class EmojiExample
             ("Performance: ", "⚡", " Response time < 100 ms"),
         })
         {
-            doc.Add(new RichText { Margin = new Thickness(12, 0, 0, 4) }
+            mixed.Add(new RichText { Margin = new Thickness(12, 0, 0, 4) }
                 .Span(label)
                 .Span(emoji, emojiStyle)
                 .Span(rest));
         }
+        doc.Add(mixed);
 
         return doc;
     }
 
-    private static void Section(Document doc, string title, string tocId)
+    /// <summary>
+    /// A section heading inside a keep-together block. Each section is added as one piece, so a
+    /// heading never sits on a page apart from its content.
+    /// </summary>
+    private static VerticalStack Section(string title, string tocId)
     {
-        doc.Add(new Heading(title)
+        VerticalStack stack = new() { BreakAllowed = false };
+        stack.Add(new Heading(title)
         {
             TocIdentifier = tocId,
             Level         = 2,
@@ -150,17 +158,20 @@ public static class EmojiExample
             Color     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 12, 0, 4),
         });
+        return stack;
     }
 
     private static void BmpSection(Document doc, string title, string tocId, string content, string font)
     {
-        Section(doc, title, tocId);
-        doc.Add(new TextBlock { Text = content, FontName = font, FontSize = 12, Color = ColorPalette.Slate[600], Margin = new Thickness(0, 0, 0, 4) });
+        VerticalStack section = Section(title, tocId);
+        section.Add(new TextBlock { Text = content, FontName = font, FontSize = 12, Color = ColorPalette.Slate[600], Margin = new Thickness(0, 0, 0, 4) });
+        doc.Add(section);
     }
 
     private static void EmojiSection(Document doc, string title, string tocId, string content, string font)
     {
-        Section(doc, title, tocId);
-        doc.Add(new TextBlock { Text = content, FontName = font, FontSize = 20, Color = ColorPalette.Slate[800], Margin = new Thickness(0, 0, 0, 4) });
+        VerticalStack section = Section(title, tocId);
+        section.Add(new TextBlock { Text = content, FontName = font, FontSize = 20, Color = ColorPalette.Slate[800], Margin = new Thickness(0, 0, 0, 4) });
+        doc.Add(section);
     }
 }

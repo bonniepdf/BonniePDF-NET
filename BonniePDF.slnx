@@ -39,6 +39,7 @@
     <Project Path="Examples/BonniePDF.Examples.Templates.GrantAwardLetter/BonniePDF.Examples.Templates.GrantAwardLetter.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.Payslip/BonniePDF.Examples.Templates.Payslip.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.Quotation/BonniePDF.Examples.Templates.Quotation.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Templates.PolicySchedule/BonniePDF.Examples.Templates.PolicySchedule.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.EmploymentContract/BonniePDF.Examples.Templates.EmploymentContract.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.UtilityBill/BonniePDF.Examples.Templates.UtilityBill.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.CourseCertificate/BonniePDF.Examples.Templates.CourseCertificate.csproj" />
@@ -46,8 +47,8 @@
     <Project Path="Examples/BonniePDF.Examples.Templates.ShelfLabel/BonniePDF.Examples.Templates.ShelfLabel.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.UkDegreeTranscript/BonniePDF.Examples.Templates.UkDegreeTranscript.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Templates.AnnualReport/BonniePDF.Examples.Templates.AnnualReport.csproj" />
-    <Project Path="Examples/BonniePDF.Examples.Integration.AsyncGeneration/BonniePDF.Examples.Integration.AsyncGeneration.csproj" />
-    <Project Path="Examples/BonniePDF.Examples.Integration.WebApi/BonniePDF.Examples.Integration.WebApi.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Integration.ServerEndpoint/BonniePDF.Examples.Integration.ServerEndpoint.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Integration.BatchGeneration/BonniePDF.Examples.Integration.BatchGeneration.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Elements.Barcodes/BonniePDF.Examples.Elements.Barcodes.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Elements.ColorPaletteSwatches/BonniePDF.Examples.Elements.ColorPaletteSwatches.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Elements.CrossReferences/BonniePDF.Examples.Elements.CrossReferences.csproj" />

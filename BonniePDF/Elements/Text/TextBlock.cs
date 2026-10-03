@@ -67,6 +67,18 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     public float ParagraphSpacing { get; set; }
 
     /// <summary>
+    /// Keep every space, including leading and repeated ones, for text whose indentation carries
+    /// meaning (source code, a fixed-width listing). Default <c>false</c>, which drops a segment's
+    /// leading spaces.
+    /// </summary>
+    /// <remarks>
+    /// Lines wrap by code point at the last space that fits, or mid-token when there is none, so a
+    /// long line never overflows. Tabs are not expanded. Inherited by <see cref="Heading"/>; list
+    /// items and <see cref="RichText"/> do not take it.
+    /// </remarks>
+    public bool PreserveWhitespace { get; set; }
+
+    /// <summary>
     /// PDF/UA structure role for this element. Defaults to
     /// <see cref="Rendering.Tagging.SemanticRole.P"/> (a paragraph).
     /// <see cref="Heading"/> overrides this to return one of
@@ -535,10 +547,16 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     /// Greedy word-wrap where the first line fits <c>contentWidth - firstLineIndent</c>
     /// and the remainder fits the full <paramref name="contentWidth"/>.
     /// </summary>
+    /// <summary>Ordinary word wrapping, or the whitespace-preserving form when <see cref="PreserveWhitespace"/> is set.</summary>
+    protected override List<string> WrapSegment(string text, float maxWidth)
+        => PreserveWhitespace ? WrapPreservingWhitespace(text, maxWidth, maxWidth) : base.WrapSegment(text, maxWidth);
+
     private List<string> WrapWithFirstIndent(string segment, float contentWidth)
     {
         var lines = new List<string>();
         if (segment.Length == 0) return lines;
+        if (PreserveWhitespace)
+            return WrapPreservingWhitespace(segment, contentWidth - FirstLineIndent, contentWidth);
 
         string[] words = segment.Split(' ');
         string current = string.Empty;
