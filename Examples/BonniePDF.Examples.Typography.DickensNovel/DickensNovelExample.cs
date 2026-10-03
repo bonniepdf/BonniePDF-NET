@@ -144,23 +144,44 @@ public static partial class DickensNovelExample
         doc.AddPage();
 
         // ── Body Content ─────────────────────────────────────────────────────
+        // Headings gather in `opener` until the first paragraph arrives, then the whole block is added
+        // as one keep-together unit: a chapter never opens at the foot of a page with its text on the next.
+        VerticalStack? opener = null;
+
         foreach (NovelSection section in sections)
         {
             switch (section.Type)
             {
                 case SectionType.BookTitle:
-                    AddBookHeading(doc, section.Text, section.Text);
+                    // Each book opens a fresh page.
+                    doc.Add(new PageBreak());
+                    opener = new() { BreakAllowed = false };
+                    AddBookHeading(opener, section.Text, section.Text);
                     break;
 
                 case SectionType.Chapter:
-                    AddChapterHeading(doc, section.Number, section.Title, section.Text);
+                    opener ??= new() { BreakAllowed = false };
+                    AddChapterHeading(opener, section.Number, section.Title, section.Text);
                     break;
 
                 case SectionType.Paragraph:
-                    AddParagraph(doc, section.Text);
+                    if (string.IsNullOrWhiteSpace(section.Text)) break;
+                    TextBlock paragraph = CreateParagraph(section.Text);
+                    if (opener is not null)
+                    {
+                        opener.Add(paragraph);
+                        doc.Add(opener);
+                        opener = null;
+                    }
+                    else
+                    {
+                        doc.Add(paragraph);
+                    }
                     break;
             }
         }
+
+        if (opener is not null) doc.Add(opener);
         return doc;
     }
 
@@ -242,9 +263,9 @@ public static partial class DickensNovelExample
     /// A generous top margin keeps it visually separated from preceding text so it
     /// sits near the top of whatever page it lands on.
     /// </summary>
-    private static void AddBookHeading(Document doc, string title, string tocId)
+    private static void AddBookHeading(VerticalStack opener, string title, string tocId)
     {
-        doc.Add(new TextBlock
+        opener.Add(new TextBlock
         {
             Text      = "---------------",
             FontName  = StandardFonts.TimesRoman,
@@ -254,7 +275,7 @@ public static partial class DickensNovelExample
             Margin    = new Thickness(0, 56, 0, 14)
         });
 
-        doc.Add(new Heading
+        opener.Add(new Heading
         {
             TocIdentifier = tocId,
             Text      = title.ToUpperInvariant(),
@@ -265,7 +286,7 @@ public static partial class DickensNovelExample
             Margin    = new Thickness(0, 0, 0, 14)
         });
 
-        doc.Add(new TextBlock
+        opener.Add(new TextBlock
         {
             Text      = "---------------",
             FontName  = StandardFonts.TimesRoman,
@@ -281,9 +302,9 @@ public static partial class DickensNovelExample
     /// The top margin provides enough breathing room to visually open a new chapter
     /// without requiring explicit page breaks.
     /// </summary>
-    private static void AddChapterHeading(Document doc, string number, string title, string tocId)
+    private static void AddChapterHeading(VerticalStack opener, string number, string title, string tocId)
     {
-        doc.Add(new TextBlock
+        opener.Add(new TextBlock
         {
             Text      = number,
             FontName  = StandardFonts.TimesBold,
@@ -293,7 +314,7 @@ public static partial class DickensNovelExample
             Margin    = new Thickness(0, 32, 0, 6)
         });
 
-        doc.Add(new Heading
+        opener.Add(new Heading
         {
             TocIdentifier = tocId,
             Text      = title,
@@ -310,16 +331,14 @@ public static partial class DickensNovelExample
     /// The small bottom margin produces a traditional single-spaced look
     /// with a thin gap between consecutive paragraphs.
     /// </summary>
-    private static void AddParagraph(Document doc, string text)
+    private static TextBlock CreateParagraph(string text)
     {
-        if (string.IsNullOrWhiteSpace(text)) return;
-
-        doc.Add(new TextBlock
+        return new TextBlock
         {
             Text      = text,
             Alignment = TextAlignment.Justify,
             Margin    = new Thickness(0, 0, 0, 7)
-        });
+        };
     }
 
     // ── Text loading ─────────────────────────────────────────────────────────

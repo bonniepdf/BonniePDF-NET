@@ -105,70 +105,77 @@ public static class DataMatrixExampleFluent
                     col.Item().Line(1, ColorPalette.Slate[200]).Margin(0, 20, 0, 20);
 
                     // ── Section 3: Rectangular symbols ─────────────────────────
-                    SectionHeader(col, "Rectangular Symbols");
-
-                    col.Item().Text("Unlike QR codes, Data Matrix supports rectangular symbols - handy for marking " +
-                                  "long, narrow parts and labels. Set Rectangular(true) and a short message will use " +
-                                  "the most compact rectangular size.").Margin(0, 0, 0, 15);
-
-                    col.Item().Row(row =>
+                    // Each section is one keep-together block, so a heading never sits on a page apart from its symbols.
+                    col.Item().PreventPageBreak().Column(section =>
                     {
-                        row.Spacing(20);
+                        SectionHeader(section, "Rectangular Symbols");
 
-                        RectangularCard(row, "12345", "18 x 8");
-                        RectangularCard(row, "PART-99A", "32 x 8");
-                        RectangularCard(row, "LOT 2026-06", "26 x 12");
+                        section.Item().Text("Unlike QR codes, Data Matrix supports rectangular symbols - handy for marking " +
+                                      "long, narrow parts and labels. Set Rectangular(true) and a short message will use " +
+                                      "the most compact rectangular size.").Margin(0, 0, 0, 15);
+
+                        section.Item().Row(row =>
+                        {
+                            row.Spacing(20);
+
+                            RectangularCard(row, "12345", "18 x 8");
+                            RectangularCard(row, "PART-99A", "32 x 8");
+                            RectangularCard(row, "LOT 2026-06", "26 x 12");
+                        });
                     });
 
                     col.Item().Line(1, ColorPalette.Slate[200]).Margin(0, 20, 0, 20);
 
                     // ── Section 4: Colours ─────────────────────────────────────
-                    SectionHeader(col, "Colours & Backgrounds");
-
-                    col.Item().Row(row =>
+                    col.Item().PreventPageBreak().Column(section =>
                     {
-                        row.Spacing(20);
+                        SectionHeader(section, "Colours & Backgrounds");
 
-                        // Custom Foreground
-                        row.RelativeItem().Column(c =>
+                        section.Item().Row(row =>
                         {
-                            c.Item().Text("Custom Foreground").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
-                            c.Item().Border(1, ColorPalette.Blue[200]).Padding(10).AlignCenter()
-                                .DataMatrix("ID-7782", size: 120)
-                                .ForegroundColor(ColorPalette.Blue[700])
-                                .QuietZone(2)
-                                .AltText("Data matrix encoding ID-7782");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("ID-7782").FontSize(9).Color(ColorPalette.Slate[500]);
-                        });
+                            row.Spacing(20);
 
-                        // Custom Background
-                        row.RelativeItem().Column(c =>
-                        {
-                            c.Item().Text("Custom Background").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
-                            c.Item().Border(1, ColorPalette.Rose[200]).Padding(10).AlignCenter()
-                                .DataMatrix("BATCH-44", size: 120)
-                                .ForegroundColor(ColorPalette.Rose[900])
-                                .BackgroundColor(ColorPalette.Rose[50])
-                                .QuietZone(2)
-                                .AltText("Data matrix encoding BATCH-44");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("BATCH-44").FontSize(9).Color(ColorPalette.Slate[500]);
-                        });
+                            // Custom Foreground
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("Custom Foreground").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
+                                c.Item().Border(1, ColorPalette.Blue[200]).Padding(10).AlignCenter()
+                                    .DataMatrix("ID-7782", size: 120)
+                                    .ForegroundColor(ColorPalette.Blue[700])
+                                    .QuietZone(2)
+                                    .AltText("Data matrix encoding ID-7782");
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("ID-7782").FontSize(9).Color(ColorPalette.Slate[500]);
+                            });
 
-                        // High Contrast (transparent, container background shows through)
-                        row.RelativeItem().Column(c =>
-                        {
-                            c.Item().Text("High Contrast").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
-                            c.Item()
-                                .Background(ColorPalette.Amber[100])
-                                .Border(1, ColorPalette.Amber[300])
-                                .Padding(10)
-                                .AlignCenter()
-                                .DataMatrix("A-1029", size: 120)
-                                .ForegroundColor(ColorPalette.Slate[900])
-                                .DrawBackground(false)
-                                .QuietZone(2)
-                                .AltText("Data matrix encoding A-1029");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("A-1029").FontSize(9).Color(ColorPalette.Slate[500]);
+                            // Custom Background
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("Custom Background").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
+                                c.Item().Border(1, ColorPalette.Rose[200]).Padding(10).AlignCenter()
+                                    .DataMatrix("BATCH-44", size: 120)
+                                    .ForegroundColor(ColorPalette.Rose[900])
+                                    .BackgroundColor(ColorPalette.Rose[50])
+                                    .QuietZone(2)
+                                    .AltText("Data matrix encoding BATCH-44");
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("BATCH-44").FontSize(9).Color(ColorPalette.Slate[500]);
+                            });
+
+                            // High Contrast (transparent, container background shows through)
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("High Contrast").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
+                                c.Item()
+                                    .Background(ColorPalette.Amber[100])
+                                    .Border(1, ColorPalette.Amber[300])
+                                    .Padding(10)
+                                    .AlignCenter()
+                                    .DataMatrix("A-1029", size: 120)
+                                    .ForegroundColor(ColorPalette.Slate[900])
+                                    .DrawBackground(false)
+                                    .QuietZone(2)
+                                    .AltText("Data matrix encoding A-1029");
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("A-1029").FontSize(9).Color(ColorPalette.Slate[500]);
+                            });
                         });
                     });
                 });

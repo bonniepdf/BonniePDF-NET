@@ -1,6 +1,7 @@
 using System.Globalization;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
@@ -188,7 +189,8 @@ public static class BillOfCostsExample
 
         // ── Rates ─────────────────────────────────────────────────────────────
 
-        doc.Add(H2("Hourly rates claimed"));
+        // Each heading asks for room for the start of what it introduces, so it is never left alone at the foot of a page.
+        doc.Add(KeepWithNext(H2("Hourly rates claimed")));
         Table rates = new(1f, 4.6f, 1.4f, 1.4f)
         {
             CellPadding = 6,
@@ -226,7 +228,7 @@ public static class BillOfCostsExample
 
         // ── Schedule of work, by phase ────────────────────────────────────────
 
-        doc.Add(H2("Schedule of work"));
+        doc.Add(KeepWithNext(H2("Schedule of work"), 170f));
         doc.Add(Cell(
             "Each phase carries its own subtotal. The phase subtotals are what the summary adds up.",
             size: 9f,
@@ -239,7 +241,7 @@ public static class BillOfCostsExample
         // mid-page then loses its label entirely when the table carries over.
         foreach ((string phase, TimeEntry[] rows, decimal hours, decimal value) in phaseTotals)
         {
-            doc.Add(H3($"{phase} — {hours.ToString("F1", CultureInfo.InvariantCulture)} hours, {Money(value)}"));
+            Heading heading = H3($"{phase} — {hours.ToString("F1", CultureInfo.InvariantCulture)} hours, {Money(value)}");
 
             Table schedule = new(1.1f, 1.5f, 0.6f, 5f, 0.85f, 1.15f, 1.25f)
             {
@@ -279,12 +281,16 @@ public static class BillOfCostsExample
                 Td(hours.ToString("F1", CultureInfo.InvariantCulture), bold: true, align: TextAlignment.Right),
                 Td(Money(value), bold: true, color: Accent, align: TextAlignment.Right));
 
-            doc.Add(schedule);
+            // A phase is short enough to keep whole: heading, rows and subtotal share a page.
+            VerticalStack phaseBlock = new() { BreakAllowed = false };
+            phaseBlock.Add(heading);
+            phaseBlock.Add(schedule);
+            doc.Add(phaseBlock);
         }
 
         // ── Disbursements ─────────────────────────────────────────────────────
 
-        doc.Add(H2("Disbursements"));
+        doc.Add(KeepWithNext(H2("Disbursements")));
 
         Table disbursements = new(1.2f, 5.4f, 1.2f, 1.3f)
         {
@@ -316,7 +322,7 @@ public static class BillOfCostsExample
 
         // ── Summary ───────────────────────────────────────────────────────────
 
-        doc.Add(H2("Summary of costs claimed"));
+        doc.Add(KeepWithNext(H2("Summary of costs claimed"), 150f));
 
         doc.Add(TotalsPanel(
             [

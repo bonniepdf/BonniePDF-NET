@@ -183,7 +183,7 @@ public static class SiteInspectionReportExample
 
         // ── The register ──────────────────────────────────────────────────────
 
-        doc.Add(H2("Defect register"));
+        doc.Add(KeepWithNext(H2("Defect register"), 150f));
         doc.Add(Body(
             "Every item carries a reference, an owner, a target date, and an evidence plate number. "
                 + "Photographic evidence is issued as a separate annexe under the same references.",
@@ -223,27 +223,30 @@ public static class SiteInspectionReportExample
 
         // ── Close-out and distribution ────────────────────────────────────────
 
-        doc.Add(H2("Close-out"));
-        doc.Add(Body(
+        // The close-out wording stays on the same page as the sign-off it leads to.
+        VerticalStack closeOut = new() { BreakAllowed = false };
+        closeOut.Add(H2("Close-out"));
+        closeOut.Add(Body(
             "Each owner is to close their items by the target date and submit evidence against the item reference. "
                 + "Items not closed by the re-inspection date are escalated to the weekly progress meeting and "
                 + "remain open on the next register.",
             color: Muted,
             size: 9f));
 
-        doc.Add(SignatureRow(
+        closeOut.Add(SignatureRow(
         [
             SignatureSlot("Inspected by", Inspector, ShortDate(Inspected)),
             SignatureSlot("Received — principal contractor", "Sample Manager — Project Manager"),
             SignatureSlot("Client representative", "Sample Manager — Facilities Manager"),
         ]));
 
-        doc.Add(Body(
+        closeOut.Add(Body(
             $"{Reference} · issued to the client, the principal contractor, and each named subcontractor.",
             color: Muted,
             marginTop: 10f,
             marginBottom: 0f,
             size: 8f));
+        doc.Add(closeOut);
 
         return doc;
     }

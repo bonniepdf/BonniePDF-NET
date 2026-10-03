@@ -158,52 +158,57 @@ public static class QRCodesExampleFluent
                     col.Item().Line(1, ColorPalette.Slate[200]).Margin(0, 20, 0, 20);
 
                     // ── Section 3: Colors and Styling ──────────────────────────
-                    SectionHeader(col, "Colors & Backgrounds");
-                    
-                    col.Item().Row(row =>
+                    // Heading and codes share a page: PreventPageBreak moves the whole section on
+                    // rather than leaving the heading stranded at the foot of the previous page.
+                    col.Item().PreventPageBreak().Column(section =>
                     {
-                        row.Spacing(20);
+                        SectionHeader(section, "Colors & Backgrounds");
 
-                        // Custom Foreground
-                        row.RelativeItem().Column(c =>
+                        section.Item().Row(row =>
                         {
-                            c.Item().Text("Custom Foreground").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
-                            c.Item().Border(1, ColorPalette.Blue[200]).Padding(10).AlignCenter()
-                                .QRCode("tel:+1234567890", size: 120)
-                                .ForegroundColor(ColorPalette.Blue[700])
-                                .QuietZone(2)
-                                .AltText("QR code encoding telephone number +1234567890");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("tel:+1234567890").FontSize(9).Color(ColorPalette.Slate[500]);
-                        });
+                            row.Spacing(20);
 
-                        // Custom Colors
-                        row.RelativeItem().Column(c =>
-                        {
-                            c.Item().Text("Custom Background").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
-                            c.Item().Border(1, ColorPalette.Rose[200]).Padding(10).AlignCenter()
-                                .QRCode("mailto:hello@example.com", size: 120)
-                                .ForegroundColor(ColorPalette.Rose[900])
-                                .BackgroundColor(ColorPalette.Rose[50])
-                                .QuietZone(2)
-                                .AltText("QR code encoding email address mailto:hello@example.com");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("mailto:hello@example.com").FontSize(9).Color(ColorPalette.Slate[500]);
-                        });
+                            // Custom Foreground
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("Custom Foreground").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
+                                c.Item().Border(1, ColorPalette.Blue[200]).Padding(10).AlignCenter()
+                                    .QRCode("tel:+1234567890", size: 120)
+                                    .ForegroundColor(ColorPalette.Blue[700])
+                                    .QuietZone(2)
+                                    .AltText("QR code encoding telephone number +1234567890");
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("tel:+1234567890").FontSize(9).Color(ColorPalette.Slate[500]);
+                            });
 
-                        // Transparent Background
-                        row.RelativeItem().Column(c =>
-                        {
-                            c.Item().Text("Transparent Background").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
-                            c.Item()
-                                .Background(ColorPalette.Amber[100])
-                                .Border(1, ColorPalette.Amber[300])
-                                .Padding(10)
-                                .AlignCenter()
-                                .QRCode("WIFI:S:MyNetwork;T:WPA;P:password;;", size: 120)
-                                .ForegroundColor(ColorPalette.Amber[900])
-                                .DrawBackground(false) // Let the container's background show through
-                                .QuietZone(2)
-                                .AltText("QR code encoding Wi-Fi network credentials for MyNetwork");
-                            c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("WIFI:S:MyNetwork;...").FontSize(9).Color(ColorPalette.Slate[500]);
+                            // Custom Colors
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("Custom Background").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
+                                c.Item().Border(1, ColorPalette.Rose[200]).Padding(10).AlignCenter()
+                                    .QRCode("mailto:hello@example.com", size: 120)
+                                    .ForegroundColor(ColorPalette.Rose[900])
+                                    .BackgroundColor(ColorPalette.Rose[50])
+                                    .QuietZone(2)
+                                    .AltText("QR code encoding email address mailto:hello@example.com");
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("mailto:hello@example.com").FontSize(9).Color(ColorPalette.Slate[500]);
+                            });
+
+                            // Transparent Background
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("Transparent Background").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
+                                c.Item()
+                                    .Background(ColorPalette.Amber[100])
+                                    .Border(1, ColorPalette.Amber[300])
+                                    .Padding(10)
+                                    .AlignCenter()
+                                    .QRCode("WIFI:S:MyNetwork;T:WPA;P:password;;", size: 120)
+                                    .ForegroundColor(ColorPalette.Amber[900])
+                                    .DrawBackground(false) // Let the container's background show through
+                                    .QuietZone(2)
+                                    .AltText("QR code encoding Wi-Fi network credentials for MyNetwork");
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("WIFI:S:MyNetwork;...").FontSize(9).Color(ColorPalette.Slate[500]);
+                            });
                         });
                     });
                 });

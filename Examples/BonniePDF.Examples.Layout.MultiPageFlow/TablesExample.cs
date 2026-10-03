@@ -1,5 +1,6 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
@@ -175,7 +176,9 @@ public static class TablesExample
 
         foreach ((string title, string body) in OverviewSections)
         {
-            doc.Add(new Heading(title)
+            // Each heading is kept with its paragraph, so a heading never ends a page on its own.
+            VerticalStack section = new() { BreakAllowed = false };
+            section.Add(new Heading(title)
             {
                 TocIdentifier = title.ToLowerInvariant().Replace(' ', '-'),
                 Level         = 2,
@@ -185,7 +188,8 @@ public static class TablesExample
                 Margin        = new Thickness(0, 14, 0, 6),
             });
 
-            doc.Add(new TextBlock { Text = body, Margin = new Thickness(0, 0, 0, 6) });
+            section.Add(new TextBlock { Text = body, Margin = new Thickness(0, 0, 0, 6) });
+            doc.Add(section);
         }
 
         return doc;

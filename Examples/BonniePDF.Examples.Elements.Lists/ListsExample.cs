@@ -1,5 +1,6 @@
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Lists;
 using BonniePDF.Elements.Text;
 using BonniePDF.Typography;
@@ -47,31 +48,34 @@ public static class ListsExample
             Margin = new Thickness(0, 0, 0, 8),
         });
 
-        Section(doc, "Decimal (1, 2, 3…)", "s-decimal");
+        VerticalStack s1 = Section("Decimal (1, 2, 3…)", "s-decimal");
         var decimalList = new OrderedList { NumberFormat = NumberFormat.Decimal, FontSize = 12, ItemSpacing = 6 };
         decimalList.AddItem("Plan the document structure before writing.");
         decimalList.AddItem("Apply semantic headings so assistive technology can navigate by section.");
         decimalList.AddItem("Tag every image with alternative text or mark it as decorative.");
         decimalList.AddItem("Validate the output with veraPDF before publishing.");
-        doc.Add(decimalList);
+        s1.Add(decimalList);
+        doc.Add(s1);
 
-        Section(doc, "Upper Roman (I, II, III…)", "s-roman");
+        VerticalStack s2 = Section("Upper Roman (I, II, III…)", "s-roman");
         var romanList = new OrderedList { NumberFormat = NumberFormat.UpperRoman, FontSize = 12, ItemSpacing = 6 };
         romanList.AddItem("Accessibility requirements");
         romanList.AddItem("Design guidelines");
         romanList.AddItem("Testing and validation");
         romanList.AddItem("Release checklist");
-        doc.Add(romanList);
+        s2.Add(romanList);
+        doc.Add(s2);
 
-        Section(doc, "Lowercase letters (a, b, c…)", "s-alpha");
+        VerticalStack s3 = Section("Lowercase letters (a, b, c…)", "s-alpha");
         var alphaList = new OrderedList { NumberFormat = NumberFormat.LowerAlpha, FontSize = 12, ItemSpacing = 6 };
         alphaList.AddItem("Provide document language metadata.");
         alphaList.AddItem("Embed all fonts used in the file.");
         alphaList.AddItem("Include a colour profile so colours reproduce reliably.");
-        doc.Add(alphaList);
+        s3.Add(alphaList);
+        doc.Add(s3);
 
-        Section(doc, "Custom start number", "s-start");
-        doc.Add(new TextBlock
+        VerticalStack s4 = Section("Custom start number", "s-start");
+        s4.Add(new TextBlock
         {
             Text   = "Numbering can begin at any value — useful when a list continues across sections.",
             Margin = new Thickness(0, 0, 0, 6),
@@ -80,10 +84,11 @@ public static class ListsExample
         customStartList.AddItem("Review colour contrast ratios.");
         customStartList.AddItem("Confirm the reading order is logical.");
         customStartList.AddItem("Export and archive the final file.");
-        doc.Add(customStartList);
+        s4.Add(customStartList);
+        doc.Add(s4);
 
-        Section(doc, "Nested ordered lists", "s-nested-ordered");
-        doc.Add(new TextBlock
+        VerticalStack s5 = Section("Nested ordered lists", "s-nested-ordered");
+        s5.Add(new TextBlock
         {
             Text   = "A sub-list nests under its parent item and can use a different numbering format.",
             Margin = new Thickness(0, 0, 0, 6),
@@ -100,9 +105,10 @@ public static class ListsExample
 
         mainOrdered.AddItem("Review and validate.");
         mainOrdered.AddItem("Publish the accessible PDF.");
-        doc.Add(mainOrdered);
+        s5.Add(mainOrdered);
 
         // ── Unordered lists ────────────────────────────────────────────────────
+        doc.Add(s5);
 
         Category(doc, "Unordered Lists", "unordered");
 
@@ -112,42 +118,47 @@ public static class ListsExample
             Margin = new Thickness(0, 0, 0, 8),
         });
 
-        Section(doc, "Disc (•)", "s-disc");
+        VerticalStack s6 = Section("Disc (•)", "s-disc");
         var discList = new UnorderedList { BulletStyle = BulletStyle.Disc, FontSize = 12, ItemSpacing = 6 };
         discList.AddItem("Screen readers announce list items and their position within the list.");
         discList.AddItem("Users can jump between lists using standard navigation shortcuts.");
         discList.AddItem("Disc is the default first-level bullet.");
-        doc.Add(discList);
+        s6.Add(discList);
+        doc.Add(s6);
 
-        Section(doc, "Circle (◦)", "s-circle");
+        VerticalStack s7 = Section("Circle (◦)", "s-circle");
         var circleList = new UnorderedList { BulletStyle = BulletStyle.Circle, FontSize = 12, ItemSpacing = 6 };
         circleList.AddItem("Circle bullets suit second-level points.");
         circleList.AddItem("They read as hollow discs.");
         circleList.AddItem("Pair them with disc bullets to signal hierarchy.");
-        doc.Add(circleList);
+        s7.Add(circleList);
+        doc.Add(s7);
 
-        Section(doc, "Square (■)", "s-square");
+        VerticalStack s8 = Section("Square (■)", "s-square");
         var squareList = new UnorderedList { BulletStyle = BulletStyle.Square, FontSize = 12, ItemSpacing = 6 };
         squareList.AddItem("Square bullets draw attention to key notes.");
         squareList.AddItem("Useful for warnings or highlights.");
         squareList.AddItem("The marker takes any palette colour.");
-        doc.Add(squareList);
+        s8.Add(squareList);
+        doc.Add(s8);
 
-        Section(doc, "Dash (-)", "s-dash");
+        VerticalStack s9 = Section("Dash (-)", "s-dash");
         var dashList = new UnorderedList { BulletStyle = BulletStyle.Dash, FontSize = 12, ItemSpacing = 6 };
         dashList.AddItem("Dash bullets give a plain, minimal look.");
         dashList.AddItem("Common in technical and code documentation.");
         dashList.AddItem("No special glyph is required.");
-        doc.Add(dashList);
+        s9.Add(dashList);
+        doc.Add(s9);
 
-        Section(doc, "Custom (★)", "s-custom");
+        VerticalStack s10 = Section("Custom (★)", "s-custom");
         var customList = new UnorderedList { BulletStyle = BulletStyle.Custom, CustomBullet = "★", FontSize = 12, ItemSpacing = 6 };
         customList.AddItem("Any character can serve as a bullet.");
         customList.AddItem("Stars, arrows, or checkmarks all work.");
         customList.AddItem("Choose one that suits the document tone.");
-        doc.Add(customList);
+        s10.Add(customList);
+        doc.Add(s10);
 
-        Section(doc, "Coloured bullets", "s-coloured");
+        VerticalStack s11 = Section("Coloured bullets", "s-coloured");
         var colouredList = new UnorderedList
         {
             BulletStyle = BulletStyle.Square,
@@ -159,9 +170,10 @@ public static class ListsExample
         colouredList.AddItem("The bullet colour is independent of the text colour.");
         colouredList.AddItem("Handy for status markers or categorisation.");
         colouredList.AddItem("Any palette token or Color works.");
-        doc.Add(colouredList);
+        s11.Add(colouredList);
+        doc.Add(s11);
 
-        Section(doc, "Nested unordered lists", "s-nested-unordered");
+        VerticalStack s12 = Section("Nested unordered lists", "s-nested-unordered");
         var mainUnordered = new UnorderedList { BulletStyle = BulletStyle.Disc, FontSize = 12, ItemSpacing = 6 };
         mainUnordered.AddItem("Compliance standards we target:");
 
@@ -173,7 +185,8 @@ public static class ListsExample
 
         mainUnordered.AddItem("Each is validated in CI.");
         mainUnordered.AddItem("A failure blocks the release.");
-        doc.Add(mainUnordered);
+        s12.Add(mainUnordered);
+        doc.Add(s12);
 
         return doc;
     }
@@ -191,9 +204,15 @@ public static class ListsExample
         });
     }
 
-    private static void Section(Document doc, string title, string tocId)
+    /// <summary>
+    /// A keep-together block that opens with a section heading. Everything added to it moves to the
+    /// next page as one piece, so a heading never sits at the foot of a page apart from its list,
+    /// and a nested list is never parted from the item it belongs to.
+    /// </summary>
+    private static VerticalStack Section(string title, string tocId)
     {
-        doc.Add(new Heading(title)
+        VerticalStack stack = new() { BreakAllowed = false };
+        stack.Add(new Heading(title)
         {
             TocIdentifier = tocId,
             Level         = 2,
@@ -202,5 +221,6 @@ public static class ListsExample
             Color     = ColorPalette.Indigo[600],
             Margin        = new Thickness(0, 14, 0, 6),
         });
+        return stack;
     }
 }

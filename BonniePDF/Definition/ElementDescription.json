@@ -559,6 +559,9 @@
       },
       "paragraphSpacing": {
         "kind": "length"
+      },
+      "preserveWhitespace": {
+        "kind": "boolean"
       }
     },
     "List": {

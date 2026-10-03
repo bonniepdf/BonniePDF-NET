@@ -391,6 +391,8 @@ public static class QuotationExample
             Padding = new Thickness(12, 12, 12, 12),
             Border = new Border(0.75f),
             BorderColors = new BorderColors(Line),
+            // The signature fields stay with the wording that asks for them.
+            BreakAllowed = false,
             Child = body,
         };
     }

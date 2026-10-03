@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using BonniePDF.Core;
 using BonniePDF.Typography;
@@ -279,9 +280,97 @@ public abstract class TextElementBase : ElementBase
     }
 
     /// <summary>
+    /// Wraps a single break-free segment, keeping every space (spec 03 "Preserved whitespace").
+    /// </summary>
+    /// <remarks>
+    /// Works by Unicode code point and never splits a surrogate pair. A line is the longest prefix
+    /// that fits: <paramref name="firstWidth"/> for a segment's first line, <paramref name="width"/>
+    /// for the rest. It breaks at the last space that has a non-space before it, trimming the line's
+    /// trailing spaces and dropping the spaces at the break; failing that, it breaks at the last code
+    /// point that fits. At least one code point is placed on every line, so it always terminates.
+    /// </remarks>
+    protected List<string> WrapPreservingWhitespace(string text, float firstWidth, float width)
+    {
+        List<string> lines = [];
+        if (string.IsNullOrEmpty(text)) return lines;
+
+        List<string> rest = [];
+        foreach (Rune rune in text.EnumerateRunes()) rest.Add(rune.ToString());
+        float limit = firstWidth;
+
+        bool Fits(int count) => MeasureTextWidth(string.Concat(rest.GetRange(0, count))) <= limit;
+        bool HasNonSpace(int count)
+        {
+            for (int i = 0; i < count; i++)
+                if (rest[i] != " ") return true;
+            return false;
+        }
+
+        while (rest.Count > 0)
+        {
+            if (Fits(rest.Count))
+            {
+                lines.Add(string.Concat(rest));
+                break;
+            }
+
+            // One code point is always placed, even when it alone is wider than the line.
+            if (rest.Count == 1)
+            {
+                lines.Add(rest[0]);
+                break;
+            }
+
+            // The longest prefix that fits, never fewer than one code point.
+            int lo = 1;
+            int hi = rest.Count - 1;
+            while (lo < hi)
+            {
+                int mid = (lo + hi + 1) >> 1;
+                if (Fits(mid)) lo = mid;
+                else hi = mid - 1;
+            }
+
+            int count = lo;
+            int cut = -1;
+            if (rest[count] == " " && HasNonSpace(count))
+            {
+                cut = count;
+            }
+            else
+            {
+                for (int i = count - 1; i > 0; i--)
+                {
+                    if (rest[i] == " " && HasNonSpace(i))
+                    {
+                        cut = i;
+                        break;
+                    }
+                }
+            }
+
+            if (cut >= 0)
+            {
+                lines.Add(string.Concat(rest.GetRange(0, cut)).TrimEnd(' '));
+                rest.RemoveRange(0, cut);
+                while (rest.Count > 0 && rest[0] == " ") rest.RemoveAt(0);
+            }
+            else
+            {
+                lines.Add(string.Concat(rest.GetRange(0, count)));
+                rest.RemoveRange(0, count);
+            }
+
+            limit = width;
+        }
+
+        return lines;
+    }
+
+    /// <summary>
     /// Word-wraps a single break-free segment to <paramref name="maxWidth"/>.
     /// </summary>
-    private List<string> WrapSegment(string text, float maxWidth)
+    protected virtual List<string> WrapSegment(string text, float maxWidth)
     {
         List<string> lines = [];
         if (string.IsNullOrEmpty(text)) return lines;

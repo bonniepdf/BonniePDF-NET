@@ -205,7 +205,8 @@ public static class UkDegreeTranscriptExample
             AltText = "QR code to verify transcript reference 20458812.",
         };
 
-        HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
+        // The heading, wording and QR code stay on one page.
+        HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, BreakAllowed = false };
         row.Add(text, 3);
         row.Add(new Container { Child = qr, HorizontalAlignment = HorizontalAlignment.End }, 1);
         return row;

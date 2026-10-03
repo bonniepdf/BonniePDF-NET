@@ -152,12 +152,14 @@ public static class ShapesAndBordersExample
         });
 
         // --- Section 5: Varying Radii ---
-        doc.Add(CreateSectionHeader("Radius Comparison"));
+        // The heading and all six samples stay together: a comparison split across pages defeats its purpose.
+        VerticalStack radiusSection = new() { BreakAllowed = false };
+        radiusSection.Add(CreateSectionHeader("Radius Comparison"));
 
         int[] radii = { 0, 4, 8, 12, 20, 30 };
         foreach (int r in radii)
         {
-            doc.Add(new Container
+            radiusSection.Add(new Container
             {
                 BackgroundColor = ColorPalette.Slate[100],
                 Border = new Border(1),
@@ -172,6 +174,7 @@ public static class ShapesAndBordersExample
                 }
             });
         }
+        doc.Add(radiusSection);
 
         // --- Section 6: Practical Examples ---
         doc.Add(new Line
@@ -180,10 +183,11 @@ public static class ShapesAndBordersExample
             Thickness = 1,
             Margin = new Thickness(0, 16, 0, 0)
         });
-        doc.Add(CreateSectionHeader("Practical Examples"));
+        VerticalStack bannerSection = new() { BreakAllowed = false };
+        bannerSection.Add(CreateSectionHeader("Practical Examples"));
 
         // Success banner
-        doc.Add(new Container
+        bannerSection.Add(new Container
         {
             BackgroundColor = Color.FromHex("#dcfce7"),
             Border = new Border(1),
@@ -201,7 +205,7 @@ public static class ShapesAndBordersExample
         });
 
         // Warning banner
-        doc.Add(new Container
+        bannerSection.Add(new Container
         {
             BackgroundColor = Color.FromHex("#fef9c3"),
             Border = new Border(1),
@@ -219,7 +223,7 @@ public static class ShapesAndBordersExample
         });
 
         // Error banner
-        doc.Add(new Container
+        bannerSection.Add(new Container
         {
             BackgroundColor = Color.FromHex("#fee2e2"),
             Border = new Border(1),
@@ -237,7 +241,7 @@ public static class ShapesAndBordersExample
         });
 
         // Info banner
-        doc.Add(new Container
+        bannerSection.Add(new Container
         {
             BackgroundColor = Color.FromHex("#dbeafe"),
             Border = new Border(1),
@@ -253,6 +257,7 @@ public static class ShapesAndBordersExample
                 Color = ColorPalette.Blue[800]
             },
         });
+        doc.Add(bannerSection);
         return doc;
     }
 

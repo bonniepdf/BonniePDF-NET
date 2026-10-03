@@ -84,9 +84,12 @@ public static class LabReportExample
             doc.Add(PanelTable(panel));
         }
 
-        doc.Add(H2("Clinical interpretation"));
-        doc.Add(Body("Mild normocytic anaemia with a neutrophil leucocytosis, consistent with an acute inflammatory or infective process. Renal function shows a mildly raised creatinine with eGFR 62 mL/min/1.73m2 (CKD stage G2). Suggest clinical correlation and a repeat FBC in 7-10 days. Flags: H = above reference range, L = below reference range."));
-        doc.Add(Authorisation());
+        // The interpretation and the sign-off that authorises it stay on one page.
+        VerticalStack sign = new() { BreakAllowed = false };
+        sign.Add(H2("Clinical interpretation"));
+        sign.Add(Body("Mild normocytic anaemia with a neutrophil leucocytosis, consistent with an acute inflammatory or infective process. Renal function shows a mildly raised creatinine with eGFR 62 mL/min/1.73m2 (CKD stage G2). Suggest clinical correlation and a repeat FBC in 7-10 days. Flags: H = above reference range, L = below reference range."));
+        sign.Add(Authorisation());
+        doc.Add(sign);
 
         return doc;
     }

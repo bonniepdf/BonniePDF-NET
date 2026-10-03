@@ -1,4 +1,4 @@
-namespace BonniePDF.Examples.Integration.AsyncGeneration;
+namespace BonniePDF.Examples.Integration.BatchGeneration;
 
 internal sealed class Program
 {
@@ -8,10 +8,10 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating Async Generation...");
-        using (var doc = AsyncGenerationExample.GenerateAsync().GetAwaiter().GetResult())
+        Console.WriteLine("Generating Batch Generation...");
+        using (var doc = BatchGenerationExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "async_document.pdf"));
+            doc.Save(Path.Combine(outputDir, "batch-generation.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

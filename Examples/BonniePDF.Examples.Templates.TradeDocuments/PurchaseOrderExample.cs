@@ -167,8 +167,10 @@ public static class PurchaseOrderExample
             TotalLine("Order total", Money(net + vat), bold: true, size: 11f, color: Accent),
         ]));
 
-        doc.Add(H2("Order terms"));
-        doc.Add(Panel("Conditions of purchase",
+        // The heading stays with the terms panel it introduces.
+        VerticalStack terms = new() { BreakAllowed = false };
+        terms.Add(H2("Order terms"));
+        terms.Add(Panel("Conditions of purchase",
         [
             Cell(
                 "This order is placed on the buyer’s standard conditions of purchase, which prevail over any terms "
@@ -185,14 +187,16 @@ public static class PurchaseOrderExample
                     + "Quantities delivered in excess of those ordered may be returned at the supplier’s cost.",
                 size: 9f),
         ]));
+        doc.Add(terms);
 
-        doc.Add(H2("Authorisation"));
-        doc.Add(Cell(
+        VerticalStack authorisation = new() { BreakAllowed = false };
+        authorisation.Add(H2("Authorisation"));
+        authorisation.Add(Cell(
             "Raised and approved within the delegated authority for this cost centre.",
             size: 9f,
             color: Muted,
             marginBottom: 8f));
-        doc.Add(WeightedRow(
+        authorisation.Add(WeightedRow(
             [
                 AuthSlot("Raised by", RaisedBy, GbDate(Raised)),
                 AuthSlot("Approved by", ApprovedBy, GbDate(Raised)),
@@ -200,6 +204,7 @@ public static class PurchaseOrderExample
             ],
             spacing: 22f,
             marginBottom: 0f));
+        doc.Add(authorisation);
 
         return doc;
     }

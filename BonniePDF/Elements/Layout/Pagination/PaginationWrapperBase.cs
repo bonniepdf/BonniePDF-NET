@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using BonniePDF.Fluent;
 using BonniePDF.Rendering;
+using BonniePDF.Rendering.Tagging;
 
 namespace BonniePDF.Elements.Layout.Pagination;
 
@@ -142,12 +143,23 @@ public abstract class PaginationWrapperBase : ElementBase, IContentContainer, IS
     {
         if (Child is null) return RenderStatus.Complete;
 
-        if (Child is IStatefulElement stateful) return stateful.RenderStateful(ctx, contentWidth);
+        // The wrapper declares no role of its own, so the child's semantics (a heading, a
+        // figure, a table) must be opened here, as every other layout container does for its
+        // children. Without it a wrapped heading drops out of the structure tree.
+        ChildTagToken token = ChildTagging.BeginChildTag(ctx, Child);
+        try
+        {
+            if (Child is IStatefulElement stateful) return stateful.RenderStateful(ctx, contentWidth);
 
-        float before = ctx.CurrentY;
-        Child.Render(ctx, contentWidth);
-        if (ctx.CurrentY == before) ctx.CurrentY += Child.MeasureHeight(contentWidth);
-        return RenderStatus.Complete;
+            float before = ctx.CurrentY;
+            Child.Render(ctx, contentWidth);
+            if (ctx.CurrentY == before) ctx.CurrentY += Child.MeasureHeight(contentWidth);
+            return RenderStatus.Complete;
+        }
+        finally
+        {
+            ChildTagging.EndChildTag(ctx, token);
+        }
     }
 
     private void OpenChildNode(RenderContext ctx, float contentWidth)

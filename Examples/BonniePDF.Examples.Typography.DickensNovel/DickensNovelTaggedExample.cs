@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements.Text;
 using BonniePDF.Extensions;
 using BonniePDF.Typography;
@@ -177,12 +178,19 @@ public static partial class DickensNovelTaggedExample
 
         // ── Body ──────────────────────────────────────────────────────────────
 
+        // Headings gather in `opener` until the first paragraph arrives, then the whole block is added
+        // as one keep-together unit: a chapter never opens at the foot of a page with its text on the next.
+        VerticalStack? opener = null;
+
         foreach ((SectionKind kind, string number, string title, string tocId) in sections)
         {
             switch (kind)
             {
                 case SectionKind.BookTitle:
-                    doc.Add(new Heading(title.ToUpperInvariant())
+                    // Each book opens a fresh page.
+                    doc.Add(new PageBreak());
+                    opener = new() { BreakAllowed = false };
+                    opener.Add(new Heading(title.ToUpperInvariant())
                     {
                         TocIdentifier = tocId,
                         Level         = 1,
@@ -196,7 +204,8 @@ public static partial class DickensNovelTaggedExample
 
                 case SectionKind.Chapter:
                     // Chapter number label (not a heading - it's presentational)
-                    doc.Add(new TextBlock
+                    opener ??= new() { BreakAllowed = false };
+                    opener.Add(new TextBlock
                     {
                         Text      = number,
                         FontName  = StandardFonts.TimesBold,
@@ -205,7 +214,7 @@ public static partial class DickensNovelTaggedExample
                         Alignment = TextAlignment.Center,
                         Margin    = new Thickness(0, 32, 0, 6),
                     });
-                    doc.Add(new Heading(title)
+                    opener.Add(new Heading(title)
                     {
                         TocIdentifier = tocId,
                         Level         = 2,
@@ -220,18 +229,30 @@ public static partial class DickensNovelTaggedExample
                 case SectionKind.Paragraph:
                     if (!string.IsNullOrWhiteSpace(title))
                     {
-                        doc.Add(new TextBlock
+                        TextBlock paragraph = new()
                         {
                             Text      = title,
                             FontSize  = 11,
                             Color = ColorPalette.Slate[900],
                             Alignment = TextAlignment.Justify,
                             Margin    = new Thickness(0, 0, 0, 7),
-                        });
+                        };
+                        if (opener is not null)
+                        {
+                            opener.Add(paragraph);
+                            doc.Add(opener);
+                            opener = null;
+                        }
+                        else
+                        {
+                            doc.Add(paragraph);
+                        }
                     }
                     break;
             }
         }
+
+        if (opener is not null) doc.Add(opener);
 
         return doc;
     }

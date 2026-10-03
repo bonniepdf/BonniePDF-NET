@@ -1,6 +1,7 @@
 using System.Globalization;
 using BonniePDF.Configuration;
 using BonniePDF.Core;
+using BonniePDF.Elements.Layout;
 using BonniePDF.Elements;
 using BonniePDF.Elements.Tables;
 using BonniePDF.Elements.Text;
@@ -227,7 +228,9 @@ public static class TimesheetExample
 
         // ── Expenses ──────────────────────────────────────────────────────────
 
-        doc.Add(H2("Expenses"));
+        // Each section is kept whole, so a heading never sits apart from its table and a table is never left with its totals on another page.
+        VerticalStack expensesSection = new() { BreakAllowed = false };
+        expensesSection.Add(H2("Expenses"));
 
         Table expenses = new(1.2f, 1.2f, 5.4f, 1.6f, 1.2f)
         {
@@ -253,9 +256,9 @@ public static class TimesheetExample
                 Td(Money(expense.Amount), bold: true, align: TextAlignment.Right));
         }
 
-        doc.Add(expenses);
+        expensesSection.Add(expenses);
 
-        doc.Add(TotalsPanel(
+        expensesSection.Add(TotalsPanel(
         [
             TotalLine("Billable time", Money(billableValue)),
             TotalLine("Rechargeable expenses", Money(rechargeable)),
@@ -263,11 +266,13 @@ public static class TimesheetExample
             Divider(),
             TotalLine("Invoiceable this week", Money(billableValue + rechargeable), bold: true, size: 11f, color: Accent),
         ]));
+        doc.Add(expensesSection);
 
         // ── Approval ──────────────────────────────────────────────────────────
 
-        doc.Add(H2("Declaration and approval"));
-        doc.Add(Panel("Consultant declaration",
+        VerticalStack approval = new() { BreakAllowed = false };
+        approval.Add(H2("Declaration and approval"));
+        approval.Add(Panel("Consultant declaration",
         [
             Cell(
                 "I confirm that the hours recorded above were worked on the projects shown, that the expenses "
@@ -275,7 +280,7 @@ public static class TimesheetExample
                     + "rechargeable item.",
                 size: 9f),
         ]));
-        doc.Add(Panel(
+        approval.Add(Panel(
             "Approval releases this for invoicing",
             [
                 Cell(
@@ -286,7 +291,7 @@ public static class TimesheetExample
             ],
             Negative));
 
-        doc.Add(WeightedRow(
+        approval.Add(WeightedRow(
             [
                 Field("Submitted by", $"{Consultant} — {GbDate(Submitted)}"),
                 Field("Approved by", $"{Approver} — date"),
@@ -294,6 +299,7 @@ public static class TimesheetExample
             ],
             spacing: 22f,
             marginBottom: 0f));
+        doc.Add(approval);
 
         return doc;
     }
