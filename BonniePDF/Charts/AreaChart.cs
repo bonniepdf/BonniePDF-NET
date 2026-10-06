@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using BonniePDF.Charts.Models;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
 
-namespace BonniePDF.Charts;
+namespace BonniePDF;
 
 /// <summary>
 /// Area chart that renders a filled polygon with a line overlay.

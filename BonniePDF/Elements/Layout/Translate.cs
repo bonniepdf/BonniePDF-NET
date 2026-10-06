@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using BonniePDF.Drawing;
 using BonniePDF.Fluent;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>Moves native painted content without changing its original flow box.</summary>
 public class Translate : ElementBase, IContentContainer, IStatefulElement

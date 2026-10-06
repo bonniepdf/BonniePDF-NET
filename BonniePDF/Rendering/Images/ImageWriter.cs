@@ -5,10 +5,9 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Configuration;
 using BonniePDF.Rendering.Writers;
 
-namespace BonniePDF.Rendering.Images;
+namespace BonniePDF;
 
 /// <summary>
 /// Writes image XObjects to PDF

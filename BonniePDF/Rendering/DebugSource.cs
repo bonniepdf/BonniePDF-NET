@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 /// <summary>
 /// Source attribution for rendered elements.

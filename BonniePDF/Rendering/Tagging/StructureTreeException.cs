@@ -1,6 +1,5 @@
-using BonniePDF.Core;
 
-namespace BonniePDF.Rendering.Tagging;
+namespace BonniePDF;
 
 /// <summary>
 /// Thrown when the structure-tree builder is asked to perform an

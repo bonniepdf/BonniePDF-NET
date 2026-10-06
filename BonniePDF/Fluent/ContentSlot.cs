@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using BonniePDF.Elements;
-using BonniePDF.Rendering;
 
 namespace BonniePDF.Fluent;
 

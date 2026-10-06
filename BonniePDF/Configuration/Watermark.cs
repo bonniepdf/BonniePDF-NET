@@ -1,6 +1,5 @@
-using BonniePDF.Core;
 
-namespace BonniePDF.Configuration;
+namespace BonniePDF;
 
 /// <summary>
 /// Configuration for rendering a text watermark over page content.

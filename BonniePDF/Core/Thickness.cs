@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Represents padding or margin values for the four sides of an element

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Typography;
+namespace BonniePDF;
 
 /// <summary>One font file in a document, identified by family, weight and italic.</summary>
 public sealed class DocumentFontFace

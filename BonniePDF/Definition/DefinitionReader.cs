@@ -9,25 +9,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Attachments;
-using BonniePDF.Charts.Models;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Layout.Pagination;
-using BonniePDF.Elements.Lists;
-using BonniePDF.Elements.Media;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
-using BonniePDF.Security.Models;
-using BonniePDF.Security.Permissions;
-using BonniePDF.Typography;
 
-namespace BonniePDF.Definition;
+namespace BonniePDF;
 
 /// <summary>
 /// Builds a <see cref="Document"/> from a validated definition. Values are converted as the element
@@ -445,19 +428,19 @@ internal sealed class DefinitionReader
             case "DataMatrix":
                 return Populated(new DataMatrix(), node, spec);
             case "BarChart":
-                return Populated(new Charts.BarChart(), node, spec);
+                return Populated(new BarChart(), node, spec);
             case "GroupedBarChart":
-                return Populated(new Charts.GroupedBarChart(), node, spec);
+                return Populated(new GroupedBarChart(), node, spec);
             case "LineChart":
-                return Populated(new Charts.LineChart(), node, spec);
+                return Populated(new LineChart(), node, spec);
             case "AreaChart":
-                return Populated(new Charts.AreaChart(), node, spec);
+                return Populated(new AreaChart(), node, spec);
             case "DotPlotChart":
-                return Populated(new Charts.DotPlotChart(), node, spec);
+                return Populated(new DotPlotChart(), node, spec);
             case "LollipopChart":
-                return Populated(new Charts.LollipopChart(), node, spec);
+                return Populated(new LollipopChart(), node, spec);
             case "PieChart":
-                return Populated(new Charts.PieChart(), node, spec);
+                return Populated(new PieChart(), node, spec);
             default:
                 throw new DefinitionException([new DefinitionIssue("", "unknown-type", $"Element type {type} is not supported by this reader.")]);
         }

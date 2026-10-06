@@ -7,15 +7,11 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Configuration;
-using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Writers;
-using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
-using BonniePDF.Core;
 using BonniePDF.Rendering.Pdf;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 /// <summary>
 /// A maximal substring of a draw call that renders with one font, after
@@ -598,7 +594,7 @@ internal class PdfResourceRegistry
 
         if (!ImageResampler.IsEligible(info, out string reason))
         {
-            Diagnostics.Add(new Core.Diagnostic(Core.DiagnosticSeverity.Info, Core.DiagnosticCategory.Image,
+            Diagnostics.Add(new Diagnostic(DiagnosticSeverity.Info, DiagnosticCategory.Image,
                 $"image.passed-through: {info.Width}x{info.Height} px drawn {drawn} " +
                 $"(about {ppi(info.Width, placed.MaxWidthMilliPoints)} ppi, cap {dpi}); embedded as it is: {reason}.", key));
             return info;
@@ -607,7 +603,7 @@ internal class PdfResourceRegistry
         ImageInfo reduced = ImageResampler.Resample(info, targetWidth, targetHeight);
         long samplesPerPixel = info.Components + (info.HasAlpha ? 1 : 0);
         long saved = ((long)info.Width * info.Height - (long)targetWidth * targetHeight) * samplesPerPixel;
-        Diagnostics.Add(new Core.Diagnostic(Core.DiagnosticSeverity.Info, Core.DiagnosticCategory.Image,
+        Diagnostics.Add(new Diagnostic(DiagnosticSeverity.Info, DiagnosticCategory.Image,
             $"image.resampled: {info.Width}x{info.Height} -> {targetWidth}x{targetHeight} px, drawn {drawn} " +
             $"(about {ppi(info.Width, placed.MaxWidthMilliPoints)} -> {ppi(targetWidth, placed.MaxWidthMilliPoints)} ppi), " +
             $"{saved.ToString(System.Globalization.CultureInfo.InvariantCulture)} fewer raw bytes.", key));

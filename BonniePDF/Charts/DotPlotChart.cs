@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using BonniePDF.Charts.Models;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
 
-namespace BonniePDF.Charts;
+namespace BonniePDF;
 
 /// <summary>
 /// Dot plot chart that renders circular data points with value labels.

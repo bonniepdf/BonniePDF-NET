@@ -1,4 +1,4 @@
-namespace BonniePDF.Typography;
+namespace BonniePDF;
 
 /// <summary>
 /// Standard PDF font names (14 Type 1 fonts built into every PDF reader)

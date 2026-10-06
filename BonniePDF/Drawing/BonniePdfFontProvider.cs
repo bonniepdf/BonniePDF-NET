@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using BonniePDF.Rendering.Svg.Fonts;
-using BonniePDF.Typography;
 
 namespace BonniePDF.Drawing;
 

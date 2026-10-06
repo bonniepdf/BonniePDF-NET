@@ -1,4 +1,4 @@
-namespace BonniePDF.Licensing;
+namespace BonniePDF;
 
 /// <summary>
 /// The BonniePDF licence tiers.

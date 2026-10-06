@@ -1,7 +1,5 @@
-using BonniePDF.Elements;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>
 /// Forces a page break at the current position in the layout flow.

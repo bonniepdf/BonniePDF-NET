@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// StringBuilder helpers shared across the rendering paths (PDF content streams,

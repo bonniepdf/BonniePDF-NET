@@ -1,4 +1,4 @@
-﻿namespace BonniePDF.Elements.Text;
+﻿namespace BonniePDF;
 
 /// <summary>
 /// Horizontal alignment of text within the width available to it.

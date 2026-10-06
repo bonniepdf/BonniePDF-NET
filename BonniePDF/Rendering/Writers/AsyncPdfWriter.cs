@@ -7,8 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Rendering.Pdf;
 using BonniePDF.Security.Encryption;
 

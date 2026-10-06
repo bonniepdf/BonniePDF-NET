@@ -1,7 +1,6 @@
 using System;
-using BonniePDF.Elements.Layout.Pagination;
 
-namespace BonniePDF.Fluent.Extensions;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Fluent forms of the pagination control primitives (spec

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BonniePDF.Rendering.Tagging;
+namespace BonniePDF;
 
 /// <summary>
 /// A node in the PDF structure tree. Carries a <see cref="SemanticRole"/>,

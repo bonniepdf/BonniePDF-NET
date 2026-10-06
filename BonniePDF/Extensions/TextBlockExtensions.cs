@@ -1,8 +1,5 @@
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
 
-namespace BonniePDF.Extensions;
+namespace BonniePDF;
 
 /// <summary>
 /// Fluent extension methods for text blocks
@@ -100,7 +97,7 @@ public static class TextBlockExtensions
     /// </summary>
     public static TextBlock Bold(this TextBlock b)
     {
-        b.FontWeight = Typography.FontWeight.Bold;
+        b.FontWeight = BonniePDF.FontWeight.Bold;
         return b;
     }
 
@@ -110,7 +107,7 @@ public static class TextBlockExtensions
     /// </summary>
     public static TextBlock Light(this TextBlock b)
     {
-        b.FontWeight = Typography.FontWeight.Light;
+        b.FontWeight = BonniePDF.FontWeight.Light;
         return b;
     }
 

@@ -1,4 +1,4 @@
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Measurement units for lengths and dimensions.

@@ -1,7 +1,5 @@
-using BonniePDF.Core;
-using BonniePDF.Typography;
 
-namespace BonniePDF.Elements.Text;
+namespace BonniePDF;
 
 /// <summary>
 /// Defines the visual style for text rendering. Properties set to null inherit
@@ -140,7 +138,7 @@ public class TextStyle
     /// <summary>
     /// Returns the effective text color, defaulting to black if not set.
     /// </summary>
-    public Color EffectiveColor => Color ?? Core.Color.Black;
+    public Color EffectiveColor => Color ?? BonniePDF.Color.Black;
 
     /// <summary>
     /// Returns the effective font name, resolving family+weight+italic or defaulting to Helvetica.
@@ -159,7 +157,7 @@ public class TextStyle
     /// across several <see cref="RichText"/> spans and mutated between them would
     /// otherwise leak its final state back onto the earlier spans.
     /// <see cref="RichText.Span(string, TextStyle?)"/> clones the style on the way
-    /// in for exactly this reason. All fields are value types (<see cref="Core.Color"/>
+    /// in for exactly this reason. All fields are value types (<see cref="Color"/>
     /// is immutable), so a shallow copy is a full copy.
     /// </remarks>
     public TextStyle Clone() => (TextStyle)MemberwiseClone();

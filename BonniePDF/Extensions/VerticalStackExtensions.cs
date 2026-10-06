@@ -1,8 +1,6 @@
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
 using System.Collections.Generic;
 
-namespace BonniePDF.Extensions;
+namespace BonniePDF;
 
 /// <summary>
 /// Fluent extension methods for vertical stacks

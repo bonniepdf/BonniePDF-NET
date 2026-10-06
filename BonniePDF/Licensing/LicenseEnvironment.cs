@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace BonniePDF.Licensing;
+namespace BonniePDF;
 
 /// <summary>
 /// How the licence check classifies the runtime it is hosted in.

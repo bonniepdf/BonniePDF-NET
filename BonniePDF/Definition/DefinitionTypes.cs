@@ -1,12 +1,11 @@
 using System;
-using BonniePDF.Core;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BonniePDF.Definition;
+namespace BonniePDF;
 
 /// <summary>One problem found in a definition, located by JSON Pointer (RFC 6901).</summary>
 /// <param name="Path">JSON Pointer to the value at fault; empty is the whole document.</param>

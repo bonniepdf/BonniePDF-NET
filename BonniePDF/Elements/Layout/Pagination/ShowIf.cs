@@ -1,7 +1,6 @@
 using System;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout.Pagination;
+namespace BonniePDF;
 
 /// <summary>
 /// Renders its child only on the pages a predicate accepts.

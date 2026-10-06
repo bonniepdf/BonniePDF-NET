@@ -1,6 +1,6 @@
 using System;
 
-namespace BonniePDF.Licensing;
+namespace BonniePDF;
 
 /// <summary>
 /// Thrown when the library is asked to generate a document without a licence
@@ -13,7 +13,7 @@ namespace BonniePDF.Licensing;
 /// never to have declared a tier keeps running.
 /// </para>
 /// <para>
-/// Deliberately <b>not</b> derived from <see cref="Core.BonniePdfException"/>. That
+/// Deliberately <b>not</b> derived from <see cref="BonniePdfException"/>. That
 /// type means "BonniePDF rejected this input or operation", and applications catch
 /// it to handle malformed content as one category. A missing licence declaration is
 /// neither malformed content nor a recoverable authoring error, and an existing

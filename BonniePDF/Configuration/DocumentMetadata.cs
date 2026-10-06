@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BonniePDF.Configuration;
+namespace BonniePDF;
 
 /// <summary>
 /// Contains metadata information about a PDF document

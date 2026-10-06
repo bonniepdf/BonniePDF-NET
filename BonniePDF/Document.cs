@@ -3,20 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Attachments;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Media;
-using BonniePDF.Elements.Lists;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
-using BonniePDF.Export;
-using BonniePDF.Licensing;
-using BonniePDF.Rendering;
 using BonniePDF.Rendering.Writers;
-using BonniePDF.Typography;
 
 namespace BonniePDF;
 
@@ -105,54 +92,54 @@ public class Document : IDisposable
 
     /// <summary>
     /// Builds a document from a Document Definition given as JSON text. The definition is validated
-    /// completely first; if it has any problem this throws a <see cref="Definition.DefinitionException"/>
+    /// completely first; if it has any problem this throws a <see cref="DefinitionException"/>
     /// that lists them all, and nothing is constructed.
     /// </summary>
     /// <remarks>
     /// Resources with a <c>ref</c> are supplied by the host through
-    /// <see cref="Definition.DefinitionReadOptions.Resources"/>; the reader never opens a path or fetches a
+    /// <see cref="DefinitionReadOptions.Resources"/>; the reader never opens a path or fetches a
     /// URL itself.
     /// </remarks>
-    public static async Task<Document> FromDefinitionAsync(string json, Definition.DefinitionReadOptions? options = null, CancellationToken cancellationToken = default)
+    public static async Task<Document> FromDefinitionAsync(string json, DefinitionReadOptions? options = null, CancellationToken cancellationToken = default)
     {
-        options ??= new Definition.DefinitionReadOptions();
-        Definition.DefinitionValidationResult result = Definition.DocumentDefinition.Validate(json, options);
-        if (!result.IsValid) throw new Definition.DefinitionException(result.Errors);
-        return await Definition.DefinitionReader.ReadAsync(result.Definition!.Value, options, cancellationToken).ConfigureAwait(false);
+        options ??= new DefinitionReadOptions();
+        DefinitionValidationResult result = DocumentDefinition.Validate(json, options);
+        if (!result.IsValid) throw new DefinitionException(result.Errors);
+        return await DefinitionReader.ReadAsync(result.Definition!.Value, options, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>Builds a document from a Document Definition that has already been parsed.</summary>
-    public static async Task<Document> FromDefinitionAsync(System.Text.Json.JsonElement definition, Definition.DefinitionReadOptions? options = null, CancellationToken cancellationToken = default)
+    public static async Task<Document> FromDefinitionAsync(System.Text.Json.JsonElement definition, DefinitionReadOptions? options = null, CancellationToken cancellationToken = default)
     {
-        options ??= new Definition.DefinitionReadOptions();
-        Definition.DefinitionValidationResult result = Definition.DocumentDefinition.Validate(definition, options);
-        if (!result.IsValid) throw new Definition.DefinitionException(result.Errors);
-        return await Definition.DefinitionReader.ReadAsync(result.Definition!.Value, options, cancellationToken).ConfigureAwait(false);
+        options ??= new DefinitionReadOptions();
+        DefinitionValidationResult result = DocumentDefinition.Validate(definition, options);
+        if (!result.IsValid) throw new DefinitionException(result.Errors);
+        return await DefinitionReader.ReadAsync(result.Definition!.Value, options, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
     /// Builds a document from a Document Definition given as JSON text, waiting for any resources the host
-    /// supplies. See <see cref="FromDefinitionAsync(string, Definition.DefinitionReadOptions?, CancellationToken)"/>.
+    /// supplies. See <see cref="FromDefinitionAsync(string, DefinitionReadOptions?, CancellationToken)"/>.
     /// </summary>
-    public static Document FromDefinition(string json, Definition.DefinitionReadOptions? options = null) =>
+    public static Document FromDefinition(string json, DefinitionReadOptions? options = null) =>
         FromDefinitionAsync(json, options).GetAwaiter().GetResult();
 
     /// <summary>
     /// Writes this document as a Document Definition: JSON data, with a note for anything the writer had to say.
-    /// Reading it back with <see cref="FromDefinitionAsync(string, Definition.DefinitionReadOptions?, CancellationToken)"/>
+    /// Reading it back with <see cref="FromDefinitionAsync(string, DefinitionReadOptions?, CancellationToken)"/>
     /// gives a document that renders identically.
     /// </summary>
     /// <remarks>
     /// A construct a definition cannot express (a function-valued page template, a <c>ShowIf</c> predicate, a custom
-    /// element, an <c>Svg</c> generator) makes this throw a <see cref="Definition.DefinitionException"/> that lists
-    /// every one; pass <see cref="Definition.DefinitionUnrepresentable.Drop"/> to leave them out and receive a
+    /// element, an <c>Svg</c> generator) makes this throw a <see cref="DefinitionException"/> that lists
+    /// every one; pass <see cref="DefinitionUnrepresentable.Drop"/> to leave them out and receive a
     /// <c>dropped</c> note for each instead. Encryption is written without its passwords, which the host supplies
     /// again on reading.
     /// </remarks>
     /// <param name="options">What to do with what cannot be written, and how to write resources.</param>
     /// <returns>The definition and its notes.</returns>
-    public Definition.DefinitionWriteResult ToDefinition(Definition.DefinitionWriteOptions? options = null) =>
-        Definition.DefinitionWriter.Write(this, options);
+    public DefinitionWriteResult ToDefinition(DefinitionWriteOptions? options = null) =>
+        DefinitionWriter.Write(this, options);
 
     /// <summary>
     /// Gets the pages in this document
@@ -714,7 +701,7 @@ public class Document : IDisposable
 
         // AES-256 requires PDF 1.7 or later
         if (Settings.IsEncrypted &&
-            Settings.Encryption!.Algorithm == Security.Models.EncryptionAlgorithm.AES_256 &&
+            Settings.Encryption!.Algorithm == EncryptionAlgorithm.AES_256 &&
             Settings.Version != PdfVersion.Pdf17 && Settings.Version != PdfVersion.Pdf20)
         {
             throw new InvalidOperationException(

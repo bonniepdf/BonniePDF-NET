@@ -1,7 +1,5 @@
-using BonniePDF.Core;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements;
+namespace BonniePDF;
 
 /// <summary>
 /// Base class for PDF elements that provides common functionality for margin handling,

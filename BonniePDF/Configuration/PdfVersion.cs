@@ -1,4 +1,4 @@
-namespace BonniePDF.Configuration;
+namespace BonniePDF;
 
 /// <summary>
 /// Specifies the PDF version for the output document.

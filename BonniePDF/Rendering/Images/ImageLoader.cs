@@ -1,10 +1,11 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
 
-namespace BonniePDF.Rendering.Images;
+namespace BonniePDF;
 
 /// <summary>
 /// Loads JPEG and PNG images and extracts metadata for PDF embedding

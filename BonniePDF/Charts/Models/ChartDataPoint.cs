@@ -1,4 +1,4 @@
-namespace BonniePDF.Charts.Models;
+namespace BonniePDF;
 
 /// <summary>
 /// Represents a single data point in a chart

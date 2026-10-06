@@ -1,9 +1,6 @@
 using System.Collections.Generic;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Lists;
+namespace BonniePDF;
 
 /// <summary>
 /// An unordered list element that displays bulleted items with various bullet styles

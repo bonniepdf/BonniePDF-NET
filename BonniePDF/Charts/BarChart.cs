@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Charts.Models;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
 
-namespace BonniePDF.Charts;
+namespace BonniePDF;
 
 /// <summary>
 /// Bar chart that renders vertical bars with value labels above each bar.

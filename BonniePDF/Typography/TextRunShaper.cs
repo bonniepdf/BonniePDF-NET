@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Typography;
+namespace BonniePDF;
 
 /// <summary>A font the shaper may select glyphs from.</summary>
 internal sealed class ShaperFont

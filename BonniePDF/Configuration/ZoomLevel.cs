@@ -1,4 +1,4 @@
-namespace BonniePDF.Configuration;
+namespace BonniePDF;
 
 /// <summary>
 /// Defines the default zoom level when a PDF is opened

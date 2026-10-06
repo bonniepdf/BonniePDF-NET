@@ -1,6 +1,5 @@
-using BonniePDF.Configuration;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 /// <summary>
 /// Stores dimension information for a page

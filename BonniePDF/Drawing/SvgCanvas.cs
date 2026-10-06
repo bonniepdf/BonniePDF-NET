@@ -2,12 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Export;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Images;
-using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF.Drawing;
@@ -17,7 +11,7 @@ namespace BonniePDF.Drawing;
 /// <see cref="SvgCanvas"/> instances. A page's SVG can be composited from
 /// several canvases (the main canvas plus positioned child canvases for
 /// charts/images, all writing into one shared <see cref="StringBuilder"/> -
-/// see <see cref="Rendering.RenderContext.GetCanvas"/>), so ids must stay
+/// see <see cref="RenderContext.GetCanvas"/>), so ids must stay
 /// unique across all of them, not just within one instance. Sharing one
 /// allocator across those canvases achieves that; a fresh, un-shared
 /// allocator (the default) is correct for a standalone canvas whose output is
@@ -55,7 +49,7 @@ internal class SvgCanvas : ICanvas
 
     /// <summary>
     /// Allocates <c>clip</c>/<c>grad</c> ids for this canvas. Set by
-    /// <see cref="Rendering.RenderContext"/> to an allocator shared with every
+    /// <see cref="RenderContext"/> to an allocator shared with every
     /// other canvas composited into the same document; defaults to a fresh,
     /// un-shared allocator for standalone use (e.g. chart/symbology export).
     /// </summary>
@@ -136,7 +130,7 @@ internal class SvgCanvas : ICanvas
     /// Optional sink invoked for every (font name, embedded face, code point) the
     /// glyph-positioned text path draws, so the page exporter can embed a minimal
     /// subset (only used glyphs) of each font as an <c>@font-face</c>. Set by
-    /// <see cref="Rendering.RenderContext"/>.
+    /// <see cref="RenderContext"/>.
     /// </summary>
     public System.Action<string, TtfFont, int>? FontUsageSink { get; set; }
 
@@ -144,14 +138,14 @@ internal class SvgCanvas : ICanvas
     /// Optional callback that registers a font (by name/path) so it can then be
     /// resolved to an embedded face. The SVG export sets this to the render
     /// context's font registrar; without it, embedded fonts referenced only in
-    /// SVG output would never be loaded. Set by <see cref="Rendering.RenderContext"/>.
+    /// SVG output would never be loaded. Set by <see cref="RenderContext"/>.
     /// </summary>
     public System.Func<string, string>? RegisterFontCallback { get; set; }
 
     /// <summary>
     /// Optional callback that splits a draw call into per-font runs, routing code
     /// points the primary font lacks to a fallback font that covers them. Set by
-    /// <see cref="Rendering.RenderContext"/> to the same resolver
+    /// <see cref="RenderContext"/> to the same resolver
     /// <see cref="PdfCanvas"/> uses, so the SVG preview cannot drift from the PDF
     /// in which font draws which code point.
     /// <para>
@@ -1269,7 +1263,7 @@ internal class SvgCanvas : ICanvas
 
     /// <summary>
     /// Where a child canvas sits on its parent, for
-    /// <see cref="Rendering.RenderContext.FlushExternalCanvas"/> to composite it
+    /// <see cref="RenderContext.FlushExternalCanvas"/> to composite it
     /// with. A child bakes no offset into its own coordinates - it draws in its
     /// own space and the parent translates the group.
     /// </summary>

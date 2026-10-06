@@ -1,4 +1,4 @@
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>
 /// Width distribution mode for HorizontalStack children

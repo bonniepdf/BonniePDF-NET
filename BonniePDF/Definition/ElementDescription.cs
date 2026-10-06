@@ -5,7 +5,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace BonniePDF.Definition;
+namespace BonniePDF;
 
 internal sealed class KeySpec
 {

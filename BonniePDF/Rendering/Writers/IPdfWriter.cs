@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Security.Encryption;
 
 namespace BonniePDF.Rendering.Writers;

@@ -1,7 +1,6 @@
-using BonniePDF.Charts.Models;
 using System;
 
-namespace BonniePDF.Charts;
+namespace BonniePDF;
 
 /// <summary>
 /// Element that renders a GroupedBarChart to the document.

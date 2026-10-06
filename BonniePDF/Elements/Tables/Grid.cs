@@ -1,4 +1,4 @@
-namespace BonniePDF.Elements.Tables;
+namespace BonniePDF;
 
 /// <summary>
 /// A <b>layout grid</b>: arranges content in weighted columns and aligned rows for

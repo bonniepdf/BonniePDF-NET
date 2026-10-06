@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace BonniePDF.Rendering.Images;
+namespace BonniePDF;
 
 /// <summary>
 /// A helper class for reading big-endian binary data from a stream.

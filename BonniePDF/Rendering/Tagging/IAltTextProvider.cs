@@ -1,4 +1,4 @@
-namespace BonniePDF.Rendering.Tagging;
+namespace BonniePDF;
 
 /// <summary>
 /// Optional companion to <see cref="IRoleProvider"/> for elements that

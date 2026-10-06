@@ -1,14 +1,7 @@
 using System;
-using BonniePDF.Charts.Models;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
-using BonniePDF.Typography;
 
-namespace BonniePDF.Charts;
+namespace BonniePDF;
 
 /// <summary>
 /// Base class for all charts that provides common functionality for drawing charts
@@ -87,7 +80,7 @@ public abstract class ChartBase : ElementBase, IRoleProvider, IAltTextProvider
 
     /// <summary>
     /// Preferred root <c>shape-rendering</c> for standalone SVG export
-    /// (<see cref="Extensions.SvgExportExtensions.ToSvg(ChartBase, Models.ChartData)"/>).
+    /// (<see cref="SvgExportExtensions.ToSvg(ChartBase, ChartData)"/>).
     /// <c>null</c> (the default) keeps the SVG default antialiasing, which is
     /// required for charts with diagonal lines, arcs, or circles. Axis-aligned
     /// charts (bar, grouped bar) set this to <c>"crispEdges"</c> so their bars

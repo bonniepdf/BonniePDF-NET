@@ -1,6 +1,5 @@
-using BonniePDF.Elements.Layout;
 
-namespace BonniePDF.Fluent.Descriptors;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Describes a vertical column layout. Provides scoped methods for adding items and configuring spacing.

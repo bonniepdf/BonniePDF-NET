@@ -2,22 +2,16 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Pdf;
-using BonniePDF.Rendering.Tagging;
-using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 /// <summary>
 /// PDF tag names for roles that are container/grouping elements and must
 /// emit BMC (no MCID) instead of BDC in the content stream.
-/// Mirrors <see cref="BonniePDF.Rendering.Tagging.SemanticRoleExtensions.IsContainerRole"/>.
+/// Mirrors <see cref="BonniePDF.SemanticRoleExtensions.IsContainerRole"/>.
 /// </summary>
 file static class ContainerRoleTags
 {
@@ -212,7 +206,7 @@ public class RenderContext
     public bool ChromeReservationSuspended { get; set; }
 
     /// <summary>
-    /// The horizontal text alignment a <see cref="BonniePDF.Elements.Layout.Container"/> establishes for
+    /// The horizontal text alignment a <see cref="BonniePDF.Container"/> establishes for
     /// descendant text that sets no alignment of its own (spec 01 "Document Model" §3.2). <c>null</c> means
     /// no ambient is in effect: unset text stays at its own default (Left). Scoped to the container's
     /// subtree by the container itself, which restores the value it found on the way in.
@@ -220,12 +214,12 @@ public class RenderContext
     public TextAlignment? AmbientHorizontalTextAlignment { get; set; }
 
     /// <summary>
-    /// While a table draws a cell whose content is a <see cref="BonniePDF.Elements.Layout.Container"/>
+    /// While a table draws a cell whose content is a <see cref="BonniePDF.Container"/>
     /// (seen through pass-through wrappers), that container. It fills <see cref="CellStretchHeight"/>, so a
     /// border or background applied to a cell's content spans the whole row rather than only the cell's own
     /// text. <c>null</c> everywhere else; no other container is affected.
     /// </summary>
-    public BonniePDF.Elements.Layout.Container? CellStretchTarget { get; set; }
+    public BonniePDF.Container? CellStretchTarget { get; set; }
 
     /// <summary>The height <see cref="CellStretchTarget"/> fills: the row height less the cell's padding.</summary>
     public float CellStretchHeight { get; set; }

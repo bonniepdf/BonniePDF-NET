@@ -1,4 +1,4 @@
-namespace BonniePDF.Elements.Text;
+namespace BonniePDF;
 
 /// <summary>
 /// Vertical baseline positioning for a text span. <see cref="Superscript"/>

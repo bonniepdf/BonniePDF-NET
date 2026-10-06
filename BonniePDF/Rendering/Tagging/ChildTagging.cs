@@ -1,7 +1,6 @@
 using System.Runtime.InteropServices;
-using BonniePDF.Elements;
 
-namespace BonniePDF.Rendering.Tagging;
+namespace BonniePDF;
 
 /// <summary>
 /// Records whether <see cref="ChildTagging.BeginChildTag"/> opened an /Artifact
@@ -66,7 +65,7 @@ internal static class ChildTagging
                 tagging.Tree.SetAlt(alt.AltText);
             // Wire the struct element back to a Hyperlink so the serializer can write
             // /StructParent + /OBJR on the annotation.
-            if (child is Core.Hyperlink hyperlink)
+            if (child is Hyperlink hyperlink)
                 hyperlink.LinkedStructElement = elem;
             if (role.Value.IsContainerRole())
                 ctx.Canvas!.BeginContainerContent(role.Value.ToPdfTag());

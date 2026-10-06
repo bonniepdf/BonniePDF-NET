@@ -1,6 +1,5 @@
-using BonniePDF.Configuration;
 
-namespace BonniePDF.Attachments;
+namespace BonniePDF;
 
 /// <summary>
 /// Conformance rules for embedded files. Kept in one place so the .NET and

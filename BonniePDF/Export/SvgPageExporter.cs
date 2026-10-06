@@ -3,15 +3,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using BonniePDF.Compliance;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Rendering;
-using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Export;
+namespace BonniePDF;
 
 /// <summary>
 /// A rendered SVG document: one standalone SVG string per page, plus
@@ -36,7 +31,7 @@ public sealed class SvgDocumentExport
     public SvgDocumentExport(
         IReadOnlyList<string> pages,
         string fontFaceCss,
-        Rendering.LayoutSnapshot? snapshot = null,
+        LayoutSnapshot? snapshot = null,
         ComplianceReport? report = null)
     {
         Pages = pages;
@@ -62,11 +57,11 @@ public sealed class SvgDocumentExport
     /// rectangles are index-aligned with <see cref="Pages"/> and use the same
     /// top-left, points coordinate space as the SVG.
     /// </summary>
-    public Rendering.LayoutSnapshot? Snapshot { get; }
+    public LayoutSnapshot? Snapshot { get; }
 
     /// <summary>
     /// The compliance report for <see cref="Snapshot"/>, present exactly when the
-    /// snapshot is. Equal to <see cref="CompliancePreflight.Evaluate(Rendering.LayoutSnapshot)"/>
+    /// snapshot is. Equal to <see cref="CompliancePreflight.Evaluate(LayoutSnapshot)"/>
     /// with default options, so every rule family runs, WCAG included; filter by
     /// <see cref="ComplianceFinding.Standard"/> to hide one. Attached here so the
     /// report always comes from the same engine as the snapshot it describes,

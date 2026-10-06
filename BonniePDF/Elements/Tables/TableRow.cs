@@ -1,9 +1,6 @@
 using System.Linq;
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Tables;
+namespace BonniePDF;
 
 /// <summary>
 /// A table row with support for custom styling and background color
@@ -11,7 +8,7 @@ namespace BonniePDF.Elements.Tables;
 public class TableRow : IBackgroundColor, IRoleProvider
 {
     /// <inheritdoc />
-    public SemanticRole SemanticRole => Rendering.Tagging.SemanticRole.TR;
+    public SemanticRole SemanticRole => SemanticRole.TR;
 
     /// <summary>
     /// The cells in this row

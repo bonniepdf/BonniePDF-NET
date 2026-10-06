@@ -1,7 +1,5 @@
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
 
-namespace BonniePDF.Fluent.Descriptors;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Fluent builder for the <see cref="Layers"/> inline z-stacking primitive,

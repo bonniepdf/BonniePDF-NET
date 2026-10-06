@@ -89,15 +89,15 @@ internal sealed class XmpConformanceBlock
     /// Returns the conformance block matching <paramref name="conformance"/>,
     /// or <c>null</c> if no PDF/A claim should be emitted.
     /// </summary>
-    public static XmpConformanceBlock? ForPdfA(Configuration.PdfAConformance conformance) => conformance switch
+    public static XmpConformanceBlock? ForPdfA(PdfAConformance conformance) => conformance switch
     {
-        Configuration.PdfAConformance.PdfA1b => PdfA1B(),
-        Configuration.PdfAConformance.PdfA1a => PdfA1A(),
-        Configuration.PdfAConformance.PdfA2b => PdfA2B(),
-        Configuration.PdfAConformance.PdfA2a => PdfA2A(),
-        Configuration.PdfAConformance.PdfA3b => PdfA3B(),
-        Configuration.PdfAConformance.PdfA3a => PdfA3A(),
-        Configuration.PdfAConformance.PdfA4 => PdfA4(),
+        PdfAConformance.PdfA1b => PdfA1B(),
+        PdfAConformance.PdfA1a => PdfA1A(),
+        PdfAConformance.PdfA2b => PdfA2B(),
+        PdfAConformance.PdfA2a => PdfA2A(),
+        PdfAConformance.PdfA3b => PdfA3B(),
+        PdfAConformance.PdfA3a => PdfA3A(),
+        PdfAConformance.PdfA4 => PdfA4(),
         _ => null,
     };
 
@@ -139,13 +139,13 @@ internal sealed class XmpConformanceBlock
     /// non-predefined <c>fx</c> namespace (ISO 19005-3 §6.6.2.3).
     ///
     /// <para>Factur-X is only meaningful on a PDF/A-3 document; the caller
-    /// (<see cref="EInvoice.FacturX"/>) enforces that, and the XMP writer only
+    /// (<see cref="FacturX"/>) enforces that, and the XMP writer only
     /// includes this block when a PDF/A claim survives the honest-claim
     /// guard.</para>
     /// </summary>
-    public static XmpConformanceBlock FacturX(EInvoice.FacturXMetadata meta) => new(
-        prefix: EInvoice.FacturXMetadata.Prefix,
-        namespaceUri: EInvoice.FacturXMetadata.NamespaceUri,
+    public static XmpConformanceBlock FacturX(FacturXMetadata meta) => new(
+        prefix: FacturXMetadata.Prefix,
+        namespaceUri: FacturXMetadata.NamespaceUri,
         elements: new[]
         {
             new KeyValuePair<string, string>("DocumentType", meta.DocumentType),
@@ -154,8 +154,8 @@ internal sealed class XmpConformanceBlock
             new KeyValuePair<string, string>("ConformanceLevel", meta.ConformanceLevel),
         },
         extensionSchema: new XmpExtensionSchema(
-            namespaceUri: EInvoice.FacturXMetadata.NamespaceUri,
-            prefix: EInvoice.FacturXMetadata.Prefix,
+            namespaceUri: FacturXMetadata.NamespaceUri,
+            prefix: FacturXMetadata.Prefix,
             schemaName: "Factur-X PDFA Extension Schema",
             properties: new[]
             {

@@ -1,6 +1,5 @@
-using BonniePDF.Core;
 
-namespace BonniePDF.Elements;
+namespace BonniePDF;
 
 /// <summary>
 /// Interface for elements that support margins

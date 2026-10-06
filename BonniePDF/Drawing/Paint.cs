@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using BonniePDF.Core;
 
 namespace BonniePDF.Drawing;
 

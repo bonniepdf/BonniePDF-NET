@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Text;
-using BonniePDF.Security.Models;
 
-namespace BonniePDF.Configuration;
+namespace BonniePDF;
 
 /// <summary>
 /// Configuration settings for PDF document creation and display
@@ -114,7 +110,7 @@ public class DocumentSettings
     /// carries more pixels than its printed size can use is reduced to this resolution when the
     /// document is written, by an exact area average that never re-encodes the image lossily and
     /// never enlarges it. <c>null</c> embeds every image at its source resolution. JPEG, indexed
-    /// and 16-bit images are always embedded as they are; <see cref="Core.Diagnostic"/> entries
+    /// and 16-bit images are always embedded as they are; <see cref="Diagnostic"/> entries
     /// in <see cref="Document.Diagnostics"/> report what was reduced and what was passed through.
     /// </summary>
     public int? MaxImageDpi
@@ -243,11 +239,11 @@ public class DocumentSettings
     /// <summary>
     /// ZUGFeRD / Factur-X e-invoice metadata. When non-<c>null</c> (and the
     /// document is a PDF/A-3 level), the XMP writer emits the <c>fx:*</c>
-    /// conformance block. Normally set via <see cref="EInvoice.FacturX"/>
+    /// conformance block. Normally set via <see cref="FacturX"/>
     /// rather than directly — that helper also attaches the XML and forces
     /// PDF/A-3. Default <c>null</c> (not an e-invoice).
     /// </summary>
-    public EInvoice.FacturXMetadata? FacturX { get; set; }
+    public FacturXMetadata? FacturX { get; set; }
 
     /// <summary>
     /// Document natural language as a BCP-47 tag (e.g. <c>"en-GB"</c>,
@@ -334,8 +330,8 @@ public class DocumentSettings
     /// Renders SVG markup to PNG bytes, or null for none.
     /// </summary>
     /// <remarks>
-    /// With one set, an <see cref="Elements.Media.Svg"/> element whose
-    /// <see cref="Elements.Media.Svg.StrictUnsupportedFeatures"/> is false draws what the
+    /// With one set, an <see cref="Svg"/> element whose
+    /// <see cref="Svg.StrictUnsupportedFeatures"/> is false draws what the
     /// SVG importer cannot draw as vector content - filters, masks, stylesheets, ... -
     /// as images in their place, instead of skipping them. BonniePDF rasterizes nothing
     /// itself: any renderer will do. It is called on the async generate paths only; a

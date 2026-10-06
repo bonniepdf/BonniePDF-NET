@@ -1,10 +1,6 @@
 using System.Collections.Generic;
-using BonniePDF.Core;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
-using BonniePDF.Typography;
 
-namespace BonniePDF.Elements.Text;
+namespace BonniePDF;
 
 /// <summary>
 /// Renders a visual Table of Contents with dotted leaders and right-aligned page numbers,
@@ -15,7 +11,7 @@ namespace BonniePDF.Elements.Text;
 public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
 {
     /// <inheritdoc />
-    public SemanticRole SemanticRole => Rendering.Tagging.SemanticRole.TOC;
+    public SemanticRole SemanticRole => SemanticRole.TOC;
 
     /// <summary>
     /// Gets or sets the ordered list of TOC identifiers to render.
@@ -163,7 +159,7 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
         bool tagThisEntry = tagging != null;
         if (tagThisEntry)
         {
-            tagging!.Tree.Begin(Rendering.Tagging.SemanticRole.TOCI);
+            tagging!.Tree.Begin(SemanticRole.TOCI);
             ctx.Canvas.BeginMarkedContent("TOCI");
         }
 

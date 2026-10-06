@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Represents border widths for the four sides of an element.

@@ -1,7 +1,4 @@
 ﻿using System.Collections.Generic;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering.Images;
 
 namespace BonniePDF.Drawing;
 

@@ -1,7 +1,5 @@
-using BonniePDF.Core;
-using BonniePDF.Elements;
 
-namespace BonniePDF.Extensions;
+namespace BonniePDF;
 
 /// <summary>
 /// Fluent extension methods for margins

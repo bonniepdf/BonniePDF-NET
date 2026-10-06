@@ -1,4 +1,4 @@
-namespace BonniePDF.Elements;
+namespace BonniePDF;
 
 /// <summary>
 /// Optional metadata an element exposes to the layout snapshot recorder,

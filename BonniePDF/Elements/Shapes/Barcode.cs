@@ -1,10 +1,6 @@
 using System;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Shapes;
+namespace BonniePDF;
 
 /// <summary>
 /// The 1D barcode symbologies supported natively by BonniePDF. These four
@@ -73,8 +69,8 @@ public class Barcode : ElementBase, IRoleProvider, IAltTextProvider
     /// <inheritdoc />
     public SemanticRole SemanticRole =>
         IsDecorative || string.IsNullOrEmpty(AltText)
-            ? Rendering.Tagging.SemanticRole.Artifact
-            : Rendering.Tagging.SemanticRole.Figure;
+            ? SemanticRole.Artifact
+            : SemanticRole.Figure;
 
     /// <summary>Height of the bars in points (excludes the text label). Default 60.</summary>
     public float Height { get; set; } = 60f;

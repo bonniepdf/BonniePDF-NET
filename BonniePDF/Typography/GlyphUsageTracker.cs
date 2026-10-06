@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Typography;
+namespace BonniePDF;
 
 /// <summary>
 /// Tracks which characters/glyphs are used in a document.

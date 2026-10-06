@@ -1,9 +1,6 @@
 using System;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Images;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Media;
+namespace BonniePDF;
 
 /// <summary>
 /// An image element that displays JPEG or PNG images in the PDF
@@ -32,7 +29,7 @@ public class Image : ElementBase, IRoleProvider, IAltTextProvider
 
     /// <summary>
     /// When <c>true</c>, the image is embedded at its source resolution regardless of
-    /// <see cref="Configuration.DocumentSettings.MaxImageDpi"/>. If the same image is placed
+    /// <see cref="DocumentSettings.MaxImageDpi"/>. If the same image is placed
     /// more than once, one placement with this set keeps the whole embedded copy at full resolution.
     /// </summary>
     public bool KeepResolution { get; set; }
@@ -57,8 +54,8 @@ public class Image : ElementBase, IRoleProvider, IAltTextProvider
     /// <inheritdoc />
     public SemanticRole SemanticRole =>
         IsDecorative || string.IsNullOrEmpty(AltText)
-            ? Rendering.Tagging.SemanticRole.Artifact
-            : Rendering.Tagging.SemanticRole.Figure;
+            ? SemanticRole.Artifact
+            : SemanticRole.Figure;
 
     protected override float GetPreferredContentWidth()
     {

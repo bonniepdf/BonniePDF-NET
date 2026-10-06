@@ -1,6 +1,6 @@
 using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Typography;
+namespace BonniePDF;
 
 /// <summary>
 /// Contains all information about an embedded TrueType font

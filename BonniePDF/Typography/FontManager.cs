@@ -5,7 +5,7 @@ using System.IO;
 using System.Reflection;
 using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Typography;
+namespace BonniePDF;
 
 /// <summary>A registered font available to the glyph-fallback chain.</summary>
 public sealed class FallbackFont
@@ -26,7 +26,7 @@ public sealed class FallbackFont
 /// <remarks>
 /// Fonts registered here are automatically substituted for standard PDF Type-1
 /// fonts (Helvetica, Times-Roman, Courier) when <c>PdfAEnabled = true</c> is set
-/// on <see cref="BonniePDF.Configuration.DocumentSettings"/>. This lets the library
+/// on <see cref="BonniePDF.DocumentSettings"/>. This lets the library
 /// produce genuinely PDF/A-1b–conformant output without the caller having to supply
 /// font paths on every element.
 ///

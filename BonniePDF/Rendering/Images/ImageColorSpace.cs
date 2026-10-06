@@ -1,4 +1,4 @@
-namespace BonniePDF.Rendering.Images;
+namespace BonniePDF;
 
 /// <summary>
 /// PDF color space for images

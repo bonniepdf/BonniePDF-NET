@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
-using BonniePDF.Core;
 
-namespace BonniePDF.Elements.Shapes;
+namespace BonniePDF;
 
 /// <summary>
 /// Thrown when a message cannot fit in the largest Data Matrix symbol.

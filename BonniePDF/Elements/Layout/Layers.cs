@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>
 /// An inline z-stacking primitive. All layers share the same origin and

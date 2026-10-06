@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace BonniePDF.Licensing;
+namespace BonniePDF;
 
 /// <summary>
 /// The licence declaration check.

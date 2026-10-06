@@ -1,4 +1,3 @@
-using BonniePDF.Core;
 
 namespace BonniePDF.Drawing;
 

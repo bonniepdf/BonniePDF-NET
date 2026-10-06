@@ -1,6 +1,5 @@
-using BonniePDF.Core;
 
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>
 /// Interface for all renderable PDF elements

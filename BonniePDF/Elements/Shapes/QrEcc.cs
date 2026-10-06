@@ -1,4 +1,4 @@
-namespace BonniePDF.Elements.Shapes;
+namespace BonniePDF;
 
 /// <summary>
 /// The error correction level in a QR Code symbol.

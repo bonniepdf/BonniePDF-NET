@@ -5,9 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using BonniePDF.Charts;
 
-namespace BonniePDF.Definition;
+namespace BonniePDF;
 
 /// <summary>Checks a definition completely against the format and the reader's limits. Constructs nothing.</summary>
 internal sealed partial class DefinitionValidator

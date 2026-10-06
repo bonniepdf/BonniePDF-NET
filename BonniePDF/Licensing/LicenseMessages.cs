@@ -1,4 +1,4 @@
-namespace BonniePDF.Licensing;
+namespace BonniePDF;
 
 /// <summary>
 /// The licence notice copy.
@@ -35,7 +35,6 @@ internal static class LicenseMessages
 
         It is one line, before you generate your first document:
 
-            using BonniePDF.Licensing;
 
             BonniePdfLicense.Tier = LicenseTier.Community;
             // or Evaluation / Professional / Enterprise

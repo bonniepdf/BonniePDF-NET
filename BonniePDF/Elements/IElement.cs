@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements;
+namespace BonniePDF;
 
 /// <summary>
 /// Interface for all renderable PDF elements

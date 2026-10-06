@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Core;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>
 /// A layout element that arranges children horizontally with spacing and alignment options
