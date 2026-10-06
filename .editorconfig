@@ -3,3 +3,10 @@ root = true
 [*.{cs,vb}]
 # Set all performance-related warnings to Error (includes CA18xx)
 dotnet_analyzer_diagnostic.category-Performance.severity = error
+
+# Namespaces are the consumer-facing API surface, not a mirror of the folder tree:
+# the public API lives in BonniePDF (and BonniePDF.Fluent / BonniePDF.Drawing) whatever folder a file is in.
+dotnet_style_namespace_match_folder = false
+dotnet_diagnostic.IDE0130.severity = none
+# Svg (element) shares a name with the vendored BonniePDF.Rendering.Svg engine namespace, which cannot be renamed here.
+dotnet_diagnostic.CA1724.severity = none
