@@ -15,6 +15,7 @@ public class PageBreak : ElementBase, IStatefulElement
 
     public RenderStatus RenderStateful(RenderContext ctx, float width)
     {
+        if (ctx.AtomicLayoutBounds is not null) throw new System.InvalidOperationException("Transformed content cannot create a page.");
         if (!_triggered)
         {
             _triggered = true;

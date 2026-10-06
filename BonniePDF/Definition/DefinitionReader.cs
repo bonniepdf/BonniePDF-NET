@@ -277,6 +277,27 @@ internal sealed class DefinitionReader
 
         switch (type)
         {
+            case "Flip":
+            {
+                var e = new Flip();
+                Populate(e, node, spec, []);
+                e.Child = Child();
+                return e;
+            }
+            case "Translate":
+            {
+                var e = new Translate();
+                Populate(e, node, spec, []);
+                e.Child = Child();
+                return e;
+            }
+            case "Rotate":
+            {
+                var e = new Rotate();
+                Populate(e, node, spec, []);
+                e.Child = Child();
+                return e;
+            }
             case "Container":
             {
                 var e = new Container();

@@ -15,6 +15,10 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Added native `Flip` and `Translate` wrappers, including fluent `FlipHorizontal`, `FlipVertical`, `Translate`, `TranslateX` and `TranslateY`, composed geometry and JSON definitions.
+
+- Added native element rotation with free angles and constrained quarter turns, including document definitions, transformed previews and hyperlink bounds.
+
 ### Changed
 
 - **`Document.ToByteArray()` and `ToByteArrayAsync()` are removed.** They were `[Obsolete]` aliases of `GenerateBytes()` and `GenerateBytesAsync()`; TypeScript removed its counterparts in the same release, so the two implementations agree.

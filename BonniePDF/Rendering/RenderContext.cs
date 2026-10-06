@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
@@ -33,6 +33,8 @@ file static class ContainerRoleTags
 /// </summary>
 public class RenderContext
 {
+    internal (float Top, float Bottom)? AtomicLayoutBounds { get; set; }
+    internal BonniePDF.Drawing.PaintTransform? ElementTransform { get; set; }
     /// <summary>
     /// Initializes a new <see cref="RenderContext"/> for a single document.
     /// </summary>
@@ -284,15 +286,15 @@ public class RenderContext
     /// overwhelming majority of documents.
     /// </summary>
     public float ContentTop =>
-        ChromeReservationSuspended ? Margin : MathF.Max(Margin, _chrome.Header);
+        AtomicLayoutBounds?.Top ?? (ChromeReservationSuspended ? Margin : MathF.Max(Margin, _chrome.Header));
 
     /// <summary>
     /// Gets the bottom of the body content band:
     /// <c>PageSize.Height - max(Margin, footerHeight)</c>.
     /// </summary>
-    public float ContentBottom => ChromeReservationSuspended
+    public float ContentBottom => AtomicLayoutBounds?.Bottom ?? (ChromeReservationSuspended
         ? PageSize.Height - Margin
-        : PageSize.Height - MathF.Max(Margin, _chrome.Footer);
+        : PageSize.Height - MathF.Max(Margin, _chrome.Footer));
 
     /// <summary>
     /// Gets the maximum Y coordinate before the bottom of the content band is
@@ -544,6 +546,7 @@ public class RenderContext
     /// </summary>
     public void NewPage()
     {
+        if (AtomicLayoutBounds is not null) throw new InvalidOperationException("Transformed content cannot create a page.");
         // Header and footer chrome is painted at a fixed position in the margin band, which lies
         // outside the body's content area. An element in it that checks "does this fit?" (a
         // Container, say) would see the band as overflow and break the page in the middle of
@@ -692,6 +695,12 @@ public class RenderContext
     /// </summary>
     internal void RegisterHyperlink(Hyperlink hyperlink)
     {
+        if (ElementTransform is { } transform)
+        {
+            float y = PageSize.Height - hyperlink.RenderY - hyperlink.RenderHeight;
+            var box = transform.MapBox(hyperlink.RenderX, y, hyperlink.RenderX + hyperlink.RenderWidth, y + hyperlink.RenderHeight);
+            hyperlink.SetRenderBounds(box.X0, PageSize.Height - box.Y1, box.X1 - box.X0, box.Y1 - box.Y0);
+        }
         if (!PageHyperlinks.ContainsKey(CurrentPageIndex)) PageHyperlinks[CurrentPageIndex] = new List<Hyperlink>();
         PageHyperlinks[CurrentPageIndex].Add(hyperlink);
     }

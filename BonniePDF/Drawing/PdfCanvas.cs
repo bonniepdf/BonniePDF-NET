@@ -936,6 +936,9 @@ internal class PdfCanvas : ICanvas
         _ctm[3] = -b * sin + d * cos;
     }
 
+    internal void TransformElement(PaintTransform t) => PdfOperators.ConcatMatrix(_stream,
+        t.A, -t.B, -t.C, t.D, t.C * Height + t.E, Height * (1 - t.D) - t.F);
+
     /// <inheritdoc />
     public void Transform(float a, float b, float c, float d, float tx, float ty)
     {

@@ -1,0 +1,159 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/transforms",
+    "description": "Native mirror and translate with composed cardinal rotation.",
+    "spec": "18"
+  },
+  "_expect": {
+    "contentStreamSha256": "b5323607e876e52e29201a88a218b007e2da7167796be22ca1aee6c09a5216d0",
+    "pages": 1,
+    "roundTrip": true,
+    "text": [
+      "Mirrored text",
+      "Moved text"
+    ],
+    "rectangles": [
+      {
+        "id": "horizontal",
+        "x": 10,
+        "y": 10,
+        "width": 80,
+        "height": 20
+      },
+      {
+        "id": "vertical",
+        "x": 10,
+        "y": 30,
+        "width": 80,
+        "height": 20
+      },
+      {
+        "id": "both",
+        "x": 10,
+        "y": 50,
+        "width": 80,
+        "height": 20
+      },
+      {
+        "id": "shift",
+        "x": 15,
+        "y": 63,
+        "width": 80,
+        "height": 20
+      },
+      {
+        "id": "nested",
+        "x": 15,
+        "y": 83,
+        "width": 80,
+        "height": 20
+      }
+    ]
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "margin": 10
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "Flip",
+          "horizontal": true,
+          "contentWidth": 80,
+          "child": {
+            "type": "Container",
+            "id": "horizontal",
+            "width": 80,
+            "height": 20,
+            "backgroundColor": "#4499bb"
+          }
+        },
+        {
+          "type": "Flip",
+          "vertical": true,
+          "contentWidth": 80,
+          "child": {
+            "type": "Container",
+            "id": "vertical",
+            "width": 80,
+            "height": 20,
+            "backgroundColor": "#4499bb"
+          }
+        },
+        {
+          "type": "Flip",
+          "horizontal": true,
+          "vertical": true,
+          "contentWidth": 80,
+          "child": {
+            "type": "Container",
+            "id": "both",
+            "width": 80,
+            "height": 20,
+            "backgroundColor": "#4499bb"
+          }
+        },
+        {
+          "type": "Translate",
+          "x": "5pt",
+          "y": -7,
+          "contentWidth": 80,
+          "child": {
+            "type": "Container",
+            "id": "shift",
+            "width": 80,
+            "height": 20,
+            "backgroundColor": "#4499bb"
+          }
+        },
+        {
+          "type": "Translate",
+          "x": 5,
+          "y": -7,
+          "contentWidth": 80,
+          "child": {
+            "type": "Flip",
+            "horizontal": true,
+            "contentWidth": 80,
+            "child": {
+              "type": "Rotate",
+              "angle": 90,
+              "mode": "constrained",
+              "contentWidth": 20,
+              "child": {
+                "type": "Container",
+                "id": "nested",
+                "width": 20,
+                "height": 80,
+                "backgroundColor": "#4499bb"
+              }
+            }
+          }
+        },
+        {
+          "type": "Flip",
+          "horizontal": true,
+          "contentWidth": 100,
+          "child": {
+            "type": "TextBlock",
+            "text": "Mirrored text"
+          }
+        },
+        {
+          "type": "Translate",
+          "x": {
+            "value": -1,
+            "unit": "cm"
+          },
+          "y": "2mm",
+          "child": {
+            "type": "TextBlock",
+            "text": "Moved text"
+          }
+        }
+      ]
+    }
+  ]
+}

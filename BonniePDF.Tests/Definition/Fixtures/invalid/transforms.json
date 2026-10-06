@@ -1,0 +1,49 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/transforms",
+    "description": "Reject invalid axes, offsets and nonpositive content widths.",
+    "spec": "18"
+  },
+  "_expectErrors": [
+    {
+      "path": "/pages/0/content/0/horizontal",
+      "code": "invalid-type"
+    },
+    {
+      "path": "/pages/0/content/1/contentWidth",
+      "code": "invalid-value"
+    },
+    {
+      "path": "/pages/0/content/2/x",
+      "code": "invalid-value"
+    },
+    {
+      "path": "/pages/0/content/3/contentWidth",
+      "code": "invalid-value"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "Flip",
+          "horizontal": "yes"
+        },
+        {
+          "type": "Flip",
+          "contentWidth": "-1mm"
+        },
+        {
+          "type": "Translate",
+          "x": "nonsense"
+        },
+        {
+          "type": "Translate",
+          "contentWidth": 0
+        }
+      ]
+    }
+  ]
+}

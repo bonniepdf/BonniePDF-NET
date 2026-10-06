@@ -840,7 +840,25 @@ internal sealed partial class DefinitionValidator
         }
         foreach (string rule in spec.Rules ?? [])
         {
-            if (rule == "singleSeries") SingleSeries(node, path, id);
+            if (rule == "rotation" || rule == "transformWidth")
+            {
+                if (node.TryGetProperty("mode", out var mode) && mode.ValueKind == JsonValueKind.String && mode.GetString() == "constrained"
+                    && node.TryGetProperty("angle", out var angle) && angle.ValueKind == JsonValueKind.Number && angle.TryGetDouble(out var a) && double.IsFinite(a) && a % 90 != 0)
+                    Error($"{path}/angle", "invalid-value", "Constrained rotation requires a multiple of 90 degrees.", id);
+                if (node.TryGetProperty("contentWidth", out var width))
+                {
+                    double? w = null;
+                    if (width.ValueKind == JsonValueKind.Number && width.TryGetDouble(out double n)) w = n;
+                    else if (width.ValueKind == JsonValueKind.String && LengthToken().IsMatch(width.GetString()!))
+                    {
+                        string token = width.GetString()!.Trim();
+                        if (double.TryParse(token[..^2].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out n)) w = n;
+                    }
+                    else if (width.ValueKind == JsonValueKind.Object && width.TryGetProperty("value", out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetDouble(out n)) w = n;
+                    if (w is double size && (!double.IsFinite(size) || size <= 0)) Error($"{path}/contentWidth", "invalid-value", "Transform contentWidth must be positive.", id);
+                }
+            }
+            else if (rule == "singleSeries") SingleSeries(node, path, id);
             else if (rule == "chartDuplicates") ChartDuplicates(node, path, id);
         }
         if (type is "Table" or "Grid") TableWidth(node, path, id);

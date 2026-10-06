@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 
@@ -180,8 +181,10 @@ public sealed class LayoutSnapshot
 /// </summary>
 internal sealed class LayoutRecorder
 {
+    internal BonniePDF.Drawing.PaintTransform? ElementTransform { get; set; }
     private sealed class OpenFrame
     {
+        public BonniePDF.Drawing.PaintTransform? Transform;
         public required LayoutNode Node;
         public float X;
         public float Width;
@@ -237,7 +240,7 @@ internal sealed class LayoutRecorder
         node.Paint = PaintOf(element, type);
         _stack[^1].Node.Children.Add(node);
 
-        var frame = new OpenFrame { Node = node, X = x, Width = width, Page = page, StartY = y };
+        var frame = new OpenFrame { Node = node, X = x, Width = width, Page = page, StartY = y, Transform = ElementTransform };
         _stack.Add(frame);
         _open[element] = frame;
     }
@@ -282,6 +285,16 @@ internal sealed class LayoutRecorder
         if (idx >= 0) _stack.RemoveRange(idx, _stack.Count - idx);
     }
 
+    internal void AbortNode(object element)
+    {
+        if (!_open.TryGetValue(element, out var frame)) return;
+        int index = _stack.IndexOf(frame);
+        if (index < 0) return;
+        var removed = new HashSet<OpenFrame>(_stack.GetRange(index, _stack.Count - index));
+        _stack.RemoveRange(index, _stack.Count - index);
+        foreach (var key in _open.Where(pair => removed.Contains(pair.Value)).Select(pair => pair.Key).ToArray()) _open.Remove(key);
+    }
+
     /// <summary>Splits every open node's rect across a page boundary.</summary>
     public void PageBreak(float outgoingBottomY, int newPage, float newTopY)
     {
@@ -300,13 +313,15 @@ internal sealed class LayoutRecorder
     {
         float height = endY - frame.StartY;
         if (height <= 0) return; // an element that drew nothing on this page gets no rect here
+        var box = frame.Transform?.MapBox(frame.X, frame.StartY, frame.X + frame.Width, endY)
+            ?? (X0: frame.X, Y0: frame.StartY, X1: frame.X + frame.Width, Y1: endY);
         frame.Node.Rects.Add(new LayoutRect
         {
             Page = frame.Page,
-            X = frame.X,
-            Y = frame.StartY,
-            Width = frame.Width,
-            Height = height
+            X = box.X0,
+            Y = box.Y0,
+            Width = box.X1 - box.X0,
+            Height = box.Y1 - box.Y0
         });
     }
 

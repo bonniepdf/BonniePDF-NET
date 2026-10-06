@@ -1,0 +1,89 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/rotation-geometry",
+    "description": "Shared four-corner bounds for cardinal and cancelling nested turns.",
+    "spec": "17"
+  },
+  "_expect": {
+    "pages": 1,
+    "roundTrip": true,
+    "rectangles": [
+      {
+        "id": "clockwise-box",
+        "x": 10,
+        "y": 10,
+        "width": 20,
+        "height": 80
+      },
+      {
+        "id": "counterclockwise-box",
+        "x": 10,
+        "y": 90,
+        "width": 20,
+        "height": 80
+      },
+      {
+        "id": "nested-box",
+        "x": 10,
+        "y": 170,
+        "width": 80,
+        "height": 20
+      }
+    ],
+    "contentStreamSha256": "9cbcbe9c369b335bfeb1ff8b706f3173ec865161e8059a28d402f327cbaf9a6e"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "margin": 10
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "Rotate",
+          "angle": 90,
+          "mode": "constrained",
+          "contentWidth": 80,
+          "child": {
+            "type": "Container",
+            "id": "clockwise-box",
+            "width": 80,
+            "height": 20,
+            "backgroundColor": "#44aa88"
+          }
+        },
+        {
+          "type": "Rotate",
+          "angle": -90,
+          "mode": "constrained",
+          "contentWidth": 80,
+          "child": {
+            "type": "Container",
+            "id": "counterclockwise-box",
+            "width": 80,
+            "height": 20,
+            "backgroundColor": "#44aa88"
+          }
+        },
+        {
+          "type": "Rotate",
+          "angle": 30,
+          "contentWidth": 80,
+          "child": {
+            "type": "Rotate",
+            "angle": -30,
+            "contentWidth": 80,
+            "child": {
+              "type": "Container",
+              "id": "nested-box",
+              "width": 80,
+              "height": 20,
+              "backgroundColor": "#44aa88"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
