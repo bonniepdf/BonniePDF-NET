@@ -9,6 +9,7 @@
     <Project Path="Examples/BonniePDF.Examples.Basics.SimpleDocument/BonniePDF.Examples.Basics.SimpleDocument.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Layout.HeadersFooters/BonniePDF.Examples.Layout.HeadersFooters.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Layout.HorizontalStacks/BonniePDF.Examples.Layout.HorizontalStacks.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Layout.MultiColumnLayouts/BonniePDF.Examples.Layout.MultiColumnLayouts.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Layout.MultiPageFlow/BonniePDF.Examples.Layout.MultiPageFlow.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Layout.TextBlockOverflow/BonniePDF.Examples.Layout.TextBlockOverflow.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Layout.VerticalStackOverflow/BonniePDF.Examples.Layout.VerticalStackOverflow.csproj" />

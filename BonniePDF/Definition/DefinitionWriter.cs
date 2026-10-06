@@ -45,6 +45,9 @@ internal sealed partial class DefinitionWriter
     /// <summary>Catalogue name of each element class, matched exactly: a subclass is custom behaviour.</summary>
     private static readonly Dictionary<Type, string> TypeByClass = new()
     {
+        [typeof(Flip)] = "Flip",
+        [typeof(Translate)] = "Translate",
+        [typeof(Rotate)] = "Rotate",
         [typeof(Container)] = "Container",
         [typeof(VerticalStack)] = "VerticalStack",
         [typeof(HorizontalStack)] = "HorizontalStack",
@@ -92,6 +95,9 @@ internal sealed partial class DefinitionWriter
     /// <summary>A fresh element of each type, for its defaults (spec 15 §3.3).</summary>
     private static readonly Dictionary<string, Func<object>> Blanks = new(StringComparer.Ordinal)
     {
+        ["Flip"] = () => new Flip(),
+        ["Translate"] = () => new Translate(),
+        ["Rotate"] = () => new Rotate(),
         ["Container"] = () => new Container(),
         ["VerticalStack"] = () => new VerticalStack(),
         ["HorizontalStack"] = () => new HorizontalStack(),
@@ -571,6 +577,12 @@ internal sealed partial class DefinitionWriter
         string parent = at[..at.LastIndexOf('/')];
         switch ($"{type}.{key}")
         {
+            case "Flip.child":
+                return Slot.Write(Child(((Flip)element).Child, at));
+            case "Translate.child":
+                return Slot.Write(Child(((Translate)element).Child, at));
+            case "Rotate.child":
+                return Slot.Write(Child(((Rotate)element).Child, at));
             case "Container.child":
                 return Slot.Write(Child(((Container)element).Child, at));
             case "EnsureSpace.child" or "PreventPageBreak.child" or "ShowEntire.child" or "StopPaging.child"

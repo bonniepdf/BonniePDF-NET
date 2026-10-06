@@ -1,0 +1,53 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/rotation",
+    "description": "Constrained angles must be quarter turns; content width must be positive.",
+    "spec": "17"
+  },
+  "_expectErrors": [
+    {
+      "path": "/pages/0/content/0/angle",
+      "code": "invalid-value"
+    },
+    {
+      "path": "/pages/0/content/1/contentWidth",
+      "code": "invalid-value"
+    },
+    {
+      "path": "/pages/0/content/2/contentWidth",
+      "code": "invalid-value"
+    },
+    {
+      "path": "/pages/0/content/3/contentWidth",
+      "code": "invalid-value"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "Rotate",
+          "mode": "constrained",
+          "angle": 45
+        },
+        {
+          "type": "Rotate",
+          "contentWidth": 0
+        },
+        {
+          "type": "Rotate",
+          "contentWidth": "-1mm"
+        },
+        {
+          "type": "Rotate",
+          "contentWidth": {
+            "value": 0,
+            "unit": "cm"
+          }
+        }
+      ]
+    }
+  ]
+}
