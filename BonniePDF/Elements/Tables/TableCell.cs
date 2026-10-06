@@ -1,9 +1,5 @@
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Tables;
+namespace BonniePDF;
 
 /// <summary>
 /// A table cell with support for custom styling, background color, and padding overrides
@@ -33,7 +29,7 @@ public class TableCell : BorderedElementBase, IRoleProvider
     /// <summary>
     /// Whether this cell is a header cell (renders as <c>/TH</c> in
     /// PDF/UA tagged output instead of <c>/TD</c>). Set automatically
-    /// by <see cref="Table.AddHeader(BonniePDF.Elements.IElement[])"/> on each cell in a header row,
+    /// by <see cref="Table.AddHeader(BonniePDF.IElement[])"/> on each cell in a header row,
     /// and at render time from the owning row's <c>IsHeader</c> flag
     /// for cells added directly to a row. May also be set explicitly
     /// for individual cells that act as headers (e.g. row headers in
@@ -43,7 +39,7 @@ public class TableCell : BorderedElementBase, IRoleProvider
 
     /// <inheritdoc />
     public SemanticRole SemanticRole =>
-        IsHeader ? Rendering.Tagging.SemanticRole.TH : Rendering.Tagging.SemanticRole.TD;
+        IsHeader ? SemanticRole.TH : SemanticRole.TD;
 
     protected override float MeasureContentHeight(float contentWidth)
     {

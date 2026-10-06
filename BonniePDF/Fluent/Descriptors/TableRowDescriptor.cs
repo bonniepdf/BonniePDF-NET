@@ -1,9 +1,6 @@
 using System.Collections.Generic;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
 
-namespace BonniePDF.Fluent.Descriptors;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Describes a table row (used for headers and footers).

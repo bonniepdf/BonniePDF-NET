@@ -1,6 +1,5 @@
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>
 /// An invisible element that reserves vertical space.

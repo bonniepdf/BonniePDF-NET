@@ -1,9 +1,6 @@
 using System;
-using BonniePDF.Core;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Shapes;
+namespace BonniePDF;
 
 /// <summary>
 /// A native, high-performance, vector-based Data Matrix (ECC200) element.
@@ -43,8 +40,8 @@ public class DataMatrix : ElementBase, IRoleProvider, IAltTextProvider
     /// <inheritdoc />
     public SemanticRole SemanticRole =>
         IsDecorative || string.IsNullOrEmpty(AltText)
-            ? Rendering.Tagging.SemanticRole.Artifact
-            : Rendering.Tagging.SemanticRole.Figure;
+            ? SemanticRole.Artifact
+            : SemanticRole.Figure;
 
     /// <summary>
     /// The display width of the symbol in points (the quiet zone is included).

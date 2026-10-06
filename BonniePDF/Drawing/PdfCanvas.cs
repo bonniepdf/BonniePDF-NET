@@ -2,13 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Pdf;
-using BonniePDF.Rendering.Tagging;
-using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF.Drawing;

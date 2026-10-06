@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BonniePDF.Charts.Models;
+namespace BonniePDF;
 
 /// <summary>
 /// Data model for chart visualization.

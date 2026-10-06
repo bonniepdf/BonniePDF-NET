@@ -1,7 +1,5 @@
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
 
-namespace BonniePDF.Extensions;
+namespace BonniePDF;
 
 /// <summary>
 /// Fluent extension methods for sizing elements

@@ -1,6 +1,5 @@
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout.Pagination;
+namespace BonniePDF;
 
 /// <summary>
 /// Renders as much of its child as fits on the current page and discards the

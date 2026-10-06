@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using BonniePDF.Elements.Text;
 
-namespace BonniePDF.Fluent.Descriptors;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Describes rich text content with multiple spans.

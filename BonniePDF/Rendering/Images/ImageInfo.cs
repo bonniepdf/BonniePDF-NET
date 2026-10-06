@@ -1,4 +1,4 @@
-namespace BonniePDF.Rendering.Images;
+namespace BonniePDF;
 
 /// <summary>
 /// Contains parsed image metadata and data for PDF embedding

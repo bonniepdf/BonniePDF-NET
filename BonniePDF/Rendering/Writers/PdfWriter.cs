@@ -4,8 +4,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Rendering.Pdf;
 using BonniePDF.Security.Encryption;
 

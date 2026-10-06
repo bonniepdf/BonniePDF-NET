@@ -1,9 +1,7 @@
 using System;
 using BonniePDF.Drawing;
-using BonniePDF.Elements;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 internal static class AtomicTransform
 {

@@ -3,12 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Attachments;
-using BonniePDF.Configuration;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
-using BonniePDF.Fluent.Descriptors;
 
 namespace BonniePDF.Fluent;
 

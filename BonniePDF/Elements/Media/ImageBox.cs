@@ -1,6 +1,6 @@
 using System;
 
-namespace BonniePDF.Elements.Media;
+namespace BonniePDF;
 
 /// <summary>
 /// The display box of image-like content with a natural size, under a fit mode.

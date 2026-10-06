@@ -1,8 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Text;
+namespace BonniePDF;
 
 /// <summary>
 /// Renders the page number on which a named <see cref="Section"/> (or anchored

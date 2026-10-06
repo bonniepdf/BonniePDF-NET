@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Provides unit conversion utilities for measurements

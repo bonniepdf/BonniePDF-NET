@@ -1,6 +1,5 @@
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout.Pagination;
+namespace BonniePDF;
 
 /// <summary>
 /// Keeps its child together: if the child will not fit in the space left on the

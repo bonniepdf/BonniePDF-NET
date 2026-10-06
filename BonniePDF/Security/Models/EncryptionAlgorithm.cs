@@ -1,4 +1,4 @@
-namespace BonniePDF.Security.Models;
+namespace BonniePDF;
 
 /// <summary>
 /// Encryption algorithms supported by PDF encryption.

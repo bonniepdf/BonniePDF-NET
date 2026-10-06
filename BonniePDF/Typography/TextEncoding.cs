@@ -1,4 +1,4 @@
-namespace BonniePDF.Typography;
+namespace BonniePDF;
 
 /// <summary>
 /// Helpers for deciding which Unicode code points may legitimately become

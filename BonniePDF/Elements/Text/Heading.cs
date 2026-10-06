@@ -1,8 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Text;
+namespace BonniePDF;
 
 /// <summary>
 /// A text block that registers itself as a heading in the Table of Contents when rendered.
@@ -21,7 +19,7 @@ public class Heading : TextBlock, IStatefulElement, IRoleProvider
     /// <summary>
     /// Optional named-anchor id. When set, this heading doubles as a cross-reference
     /// target: it records its page number against <see cref="AnchorId"/> in the shared
-    /// TOC registry so a <see cref="Core.SectionLink"/> can jump to it and a
+    /// TOC registry so a <see cref="SectionLink"/> can jump to it and a
     /// <see cref="PageNumberOf"/> can print its page. Independent of
     /// <see cref="TocIdentifier"/> (which drives the on-page <see cref="VisualToc"/>);
     /// a heading may carry either, both, or neither.
@@ -39,12 +37,12 @@ public class Heading : TextBlock, IStatefulElement, IRoleProvider
     /// <inheritdoc />
     public override SemanticRole SemanticRole => Level switch
     {
-        <= 1 => Rendering.Tagging.SemanticRole.H1,
-        2 => Rendering.Tagging.SemanticRole.H2,
-        3 => Rendering.Tagging.SemanticRole.H3,
-        4 => Rendering.Tagging.SemanticRole.H4,
-        5 => Rendering.Tagging.SemanticRole.H5,
-        _ => Rendering.Tagging.SemanticRole.H6,
+        <= 1 => SemanticRole.H1,
+        2 => SemanticRole.H2,
+        3 => SemanticRole.H3,
+        4 => SemanticRole.H4,
+        5 => SemanticRole.H5,
+        _ => SemanticRole.H6,
     };
 
     private bool _tocRegistered;

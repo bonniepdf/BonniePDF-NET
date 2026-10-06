@@ -1,6 +1,5 @@
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout.Pagination;
+namespace BonniePDF;
 
 /// <summary>
 /// Starts a new page unless at least <see cref="MinHeight"/> of body height
@@ -34,7 +33,7 @@ public class EnsureSpace : PaginationWrapperBase
 
     /// <summary>
     /// The body height, in points, that must remain on the current page for the
-    /// child to start here. Use <see cref="Core.Units"/> for other units:
+    /// child to start here. Use <see cref="Units"/> for other units:
     /// <c>Units.Mm(50)</c>.
     /// </summary>
     public float MinHeight { get; set; }

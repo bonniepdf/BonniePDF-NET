@@ -1,7 +1,5 @@
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
 
-namespace BonniePDF.Fluent.Descriptors;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Describes a horizontal row layout. Provides scoped methods for adding items with

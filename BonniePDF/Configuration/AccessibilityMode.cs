@@ -1,4 +1,4 @@
-namespace BonniePDF.Configuration;
+namespace BonniePDF;
 
 /// <summary>
 /// Accessibility / tagged-PDF conformance mode for the document.

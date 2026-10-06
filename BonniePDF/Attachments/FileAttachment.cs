@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace BonniePDF.Attachments;
+namespace BonniePDF;
 
 /// <summary>
 /// A file embedded into a generated PDF as an associated file (PDF 2.0

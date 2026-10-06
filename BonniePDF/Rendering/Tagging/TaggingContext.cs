@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BonniePDF.Rendering.Tagging;
+namespace BonniePDF;
 
 /// <summary>
 /// Carries the per-document tagging state through the render pipeline:

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// A Tailwind v4 colour ramp: eleven fixed shade stops (50 → 950) addressed by index,

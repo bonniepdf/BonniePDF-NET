@@ -31,7 +31,8 @@
     <!-- Deliberate, individually-justified suppressions only (audited 2026-07 - see comments below).
          MA0004/MA0006/MA0009/MA0015/MA0074/MA0140 were removed from this list: each had its violations
          fixed, so re-enabling them costs nothing further and catches regressions. -->
-    <NoWarn>$(NoWarn);CS1591;CS1573;MA0002;MA0011;MA0046;MA0048;MA0051;MA0089;CA1854;CA1859</NoWarn>
+    <NoWarn>$(NoWarn);IDE0130;CA1724;CS1591;CS1573;MA0002;MA0011;MA0046;MA0048;MA0051;MA0089;CA1854;CA1859</NoWarn>
+    <!-- IDE0130/CA1724: the public API is deliberately in the BonniePDF namespace regardless of folder; Svg shares a name with the vendored BonniePDF.Rendering.Svg namespace. -->
     <!-- CS1591/CS1573: missing/incomplete XML doc comments (~540 combined). Real doc-coverage gaps,
          not correctness issues; fixing needs a dedicated documentation pass, not a drive-by. -->
     <!-- MA0002: Dictionary/HashSet<string> without an explicit IEqualityComparer (~170 sites). Some are

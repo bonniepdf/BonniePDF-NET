@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Elements;
-using BonniePDF.Rendering;
 using BonniePDF.Rendering.Pdf;
-using BonniePDF.Rendering.Tagging;
-using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Represents a hyperlink annotation in a PDF document.
@@ -17,7 +13,7 @@ namespace BonniePDF.Core;
 public class Hyperlink : IElement, IRoleProvider
 {
     /// <inheritdoc />
-    public SemanticRole SemanticRole => Rendering.Tagging.SemanticRole.Link;
+    public SemanticRole SemanticRole => SemanticRole.Link;
 
     /// <summary>
     /// Creates a new hyperlink with the specified URI and display text
@@ -85,7 +81,7 @@ public class Hyperlink : IElement, IRoleProvider
     /// The structure element created for this link by the tagging pipeline.
     /// Set during render; used by the serializer to wire /StructParent and /OBJR.
     /// </summary>
-    internal Rendering.Tagging.StructureElement? LinkedStructElement { get; set; }
+    internal StructureElement? LinkedStructElement { get; set; }
 
     // Internal properties set during rendering
     /// <summary>Gets the X position of the rendered annotation rectangle in PDF coordinates (bottom-left origin).</summary>
@@ -164,7 +160,7 @@ public class Hyperlink : IElement, IRoleProvider
                 maxWidth = lineWidth;
 
             ctx.Canvas.DrawText(ctx.CurrentX + Margin.Left, localY, line, Color, FontSize, FontName,
-                Elements.Text.TextAlignment.Left);
+                TextAlignment.Left);
 
             localY += LineHeight;
         }

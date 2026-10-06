@@ -1,6 +1,5 @@
-using BonniePDF.Security.Permissions;
 
-namespace BonniePDF.Security.Models;
+namespace BonniePDF;
 
 /// <summary>
 /// Fluent builder for configuring PDF encryption options.

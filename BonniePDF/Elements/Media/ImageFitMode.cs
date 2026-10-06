@@ -1,4 +1,4 @@
-namespace BonniePDF.Elements.Media;
+namespace BonniePDF;
 
 /// <summary>
 /// How to fit an image within its bounds

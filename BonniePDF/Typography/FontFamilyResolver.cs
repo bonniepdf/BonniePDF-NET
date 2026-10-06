@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BonniePDF.Typography;
+namespace BonniePDF;
 
 /// <summary>
 /// Resolves a font family name + weight + italic to the actual PDF font name or TTF file path.
@@ -20,22 +20,22 @@ public static class FontFamilyResolver
     private static readonly Dictionary<(string family, bool bold, bool italic), string> StandardFonts = new()
     {
         // Helvetica family
-        [("Helvetica", false, false)] = Typography.StandardFonts.Helvetica,
-        [("Helvetica", true, false)] = Typography.StandardFonts.HelveticaBold,
-        [("Helvetica", false, true)] = Typography.StandardFonts.HelveticaOblique,
-        [("Helvetica", true, true)] = Typography.StandardFonts.HelveticaBoldOblique,
+        [("Helvetica", false, false)] = BonniePDF.StandardFonts.Helvetica,
+        [("Helvetica", true, false)] = BonniePDF.StandardFonts.HelveticaBold,
+        [("Helvetica", false, true)] = BonniePDF.StandardFonts.HelveticaOblique,
+        [("Helvetica", true, true)] = BonniePDF.StandardFonts.HelveticaBoldOblique,
 
         // Times family
-        [("Times", false, false)] = Typography.StandardFonts.TimesRoman,
-        [("Times", true, false)] = Typography.StandardFonts.TimesBold,
-        [("Times", false, true)] = Typography.StandardFonts.TimesItalic,
-        [("Times", true, true)] = Typography.StandardFonts.TimesBoldItalic,
+        [("Times", false, false)] = BonniePDF.StandardFonts.TimesRoman,
+        [("Times", true, false)] = BonniePDF.StandardFonts.TimesBold,
+        [("Times", false, true)] = BonniePDF.StandardFonts.TimesItalic,
+        [("Times", true, true)] = BonniePDF.StandardFonts.TimesBoldItalic,
 
         // Courier family
-        [("Courier", false, false)] = Typography.StandardFonts.Courier,
-        [("Courier", true, false)] = Typography.StandardFonts.CourierBold,
-        [("Courier", false, true)] = Typography.StandardFonts.CourierOblique,
-        [("Courier", true, true)] = Typography.StandardFonts.CourierBoldOblique
+        [("Courier", false, false)] = BonniePDF.StandardFonts.Courier,
+        [("Courier", true, false)] = BonniePDF.StandardFonts.CourierBold,
+        [("Courier", false, true)] = BonniePDF.StandardFonts.CourierOblique,
+        [("Courier", true, true)] = BonniePDF.StandardFonts.CourierBoldOblique
     };
 
     /// <summary>
@@ -66,7 +66,7 @@ public static class FontFamilyResolver
     /// <returns>The resolved PDF font name or TTF file path</returns>
     public static string Resolve(string family, FontWeight weight, bool italic)
     {
-        if (string.IsNullOrEmpty(family)) return Typography.StandardFonts.Helvetica;
+        if (string.IsNullOrEmpty(family)) return BonniePDF.StandardFonts.Helvetica;
 
         // A font name a document made for one of its faces is already resolved.
         if (DocumentFonts.IsDocumentFontName(family)) return family;
@@ -97,7 +97,7 @@ public static class FontFamilyResolver
             return fontName;
 
         // Fallback: return Helvetica variant
-        return StandardFonts.GetValueOrDefault(("Helvetica", isBold, italic), Typography.StandardFonts.Helvetica);
+        return StandardFonts.GetValueOrDefault(("Helvetica", isBold, italic), BonniePDF.StandardFonts.Helvetica);
     }
 
     /// <summary>
@@ -157,20 +157,20 @@ public static class FontFamilyResolver
         return name switch
         {
             // Helvetica variants - base "Helvetica" excluded so Bold/Italic can still be applied
-            Typography.StandardFonts.HelveticaBold
-                or Typography.StandardFonts.HelveticaOblique
-                or Typography.StandardFonts.HelveticaBoldOblique
+            BonniePDF.StandardFonts.HelveticaBold
+                or BonniePDF.StandardFonts.HelveticaOblique
+                or BonniePDF.StandardFonts.HelveticaBoldOblique
             // Times variants - base "Times-Roman" excluded so Bold/Italic can still be applied
-                or Typography.StandardFonts.TimesBold
-                or Typography.StandardFonts.TimesItalic
-                or Typography.StandardFonts.TimesBoldItalic
+                or BonniePDF.StandardFonts.TimesBold
+                or BonniePDF.StandardFonts.TimesItalic
+                or BonniePDF.StandardFonts.TimesBoldItalic
             // Courier variants - base "Courier" excluded so Bold/Italic can still be applied
-                or Typography.StandardFonts.CourierBold
-                or Typography.StandardFonts.CourierOblique
-                or Typography.StandardFonts.CourierBoldOblique
+                or BonniePDF.StandardFonts.CourierBold
+                or BonniePDF.StandardFonts.CourierOblique
+                or BonniePDF.StandardFonts.CourierBoldOblique
             // Special fonts with no variants
-                or Typography.StandardFonts.Symbol
-                or Typography.StandardFonts.ZapfDingbats => true,
+                or BonniePDF.StandardFonts.Symbol
+                or BonniePDF.StandardFonts.ZapfDingbats => true,
             _ => false
         };
     }

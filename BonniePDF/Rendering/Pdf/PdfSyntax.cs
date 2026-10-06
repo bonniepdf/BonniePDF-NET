@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
-using BonniePDF.Core;
 using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF.Rendering.Pdf;

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Represents a 2D point with X and Y coordinates

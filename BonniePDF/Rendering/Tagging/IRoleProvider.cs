@@ -1,4 +1,4 @@
-namespace BonniePDF.Rendering.Tagging;
+namespace BonniePDF;
 
 /// <summary>
 /// Marker interface for elements that declare a PDF structure role

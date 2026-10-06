@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using BonniePDF.Drawing;
 using BonniePDF.Fluent;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>Mirrors a native subtree about its box centre without changing flow dimensions.</summary>
 public class Flip : ElementBase, IContentContainer, IStatefulElement

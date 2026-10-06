@@ -1,7 +1,5 @@
-using BonniePDF.Core;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Shapes;
+namespace BonniePDF;
 
 /// <summary>
 /// A filled circle element, useful for status indicators, bullets, etc.

@@ -1,7 +1,6 @@
 using System;
-using BonniePDF.Elements;
 
-namespace BonniePDF.Fluent.Extensions;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Internal bridge methods that make the fluent API chain pattern work.

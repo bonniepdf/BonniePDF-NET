@@ -1,4 +1,4 @@
-namespace BonniePDF.Charts.Models;
+namespace BonniePDF;
 
 /// <summary>
 /// Series-specific styling options for fine-grained control over appearance.

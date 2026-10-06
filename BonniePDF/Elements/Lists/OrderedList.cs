@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Lists;
+namespace BonniePDF;
 
 /// <summary>
 /// An ordered list element that displays numbered items with various numbering formats

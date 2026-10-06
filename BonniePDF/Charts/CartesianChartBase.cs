@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Charts.Models;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
 
-namespace BonniePDF.Charts;
+namespace BonniePDF;
 
 /// <summary>
 /// Base class for Cartesian charts (charts with X and Y axes).

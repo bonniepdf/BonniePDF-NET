@@ -6,7 +6,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace BonniePDF.Definition;
+namespace BonniePDF;
 
 /// <summary>What to do with a construct a definition cannot express (spec 15 §11.2).</summary>
 public enum DefinitionUnrepresentable

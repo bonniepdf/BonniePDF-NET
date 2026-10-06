@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using BonniePDF.Drawing;
 using BonniePDF.Fluent;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>How rotation affects the flow box.</summary>
 public enum RotationMode

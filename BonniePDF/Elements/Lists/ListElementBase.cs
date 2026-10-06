@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Lists;
+namespace BonniePDF;
 
 /// <summary>
 /// Base class for list elements (ordered and unordered) that provides common functionality

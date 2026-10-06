@@ -1,9 +1,6 @@
 using System;
-using BonniePDF.Configuration;
-using BonniePDF.Security.Models;
-using BonniePDF.Security.Permissions;
 
-namespace BonniePDF.Extensions;
+namespace BonniePDF;
 
 /// <summary>
 /// Extension methods for configuring PDF document encryption.

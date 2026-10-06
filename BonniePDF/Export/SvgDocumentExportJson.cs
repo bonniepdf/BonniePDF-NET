@@ -3,10 +3,8 @@ using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using BonniePDF.Compliance;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Export;
+namespace BonniePDF;
 
 /// <summary>
 /// Writes an <see cref="SvgDocumentExport"/> as JSON under the shared JSON

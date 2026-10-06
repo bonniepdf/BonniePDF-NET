@@ -1,11 +1,7 @@
-﻿using BonniePDF.Charts.Models;
-using BonniePDF.Drawing;
-using BonniePDF.Elements;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
+﻿using BonniePDF.Drawing;
 using System;
 
-namespace BonniePDF.Charts;
+namespace BonniePDF;
 
 /// <summary>
 /// Custom element that renders a chart using ICanvas to PDF.

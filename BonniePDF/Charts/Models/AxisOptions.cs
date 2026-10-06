@@ -1,4 +1,4 @@
-namespace BonniePDF.Charts.Models;
+namespace BonniePDF;
 
 /// <summary>
 /// Options for configuring chart axis display

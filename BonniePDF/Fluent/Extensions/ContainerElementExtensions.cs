@@ -1,15 +1,7 @@
 using System;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Drawing;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Media;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Elements.Text;
-using BonniePDF.Fluent.Descriptors;
 
-namespace BonniePDF.Fluent.Extensions;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Fluent extension methods for adding content elements to containers.
@@ -49,7 +41,7 @@ public static class ContainerElementExtensions
     /// </summary>
     public static void Empty(this IContentContainer c)
     {
-        c.Element(new Elements.Layout.Container());
+        c.Element(new Container());
     }
 
     /// <summary>
@@ -57,7 +49,7 @@ public static class ContainerElementExtensions
     /// </summary>
     public static void Spacer(this IContentContainer c, float height)
     {
-        c.Element(new Elements.Layout.Spacer(height));
+        c.Element(new Spacer(height));
     }
 
     /// <summary>
@@ -66,7 +58,7 @@ public static class ContainerElementExtensions
     /// </summary>
     public static void PageBreak(this IContentContainer c)
     {
-        c.Element(new Elements.Layout.PageBreak());
+        c.Element(new PageBreak());
     }
 
     // --- Layout ---
@@ -108,7 +100,7 @@ public static class ContainerElementExtensions
     {
         var descriptor = new TableDescriptor();
         handler(descriptor);
-        c.Element<Elements.Tables.Table>(descriptor.Build());
+        c.Element<Table>(descriptor.Build());
     }
 
     // --- Media ---

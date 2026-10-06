@@ -1,7 +1,5 @@
 using System;
 using System.Linq;
-using BonniePDF.Core;
-using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Svg.Sink;
 using SinkFillRule = BonniePDF.Rendering.Svg.Sink.FillRule;
 using SinkLineCap = BonniePDF.Rendering.Svg.Sink.LineCap;

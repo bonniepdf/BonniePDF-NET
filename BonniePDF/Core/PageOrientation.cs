@@ -1,4 +1,4 @@
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Represents the orientation of a PDF page

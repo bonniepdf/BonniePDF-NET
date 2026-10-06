@@ -1,8 +1,6 @@
 using System;
-using BonniePDF.Attachments;
-using BonniePDF.Configuration;
 
-namespace BonniePDF.EInvoice;
+namespace BonniePDF;
 
 /// <summary>
 /// Binds caller-supplied invoice XML to a generated document to produce a

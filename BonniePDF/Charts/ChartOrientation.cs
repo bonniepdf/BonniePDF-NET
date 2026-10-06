@@ -1,4 +1,4 @@
-namespace BonniePDF.Charts;
+namespace BonniePDF;
 
 /// <summary>
 /// Controls the orientation of a Cartesian chart.

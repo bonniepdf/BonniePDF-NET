@@ -1,8 +1,5 @@
-using BonniePDF.Configuration;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>
 /// A layout container that wraps its children in an explicit PDF/UA

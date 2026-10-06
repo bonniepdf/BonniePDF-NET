@@ -1,6 +1,5 @@
-using BonniePDF.Elements.Media;
 
-namespace BonniePDF.Extensions;
+namespace BonniePDF;
 
 /// <summary>
 /// Fluent extension methods for images

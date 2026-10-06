@@ -1,6 +1,6 @@
 using System;
 
-namespace BonniePDF.EInvoice;
+namespace BonniePDF;
 
 /// <summary>
 /// Factur-X / ZUGFeRD 2.x semantic profile. Determines the

@@ -2,7 +2,7 @@ using System.Linq;
 using System;
 using System.Collections.Generic;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 // ---------------------------------------------------------------------------
 // Layout snapshot capture.
@@ -337,14 +337,14 @@ internal sealed class LayoutRecorder
     /// <summary>Reads an element's canonical capture type without depending on ElementBase.</summary>
     public static string CaptureTypeOf(object element)
     {
-        if (element is Elements.ICaptureMetadata meta) return meta.CaptureType;
+        if (element is ICaptureMetadata meta) return meta.CaptureType;
         return element.GetType().Name;
     }
 
     /// <summary>Reads an element's optional author capture name.</summary>
     public static string? CaptureNameOf(object element)
     {
-        return element is Elements.ICaptureMetadata meta ? meta.CaptureName : null;
+        return element is ICaptureMetadata meta ? meta.CaptureName : null;
     }
 
     private static readonly HashSet<string> ImageLikeTypes = new()
@@ -362,10 +362,10 @@ internal sealed class LayoutRecorder
     /// </summary>
     public static NodeAccessibility? AccessibilityOf(object element, string type)
     {
-        if (element is not Tagging.IRoleProvider roleProvider) return null;
+        if (element is not IRoleProvider roleProvider) return null;
 
         string role = roleProvider.SemanticRole.ToString();
-        bool artifact = roleProvider.SemanticRole == Tagging.SemanticRole.Artifact;
+        bool artifact = roleProvider.SemanticRole == SemanticRole.Artifact;
 
         int? headingLevel = role switch
         {
@@ -375,7 +375,7 @@ internal sealed class LayoutRecorder
 
         string? alt = null;
         bool? decorative = null;
-        if (element is Tagging.IAltTextProvider altProvider)
+        if (element is IAltTextProvider altProvider)
         {
             if (!string.IsNullOrEmpty(altProvider.AltText)) alt = altProvider.AltText;
             if (altProvider.IsDecorative) decorative = true;
@@ -405,16 +405,16 @@ internal sealed class LayoutRecorder
     };
 
     /// <summary>Formats a colour as "#rrggbb" (alpha is carried separately).</summary>
-    public static string ColorToHex(Core.Color color) =>
+    public static string ColorToHex(Color color) =>
         $"#{color.R:x2}{color.G:x2}{color.B:x2}";
 
     /// <summary>Alpha in [0,1], rounded to 3 decimals so fixtures compare cleanly.</summary>
-    private static float AlphaOf(Core.Color color) =>
+    private static float AlphaOf(Color color) =>
         (float)Math.Round(color.ScA, 3, MidpointRounding.AwayFromZero);
 
     /// <summary>Builds a <see cref="NodePaint"/> carrying just a resolved background colour,
     /// for callers that compute a fill outside the element (see <see cref="AnnotatePaint"/>).</summary>
-    public static NodePaint PaintForBackground(Core.Color color)
+    public static NodePaint PaintForBackground(Color color)
     {
         var paint = new NodePaint { Background = ColorToHex(color) };
         float alpha = AlphaOf(color);
@@ -434,15 +434,15 @@ internal sealed class LayoutRecorder
     {
         var paint = new NodePaint();
 
-        if (element is Elements.Text.TextElementBase text)
+        if (element is TextElementBase text)
         {
             paint.Text = ColorToHex(text.Color);
             float textAlpha = AlphaOf(text.Color);
             if (textAlpha < 1f) paint.TextAlpha = textAlpha;
             paint.FontSize = text.FontSize;
-            if (text.FontWeight >= Typography.FontWeight.Bold || FontNameLooksBold(text.FontName)) paint.Bold = true;
+            if (text.FontWeight >= FontWeight.Bold || FontNameLooksBold(text.FontName)) paint.Bold = true;
         }
-        else if (element is Core.Hyperlink link)
+        else if (element is Hyperlink link)
         {
             // Hyperlink paints text but does not derive from TextElementBase — it
             // carries its own Color/FontSize. Gating the text branch on the base
@@ -457,7 +457,7 @@ internal sealed class LayoutRecorder
             if (FontNameLooksBold(link.FontName)) paint.Bold = true;
         }
 
-        if (element is Elements.Layout.IBackgroundColor { BackgroundColor: { } background })
+        if (element is IBackgroundColor { BackgroundColor: { } background })
         {
             paint.Background = ColorToHex(background);
             float backgroundAlpha = AlphaOf(background);
@@ -473,9 +473,9 @@ internal sealed class LayoutRecorder
     /// Secondary bold signal for elements styled by setting <c>FontName</c>
     /// directly to a bold PostScript name (e.g. "Helvetica-Bold") rather than
     /// through the Weight/FontFamily builder — the idiom most examples in this
-    /// codebase still use, and the only one <see cref="Core.Hyperlink"/> exposes
+    /// codebase still use, and the only one <see cref="Hyperlink"/> exposes
     /// at all. Every bold standard-14 name contains "Bold" (see
-    /// <see cref="Typography.StandardFonts"/>), so a case-insensitive substring
+    /// <see cref="StandardFonts"/>), so a case-insensitive substring
     /// check is a reliable fallback where <c>Weight</c> was never touched.
     /// </summary>
     private static bool FontNameLooksBold(string? fontName) =>

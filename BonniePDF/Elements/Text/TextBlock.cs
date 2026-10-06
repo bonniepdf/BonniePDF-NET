@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Text;
+namespace BonniePDF;
 
 /// <summary>
 /// A text block element that supports word wrapping, alignment, font customization,
@@ -30,7 +27,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     internal bool AlignmentIsExplicit => _alignmentExplicit;
 
     /// <summary>
-    /// Paragraph alignment. When not set explicitly, an enclosing <see cref="Layout.Container"/> whose
+    /// Paragraph alignment. When not set explicitly, an enclosing <see cref="Container"/> whose
     /// <c>HorizontalAlignment</c> is Start/Center/End supplies an ambient default instead of the plain
     /// Left below (spec 01 "Document Model" §3.2); see <see cref="EffectiveAlignment"/>.
     /// </summary>
@@ -80,11 +77,11 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 
     /// <summary>
     /// PDF/UA structure role for this element. Defaults to
-    /// <see cref="Rendering.Tagging.SemanticRole.P"/> (a paragraph).
+    /// <see cref="SemanticRole.P"/> (a paragraph).
     /// <see cref="Heading"/> overrides this to return one of
     /// <c>H1</c>…<c>H6</c>.
     /// </summary>
-    public virtual SemanticRole SemanticRole => Rendering.Tagging.SemanticRole.P;
+    public virtual SemanticRole SemanticRole => SemanticRole.P;
 
     /// <summary>
     /// Minimum number of lines to render before a page break (orphan control).

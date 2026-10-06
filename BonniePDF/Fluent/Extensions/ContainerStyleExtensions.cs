@@ -1,7 +1,5 @@
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
 
-namespace BonniePDF.Fluent.Extensions;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Fluent chaining extension methods for styling containers.
@@ -17,11 +15,11 @@ public static class ContainerStyleExtensions
         c.Padding = new Thickness(left ?? c.Padding.Left, top ?? c.Padding.Top, right ?? c.Padding.Right, bottom ?? c.Padding.Bottom);
 
     private static void SetMargin(Container c, float? left = null, float? top = null, float? right = null, float? bottom = null) =>
-        c.Margin = new Core.Thickness(left ?? c.Margin.Left, top ?? c.Margin.Top, right ?? c.Margin.Right, bottom ?? c.Margin.Bottom);
+        c.Margin = new Thickness(left ?? c.Margin.Left, top ?? c.Margin.Top, right ?? c.Margin.Right, bottom ?? c.Margin.Bottom);
 
     private static void SetBorderSides(Container c, Color color, float? left = null, float? top = null, float? right = null, float? bottom = null)
     {
-        c.Border = new Core.Border(left ?? c.Border.Left, top ?? c.Border.Top, right ?? c.Border.Right, bottom ?? c.Border.Bottom);
+        c.Border = new Border(left ?? c.Border.Left, top ?? c.Border.Top, right ?? c.Border.Right, bottom ?? c.Border.Bottom);
         c.BorderColors = new BorderColors(
             left.HasValue ? color : c.BorderColors.Left,
             top.HasValue ? color : c.BorderColors.Top,
@@ -132,7 +130,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer Border(this IContentContainer c, float width)
     {
         var container = GetOrCreateContainer(c);
-        container.Border = new Core.Border(width);
+        container.Border = new Border(width);
         container.BorderColors = new BorderColors(Color.Black);
         return container;
     }
@@ -141,7 +139,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer Border(this IContentContainer c, float width, Color color)
     {
         var container = GetOrCreateContainer(c);
-        container.Border = new Core.Border(width);
+        container.Border = new Border(width);
         container.BorderColors = new BorderColors(color);
         return container;
     }
@@ -288,7 +286,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer Margin(this IContentContainer c, float value)
     {
         var container = GetOrCreateContainer(c);
-        container.Margin = new Core.Thickness(value);
+        container.Margin = new Thickness(value);
         return container;
     }
 
@@ -296,7 +294,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer Margin(this IContentContainer c, float horizontal, float vertical)
     {
         var container = GetOrCreateContainer(c);
-        container.Margin = new Core.Thickness(horizontal, vertical);
+        container.Margin = new Thickness(horizontal, vertical);
         return container;
     }
 
@@ -304,7 +302,7 @@ public static class ContainerStyleExtensions
     public static IContentContainer Margin(this IContentContainer c, float left, float top, float right, float bottom)
     {
         var container = GetOrCreateContainer(c);
-        container.Margin = new Core.Thickness(left, top, right, bottom);
+        container.Margin = new Thickness(left, top, right, bottom);
         return container;
     }
 

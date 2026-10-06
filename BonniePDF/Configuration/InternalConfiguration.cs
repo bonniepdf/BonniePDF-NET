@@ -1,4 +1,4 @@
-﻿namespace BonniePDF.Configuration;
+﻿namespace BonniePDF;
 
 internal class InternalConfiguration
 {

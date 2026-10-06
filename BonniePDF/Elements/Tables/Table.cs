@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Layout.Pagination;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Tables;
+namespace BonniePDF;
 
 /// <summary>
 /// A table element with support for column weights, cell padding, borders, headers, and footers
@@ -35,7 +29,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     protected virtual bool IsLayoutGrid => Presentation;
 
     /// <summary>The grouping role this table tags under: Table for data, Div for layout.</summary>
-    private SemanticRole GroupRole => IsLayoutGrid ? Rendering.Tagging.SemanticRole.Div : Rendering.Tagging.SemanticRole.Table;
+    private SemanticRole GroupRole => IsLayoutGrid ? SemanticRole.Div : SemanticRole.Table;
 
     /// <inheritdoc />
     public SemanticRole SemanticRole => GroupRole;

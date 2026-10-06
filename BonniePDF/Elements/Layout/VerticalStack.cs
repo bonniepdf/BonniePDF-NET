@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BonniePDF.Core;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>
 /// A layout element that stacks children vertically with automatic pagination.

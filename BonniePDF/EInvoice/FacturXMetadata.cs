@@ -1,4 +1,4 @@
-namespace BonniePDF.EInvoice;
+namespace BonniePDF;
 
 /// <summary>
 /// Resolved Factur-X / ZUGFeRD XMP metadata written into the document-level

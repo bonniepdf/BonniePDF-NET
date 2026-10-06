@@ -1,9 +1,6 @@
 using System;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
 
-namespace BonniePDF.Fluent.Descriptors;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Describes a page's configuration and structure.

@@ -1,4 +1,4 @@
-namespace BonniePDF.Attachments;
+namespace BonniePDF;
 
 /// <summary>
 /// The relationship an embedded file has to the PDF that carries it, written

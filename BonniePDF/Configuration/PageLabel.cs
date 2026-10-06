@@ -1,4 +1,4 @@
-namespace BonniePDF.Configuration;
+namespace BonniePDF;
 
 /// <summary>
 /// Numbering style for a page label section, mapping to the PDF /S entry.

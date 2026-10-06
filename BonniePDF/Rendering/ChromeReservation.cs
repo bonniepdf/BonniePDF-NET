@@ -1,9 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
-using BonniePDF.Configuration;
-using BonniePDF.Elements;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 /// <summary>
 /// The vertical space a page's header and footer take out of the body content

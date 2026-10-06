@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace BonniePDF.Charts;
+namespace BonniePDF;
 
 /// <summary>
 /// Number formatting for chart text: data-point labels, the pie total and the axis ticks.

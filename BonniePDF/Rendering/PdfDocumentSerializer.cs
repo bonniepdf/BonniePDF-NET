@@ -3,18 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Attachments;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering.Tagging;
 using BonniePDF.Fluent;
 using BonniePDF.Rendering.Writers;
-using BonniePDF.Typography;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 /// <summary>
 /// Orchestrates the process of rendering a Document and writing it to a PDF file.

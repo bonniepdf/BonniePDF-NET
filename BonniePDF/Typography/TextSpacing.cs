@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace BonniePDF.Typography;
+namespace BonniePDF;
 
 /// <summary>
 /// Shared letter/word-spacing advance calculation used by the text elements and

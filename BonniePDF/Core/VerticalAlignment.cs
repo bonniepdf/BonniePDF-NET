@@ -1,4 +1,4 @@
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Vertical alignment options for layout elements.

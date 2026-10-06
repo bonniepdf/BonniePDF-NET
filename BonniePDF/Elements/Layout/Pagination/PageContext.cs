@@ -1,7 +1,6 @@
 using System.Runtime.InteropServices;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout.Pagination;
+namespace BonniePDF;
 
 /// <summary>
 /// The page facts a conditional pagination primitive decides on.

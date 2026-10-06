@@ -1,4 +1,4 @@
-namespace BonniePDF.Security.Permissions;
+namespace BonniePDF;
 
 /// <summary>
 /// Encodes PDF permissions into the integer format required by the /P entry

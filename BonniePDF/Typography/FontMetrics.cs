@@ -4,10 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
-using BonniePDF.Rendering.Images;
 using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Typography;
+namespace BonniePDF;
 
 /// <summary>
 /// Provides font metrics for calculating text width in PDF documents.

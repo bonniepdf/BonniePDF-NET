@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>Severity of a <see cref="Diagnostic"/>.</summary>
 public enum DiagnosticSeverity

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using BonniePDF.Core;
 
-namespace BonniePDF.Charts.Models;
+namespace BonniePDF;
 
 /// <summary>
 /// Represents a single data series in a chart.

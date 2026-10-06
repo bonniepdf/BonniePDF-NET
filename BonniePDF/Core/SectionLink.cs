@@ -1,13 +1,12 @@
 using System;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// A clickable internal cross-reference. Unlike a plain <see cref="Hyperlink"/>
 /// (which needs an explicit <see cref="Hyperlink.TargetPageIndex"/>), a
-/// SectionLink targets a named <see cref="Elements.Text.Section"/> - or a
-/// <see cref="Elements.Text.Heading"/> carrying an <c>AnchorId</c> - by id and
+/// SectionLink targets a named <see cref="Section"/> - or a
+/// <see cref="Heading"/> carrying an <c>AnchorId</c> - by id and
 /// resolves the destination page at render time from the shared
 /// <see cref="RenderContext.TocEntries"/> registry.
 /// </summary>
@@ -20,8 +19,8 @@ namespace BonniePDF.Core;
 public class SectionLink : Hyperlink
 {
     /// <summary>
-    /// The anchor id this link jumps to (a <see cref="Elements.Text.Section"/>
-    /// or anchored <see cref="Elements.Text.Heading"/>).
+    /// The anchor id this link jumps to (a <see cref="Section"/>
+    /// or anchored <see cref="Heading"/>).
     /// </summary>
     public string AnchorTarget { get; }
 
@@ -29,7 +28,7 @@ public class SectionLink : Hyperlink
     /// Creates a new internal cross-reference link.
     /// </summary>
     /// <param name="text">The visible link text.</param>
-    /// <param name="anchorTarget">The id of the <see cref="Elements.Text.Section"/>/anchor to jump to.</param>
+    /// <param name="anchorTarget">The id of the <see cref="Section"/>/anchor to jump to.</param>
     public SectionLink(string text, string anchorTarget) : base(text)
     {
         if (string.IsNullOrEmpty(anchorTarget))

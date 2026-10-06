@@ -1,6 +1,6 @@
 using System;
 
-namespace BonniePDF.Rendering.Images;
+namespace BonniePDF;
 
 /// <summary>
 /// Reduces an over-sampled image to the resolution its printed size can use.

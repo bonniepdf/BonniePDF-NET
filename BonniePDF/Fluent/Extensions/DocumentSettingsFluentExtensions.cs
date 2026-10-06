@@ -1,8 +1,6 @@
 using System;
-using BonniePDF.Configuration;
-using BonniePDF.Elements;
 
-namespace BonniePDF.Fluent.Extensions;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Fluent extension methods for <see cref="DocumentSettings"/>.
@@ -19,7 +17,7 @@ public static class DocumentSettingsFluentExtensions
         {
             var slot = new ContentSlot();
             builder(pageNumber, slot);
-            return slot.Child ?? new Elements.Text.TextBlock { Text = "" };
+            return slot.Child ?? new TextBlock { Text = "" };
         };
     }
 
@@ -33,7 +31,7 @@ public static class DocumentSettingsFluentExtensions
         {
             var slot = new ContentSlot();
             builder(pageNumber, slot);
-            return slot.Child ?? new Elements.Text.TextBlock { Text = "" };
+            return slot.Child ?? new TextBlock { Text = "" };
         };
     }
 }

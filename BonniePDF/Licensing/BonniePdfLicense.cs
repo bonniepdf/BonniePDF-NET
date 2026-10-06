@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace BonniePDF.Licensing;
+namespace BonniePDF;
 
 /// <summary>
 /// The application's BonniePDF licence declaration.
@@ -16,7 +16,7 @@ namespace BonniePDF.Licensing;
 /// settings bag, so nothing else belongs here.
 /// </para>
 /// <para>
-/// Not to be confused with <see cref="Configuration.DocumentSettings"/>, reached
+/// Not to be confused with <see cref="DocumentSettings"/>, reached
 /// through <c>document.Settings</c>, which is what "settings" means in this library.
 /// </para>
 /// </remarks>

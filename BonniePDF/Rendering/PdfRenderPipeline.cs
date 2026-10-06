@@ -1,17 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
 using BonniePDF.Rendering.Pdf;
-using BonniePDF.Rendering.Tagging;
-using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 /// <summary>
 /// Shared render pipeline that performs the layout and rendering phase.

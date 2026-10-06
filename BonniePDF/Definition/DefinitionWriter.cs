@@ -8,22 +8,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
-using BonniePDF.Attachments;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Layout.Pagination;
-using BonniePDF.Elements.Lists;
-using BonniePDF.Elements.Media;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering;
-using BonniePDF.Security.Permissions;
-using BonniePDF.Typography;
 
-namespace BonniePDF.Definition;
+namespace BonniePDF;
 
 /// <summary>
 /// Writes a <see cref="Document"/> as a Document Definition (spec 15 §11, §14, §21). The inverse of
@@ -83,13 +69,13 @@ internal sealed partial class DefinitionWriter
         [typeof(QRCode)] = "QRCode",
         [typeof(Barcode)] = "Barcode",
         [typeof(DataMatrix)] = "DataMatrix",
-        [typeof(Charts.BarChart)] = "BarChart",
-        [typeof(Charts.GroupedBarChart)] = "GroupedBarChart",
-        [typeof(Charts.LineChart)] = "LineChart",
-        [typeof(Charts.AreaChart)] = "AreaChart",
-        [typeof(Charts.DotPlotChart)] = "DotPlotChart",
-        [typeof(Charts.LollipopChart)] = "LollipopChart",
-        [typeof(Charts.PieChart)] = "PieChart",
+        [typeof(BarChart)] = "BarChart",
+        [typeof(GroupedBarChart)] = "GroupedBarChart",
+        [typeof(LineChart)] = "LineChart",
+        [typeof(AreaChart)] = "AreaChart",
+        [typeof(DotPlotChart)] = "DotPlotChart",
+        [typeof(LollipopChart)] = "LollipopChart",
+        [typeof(PieChart)] = "PieChart",
     };
 
     /// <summary>A fresh element of each type, for its defaults (spec 15 §3.3).</summary>
@@ -104,7 +90,7 @@ internal sealed partial class DefinitionWriter
         ["Layers"] = () => new Layers(),
         ["Spacer"] = () => new Spacer(),
         ["PageBreak"] = () => new PageBreak(),
-        ["SemanticGroup"] = () => new SemanticGroup(Rendering.Tagging.SemanticRole.Div),
+        ["SemanticGroup"] = () => new SemanticGroup(SemanticRole.Div),
         ["EnsureSpace"] = () => new EnsureSpace(),
         ["PreventPageBreak"] = () => new PreventPageBreak(),
         ["ShowEntire"] = () => new ShowEntire(),
@@ -133,13 +119,13 @@ internal sealed partial class DefinitionWriter
         ["QRCode"] = () => new QRCode(),
         ["Barcode"] = () => new Barcode(),
         ["DataMatrix"] = () => new DataMatrix(),
-        ["BarChart"] = () => new Charts.BarChart(),
-        ["GroupedBarChart"] = () => new Charts.GroupedBarChart(),
-        ["LineChart"] = () => new Charts.LineChart(),
-        ["AreaChart"] = () => new Charts.AreaChart(),
-        ["DotPlotChart"] = () => new Charts.DotPlotChart(),
-        ["LollipopChart"] = () => new Charts.LollipopChart(),
-        ["PieChart"] = () => new Charts.PieChart(),
+        ["BarChart"] = () => new BarChart(),
+        ["GroupedBarChart"] = () => new GroupedBarChart(),
+        ["LineChart"] = () => new LineChart(),
+        ["AreaChart"] = () => new AreaChart(),
+        ["DotPlotChart"] = () => new DotPlotChart(),
+        ["LollipopChart"] = () => new LollipopChart(),
+        ["PieChart"] = () => new PieChart(),
     };
 
     private static readonly Dictionary<string, object> BlankCache = new(StringComparer.Ordinal);
@@ -669,19 +655,19 @@ internal sealed partial class DefinitionWriter
                 return SvgSource((Svg)element, key, parent, id);
             case "BarChart.data" or "GroupedBarChart.data" or "LineChart.data" or "AreaChart.data"
                 or "DotPlotChart.data" or "LollipopChart.data" or "PieChart.data":
-                return Slot.Write(ChartData((Charts.ChartBase)element));
+                return Slot.Write(ChartData((ChartBase)element));
             default:
                 return Slot.Ordinary;
         }
     }
 
-    private JsonObject ChartData(Charts.ChartBase chart)
+    private JsonObject ChartData(ChartBase chart)
     {
         var series = new JsonArray();
         ShapeSpec seriesSpec = D.Shapes["Series"];
-        foreach (Charts.Models.ChartSeries s in chart.Data.Series)
+        foreach (ChartSeries s in chart.Data.Series)
         {
-            var blankSeries = new Charts.Models.ChartSeries();
+            var blankSeries = new ChartSeries();
             var node = new JsonObject();
             foreach ((string key, KeySpec keySpec) in seriesSpec.Keys)
             {
@@ -690,20 +676,20 @@ internal sealed partial class DefinitionWriter
                     case "dataPoints":
                     {
                         var points = new JsonArray();
-                        foreach (Charts.Models.ChartDataPoint point in s.DataPoints)
-                            points.Add(Shape(point, D.Shapes["DataPoint"], new Charts.Models.ChartDataPoint(), []));
+                        foreach (ChartDataPoint point in s.DataPoints)
+                            points.Add(Shape(point, D.Shapes["DataPoint"], new ChartDataPoint(), []));
                         node[key] = points;
                         break;
                     }
                     case "style":
                     {
-                        JsonObject style = Shape(s.Style, D.Shapes["SeriesStyle"], new Charts.Models.ChartSeriesStyle(), []);
+                        JsonObject style = Shape(s.Style, D.Shapes["SeriesStyle"], new ChartSeriesStyle(), []);
                         if (style.Count > 0) node[key] = style;
                         break;
                     }
                     default:
                     {
-                        PropertyInfo property = DefinitionReader.FindProperty(typeof(Charts.Models.ChartSeries), key)!;
+                        PropertyInfo property = DefinitionReader.FindProperty(typeof(ChartSeries), key)!;
                         JsonNode? wire = Wire(keySpec.Kind, property.GetValue(s));
                         if (wire is not null && !Same(wire, Wire(keySpec.Kind, property.GetValue(blankSeries)))) node[key] = wire;
                         break;
@@ -1005,7 +991,7 @@ internal sealed partial class DefinitionWriter
                     continue;
                 case "encryption":
                     if (settings.Encryption is null) continue;
-                    result[key] = Shape(settings.Encryption, D.Shapes["Encryption"], new Security.Models.EncryptionSettings(), []);
+                    result[key] = Shape(settings.Encryption, D.Shapes["Encryption"], new EncryptionSettings(), []);
                     _notes.Add(new DefinitionIssue(at, "secret-omitted", "The passwords are not stored in a definition; the host supplies them when it is read."));
                     continue;
                 default:

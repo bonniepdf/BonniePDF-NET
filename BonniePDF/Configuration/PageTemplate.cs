@@ -1,8 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
-using BonniePDF.Elements;
 
-namespace BonniePDF.Configuration;
+namespace BonniePDF;
 
 /// <summary>
 /// The elements an element-based page template chooses among; see

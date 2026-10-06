@@ -1,13 +1,12 @@
 using System;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Text;
+namespace BonniePDF;
 
 /// <summary>
 /// An invisible, zero-height named anchor. When rendered, a Section records the
 /// 1-based page number on which it sits against its <see cref="AnchorId"/> in the
 /// shared <see cref="RenderContext.TocEntries"/> registry, so that a
-/// <see cref="Core.SectionLink"/> can jump to it and a <see cref="PageNumberOf"/>
+/// <see cref="SectionLink"/> can jump to it and a <see cref="PageNumberOf"/>
 /// can print "see page 42".
 /// </summary>
 /// <remarks>
@@ -18,7 +17,7 @@ namespace BonniePDF.Elements.Text;
 public class Section : ElementBase
 {
     /// <summary>
-    /// The unique anchor identifier. A <see cref="Core.SectionLink"/> or
+    /// The unique anchor identifier. A <see cref="SectionLink"/> or
     /// <see cref="PageNumberOf"/> referencing this id resolves to the page this
     /// Section rendered on.
     /// </summary>

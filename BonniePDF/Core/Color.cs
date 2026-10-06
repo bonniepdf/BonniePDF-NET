@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Represents an RGB color with values ranging from 0 to 255.

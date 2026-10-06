@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace BonniePDF.Definition;
+namespace BonniePDF;
 
 /// <summary>
 /// Entry points for the Document Definition: a versioned, language-neutral JSON description of a whole

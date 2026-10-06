@@ -4,16 +4,11 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Svg;
 using BonniePDF.Rendering.Svg.Ir;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Media;
+namespace BonniePDF;
 
 /// <summary>
 /// Draws an SVG document as vector content: paths, fills, strokes, gradients, clips

@@ -1,7 +1,6 @@
 using System;
-using BonniePDF.Security.Permissions;
 
-namespace BonniePDF.Security.Models;
+namespace BonniePDF;
 
 /// <summary>
 /// Configuration settings for PDF encryption.

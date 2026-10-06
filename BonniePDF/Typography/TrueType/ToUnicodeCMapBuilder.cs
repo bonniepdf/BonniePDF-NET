@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using BonniePDF.Core; // AppendLf - platform-independent '\n' (see StringBuilderExtensions)
+using BonniePDF; // AppendLf - platform-independent '\n' (see StringBuilderExtensions)
 
 namespace BonniePDF.Typography.TrueType;
 

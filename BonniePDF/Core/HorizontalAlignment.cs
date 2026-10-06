@@ -1,4 +1,4 @@
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Horizontal alignment options for layout elements

@@ -1,8 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using BonniePDF.Configuration;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 /// <summary>
 /// Contains the results of the PDF rendering phase (Phase 1).

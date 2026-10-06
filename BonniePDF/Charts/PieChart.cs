@@ -2,13 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using BonniePDF.Charts.Models;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
 
-namespace BonniePDF.Charts;
+namespace BonniePDF;
 
 /// <summary>
 /// Pie chart that renders pie slices with a legend on the right side.

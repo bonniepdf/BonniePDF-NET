@@ -1,6 +1,6 @@
 using BonniePDF.Drawing;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 internal static class ElementTransforms
 {

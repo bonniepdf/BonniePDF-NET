@@ -1,15 +1,8 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout.Pagination;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
 using BonniePDF.Fluent;
-using BonniePDF.Fluent.Descriptors;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Layout;
+namespace BonniePDF;
 
 /// <summary>
 /// A container element that supports padding, background color, and borders.
@@ -78,7 +71,7 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
     /// content height, because a pure measure has no cursor to measure from);
     /// only arrangement expands. Combines with
     /// <see cref="VerticalAlignment"/>: the slack fill creates is exactly the
-    /// space it gained, so <see cref="Layout.VerticalAlignment.End"/> anchors
+    /// space it gained, so <see cref="VerticalAlignment.End"/> anchors
     /// content to the foot of the band.
     /// </remarks>
     public bool FillHeight { get; set; }
@@ -145,11 +138,11 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
     /// descendant text (spec 01 "Document Model" §3.2). Start/Center/End map to Left/Center/Right; Stretch
     /// and unset (null) return null, leaving whatever ambient an enclosing container established untouched.
     /// </summary>
-    private static TextAlignment? AmbientTextAlignmentFor(BonniePDF.Core.HorizontalAlignment? alignment) => alignment switch
+    private static TextAlignment? AmbientTextAlignmentFor(BonniePDF.HorizontalAlignment? alignment) => alignment switch
     {
-        BonniePDF.Core.HorizontalAlignment.Start => TextAlignment.Left,
-        BonniePDF.Core.HorizontalAlignment.Center => TextAlignment.Center,
-        BonniePDF.Core.HorizontalAlignment.End => TextAlignment.Right,
+        BonniePDF.HorizontalAlignment.Start => TextAlignment.Left,
+        BonniePDF.HorizontalAlignment.Center => TextAlignment.Center,
+        BonniePDF.HorizontalAlignment.End => TextAlignment.Right,
         _ => null,
     };
 
@@ -190,18 +183,18 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         float boxX = ctx.CurrentX + Margin.Left;
         float boxTop = ctx.CurrentY;
 
-        Core.Border inset = ChildInset;
+        Border inset = ChildInset;
         bool frame = AbsorbsTable;
         float childWidth = effectiveWidth - Padding.Left - Padding.Right - inset.HorizontalWidth;
         float childX = boxX + inset.Left + Padding.Left;
         var align = HorizontalAlignment;
-        if (align == BonniePDF.Core.HorizontalAlignment.Center || align == BonniePDF.Core.HorizontalAlignment.End)
+        if (align == BonniePDF.HorizontalAlignment.Center || align == BonniePDF.HorizontalAlignment.End)
         {
             float preferred = Child!.GetPreferredWidth();
             if (preferred > 0 && preferred < childWidth)
             {
                 float slack = childWidth - preferred;
-                childX += align == BonniePDF.Core.HorizontalAlignment.Center ? slack / 2f : slack;
+                childX += align == BonniePDF.HorizontalAlignment.Center ? slack / 2f : slack;
                 childWidth = preferred;
             }
         }
@@ -249,7 +242,7 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
             // The background goes behind the content; a table's frame stays on top of it.
             if (!frame && Border.HasAnyBorder)
                 DrawBorder(ctx, boxX, boxTop, effectiveWidth, height,
-                    new Core.Border(Border.Left, first ? Border.Top : 0, Border.Right, last ? Border.Bottom : 0), BorderColors);
+                    new Border(Border.Left, first ? Border.Top : 0, Border.Right, last ? Border.Bottom : 0), BorderColors);
 
             if (stream.Length > decorationStart)
             {
@@ -313,7 +306,7 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
     }
 
     /// <summary>The border width the child is inset by: none when the border is a table's frame.</summary>
-    private Core.Border ChildInset => AbsorbsTable ? new Core.Border(0) : Border;
+    private Border ChildInset => AbsorbsTable ? new Border(0) : Border;
 
     protected override float GetPreferredContentWidth()
     {
@@ -408,7 +401,7 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
 
     private void RenderClippedContent(RenderContext ctx, float effectiveWidth, float containerHeight)
     {
-        Core.Border inset = ChildInset;
+        Border inset = ChildInset;
         bool frame = AbsorbsTable;
         float boxX = ctx.CurrentX;
         float boxY = ctx.CurrentY;
@@ -450,13 +443,13 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         // Horizontal alignment: when the child is narrower than the available
         // inner width, position it within that width rather than pinning it left.
         var align = HorizontalAlignment;
-        if (align == BonniePDF.Core.HorizontalAlignment.Center || align == BonniePDF.Core.HorizontalAlignment.End)
+        if (align == BonniePDF.HorizontalAlignment.Center || align == BonniePDF.HorizontalAlignment.End)
         {
             float preferred = Child.GetPreferredWidth();
             if (preferred > 0 && preferred < childWidth)
             {
                 float slack = childWidth - preferred;
-                ctx.CurrentX += align == BonniePDF.Core.HorizontalAlignment.Center ? slack / 2f : slack;
+                ctx.CurrentX += align == BonniePDF.HorizontalAlignment.Center ? slack / 2f : slack;
                 childWidth = preferred;
             }
         }
@@ -465,12 +458,12 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         // and the container's own, so a fixed-height box can anchor its content to
         // the bottom instead of being positioned by a hand-tuned top padding.
         var vAlign = VerticalAlignment;
-        if (vAlign == BonniePDF.Core.VerticalAlignment.Center || vAlign == BonniePDF.Core.VerticalAlignment.End)
+        if (vAlign == BonniePDF.VerticalAlignment.Center || vAlign == BonniePDF.VerticalAlignment.End)
         {
             float innerHeight = containerHeight - Padding.Top - Padding.Bottom - inset.VerticalWidth;
             float slack = innerHeight - Child.MeasureHeight(childWidth);
             if (slack > 0)
-                ctx.CurrentY += vAlign == BonniePDF.Core.VerticalAlignment.Center ? slack / 2f : slack;
+                ctx.CurrentY += vAlign == BonniePDF.VerticalAlignment.Center ? slack / 2f : slack;
         }
 
         // Save Y position before child render. Tag the child so a role-bearing

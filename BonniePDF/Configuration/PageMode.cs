@@ -1,4 +1,4 @@
-namespace BonniePDF.Configuration;
+namespace BonniePDF;
 
 /// <summary>
 /// Defines how the PDF document should be displayed when opened

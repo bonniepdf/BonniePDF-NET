@@ -1,6 +1,5 @@
-using BonniePDF.Elements.Layout;
 
-namespace BonniePDF.Fluent.Extensions;
+namespace BonniePDF.Fluent;
 
 /// <summary>Fluent mirroring and translation of native child content.</summary>
 public static class ContainerTransformExtensions

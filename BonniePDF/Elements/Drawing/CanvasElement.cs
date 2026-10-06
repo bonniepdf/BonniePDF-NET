@@ -1,9 +1,7 @@
 using System;
 using BonniePDF.Drawing;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Drawing;
+namespace BonniePDF;
 
 /// <summary>
 /// A leaf element that exposes the raw ICanvas for freeform drawing.

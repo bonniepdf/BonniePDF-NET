@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
 
-namespace BonniePDF.Fluent.Descriptors;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Describes a table layout. Provides scoped methods for defining columns, headers, footers, and cells.
@@ -23,7 +19,7 @@ public sealed class TableDescriptor
     private Color? _headerTextColor;
     private float _cellPadding = 5;
     private bool _repeatHeaders = true;
-    private Core.Border _border = new(0);
+    private Border _border = new(0);
     private BorderColors _borderColors;
 
     /// <summary>
@@ -60,7 +56,7 @@ public sealed class TableDescriptor
     /// </summary>
     public void Border(float width, Color? color = null)
     {
-        _border = new Core.Border(width);
+        _border = new Border(width);
         _borderColors = new BorderColors(color ?? Color.Black);
     }
 

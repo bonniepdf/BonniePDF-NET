@@ -1,4 +1,4 @@
-namespace BonniePDF.Rendering.Tagging;
+namespace BonniePDF;
 
 /// <summary>
 /// Visitor over a structure tree. <see cref="StructureElement.Accept"/>

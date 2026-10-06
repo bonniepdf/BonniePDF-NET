@@ -1,7 +1,5 @@
-using BonniePDF.Core;
-using BonniePDF.Elements.Shapes;
 
-namespace BonniePDF.Extensions;
+namespace BonniePDF;
 
 /// <summary>
 /// Fluent extension methods for Data Matrix symbols.

@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BonniePDF.Core;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
-using BonniePDF.Typography;
 
-namespace BonniePDF.Elements.Text;
+namespace BonniePDF;
 
 /// <summary>
 /// A rich text element that supports mixed styling within a single flowing paragraph.
@@ -39,7 +35,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     internal IReadOnlyList<TextSpan> SpanList => _spans;
 
     /// <summary>
-    /// Paragraph alignment. When not set explicitly, an enclosing <see cref="Layout.Container"/> whose
+    /// Paragraph alignment. When not set explicitly, an enclosing <see cref="Container"/> whose
     /// <c>HorizontalAlignment</c> is Start/Center/End supplies an ambient default instead of the plain
     /// Left below (spec 01 "Document Model" §3.2); see <see cref="EffectiveAlignment"/>.
     /// </summary>

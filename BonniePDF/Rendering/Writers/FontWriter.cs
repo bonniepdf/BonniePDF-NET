@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF.Rendering.Writers;

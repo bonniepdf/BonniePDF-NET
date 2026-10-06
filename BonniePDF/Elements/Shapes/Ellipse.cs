@@ -1,7 +1,5 @@
-using BonniePDF.Core;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Shapes;
+namespace BonniePDF;
 
 /// <summary>
 /// Draws a filled and optionally stroked ellipse at the current flow position.

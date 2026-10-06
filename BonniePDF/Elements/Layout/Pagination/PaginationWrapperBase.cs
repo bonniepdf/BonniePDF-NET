@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using BonniePDF.Fluent;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Tagging;
 
-namespace BonniePDF.Elements.Layout.Pagination;
+namespace BonniePDF;
 
 /// <summary>
 /// What a pagination primitive decides to do with its child before rendering it

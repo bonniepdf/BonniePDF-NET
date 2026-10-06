@@ -1,4 +1,4 @@
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// XML/SVG string escaping helpers shared by the SVG canvas, the SVG page

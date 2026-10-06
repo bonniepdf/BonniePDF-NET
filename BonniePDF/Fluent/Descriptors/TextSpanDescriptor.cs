@@ -1,8 +1,5 @@
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
 
-namespace BonniePDF.Fluent.Descriptors;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Provides fluent styling methods for a text span within a <see cref="TextDescriptor"/>.

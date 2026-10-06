@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BonniePDF.Rendering.Tagging;
+namespace BonniePDF;
 
 /// <summary>
 /// Stack-based builder for the PDF structure tree. The renderer pushes

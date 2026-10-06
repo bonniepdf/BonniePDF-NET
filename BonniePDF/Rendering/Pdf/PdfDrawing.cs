@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Text;
-using BonniePDF.Core;
 
 namespace BonniePDF.Rendering.Pdf;
 

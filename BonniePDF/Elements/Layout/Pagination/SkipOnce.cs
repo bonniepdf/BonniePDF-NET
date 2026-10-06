@@ -1,6 +1,5 @@
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Elements.Layout.Pagination;
+namespace BonniePDF;
 
 /// <summary>
 /// Renders its child on every page except the document's first.

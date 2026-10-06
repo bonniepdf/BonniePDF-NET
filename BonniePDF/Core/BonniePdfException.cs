@@ -1,6 +1,6 @@
 using System;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Base type for exceptions raised by BonniePDF itself (content that cannot be

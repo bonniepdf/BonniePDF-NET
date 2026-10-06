@@ -1,8 +1,7 @@
 using System;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
 
-namespace BonniePDF.Elements.Text;
+namespace BonniePDF;
 
 /// <summary>
 /// Line style for text decorations (underline/strikethrough/overline).

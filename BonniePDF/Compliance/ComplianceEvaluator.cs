@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using BonniePDF.Rendering;
 
-namespace BonniePDF.Compliance;
+namespace BonniePDF;
 
 // ---------------------------------------------------------------------------
 // Accessibility / compliance preflight.

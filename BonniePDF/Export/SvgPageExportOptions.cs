@@ -1,4 +1,4 @@
-namespace BonniePDF.Export;
+namespace BonniePDF;
 
 /// <summary>
 /// How raster images are represented in exported SVG.
@@ -97,7 +97,7 @@ public sealed class SvgPageExportOptions
     public int? MaxPages { get; init; }
 
     /// <summary>
-    /// Capture a <see cref="BonniePDF.Rendering.LayoutSnapshot"/> of the rendered
+    /// Capture a <see cref="BonniePDF.LayoutSnapshot"/> of the rendered
     /// element tree (types, parent relationships, and per-page rectangles) and
     /// return it on the export result. Off by default and zero-cost when off: with
     /// no recorder attached, the layout pass is byte-identical to normal output.

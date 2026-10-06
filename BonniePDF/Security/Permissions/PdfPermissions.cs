@@ -1,6 +1,6 @@
 using System;
 
-namespace BonniePDF.Security.Permissions;
+namespace BonniePDF;
 
 /// <summary>
 /// Flags enumeration for PDF document permissions.

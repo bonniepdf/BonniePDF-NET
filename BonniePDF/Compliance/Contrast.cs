@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-namespace BonniePDF.Compliance;
+namespace BonniePDF;
 
 // ---------------------------------------------------------------------------
 // WCAG 2.2 contrast maths.

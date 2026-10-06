@@ -1,11 +1,7 @@
 using System.Linq;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
 using BonniePDF.Fluent;
 
-namespace BonniePDF.Rendering;
+namespace BonniePDF;
 
 /// <summary>
 /// Shared helpers for two-pass page-number resolution. A <see cref="VisualToc"/>,

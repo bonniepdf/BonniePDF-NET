@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Security.Encryption;
 
 namespace BonniePDF.Rendering.Writers;

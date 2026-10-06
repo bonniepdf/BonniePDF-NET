@@ -1,8 +1,5 @@
-﻿using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Tables;
-
-namespace BonniePDF.Extensions;
+﻿
+namespace BonniePDF;
 
 /// <summary>
 /// Convenience conversions that wrap elements and values as table cells.

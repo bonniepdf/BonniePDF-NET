@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using BonniePDF.Core;
 
-namespace BonniePDF.Prototyping;
+namespace BonniePDF;
 
 /// <summary>
 /// Deterministic placeholder text for prototyping layouts before real content
@@ -141,14 +140,14 @@ public class PlaceholderSource(int seed)
 
     private static readonly Color[] BackgroundColors =
     [
-        Core.ColorPalette.Blue[50], Core.ColorPalette.Green[50], Core.ColorPalette.Amber[50], Core.ColorPalette.Rose[50],
-        Core.ColorPalette.Indigo[50], Core.ColorPalette.Slate[50], Core.ColorPalette.Purple[50], Core.ColorPalette.Cyan[50],
+        ColorPalette.Blue[50], ColorPalette.Green[50], ColorPalette.Amber[50], ColorPalette.Rose[50],
+        ColorPalette.Indigo[50], ColorPalette.Slate[50], ColorPalette.Purple[50], ColorPalette.Cyan[50],
     ];
 
     private static readonly Color[] AccentColors =
     [
-        Core.ColorPalette.Indigo[600], Core.ColorPalette.Blue[600], Core.ColorPalette.Green[600], Core.ColorPalette.Amber[600],
-        Core.ColorPalette.Rose[600], Core.ColorPalette.Purple[600], Core.ColorPalette.Cyan[600], Core.ColorPalette.Slate[600],
+        ColorPalette.Indigo[600], ColorPalette.Blue[600], ColorPalette.Green[600], ColorPalette.Amber[600],
+        ColorPalette.Rose[600], ColorPalette.Purple[600], ColorPalette.Cyan[600], ColorPalette.Slate[600],
     ];
 
     public string Word()

@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using BonniePDF.Charts.Models;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Elements.Text;
 
-namespace BonniePDF.Charts;
+namespace BonniePDF;
 
 /// <summary>
 /// Grouped bar chart that renders multiple bars per category.

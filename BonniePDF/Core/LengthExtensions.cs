@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace BonniePDF.Core;
+namespace BonniePDF;
 
 /// <summary>
 /// Unit-qualified measurements for object-initializer authoring.

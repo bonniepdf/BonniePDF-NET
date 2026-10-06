@@ -1,6 +1,5 @@
-using BonniePDF.Core;
 
-namespace BonniePDF.Fluent.Extensions;
+namespace BonniePDF.Fluent;
 
 /// <summary>
 /// Unit-qualified overloads of the fluent measurement verbs, so any measurement
@@ -119,6 +118,6 @@ public static class ContainerUnitExtensions
         c.CornerRadius(P(radius, unit));
 
     /// <summary>Sets the page margin, in the given unit.</summary>
-    public static void Margin(this Descriptors.PageDescriptor page, float margin, Unit unit) =>
+    public static void Margin(this PageDescriptor page, float margin, Unit unit) =>
         page.Margin(P(margin, unit));
 }
