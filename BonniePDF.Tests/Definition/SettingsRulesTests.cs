@@ -1,10 +1,5 @@
 using System.Text;
 using System.Text.Json;
-using BonniePDF.Configuration;
-using BonniePDF.Definition;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Text;
-using BonniePDF.Security.Models;
 using Xunit;
 using PdfDocument = BonniePDF.Document;
 

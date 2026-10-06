@@ -1,6 +1,5 @@
 using System.Text;
 using BonniePDF.Drawing;
-using BonniePDF.Rendering.Tagging;
 using Xunit;
 
 namespace BonniePDF.Tests.Drawing;
@@ -192,6 +191,6 @@ public class PdfCanvasMarkedContentTests
         public void BeginMarkedContent(string role) => Inner.BeginMarkedContent(role);
         public void BeginContainerContent(string role) => Inner.BeginContainerContent(role);
         public void EndMarkedContent() => Inner.EndMarkedContent();
-        public void FillRect() => Inner.FillRect(0, 0, 10, 10, BonniePDF.Core.Color.Black);
+        public void FillRect() => Inner.FillRect(0, 0, 10, 10, BonniePDF.Color.Black);
     }
 }

@@ -1,7 +1,3 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Images;
 using Xunit;
 
 namespace BonniePDF.Tests.Export;

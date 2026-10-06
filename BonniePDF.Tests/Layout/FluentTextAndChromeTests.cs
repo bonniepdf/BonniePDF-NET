@@ -1,10 +1,6 @@
 using System.IO.Compression;
 using System.Text.RegularExpressions;
-using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
 using BonniePDF.Fluent;
-using BonniePDF.Fluent.Extensions;
-using BonniePDF.Rendering;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;
@@ -33,7 +29,7 @@ public partial class FluentTextAndChromeTests
             {
                 t.Span("Label: ").Bold();
                 t.Span("value");
-                t.Span("Red").FontColor(BonniePDF.Core.Color.Red);
+                t.Span("Red").FontColor(BonniePDF.Color.Red);
             }))).Build();
 
         string stream = RenderPages(doc).Single().ContentStream;
@@ -151,7 +147,7 @@ public partial class FluentTextAndChromeTests
     [GeneratedRegex(@"/Length (\d+)")]
     private static partial Regex LengthEntry();
 
-    private static BonniePDF.Document TwoPageDocumentWithFooter(Action<BonniePDF.Fluent.Descriptors.TextDescriptor> footer) =>
+    private static BonniePDF.Document TwoPageDocumentWithFooter(Action<BonniePDF.Fluent.TextDescriptor> footer) =>
         Pdf.Create(pdf => pdf.Page(page =>
         {
             page.Margin(50);

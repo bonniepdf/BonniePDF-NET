@@ -1,11 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
-using BonniePDF.Core;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
 using BonniePDF.Fluent;
-using BonniePDF.Fluent.Extensions;
-using BonniePDF.Rendering;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;

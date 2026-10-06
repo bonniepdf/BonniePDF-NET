@@ -1,10 +1,5 @@
 using System.Globalization;
-using BonniePDF.Charts;
-using BonniePDF.Charts.Models;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
 using Xunit;
 
 namespace BonniePDF.Tests.Export;

@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Rendering;
 using BonniePDF.Rendering.Pdf;
 using Xunit;
 

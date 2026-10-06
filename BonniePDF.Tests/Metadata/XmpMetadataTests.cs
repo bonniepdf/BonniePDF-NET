@@ -1,5 +1,3 @@
-using BonniePDF.Configuration;
-using BonniePDF.Extensions;
 using BonniePDF.Metadata;
 using Xunit;
 

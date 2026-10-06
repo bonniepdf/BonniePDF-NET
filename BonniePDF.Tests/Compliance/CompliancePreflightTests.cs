@@ -1,12 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using BonniePDF.Compliance;
-using BonniePDF.Configuration;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
-using BonniePDF.Export;
-using BonniePDF.Rendering;
 using Xunit;
 
 namespace BonniePDF.Tests.Compliance;

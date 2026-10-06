@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using BonniePDF.Configuration;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;

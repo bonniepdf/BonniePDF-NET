@@ -2,13 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using BonniePDF.Compliance;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
-using BonniePDF.Export;
-using BonniePDF.Rendering;
 using Xunit;
 
 namespace BonniePDF.Tests.Export;

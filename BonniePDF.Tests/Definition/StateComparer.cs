@@ -1,8 +1,5 @@
 using System.Collections;
 using System.Reflection;
-using BonniePDF.Configuration;
-using BonniePDF.Elements;
-using BonniePDF.Typography;
 
 namespace BonniePDF.Tests.Definition;
 

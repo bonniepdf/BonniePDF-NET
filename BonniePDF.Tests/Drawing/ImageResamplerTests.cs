@@ -1,4 +1,3 @@
-using BonniePDF.Rendering.Images;
 using Xunit;
 
 namespace BonniePDF.Tests.Drawing;

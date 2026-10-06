@@ -1,8 +1,4 @@
 using System.Text;
-using BonniePDF.Configuration;
-using BonniePDF.Elements.Media;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Rendering.Tagging;
 using Xunit;
 
 namespace BonniePDF.Tests.Accessibility;

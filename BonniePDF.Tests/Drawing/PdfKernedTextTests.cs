@@ -1,5 +1,4 @@
 using System.Text;
-using BonniePDF.Elements.Text;
 using BonniePDF.Rendering.Pdf;
 using BonniePDF.Tests.Support;
 using BonniePDF.Typography.TrueType;
@@ -101,7 +100,7 @@ public class PdfKernedTextTests
     {
         // Content streams are Flate-compressed by default; disable so the
         // Tj/TJ operators are directly assertable in the output bytes.
-        Configuration.InternalConfiguration.EnableCompression = false;
+        InternalConfiguration.EnableCompression = false;
         try
         {
             using var doc = new BonniePDF.Document();
@@ -112,7 +111,7 @@ public class PdfKernedTextTests
         }
         finally
         {
-            Configuration.InternalConfiguration.EnableCompression = true;
+            InternalConfiguration.EnableCompression = true;
         }
     }
 }

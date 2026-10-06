@@ -1,8 +1,5 @@
 using System.Text.RegularExpressions;
-using BonniePDF.Core;
 using BonniePDF.Fluent;
-using BonniePDF.Fluent.Extensions;
-using BonniePDF.Rendering;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;
@@ -30,7 +27,7 @@ public partial class ContainerAndRowSplittingTests
     private static int BlackHorizontals(string page) =>
         BlackHorizontal().Matches(page).Count(m => Math.Abs(float.Parse(m.Groups[3].Value, System.Globalization.CultureInfo.InvariantCulture) - float.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture)) > 300);
 
-    private static void RowsOfCells(BonniePDF.Fluent.Descriptors.TableDescriptor t)
+    private static void RowsOfCells(BonniePDF.Fluent.TableDescriptor t)
     {
         t.Columns(1, 1);
         t.CellPadding(0);

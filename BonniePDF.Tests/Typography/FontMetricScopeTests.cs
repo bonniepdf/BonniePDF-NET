@@ -1,11 +1,6 @@
 using System.IO.Compression;
 using System.Text;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
 using BonniePDF.Tests.Support;
-using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 using Xunit;
 

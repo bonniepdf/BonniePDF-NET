@@ -1,4 +1,3 @@
-using BonniePDF.Rendering.Tagging;
 using Xunit;
 
 namespace BonniePDF.Tests.Accessibility;

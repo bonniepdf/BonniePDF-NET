@@ -1,7 +1,4 @@
 using System.Text;
-using BonniePDF.Configuration;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Rendering.Tagging;
 using Xunit;
 
 namespace BonniePDF.Tests.Content;

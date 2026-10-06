@@ -1,7 +1,3 @@
-using BonniePDF.Configuration;
-using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
-using BonniePDF.Security.Models;
 using Xunit;
 
 namespace BonniePDF.Tests.Export;

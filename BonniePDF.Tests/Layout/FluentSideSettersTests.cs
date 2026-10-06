@@ -1,7 +1,4 @@
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
 using BonniePDF.Fluent;
-using BonniePDF.Fluent.Extensions;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;
@@ -81,6 +78,6 @@ public class FluentSideSettersTests
     {
         Container c = Chain(x => x.BorderBottom(2).Border(1));
 
-        Assert.Equal(new BonniePDF.Core.Border(1), c.Border);
+        Assert.Equal(new BonniePDF.Border(1), c.Border);
     }
 }

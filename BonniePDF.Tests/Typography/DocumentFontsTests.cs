@@ -1,7 +1,5 @@
 using System.Text;
 using System.Text.RegularExpressions;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
 using Xunit;
 
 namespace BonniePDF.Tests.Typography;

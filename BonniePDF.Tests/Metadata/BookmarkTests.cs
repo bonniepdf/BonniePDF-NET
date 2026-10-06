@@ -1,5 +1,3 @@
-using BonniePDF.Configuration;
-using BonniePDF.Extensions;
 using Xunit;
 
 namespace BonniePDF.Tests.Metadata;

@@ -1,6 +1,5 @@
 using System;
 using System.Globalization;
-using BonniePDF.Configuration;
 using BonniePDF.Metadata;
 using BonniePDF.Rendering.Pdf;
 using Xunit;

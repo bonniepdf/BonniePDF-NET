@@ -1,8 +1,4 @@
 using System.Text.RegularExpressions;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
-using BonniePDF.Export;
-using BonniePDF.Rendering;
 using Xunit;
 
 namespace BonniePDF.Tests.Export;
@@ -98,7 +94,7 @@ public partial class LayoutSnapshotTests
         // previewer's structure and accessibility views.
         var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "Before", FontSize = 12 });
-        doc.Add(new BonniePDF.Core.Hyperlink("https://example.com", "Visit example"));
+        doc.Add(new BonniePDF.Hyperlink("https://example.com", "Visit example"));
 
         LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
         LayoutNode link = Walk(snapshot.Root).First(n => n.Type == "Hyperlink");

@@ -1,8 +1,4 @@
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
-using BonniePDF.Fluent.Descriptors;
-using BonniePDF.Fluent.Extensions;
+using BonniePDF.Fluent;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;

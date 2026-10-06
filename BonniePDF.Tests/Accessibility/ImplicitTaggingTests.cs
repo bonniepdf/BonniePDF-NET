@@ -1,6 +1,4 @@
 using System.Text;
-using BonniePDF.Configuration;
-using BonniePDF.Elements.Text;
 using Xunit;
 
 namespace BonniePDF.Tests.Accessibility;

@@ -6,18 +6,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using BonniePDF.Compliance;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Elements.Media;
-using BonniePDF.Elements.Text;
-using BonniePDF.Export;
-using BonniePDF.Rendering;
 using BonniePDF.Rendering.Svg;
 using BonniePDF.Rendering.Svg.Fonts;
-using BonniePDF.Rendering.Tagging;
-using BonniePDF.Typography;
 using Xunit;
 
 namespace BonniePDF.Tests.Content;

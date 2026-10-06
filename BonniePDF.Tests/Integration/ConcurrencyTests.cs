@@ -1,13 +1,5 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using BonniePDF.Charts;
-using BonniePDF.Charts.Models;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Media;
-using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
-using BonniePDF.Typography;
 using Xunit;
 
 namespace BonniePDF.Tests.Integration;

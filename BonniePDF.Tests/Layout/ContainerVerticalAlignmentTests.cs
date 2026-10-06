@@ -1,9 +1,5 @@
 using System;
 using System.Globalization;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;
@@ -42,7 +38,7 @@ public class ContainerVerticalAlignmentTests
             Child = new TextBlock("Anchor") { FontSize = 20 },
         });
 
-        return FirstTextBaseline(doc.GenerateSvgDocument(new BonniePDF.Export.SvgPageExportOptions()).Pages[0]);
+        return FirstTextBaseline(doc.GenerateSvgDocument(new BonniePDF.SvgPageExportOptions()).Pages[0]);
     }
 
     [Fact]
