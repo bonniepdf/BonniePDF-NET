@@ -44,6 +44,40 @@ public static class ImageLoader
     }
 
     /// <summary>
+    /// Loads an image through the process-wide cache (see <see cref="ImagePipeline"/>): the file is read and
+    /// decoded once however many documents place it, and re-read if it changes on disk. The result is a
+    /// private copy of the cached description that shares its pixel arrays, which must not be modified.
+    /// </summary>
+    internal static ImageInfo LoadCached(string filePath)
+    {
+        FileInfo file = new(filePath);
+        if (!file.Exists)
+            throw new FileNotFoundException("Image file not found", filePath);
+
+        string key = $"f|{file.FullName}|{file.Length}|{file.LastWriteTimeUtc.Ticks}";
+        return ImageCache.GetOrAdd(key, () => WithContentKey(Load(File.ReadAllBytes(file.FullName)))).ShallowClone();
+    }
+
+    /// <summary>
+    /// Loads an image from bytes through the process-wide cache, keyed by the bytes' content so a fresh copy
+    /// of the same file in each document still hits. The result is a private copy of the cached description
+    /// that shares its pixel arrays, which must not be modified.
+    /// </summary>
+    internal static ImageInfo LoadCached(byte[] data)
+    {
+        if (ImagePipeline.CacheMaxBytes <= 0 || data == null || data.Length < 8) return Load(data!);
+
+        string key = "b|" + System.Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(data), 0, 8);
+        return ImageCache.GetOrAdd(key, () => WithContentKey(Load(data))).ShallowClone();
+    }
+
+    private static ImageInfo WithContentKey(ImageInfo info)
+    {
+        info.ContentKey = PdfResourceRegistry.ContentKeyOf(info);
+        return info;
+    }
+
+    /// <summary>
     /// Load a JPEG image from file path
     /// </summary>
     public static ImageInfo LoadJpeg(string filePath)
@@ -363,7 +397,7 @@ public static class ImageLoader
             throw new InvalidOperationException("Invalid PNG file: Missing PNG signature");
 
         ImageInfo info = new() { Format = ImageFormat.Png, OriginalData = data };
-        List<byte[]> idatChunks = new();
+        List<(int Start, int Length)> idatChunks = new();
         byte[]? palette = null;
         byte[]? compressedIccProfile = null;
         int colorType = 0;
@@ -437,9 +471,7 @@ public static class ImageLoader
 
                 case "IDAT":
                     // Image data chunk (compressed)
-                    byte[] chunk = new byte[chunkLength];
-                    Array.Copy(data, pos, chunk, 0, chunkLength);
-                    idatChunks.Add(chunk);
+                    idatChunks.Add((pos, chunkLength));
                     break;
 
                 case "iCCP":
@@ -476,116 +508,103 @@ public static class ImageLoader
         if (info.Width <= 0 || info.Height <= 0)
             throw new InvalidOperationException("Invalid PNG file: Missing or invalid IHDR chunk");
 
-        // Combine all IDAT chunks
+        // The compressed image data is the IDAT chunks end to end. A single chunk is read in place.
         int totalLength = 0;
-        foreach (byte[] chunk in idatChunks)
-            totalLength += chunk.Length;
+        foreach ((int _, int length) in idatChunks)
+            totalLength += length;
 
-        byte[] compressedData = new byte[totalLength];
-        int offset = 0;
-        foreach (byte[] chunk in idatChunks)
+        if (totalLength < 2)
+            throw new InvalidOperationException("Failed to decompress PNG data: no image data");
+
+        byte[] compressedData = data;
+        int compressedStart, compressedLength;
+        if (idatChunks.Count == 1)
         {
-            Array.Copy(chunk, 0, compressedData, offset, chunk.Length);
-            offset += chunk.Length;
-        }
-
-        // Decompress the image data using zlib (skip the 2-byte zlib header)
-        byte[] decompressedData;
-        try
-        {
-            using MemoryStream compressedStream = new(compressedData, 2, compressedData.Length - 2);
-            using DeflateStream deflateStream = new(compressedStream, CompressionMode.Decompress);
-            using MemoryStream resultStream = new();
-            deflateStream.CopyTo(resultStream);
-            decompressedData = resultStream.ToArray();
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to decompress PNG data: {ex.Message}");
-        }
-
-        // Remove PNG filter bytes and extract pixel data
-        int bytesPerPixel = info.Components * (bitDepth / 8);
-        int scanlineLength = info.Width * bytesPerPixel;
-        int rawDataLength = info.Width * info.Height * bytesPerPixel;
-
-        byte[] pixelData;
-        byte[]? alphaData = null;
-
-        if (info.HasAlpha)
-        {
-            // Separate RGB/Gray and Alpha channels
-            int colorComponents = info.Components - 1; // Without alpha
-            int colorBytesPerPixel = colorComponents * (bitDepth / 8);
-            int alphaBytesPerPixel = bitDepth / 8;
-
-            pixelData = new byte[info.Width * info.Height * colorBytesPerPixel];
-            alphaData = new byte[info.Width * info.Height * alphaBytesPerPixel];
-
-            int srcPos = 0;
-            int colorPos = 0;
-            int alphaPos = 0;
-
-            // The previous defiltered scanline lives across rows: the Up, Average and
-            // Paeth filters read it, and row 0 sees zeros.
-            byte[] prevScanline = new byte[scanlineLength];
-
-            for (int y = 0; y < info.Height; y++)
-            {
-                // Skip filter byte
-                byte filter = decompressedData[srcPos++];
-                byte[] currScanline = new byte[scanlineLength];
-
-                // Read and defilter the scanline
-                Array.Copy(decompressedData, srcPos, currScanline, 0, scanlineLength);
-                DefilterScanline(currScanline, prevScanline, bytesPerPixel, filter);
-
-                // Separate color and alpha
-                for (int x = 0; x < info.Width; x++)
-                {
-                    int pixelOffset = x * bytesPerPixel;
-
-                    // Copy color components
-                    for (int c = 0; c < colorBytesPerPixel; c++)
-                        pixelData[colorPos++] = currScanline[pixelOffset + c];
-
-                    // Copy alpha
-                    for (int a = 0; a < alphaBytesPerPixel; a++)
-                        alphaData[alphaPos++] = currScanline[pixelOffset + colorBytesPerPixel + a];
-                }
-
-                srcPos += scanlineLength;
-                Array.Copy(currScanline, prevScanline, scanlineLength);
-            }
-
-            info.Components = colorComponents;
+            compressedStart = idatChunks[0].Start;
+            compressedLength = idatChunks[0].Length;
         }
         else
         {
-            // No alpha - just remove filter bytes
-            pixelData = new byte[rawDataLength];
-            int srcPos = 0;
-            int dstPos = 0;
-            byte[] prevScanline = new byte[scanlineLength];
-
-            for (int y = 0; y < info.Height; y++)
+            compressedData = new byte[totalLength];
+            int offset = 0;
+            foreach ((int start, int length) in idatChunks)
             {
-                byte filter = decompressedData[srcPos++];
-                byte[] currScanline = new byte[scanlineLength];
-                Array.Copy(decompressedData, srcPos, currScanline, 0, scanlineLength);
-
-                DefilterScanline(currScanline, prevScanline, bytesPerPixel, filter);
-
-                Array.Copy(currScanline, 0, pixelData, dstPos, scanlineLength);
-
-                srcPos += scanlineLength;
-                dstPos += scanlineLength;
-                Array.Copy(currScanline, prevScanline, scanlineLength);
+                Buffer.BlockCopy(data, start, compressedData, offset, length);
+                offset += length;
             }
+
+            compressedStart = 0;
+            compressedLength = totalLength;
         }
 
-        info.Data = pixelData;
-        info.AlphaData = alphaData ?? Array.Empty<byte>();
+        int bytesPerPixel = info.Components * (bitDepth / 8);
+        int scanlineLength = info.Width * bytesPerPixel;
+        int stride = scanlineLength + 1; // each row is a filter byte, then the row
+        long inflatedLength = (long)stride * info.Height;
+        if (inflatedLength > Array.MaxLength)
+            throw new InvalidOperationException("Invalid PNG file: image is too large");
+
+        // Inflate into a pooled buffer sized from the header, defilter each row in place, and copy the
+        // result out once, so the only allocations are the pixel arrays themselves.
+        byte[] inflated = ArrayPool<byte>.Shared.Rent((int)inflatedLength);
+        try
+        {
+            try
+            {
+                // Skip the 2-byte zlib header.
+                using MemoryStream compressedStream = new(compressedData, compressedStart + 2, compressedLength - 2, false);
+                using DeflateStream deflateStream = new(compressedStream, CompressionMode.Decompress);
+                int filled = 0;
+                while (filled < (int)inflatedLength)
+                {
+                    int read = deflateStream.Read(inflated, filled, (int)inflatedLength - filled);
+                    if (read == 0) break;
+                    filled += read;
+                }
+
+                if (filled < (int)inflatedLength)
+                    throw new InvalidOperationException("the image data is shorter than the header declares");
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to decompress PNG data: {ex.Message}");
+            }
+
+            DefilterRows(inflated, info.Height, scanlineLength, bytesPerPixel);
+
+            byte[] pixelData;
+            byte[]? alphaData = null;
+
+            if (info.HasAlpha)
+            {
+                // Separate RGB/Gray and Alpha channels
+                int colorComponents = info.Components - 1; // Without alpha
+                int colorBytesPerPixel = colorComponents * (bitDepth / 8);
+                int alphaBytesPerPixel = bitDepth / 8;
+
+                pixelData = new byte[info.Width * info.Height * colorBytesPerPixel];
+                alphaData = new byte[info.Width * info.Height * alphaBytesPerPixel];
+                SplitAlpha(inflated, info.Width, info.Height, scanlineLength, bytesPerPixel,
+                    colorBytesPerPixel, alphaBytesPerPixel, pixelData, alphaData);
+
+                info.Components = colorComponents;
+            }
+            else
+            {
+                // No alpha - just remove filter bytes
+                pixelData = new byte[info.Width * info.Height * bytesPerPixel];
+                for (int y = 0; y < info.Height; y++)
+                    Buffer.BlockCopy(inflated, y * stride + 1, pixelData, y * scanlineLength, scanlineLength);
+            }
+
+            info.Data = pixelData;
+            info.AlphaData = alphaData ?? Array.Empty<byte>();
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(inflated);
+        }
+
         info.Palette = palette ?? Array.Empty<byte>();
 
         // Inflate the iCCP profile if one was carried. The profile stream is
@@ -614,9 +633,79 @@ public static class ImageLoader
     }
 
     /// <summary>
+    /// Undoes the PNG row filters in place. <paramref name="buffer"/> holds each row as a filter byte then
+    /// <paramref name="scanlineLength"/> bytes; the Up, Average and Paeth filters read the row above, already
+    /// defiltered, and the first row sees zeros.
+    /// </summary>
+    private static void DefilterRows(byte[] buffer, int height, int scanlineLength, int bytesPerPixel)
+    {
+        int stride = scanlineLength + 1;
+        byte[] zeros = new byte[scanlineLength];
+
+        for (int y = 0; y < height; y++)
+        {
+            byte filter = buffer[y * stride];
+            if (filter == 0) continue;
+
+            Span<byte> row = buffer.AsSpan(y * stride + 1, scanlineLength);
+            ReadOnlySpan<byte> above = y == 0 ? zeros : buffer.AsSpan((y - 1) * stride + 1, scanlineLength);
+            DefilterScanline(row, above, bytesPerPixel, filter);
+        }
+    }
+
+    /// <summary>
+    /// Splits defiltered rows of interleaved colour-and-alpha samples into a colour plane and an alpha plane.
+    /// </summary>
+    private static void SplitAlpha(byte[] buffer, int width, int height, int scanlineLength, int bytesPerPixel,
+        int colorBytesPerPixel, int alphaBytesPerPixel, byte[] colorOut, byte[] alphaOut)
+    {
+        int stride = scanlineLength + 1;
+        int colorPos = 0;
+        int alphaPos = 0;
+
+        for (int y = 0; y < height; y++)
+        {
+            ReadOnlySpan<byte> row = buffer.AsSpan(y * stride + 1, scanlineLength);
+
+            if (colorBytesPerPixel == 3 && alphaBytesPerPixel == 1)
+            {
+                // 8-bit RGBA
+                for (int x = 0, o = 0; x < width; x++, o += 4)
+                {
+                    colorOut[colorPos] = row[o];
+                    colorOut[colorPos + 1] = row[o + 1];
+                    colorOut[colorPos + 2] = row[o + 2];
+                    colorPos += 3;
+                    alphaOut[alphaPos++] = row[o + 3];
+                }
+            }
+            else if (colorBytesPerPixel == 1 && alphaBytesPerPixel == 1)
+            {
+                // 8-bit grey with alpha
+                for (int x = 0, o = 0; x < width; x++, o += 2)
+                {
+                    colorOut[colorPos++] = row[o];
+                    alphaOut[alphaPos++] = row[o + 1];
+                }
+            }
+            else
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int pixelOffset = x * bytesPerPixel;
+                    for (int c = 0; c < colorBytesPerPixel; c++)
+                        colorOut[colorPos++] = row[pixelOffset + c];
+                    for (int a = 0; a < alphaBytesPerPixel; a++)
+                        alphaOut[alphaPos++] = row[pixelOffset + colorBytesPerPixel + a];
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Apply PNG defiltering to a scanline
     /// </summary>
-    private static void DefilterScanline(byte[] scanline, byte[] prevScanline, int bytesPerPixel, byte filter)
+    private static void DefilterScanline(Span<byte> scanline, ReadOnlySpan<byte> prevScanline, int bytesPerPixel, byte filter)
     {
         switch (filter)
         {

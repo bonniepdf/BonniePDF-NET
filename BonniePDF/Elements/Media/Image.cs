@@ -106,9 +106,9 @@ public class Image : ElementBase, IRoleProvider, IAltTextProvider
             return _cachedInfo;
 
         if (ImageData != null && ImageData.Length > 0)
-            _cachedInfo = ImageLoader.Load(ImageData);
+            _cachedInfo = ImageLoader.LoadCached(ImageData);
         else if (!string.IsNullOrEmpty(FilePath))
-            _cachedInfo = ImageLoader.Load(FilePath);
+            _cachedInfo = ImageLoader.LoadCached(FilePath);
         else
             throw new InvalidOperationException("Either FilePath or ImageData must be specified");
 

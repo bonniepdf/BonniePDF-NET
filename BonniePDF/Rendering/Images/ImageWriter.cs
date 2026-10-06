@@ -281,81 +281,75 @@ internal class ImageWriter
         _writer!.WriteBinaryObject(id, BuildSoftMaskDict(image), compressedAlpha);
     }
 
+    /// <summary>The compressed form of one pixel array, kept for as long as the array itself lives.</summary>
+    private sealed class CompressedStream
+    {
+        public ImageCompressionLevel Level;
+        public byte[] Bytes = [];
+    }
+
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<byte[], CompressedStream> Compressed = new();
+
+    private static System.IO.Compression.CompressionLevel ToZlibLevel(ImageCompressionLevel level) => level switch
+    {
+        ImageCompressionLevel.Smallest => CompressionLevel.SmallestSize,
+        ImageCompressionLevel.Fast => CompressionLevel.Fastest,
+        _ => CompressionLevel.Optimal
+    };
+
     /// <summary>
-    /// Compresses data using zlib/Deflate (Legacy Sync Version)
+    /// Compresses data with zlib. The result is remembered against the array, so an image whose pixels are
+    /// shared between documents (see <see cref="ImagePipeline"/>) is compressed once, and forgotten with it.
     /// </summary>
     private static byte[] CompressData(byte[] data)
     {
-        using MemoryStream output = new();
+        ImageCompressionLevel level = ImagePipeline.CompressionLevel;
+        if (ImagePipeline.CacheMaxBytes <= 0) return Deflate(data, level);
 
-        // Write zlib header (CMF=78, FLG=9C for default compression)
-        output.WriteByte(0x78);
-        output.WriteByte(0x9C);
+        if (Compressed.TryGetValue(data, out CompressedStream? known) && known.Level == level)
+            return known.Bytes;
 
-        using (DeflateStream deflate = new(output, CompressionLevel.SmallestSize, true))
+        CompressedStream made = new() { Level = level, Bytes = Deflate(data, level) };
+        Compressed.AddOrUpdate(data, made);
+        return made.Bytes;
+    }
+
+    private static byte[] Deflate(byte[] data, ImageCompressionLevel level)
+    {
+        using MemoryStream output = new(Math.Max(256, data.Length / 4));
+        using (ZLibStream zlib = new(output, ToZlibLevel(level), true))
         {
-            deflate.Write(data, 0, data.Length);
+            zlib.Write(data, 0, data.Length);
         }
-
-        // Calculate and write Adler-32 checksum
-        uint adler = CalculateAdler32(data);
-        output.WriteByte((byte)(adler >> 24));
-        output.WriteByte((byte)(adler >> 16));
-        output.WriteByte((byte)(adler >> 8));
-        output.WriteByte((byte)adler);
 
         return output.ToArray();
     }
 
     /// <summary>
-    /// Compresses data using ArrayPool to avoid allocations (Async Version)
-    /// Returns the buffer and the actual length used.
-    /// Caller MUST return the buffer to ArrayPool&lt;byte&gt;.Shared
+    /// Compresses data for the async writer. When the cache is on the shared, remembered stream is returned
+    /// (<c>Pooled</c> false: it must not be returned to the pool); otherwise a pooled buffer is filled, which the
+    /// caller MUST return to <see cref="ArrayPool{T}.Shared"/>.
     /// </summary>
-    private static (byte[] Buffer, int Length) CompressDataToPool(byte[] data)
+    private static (byte[] Buffer, int Length, bool Pooled) CompressForAsync(byte[] data)
     {
-        // Guess size: Input + overhead. Zlib usually compresses, but can expand slightly if random.
-        // We allow some headroom to avoid MemoryStream expansion issues on fixed buffers.
+        if (ImagePipeline.CacheMaxBytes > 0)
+        {
+            byte[] shared = CompressData(data);
+            return (shared, shared.Length, false);
+        }
+
+        // Guess size: input + overhead. Zlib may expand incompressible data slightly; the headroom keeps a
+        // fixed buffer from overflowing.
         int capacity = data.Length + data.Length / 100 + 64;
         byte[] buffer = ArrayPool<byte>.Shared.Rent(capacity);
 
-        using (MemoryStream output = new(buffer))
+        using MemoryStream output = new(buffer);
+        using (ZLibStream zlib = new(output, ToZlibLevel(ImagePipeline.CompressionLevel), true))
         {
-            // Write zlib header
-            output.WriteByte(0x78);
-            output.WriteByte(0x9C);
-
-            using (DeflateStream deflate = new(output, CompressionLevel.SmallestSize, true))
-            {
-                deflate.Write(data, 0, data.Length);
-            }
-
-            // Calculate and write Adler-32 checksum
-            uint adler = CalculateAdler32(data);
-            output.WriteByte((byte)(adler >> 24));
-            output.WriteByte((byte)(adler >> 16));
-            output.WriteByte((byte)(adler >> 8));
-            output.WriteByte((byte)adler);
-
-            return (buffer, (int)output.Position);
-        }
-    }
-
-    /// <summary>
-    /// Calculates Adler-32 checksum for zlib
-    /// </summary>
-    private static uint CalculateAdler32(byte[] data)
-    {
-        const uint MOD_ADLER = 65521;
-        uint a = 1, b = 0;
-
-        foreach (byte d in data)
-        {
-            a = (a + d) % MOD_ADLER;
-            b = (b + a) % MOD_ADLER;
+            zlib.Write(data, 0, data.Length);
         }
 
-        return (b << 16) | a;
+        return (buffer, (int)output.Position, true);
     }
 
     /// <summary>
@@ -423,7 +417,7 @@ internal class ImageWriter
         }
 
         // Compress using ArrayPool
-        (byte[] compressedBuffer, int compressedLength) = CompressDataToPool(pixelData);
+        (byte[] compressedBuffer, int compressedLength, bool pooled) = CompressForAsync(pixelData);
 
         try
         {
@@ -446,7 +440,7 @@ internal class ImageWriter
         finally
         {
             // CRITICAL: Return buffer to pool
-            ArrayPool<byte>.Shared.Return(compressedBuffer);
+            if (pooled) ArrayPool<byte>.Shared.Return(compressedBuffer);
         }
     }
 
@@ -456,7 +450,7 @@ internal class ImageWriter
     private async Task WriteSoftMaskAsync(int id, ImageInfo image, CancellationToken cancellationToken)
     {
         // Compress using ArrayPool
-        (byte[] compressedBuffer, int compressedLength) = CompressDataToPool(image.AlphaData);
+        (byte[] compressedBuffer, int compressedLength, bool pooled) = CompressForAsync(image.AlphaData);
 
         try
         {
@@ -466,7 +460,7 @@ internal class ImageWriter
         }
         finally
         {
-            ArrayPool<byte>.Shared.Return(compressedBuffer);
+            if (pooled) ArrayPool<byte>.Shared.Return(compressedBuffer);
         }
     }
 
