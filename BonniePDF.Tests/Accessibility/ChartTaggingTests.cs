@@ -1,10 +1,4 @@
 using System.Text;
-using BonniePDF.Charts;
-using BonniePDF.Charts.Models;
-using BonniePDF.Configuration;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Drawing;
-using BonniePDF.Elements.Layout;
 using Xunit;
 
 namespace BonniePDF.Tests.Accessibility;
@@ -141,7 +135,7 @@ public class ChartTaggingTests
             Height = 120,
             // The background fill is what reaches the artifact fallback; without it
             // the chart draws nothing that would have been wrapped.
-            BackgroundColor = BonniePDF.Core.Color.White,
+            BackgroundColor = BonniePDF.Color.White,
         }))));
 
         Assert.Contains("/Figure", pdf, StringComparison.Ordinal);
@@ -156,7 +150,7 @@ public class ChartTaggingTests
             Data = SampleData(),
             IsDecorative = true,
             Height = 120,
-            BackgroundColor = BonniePDF.Core.Color.White,
+            BackgroundColor = BonniePDF.Color.White,
         }))));
 
         AssertNoArtifactInsideTaggedContent(pdf);
@@ -170,7 +164,7 @@ public class ChartTaggingTests
     public void CanvasElementWithAltText_DoesNotNestAnArtifactInsideItsFigure()
     {
         string pdf = ContentStreams(RenderTagged(doc => doc.Add(Nested(new CanvasElement((canvas, width, height) =>
-            canvas.FillRect(0, 0, width, height, BonniePDF.Core.ColorPalette.Slate[200]))
+            canvas.FillRect(0, 0, width, height, BonniePDF.ColorPalette.Slate[200]))
         {
             AltText = "A filled sample rectangle.",
             DrawHeight = 40,

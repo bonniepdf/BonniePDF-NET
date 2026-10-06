@@ -1,13 +1,5 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Drawing;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Lists;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
 using BonniePDF.Fluent;
-using BonniePDF.Rendering;
-using BonniePDF.Rendering.Images;
+using BonniePDF.Drawing;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;

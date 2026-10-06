@@ -1,13 +1,4 @@
-﻿using BonniePDF.Charts;
-using BonniePDF.Charts.Models;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Media;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
-using BonniePDF.Export;
-using BonniePDF.Tests.Support;
-using BonniePDF.Typography;
+﻿using BonniePDF.Tests.Support;
 using Xunit;
 
 namespace BonniePDF.Tests.Export;

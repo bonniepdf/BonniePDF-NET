@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
 using Xunit;
 
 namespace BonniePDF.Tests.Content;

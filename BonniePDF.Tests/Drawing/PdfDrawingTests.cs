@@ -1,5 +1,4 @@
 using System.Text;
-using BonniePDF.Core;
 using BonniePDF.Rendering.Pdf;
 using Xunit;
 

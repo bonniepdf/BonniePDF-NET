@@ -1,6 +1,3 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Rendering.Images;
 using BonniePDF.Rendering.Writers;
 using Xunit;
 
@@ -50,12 +47,12 @@ public class ImageWriterTests
             throw new NotImplementedException();
         }
 
-        public int WriteViewerPreferences(int id, BonniePDF.Configuration.DocumentSettings settings)
+        public int WriteViewerPreferences(int id, BonniePDF.DocumentSettings settings)
         {
             throw new NotImplementedException();
         }
 
-        public void WriteCatalog(int id, int pagesId, int firstPageId, BonniePDF.Configuration.DocumentSettings settings, CatalogOptions options)
+        public void WriteCatalog(int id, int pagesId, int firstPageId, BonniePDF.DocumentSettings settings, CatalogOptions options)
         {
             throw new NotImplementedException();
         }

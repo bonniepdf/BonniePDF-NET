@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
 using Xunit;
 
 namespace BonniePDF.Tests.Content;
@@ -111,11 +108,11 @@ public class SectionLinkTests
         using var doc = new BonniePDF.Document();
         doc.Add(new SectionLink("Jump", "ch3"));
         doc.Add(new Section("ch3"));
-        Assert.True(BonniePDF.Rendering.TocLayout.RequiresTwoPass(doc));
+        Assert.True(BonniePDF.TocLayout.RequiresTwoPass(doc));
 
         using var plain = new BonniePDF.Document();
         plain.Add(new TextBlock { Text = "No cross references here." });
-        Assert.False(BonniePDF.Rendering.TocLayout.RequiresTwoPass(plain));
+        Assert.False(BonniePDF.TocLayout.RequiresTwoPass(plain));
     }
 
     [Fact]

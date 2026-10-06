@@ -2,12 +2,6 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Export;
-using BonniePDF.Rendering;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;

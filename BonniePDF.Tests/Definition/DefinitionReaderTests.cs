@@ -2,10 +2,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using BonniePDF.Definition;
-using BonniePDF.Export;
-using BonniePDF.Rendering;
-using BonniePDF.Typography;
 using Xunit;
 
 namespace BonniePDF.Tests.Definition;

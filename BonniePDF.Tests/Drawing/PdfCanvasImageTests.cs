@@ -1,6 +1,5 @@
 using System.Text;
 using BonniePDF.Drawing;
-using BonniePDF.Rendering.Images;
 using Xunit;
 
 namespace BonniePDF.Tests.Drawing;

@@ -49,9 +49,9 @@ public class DocumentTests
     {
         using BonniePDF.Document doc = new()
         {
-            Settings = new BonniePDF.Configuration.DocumentSettings { Margin = 72 },
+            Settings = new BonniePDF.DocumentSettings { Margin = 72 },
         };
-        doc.Add(new BonniePDF.Elements.Text.TextBlock { Text = "Body copy." });
+        doc.Add(new BonniePDF.TextBlock { Text = "Body copy." });
 
         string svg = doc.GenerateSvgDocument().Pages[0];
         Assert.Equal(72f, FirstGlyphX(svg), 3);
@@ -61,7 +61,7 @@ public class DocumentTests
     public void KeepsExplicitPageMarginInPreferenceToDocumentMargin()
     {
         using BonniePDF.Document doc = new();
-        BonniePDF.Elements.Layout.Page page = doc.AddPage(BonniePDF.Configuration.PdfSize.A4, 20f);
+        BonniePDF.Page page = doc.AddPage(BonniePDF.PdfSize.A4, 20f);
 
         doc.Settings.Margin = 72;
 

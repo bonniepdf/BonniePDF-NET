@@ -1,12 +1,3 @@
-using BonniePDF.Charts;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Media;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
-using BonniePDF.Security.Permissions;
-using BonniePDF.Typography;
 using Xunit;
 
 namespace BonniePDF.Tests.Integration;
@@ -214,7 +205,7 @@ public class EncryptionIntegrationTests : IntegrationTestBase
             // Add chart
             var chartData = CreateTestChartData(5);
             chartData.Title = "Encrypted Chart";
-            Charts.BarChart barChart = new()
+            BarChart barChart = new()
             {
                 Height = 200,
                 StretchToFit = true

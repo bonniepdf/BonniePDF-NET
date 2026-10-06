@@ -1,9 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
-using BonniePDF.Core;
 using BonniePDF.Fluent;
-using BonniePDF.Fluent.Extensions;
-using BonniePDF.Rendering;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;
@@ -22,7 +19,7 @@ public partial class TableCellStretchTests
     [GeneratedRegex(@"([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+) re\s*f")]
     private static partial Regex FilledRect();
 
-    private static string FirstRowStream(Action<BonniePDF.Fluent.Descriptors.TableDescriptor> table)
+    private static string FirstRowStream(Action<BonniePDF.Fluent.TableDescriptor> table)
     {
         using BonniePDF.Document doc = Pdf.Create(pdf => pdf.Page(page =>
         {

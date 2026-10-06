@@ -1,10 +1,6 @@
 using System;
 using System.IO;
 using System.Text;
-using BonniePDF.Configuration;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout.Pagination;
-using BonniePDF.Elements.Text;
 using Xunit;
 
 namespace BonniePDF.Tests.Accessibility;

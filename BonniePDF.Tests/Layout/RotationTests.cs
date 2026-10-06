@@ -2,12 +2,6 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Export;
-using BonniePDF.Rendering;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;
@@ -18,7 +12,7 @@ public class RotationTests
     public void PositionedCanvasRotatesInPdf()
     {
         var ctx = Context();
-        var child = new BonniePDF.Elements.Drawing.CanvasElement((canvas, _, _) => canvas.FillRect(0, 0, 80, 20, Color.Black)) { DrawWidth = 80, DrawHeight = 20 };
+        var child = new BonniePDF.CanvasElement((canvas, _, _) => canvas.FillRect(0, 0, 80, 20, Color.Black)) { DrawWidth = 80, DrawHeight = 20 };
         new Rotate { Angle = 90, Mode = RotationMode.Constrained, Child = child }.RenderStateful(ctx, 200);
         Assert.Contains("0 -1 1 0 -260 300 cm", ctx.CurrentStream.ToString());
         Assert.Contains("10 270 80 20 re", ctx.CurrentStream.ToString());

@@ -1,8 +1,4 @@
 using System.Text;
-using BonniePDF.Attachments;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
 using Xunit;
 
 namespace BonniePDF.Tests.Document;

@@ -1,9 +1,4 @@
-using BonniePDF.Configuration;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
 using BonniePDF.Fluent;
-using BonniePDF.Rendering;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;

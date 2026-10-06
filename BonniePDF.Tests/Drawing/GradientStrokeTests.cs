@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
 using Xunit;
 

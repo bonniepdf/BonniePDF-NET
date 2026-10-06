@@ -1,11 +1,5 @@
 using System.Text;
-using BonniePDF.Charts;
-using BonniePDF.Charts.Models;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
 using BonniePDF.Drawing;
-using BonniePDF.Elements.Text;
-using BonniePDF.Rendering.Images;
 using Xunit;
 
 namespace BonniePDF.Tests.Content;

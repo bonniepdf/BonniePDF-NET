@@ -1,5 +1,3 @@
-using BonniePDF.Charts;
-using BonniePDF.Charts.Models;
 using Xunit;
 
 namespace BonniePDF.Tests.Layout;

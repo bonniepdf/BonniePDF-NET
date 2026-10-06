@@ -3,16 +3,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
-using BonniePDF.Configuration;
-using BonniePDF.Definition;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Layout.Pagination;
-using BonniePDF.Elements.Media;
-using BonniePDF.Elements.Text;
-using BonniePDF.Export;
-using BonniePDF.Rendering;
-using BonniePDF.Typography;
 using Xunit;
 
 namespace BonniePDF.Tests.Definition;
@@ -405,7 +395,7 @@ public partial class DefinitionWriterTests
     {
         using var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "plain" });
-        doc.Add(new TextBlock { Text = "chosen", FontSize = 12, Color = BonniePDF.Core.Color.Black, Alignment = TextAlignment.Left, LineHeight = 1.2f });
+        doc.Add(new TextBlock { Text = "chosen", FontSize = 12, Color = BonniePDF.Color.Black, Alignment = TextAlignment.Left, LineHeight = 1.2f });
         JsonArray content = doc.ToDefinition().Definition["pages"]![0]!["content"]!.AsArray();
         Assert.Equal("""{"type":"TextBlock","text":"plain"}""", content[0]!.ToJsonString());
         // Set to the same value as the default: still written, because a default text style would not override it.
@@ -518,7 +508,7 @@ public partial class DefinitionWriterTests
         var settings = new DocumentSettings
         {
             Version = PdfVersion.Pdf17,
-            Encryption = new BonniePDF.Security.Models.EncryptionSettings { Algorithm = BonniePDF.Security.Models.EncryptionAlgorithm.AES_256, OwnerPassword = "secret", UserPassword = "open" },
+            Encryption = new BonniePDF.EncryptionSettings { Algorithm = BonniePDF.EncryptionAlgorithm.AES_256, OwnerPassword = "secret", UserPassword = "open" },
         };
         using var doc = new BonniePDF.Document(settings);
         doc.Add(new TextBlock { Text = "x" });
@@ -554,7 +544,7 @@ public partial class DefinitionWriterTests
     public void PaletteTokensAreWrittenOnlyWhenAskedFor()
     {
         using var doc = new BonniePDF.Document();
-        doc.Add(new Container { BackgroundColor = BonniePDF.Core.ColorPalette.Slate[100] });
+        doc.Add(new Container { BackgroundColor = BonniePDF.ColorPalette.Slate[100] });
         Assert.Equal("#f1f5f9", doc.ToDefinition().Definition["pages"]![0]!["content"]![0]!["backgroundColor"]!.GetValue<string>());
         Assert.Equal(
             "slate-100",

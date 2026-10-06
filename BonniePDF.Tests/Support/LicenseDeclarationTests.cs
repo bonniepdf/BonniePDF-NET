@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using BonniePDF.Elements.Text;
-using BonniePDF.Licensing;
 using Xunit;
 
 // The suite has a `BonniePDF.Tests.Document` namespace. A name declared in an

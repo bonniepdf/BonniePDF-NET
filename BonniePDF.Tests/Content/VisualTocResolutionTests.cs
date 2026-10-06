@@ -1,10 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using BonniePDF.Configuration;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
 using Xunit;
 
 namespace BonniePDF.Tests.Content;

@@ -1,4 +1,3 @@
-using BonniePDF.Core;
 using Xunit;
 
 namespace BonniePDF.Tests.Core;

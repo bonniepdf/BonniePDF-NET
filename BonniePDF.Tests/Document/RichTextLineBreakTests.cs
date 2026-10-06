@@ -1,4 +1,3 @@
-using BonniePDF.Elements.Text;
 using Xunit;
 
 namespace BonniePDF.Tests.Document;

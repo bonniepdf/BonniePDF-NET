@@ -1,5 +1,4 @@
 using System.Text;
-using BonniePDF.Charts.Models;
 using Xunit;
 
 namespace BonniePDF.Tests.Integration;
