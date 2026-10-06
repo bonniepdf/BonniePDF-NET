@@ -1,12 +1,5 @@
 using System.Linq;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Drawing;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
+using BonniePDF;
 
 namespace BonniePDF.Examples.Templates.CourseCertificate;
 

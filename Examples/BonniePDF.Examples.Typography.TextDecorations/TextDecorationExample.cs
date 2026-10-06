@@ -1,9 +1,4 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
-using BonniePDF.Typography;
+using BonniePDF;
 
 namespace BonniePDF.Examples.Typography.TextDecorations;
 

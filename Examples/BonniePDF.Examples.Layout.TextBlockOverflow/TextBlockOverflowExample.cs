@@ -1,8 +1,4 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Prototyping;
-using BonniePDF.Typography;
+using BonniePDF;
 
 namespace BonniePDF.Examples.Layout.TextBlockOverflow;
 

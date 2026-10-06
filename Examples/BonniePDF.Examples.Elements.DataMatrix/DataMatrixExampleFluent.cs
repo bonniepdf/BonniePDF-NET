@@ -1,10 +1,5 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Extensions;
+using BonniePDF;
 using BonniePDF.Fluent;
-using BonniePDF.Fluent.Descriptors;
-using BonniePDF.Fluent.Extensions;
-using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Elements.DataMatrix;
 

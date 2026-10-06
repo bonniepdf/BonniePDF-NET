@@ -1,12 +1,5 @@
 using System.Globalization;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
-using BonniePDF.Typography;
+using BonniePDF;
 using static BonniePDF.Examples.Templates.RegionalInvoices.InvoiceKit;
 
 namespace BonniePDF.Examples.Templates.RegionalInvoices;

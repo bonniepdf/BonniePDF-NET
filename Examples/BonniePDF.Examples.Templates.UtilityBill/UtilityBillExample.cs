@@ -1,16 +1,6 @@
 using System.Globalization;
-using BonniePDF.Charts;
-using BonniePDF.Charts.Models;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
+using BonniePDF;
 using BonniePDF.Drawing;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Drawing;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Templates.UtilityBill;
 

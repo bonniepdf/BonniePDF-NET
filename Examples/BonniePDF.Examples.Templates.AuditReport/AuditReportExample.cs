@@ -1,13 +1,5 @@
 using System.Globalization;
-using BonniePDF.Charts;
-using BonniePDF.Charts.Models;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
+using BonniePDF;
 
 namespace BonniePDF.Examples.Templates.AuditReport;
 

@@ -1,10 +1,5 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
+using BonniePDF;
 using BonniePDF.Drawing;
-using BonniePDF.Elements.Drawing;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
 
 namespace BonniePDF.Examples.Templates.AnnualReportCovers;
 
