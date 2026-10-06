@@ -1,8 +1,5 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
-using Align = BonniePDF.Elements.Text.TextAlignment;
+using BonniePDF;
+using Align = BonniePDF.TextAlignment;
 
 namespace BonniePDF.Examples.Typography.Alignment;
 

@@ -1,14 +1,10 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
+using BonniePDF;
 
 
 namespace BonniePDF.Examples.Elements.ColorPaletteSwatches;
 
 /// <summary>
-/// Draws the entire <see cref="BonniePDF.Core.ColorPalette"/> as a swatch grid - all 22 Tailwind v4
+/// Draws the entire <see cref="BonniePDF.ColorPalette"/> as a swatch grid - all 22 Tailwind v4
 /// ramps × 11 shades, rendered as little squares via <c>ColorPalette[name][shade]</c>. Doubles as a
 /// living reference for the palette tokens.
 /// </summary>

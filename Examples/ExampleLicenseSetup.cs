@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using BonniePDF.Licensing;
+using BonniePDF;
 
 namespace BonniePDF.Examples.Shared;
 

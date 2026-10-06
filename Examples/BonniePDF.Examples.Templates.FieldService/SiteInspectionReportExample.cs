@@ -1,13 +1,5 @@
 using System.Globalization;
-using BonniePDF.Charts;
-using BonniePDF.Charts.Models;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
+using BonniePDF;
 using static BonniePDF.Examples.Templates.FieldService.FieldKit;
 
 namespace BonniePDF.Examples.Templates.FieldService;

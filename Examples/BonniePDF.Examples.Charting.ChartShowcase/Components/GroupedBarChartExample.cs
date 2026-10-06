@@ -1,12 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
-using BonniePDF.Charts;
-using BonniePDF.Charts.Models;
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
-using BonniePDF.Typography;
+using BonniePDF;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 

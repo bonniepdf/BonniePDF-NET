@@ -1,5 +1,5 @@
 using System.Globalization;
-using BonniePDF.Charts.Models;
+using BonniePDF;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Data;
 

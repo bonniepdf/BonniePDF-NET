@@ -1,9 +1,4 @@
-using BonniePDF.Configuration;
-using BonniePDF.Typography;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Extensions;
-using BonniePDF.Security.Permissions;
+using BonniePDF;
 
 namespace BonniePDF.Examples.Security.Encryption;
 

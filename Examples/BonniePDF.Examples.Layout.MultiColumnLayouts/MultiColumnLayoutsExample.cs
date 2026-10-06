@@ -1,11 +1,4 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Media;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Elements.Text;
-using BonniePDF.Prototyping;
-using BonniePDF.Typography;
+using BonniePDF;
 
 namespace BonniePDF.Examples.Layout.MultiColumnLayouts;
 

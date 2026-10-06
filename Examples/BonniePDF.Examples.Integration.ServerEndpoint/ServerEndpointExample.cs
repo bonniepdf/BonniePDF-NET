@@ -1,9 +1,4 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Layout;
-using BonniePDF.Elements.Tables;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
+using BonniePDF;
 using static BonniePDF.Examples.Shared.TradeKit;
 
 namespace BonniePDF.Examples.Integration.ServerEndpoint;

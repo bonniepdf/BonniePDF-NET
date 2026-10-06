@@ -1,9 +1,4 @@
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Lists;
-using BonniePDF.Elements.Shapes;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
+using BonniePDF;
 
 namespace BonniePDF.Examples.Basics.SimpleDocument;
 
