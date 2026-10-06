@@ -84,4 +84,13 @@ public class ImageInfo
     /// EXIF orientation. Mirror of <see cref="DisplayWidth"/>.
     /// </summary>
     public int DisplayHeight => Orientation is >= 5 and <= 8 ? Width : Height;
+
+    /// <summary>The content-hash key the resource registry identifies this image by, computed once.</summary>
+    internal string? ContentKey { get; set; }
+
+    /// <summary>
+    /// A copy that shares this image's pixel arrays but not its settings, so the element placing it can set
+    /// <see cref="KeepResolution"/> without affecting any other placement of the same cached image.
+    /// </summary>
+    internal ImageInfo ShallowClone() => (ImageInfo)MemberwiseClone();
 }

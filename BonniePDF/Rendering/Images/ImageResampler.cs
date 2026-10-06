@@ -106,6 +106,9 @@ internal static class ImageResampler
         long[] rowColor = new long[targetWidth * cc];
         long[] rowAlpha = alpha == null ? [] : new long[targetWidth];
 
+        // A source row on the boundary of two destination rows is weighted horizontally once, not twice.
+        int rowInBuffer = -1;
+
         for (int y = 0; y < targetHeight; y++)
         {
             Array.Clear(accColor);
@@ -115,34 +118,16 @@ internal static class ImageResampler
             {
                 int sy = yFirst[y] + k;
                 long oy = yWeight[yOffset[y] + k];
-                int rowStart = sy * sourceWidth;
 
-                for (int x = 0; x < targetWidth; x++)
+                if (sy != rowInBuffer)
                 {
-                    int wOff = xOffset[x];
-                    long a = 0;
-                    for (int c = 0; c < cc; c++) rowColor[x * cc + c] = 0;
-
-                    for (int m = 0; m < xCount[x]; m++)
-                    {
-                        long ox = xWeight[wOff + m];
-                        int p = rowStart + xFirst[x] + m;
-                        if (alpha == null)
-                        {
-                            for (int c = 0; c < cc; c++) rowColor[x * cc + c] += ox * color[p * cc + c];
-                        }
-                        else
-                        {
-                            long oa = ox * alpha[p];
-                            a += oa;
-                            for (int c = 0; c < cc; c++) rowColor[x * cc + c] += oa * color[p * cc + c];
-                        }
-                    }
-
-                    if (alpha != null) rowAlpha[x] = a;
-                    for (int c = 0; c < cc; c++) accColor[x * cc + c] += oy * rowColor[x * cc + c];
-                    if (alpha != null) accAlpha[x] += oy * rowAlpha[x];
+                    HorizontalRow(color, alpha, sy * sourceWidth, cc, targetWidth, xFirst, xCount, xOffset, xWeight,
+                        rowColor, rowAlpha);
+                    rowInBuffer = sy;
                 }
+
+                for (int i = 0; i < accColor.Length; i++) accColor[i] += oy * rowColor[i];
+                for (int i = 0; i < accAlpha.Length; i++) accAlpha[i] += oy * rowAlpha[i];
             }
 
             for (int x = 0; x < targetWidth; x++)
@@ -164,6 +149,90 @@ internal static class ImageResampler
         }
 
         return outColor;
+    }
+
+    /// <summary>
+    /// Weights one source row horizontally into <paramref name="rowColor"/> (and <paramref name="rowAlpha"/>):
+    /// each destination column is the sum of the source samples it overlaps times their overlap. With alpha
+    /// the colour is weighted by alpha as well, which makes the average premultiplied.
+    /// </summary>
+    private static void HorizontalRow(byte[] color, byte[]? alpha, int rowStart, int cc, int targetWidth,
+        int[] xFirst, int[] xCount, int[] xOffset, int[] xWeight, long[] rowColor, long[] rowAlpha)
+    {
+        if (alpha == null)
+        {
+            if (cc == 3)
+            {
+                for (int x = 0; x < targetWidth; x++)
+                {
+                    long r = 0, g = 0, b = 0;
+                    int p = (rowStart + xFirst[x]) * 3;
+                    int w = xOffset[x];
+                    for (int end = w + xCount[x]; w < end; w++, p += 3)
+                    {
+                        long ox = xWeight[w];
+                        r += ox * color[p];
+                        g += ox * color[p + 1];
+                        b += ox * color[p + 2];
+                    }
+
+                    rowColor[x * 3] = r;
+                    rowColor[x * 3 + 1] = g;
+                    rowColor[x * 3 + 2] = b;
+                }
+
+                return;
+            }
+
+            for (int x = 0; x < targetWidth; x++)
+            {
+                for (int c = 0; c < cc; c++) rowColor[x * cc + c] = 0;
+                int p = (rowStart + xFirst[x]) * cc;
+                int w = xOffset[x];
+                for (int end = w + xCount[x]; w < end; w++, p += cc)
+                {
+                    long ox = xWeight[w];
+                    for (int c = 0; c < cc; c++) rowColor[x * cc + c] += ox * color[p + c];
+                }
+            }
+
+            return;
+        }
+
+        for (int x = 0; x < targetWidth; x++)
+        {
+            long a = 0;
+            int p = rowStart + xFirst[x];
+            int w = xOffset[x];
+            if (cc == 3)
+            {
+                long r = 0, g = 0, b = 0;
+                for (int end = w + xCount[x]; w < end; w++, p++)
+                {
+                    long oa = xWeight[w] * alpha[p];
+                    a += oa;
+                    r += oa * color[p * 3];
+                    g += oa * color[p * 3 + 1];
+                    b += oa * color[p * 3 + 2];
+                }
+
+                rowColor[x * 3] = r;
+                rowColor[x * 3 + 1] = g;
+                rowColor[x * 3 + 2] = b;
+            }
+            else
+            {
+                for (int c = 0; c < cc; c++) rowColor[x * cc + c] = 0;
+                for (int end = w + xCount[x]; w < end; w++, p++)
+                {
+                    long oa = xWeight[w] * alpha[p];
+                    a += oa;
+                    for (int c = 0; c < cc; c++) rowColor[x * cc + c] += oa * color[p * cc + c];
+                }
+            }
+
+            rowAlpha[x] = a;
+        }
     }
 
     /// <summary>round(n / d) with halves rounding up, for non-negative n and positive d.</summary>

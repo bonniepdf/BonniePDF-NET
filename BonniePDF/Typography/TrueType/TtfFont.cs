@@ -60,6 +60,59 @@ internal class TtfFont
         Parse();
     }
 
+    // A parsed font is read-only, so one parse can serve every document and thread that uses the font.
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<byte[], TtfFont> ByBytes = new();
+    private static readonly object FileCacheGate = new();
+    private static readonly Dictionary<string, (long Length, long Ticks, TtfFont Font)> ByFile = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Like <see cref="LoadFromBytes"/>, but parses a given array once: the result is kept for as long as the
+    /// array is alive, so a font registered once and used by every document is not re-parsed for each.
+    /// </summary>
+    public static TtfFont LoadFromBytesCached(byte[] bytes)
+    {
+        ArgumentNullException.ThrowIfNull(bytes);
+        if (FontCache.MaxFiles <= 0) return LoadFromBytes(bytes);
+        return ByBytes.GetValue(bytes, static b => new TtfFont(b));
+    }
+
+    /// <summary>
+    /// Like <c>new TtfFont(path)</c>, but reads and parses a font file once, and again only if the file changes.
+    /// At most <see cref="FontCache.MaxFiles"/> files are kept; the least recently loaded is dropped first.
+    /// </summary>
+    public static TtfFont LoadFromFileCached(string filePath)
+    {
+        if (FontCache.MaxFiles <= 0) return new TtfFont(filePath);
+
+        FileInfo file = new(filePath);
+        if (!file.Exists)
+            throw new FileNotFoundException("Font file not found", filePath);
+
+        string key = file.FullName;
+        long ticks = file.LastWriteTimeUtc.Ticks;
+        lock (FileCacheGate)
+        {
+            if (ByFile.TryGetValue(key, out var hit) && hit.Length == file.Length && hit.Ticks == ticks)
+                return hit.Font;
+        }
+
+        TtfFont font = new(filePath);
+        lock (FileCacheGate)
+        {
+            ByFile.Remove(key);
+            while (ByFile.Count >= FontCache.MaxFiles && ByFile.Count > 0)
+                ByFile.Remove(ByFile.Keys.First());
+            ByFile[key] = (file.Length, ticks, font);
+        }
+
+        return font;
+    }
+
+    internal static void ClearFileCache()
+    {
+        lock (FileCacheGate) ByFile.Clear();
+    }
+
     // =====================================================
     // PUBLIC PROPERTIES (from parsed tables)
     // =====================================================

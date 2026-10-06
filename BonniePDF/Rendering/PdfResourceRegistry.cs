@@ -269,7 +269,7 @@ internal class PdfResourceRegistry
     {
         if (!EmbeddedFonts.ContainsKey(key))
         {
-            TtfFont font = TtfFont.LoadFromBytes(bytes);
+            TtfFont font = TtfFont.LoadFromBytesCached(bytes);
             GlyphUsageTracker tracker = new(font);
 
             _fontCounter++;
@@ -294,7 +294,7 @@ internal class PdfResourceRegistry
     {
         if (!EmbeddedFonts.TryGetValue(filePath, out EmbeddedFontInfo? existingFont))
         {
-            TtfFont font = new(filePath);
+            TtfFont font = TtfFont.LoadFromFileCached(filePath);
             GlyphUsageTracker tracker = new(font);
 
             _fontCounter++;
@@ -600,7 +600,10 @@ internal class PdfResourceRegistry
             return info;
         }
 
-        ImageInfo reduced = ImageResampler.Resample(info, targetWidth, targetHeight);
+        // The reduction depends only on the image and the target size, so documents that embed the same
+        // image at the same size share one reduced copy.
+        ImageInfo reduced = ImageCache.GetOrAdd($"r|{key}|{targetWidth}x{targetHeight}",
+            () => ImageResampler.Resample(info, targetWidth, targetHeight));
         long samplesPerPixel = info.Components + (info.HasAlpha ? 1 : 0);
         long saved = ((long)info.Width * info.Height - (long)targetWidth * targetHeight) * samplesPerPixel;
         Diagnostics.Add(new Diagnostic(DiagnosticSeverity.Info, DiagnosticCategory.Image,
@@ -610,14 +613,14 @@ internal class PdfResourceRegistry
         return reduced;
     }
 
-    private readonly System.Runtime.CompilerServices.ConditionalWeakTable<ImageInfo, string> _imageKeys = new();
-
     /// <summary>The content-hash key for an image, computed once per decoded image.</summary>
-    private string ImageKey(ImageInfo info) => _imageKeys.GetValue(info, i =>
+    private static string ImageKey(ImageInfo info) => info.ContentKey ??= ContentKeyOf(info);
+
+    internal static string ContentKeyOf(ImageInfo info)
     {
-        byte[] dataToHash = i.OriginalData != null && i.OriginalData.Length > 0 ? i.OriginalData : i.Data;
+        byte[] dataToHash = info.OriginalData != null && info.OriginalData.Length > 0 ? info.OriginalData : info.Data;
         return "img_" + ComputeHash(dataToHash);
-    });
+    }
 
     private static string ComputeHash(byte[] data)
     {
