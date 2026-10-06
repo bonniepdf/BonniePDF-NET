@@ -86,7 +86,7 @@ First, declare which licence applies to you — once, at application startup. It
 self-declaration: no key, no activation, no telemetry. See [Licence](#licence).
 
 ```csharp
-using BonniePDF.Licensing;
+using BonniePDF;
 
 BonniePdfLicense.Tier = LicenseTier.Community;
 // or Evaluation / Professional / Enterprise
@@ -95,10 +95,7 @@ BonniePdfLicense.Tier = LicenseTier.Community;
 Then build a document:
 
 ```csharp
-using BonniePDF.Configuration;
-using BonniePDF.Core;
-using BonniePDF.Elements.Text;
-using BonniePDF.Typography;
+using BonniePDF;
 
 Document document = new();
 
@@ -136,8 +133,8 @@ A `Document` starts with its first page ready to use. Add elements in reading or
 ### Fluent API
 
 ```csharp
+using BonniePDF;
 using BonniePDF.Fluent;
-using BonniePDF.Fluent.Extensions;
 
 Pdf.Create(document =>
 {
@@ -161,6 +158,8 @@ byte[] bytes = await document.GenerateBytesAsync();
 ```
 
 ## Capabilities
+
+Native [rotation](https://www.bonniepdf.dev/docs/dotnet/rotation) supports constrained quarter turns through `RotateClockwise(contentWidth?)` and `RotateCounterclockwise(contentWidth?)`, and free angles through `Rotate(angle)`. The object model exposes the same behavior through `Rotate`. Text stays selectable, SVG previews and link bounds follow the transform, and the subtree stays on one page. Free angles keep the original flow box and need surrounding clearance.
 
 | Area                  | Included                                                                                                                                |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -199,7 +198,7 @@ Professional covers one named legal entity with unlimited developers; Enterprise
 BonniePDF asks your application to state which tier applies to it, once at startup:
 
 ```csharp
-using BonniePDF.Licensing;
+using BonniePDF;
 
 BonniePdfLicense.Tier = LicenseTier.Community;
 ```
