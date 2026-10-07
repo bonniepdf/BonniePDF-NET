@@ -256,6 +256,45 @@ public partial class DocumentFontsTests
         Assert.Equal(Mask(a.GenerateBytes()), Mask(b.GenerateBytes()));
     }
 
+    [Theory]
+    [InlineData("virtual:docfont/1/inter:400:n", "bpf-docfont-inter-400-n")]
+    [InlineData("virtual:docfont/999/inter:400:n", "bpf-docfont-inter-400-n")]
+    [InlineData("virtual:docfont/2/inter:700:i", "bpf-docfont-inter-700-i")]
+    [InlineData("virtual:fallback:virtual:docfont/3/inter:400:n", "bpf-virtual-fallback-docfont-inter-400-n")]
+    [InlineData("Helvetica-Bold", "bpf-helvetica-bold")]
+    public void UsesStableSvgFaceAlias(string input, string expected)
+        => Assert.Equal(expected, BonniePDF.Drawing.SvgCanvas.EmbeddedFontFamily(input));
+
+    [Fact]
+    public void ExportsSameSvgReferencesForIndependentlyCreatedDocuments()
+    {
+        static BonniePDF.Document Build()
+        {
+            BonniePDF.Document doc = new();
+            DocumentFontFace face = doc.Fonts.Add(SansRegular, "Inter");
+            doc.Add(new TextBlock { Text = "Same face", FontName = face.FontName });
+            return doc;
+        }
+
+        using BonniePDF.Document a = Build();
+        using BonniePDF.Document b = Build();
+        var first = a.GenerateSvgDocument();
+        var second = b.GenerateSvgDocument();
+        Assert.Equal(first.Pages, second.Pages);
+        Assert.Contains("font-family:'bpf-docfont-inter-400-n'", first.FontFaceCss, StringComparison.Ordinal);
+        Assert.Contains("font-family:'bpf-docfont-inter-400-n'", second.FontFaceCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("virtual:docfont/", string.Join("", first.Pages), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task EmbedsDocumentOwnedBytesBeforeAsyncPdfPreloading()
+    {
+        using BonniePDF.Document doc = new();
+        DocumentFontFace face = doc.Fonts.Add(SansRegular, "Inter");
+        doc.Add(new TextBlock { Text = "Owned font", FontName = face.FontName });
+        Assert.Contains("/FontFile2", Encoding.Latin1.GetString(await doc.GenerateBytesAsync()), StringComparison.Ordinal);
+    }
+
     [Fact]
     public void LeavesADocumentWithoutFontsOfItsOwnExactlyAsBefore()
     {

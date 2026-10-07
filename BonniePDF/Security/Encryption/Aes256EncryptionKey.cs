@@ -32,7 +32,7 @@ internal sealed class Aes256EncryptionKey
         ComputeOwnerEntries(settings.OwnerPassword ?? "");
 
         // Compute Perms entry
-        ComputePermsEntry();
+        ComputePermsEntry(settings.EncryptMetadata);
 
         // Generate document ID
         DocumentId = PdfEncryptionKey.GenerateDocumentId();
@@ -141,7 +141,7 @@ internal sealed class Aes256EncryptionKey
     /// <summary>
     /// Computes the /Perms entry.
     /// </summary>
-    private void ComputePermsEntry()
+    private void ComputePermsEntry(bool encryptMetadata)
     {
         // Build 16-byte permissions block
         byte[] permsBlock = new byte[16];
@@ -159,7 +159,7 @@ internal sealed class Aes256EncryptionKey
         permsBlock[7] = 0xFF;
 
         // Byte 8: 'T' if encrypting metadata, 'F' otherwise
-        permsBlock[8] = (byte)'T'; // We always encrypt metadata for AES-256
+        permsBlock[8] = (byte)(encryptMetadata ? 'T' : 'F');
 
         // Bytes 9-11: 'adb'
         permsBlock[9] = (byte)'a';

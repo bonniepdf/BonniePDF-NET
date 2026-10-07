@@ -162,7 +162,7 @@ internal sealed class PdfEncryptionKey
         permBytes[3] = (byte)((permissions >> 24) & 0xFF);
 
         byte[] toHash;
-        if (_revision >= 3 && !encryptMetadata)
+        if (_revision >= 4 && !encryptMetadata)
         {
             // Add 0xFFFFFFFF if not encrypting metadata
             byte[] noEncryptFlag = { 0xFF, 0xFF, 0xFF, 0xFF };

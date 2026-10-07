@@ -245,14 +245,12 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
         // Render headers if pending (first page or continuation with RepeatHeadersOnNewPage).
         // On the first page the header rows are tagged as THead (structural).
-        // On continuation pages the repeated rows are purely presentational, so they are
-        // wrapped in /Artifact to avoid a second THead child under the same Table element
-        // (PDF/UA 7.2-11: a Table shall contain zero or one THead).
+        // Continuation headers use TBody so the table has exactly one THead,
+        // and their tagged cells remain outside artifact regions.
         if (_headersPending)
         {
             bool isContinuation = _lastRowRendered >= 0;
             bool theadOpen = false;
-            bool artifactOpen = false;
 
             foreach (TableRow headerRow in _headers)
             {
@@ -261,20 +259,14 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 if (ctx.CurrentY + headerHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop)
                 {
                     if (theadOpen && groupTagging != null) groupTagging!.Tree.End();
-                    if (artifactOpen) ctx.Canvas.EndArtifact();
                     return _lastRowRendered < 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
                 }
 
-                if (!theadOpen && !artifactOpen)
+                if (!theadOpen)
                 {
-                    if (isContinuation && groupTagging != null)
+                    if (groupTagging != null)
                     {
-                        ctx.Canvas.BeginArtifact();
-                        artifactOpen = true;
-                    }
-                    else if (groupTagging != null)
-                    {
-                        groupTagging.Tree.Begin(SemanticRole.THead);
+                        groupTagging.Tree.Begin(isContinuation ? SemanticRole.TBody : SemanticRole.THead);
                         theadOpen = true;
                     }
                 }
@@ -283,7 +275,6 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             }
 
             if (theadOpen && groupTagging != null) groupTagging!.Tree.End();
-            if (artifactOpen) ctx.Canvas.EndArtifact();
             _headersPending = false;
         }
 

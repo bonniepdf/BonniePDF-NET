@@ -39,7 +39,7 @@ internal class SvgIdAllocator
 /// In multipage mode, each page is wrapped in a group with id="pageN" and
 /// translated vertically to stack pages.
 /// </summary>
-internal class SvgCanvas : ICanvas
+internal partial class SvgCanvas : ICanvas
 {
     private readonly StringBuilder _sb;
     private readonly float _xOffset;
@@ -1331,6 +1331,8 @@ internal class SvgCanvas : ICanvas
     /// </summary>
     public static string EmbeddedFontFamily(string fontFamily)
     {
+        // Document-local selection names carry process identity, which must not enter SVG output.
+        fontFamily = DocumentFontIdentity().Replace(fontFamily, "docfont/");
         var sb = new StringBuilder("bpf-");
         foreach (char c in fontFamily.ToLowerInvariant())
             sb.Append((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ? c : '-');
@@ -1339,6 +1341,9 @@ internal class SvgCanvas : ICanvas
         while (s.Contains("--")) s = s.Replace("--", "-");
         return s.Trim('-');
     }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"virtual:docfont/\d+/", System.Text.RegularExpressions.RegexOptions.CultureInvariant, 1000)]
+    private static partial System.Text.RegularExpressions.Regex DocumentFontIdentity();
 
     /// <summary>
     /// Generic CSS family to sit behind the embedded face, so text still renders

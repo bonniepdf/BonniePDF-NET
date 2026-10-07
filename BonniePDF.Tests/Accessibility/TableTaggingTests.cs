@@ -13,6 +13,25 @@ namespace BonniePDF.Tests.Accessibility;
 /// </summary>
 public class TableTaggingTests
 {
+    [Fact]
+    public void RepeatedHeadersUseBodyGroupsAfterOneHeadGroup()
+    {
+        using BonniePDF.Document doc = new(new DocumentSettings
+        {
+            PageSize = new PdfSize(200, 150), Margin = 10,
+            Accessibility = AccessibilityMode.PdfUa1, Language = "en-GB"
+        });
+        Table table = new(100f);
+        table.AddHeader(new TextBlock { Text = "Column", FontSize = 12 });
+        for (int i = 0; i < 20; i++) table.AddRow(new TextBlock { Text = "Value", FontSize = 12 });
+        doc.Add(table);
+        int pages = doc.GenerateSvgDocument().Pages.Count;
+        Assert.True(pages > 1);
+        string pdf = Encoding.Latin1.GetString(doc.GenerateBytes());
+        Assert.Equal(1, pdf.Split("/S /THead", StringSplitOptions.None).Length - 1);
+        Assert.Equal(pages * 2 - 1, pdf.Split("/S /TBody", StringSplitOptions.None).Length - 1);
+    }
+
     private static string GenerateTaggedTable(System.Action<Table> populate, System.Action<Table> hookHeader = null)
     {
         using var doc = new BonniePDF.Document();

@@ -11,6 +11,23 @@ namespace BonniePDF.Tests.Export;
 // before considering the .NET mirror landed.
 public partial class LayoutSnapshotTests
 {
+    [Theory]
+    [InlineData("Barcode", "#ffffff")]
+    [InlineData("QRCode", "#ffffff")]
+    [InlineData("DataMatrix", "#ffffff")]
+    [InlineData("BarChart", "#fafafa")]
+    public void CapturesSymbolAndChartBackgrounds(string type, string expected)
+    {
+        object element = type switch
+        {
+            "Barcode" => new Barcode(),
+            "QRCode" => new QRCode(),
+            "DataMatrix" => new DataMatrix(),
+            _ => new BarChart { BackgroundColor = Color.FromHex("#fafafa") }
+        };
+        Assert.Equal(expected, LayoutRecorder.PaintOf(element, type)?.Background);
+    }
+
     [GeneratedRegex(@"/ID \[[^\]]*\]|/(?:CreationDate|ModDate) \([^)]*\)")]
     private static partial Regex TrailerId();
 

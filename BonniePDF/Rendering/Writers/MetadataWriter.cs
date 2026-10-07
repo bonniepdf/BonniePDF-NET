@@ -124,8 +124,11 @@ internal class MetadataWriter
             [PdfKeys.Common.Subtype] = "/XML"
         };
 
-        // XMP metadata must NOT be encrypted and must NOT be compressed
-        _writer!.WriteUnencryptedBinaryObject(id, dict, xmpBytes);
+        // Metadata encryption must agree with the security handler declaration.
+        if (_writer!.Encryptor is { } encryptor && (encryptor.Settings.EncryptMetadata || encryptor.Settings.Algorithm != EncryptionAlgorithm.AES_256))
+            _writer.WriteBinaryObject(id, dict, xmpBytes);
+        else
+            _writer.WriteUnencryptedBinaryObject(id, dict, xmpBytes);
     }
 
     /// <summary>
@@ -147,7 +150,10 @@ internal class MetadataWriter
             [PdfKeys.Common.Subtype] = "/XML"
         };
 
-        await _asyncWriter!.WriteUnencryptedBinaryObjectAsync(id, dict, xmpBytes, cancellationToken).ConfigureAwait(false);
+        if (_asyncWriter!.Encryptor is { } encryptor && (encryptor.Settings.EncryptMetadata || encryptor.Settings.Algorithm != EncryptionAlgorithm.AES_256))
+            await _asyncWriter.WriteBinaryObjectAsync(id, dict, xmpBytes, xmpBytes.Length, cancellationToken).ConfigureAwait(false);
+        else
+            await _asyncWriter.WriteUnencryptedBinaryObjectAsync(id, dict, xmpBytes, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

@@ -457,7 +457,16 @@ internal sealed class LayoutRecorder
             if (FontNameLooksBold(link.FontName)) paint.Bold = true;
         }
 
-        if (element is IBackgroundColor { BackgroundColor: { } background })
+        Color? ownBackground = element switch
+        {
+            IBackgroundColor fill => fill.BackgroundColor,
+            Barcode symbol => symbol.BackgroundColor,
+            QRCode symbol => symbol.BackgroundColor,
+            DataMatrix symbol => symbol.BackgroundColor,
+            ChartBase chart => chart.BackgroundColor,
+            _ => null
+        };
+        if (ownBackground is { } background)
         {
             paint.Background = ColorToHex(background);
             float backgroundAlpha = AlphaOf(background);

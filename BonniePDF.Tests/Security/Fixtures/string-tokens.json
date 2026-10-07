@@ -1,0 +1,53 @@
+{
+  "cases": [
+    {
+      "id": "nested",
+      "fragment": "<< /A (one(two)three) /B [(four) 2 0 R] >>",
+      "decodedHex": [
+        "6F6E652874776F297468726565",
+        "666F7572"
+      ],
+      "expected": "<< /A <6F6E652874776F297468726565> /B [<666F7572> 2 0 R] >>"
+    },
+    {
+      "id": "escaped",
+      "fragment": "(A\\n\\r\\t\\b\\f\\(\\)\\\\\\101\\1\\777\\z)",
+      "decodedHex": [
+        "410A0D09080C28295C4101FF7A"
+      ],
+      "expected": "<410A0D09080C28295C4101FF7A>"
+    },
+    {
+      "id": "line-endings",
+      "fragment": "(a\r\nb\rc\nd\\\r\ne\\\nf)",
+      "decodedHex": [
+        "610A620A630A646566"
+      ],
+      "expected": "<610A620A630A646566>"
+    },
+    {
+      "id": "unicode-hex",
+      "fragment": "[<FEFF 03A9> <abc> <> ()]",
+      "decodedHex": [
+        "FEFF03A9",
+        "ABC0",
+        "",
+        ""
+      ],
+      "expected": "[<FEFF03A9> <ABC0> <> <>]"
+    },
+    {
+      "id": "syntax",
+      "fragment": "<< /Name /value#28 /N 12 /R 3 0 R % (ignore) <abc>\n /S (read) >>",
+      "decodedHex": [
+        "72656164"
+      ],
+      "expected": "<< /Name /value#28 /N 12 /R 3 0 R % (ignore) <abc>\n /S <72656164> >>"
+    }
+  ],
+  "invalid": [
+    "(unterminated",
+    "<123",
+    "<GH>"
+  ]
+}

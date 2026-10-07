@@ -34,6 +34,11 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     private int _currentObjId;
     private int _encryptId;
 
+    private string EncryptObjectStrings(int id, string fragment) =>
+        Encryptor == null || id == _encryptId
+            ? fragment
+            : PdfStringEncryption.EncryptStrings(fragment, bytes => Encryptor.EncryptData(bytes, id));
+
     /// <summary>
     /// Creates a new async PDF writer that writes to a file
     /// </summary>
@@ -100,7 +105,7 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
         await _writer.WriteLineAsync($"{id} 0 obj").ConfigureAwait(false);
         await _writer.WriteLineAsync("<<").ConfigureAwait(false);
         foreach ((string key, string value) in dict)
-            await _writer.WriteLineAsync($"  {key} {value}").ConfigureAwait(false);
+            await _writer.WriteLineAsync($"  {key} {EncryptObjectStrings(id, value)}").ConfigureAwait(false);
 
         if (streamContent != null)
         {
@@ -136,7 +141,7 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
         _offsets[id] = _stream.Position;
 
         await _writer.WriteLineAsync($"{id} 0 obj").ConfigureAwait(false);
-        await _writer.WriteLineAsync(body).ConfigureAwait(false);
+        await _writer.WriteLineAsync(EncryptObjectStrings(id, body)).ConfigureAwait(false);
         await _writer.WriteLineAsync("endobj").ConfigureAwait(false);
     }
 
@@ -424,7 +429,7 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
 
     /// <summary>
     /// Writes an uncompressed binary stream object, bypassing encryption.
-    /// Used for XMP metadata which must not be encrypted even when encryption is active.
+    /// Used for XMP metadata when metadata encryption is explicitly disabled.
     /// </summary>
     public async Task WriteUnencryptedBinaryObjectAsync(int id, IDictionary<string, string> dict, byte[] streamContent,
         CancellationToken cancellationToken = default)
@@ -434,7 +439,7 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
 
         await _writer.WriteAsync($"{id} 0 obj\n<<\n").ConfigureAwait(false);
         foreach (KeyValuePair<string, string> kvp in dict)
-            await _writer.WriteAsync($"  {kvp.Key} {kvp.Value}\n").ConfigureAwait(false);
+            await _writer.WriteAsync($"  {kvp.Key} {EncryptObjectStrings(id, kvp.Value)}\n").ConfigureAwait(false);
 
         await _writer.WriteAsync($"  /Length {streamContent.Length}\n").ConfigureAwait(false);
         await _writer.WriteAsync(">>\nstream\n").ConfigureAwait(false);
@@ -509,7 +514,7 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
         // Write object header and dictionary keys
         await _writer.WriteAsync($"{id} 0 obj\n<<\n").ConfigureAwait(false);
         foreach (KeyValuePair<string, string> kvp in dict)
-            await _writer.WriteAsync($"  {kvp.Key} {kvp.Value}\n").ConfigureAwait(false);
+            await _writer.WriteAsync($"  {kvp.Key} {EncryptObjectStrings(id, kvp.Value)}\n").ConfigureAwait(false);
 
         // IMPORTANT: Write the explicit length, not the buffer length
         await _writer.WriteAsync($"  /Length {lengthToWrite}\n").ConfigureAwait(false);

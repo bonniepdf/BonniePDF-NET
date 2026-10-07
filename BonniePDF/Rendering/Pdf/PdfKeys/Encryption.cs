@@ -43,5 +43,8 @@ internal static partial class PdfKeys
 
         /// <summary>Name of the default crypt filter for strings.</summary>
         internal const string StringFilter = "/StrF";
+
+        /// <summary>Whether the security handler encrypts document metadata streams.</summary>
+        internal const string EncryptMetadata = "/EncryptMetadata";
     }
 }
