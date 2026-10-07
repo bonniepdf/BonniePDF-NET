@@ -29,7 +29,7 @@ public class EncryptionOptions
     /// </summary>
     /// <param name="password">The user password</param>
     /// <returns>This builder for method chaining</returns>
-    public EncryptionOptions WithUserPassword(string password)
+    public EncryptionOptions WithUserPassword(string? password)
     {
         _settings.UserPassword = password ?? "";
         return this;
@@ -40,7 +40,7 @@ public class EncryptionOptions
     /// </summary>
     /// <param name="password">The owner password</param>
     /// <returns>This builder for method chaining</returns>
-    public EncryptionOptions WithOwnerPassword(string password)
+    public EncryptionOptions WithOwnerPassword(string? password)
     {
         _settings.OwnerPassword = password ?? "";
         return this;
@@ -51,7 +51,7 @@ public class EncryptionOptions
     /// </summary>
     /// <param name="password">The password to use for both</param>
     /// <returns>This builder for method chaining</returns>
-    public EncryptionOptions WithPassword(string password)
+    public EncryptionOptions WithPassword(string? password)
     {
         _settings.UserPassword = password ?? "";
         _settings.OwnerPassword = password ?? "";

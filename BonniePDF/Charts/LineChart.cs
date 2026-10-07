@@ -43,16 +43,6 @@ public class LineChart : CartesianChartBase
     public Color LineColor { get; set; } = Color.FromHex(DefaultLineColorHex);
 
     /// <summary>
-    /// Width of the line stroke for single-series charts (backward compatibility).
-    /// </summary>
-    public float LineWidth { get; set; } = 2f;
-
-    /// <summary>
-    /// Whether to show circular markers at data points for single-series charts (backward compatibility).
-    /// </summary>
-    public bool ShowDataPointMarkers { get; set; } = true;
-
-    /// <summary>
     /// Draws the line chart elements for a single series (connecting line and optional data point markers).
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,

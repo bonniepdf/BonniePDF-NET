@@ -68,7 +68,7 @@ public class VerticalStack : ElementBase, IStatefulElement
                 if (child is IStatefulElement statefulChild)
                 {
                     // Check if this child disallows breaking across pages
-                    if (child is ElementBase { BreakAllowed: false } eb)
+                    if (child is ElementBase { BreakAllowed: false })
                     {
                         float childHeight = child.MeasureHeight(contentWidth);
                         bool wouldOverflow = ctx.CurrentY + childHeight > ctx.MaxY;

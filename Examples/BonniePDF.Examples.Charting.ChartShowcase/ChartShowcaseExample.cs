@@ -253,11 +253,9 @@ public static class ChartShowcaseExample
             Height = 400,
             StretchToFit = true,
             LineColor = Color.FromHex(ChartColors.Violet),
-            LineWidth = 2.5f,
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            ShowDataPointMarkers = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
@@ -353,7 +351,6 @@ public static class ChartShowcaseExample
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            ShowDataPointMarkers = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 
@@ -461,8 +458,6 @@ public static class ChartShowcaseExample
             Height = 400,
             StretchToFit = true,
             LollipopColor = Color.FromHex(ChartColors.Pink),
-            StemWidth = 2.5f,
-            HeadRadius = 10,
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
@@ -517,7 +512,6 @@ public static class ChartShowcaseExample
             Height = 400,
             StretchToFit = true,
             DotColor = Color.FromHex(ChartColors.Teal),
-            DotRadius = 12,
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,

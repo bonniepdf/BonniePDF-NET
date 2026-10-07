@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -229,18 +229,6 @@ internal class SvgCanvas : ICanvas
         return width;
     }
 
-    /// <summary>Records every code point of <paramref name="text"/> as used by the
-    /// embedded <paramref name="font"/>, for building a minimal subset.</summary>
-    private void RecordEmbeddedUsage(string fontFamily, TtfFont font, string text)
-    {
-        if (FontUsageSink == null) return;
-        foreach (Rune rune in text.EnumerateRunes())
-        {
-            if (Rune.IsControl(rune)) continue;
-            FontUsageSink(fontFamily, font, rune.Value);
-        }
-    }
-
     /// <summary>
     /// Paints text as explicitly positioned glyphs, one <c>&lt;text&gt;</c> element
     /// per font run, positions carried by the element's multi-value <c>x</c> list.
@@ -317,42 +305,12 @@ internal class SvgCanvas : ICanvas
     }
 
     /// <summary>
-    /// Drops code points <paramref name="font"/> has no glyph for, so they are
-    /// never emitted against a face that cannot draw them (which would let the
-    /// viewer substitute a system font).
-    /// <para>
-    /// Used by the draw paths that emit a single <c>&lt;text&gt;</c> with one
-    /// <c>font-family</c> and let the viewer lay the glyphs out. Those cannot
-    /// represent a multi-font run, so uncovered code points are dropped rather
-    /// than routed to a fallback face; only <see cref="DrawText"/> positions
-    /// glyphs itself and can therefore switch fonts mid-string.
-    /// </para>
-    /// </summary>
-    private static string FilterToCoveredText(TtfFont font, string text)
-    {
-        var kept = new StringBuilder(text.Length);
-        bool dropped = false;
-        foreach (Rune rune in text.EnumerateRunes())
-        {
-            if (font.GetGlyphId(rune.Value) == 0 && !Rune.IsWhiteSpace(rune))
-            {
-                dropped = true;
-                continue;
-            }
-
-            kept.Append(rune.ToString());
-        }
-
-        return dropped ? kept.ToString() : text;
-    }
-
-    /// <summary>
     /// Formats a coordinate. When <see cref="SvgRenderOptions.Precision"/> is set
     /// the value is rounded to that many decimals (invariant, trailing zeros
     /// trimmed) for compact, deterministic output; otherwise it is emitted
     /// verbatim to preserve the legacy chart golden output.
     /// </summary>
-    private string N(float v) => Options.Precision is int p
+    private string N(float v) => Options.Precision is not null
         ? N((double)v)
         // SVG/XML numeric values must use '.' as the decimal separator regardless
         // of the host locale. Always format invariantly - emitting CurrentCulture
@@ -613,7 +571,7 @@ internal class SvgCanvas : ICanvas
     /// Fills a closed path defined by a series of points.
     /// No coordinate transformation needed for SVG.
     /// </summary>
-    public void FillPath(IList<Point> points, Color color)
+    public void FillPath(IList<Point>? points, Color color)
     {
         if (points == null || points.Count < 3) return;
 
@@ -1117,7 +1075,6 @@ internal class SvgCanvas : ICanvas
         _currentPathData.Clear();
     }
 
-    /// <inheritdoc />
     /// <summary>Pending letter spacing in points, applied by the next DrawText.</summary>
     private float _letterSpacing;
     /// <summary>Pending word spacing in points, applied by the next DrawText.</summary>

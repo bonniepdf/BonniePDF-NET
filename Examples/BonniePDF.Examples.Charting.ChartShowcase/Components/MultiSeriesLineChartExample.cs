@@ -121,7 +121,6 @@ public static class MultiSeriesLineChartExample
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            ShowDataPointMarkers = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 

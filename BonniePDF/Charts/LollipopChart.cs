@@ -38,16 +38,6 @@ public class LollipopChart : CartesianChartBase
     public Color LollipopColor { get; set; } = Color.FromHex(DefaultColorHex);
 
     /// <summary>
-    /// Width of the stem line (backward compatibility).
-    /// </summary>
-    public float StemWidth { get; set; } = 2f;
-
-    /// <summary>
-    /// Radius of the lollipop head (circle) (backward compatibility).
-    /// </summary>
-    public float HeadRadius { get; set; } = DefaultHeadRadiusValue;
-
-    /// <summary>
     /// Draws the lollipop chart elements for a single series (stems and heads).
     /// In vertical mode stems are vertical lines; in horizontal mode they are horizontal lines.
     /// </summary>

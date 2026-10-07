@@ -60,7 +60,6 @@ internal static class PdfRenderPipeline
             // for Y-axis coordinate transformation. If we set dimensions after, the canvas
             // will use stale values from the previous page, causing incorrect text positioning.
             float pageWidth = page.Width;
-            float pageHeight = page.Height;
             // Pages created from document settings inherit the margin lazily, so a
             // DocumentSettings assigned after construction still reaches page 1.
             float pageMargin = page.HasExplicitMargin ? page.Margin : settings.Margin;
@@ -261,7 +260,7 @@ internal static class PdfRenderPipeline
 
         // Get the oriented page size from settings - this respects orientation changes
         // made after the document was created (e.g., doc.Settings.Orientation = Landscape)
-        PdfSize orientedPageSize = settings.GetOrientedPageSize();
+        settings.GetOrientedPageSize();
 
         // Header/footer consume body content height (spec: Layout & Pagination
         // §5.1). The context is supplied by the caller here, so the reservation
@@ -280,7 +279,6 @@ internal static class PdfRenderPipeline
             // IMPORTANT: Update dimensions BEFORE SwitchToPage so the canvas
             // is created with the correct PageHeight for Y-axis transformation
             float pageWidth = page.Width;
-            float pageHeight = page.Height;
             // Pages created from document settings inherit the margin lazily, so a
             // DocumentSettings assigned after construction still reaches page 1.
             float pageMargin = page.HasExplicitMargin ? page.Margin : settings.Margin;

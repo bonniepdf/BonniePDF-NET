@@ -5,6 +5,29 @@ namespace BonniePDF.Tests.Metadata;
 
 public class XmpMetadataTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task XmpPacket_BeginsWithUtf8ByteOrderMark(bool asynchronous)
+    {
+        using BonniePDF.Document doc = new();
+        doc.Settings.Conformance = PdfAConformance.PdfA2b;
+
+        using MemoryStream ms = new();
+        if (asynchronous)
+            await doc.SaveAsync(ms, true);
+        else
+            doc.Save(ms, true);
+
+        byte[] bytes = ms.ToArray();
+        byte[] header = System.Text.Encoding.ASCII.GetBytes("<?xpacket begin=\"");
+        int at = bytes.AsSpan().IndexOf(header);
+        Assert.True(at >= 0, "The PDF must contain an XMP packet header.");
+        // U+FEFF must be encoded as EF BB BF, followed by the closing quote.
+        Assert.Equal(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'"' },
+            bytes.AsSpan(at + header.Length, 4).ToArray());
+    }
+
     [Fact]
     public void Pdf17_ContainsXmpMetadata()
     {

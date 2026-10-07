@@ -138,14 +138,6 @@ internal class PdfResourceRegistry
     private readonly Dictionary<string, AlphaGraphicsStateInfo> _alphaGraphicsStates = new();
     private readonly List<ShadingResourceInfo> _shadings = new();
 
-    private static readonly HashSet<string> StandardFontNames = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Helvetica", "Helvetica-Bold", "Helvetica-Oblique", "Helvetica-BoldOblique",
-        "Times-Roman", "Times-Bold", "Times-Italic", "Times-BoldItalic",
-        "Courier", "Courier-Bold", "Courier-Oblique", "Courier-BoldOblique",
-        "Symbol", "ZapfDingbats",
-    };
-
     /// <summary>
     /// Registers a font and returns its resource name (e.g., /F1).
     /// </summary>
@@ -163,8 +155,8 @@ internal class PdfResourceRegistry
 
         // (B) Already registered as a virtual (bytes-based) font
         string virtualKey = $"virtual:{fontIdentifier}";
-        if (EmbeddedFonts.ContainsKey(virtualKey))
-            return EmbeddedFonts[virtualKey].ResourceName;
+        if (EmbeddedFonts.TryGetValue(virtualKey, out EmbeddedFontInfo? registeredFont))
+            return registeredFont.ResourceName;
 
         if (ShouldEmbedStandardFonts)
         {
@@ -292,7 +284,7 @@ internal class PdfResourceRegistry
 
     private string RegisterEmbeddedFont(string filePath)
     {
-        if (!EmbeddedFonts.TryGetValue(filePath, out EmbeddedFontInfo? existingFont))
+        if (!EmbeddedFonts.ContainsKey(filePath))
         {
             TtfFont font = TtfFont.LoadFromFileCached(filePath);
             GlyphUsageTracker tracker = new(font);
@@ -717,18 +709,6 @@ internal class PdfResourceRegistry
         return new ShadingResources(shadingName, softMaskGsName);
     }
 
-    private static string MapToStandardFontName(string fontIdentifier)
-    {
-        string lower = fontIdentifier.ToLowerInvariant();
-        return lower switch
-        {
-            var s when s.Contains("arial") || s.Contains("helvetica") => StandardFonts.Helvetica,
-            var s when s.Contains("times") => StandardFonts.TimesRoman,
-            var s when s.Contains("courier") || s.Contains("mono") => StandardFonts.Courier,
-            _ => StandardFonts.Helvetica
-        };
-    }
-
     private int ResolveFontObjectId(string fontIdentifier)
     {
         if (FontAliasMap.TryGetValue(fontIdentifier, out string? ttfPath) &&
@@ -820,10 +800,10 @@ internal class PdfResourceRegistry
 
             Dictionary<string, string> dict = new()
             {
-                ["/Type"] = "/XObject",
-                ["/Subtype"] = "/Form",
-                ["/BBox"] = $"[0 -{info.FontSize * 2} 100 0]",
-                ["/Resources"] = $"<< /Font << {info.FontResourceName} {ResolveFontObjectId(info.FontIdentifier)} 0 R >> >>"
+                [PdfKeys.Common.Type] = "/XObject",
+                [PdfKeys.Common.Subtype] = "/Form",
+                [PdfKeys.Form.BoundingBox] = $"[0 -{info.FontSize * 2} 100 0]",
+                [PdfKeys.Form.Resources] = $"<< /Font << {info.FontResourceName} {ResolveFontObjectId(info.FontIdentifier)} 0 R >> >>"
             };
 
             writer.WriteObject(id, dict, content);
@@ -894,9 +874,9 @@ internal class PdfResourceRegistry
             float alphaValue = info.Alpha;
             writer.WriteObject(objectId, new Dictionary<string, string>
             {
-                ["/Type"] = "/ExtGState",
-                ["/ca"] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture),
-                ["/CA"] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)
+                [PdfKeys.Common.Type] = "/ExtGState",
+                [PdfKeys.GraphicsState.FillAlpha] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture),
+                [PdfKeys.GraphicsState.StrokeAlpha] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)
             });
             graphicsStateRefs.Add($"{info.ResourceName} {objectId} 0 R");
         }
@@ -1012,10 +992,10 @@ internal class PdfResourceRegistry
 
             Dictionary<string, string> dict = new()
             {
-                ["/Type"] = "/XObject",
-                ["/Subtype"] = "/Form",
-                ["/BBox"] = $"[0 -{info.FontSize * 2} 100 0]",
-                ["/Resources"] = $"<< /Font << {info.FontResourceName} {ResolveFontObjectId(info.FontIdentifier)} 0 R >> >>"
+                [PdfKeys.Common.Type] = "/XObject",
+                [PdfKeys.Common.Subtype] = "/Form",
+                [PdfKeys.Form.BoundingBox] = $"[0 -{info.FontSize * 2} 100 0]",
+                [PdfKeys.Form.Resources] = $"<< /Font << {info.FontResourceName} {ResolveFontObjectId(info.FontIdentifier)} 0 R >> >>"
             };
 
             await writer.WriteObjectAsync(id, dict, content, cancellationToken).ConfigureAwait(false);
@@ -1086,9 +1066,9 @@ internal class PdfResourceRegistry
             float alphaValue = info.Alpha;
             await writer.WriteObjectAsync(objectId, new Dictionary<string, string>
             {
-                ["/Type"] = "/ExtGState",
-                ["/ca"] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture),
-                ["/CA"] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)
+                [PdfKeys.Common.Type] = "/ExtGState",
+                [PdfKeys.GraphicsState.FillAlpha] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture),
+                [PdfKeys.GraphicsState.StrokeAlpha] = alphaValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)
             }, null, cancellationToken).ConfigureAwait(false);
             graphicsStateRefs.Add($"{info.ResourceName} {objectId} 0 R");
         }
@@ -1130,12 +1110,12 @@ internal class PdfResourceRegistry
         float[] b = request.Bbox;
         return new Dictionary<string, string>
         {
-            ["/Type"] = "/XObject",
-            ["/Subtype"] = "/Form",
-            ["/FormType"] = "1",
-            ["/BBox"] = $"[{Fmt(b[0])} {Fmt(b[1])} {Fmt(b[2])} {Fmt(b[3])}]",
-            ["/Group"] = "<< /Type /Group /S /Transparency /CS /DeviceGray /I true >>",
-            ["/Resources"] = $"<< /Shading << /ShM {GradientShading.BuildAlphaShadingDict(request)} >> >>"
+            [PdfKeys.Common.Type] = "/XObject",
+            [PdfKeys.Common.Subtype] = "/Form",
+            [PdfKeys.Form.FormType] = "1",
+            [PdfKeys.Form.BoundingBox] = $"[{Fmt(b[0])} {Fmt(b[1])} {Fmt(b[2])} {Fmt(b[3])}]",
+            [PdfKeys.Form.Group] = "<< /Type /Group /S /Transparency /CS /DeviceGray /I true >>",
+            [PdfKeys.Form.Resources] = $"<< /Shading << /ShM {GradientShading.BuildAlphaShadingDict(request)} >> >>"
         };
     }
 
@@ -1143,10 +1123,10 @@ internal class PdfResourceRegistry
     private static IDictionary<string, string> BuildSoftMaskGsDict(int formId) =>
         new Dictionary<string, string>
         {
-            ["/Type"] = "/ExtGState",
-            ["/SMask"] = $"<< /Type /Mask /S /Luminosity /G {formId} 0 R >>",
-            ["/ca"] = "1",
-            ["/CA"] = "1"
+            [PdfKeys.Common.Type] = "/ExtGState",
+            [PdfKeys.GraphicsState.SoftMask] = $"<< /Type /Mask /S /Luminosity /G {formId} 0 R >>",
+            [PdfKeys.GraphicsState.FillAlpha] = "1",
+            [PdfKeys.GraphicsState.StrokeAlpha] = "1"
         };
 
     private static string CombineResources(params string[] resources)

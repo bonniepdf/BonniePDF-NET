@@ -301,7 +301,7 @@ public static class FontMetrics
     /// embedded fonts because it accounts for kern pairs.
     /// Returns 0 if font is null or text is empty.
     /// </summary>
-    internal static float GetKernedStringWidth(string text, TtfFont font, float fontSize)
+    internal static float GetKernedStringWidth(string? text, TtfFont? font, float fontSize)
     {
         if (string.IsNullOrEmpty(text) || font == null) return 0;
 
@@ -459,7 +459,7 @@ public static class FontMetrics
             {
                 // 1. READ OFFSET TABLE
                 // https://learn.microsoft.com/en-us/typography/opentype/spec/otff
-                float version = reader.ReadFixed();
+                reader.ReadFixed(); // version
                 int numTables = reader.ReadUInt16();
                 reader.Skip(6); // searchRange, entrySelector, rangeShift
 
@@ -468,9 +468,9 @@ public static class FontMetrics
                 for (int i = 0; i < numTables; i++)
                 {
                     string tag = reader.ReadTag();
-                    uint checkSum = reader.ReadUInt32();
+                    reader.ReadUInt32(); // checkSum
                     uint offset = reader.ReadUInt32();
-                    uint length = reader.ReadUInt32();
+                    reader.ReadUInt32(); // length
                     tables[tag] = offset;
                 }
 
@@ -558,8 +558,8 @@ public static class FontMetrics
             if (format != 4)
                 return 0; // We only implement Format 4 (Standard Segment Mapping) for this demo
 
-            int length = reader.ReadUInt16();
-            int language = reader.ReadUInt16();
+            reader.ReadUInt16(); // length
+            reader.ReadUInt16(); // language
             int segCountX2 = reader.ReadUInt16();
             int segCount = segCountX2 / 2;
             reader.Skip(6); // searchRange, entrySelector, rangeShift

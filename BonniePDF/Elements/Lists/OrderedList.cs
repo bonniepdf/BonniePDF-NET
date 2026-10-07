@@ -36,7 +36,7 @@ public class OrderedList : ListElementBase
     /// list.AddItem("Main text");
     /// </code>
     /// </example>
-    public void AddItem(string item)
+    public void AddItem(string? item)
     {
         _items.Add(item ?? string.Empty);
     }

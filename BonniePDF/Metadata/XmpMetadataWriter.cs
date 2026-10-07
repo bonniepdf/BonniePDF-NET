@@ -71,7 +71,7 @@ internal static class XmpMetadataWriter
     {
         public const string InstructionName = "xpacket";
         // The id is a standard GUID required by the XMP specification
-        public const string BeginAttribute = "begin=\"\xEF\xBB\xBF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"";
+        public const string BeginAttribute = "begin=\"\uFEFF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"";
         public const string EndAttribute = "end=\"w\"";
     }
 

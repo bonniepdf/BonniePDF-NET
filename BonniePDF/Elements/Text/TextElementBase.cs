@@ -222,7 +222,7 @@ public abstract class TextElementBase : ElementBase
     /// that have not been explicitly set by user code. Called by the document
     /// tree-walk before rendering when DefaultTextStyle is configured.
     /// </summary>
-    public void ApplyDefaultStyleIfNotSet(TextStyle style)
+    public void ApplyDefaultStyleIfNotSet(TextStyle? style)
     {
         if (style == null) return;
 
@@ -266,7 +266,7 @@ public abstract class TextElementBase : ElementBase
 
         foreach (string segment in segments)
         {
-            List<string> wrapped = WrapSegment(segment, maxWidth);
+            IList<string> wrapped = WrapSegment(segment, maxWidth);
             if (wrapped.Count == 0)
                 // Preserve the blank line represented by an empty segment.
                 lines.Add("");
@@ -287,7 +287,7 @@ public abstract class TextElementBase : ElementBase
     /// trailing spaces and dropping the spaces at the break; failing that, it breaks at the last code
     /// point that fits. At least one code point is placed on every line, so it always terminates.
     /// </remarks>
-    protected List<string> WrapPreservingWhitespace(string text, float firstWidth, float width)
+    protected IList<string> WrapPreservingWhitespace(string text, float firstWidth, float width)
     {
         List<string> lines = [];
         if (string.IsNullOrEmpty(text)) return lines;
@@ -368,7 +368,7 @@ public abstract class TextElementBase : ElementBase
     /// <summary>
     /// Word-wraps a single break-free segment to <paramref name="maxWidth"/>.
     /// </summary>
-    protected virtual List<string> WrapSegment(string text, float maxWidth)
+    protected virtual IList<string> WrapSegment(string text, float maxWidth)
     {
         List<string> lines = [];
         if (string.IsNullOrEmpty(text)) return lines;

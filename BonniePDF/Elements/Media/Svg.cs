@@ -66,6 +66,7 @@ public class Svg : ElementBase, IRoleProvider, IAltTextProvider
     /// <c>/Alt</c>. When not set, reads as the document's own <c>&lt;title&gt;</c>,
     /// which is used in its place.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.AllowNull]
     public string AltText
     {
         get => _altText.Length > 0 ? _altText : DocumentTitle();

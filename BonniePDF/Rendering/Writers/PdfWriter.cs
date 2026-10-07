@@ -30,7 +30,6 @@ internal class PdfWriter : IPdfWriter, IDisposable
     private readonly StreamWriter _writer;
     private int _currentObjId;
     private int _encryptId;
-    private readonly PdfVersion _version;
 
     /// <summary>
     /// Creates a new PDF writer that writes to a file
@@ -39,7 +38,6 @@ internal class PdfWriter : IPdfWriter, IDisposable
     /// <param name="version">The PDF version to emit</param>
     public PdfWriter(string filename, PdfVersion version = PdfVersion.Pdf14)
     {
-        _version = version;
         _fs = new FileStream(filename, FileMode.Create);
         _stream = _fs;
         _leaveOpen = false;
@@ -62,7 +60,6 @@ internal class PdfWriter : IPdfWriter, IDisposable
         if (!stream.CanWrite)
             throw new ArgumentException("Stream must be writable", nameof(stream));
 
-        _version = version;
         _fs = null;
         _stream = stream;
         _leaveOpen = leaveOpen;
@@ -178,7 +175,7 @@ internal class PdfWriter : IPdfWriter, IDisposable
         byte[] compressedBytes = memoryStream.ToArray();
 
         // 3. Inject Filter into dictionary
-        dict["/Filter"] = "/FlateDecode";
+        dict[PdfKeys.Stream.Filter] = "/FlateDecode";
 
         // 4. Delegate to existing binary writer
         WriteBinaryObject(id, dict, compressedBytes);
@@ -194,32 +191,32 @@ internal class PdfWriter : IPdfWriter, IDisposable
     {
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/Annot",
-            ["/Subtype"] = "/Link",
-            ["/Rect"] = hyperlink.GetRectangleString(),
-            ["/F"] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
+            [PdfKeys.Common.Type] = "/Annot",
+            [PdfKeys.Common.Subtype] = "/Link",
+            [PdfKeys.Annotation.Rectangle] = hyperlink.GetRectangleString(),
+            [PdfKeys.Annotation.Flags] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
             // PDF/UA rule 7-18: /Contents on the annotation must
             // carry an alt-text that mirrors the visible link text. Used
             // by screen readers when the structure tree omits or can't
             // resolve the link's text. Emitted unconditionally - even
             // untagged docs benefit, and the field is a no-op for
             // viewers that don't surface annotation alt-text.
-            ["/Contents"] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
+            [PdfKeys.Annotation.Contents] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
         };
 
         // /StructParent wires this annotation into the parent tree
         // for reverse MCID→StructElem lookup by accessible viewers.
         if (structParentKey.HasValue)
-            dict["/StructParent"] = structParentKey.Value.ToString();
+            dict[PdfKeys.Annotation.StructureParent] = structParentKey.Value.ToString();
 
         if (hyperlink.TargetPageIndex.HasValue && pageIds != null)
         {
             int pageIdx = Math.Max(0, Math.Min(hyperlink.TargetPageIndex.Value, pageIds.Count - 1));
-            dict["/A"] = $"<< /S /GoTo /D [{pageIds[pageIdx]} 0 R /Fit] >>";
+            dict[PdfKeys.Annotation.Action] = $"<< /S /GoTo /D [{pageIds[pageIdx]} 0 R /Fit] >>";
         }
         else
         {
-            dict["/A"] = $"<< /S /URI /URI ({PdfSyntax.Escape(hyperlink.Uri ?? "")}) >>";
+            dict[PdfKeys.Annotation.Action] = $"<< /S /URI /URI ({PdfSyntax.Escape(hyperlink.Uri ?? "")}) >>";
         }
 
         WriteObject(id, dict);
@@ -313,22 +310,22 @@ internal class PdfWriter : IPdfWriter, IDisposable
         Dictionary<string, string> dict = new();
 
         if (settings.HideToolbar)
-            dict["/HideToolbar"] = "true";
+            dict[PdfKeys.ViewerPreferences.HideToolbar] = "true";
 
         if (settings.HideMenubar)
-            dict["/HideMenubar"] = "true";
+            dict[PdfKeys.ViewerPreferences.HideMenubar] = "true";
 
         if (settings.HideWindowUI)
-            dict["/HideWindowUI"] = "true";
+            dict[PdfKeys.ViewerPreferences.HideWindowUi] = "true";
 
         if (settings.FitWindow)
-            dict["/FitWindow"] = "true";
+            dict[PdfKeys.ViewerPreferences.FitWindow] = "true";
 
         if (settings.CenterWindow)
-            dict["/CenterWindow"] = "true";
+            dict[PdfKeys.ViewerPreferences.CenterWindow] = "true";
 
         if (settings.DisplayDocTitle)
-            dict["/DisplayDocTitle"] = "true";
+            dict[PdfKeys.ViewerPreferences.DisplayDocumentTitle] = "true";
 
         // Only write if there are actual preferences
         if (dict.Count == 0)
@@ -346,70 +343,70 @@ internal class PdfWriter : IPdfWriter, IDisposable
     /// <param name="firstPageId">The first page object ID (for OpenAction)</param>
     /// <param name="settings">The document settings</param>
     /// <param name="options">Optional catalog references such as outlines, XMP metadata, and PDF/A output intents.</param>
-    public void WriteCatalog(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions options)
+    public void WriteCatalog(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions? options)
     {
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/Catalog",
-            ["/Pages"] = $"{pagesId} 0 R"
+            [PdfKeys.Common.Type] = "/Catalog",
+            [PdfKeys.Catalog.Pages] = $"{pagesId} 0 R"
         };
 
         // Add OpenAction
         string openAction = GetOpenActionString(firstPageId, settings);
-        dict["/OpenAction"] = openAction;
+        dict[PdfKeys.Catalog.OpenAction] = openAction;
 
         // Add PageMode - auto-set to UseOutlines when outlines are present
         if (options?.OutlinesId > 0)
-            dict["/PageMode"] = "/UseOutlines";
+            dict[PdfKeys.Catalog.PageMode] = "/UseOutlines";
         else if (settings.PageMode != PageMode.UseNone)
-            dict["/PageMode"] = $"/{GetPageModeString(settings.PageMode)}";
+            dict[PdfKeys.Catalog.PageMode] = $"/{GetPageModeString(settings.PageMode)}";
 
         // Add ViewerPreferences if provided
-        if (options?.ViewerPrefsId > 0) dict["/ViewerPreferences"] = $"{options.ViewerPrefsId} 0 R";
+        if (options?.ViewerPrefsId > 0) dict[PdfKeys.Catalog.ViewerPreferences] = $"{options.ViewerPrefsId} 0 R";
 
         // Add Outlines if provided
-        if (options?.OutlinesId > 0) dict["/Outlines"] = $"{options.OutlinesId} 0 R";
+        if (options?.OutlinesId > 0) dict[PdfKeys.Catalog.Outlines] = $"{options.OutlinesId} 0 R";
 
         // Add XMP Metadata if provided
-        if (options?.XmpMetadataId > 0) dict["/Metadata"] = $"{options.XmpMetadataId} 0 R";
+        if (options?.XmpMetadataId > 0) dict[PdfKeys.Catalog.Metadata] = $"{options.XmpMetadataId} 0 R";
 
         // Add OutputIntents if provided (PDF/A)
         if (options?.OutputIntentIds is { Count: > 0 })
         {
             string refs = string.Join(' ', options.OutputIntentIds.ToList().ConvertAll(oid => $"{oid} 0 R"));
-            dict["/OutputIntents"] = $"[ {refs} ]";
+            dict[PdfKeys.Catalog.OutputIntents] = $"[ {refs} ]";
         }
 
         // Add MarkInfo when either PDF/A or tagging is on. Both standards
         // require /MarkInfo /Marked true; they're orthogonal flags so emitting
         // it once when either is set covers both cases.
         if (options?.PdfAEnabled == true || options?.Tagged == true)
-            dict["/MarkInfo"] = "<< /Marked true >>";
+            dict[PdfKeys.Catalog.MarkInfo] = "<< /Marked true >>";
 
         // Add StructTreeRoot when tagging is on.
         if (options?.StructTreeRootId > 0)
-            dict["/StructTreeRoot"] = $"{options.StructTreeRootId} 0 R";
+            dict[PdfKeys.Catalog.StructureTreeRoot] = $"{options.StructTreeRootId} 0 R";
 
         // Add /Lang when the document declares a natural language. Required
         // by PDF/UA-1; useful generally for assistive tech.
         if (!string.IsNullOrEmpty(options?.Language))
-            dict["/Lang"] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(options.Language)})";
+            dict[PdfKeys.Catalog.Language] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(options.Language)})";
 
         // Add Dests if provided
         if (options?.DestsId > 0)
-            dict["/Dests"] = $"{options.DestsId} 0 R";
+            dict[PdfKeys.Catalog.Destinations] = $"{options.DestsId} 0 R";
 
         // Add PageLabels if configured
         if (options?.PageLabelsId > 0)
-            dict["/PageLabels"] = $"{options.PageLabelsId} 0 R";
+            dict[PdfKeys.Catalog.PageLabels] = $"{options.PageLabelsId} 0 R";
 
         // Add /Names /EmbeddedFiles and /AF for document attachments (PDF/A-3).
         if (options?.NamesEmbeddedFilesId > 0)
-            dict["/Names"] = $"<< /EmbeddedFiles {options.NamesEmbeddedFilesId} 0 R >>";
+            dict[PdfKeys.Catalog.Names] = $"<< /EmbeddedFiles {options.NamesEmbeddedFilesId} 0 R >>";
         if (options?.AssociatedFileIds is { Count: > 0 })
         {
             string afRefs = string.Join(' ', options.AssociatedFileIds.ToList().ConvertAll(fid => $"{fid} 0 R"));
-            dict["/AF"] = $"[ {afRefs} ]";
+            dict[PdfKeys.Catalog.AssociatedFiles] = $"[ {afRefs} ]";
         }
 
         WriteObject(id, dict);
@@ -460,7 +457,7 @@ internal class PdfWriter : IPdfWriter, IDisposable
         }
 
         byte[] compressedBytes = memoryStream.ToArray();
-        dict["/Filter"] = "/FlateDecode";
+        dict[PdfKeys.Stream.Filter] = "/FlateDecode";
         WriteBinaryObject(id, dict, compressedBytes);
     }
 
@@ -540,9 +537,9 @@ internal class PdfWriter : IPdfWriter, IDisposable
 
         WriteObject(id, new Dictionary<string, string>
         {
-            ["/Type"] = "/Catalog",
-            ["/Pages"] = $"{pagesId} 0 R",
-            ["/OpenAction"] = openAction
+            [PdfKeys.Common.Type] = "/Catalog",
+            [PdfKeys.Catalog.Pages] = $"{pagesId} 0 R",
+            [PdfKeys.Catalog.OpenAction] = openAction
         });
     }
 

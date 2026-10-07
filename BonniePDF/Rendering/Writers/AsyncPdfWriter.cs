@@ -181,7 +181,7 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
             }
 
             // 6. Update Dictionary
-            dict["/Filter"] = "/FlateDecode";
+            dict[PdfKeys.Stream.Filter] = "/FlateDecode";
 
             // 7. Write to the actual PDF stream
             // IMPORTANT: Pass 'rentedBuffer' but ONLY write 'actualLength' bytes
@@ -206,27 +206,27 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     {
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/Annot",
-            ["/Subtype"] = "/Link",
-            ["/Rect"] = hyperlink.GetRectangleString(),
-            ["/F"] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
+            [PdfKeys.Common.Type] = "/Annot",
+            [PdfKeys.Common.Subtype] = "/Link",
+            [PdfKeys.Annotation.Rectangle] = hyperlink.GetRectangleString(),
+            [PdfKeys.Annotation.Flags] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
             // PDF/UA rule 7-18: /Contents mirrors the visible
             // link text. See the sync variant for the rationale.
-            ["/Contents"] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
+            [PdfKeys.Annotation.Contents] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
         };
 
         // /StructParent wires this annotation into the parent tree.
         if (structParentKey.HasValue)
-            dict["/StructParent"] = structParentKey.Value.ToString();
+            dict[PdfKeys.Annotation.StructureParent] = structParentKey.Value.ToString();
 
         if (hyperlink.TargetPageIndex.HasValue && pageIds != null)
         {
             int pageIdx = Math.Max(0, Math.Min(hyperlink.TargetPageIndex.Value, pageIds.Count - 1));
-            dict["/A"] = $"<< /S /GoTo /D [{pageIds[pageIdx]} 0 R /Fit] >>";
+            dict[PdfKeys.Annotation.Action] = $"<< /S /GoTo /D [{pageIds[pageIdx]} 0 R /Fit] >>";
         }
         else
         {
-            dict["/A"] = $"<< /S /URI /URI ({PdfSyntax.Escape(hyperlink.Uri ?? "")}) >>";
+            dict[PdfKeys.Annotation.Action] = $"<< /S /URI /URI ({PdfSyntax.Escape(hyperlink.Uri ?? "")}) >>";
         }
 
         await WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
@@ -318,22 +318,22 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
         Dictionary<string, string> dict = new();
 
         if (settings.HideToolbar)
-            dict["/HideToolbar"] = "true";
+            dict[PdfKeys.ViewerPreferences.HideToolbar] = "true";
 
         if (settings.HideMenubar)
-            dict["/HideMenubar"] = "true";
+            dict[PdfKeys.ViewerPreferences.HideMenubar] = "true";
 
         if (settings.HideWindowUI)
-            dict["/HideWindowUI"] = "true";
+            dict[PdfKeys.ViewerPreferences.HideWindowUi] = "true";
 
         if (settings.FitWindow)
-            dict["/FitWindow"] = "true";
+            dict[PdfKeys.ViewerPreferences.FitWindow] = "true";
 
         if (settings.CenterWindow)
-            dict["/CenterWindow"] = "true";
+            dict[PdfKeys.ViewerPreferences.CenterWindow] = "true";
 
         if (settings.DisplayDocTitle)
-            dict["/DisplayDocTitle"] = "true";
+            dict[PdfKeys.ViewerPreferences.DisplayDocumentTitle] = "true";
 
         // Only write if there are actual preferences
         if (dict.Count == 0)
@@ -353,70 +353,70 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="options">Optional catalog references such as outlines, XMP metadata, and PDF/A output intents.</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     public async Task WriteCatalogAsync(int id, int pagesId, int firstPageId, DocumentSettings settings,
-        CatalogOptions options, CancellationToken cancellationToken = default)
+        CatalogOptions? options, CancellationToken cancellationToken = default)
     {
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/Catalog",
-            ["/Pages"] = $"{pagesId} 0 R"
+            [PdfKeys.Common.Type] = "/Catalog",
+            [PdfKeys.Catalog.Pages] = $"{pagesId} 0 R"
         };
 
         // Add OpenAction
         string openAction = GetOpenActionString(firstPageId, settings);
-        dict["/OpenAction"] = openAction;
+        dict[PdfKeys.Catalog.OpenAction] = openAction;
 
         // Add PageMode - auto-set to UseOutlines when outlines are present
         if (options?.OutlinesId > 0)
-            dict["/PageMode"] = "/UseOutlines";
+            dict[PdfKeys.Catalog.PageMode] = "/UseOutlines";
         else if (settings.PageMode != PageMode.UseNone)
-            dict["/PageMode"] = $"/{GetPageModeString(settings.PageMode)}";
+            dict[PdfKeys.Catalog.PageMode] = $"/{GetPageModeString(settings.PageMode)}";
 
         // Add ViewerPreferences if provided
-        if (options?.ViewerPrefsId > 0) dict["/ViewerPreferences"] = $"{options.ViewerPrefsId} 0 R";
+        if (options?.ViewerPrefsId > 0) dict[PdfKeys.Catalog.ViewerPreferences] = $"{options.ViewerPrefsId} 0 R";
 
         // Add Outlines if provided
-        if (options?.OutlinesId > 0) dict["/Outlines"] = $"{options.OutlinesId} 0 R";
+        if (options?.OutlinesId > 0) dict[PdfKeys.Catalog.Outlines] = $"{options.OutlinesId} 0 R";
 
         // Add XMP Metadata if provided
-        if (options?.XmpMetadataId > 0) dict["/Metadata"] = $"{options.XmpMetadataId} 0 R";
+        if (options?.XmpMetadataId > 0) dict[PdfKeys.Catalog.Metadata] = $"{options.XmpMetadataId} 0 R";
 
         // Add OutputIntents if provided (PDF/A)
         if (options?.OutputIntentIds is { Count: > 0 })
         {
             string refs = string.Join(' ', options.OutputIntentIds.ToList().ConvertAll(oid => $"{oid} 0 R"));
-            dict["/OutputIntents"] = $"[ {refs} ]";
+            dict[PdfKeys.Catalog.OutputIntents] = $"[ {refs} ]";
         }
 
         // Add MarkInfo when either PDF/A or tagging is on. Both standards
         // require /MarkInfo /Marked true; they're orthogonal flags so emitting
         // it once when either is set covers both cases.
         if (options?.PdfAEnabled == true || options?.Tagged == true)
-            dict["/MarkInfo"] = "<< /Marked true >>";
+            dict[PdfKeys.Catalog.MarkInfo] = "<< /Marked true >>";
 
         // Add StructTreeRoot when tagging is on.
         if (options?.StructTreeRootId > 0)
-            dict["/StructTreeRoot"] = $"{options.StructTreeRootId} 0 R";
+            dict[PdfKeys.Catalog.StructureTreeRoot] = $"{options.StructTreeRootId} 0 R";
 
         // Add /Lang when the document declares a natural language. Required
         // by PDF/UA-1; useful generally for assistive tech.
         if (!string.IsNullOrEmpty(options?.Language))
-            dict["/Lang"] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(options.Language)})";
+            dict[PdfKeys.Catalog.Language] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(options.Language)})";
 
         // Add Dests if provided
         if (options?.DestsId > 0)
-            dict["/Dests"] = $"{options.DestsId} 0 R";
+            dict[PdfKeys.Catalog.Destinations] = $"{options.DestsId} 0 R";
 
         // Add PageLabels if configured
         if (options?.PageLabelsId > 0)
-            dict["/PageLabels"] = $"{options.PageLabelsId} 0 R";
+            dict[PdfKeys.Catalog.PageLabels] = $"{options.PageLabelsId} 0 R";
 
         // Add /Names /EmbeddedFiles and /AF for document attachments (PDF/A-3).
         if (options?.NamesEmbeddedFilesId > 0)
-            dict["/Names"] = $"<< /EmbeddedFiles {options.NamesEmbeddedFilesId} 0 R >>";
+            dict[PdfKeys.Catalog.Names] = $"<< /EmbeddedFiles {options.NamesEmbeddedFilesId} 0 R >>";
         if (options?.AssociatedFileIds is { Count: > 0 })
         {
             string afRefs = string.Join(' ', options.AssociatedFileIds.ToList().ConvertAll(fid => $"{fid} 0 R"));
-            dict["/AF"] = $"[ {afRefs} ]";
+            dict[PdfKeys.Catalog.AssociatedFiles] = $"[ {afRefs} ]";
         }
 
         await WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
@@ -465,7 +465,7 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
         }
 
         byte[] compressedBytes = memoryStream.ToArray();
-        dict["/Filter"] = "/FlateDecode";
+        dict[PdfKeys.Stream.Filter] = "/FlateDecode";
         await WriteBinaryObjectAsync(id, dict, compressedBytes, compressedBytes.Length, cancellationToken)
             .ConfigureAwait(false);
     }
@@ -597,9 +597,9 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
 
         await WriteObjectAsync(id, new Dictionary<string, string>
         {
-            ["/Type"] = "/Catalog",
-            ["/Pages"] = $"{pagesId} 0 R",
-            ["/OpenAction"] = openAction
+            [PdfKeys.Common.Type] = "/Catalog",
+            [PdfKeys.Catalog.Pages] = $"{pagesId} 0 R",
+            [PdfKeys.Catalog.OpenAction] = openAction
         }, null, cancellationToken).ConfigureAwait(false);
     }
 

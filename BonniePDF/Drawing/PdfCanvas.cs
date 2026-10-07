@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -116,7 +116,7 @@ internal class PdfCanvas : ICanvas
     /// <summary>
     /// Gets the width of the canvas (not directly applicable to PDF streams, returns 0)
     /// </summary>
-    public float Width { get; }
+    public float Width => 0;
 
     /// <summary>
     /// Gets the height of the canvas (returns the page height)
@@ -259,7 +259,7 @@ internal class PdfCanvas : ICanvas
     /// Fills a closed path defined by a series of points.
     /// Converts all points from Top-Left to Bottom-Left coordinates.
     /// </summary>
-    public void FillPath(IList<Point> points, Color color)
+    public void FillPath(IList<Point>? points, Color color)
     {
         if (points == null || points.Count < 3) return;
 

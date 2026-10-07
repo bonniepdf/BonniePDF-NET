@@ -343,7 +343,7 @@ internal static class PdfOperators
     /// <c>d</c> - Set the dash pattern and phase.
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=217"/>
     /// </summary>
-    internal static void SetDashPattern(StringBuilder s, float[] pattern, float phase)
+    internal static void SetDashPattern(StringBuilder s, float[]? pattern, float phase)
     {
         if (pattern == null || pattern.Length == 0)
         {

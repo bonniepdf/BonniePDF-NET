@@ -22,7 +22,7 @@ public static class SvgExportExtensions
         foreach (IElement element in page.Elements)
         {
             // Measure height to ensure consistent layout behavior (some elements might cache calculations)
-            float elementHeight = element.MeasureHeight(page.ContentWidth);
+            element.MeasureHeight(page.ContentWidth);
 
             // Render the element
             element.Render(ctx, page.ContentWidth);

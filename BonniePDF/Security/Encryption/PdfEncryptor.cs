@@ -1,3 +1,4 @@
+using BonniePDF.Rendering.Pdf;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -73,9 +74,10 @@ internal sealed class PdfEncryptor
     /// Encrypts binary data for a specific PDF object.
     /// For AES-256, uses the file encryption key directly (no per-object key derivation).
     /// </summary>
-    public byte[] EncryptData(byte[] data, int objectNumber, int generationNumber = 0)
+    [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(data))]
+    public byte[]? EncryptData(byte[]? data, int objectNumber, int generationNumber = 0)
     {
-        if (data == null) return data!;
+        if (data == null) return data;
         if (data.Length == 0) return data;
 
         if (_isAes256)
@@ -92,7 +94,7 @@ internal sealed class PdfEncryptor
     /// <summary>
     /// Encrypts a string for a specific PDF object.
     /// </summary>
-    public byte[] EncryptString(string text, int objectNumber, int generationNumber = 0)
+    public byte[] EncryptString(string? text, int objectNumber, int generationNumber = 0)
     {
         if (string.IsNullOrEmpty(text))
             return Array.Empty<byte>();
@@ -107,7 +109,7 @@ internal sealed class PdfEncryptor
     /// (IV + padding). Callers using AES should use EncryptData instead.
     /// For RC4, this modifies the data array in place.
     /// </summary>
-    public void EncryptInPlace(byte[] data, int objectNumber, int generationNumber = 0)
+    public void EncryptInPlace(byte[]? data, int objectNumber, int generationNumber = 0)
     {
         if (data == null || data.Length == 0)
             return;
@@ -143,16 +145,16 @@ internal sealed class PdfEncryptor
 
         Dictionary<string, string> dict = new()
         {
-            ["/Filter"] = "/Standard",
-            ["/V"] = Settings.VersionValue.ToString(),
-            ["/R"] = Settings.RevisionValue.ToString(),
-            ["/O"] = FormatHexString(_key!.OwnerEntry),
-            ["/U"] = FormatHexString(_key.UserEntry),
-            ["/P"] = _key.PermissionsValue.ToString()
+            [PdfKeys.Encryption.Handler] = "/Standard",
+            [PdfKeys.Encryption.AlgorithmVersion] = Settings.VersionValue.ToString(),
+            [PdfKeys.Encryption.HandlerRevision] = Settings.RevisionValue.ToString(),
+            [PdfKeys.Encryption.OwnerEntry] = FormatHexString(_key!.OwnerEntry),
+            [PdfKeys.Encryption.UserEntry] = FormatHexString(_key.UserEntry),
+            [PdfKeys.Encryption.Permissions] = _key.PermissionsValue.ToString()
         };
 
         // Add /Length for revision 3+ (in bits)
-        if (Settings.RevisionValue >= 3) dict["/Length"] = Settings.KeyLengthBits.ToString();
+        if (Settings.RevisionValue >= 3) dict[PdfKeys.Encryption.KeyLength] = Settings.KeyLengthBits.ToString();
 
         return dict;
     }
@@ -164,19 +166,19 @@ internal sealed class PdfEncryptor
     {
         return new Dictionary<string, string>
         {
-            ["/Filter"] = "/Standard",
-            ["/V"] = "5",
-            ["/R"] = "6",
-            ["/Length"] = "256",
-            ["/O"] = FormatHexString(_aesKey!.OwnerEntry),
-            ["/U"] = FormatHexString(_aesKey.UserEntry),
-            ["/OE"] = FormatHexString(_aesKey.OwnerEncryptionEntry),
-            ["/UE"] = FormatHexString(_aesKey.UserEncryptionEntry),
-            ["/Perms"] = FormatHexString(_aesKey.PermsEntry),
-            ["/P"] = _aesKey.PermissionsValue.ToString(),
-            ["/CF"] = "<< /StdCF << /CFM /AESV3 /AuthEvent /DocOpen /Length 32 >> >>",
-            ["/StmF"] = "/StdCF",
-            ["/StrF"] = "/StdCF"
+            [PdfKeys.Encryption.Handler] = "/Standard",
+            [PdfKeys.Encryption.AlgorithmVersion] = "5",
+            [PdfKeys.Encryption.HandlerRevision] = "6",
+            [PdfKeys.Encryption.KeyLength] = "256",
+            [PdfKeys.Encryption.OwnerEntry] = FormatHexString(_aesKey!.OwnerEntry),
+            [PdfKeys.Encryption.UserEntry] = FormatHexString(_aesKey.UserEntry),
+            [PdfKeys.Encryption.OwnerEncryptionEntry] = FormatHexString(_aesKey.OwnerEncryptionEntry),
+            [PdfKeys.Encryption.UserEncryptionEntry] = FormatHexString(_aesKey.UserEncryptionEntry),
+            [PdfKeys.Encryption.EncryptedPermissions] = FormatHexString(_aesKey.PermsEntry),
+            [PdfKeys.Encryption.Permissions] = _aesKey.PermissionsValue.ToString(),
+            [PdfKeys.Encryption.CryptFilters] = "<< /StdCF << /CFM /AESV3 /AuthEvent /DocOpen /Length 32 >> >>",
+            [PdfKeys.Encryption.StreamFilter] = "/StdCF",
+            [PdfKeys.Encryption.StringFilter] = "/StdCF"
         };
     }
 
@@ -193,7 +195,7 @@ internal sealed class PdfEncryptor
     /// <summary>
     /// Formats a byte array as a PDF hex string.
     /// </summary>
-    private static string FormatHexString(byte[] data)
+    private static string FormatHexString(byte[]? data)
     {
         if (data == null || data.Length == 0)
             return "<>";

@@ -1772,12 +1772,6 @@
         },
         "lineColor": {
           "kind": "color"
-        },
-        "lineWidth": {
-          "kind": "length"
-        },
-        "showDataPointMarkers": {
-          "kind": "boolean"
         }
       },
       "rules": [
@@ -1827,9 +1821,6 @@
         },
         "dotColor": {
           "kind": "color"
-        },
-        "dotRadius": {
-          "kind": "length"
         }
       },
       "rules": [
@@ -1851,12 +1842,6 @@
         },
         "lollipopColor": {
           "kind": "color"
-        },
-        "stemWidth": {
-          "kind": "length"
-        },
-        "headRadius": {
-          "kind": "length"
         }
       },
       "rules": [
@@ -1877,12 +1862,6 @@
         },
         "totalLabel": {
           "kind": "string"
-        },
-        "totalLabelFontSize": {
-          "kind": "length"
-        },
-        "totalValueFontSize": {
-          "kind": "length"
         },
         "totalValueFormat": {
           "kind": "chartNumberFormat"

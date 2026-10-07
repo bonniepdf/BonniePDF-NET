@@ -91,8 +91,6 @@ public static class LollipopChartExample
             Height = 400,
             StretchToFit = true,
             LollipopColor = Color.FromHex(ChartColors.Pink),
-            StemWidth = 2.5f,
-            HeadRadius = 10,
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,

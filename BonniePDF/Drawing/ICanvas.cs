@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace BonniePDF.Drawing;
 
@@ -64,7 +64,7 @@ public interface ICanvas
     /// </summary>
     /// <param name="points">The points that define the path</param>
     /// <param name="color">Fill color</param>
-    void FillPath(IList<Point> points, Color color);
+    void FillPath(IList<Point>? points, Color color);
 
     /// <summary>
     /// Draws a filled rounded rectangle.

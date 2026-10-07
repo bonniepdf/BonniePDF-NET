@@ -5,15 +5,15 @@ Versions use CalVer (`yyyy.m.minor`), decided by the versioning tool, and are
 shared with the TypeScript implementation: `BonniePDF` and `@bonniepdf/core`
 at the same version are the same library.
 
-This file is maintained by hand. Add an entry under **Unreleased** with each
-change to the library; on release, rename it to the version being tagged.
+This file is maintained by hand. Add an entry under the current version with
+each change to the library.
 
 Because both implementations conform to one specification, a behavioural
 change lands in both and is described in both changelogs. Word the entry for
 this language — C# spellings, C# type names — but describe the same
 behaviour, so the two files can be read side by side.
 
-## Unreleased
+## 2026.10.0
 
 - Added native `Flip` and `Translate` wrappers, including fluent `FlipHorizontal`, `FlipVertical`, `Translate`, `TranslateX` and `TranslateY`, composed geometry and JSON definitions.
 
@@ -27,6 +27,11 @@ behaviour, so the two files can be read side by side.
 - **Image compression defaults to a balanced level.** Image streams are now compressed at zlib level 6 rather than 9: about a quarter faster on the first document, for output typically 1-2% larger. `ImagePipeline.CompressionLevel` selects `ImageCompressionLevel.Smallest` (the previous behaviour), `Balanced` or `Fast`. Image streams are written with a standard zlib header and checksum from the runtime, replacing a managed Adler-32 loop.
 
 ### Changed
+
+- Centralized PDF dictionary keys in documented, context-specific internal constants. Serialized PDF output is unchanged.
+
+- **Breaking: removed options that had no effect.** `LineChart.LineWidth` and `ShowDataPointMarkers` are replaced by `DefaultLineWidth` and `DefaultShowMarkers`; use `DotPlotChart.DefaultDotRadius` and `LollipopChart.DefaultStemWidth`/`DefaultHeadRadius` instead of `DotRadius`, `StemWidth` and `HeadRadius`. Series styles still override these defaults. Removed `PieChart.TotalLabelFontSize`/`TotalValueFontSize` and SVG export `TextMode`/`IncludeLinks` (including `SvgTextMode`); they never controlled rendering. Remove these keys from document definitions: ordinary validation warns, and strict validation rejects them.
+- Nullable annotations now describe existing null handling for keywords, list items, layers, SVG alternative text, password helpers, drawing paths and encryption buffers. Runtime behavior is unchanged. Removed unused locals and fields while retaining font stream reads and layout measurement calls.
 
 - **Breaking: the public API now lives in one `BonniePDF` namespace.** `using BonniePDF;` replaces the former `BonniePDF.Core`, `Configuration`, `Elements.*`, `Typography`, `Charts`, `Charts.Models`, `Extensions`, `Rendering`, `Rendering.Images`, `Rendering.Tagging`, `Definition`, `Compliance`, `Export`, `Licensing`, `Security.*`, `Attachments`, `EInvoice` and `Prototyping` imports. Two namespaces remain by design: `BonniePDF.Fluent` for the fluent API (`Pdf.Create`, its descriptors and its extension methods, previously split across `Fluent`, `Fluent.Descriptors` and `Fluent.Extensions`) and `BonniePDF.Drawing` for the canvas and paint types. `SvgUnsupportedFeatureException` and its `UnsupportedFeature` entries remain under `BonniePDF.Rendering.Svg` while the SVG engine is vendored. To migrate, replace the old `using` lines with `using BonniePDF;` (plus `using BonniePDF.Fluent;` or `using BonniePDF.Drawing;` where you use them) and drop the old namespace segment from any fully-qualified name. Behaviour and generated PDF output are unchanged. The classic (`IElement`) and fluent (`IContentContainer`) extension methods stay in separate namespaces so `Padding`, `Margin`, `Size` and similar do not become ambiguous on `Container`; import `BonniePDF.Fluent` only where you use the fluent API.
 
@@ -77,6 +82,8 @@ behaviour, so the two files can be read side by side.
   `labelFormat` and `totalValueFormat` support it lacked.
 
 ### Fixed
+
+- **The XMP packet header now carries a real byte order mark.** The `begin` attribute uses U+FEFF (`EF BB BF` in UTF-8), matching the TypeScript output, instead of three characters that encoded as six bytes. Both synchronous and asynchronous PDF generation use the corrected header.
 
 - **Value labels on a `GroupedBarChart` sit on their own bars.** Every series' label was drawn at the middle of the category, so the labels of neighbouring bars printed on top of each other. Each label is now centred above its bar, or beside it on a horizontal chart.
 

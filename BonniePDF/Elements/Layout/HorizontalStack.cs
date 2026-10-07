@@ -201,7 +201,7 @@ public class HorizontalStack : ElementBase, IStatefulElement
     {
         if (Height.HasValue) return Height.Value;
 
-        (List<float> childWidths, float totalSpacing) = CalculateChildWidths(contentWidth);
+        (List<float> childWidths, _) = CalculateChildWidths(contentWidth);
 
         float maxHeight = 0;
         for (int i = 0; i < _children.Count; i++)
@@ -216,7 +216,7 @@ public class HorizontalStack : ElementBase, IStatefulElement
 
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
-        (List<float> childWidths, float totalSpacing) = CalculateChildWidths(contentWidth);
+        (List<float> childWidths, _) = CalculateChildWidths(contentWidth);
 
         // Calculate maximum height for alignment
         float maxHeight = Height ?? 0;

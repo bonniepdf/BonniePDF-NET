@@ -642,7 +642,7 @@ internal sealed partial class DefinitionWriter
                 {
                     "header" => table.HeaderRows,
                     "footer" => table.FooterRows,
-                    _ => (IReadOnlyList<TableRow>)table.Rows.ToList(),
+                    _ => [.. table.Rows],
                 };
                 if (rows.Count == 0 && key != "rows") return Slot.Write(null);
                 var array = new JsonArray();

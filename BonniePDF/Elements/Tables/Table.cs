@@ -381,7 +381,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
     private static float Luminance(Color c) => 0.2126f * c.R + 0.7152f * c.G + 0.0722f * c.B;
 
-    private void PlanRowEdges(RenderContext ctx, TableRow row, float[] widths)
+    private void PlanRowEdges(RenderContext ctx, TableRow row)
     {
         _edgePlan.Clear();
         bool aboveKnown = _bottomsAbove != null && _bottomsAbovePage == ctx.CurrentPageIndex;
@@ -483,7 +483,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     private void RenderRowDirect(RenderContext ctx, TableRow row, float[] widths)
     {
         float rowHeight = MeasureRowHeight(row, widths);
-        PlanRowEdges(ctx, row, widths);
+        PlanRowEdges(ctx, row);
 
         var tagging = ctx.Tagging;
         // Data tables tag TR/TH/TD; presentation (layout) tables tag each cell's
@@ -617,7 +617,6 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     private void RenderContentRows(RenderContext ctx, float contentWidth, TaggingContext? tagging)
     {
         float[] widths = CalculateColumnWidths(contentWidth);
-        bool isFirstPage = true;
         // Layout (presentation) tables emit no TR/TH/TD and therefore no row-groups.
         TaggingContext? groupTagging = IsLayoutGrid ? null : tagging;
 
@@ -627,16 +626,13 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             if (groupTagging != null) groupTagging.Tree.Begin(SemanticRole.THead);
             try
             {
-                foreach (TableRow row in _headers) RenderRow(ctx, row, widths, isFirstPage);
+                foreach (TableRow row in _headers) RenderRow(ctx, row, widths);
             }
             finally
             {
                 if (groupTagging != null) groupTagging!.Tree.End();
             }
         }
-
-        // Track if we've added headers on a new page
-        bool headersAddedOnNewPage = false;
 
         // Render data rows - grouped under TBody.
         if (_rows.Count > 0)
@@ -652,17 +648,15 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                     if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop)
                     {
                         ctx.NewPage();
-                        isFirstPage = false;
 
                         // Repeat headers on new page if enabled
                         if (RepeatHeadersOnNewPage && _headers.Count > 0)
                         {
-                            headersAddedOnNewPage = true;
-                            foreach (TableRow headerRow in _headers) RenderRow(ctx, headerRow, widths, false);
+                            foreach (TableRow headerRow in _headers) RenderRow(ctx, headerRow, widths);
                         }
                     }
 
-                    RenderRow(ctx, row, widths, isFirstPage && !headersAddedOnNewPage);
+                    RenderRow(ctx, row, widths);
                 }
             }
             finally
@@ -677,7 +671,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             if (groupTagging != null) groupTagging.Tree.Begin(SemanticRole.TFoot);
             try
             {
-                foreach (TableRow row in _footers) RenderRow(ctx, row, widths, isFirstPage);
+                foreach (TableRow row in _footers) RenderRow(ctx, row, widths);
             }
             finally
             {
@@ -686,7 +680,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         }
     }
 
-    private void RenderRow(RenderContext ctx, TableRow row, float[] widths, bool isFirstPage)
+    private void RenderRow(RenderContext ctx, TableRow row, float[] widths)
     {
         // For footers, only show on last page if ShowFootersOnAllPages is false
         if (row.IsFooter && !ShowFootersOnAllPages && !IsLastPage(ctx)) return;

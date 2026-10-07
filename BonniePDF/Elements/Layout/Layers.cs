@@ -29,14 +29,14 @@ public class Layers : ElementBase
     public IReadOnlyList<IElement> ForegroundLayers => _foreground.AsReadOnly();
 
     /// <summary>Adds a layer painted behind the primary layer. Fluent; returns this.</summary>
-    public Layers AddBackground(IElement element)
+    public Layers AddBackground(IElement? element)
     {
         if (element != null) _background.Add(element);
         return this;
     }
 
     /// <summary>Adds a layer painted on top of the primary layer. Fluent; returns this.</summary>
-    public Layers AddForeground(IElement element)
+    public Layers AddForeground(IElement? element)
     {
         if (element != null) _foreground.Add(element);
         return this;

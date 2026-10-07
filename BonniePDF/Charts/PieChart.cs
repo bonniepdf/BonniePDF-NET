@@ -46,8 +46,6 @@ public class PieChart : ChartBase
 
     // Styling constants
     private static readonly Color LegendTextColor = Color.FromHex("#333333");
-    private static readonly Color TotalLabelColor = Color.FromHex("#666666");
-    private static readonly Color TotalValueColor = Color.FromHex("#333333");
 
     // Default colors matching the SVG
     private static readonly string[] DefaultColors =
@@ -73,18 +71,6 @@ public class PieChart : ChartBase
     /// Default is "Total".
     /// </summary>
     public string TotalLabel { get; set; } = "Total";
-
-    /// <summary>
-    /// Font size for the total label in the donut hole.
-    /// </summary>
-    /// <remarks>No longer used - the total is now shown in the legend. Kept for API compatibility.</remarks>
-    public float TotalLabelFontSize { get; set; } = 11;
-
-    /// <summary>
-    /// Font size for the total value in the donut hole.
-    /// </summary>
-    /// <remarks>No longer used - the total is now shown in the legend. Kept for API compatibility.</remarks>
-    public float TotalValueFontSize { get; set; } = 16;
 
     /// <summary>
     /// Number format for the total: <c>G</c> (default), <c>F&lt;n&gt;</c>, <c>N&lt;n&gt;</c> or <c>P&lt;n&gt;</c>.

@@ -28,7 +28,7 @@ public abstract class ListElementBase : TextElementBase
         return [];
     }
 
-    /// <inheritdoc />
+    /// <summary>Returns nested lists as child elements.</summary>
     public IEnumerable<IElement> GetChildren() => GetNestedLists();
 
     /// <summary>

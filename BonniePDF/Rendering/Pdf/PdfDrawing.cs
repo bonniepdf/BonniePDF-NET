@@ -269,7 +269,7 @@ internal static class PdfDrawing
     /// <param name="stream">The PDF content stream to write to</param>
     /// <param name="points">The points that define the path in PDF coordinates</param>
     /// <param name="color">Fill color</param>
-    public static void FillPath(StringBuilder stream, List<Point> points, Color color)
+    public static void FillPath(StringBuilder stream, List<Point>? points, Color color)
     {
         if (points == null || points.Count < 3) return;
 
