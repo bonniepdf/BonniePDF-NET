@@ -8,6 +8,7 @@ namespace BonniePDF.Examples.Basics.SimpleDocument;
 /// </summary>
 public static class PdfA4ValidationExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new()

@@ -1,7 +1,7 @@
+using System.Globalization;
 using System;
 using System.IO;
 using BonniePDF;
-using BonniePDF.Examples.Charting.ChartShowcase.Data;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
@@ -12,10 +12,11 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// </summary>
 [System.ComponentModel.DisplayName("Pie Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("PieChart component with monthly sales data, showing a donut-style pie chart with customizable colors and legend.")]
+[System.ComponentModel.Description(
+    "PieChart component with monthly sales data, showing a donut-style pie chart with customizable colors and legend.")]
 public static class PieChartExample
 {
-
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // Create a new PDF document
@@ -25,8 +26,19 @@ public static class PieChartExample
             FooterTemplate = pageNumber =>
             {
                 HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.Add(new TextBlock { Text = "BonniePDF - Pie Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] }, null);
-                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = "BonniePDF - Pie Chart", FontName = StandardFonts.Helvetica, FontSize = 10,
+                        Color = ColorPalette.Slate[500]
+                    }, null);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                        FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500],
+                        Alignment = TextAlignment.Right
+                    }, 1f);
                 return stack;
             }
         });
@@ -61,7 +73,7 @@ public static class PieChartExample
         ChartData chartData = new()
         {
             Title = $"Monthly Sales {DateTime.Now.Year}",
-            Series = [new ChartSeries { DataPoints = ExampleChartData.PieChartSales }]
+            Series = [new ChartSeries { DataPoints = PieChartSales }]
         };
 
         // Create the pie chart with custom colors matching the SVG
@@ -73,7 +85,7 @@ public static class PieChartExample
             IsDonut = true,
             TotalLabel = "Total",
             ShowLegend = true,
-            Colors = ChartColors.All,
+            Colors = new[] { "#4f46e5", "#7c3aed", "#a855f7", "#d946ef", "#ec4899", "#f43f5e", "#f97316", "#eab308", "#84cc16", "#22c55e", "#14b8a6", "#06b6d4" },
             BackgroundColor = Color.White
         };
 
@@ -81,10 +93,89 @@ public static class PieChartExample
         document.Add(pieChart);
 
         // Save the document
-        
+
 
         return document;
     }
+
+    // Local helpers and sample data for this document.
+
+    // Local helpers and sample data for this document.
+    private static List<string> MonthLabels => Enumerable.Range(1, 12).Select(m => DateTimeFormatInfo.CurrentInfo.GetAbbreviatedMonthName(m)).ToList();
+
+    private static IList<ChartDataPoint> PieChartSales => new List<ChartDataPoint>()
+    {
+        new ChartDataPoint
+        {
+            Label = MonthLabels[0],
+            Value = 7234,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[1],
+            Value = 4891,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[2],
+            Value = 8456,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[3],
+            Value = 3127,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[4],
+            Value = 9542,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[5],
+            Value = 6789,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[6],
+            Value = 5234,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[7],
+            Value = 8901,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[8],
+            Value = 2456,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[9],
+            Value = 7890,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[10],
+            Value = 6123,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[11],
+            Value = 9876,
+            LabelFormat = "N0"
+        }
+    };
 }
-
-

@@ -12,7 +12,8 @@ namespace BonniePDF.Examples.Templates.SaasInvoice;
 /// </summary>
 [System.ComponentModel.DisplayName("Accessible SaaS Invoice")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("Accessible (PDF/UA-1) and archival (PDF/A-2a) subscription invoice: tagged line-items table, totals, and a QR \"pay by bank\" code with alt text.")]
+[System.ComponentModel.Description(
+    "Accessible (PDF/UA-1) and archival (PDF/A-2a) subscription invoice: tagged line-items table, totals, and a QR \"pay by bank\" code with alt text.")]
 public static class SaasInvoiceExample
 {
     // ── Palette (Slate neutrals + indigo brand) ───────────────────────────────
@@ -23,6 +24,7 @@ public static class SaasInvoiceExample
     private static readonly Color Brand = ColorPalette.Indigo[600];
     private static readonly Color Panel = ColorPalette.Slate[50];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new(new DocumentSettings
@@ -110,6 +112,7 @@ public static class SaasInvoiceExample
                 Cell(Money(unit), 9, BodyCol, TextAlignment.Right),
                 Cell(Money(amount), 9, Ink, TextAlignment.Right));
         }
+
         doc.Add(items);
         doc.Add(Rule(0));
 
@@ -143,7 +146,8 @@ public static class SaasInvoiceExample
             Size = 96,
             QuietZone = 1,
             ErrorCorrection = QrErrorCorrection.Medium,
-            AltText = "QR code to pay invoice INV-2026-0042 online, total £" + total.ToString("0.00", CultureInfo.InvariantCulture),
+            AltText = "QR code to pay invoice INV-2026-0042 online, total £" +
+                      total.ToString("0.00", CultureInfo.InvariantCulture),
         };
         Container qrWrap = new() { Child = qr, Padding = new Thickness(6) };
 

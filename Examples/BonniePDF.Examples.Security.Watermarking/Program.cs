@@ -13,11 +13,13 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "watermark_confidential.pdf"));
         }
+
         Console.WriteLine("Generating Watermark - Draft...");
         using (var doc = WatermarkDraftExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "watermark_draft.pdf"));
         }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

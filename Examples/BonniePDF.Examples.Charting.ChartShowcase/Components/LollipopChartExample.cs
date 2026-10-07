@@ -9,10 +9,11 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// </summary>
 [System.ComponentModel.DisplayName("Lollipop Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("LollipopChart implementation with quarterly performance metrics, showing data points as lollipops with customizable stem width and head radius.")]
+[System.ComponentModel.Description(
+    "LollipopChart implementation with quarterly performance metrics, showing data points as lollipops with customizable stem width and head radius.")]
 public static class LollipopChartExample
 {
-
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // Create a new PDF document
@@ -22,8 +23,19 @@ public static class LollipopChartExample
             FooterTemplate = pageNumber =>
             {
                 HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.Add(new TextBlock { Text = "BonniePDF - Lollipop Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] }, null);
-                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = "BonniePDF - Lollipop Chart", FontName = StandardFonts.Helvetica, FontSize = 10,
+                        Color = ColorPalette.Slate[500]
+                    }, null);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                        FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500],
+                        Alignment = TextAlignment.Right
+                    }, 1f);
                 return stack;
             }
         });
@@ -90,7 +102,7 @@ public static class LollipopChartExample
             AltText = "Lollipop chart showing quarterly revenue performance",
             Height = 400,
             StretchToFit = true,
-            LollipopColor = Color.FromHex(ChartColors.Pink),
+            LollipopColor = Color.FromHex("#ec4899"),
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
@@ -101,10 +113,12 @@ public static class LollipopChartExample
         document.Add(lollipopChart);
 
         // Save the document
-        
+
 
         return document;
     }
+
+    // Local helpers and sample data for this document.
+
+
 }
-
-

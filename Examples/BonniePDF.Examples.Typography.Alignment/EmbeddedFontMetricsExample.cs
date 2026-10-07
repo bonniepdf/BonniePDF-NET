@@ -16,7 +16,8 @@ namespace BonniePDF.Examples.Typography.Alignment;
 /// </summary>
 [System.ComponentModel.DisplayName("Embedded-Font Metrics")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("How an embedded TrueType font makes alignment edges exact, using its own hmtx advance widths rather than the approximate standard-14 width tables. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "How an embedded TrueType font makes alignment edges exact, using its own hmtx advance widths rather than the approximate standard-14 width tables. PDF/A-2a + PDF/UA-1.")]
 public static class EmbeddedFontMetricsExample
 {
     private const string SampleText =
@@ -25,27 +26,29 @@ public static class EmbeddedFontMetricsExample
         "word spacing is adjusted so that both the left and right edges align perfectly with " +
         "the margins, creating a clean, professional look commonly seen in books and formal documents.";
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
-        string sansPath = BundledFont.SansPath;
-        string sansBoldPath = BundledFont.SansBoldPath;
+        string sansPath = Path.Combine(AppContext.BaseDirectory, "fonts", "LiberationSans-Regular.ttf");
+        string sansBoldPath = Path.Combine(AppContext.BaseDirectory, "fonts", "LiberationSans-Bold.ttf");
 
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Embedded-Font Metrics",
-                Author   = "BonniePDF",
-                Subject  = "How an embedded TrueType font makes alignment edges exact, using its own hmtx advance widths.",
+                Title = "Embedded-Font Metrics",
+                Author = "BonniePDF",
+                Subject =
+                    "How an embedded TrueType font makes alignment edges exact, using its own hmtx advance widths.",
                 Keywords = "pdf, pdf/ua, pdf/a, fonts, embedding, metrics, hmtx, alignment, truetype, liberation",
             },
             Settings = new DocumentSettings
             {
-                PageSize      = PdfSize.A4,
-                Margin        = 60,
-                Conformance   = PdfAConformance.PdfA2a,
+                PageSize = PdfSize.A4,
+                Margin = 60,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
+                Language = "en-GB",
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(sansPath)
                     .WithSize(11)
@@ -56,18 +59,19 @@ public static class EmbeddedFontMetricsExample
         doc.Add(new Heading("Embedded-Font Metrics")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = sansBoldPath,
-            FontSize      = 22,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 16),
+            Level = 1,
+            FontName = sansBoldPath,
+            FontSize = 22,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 16),
         });
 
         doc.Add(new TextBlock
         {
-            Text   = "The standard-14 fonts are measured from approximate width tables. An embedded TrueType font carries " +
-                     "its own hmtx advance widths, so glyph placement is exact — which is what makes the right, centre, and " +
-                     "justified edges below land precisely on the margin. Every element here is set in embedded Liberation Sans.",
+            Text =
+                "The standard-14 fonts are measured from approximate width tables. An embedded TrueType font carries " +
+                "its own hmtx advance widths, so glyph placement is exact — which is what makes the right, centre, and " +
+                "justified edges below land precisely on the margin. Every element here is set in embedded Liberation Sans.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 
@@ -98,10 +102,10 @@ public static class EmbeddedFontMetricsExample
         {
             doc.Add(new TextBlock
             {
-                Text      = p,
-                FontName  = sansPath,
+                Text = p,
+                FontName = sansPath,
                 Alignment = Align.Justify,
-                Margin    = new Thickness(0, 0, 0, 8),
+                Margin = new Thickness(0, 0, 0, 8),
             });
         }
 
@@ -113,12 +117,12 @@ public static class EmbeddedFontMetricsExample
         doc.Add(new Heading(title)
         {
             TocIdentifier = tocId,
-            Level         = 2,
-            FontName      = fontPath,
-            FontSize      = 13,
-            Color     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 0, 0, 6),
-            Alignment     = alignment,
+            Level = 2,
+            FontName = fontPath,
+            FontSize = 13,
+            Color = ColorPalette.Indigo[600],
+            Margin = new Thickness(0, 0, 0, 6),
+            Alignment = alignment,
         });
     }
 

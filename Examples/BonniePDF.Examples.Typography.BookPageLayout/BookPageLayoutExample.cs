@@ -10,36 +10,38 @@ namespace BonniePDF.Examples.Typography.BookPageLayout;
 /// </summary>
 [System.ComponentModel.DisplayName("Book Page Layout")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("Book-style typeset chapter page with Times family fonts, a pull-quote block, and a chapter footer. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Book-style typeset chapter page with Times family fonts, a pull-quote block, and a chapter footer. PDF/A-2a + PDF/UA-1.")]
 public static class BookPageLayoutExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "The Architecture of Memory",
-                Author   = "Professor Halloway",
-                Subject  = "Chapter III of 'The Architecture of Consciousness'.",
+                Title = "The Architecture of Memory",
+                Author = "Professor Halloway",
+                Subject = "Chapter III of 'The Architecture of Consciousness'.",
                 Keywords = "pdf, book, typography, pdf/ua, pdf/a, BonniePDF",
             },
             Settings = new DocumentSettings
             {
-                PageSize  = PdfSize.A4,
-                Margin    = 60,
-                Conformance   = PdfAConformance.PdfA2a,
+                PageSize = PdfSize.A4,
+                Margin = 60,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
+                Language = "en-GB",
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.TimesRoman)
                     .WithSize(11)
                     .WithColor(ColorPalette.Slate[800]),
                 HeaderTemplate = _ => new TextBlock
                 {
-                    Text      = "THE ARCHITECTURE OF CONSCIOUSNESS",
-                    FontName  = StandardFonts.TimesItalic,
-                    FontSize  = 8,
+                    Text = "THE ARCHITECTURE OF CONSCIOUSNESS",
+                    FontName = StandardFonts.TimesItalic,
+                    FontSize = 8,
                     Color = ColorPalette.Slate[400],
                     Alignment = TextAlignment.Center,
                 },
@@ -47,9 +49,9 @@ public static class BookPageLayoutExample
                 PageLabel = new PageLabel { StartAt = 42 },
                 FooterTemplate = pageNum => new TextBlock
                 {
-                    Text      = (pageNum + 41).ToString(),
-                    FontName  = StandardFonts.TimesBold,
-                    FontSize  = 10,
+                    Text = (pageNum + 41).ToString(),
+                    FontName = StandardFonts.TimesBold,
+                    FontSize = 10,
                     Color = ColorPalette.Slate[500],
                     Alignment = TextAlignment.Center,
                 },
@@ -60,23 +62,23 @@ public static class BookPageLayoutExample
 
         doc.Add(new TextBlock
         {
-            Text      = "CHAPTER III",
-            FontName  = StandardFonts.TimesBold,
-            FontSize  = 11,
+            Text = "CHAPTER III",
+            FontName = StandardFonts.TimesBold,
+            FontSize = 11,
             Color = ColorPalette.Slate[700],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 0, 0, 6),
+            Margin = new Thickness(0, 0, 0, 6),
         });
 
         doc.Add(new Heading("The Architecture of Memory")
         {
             TocIdentifier = "chapter-iii",
-            Level         = 1,
-            FontName      = StandardFonts.TimesBold,
-            FontSize      = 18,
-            Color     = ColorPalette.Slate[900],
-            Alignment     = TextAlignment.Center,
-            Margin        = new Thickness(0, 0, 0, 20),
+            Level = 1,
+            FontName = StandardFonts.TimesBold,
+            FontSize = 18,
+            Color = ColorPalette.Slate[900],
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20),
         });
 
         // ── Body ─────────────────────────────────────────────────────────────
@@ -118,16 +120,16 @@ public static class BookPageLayoutExample
         VerticalStack emphStack = new() { Margin = new Thickness(0, 0, 0, 10) };
         emphStack.Add(new TextBlock
         {
-            Text      = "But then –",
-            FontName  = StandardFonts.TimesBold,
-            FontSize  = 11,
+            Text = "But then –",
+            FontName = StandardFonts.TimesBold,
+            FontSize = 11,
             Color = ColorPalette.Slate[800],
         });
         emphStack.Add(new TextBlock
         {
-            Text      = "he continued, his voice dropping to a conspiratorial whisper –",
-            FontName  = StandardFonts.TimesItalic,
-            FontSize  = 11,
+            Text = "he continued, his voice dropping to a conspiratorial whisper –",
+            FontName = StandardFonts.TimesItalic,
+            FontSize = 11,
             Color = ColorPalette.Slate[700],
         });
         doc.Add(emphStack);
@@ -148,26 +150,26 @@ public static class BookPageLayoutExample
         VerticalStack quoteInner = new();
         quoteInner.Add(new TextBlock
         {
-            Text      = "We have discovered, through decades of research across multiple disciplines, that the " +
-                        "architectural blueprint of memory is not unique to humans. It exists in varying forms " +
-                        "across all mammalian species, suggesting an ancient origin predating consciousness " +
-                        "itself. More remarkably - and this is where conventional science begins to grow " +
-                        "uncomfortable - we have found evidence that this architecture can be influenced, " +
-                        "modified, and in some cases, completely redesigned.",
-            FontName  = StandardFonts.TimesItalic,
-            FontSize  = 10,
+            Text = "We have discovered, through decades of research across multiple disciplines, that the " +
+                   "architectural blueprint of memory is not unique to humans. It exists in varying forms " +
+                   "across all mammalian species, suggesting an ancient origin predating consciousness " +
+                   "itself. More remarkably - and this is where conventional science begins to grow " +
+                   "uncomfortable - we have found evidence that this architecture can be influenced, " +
+                   "modified, and in some cases, completely redesigned.",
+            FontName = StandardFonts.TimesItalic,
+            FontSize = 10,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Justify,
         });
 
         doc.Add(new Container
         {
-            Child           = quoteInner,
+            Child = quoteInner,
             BackgroundColor = ColorPalette.Slate[50],
-            Border          = new Border(1),
-            BorderColors    = new BorderColors(ColorPalette.Slate[300]),
-            Padding         = new Thickness(20, 8, 20, 8),
-            Margin          = new Thickness(20, 10, 20, 10),
+            Border = new Border(1),
+            BorderColors = new BorderColors(ColorPalette.Slate[300]),
+            Padding = new Thickness(20, 8, 20, 8),
+            Margin = new Thickness(20, 10, 20, 10),
         });
 
         Body(doc,
@@ -178,19 +180,19 @@ public static class BookPageLayoutExample
 
         doc.Add(new TextBlock
         {
-            Text      = "“I know what you’re thinking,” Halloway said softly. “You’re " +
-                        "thinking about Alzheimer’s. About PTSD. About the millions of people whose " +
-                        "internal cathedrals are crumbling, whose memories have become labyrinths with no exit. " +
-                        "You’re wondering why this isn’t headline news. Why pharmaceutical companies " +
-                        "aren’t beating down my door.” He looked around the room, making eye contact " +
-                        "with each student in turn. “The answer, unfortunately, is the same reason I’ve " +
-                        "been forced to hold this lecture in a rented classroom at nine o’clock at night. " +
-                        "Some discoveries are too dangerous. Some architectures, once revealed, cannot be unseen.”",
-            FontName  = StandardFonts.TimesRoman,
-            FontSize  = 11,
+            Text = "“I know what you’re thinking,” Halloway said softly. “You’re " +
+                   "thinking about Alzheimer’s. About PTSD. About the millions of people whose " +
+                   "internal cathedrals are crumbling, whose memories have become labyrinths with no exit. " +
+                   "You’re wondering why this isn’t headline news. Why pharmaceutical companies " +
+                   "aren’t beating down my door.” He looked around the room, making eye contact " +
+                   "with each student in turn. “The answer, unfortunately, is the same reason I’ve " +
+                   "been forced to hold this lecture in a rented classroom at nine o’clock at night. " +
+                   "Some discoveries are too dangerous. Some architectures, once revealed, cannot be unseen.”",
+            FontName = StandardFonts.TimesRoman,
+            FontSize = 11,
             Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Justify,
-            Margin    = new Thickness(0, 0, 0, 10),
+            Margin = new Thickness(0, 0, 0, 10),
         });
 
         return doc;
@@ -200,12 +202,12 @@ public static class BookPageLayoutExample
     {
         doc.Add(new TextBlock
         {
-            Text      = text,
-            FontName  = fontName ?? StandardFonts.TimesRoman,
-            FontSize  = 11,
+            Text = text,
+            FontName = fontName ?? StandardFonts.TimesRoman,
+            FontSize = 11,
             Color = color ?? ColorPalette.Slate[800],
             Alignment = TextAlignment.Justify,
-            Margin    = new Thickness(0, 0, 0, 10),
+            Margin = new Thickness(0, 0, 0, 10),
         });
     }
 }

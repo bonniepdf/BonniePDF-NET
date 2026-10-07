@@ -10,9 +10,11 @@ namespace BonniePDF.Examples.Elements.Barcodes;
 /// </summary>
 [System.ComponentModel.DisplayName("Barcodes (Fluent API)")]
 [System.ComponentModel.Category("Elements")]
-[System.ComponentModel.Description("Generating native, vector-based 1D barcodes (Code 128, EAN-13, UPC-A, ITF-14) with automatic check digits and human-readable labels using the Fluent API.")]
+[System.ComponentModel.Description(
+    "Generating native, vector-based 1D barcodes (Code 128, EAN-13, UPC-A, ITF-14) with automatic check digits and human-readable labels using the Fluent API.")]
 public static class BarcodesExampleFluent
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         return Pdf.Create(doc =>
@@ -95,7 +97,6 @@ public static class BarcodesExampleFluent
                         isLast: true);
                 });
             });
-
         }).Build();
     }
 

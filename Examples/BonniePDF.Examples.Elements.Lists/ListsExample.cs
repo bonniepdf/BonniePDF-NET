@@ -9,26 +9,30 @@ namespace BonniePDF.Examples.Elements.Lists;
 /// </summary>
 [System.ComponentModel.DisplayName("Lists")]
 [System.ComponentModel.Category("Elements")]
-[System.ComponentModel.Description("Ordered and unordered lists — numbering formats, bullet styles, custom start numbers, coloured bullets, and nested sub-lists. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Ordered and unordered lists — numbering formats, bullet styles, custom start numbers, coloured bullets, and nested sub-lists. PDF/A-2a + PDF/UA-1.")]
 public static class ListsExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Lists",
-                Author   = "BonniePDF",
-                Subject  = "Ordered and unordered lists — numbering formats, bullet styles, nesting, and coloured bullets. PDF/A-2a + PDF/UA-1.",
+                Title = "Lists",
+                Author = "BonniePDF",
+                Subject =
+                    "Ordered and unordered lists — numbering formats, bullet styles, nesting, and coloured bullets. PDF/A-2a + PDF/UA-1.",
                 Keywords = "pdf, pdf/ua, pdf/a, accessibility, lists, ordered, unordered, nested",
             },
             Settings = new DocumentSettings
             {
-                Conformance   = PdfAConformance.PdfA2a,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
-                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]),
+                Language = "en-GB",
+                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12)
+                    .WithColor(ColorPalette.Slate[700]),
             },
         };
 
@@ -38,8 +42,8 @@ public static class ListsExample
 
         doc.Add(new TextBlock
         {
-            Text   = "Ordered lists number each item. The marker and the item text are held " +
-                     "separately, so a screen reader can announce where an item sits in the list.",
+            Text = "Ordered lists number each item. The marker and the item text are held " +
+                   "separately, so a screen reader can announce where an item sits in the list.",
             Margin = new Thickness(0, 0, 0, 8),
         });
 
@@ -72,10 +76,11 @@ public static class ListsExample
         VerticalStack s4 = Section("Custom start number", "s-start");
         s4.Add(new TextBlock
         {
-            Text   = "Numbering can begin at any value — useful when a list continues across sections.",
+            Text = "Numbering can begin at any value — useful when a list continues across sections.",
             Margin = new Thickness(0, 0, 0, 6),
         });
-        var customStartList = new OrderedList { NumberFormat = NumberFormat.Decimal, StartNumber = 5, FontSize = 12, ItemSpacing = 6 };
+        var customStartList = new OrderedList
+            { NumberFormat = NumberFormat.Decimal, StartNumber = 5, FontSize = 12, ItemSpacing = 6 };
         customStartList.AddItem("Review colour contrast ratios.");
         customStartList.AddItem("Confirm the reading order is logical.");
         customStartList.AddItem("Export and archive the final file.");
@@ -85,14 +90,15 @@ public static class ListsExample
         VerticalStack s5 = Section("Nested ordered lists", "s-nested-ordered");
         s5.Add(new TextBlock
         {
-            Text   = "A sub-list nests under its parent item and can use a different numbering format.",
+            Text = "A sub-list nests under its parent item and can use a different numbering format.",
             Margin = new Thickness(0, 0, 0, 6),
         });
         var mainOrdered = new OrderedList { NumberFormat = NumberFormat.Decimal, FontSize = 12, ItemSpacing = 6 };
         mainOrdered.AddItem("Gather the source material.");
         mainOrdered.AddItem("Structure the document:");
 
-        var nestedAlpha = new OrderedList { NumberFormat = NumberFormat.LowerAlpha, FontSize = 12, ItemSpacing = 4, Indent = 20 };
+        var nestedAlpha = new OrderedList
+            { NumberFormat = NumberFormat.LowerAlpha, FontSize = 12, ItemSpacing = 4, Indent = 20 };
         nestedAlpha.AddItem("Outline the sections.");
         nestedAlpha.AddItem("Assign heading levels.");
         nestedAlpha.AddItem("Mark up lists and tables.");
@@ -109,7 +115,8 @@ public static class ListsExample
 
         doc.Add(new TextBlock
         {
-            Text   = "Bullet items are structured the same way; only the marker changes. Several bullet styles are available.",
+            Text =
+                "Bullet items are structured the same way; only the marker changes. Several bullet styles are available.",
             Margin = new Thickness(0, 0, 0, 8),
         });
 
@@ -146,7 +153,8 @@ public static class ListsExample
         doc.Add(s9);
 
         VerticalStack s10 = Section("Custom (★)", "s-custom");
-        var customList = new UnorderedList { BulletStyle = BulletStyle.Custom, CustomBullet = "★", FontSize = 12, ItemSpacing = 6 };
+        var customList = new UnorderedList
+            { BulletStyle = BulletStyle.Custom, CustomBullet = "★", FontSize = 12, ItemSpacing = 6 };
         customList.AddItem("Any character can serve as a bullet.");
         customList.AddItem("Stars, arrows, or checkmarks all work.");
         customList.AddItem("Choose one that suits the document tone.");
@@ -158,8 +166,8 @@ public static class ListsExample
         {
             BulletStyle = BulletStyle.Square,
             BulletColor = Color.Red,
-            Color   = ColorPalette.Slate[700],
-            FontSize    = 12,
+            Color = ColorPalette.Slate[700],
+            FontSize = 12,
             ItemSpacing = 6,
         };
         colouredList.AddItem("The bullet colour is independent of the text colour.");
@@ -172,7 +180,8 @@ public static class ListsExample
         var mainUnordered = new UnorderedList { BulletStyle = BulletStyle.Disc, FontSize = 12, ItemSpacing = 6 };
         mainUnordered.AddItem("Compliance standards we target:");
 
-        var nestedCircle = new UnorderedList { BulletStyle = BulletStyle.Circle, FontSize = 12, ItemSpacing = 4, Indent = 20 };
+        var nestedCircle = new UnorderedList
+            { BulletStyle = BulletStyle.Circle, FontSize = 12, ItemSpacing = 4, Indent = 20 };
         nestedCircle.AddItem("PDF/UA-1 (ISO 14289-1)");
         nestedCircle.AddItem("PDF/A-2a (ISO 19005-2)");
         nestedCircle.AddItem("WCAG 2.1 Level AA");
@@ -191,11 +200,11 @@ public static class ListsExample
         doc.Add(new Heading(title)
         {
             TocIdentifier = tocId,
-            Level         = 1,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 22,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 10),
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 10),
         });
     }
 
@@ -210,11 +219,11 @@ public static class ListsExample
         stack.Add(new Heading(title)
         {
             TocIdentifier = tocId,
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 14,
-            Color     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 14, 0, 6),
+            Level = 2,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 14,
+            Color = ColorPalette.Indigo[600],
+            Margin = new Thickness(0, 14, 0, 6),
         });
         return stack;
     }

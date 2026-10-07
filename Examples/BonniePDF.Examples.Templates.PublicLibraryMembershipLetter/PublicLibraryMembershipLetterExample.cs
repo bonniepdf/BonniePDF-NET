@@ -10,7 +10,8 @@ namespace BonniePDF.Examples.Templates.PublicLibraryMembershipLetter;
 /// </summary>
 [System.ComponentModel.DisplayName("Public Library Membership")]
 [System.ComponentModel.Category("Community")]
-[System.ComponentModel.Description("Fictional UK public-library membership confirmation with local-service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Fictional UK public-library membership confirmation with local-service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice. PDF/A-2a + PDF/UA-1.")]
 public static class PublicLibraryMembershipLetterExample
 {
     private const float Margin = 50;
@@ -39,6 +40,7 @@ public static class PublicLibraryMembershipLetterExample
     private static readonly float[] MembershipColumns = [2.5f, 1f, 2.7f];
     private static readonly float[] HoursColumns = [1.3f, 1f, 2.2f];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DateTime now = DateTime.Now;
@@ -65,7 +67,8 @@ public static class PublicLibraryMembershipLetterExample
         Document doc = new(settings);
         doc.Metadata.Title = "Public library membership confirmation";
         doc.Metadata.Author = "Sample Libraries";
-        doc.Metadata.Subject = "Public library membership confirmation with borrowing limits and branch hours (fictional).";
+        doc.Metadata.Subject =
+            "Public library membership confirmation with borrowing limits and branch hours (fictional).";
 
         doc.Add(Masthead());
         doc.Add(ServiceHeader());
@@ -166,7 +169,8 @@ public static class PublicLibraryMembershipLetterExample
 
         VerticalStack meta = new();
         meta.Add(Body(longDate, align: TextAlignment.Right, mb: 0));
-        meta.Add(Body("Membership no. NBL-4471-208823", align: TextAlignment.Right, color: LibrarySecondary, size: 10, mb: 0));
+        meta.Add(Body("Membership no. NBL-4471-208823", align: TextAlignment.Right, color: LibrarySecondary, size: 10,
+            mb: 0));
 
         top.AddRow(addr, meta);
         return top;
@@ -202,7 +206,8 @@ public static class PublicLibraryMembershipLetterExample
         };
     }
 
-    private static Table InfoTable(InfoLine[] rows, float[] columns, Color headerColor, string first, string second, string third)
+    private static Table InfoTable(InfoLine[] rows, float[] columns, Color headerColor, string first, string second,
+        string third)
     {
         Table table = new(columns)
         {
@@ -219,7 +224,8 @@ public static class PublicLibraryMembershipLetterExample
         {
             table.AddRow(
                 Td(row.Label, TextAlignment.Left),
-                Td(row.Value, TextAlignment.Left, LibraryInk, bold: string.Equals(first, "Days", StringComparison.Ordinal)),
+                Td(row.Value, TextAlignment.Left, LibraryInk,
+                    bold: string.Equals(first, "Days", StringComparison.Ordinal)),
                 Td(row.Note, TextAlignment.Left, LibrarySecondary));
         }
 
@@ -244,7 +250,8 @@ public static class PublicLibraryMembershipLetterExample
         Margin = new Thickness(0, 6, 0, 8),
     };
 
-    private static TextBlock Body(string text, TextAlignment? align = null, Color? color = null, float size = 11, float mb = 12)
+    private static TextBlock Body(string text, TextAlignment? align = null, Color? color = null, float size = 11,
+        float mb = 12)
     {
         TextBlock block = new()
         {

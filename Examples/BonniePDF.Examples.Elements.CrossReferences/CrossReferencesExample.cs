@@ -24,13 +24,15 @@ public static class CrossReferencesExample
             "A PageNumberOf prints the page a named anchor landed on, so \"see page 4\" stays correct as content reflows."),
     };
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new();
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]);
         doc.Settings.DisplayDocTitle = true;
 
         doc.Metadata.Title = "Cross-Reference Field Guide";

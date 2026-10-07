@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using BonniePDF;
-using static BonniePDF.Examples.Shared.TradeKit;
 
 namespace BonniePDF.Examples.Integration.BatchGeneration;
 
@@ -30,7 +29,8 @@ namespace BonniePDF.Examples.Integration.BatchGeneration;
 /// </summary>
 [System.ComponentModel.DisplayName("Batch Generation")]
 [System.ComponentModel.Category("Integration")]
-[System.ComponentModel.Description("Generating 250 documents in one process. The output reports the timings of its own run and covers per-document lifecycle, disposal in the loop, and one-time setup.")]
+[System.ComponentModel.Description(
+    "Generating 250 documents in one process. The output reports the timings of its own run and covers per-document lifecycle, disposal in the loop, and one-time setup.")]
 public static class BatchGenerationExample
 {
     private const int RunSize = 250;
@@ -40,11 +40,14 @@ public static class BatchGenerationExample
 
     /// <summary>A deterministic synthetic ledger, so the run is repeatable.</summary>
     private static Statement[] Records(int count)
-        => [.. Enumerable.Range(0, count).Select(i => new Statement(
-            Account: $"ACC-{(4000 + i).ToString(CultureInfo.InvariantCulture).PadLeft(6, '0')}",
-            Customer: $"Sample Customer {i + 1}",
-            // Deterministic pseudo-amounts: no randomness, so two runs compare.
-            Balance: Math.Round(((i * 7919) % 45000) + 250m + ((i * 31) % 100)) / 100m))];
+        =>
+        [
+            .. Enumerable.Range(0, count).Select(i => new Statement(
+                Account: $"ACC-{(4000 + i).ToString(CultureInfo.InvariantCulture).PadLeft(6, '0')}",
+                Customer: $"Sample Customer {i + 1}",
+                // Deterministic pseudo-amounts: no randomness, so two runs compare.
+                Balance: Math.Round(((i * 7919) % 45000) + 250m + ((i * 31) % 100)) / 100m))
+        ];
 
     /// <summary>Builds one small statement. A fresh Document per record, by design.</summary>
     private static Document BuildOne(Statement record)
@@ -64,6 +67,7 @@ public static class BatchGenerationExample
         return doc;
     }
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // ── The run ───────────────────────────────────────────────────────────
@@ -114,7 +118,7 @@ public static class BatchGenerationExample
         doc.Add(H1($"{RunSize} documents in one process"));
         doc.Add(Cell(
             "Every figure below was measured while producing this page. Run it on your own hardware and the numbers "
-                + "change; the shape of the result does not.",
+            + "change; the shape of the result does not.",
             color: Muted,
             marginBottom: 14f));
 
@@ -153,19 +157,21 @@ public static class BatchGenerationExample
             Td("Font registration is process-wide and is not repaid per document", color: Muted));
         table.AddRow(
             Td("Total bytes produced"),
-            Td($"{(totalBytes / 1024.0).ToString("F0", CultureInfo.InvariantCulture)} KiB", bold: true, align: TextAlignment.Right),
+            Td($"{(totalBytes / 1024.0).ToString("F0", CultureInfo.InvariantCulture)} KiB", bold: true,
+                align: TextAlignment.Right),
             Td("Sum of the serialised output across the run", color: Muted));
         table.AddRow(
             Td("Largest single document"),
-            Td($"{(largest / 1024.0).ToString("F1", CultureInfo.InvariantCulture)} KiB", bold: true, align: TextAlignment.Right),
+            Td($"{(largest / 1024.0).ToString("F1", CultureInfo.InvariantCulture)} KiB", bold: true,
+                align: TextAlignment.Right),
             Td("Peak working set tracks this, not the run total, when each is disposed", color: Muted));
         doc.Add(table);
 
         // The caveat sits with the figures it qualifies, not alone at the end of the document.
         doc.Add(Cell(
             $"Run completed {GbDate(DateTime.Now)} on the machine that generated this document. "
-                + "Figures are a single sample, not a benchmark: they include process warm-up and whatever else the machine "
-                + "was doing.",
+            + "Figures are a single sample, not a benchmark: they include process warm-up and whatever else the machine "
+            + "was doing.",
             size: 8.5f,
             color: Muted,
             marginTop: 8f));
@@ -175,33 +181,172 @@ public static class BatchGenerationExample
         [
             Cell(
                 "Build a fresh document per record. The serialiser assumes a frozen tree, so mutating and re-generating one "
-                    + "is not a supported shape — and sharing one across records would serialise the same content repeatedly.",
+                + "is not a supported shape — and sharing one across records would serialise the same content repeatedly.",
                 size: 9f),
         ]));
         doc.Add(Panel("Dispose inside the loop",
         [
             Cell(
                 "Releasing each document as it is written keeps peak memory at the size of one document rather than the "
-                    + "whole run. Declare it with using inside the loop so a failed record does not leak.",
+                + "whole run. Declare it with using inside the loop so a failed record does not leak.",
                 size: 9f),
         ]));
         doc.Add(Panel("Process-wide work happens once",
         [
             Cell(
                 "Font registration and the licence declaration are set up before the loop. The licence notice in "
-                    + "particular fires at most once per process, not once per document, which is what makes it "
-                    + "acceptable in a job that runs nightly.",
+                + "particular fires at most once per process, not once per document, which is what makes it "
+                + "acceptable in a job that runs nightly.",
                 size: 9f),
         ]));
         doc.Add(Panel("Bound the concurrency, do not remove it",
         [
             Cell(
                 "A real batch would use the async path with a bounded worker pool, such as Parallel.ForEachAsync with "
-                    + "MaxDegreeOfParallelism. Unbounded parallelism on a document workload trades throughput for peak "
-                    + "memory, because every in-flight document holds its own laid-out tree.",
+                + "MaxDegreeOfParallelism. Unbounded parallelism on a document workload trades throughput for peak "
+                + "memory, because every in-flight document holds its own laid-out tree.",
                 size: 9f),
         ]));
 
         return doc;
     }
+
+    // Local helpers and sample data for this document.
+
+    // Local helpers and sample data for this document.
+    private static readonly Color Ink = ColorPalette.Slate[700];
+
+    /// <summary>600, not 400: 400 never clears 4.5:1 as body text on white.</summary>
+    private static readonly Color Muted = ColorPalette.Slate[600];
+
+    private static readonly Color Heading = ColorPalette.Slate[800];
+
+    private static readonly Color Accent = ColorPalette.Indigo[700];
+
+    private static readonly Color Rule = ColorPalette.Slate[200];
+
+    /// <summary>A styled text cell with trade-document defaults.</summary>
+    private static TextBlock Cell(string text, float size = 9f, bool bold = false, Color? color = null, TextAlignment align = TextAlignment.Left, float marginTop = 0f, float marginBottom = 0f) => new()
+    {
+        Text = text,
+        FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+        FontSize = size,
+        Color = color ?? Ink,
+        Alignment = align,
+        Margin = new Thickness(0, marginTop, 0, marginBottom),
+    };
+
+    /// <summary>Table header cell - white on the accent band.</summary>
+    private static TextBlock Th(string text, TextAlignment align = TextAlignment.Left) => Cell(text, size: 8.5f, bold: true, color: Color.White, align: align);
+
+    /// <summary>Table body cell.</summary>
+    private static TextBlock Td(string text, float size = 8.5f, bool bold = false, Color? color = null, TextAlignment align = TextAlignment.Left) => Cell(text, size: size, bold: bold, color: color, align: align);
+
+    private static Heading H1(string text) => new(text)
+    {
+        Level = 1,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 21,
+        Color = Heading,
+        Margin = new Thickness(0, 0, 0, 4),
+    };
+
+    private static Heading H2(string text, Color? color = null) => new(text)
+    {
+        Level = 2,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 13,
+        Color = color ?? Accent,
+        Margin = new Thickness(0, 16, 0, 8),
+    };
+
+    /// <summary>The full-width accent rule at the top of each document.</summary>
+    private static Container AccentBar(Color? color = null, float height = 4f) => new()
+    {
+        BackgroundColor = color ?? Accent,
+        Height = height,
+        Margin = new Thickness(0, 0, 0, 14),
+    };
+
+    /// <summary>A row of evenly weighted elements.</summary>
+    private static HorizontalStack WeightedRow(IEnumerable<IElement> items, float spacing = 14f, float marginTop = 0f, float marginBottom = 14f)
+    {
+        HorizontalStack row = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Spacing = spacing,
+            Margin = new Thickness(0, marginTop, 0, marginBottom),
+        };
+        foreach (IElement item in items)
+        {
+            row.Add(item, 1);
+        }
+
+        return row;
+    }
+
+    /// <summary>A bordered panel with a heading - terms, notes, declarations.</summary>
+    private static Container Panel(string title, IEnumerable<IElement> children, Color? accent = null)
+    {
+        VerticalStack body = new()
+        {
+            Spacing = 4
+        };
+        body.Add(Cell(title, size: 9.5f, bold: true, color: accent ?? Accent, marginBottom: 4f));
+        foreach (IElement child in children)
+        {
+            body.Add(child);
+        }
+
+        return new Container
+        {
+            BackgroundColor = ColorPalette.Slate[50],
+            Border = new Border(0.75f),
+            BorderColors = new BorderColors(Rule),
+            CornerRadius = 6,
+            Padding = new Thickness(12),
+            Margin = new Thickness(0, 4, 0, 12),
+            Child = body,
+        };
+    }
+
+    /// <summary>A summary tile.</summary>
+    private static Container Tile(string value, string label, Color? accent = null)
+    {
+        VerticalStack body = new();
+        body.Add(Cell(value, size: 14f, bold: true, color: accent ?? Accent, marginBottom: 2f));
+        body.Add(Cell(label, size: 8f, color: Muted));
+        return new Container
+        {
+            BackgroundColor = ColorPalette.Slate[50],
+            Border = new Border(0.75f),
+            BorderColors = new BorderColors(Rule),
+            CornerRadius = 6,
+            Padding = new Thickness(11, 10),
+            Child = body,
+        };
+    }
+
+    /// <summary>The running header / footer band.</summary>
+    private static HorizontalStack Band(string left, string right)
+    {
+        HorizontalStack row = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted
+        };
+        row.Add(Cell(left, size: 7.5f, color: Muted), 2.5f);
+        row.Add(Cell(right, size: 7.5f, color: Muted, align: TextAlignment.Right), 2);
+        return row;
+    }
+
+    /// <summary>
+    /// Sterling, with the sign outside the symbol.
+    ///
+    /// On a statement or a credit note, where the sign is the most important
+    /// character in the cell, it belongs in front of the symbol rather than after
+    /// it - "-£420.00", not "£-420.00".
+    /// </summary>
+    private static string Money(decimal value, string symbol = "£", string culture = "en-GB") => (value < 0 ? "-" : string.Empty) + symbol + Math.Abs(value).ToString("N2", CultureInfo.GetCultureInfo(culture));
+
+    private static string GbDate(DateTime date) => date.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
 }

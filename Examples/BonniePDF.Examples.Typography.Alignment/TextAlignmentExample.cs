@@ -13,7 +13,8 @@ namespace BonniePDF.Examples.Typography.Alignment;
 /// </summary>
 [System.ComponentModel.DisplayName("Text Alignment")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("Left, centre, right, and justified text alignment including book-style paragraphs, accessible to screen readers. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Left, centre, right, and justified text alignment including book-style paragraphs, accessible to screen readers. PDF/A-2a + PDF/UA-1.")]
 public static class TextAlignmentExample
 {
     private const string SampleText =
@@ -22,24 +23,25 @@ public static class TextAlignmentExample
         "word spacing is adjusted so that both the left and right edges align perfectly with " +
         "the margins, creating a clean, professional look commonly seen in books and formal documents.";
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Text Alignment",
-                Author   = "BonniePDF",
-                Subject  = "Left, centre, right, and justified text alignment. PDF/A-2a + PDF/UA-1.",
+                Title = "Text Alignment",
+                Author = "BonniePDF",
+                Subject = "Left, centre, right, and justified text alignment. PDF/A-2a + PDF/UA-1.",
                 Keywords = "pdf, pdf/ua, pdf/a, accessibility, text, alignment, justified",
             },
             Settings = new DocumentSettings
             {
-                PageSize      = PdfSize.A4,
-                Margin        = 60,
-                Conformance   = PdfAConformance.PdfA2a,
+                PageSize = PdfSize.A4,
+                Margin = 60,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
+                Language = "en-GB",
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.TimesRoman)
                     .WithSize(11)
@@ -50,17 +52,17 @@ public static class TextAlignmentExample
         doc.Add(new Heading("Text Alignment Comparison")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 22,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 16),
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 16),
         });
 
         doc.Add(new TextBlock
         {
-            Text   = "The four standard alignments are shown below. Each paragraph carries the same text and the " +
-                     "same tagging — alignment is a purely visual property.",
+            Text = "The four standard alignments are shown below. Each paragraph carries the same text and the " +
+                   "same tagging — alignment is a purely visual property.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 
@@ -91,10 +93,10 @@ public static class TextAlignmentExample
         {
             doc.Add(new TextBlock
             {
-                Text      = p,
-                FontName  = StandardFonts.TimesRoman,
+                Text = p,
+                FontName = StandardFonts.TimesRoman,
                 Alignment = Align.Justify,
-                Margin    = new Thickness(0, 0, 0, 8),
+                Margin = new Thickness(0, 0, 0, 8),
             });
         }
 
@@ -106,12 +108,12 @@ public static class TextAlignmentExample
         doc.Add(new Heading(title)
         {
             TocIdentifier = tocId,
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 13,
-            Color     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 0, 0, 6),
-            Alignment     = alignment,
+            Level = 2,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 13,
+            Color = ColorPalette.Indigo[600],
+            Margin = new Thickness(0, 0, 0, 6),
+            Alignment = alignment,
         });
     }
 

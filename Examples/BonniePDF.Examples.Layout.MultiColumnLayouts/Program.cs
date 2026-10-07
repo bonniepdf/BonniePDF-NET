@@ -13,6 +13,7 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "multi_column_layouts.pdf"));
         }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

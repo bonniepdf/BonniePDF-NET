@@ -8,7 +8,8 @@ namespace BonniePDF.Examples.Templates.FinancialDashboard;
 /// </summary>
 [System.ComponentModel.DisplayName("Financial Dashboard")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("Landscape A4 financial dashboard with KPI strip, 12-month revenue bar chart with alt text, and top-products table.")]
+[System.ComponentModel.Description(
+    "Landscape A4 financial dashboard with KPI strip, 12-month revenue bar chart with alt text, and top-products table.")]
 public static class FinancialDashboardExample
 {
     // ── Brand colours - drawn from the BonniePDF logo palette ────────────────
@@ -22,6 +23,7 @@ public static class FinancialDashboardExample
     private static readonly Color DeltaPos = Color.FromHex("#2d7a3a");
     private static readonly Color DeltaNeg = Color.FromHex("#b94040");
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // Landscape, zero margin - layout elements carry their own padding
@@ -51,7 +53,8 @@ public static class FinancialDashboardExample
 
         doc.Metadata.Title = title;
         doc.Metadata.Author = "Sample Company";
-        doc.Metadata.Subject = $"{quarterLabel} financial dashboard - KPIs, monthly revenue chart, and product breakdown";
+        doc.Metadata.Subject =
+            $"{quarterLabel} financial dashboard - KPIs, monthly revenue chart, and product breakdown";
 
         // ════════════════════════════════════════════════════════════════════════
         // 1.  Header bar
@@ -216,27 +219,59 @@ public static class FinancialDashboardExample
         };
 
         productTable.AddHeader(
-            new TextBlock { Text = "Product", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Left },
-            new TextBlock { Text = "Units", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Right },
-            new TextBlock { Text = "Revenue", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Right },
-            new TextBlock { Text = "Margin", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Right }
+            new TextBlock
+            {
+                Text = "Product", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso,
+                Alignment = TextAlignment.Left
+            },
+            new TextBlock
+            {
+                Text = "Units", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso,
+                Alignment = TextAlignment.Right
+            },
+            new TextBlock
+            {
+                Text = "Revenue", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso,
+                Alignment = TextAlignment.Right
+            },
+            new TextBlock
+            {
+                Text = "Margin", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso,
+                Alignment = TextAlignment.Right
+            }
         );
 
         var products = new[]
         {
-            new { Name = "Enterprise Plan", Units = "142",   Revenue = "£890,400", Margin = "71%" },
-            new { Name = "Pro Plan",        Units = "1,204", Revenue = "£722,400", Margin = "64%" },
-            new { Name = "Starter Plan",    Units = "2,468", Revenue = "£493,600", Margin = "58%" },
-            new { Name = "Add-ons",         Units = "-",     Revenue = "£304,000", Margin = "82%" },
+            new { Name = "Enterprise Plan", Units = "142", Revenue = "£890,400", Margin = "71%" },
+            new { Name = "Pro Plan", Units = "1,204", Revenue = "£722,400", Margin = "64%" },
+            new { Name = "Starter Plan", Units = "2,468", Revenue = "£493,600", Margin = "58%" },
+            new { Name = "Add-ons", Units = "-", Revenue = "£304,000", Margin = "82%" },
         };
 
         foreach (var p in products)
         {
             productTable.AddRow(
-                new TextBlock { Text = p.Name, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Left },
-                new TextBlock { Text = p.Units, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Brown, Alignment = TextAlignment.Right },
-                new TextBlock { Text = p.Revenue, FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso, Alignment = TextAlignment.Right },
-                new TextBlock { Text = p.Margin, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Brown, Alignment = TextAlignment.Right }
+                new TextBlock
+                {
+                    Text = p.Name, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Espresso,
+                    Alignment = TextAlignment.Left
+                },
+                new TextBlock
+                {
+                    Text = p.Units, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Brown,
+                    Alignment = TextAlignment.Right
+                },
+                new TextBlock
+                {
+                    Text = p.Revenue, FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso,
+                    Alignment = TextAlignment.Right
+                },
+                new TextBlock
+                {
+                    Text = p.Margin, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Brown,
+                    Alignment = TextAlignment.Right
+                }
             );
         }
 
@@ -249,7 +284,8 @@ public static class FinancialDashboardExample
         return doc;
     }
 
-    private static Container CreateKpiCard(string value, string label, string delta, Color deltaColor, bool showLeftBorder)
+    private static Container CreateKpiCard(string value, string label, string delta, Color deltaColor,
+        bool showLeftBorder)
     {
         VerticalStack stack = new();
         stack.Add(new TextBlock

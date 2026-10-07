@@ -1,4 +1,5 @@
 namespace BonniePDF.Examples.Basics.Margins;
+
 internal sealed class Program
 {
     private static void Main()
@@ -12,6 +13,7 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "margins.pdf"));
         }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

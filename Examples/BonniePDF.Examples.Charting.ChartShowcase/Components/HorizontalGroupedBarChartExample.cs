@@ -10,9 +10,11 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// </summary>
 [System.ComponentModel.DisplayName("Horizontal Grouped Bar Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("GroupedBarChart with Orientation = ChartOrientation.Horizontal - quarterly sales for three product lines shown as horizontal grouped bars.")]
+[System.ComponentModel.Description(
+    "GroupedBarChart with Orientation = ChartOrientation.Horizontal - quarterly sales for three product lines shown as horizontal grouped bars.")]
 public static class HorizontalGroupedBarChartExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document document = new(new DocumentSettings
@@ -46,7 +48,7 @@ public static class HorizontalGroupedBarChartExample
         ChartSeries electronicsSeries = new()
         {
             Name = "Electronics",
-            Color = Color.FromHex(ChartColors.Indigo),
+            Color = Color.FromHex("#4f46e5"),
             DataPoints =
             [
                 new ChartDataPoint { Label = "Q1", Value = 42000 },
@@ -59,7 +61,7 @@ public static class HorizontalGroupedBarChartExample
         ChartSeries clothingSeries = new()
         {
             Name = "Clothing",
-            Color = Color.FromHex(ChartColors.Rose),
+            Color = Color.FromHex("#f43f5e"),
             DataPoints =
             [
                 new ChartDataPoint { Label = "Q1", Value = 31000 },
@@ -72,7 +74,7 @@ public static class HorizontalGroupedBarChartExample
         ChartSeries homeSeries = new()
         {
             Name = "Home & Garden",
-            Color = Color.FromHex(ChartColors.Green),
+            Color = Color.FromHex("#22c55e"),
             DataPoints =
             [
                 new ChartDataPoint { Label = "Q1", Value = 24000 },
@@ -100,7 +102,8 @@ public static class HorizontalGroupedBarChartExample
 
         GroupedBarChart groupedBarChart = new(chartData)
         {
-            AltText = "Horizontal grouped bar chart comparing quarterly sales across Electronics, Clothing, and Home & Garden",
+            AltText =
+                "Horizontal grouped bar chart comparing quarterly sales across Electronics, Clothing, and Home & Garden",
             Orientation = ChartOrientation.Horizontal,
             Height = 380,
             StretchToFit = true,
@@ -113,7 +116,7 @@ public static class HorizontalGroupedBarChartExample
         };
 
         document.Add(groupedBarChart);
-        
+
 
         //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");
         //File.WriteAllText(svgChartPath, groupedBarChart.ToSvg(chartData));
@@ -122,6 +125,8 @@ public static class HorizontalGroupedBarChartExample
         //File.WriteAllText(svgPagePath, document.Pages[0].ToSvg());
         return document;
     }
+
+    // Local helpers and sample data for this document.
+
+
 }
-
-

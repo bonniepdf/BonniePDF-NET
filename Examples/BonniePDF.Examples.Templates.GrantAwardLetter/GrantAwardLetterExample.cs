@@ -12,7 +12,8 @@ namespace BonniePDF.Examples.Templates.GrantAwardLetter;
 /// </summary>
 [System.ComponentModel.DisplayName("Grant Award Letter")]
 [System.ComponentModel.Category("Community")]
-[System.ComponentModel.Description("Fictional public-sector grant funding decision with an \"Awarded\" decision block, an award-breakdown table, key dates, next steps, a review route, contact options, and an alternative-formats notice. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Fictional public-sector grant funding decision with an \"Awarded\" decision block, an award-breakdown table, key dates, next steps, a review route, contact options, and an alternative-formats notice. PDF/A-2a + PDF/UA-1.")]
 public static class GrantAwardLetterExample
 {
     private const float Margin = 50;
@@ -48,6 +49,7 @@ public static class GrantAwardLetterExample
         new("First instalment", "Friday 26 September 2026"),
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new(PdfSize.A4, Margin)
@@ -59,7 +61,8 @@ public static class GrantAwardLetterExample
             DisplayDocTitle = true,
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any funding body  |  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                Text =
+                    $"SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any funding body  |  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7.5f,
                 Color = Muted,
@@ -71,7 +74,8 @@ public static class GrantAwardLetterExample
         Document doc = new(settings);
         doc.Metadata.Title = "Grant award decision letter";
         doc.Metadata.Author = "Sample Community Fund";
-        doc.Metadata.Subject = "Fictional community grant award with award breakdown, payment schedule, next steps, and review route.";
+        doc.Metadata.Subject =
+            "Fictional community grant award with award breakdown, payment schedule, next steps, and review route.";
         doc.Metadata.Keywords = "sample, public sector, grant, award, funding, accessibility, fictional data";
 
         doc.Add(Masthead());
@@ -167,7 +171,8 @@ public static class GrantAwardLetterExample
 
         // One TextBlock with hard line breaks: the address tags as a single
         // paragraph under PDF/UA instead of five.
-        TextBlock addr = Body("Sample Recipient\nSample Community Project\n14 Sample Walk\nSample Town\nST3 2LP", mb: 0);
+        TextBlock addr = Body("Sample Recipient\nSample Community Project\n14 Sample Walk\nSample Town\nST3 2LP",
+            mb: 0);
 
         VerticalStack meta = new();
         meta.Add(Body("Issued 4 August 2026", align: TextAlignment.Right, mb: 0));
@@ -314,7 +319,8 @@ public static class GrantAwardLetterExample
         Margin = new Thickness(0, 6, 0, 8),
     };
 
-    private static TextBlock Body(string text, TextAlignment? align = null, Color? color = null, float size = 11, float mb = 12, bool bold = false)
+    private static TextBlock Body(string text, TextAlignment? align = null, Color? color = null, float size = 11,
+        float mb = 12, bool bold = false)
     {
         TextBlock block = new()
         {
@@ -361,7 +367,8 @@ public static class GrantAwardLetterExample
         Alignment = align,
     };
 
-    private static TextBlock Td(string text, Color? color = null, TextAlignment align = TextAlignment.Left, bool bold = false) => new()
+    private static TextBlock Td(string text, Color? color = null, TextAlignment align = TextAlignment.Left,
+        bool bold = false) => new()
     {
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,

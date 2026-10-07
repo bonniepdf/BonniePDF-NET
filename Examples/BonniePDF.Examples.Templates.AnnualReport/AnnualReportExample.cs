@@ -12,14 +12,15 @@ namespace BonniePDF.Examples.Templates.AnnualReport;
 /// </summary>
 [System.ComponentModel.DisplayName("Annual - Classic")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("A4 portrait annual report with a full-bleed cover, page backgrounds, and blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers.")]
+[System.ComponentModel.Description(
+    "A4 portrait annual report with a full-bleed cover, page backgrounds, and blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers.")]
 public static class AnnualReportExample
 {
     // ── Brand colours ───────────────────────────────────────────────────────
     // Three brand colours drive the whole template - the cover accents, the
     // tri-colour rule under the title, the header/footer hairlines, and the KPI
     // cards all draw from this trio (plus tints derived from the primary).
-    private static readonly Color Primary = ColorPalette.Blue[800];   // deep corporate blue
+    private static readonly Color Primary = ColorPalette.Blue[800]; // deep corporate blue
     private static readonly Color Secondary = ColorPalette.Teal[500]; // teal accent
     private static readonly Color Tertiary = ColorPalette.Amber[400]; // warm gold accent
 
@@ -30,10 +31,10 @@ public static class AnnualReportExample
     private static readonly Color SecondaryText = ColorPalette.Teal[600];
     private static readonly Color TertiaryText = ColorPalette.Amber[700];
 
-    private static readonly Color CoverBg = ColorPalette.Blue[900];   // deepest primary tint - cover field
-    private static readonly Color BandBg = ColorPalette.Blue[100];    // lightest primary tint - header/footer bands
-    private static readonly Color Ink = ColorPalette.Slate[600];      // body copy
-    private static readonly Color HeadingColor = ColorPalette.Blue[800];   // section headings
+    private static readonly Color CoverBg = ColorPalette.Blue[900]; // deepest primary tint - cover field
+    private static readonly Color BandBg = ColorPalette.Blue[100]; // lightest primary tint - header/footer bands
+    private static readonly Color Ink = ColorPalette.Slate[600]; // body copy
+    private static readonly Color HeadingColor = ColorPalette.Blue[800]; // section headings
 
     // A4 portrait. The generous margin doubles as the height of the full-bleed
     // header/footer bands, leaving the band text comfortably clear of the paper
@@ -50,6 +51,7 @@ public static class AnnualReportExample
     private static readonly string Generated =
         "Generated " + DateTime.Now.ToString("d MMMM yyyy 'at' HH:mm", CultureInfo.InvariantCulture);
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         DocumentSettings settings = new()
@@ -202,7 +204,8 @@ public static class AnnualReportExample
     };
 
     private static HorizontalStack BandRow(
-        TextBlock left, TextBlock center, TextBlock right, float leftWeight = 1, float centerWeight = 1, float rightWeight = 1)
+        TextBlock left, TextBlock center, TextBlock right, float leftWeight = 1, float centerWeight = 1,
+        float rightWeight = 1)
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
         row.Add(left, leftWeight);
@@ -234,6 +237,7 @@ public static class AnnualReportExample
         {
             row.Add(new Container { BackgroundColor = color, Width = 14, Height = 14, CornerRadius = 3 });
         }
+
         return row;
     }
 
@@ -263,6 +267,7 @@ public static class AnnualReportExample
         {
             row.Add(new Container { BackgroundColor = color, Width = 34, Height = 5 });
         }
+
         return row;
     }
 

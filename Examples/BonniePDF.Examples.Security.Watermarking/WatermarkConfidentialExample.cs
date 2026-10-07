@@ -7,10 +7,11 @@ namespace BonniePDF.Examples.Security.Watermarking;
 /// </summary>
 [System.ComponentModel.DisplayName("Watermark - Confidential")]
 [System.ComponentModel.Category("Security")]
-[System.ComponentModel.Description("Generates a document with a 'CONFIDENTIAL' watermark using custom styling (red color, larger size, steeper angle).")]
+[System.ComponentModel.Description(
+    "Generates a document with a 'CONFIDENTIAL' watermark using custom styling (red color, larger size, steeper angle).")]
 public static class WatermarkConfidentialExample
 {
-
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new(new DocumentSettings
@@ -22,7 +23,8 @@ public static class WatermarkConfidentialExample
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Confidential Report";
         doc.Metadata.Author = "BonniePDF";
@@ -110,4 +112,3 @@ public static class WatermarkConfidentialExample
         };
     }
 }
-

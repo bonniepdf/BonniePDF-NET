@@ -9,9 +9,11 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// </summary>
 [System.ComponentModel.DisplayName("Horizontal Lollipop Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("LollipopChart with Orientation = ChartOrientation.Horizontal - product revenue ranking with a lightweight stem-and-head style that reads cleanly left-to-right.")]
+[System.ComponentModel.Description(
+    "LollipopChart with Orientation = ChartOrientation.Horizontal - product revenue ranking with a lightweight stem-and-head style that reads cleanly left-to-right.")]
 public static class HorizontalLollipopChartExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document document = new(new DocumentSettings
@@ -49,17 +51,17 @@ public static class HorizontalLollipopChartExample
             [
                 new ChartSeries
                 {
-                    Color = Color.FromHex(ChartColors.Violet),
+                    Color = Color.FromHex("#7c3aed"),
                     DataPoints =
                     [
-                        new ChartDataPoint { Label = "Product A", Value = 45000,  LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product B", Value = 62000,  LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product C", Value = 38500,  LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product D", Value = 71000,  LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product E", Value = 55000,  LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product F", Value = 83000,  LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product G", Value = 49000,  LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product H", Value = 91000,  LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product A", Value = 45000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product B", Value = 62000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product C", Value = 38500, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product D", Value = 71000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product E", Value = 55000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product F", Value = 83000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product G", Value = 49000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product H", Value = 91000, LabelFormat = "N0" },
                     ]
                 }
             ],
@@ -80,7 +82,7 @@ public static class HorizontalLollipopChartExample
             Orientation = ChartOrientation.Horizontal,
             Height = 400,
             StretchToFit = true,
-            LollipopColor = Color.FromHex(ChartColors.Violet),
+            LollipopColor = Color.FromHex("#7c3aed"),
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
@@ -88,7 +90,7 @@ public static class HorizontalLollipopChartExample
         };
 
         document.Add(lollipopChart);
-        
+
 
         //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");
         //File.WriteAllText(svgChartPath, lollipopChart.ToSvg(chartData));
@@ -97,6 +99,8 @@ public static class HorizontalLollipopChartExample
         //File.WriteAllText(svgPagePath, document.Pages[0].ToSvg());
         return document;
     }
+
+    // Local helpers and sample data for this document.
+
+
 }
-
-

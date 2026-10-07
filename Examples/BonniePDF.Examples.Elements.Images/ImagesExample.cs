@@ -13,9 +13,11 @@ namespace BonniePDF.Examples.Elements.Images;
 /// </summary>
 [System.ComponentModel.DisplayName("Images")]
 [System.ComponentModel.Category("Elements")]
-[System.ComponentModel.Description("Raster image embedding — fit modes, containers, alpha transparency, and alt text for screen readers. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Raster image embedding — fit modes, containers, alpha transparency, and alt text for screen readers. PDF/A-2a + PDF/UA-1.")]
 public static class ImagesExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         byte[] gradientPng = BuildRgbPng(100, (x, y) =>
@@ -35,17 +37,19 @@ public static class ImagesExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Images",
-                Author   = "BonniePDF",
-                Subject  = "Raster image embedding — fit modes, containers, alpha transparency, and alt text for screen readers. PDF/A-2a + PDF/UA-1.",
+                Title = "Images",
+                Author = "BonniePDF",
+                Subject =
+                    "Raster image embedding — fit modes, containers, alpha transparency, and alt text for screen readers. PDF/A-2a + PDF/UA-1.",
                 Keywords = "pdf, pdf/ua, pdf/a, accessibility, image, png, figure, alt-text, transparency, fit-mode",
             },
             Settings = new DocumentSettings
             {
-                Conformance   = PdfAConformance.PdfA2a,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
-                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]),
+                Language = "en-GB",
+                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12)
+                    .WithColor(ColorPalette.Slate[700]),
             },
         };
 
@@ -54,26 +58,29 @@ public static class ImagesExample
         doc.Add(new Heading("Images")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 24,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 8),
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 24,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 8),
         });
 
         doc.Add(new TextBlock
         {
-            Text   = "BonniePDF embeds PNG images straight into the document. Under PDF/UA-1 an image is either informative — in " +
-                     "which case it needs alt text — or decorative, in which case screen readers skip it. Each image " +
-                     "below carries alt text; the divider at the end does not.",
+            Text =
+                "BonniePDF embeds PNG images straight into the document. Under PDF/UA-1 an image is either informative — in " +
+                "which case it needs alt text — or decorative, in which case screen readers skip it. Each image " +
+                "below carries alt text; the divider at the end does not.",
             Margin = new Thickness(0, 0, 0, 12),
         });
 
         // ── Fit modes ────────────────────────────────────────────────────────────
 
         RenderSection(doc, "Fit Modes", "s-fit",
-            FitModeBlock(gradientPng, ImageFitMode.Contain, "Contain", "scaled to fit within the box, preserving aspect ratio"),
-            FitModeBlock(gradientPng, ImageFitMode.Cover, "Cover", "scaled to fill the box, preserving aspect ratio (may crop)"),
+            FitModeBlock(gradientPng, ImageFitMode.Contain, "Contain",
+                "scaled to fit within the box, preserving aspect ratio"),
+            FitModeBlock(gradientPng, ImageFitMode.Cover, "Cover",
+                "scaled to fill the box, preserving aspect ratio (may crop)"),
             FitModeBlock(gradientPng, ImageFitMode.Fill, "Fill", "stretched to fill the box, ignoring aspect ratio"));
 
         // ── Alpha transparency ───────────────────────────────────────────────────
@@ -81,14 +88,16 @@ public static class ImagesExample
         RenderSection(doc, "Alpha Transparency", "s-alpha",
             new IElement[]
             {
-                Caption("PNG images can carry an alpha channel (a PDF soft mask), letting the background show through."),
+                Caption(
+                    "PNG images can carry an alpha channel (a PDF soft mask), letting the background show through."),
                 new Image
                 {
                     ImageData = alphaPng,
-                    Width     = 200,
-                    FitMode   = ImageFitMode.Contain,
-                    AltText   = "A circular blue-to-red gradient fading to transparent at the edges, on the page background.",
-                    Margin    = new Thickness(0, 0, 0, 10),
+                    Width = 200,
+                    FitMode = ImageFitMode.Contain,
+                    AltText =
+                        "A circular blue-to-red gradient fading to transparent at the edges, on the page background.",
+                    Margin = new Thickness(0, 0, 0, 10),
                 },
             },
             new IElement[]
@@ -97,13 +106,14 @@ public static class ImagesExample
                 new Container
                 {
                     BackgroundColor = ColorPalette.Emerald[100],
-                    Padding         = new Thickness(10),
+                    Padding = new Thickness(10),
                     Child = new Image
                     {
                         ImageData = alphaPng,
-                        Width     = 200,
-                        FitMode   = ImageFitMode.Contain,
-                        AltText   = "The circular gradient over a green container, whose colour shows through the transparent edges.",
+                        Width = 200,
+                        FitMode = ImageFitMode.Contain,
+                        AltText =
+                            "The circular gradient over a green container, whose colour shows through the transparent edges.",
                     },
                 },
             });
@@ -116,15 +126,15 @@ public static class ImagesExample
                 Caption("A bordered, padded container wraps the image."),
                 new Container
                 {
-                    Padding      = new Thickness(15),
-                    Border       = new Border(2),
+                    Padding = new Thickness(15),
+                    Border = new Border(2),
                     BorderColors = new BorderColors(ColorPalette.Slate[600]),
                     Child = new Image
                     {
                         ImageData = gradientPng,
-                        Width     = 250,
-                        FitMode   = ImageFitMode.Contain,
-                        AltText   = "Colour gradient inside a bordered container.",
+                        Width = 250,
+                        FitMode = ImageFitMode.Contain,
+                        AltText = "Colour gradient inside a bordered container.",
                     },
                 },
             });
@@ -134,13 +144,14 @@ public static class ImagesExample
         RenderSection(doc, "Decorative Images", "s-decorative",
             new IElement[]
             {
-                Caption("The light grey bar below is purely decorative, so it carries no alt text and screen readers skip it."),
+                Caption(
+                    "The light grey bar below is purely decorative, so it carries no alt text and screen readers skip it."),
                 new Image
                 {
-                    ImageData    = dividerPng,
-                    Width        = 360,
-                    Height       = 12,
-                    FitMode      = ImageFitMode.Fill,
+                    ImageData = dividerPng,
+                    Width = 360,
+                    Height = 12,
+                    FitMode = ImageFitMode.Fill,
                     IsDecorative = true,
                 },
             });
@@ -184,19 +195,19 @@ public static class ImagesExample
     private static Heading SectionHeading(string title, string tocId) => new(title)
     {
         TocIdentifier = tocId,
-        Level         = 2,
-        FontName      = StandardFonts.HelveticaBold,
-        FontSize      = 15,
-        Color     = ColorPalette.Indigo[600],
-        Margin        = new Thickness(0, 14, 0, 6),
+        Level = 2,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 15,
+        Color = ColorPalette.Indigo[600],
+        Margin = new Thickness(0, 14, 0, 6),
     };
 
     private static TextBlock Caption(string text) => new()
     {
-        Text      = text,
-        FontSize  = 10,
+        Text = text,
+        FontSize = 10,
         Color = ColorPalette.Slate[500],
-        Margin    = new Thickness(0, 0, 0, 6),
+        Margin = new Thickness(0, 0, 0, 6),
     };
 
     private static IElement[] FitModeBlock(byte[] png, ImageFitMode fitMode, string label, string description) =>
@@ -206,11 +217,11 @@ public static class ImagesExample
             new Image
             {
                 ImageData = png,
-                Width     = 300,
-                Height    = 150,
-                FitMode   = fitMode,
-                AltText   = $"Colour gradient shown in {label.ToLowerInvariant()} fit mode.",
-                Margin    = new Thickness(0, 0, 0, 10),
+                Width = 300,
+                Height = 150,
+                FitMode = fitMode,
+                AltText = $"Colour gradient shown in {label.ToLowerInvariant()} fit mode.",
+                Margin = new Thickness(0, 0, 0, 10),
             },
         };
 
@@ -249,7 +260,7 @@ public static class ImagesExample
         var idat = new List<byte>
         {
             0x78, 0x01, // zlib header
-            0x01,       // BFINAL=1, BTYPE=00 (stored)
+            0x01, // BFINAL=1, BTYPE=00 (stored)
             (byte)(raw.Length & 0xFF), (byte)((raw.Length >> 8) & 0xFF),
             (byte)(nlen & 0xFF), (byte)((nlen >> 8) & 0xFF),
         };
@@ -293,6 +304,7 @@ public static class ImagesExample
             a = (a + d) % mod;
             b = (b + a) % mod;
         }
+
         return (b << 16) | a;
     }
 
@@ -305,6 +317,7 @@ public static class ImagesExample
             for (int i = 0; i < 8; i++)
                 crc = (crc & 1) != 0 ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
         }
+
         return crc ^ 0xFFFFFFFF;
     }
 }

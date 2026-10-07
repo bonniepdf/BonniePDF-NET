@@ -13,6 +13,7 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "headers_footers.pdf"));
         }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

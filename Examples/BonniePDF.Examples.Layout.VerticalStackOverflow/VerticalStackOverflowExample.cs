@@ -18,7 +18,8 @@ namespace BonniePDF.Examples.Layout.VerticalStackOverflow;
 /// </summary>
 [System.ComponentModel.DisplayName("VerticalStack Overflow")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("A column of Code 128 barcodes paginated by a VerticalStack - barcodes have no pagination of their own, so the stack is what keeps the overflow on the page.")]
+[System.ComponentModel.Description(
+    "A column of Code 128 barcodes paginated by a VerticalStack - barcodes have no pagination of their own, so the stack is what keeps the overflow on the page.")]
 public static class VerticalStackOverflowExample
 {
     private static readonly string[] Locations =
@@ -30,22 +31,24 @@ public static class VerticalStackOverflowExample
         "WH2-B04-R02-B08", "WH2-B05-R01-B02", "WH2-B05-R03-B06", "WH2-B06-R04-B03",
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Warehouse Asset-Label Sheet",
-                Author   = "BonniePDF",
-                Subject  = "Demonstrates VerticalStack paginating a column of barcodes in an accessible PDF/A-2a + PDF/UA-1 document.",
+                Title = "Warehouse Asset-Label Sheet",
+                Author = "BonniePDF",
+                Subject =
+                    "Demonstrates VerticalStack paginating a column of barcodes in an accessible PDF/A-2a + PDF/UA-1 document.",
                 Keywords = "pdf, accessibility, layout, vertical stack, barcode, logistics, warehouse, BonniePDF",
             },
             Settings = new DocumentSettings
             {
-                Conformance   = PdfAConformance.PdfA2a,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
+                Language = "en-GB",
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
@@ -53,9 +56,9 @@ public static class VerticalStackOverflowExample
 
                 FooterTemplate = pageNum => new TextBlock
                 {
-                    Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
-                    FontName  = StandardFonts.Helvetica,
-                    FontSize  = 9,
+                    Text = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
+                    FontName = StandardFonts.Helvetica,
+                    FontSize = 9,
                     Color = ColorPalette.Slate[400],
                     Alignment = TextAlignment.Right,
                 },
@@ -65,16 +68,17 @@ public static class VerticalStackOverflowExample
         doc.Add(new Heading("Warehouse Asset-Label Sheet")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 22,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 10),
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 10),
         });
 
         doc.Add(new TextBlock
         {
-            Text   = "One Code 128 label per storage location. Barcodes have no pagination of their own, so a VerticalStack lays the column out and carries each label that would fall off the page onto the next one - nothing is lost off the bottom edge.",
+            Text =
+                "One Code 128 label per storage location. Barcodes have no pagination of their own, so a VerticalStack lays the column out and carries each label that would fall off the page onto the next one - nothing is lost off the bottom edge.",
             Margin = new Thickness(0, 0, 0, 16),
         });
 
@@ -83,13 +87,14 @@ public static class VerticalStackOverflowExample
         {
             sheet.Add(new Barcode
             {
-                Value             = location,
-                Symbology         = BarcodeSymbology.Code128,
-                Height            = 46,
+                Value = location,
+                Symbology = BarcodeSymbology.Code128,
+                Height = 46,
                 TextLabelFontSize = 10,
-                AltText           = $"Warehouse location barcode {location}",
+                AltText = $"Warehouse location barcode {location}",
             });
         }
+
         doc.Add(sheet);
 
         return doc;

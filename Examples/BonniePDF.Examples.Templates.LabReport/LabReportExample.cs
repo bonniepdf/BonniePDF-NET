@@ -10,17 +10,22 @@ namespace BonniePDF.Examples.Templates.LabReport;
 /// </summary>
 [System.ComponentModel.DisplayName("Pathology Lab Report")]
 [System.ComponentModel.Category("Healthcare")]
-[System.ComponentModel.Description("Fictional UK/EU pathology laboratory report with patient demographics, specimen timestamps, grouped result panels, reference ranges, High/Low flags, and clinical interpretation.")]
+[System.ComponentModel.Description(
+    "Fictional UK/EU pathology laboratory report with patient demographics, specimen timestamps, grouped result panels, reference ranges, High/Low flags, and clinical interpretation.")]
 public static class LabReportExample
 {
     private static readonly Color ClinicalBlue = Color.FromHex("#2563eb");
+
     private static readonly Color Ink = ColorPalette.Slate[700];
+
     // 600, not 500: reads against a tinted panel elsewhere in the document, and
     // 500 falls to 4.38:1 there against the 4.5:1 WCAG AA threshold.
     private static readonly Color Muted = ColorPalette.Slate[600];
     private static readonly Color Rule = ColorPalette.Slate[200];
     private static readonly Color HeaderBackground = ColorPalette.Slate[100];
+
     private static readonly Color High = ColorPalette.Rose[600];
+
     // 700, not 600: this flag's text on white needs 4.5:1 and 600 falls to 3.20:1.
     private static readonly Color Low = ColorPalette.Amber[700];
 
@@ -46,6 +51,7 @@ public static class LabReportExample
         ]),
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new(PdfSize.A4, 50)
@@ -56,7 +62,8 @@ public static class LabReportExample
             Language = "en-GB",
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                Text =
+                    $"CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8,
                 Color = Muted,
@@ -82,7 +89,8 @@ public static class LabReportExample
         // The interpretation and the sign-off that authorises it stay on one page.
         VerticalStack sign = new() { BreakAllowed = false };
         sign.Add(H2("Clinical interpretation"));
-        sign.Add(Body("Mild normocytic anaemia with a neutrophil leucocytosis, consistent with an acute inflammatory or infective process. Renal function shows a mildly raised creatinine with eGFR 62 mL/min/1.73m2 (CKD stage G2). Suggest clinical correlation and a repeat FBC in 7-10 days. Flags: H = above reference range, L = below reference range."));
+        sign.Add(Body(
+            "Mild normocytic anaemia with a neutrophil leucocytosis, consistent with an acute inflammatory or infective process. Renal function shows a mildly raised creatinine with eGFR 62 mL/min/1.73m2 (CKD stage G2). Suggest clinical correlation and a repeat FBC in 7-10 days. Flags: H = above reference range, L = below reference range."));
         sign.Add(Authorisation());
         doc.Add(sign);
 

@@ -9,10 +9,11 @@ namespace BonniePDF.Examples.Security.Watermarking;
 /// </summary>
 [System.ComponentModel.DisplayName("Watermark - Draft")]
 [System.ComponentModel.Category("Security")]
-[System.ComponentModel.Description("Generates a multipage document with a 'DRAFT' watermark on every page, demonstrating document status marking.")]
+[System.ComponentModel.Description(
+    "Generates a multipage document with a 'DRAFT' watermark on every page, demonstrating document status marking.")]
 public static class WatermarkDraftExample
 {
-
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new(new DocumentSettings
@@ -24,7 +25,8 @@ public static class WatermarkDraftExample
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Draft Document with Watermark";
         doc.Metadata.Author = "BonniePDF";

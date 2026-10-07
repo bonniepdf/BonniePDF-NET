@@ -1,6 +1,5 @@
 using System.Globalization;
 using BonniePDF;
-using static BonniePDF.Examples.Shared.TradeKit;
 
 namespace BonniePDF.Examples.Templates.PropertyParticulars;
 
@@ -25,7 +24,8 @@ namespace BonniePDF.Examples.Templates.PropertyParticulars;
 /// </summary>
 [System.ComponentModel.DisplayName("Property particulars")]
 [System.ComponentModel.Category("Property")]
-[System.ComponentModel.Description("Estate agency particulars with an accommodation schedule in metric and imperial, an energy-rating graphic drawn from layout primitives rather than an image, and the misrepresentation notice. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Estate agency particulars with an accommodation schedule in metric and imperial, an energy-rating graphic drawn from layout primitives rather than an image, and the misrepresentation notice. PDF/A-2a + PDF/UA-1.")]
 public static class PropertyParticularsExample
 {
     private const string Headline = "Three-bedroom semi-detached house";
@@ -60,7 +60,8 @@ public static class PropertyParticularsExample
         new("Entrance hall", "Ground", "4.20 × 1.85 m", "13'9\" × 6'1\"", "Original tiled floor, understairs storage"),
         new("Front reception", "Ground", "4.05 × 3.70 m", "13'3\" × 12'2\"", "Bay window to the front, open fireplace"),
         new("Rear reception", "Ground", "4.10 × 3.55 m", "13'5\" × 11'8\"", "French doors to the garden"),
-        new("Kitchen and dining room", "Ground", "6.40 × 3.30 m", "21'0\" × 10'10\"", "Fitted 2024, integrated appliances, roof lantern"),
+        new("Kitchen and dining room", "Ground", "6.40 × 3.30 m", "21'0\" × 10'10\"",
+            "Fitted 2024, integrated appliances, roof lantern"),
         new("Cloakroom", "Ground", "1.80 × 0.95 m", "5'11\" × 3'1\"", "WC and basin"),
         new("Principal bedroom", "First", "4.05 × 3.65 m", "13'3\" × 12'0\"", "Fitted wardrobes to one wall"),
         new("Bedroom two", "First", "3.95 × 3.40 m", "13'0\" × 11'2\"", "Overlooking the rear garden"),
@@ -94,6 +95,7 @@ public static class PropertyParticularsExample
     private static EpcBand BandFor(int score)
         => EpcBands.FirstOrDefault(b => score >= b.From && score <= b.To) ?? EpcBands[^1];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         EpcBand current = BandFor(EpcCurrent);
@@ -145,15 +147,15 @@ public static class PropertyParticularsExample
         doc.Add(H2("The property"));
         doc.Add(Cell(
             "A well-proportioned semi-detached house on a established residential road, extended to the rear to "
-                + "create an open kitchen and dining room with a roof lantern. The two reception rooms retain their "
-                + "original proportions, with a bay window to the front and doors from the rear room onto the "
-                + "garden.",
+            + "create an open kitchen and dining room with a roof lantern. The two reception rooms retain their "
+            + "original proportions, with a bay window to the front and doors from the rear room onto the "
+            + "garden.",
             size: 9.5f,
             marginBottom: 6f));
         doc.Add(Cell(
             "Upstairs there are three bedrooms and a family bathroom. The south-facing garden extends to "
-                + "approximately fourteen metres, with a paved terrace adjoining the house and lawn beyond. "
-                + "Off-street parking is to the front for two vehicles.",
+            + "approximately fourteen metres, with a paved terrace adjoining the house and lawn beyond. "
+            + "Off-street parking is to the front for two vehicles.",
             size: 9.5f,
             marginBottom: 4f));
 
@@ -190,7 +192,7 @@ public static class PropertyParticularsExample
         doc.Add(H2("Energy performance"));
         doc.Add(Cell(
             $"Current rating {current.Letter} ({EpcCurrent}). Potential after the recommended improvements: "
-                + $"{potential.Letter} ({EpcPotential}).",
+            + $"{potential.Letter} ({EpcPotential}).",
             size: 9.5f,
             marginBottom: 10f));
         doc.Add(EpcChart(EpcCurrent, EpcPotential));
@@ -218,17 +220,17 @@ public static class PropertyParticularsExample
         [
             Cell(
                 "These particulars are prepared as a general guide and are not an offer or a contract, nor any "
-                    + "part of one. Descriptions, dimensions, references to condition, and any necessary "
-                    + "permissions for use and occupation are given in good faith and are believed to be correct, "
-                    + "but any intending purchaser should not rely on them as statements of fact and must satisfy "
-                    + "themselves by inspection or otherwise.",
+                + "part of one. Descriptions, dimensions, references to condition, and any necessary "
+                + "permissions for use and occupation are given in good faith and are believed to be correct, "
+                + "but any intending purchaser should not rely on them as statements of fact and must satisfy "
+                + "themselves by inspection or otherwise.",
                 size: 8.5f,
                 color: Muted,
                 marginBottom: 3f),
             Cell(
                 "No person in the employment of the agency has authority to make or give any representation or "
-                    + "warranty in relation to this property. Services, appliances, and fittings have not been "
-                    + "tested.",
+                + "warranty in relation to this property. Services, appliances, and fittings have not been "
+                + "tested.",
                 size: 8.5f,
                 color: Muted),
         ]));
@@ -306,5 +308,142 @@ public static class PropertyParticularsExample
         }
 
         return stack;
+    }
+
+    // Local helpers and sample data for this document.
+
+    // Local helpers and sample data for this document.
+    private static readonly Color Ink = ColorPalette.Slate[700];
+
+    /// <summary>600, not 400: 400 never clears 4.5:1 as body text on white.</summary>
+    private static readonly Color Muted = ColorPalette.Slate[600];
+
+    private static readonly Color Heading = ColorPalette.Slate[800];
+
+    private static readonly Color Accent = ColorPalette.Indigo[700];
+
+    private static readonly Color Rule = ColorPalette.Slate[200];
+
+    /// <summary>A styled text cell with trade-document defaults.</summary>
+    private static TextBlock Cell(string text, float size = 9f, bool bold = false, Color? color = null, TextAlignment align = TextAlignment.Left, float marginTop = 0f, float marginBottom = 0f) => new()
+    {
+        Text = text,
+        FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+        FontSize = size,
+        Color = color ?? Ink,
+        Alignment = align,
+        Margin = new Thickness(0, marginTop, 0, marginBottom),
+    };
+
+    /// <summary>Table header cell - white on the accent band.</summary>
+    private static TextBlock Th(string text, TextAlignment align = TextAlignment.Left) => Cell(text, size: 8.5f, bold: true, color: Color.White, align: align);
+
+    /// <summary>Table body cell.</summary>
+    private static TextBlock Td(string text, float size = 8.5f, bool bold = false, Color? color = null, TextAlignment align = TextAlignment.Left) => Cell(text, size: size, bold: bold, color: color, align: align);
+
+    private static Heading H1(string text) => new(text)
+    {
+        Level = 1,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 21,
+        Color = Heading,
+        Margin = new Thickness(0, 0, 0, 4),
+    };
+
+    private static Heading H2(string text, Color? color = null) => new(text)
+    {
+        Level = 2,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 13,
+        Color = color ?? Accent,
+        Margin = new Thickness(0, 16, 0, 8),
+    };
+
+    /// <summary>The full-width accent rule at the top of each document.</summary>
+    private static Container AccentBar(Color? color = null, float height = 4f) => new()
+    {
+        BackgroundColor = color ?? Accent,
+        Height = height,
+        Margin = new Thickness(0, 0, 0, 14),
+    };
+
+    /// <summary>One label/value pair for the reference grid.</summary>
+    private static VerticalStack Field(string label, string value)
+    {
+        VerticalStack stack = new();
+        stack.Add(Cell(label.ToUpperInvariant(), size: 6.5f, bold: true, color: Muted, marginBottom: 2f));
+        stack.Add(Cell(value, size: 9.5f));
+        return stack;
+    }
+
+    /// <summary>A row of evenly weighted elements.</summary>
+    private static HorizontalStack WeightedRow(IEnumerable<IElement> items, float spacing = 14f, float marginTop = 0f, float marginBottom = 14f)
+    {
+        HorizontalStack row = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Spacing = spacing,
+            Margin = new Thickness(0, marginTop, 0, marginBottom),
+        };
+        foreach (IElement item in items)
+        {
+            row.Add(item, 1);
+        }
+
+        return row;
+    }
+
+    /// <summary>A bordered panel with a heading - terms, notes, declarations.</summary>
+    private static Container Panel(string title, IEnumerable<IElement> children, Color? accent = null)
+    {
+        VerticalStack body = new()
+        {
+            Spacing = 4
+        };
+        body.Add(Cell(title, size: 9.5f, bold: true, color: accent ?? Accent, marginBottom: 4f));
+        foreach (IElement child in children)
+        {
+            body.Add(child);
+        }
+
+        return new Container
+        {
+            BackgroundColor = ColorPalette.Slate[50],
+            Border = new Border(0.75f),
+            BorderColors = new BorderColors(Rule),
+            CornerRadius = 6,
+            Padding = new Thickness(12),
+            Margin = new Thickness(0, 4, 0, 12),
+            Child = body,
+        };
+    }
+
+    /// <summary>A summary tile.</summary>
+    private static Container Tile(string value, string label, Color? accent = null)
+    {
+        VerticalStack body = new();
+        body.Add(Cell(value, size: 14f, bold: true, color: accent ?? Accent, marginBottom: 2f));
+        body.Add(Cell(label, size: 8f, color: Muted));
+        return new Container
+        {
+            BackgroundColor = ColorPalette.Slate[50],
+            Border = new Border(0.75f),
+            BorderColors = new BorderColors(Rule),
+            CornerRadius = 6,
+            Padding = new Thickness(11, 10),
+            Child = body,
+        };
+    }
+
+    /// <summary>The running header / footer band.</summary>
+    private static HorizontalStack Band(string left, string right)
+    {
+        HorizontalStack row = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted
+        };
+        row.Add(Cell(left, size: 7.5f, color: Muted), 2.5f);
+        row.Add(Cell(right, size: 7.5f, color: Muted, align: TextAlignment.Right), 2);
+        return row;
     }
 }

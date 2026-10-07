@@ -14,11 +14,13 @@ namespace BonniePDF.Examples.Templates.Payslip;
 /// </summary>
 [System.ComponentModel.DisplayName("Payslip")]
 [System.ComponentModel.Category("HR")]
-[System.ComponentModel.Description("An encrypted UK payslip: earnings, deductions, taxes, year-to-date totals, masked identifiers, and AES-256 encryption. Privacy-sensitive and client-side-generated. PDF/UA-1 tagged.")]
+[System.ComponentModel.Description(
+    "An encrypted UK payslip: earnings, deductions, taxes, year-to-date totals, masked identifiers, and AES-256 encryption. Privacy-sensitive and client-side-generated. PDF/UA-1 tagged.")]
 public static class PayslipExample
 {
     // ── Design tokens ─────────────────────────────────────────────────────────
     private static readonly Color Ink = ColorPalette.Slate[800];
+
     // 600, not 500/400: both read against Panel/NetPanel (Slate-100/Blue-50) as
     // well as the plain page, and 500 falls to 4.35-4.38:1 there while 400 never
     // clears 4.5:1 anywhere (2.40-2.63:1). 600 clears 4.5:1 on every background
@@ -56,6 +58,7 @@ public static class PayslipExample
         Locale: "en-GB",
         Currency: "GBP");
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new(PdfSize.A5, PageOrientation.Landscape, 26)
@@ -110,7 +113,8 @@ public static class PayslipExample
         VerticalStack period = new() { Spacing = 2 };
         period.Add(Text("PAYSLIP", bold: true, size: 11, align: TextAlignment.Right));
         period.Add(Text($"Pay date   {data.PayPeriod.PayDate}", size: 8, color: Muted, align: TextAlignment.Right));
-        period.Add(Text($"Tax month {data.PayPeriod.TaxMonth}  ·  {data.PayPeriod.TaxYear}", size: 8, color: Muted, align: TextAlignment.Right));
+        period.Add(Text($"Tax month {data.PayPeriod.TaxMonth}  ·  {data.PayPeriod.TaxYear}", size: 8, color: Muted,
+            align: TextAlignment.Right));
 
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
         row.Add(identity, 1);
@@ -141,16 +145,20 @@ public static class PayslipExample
             BorderColors = new BorderColors(Line),
             HeaderBackgroundColor = Panel,
         };
-        payments.AddHeader(ColumnHead("Payments"), ColumnHead("Units", TextAlignment.Right), ColumnHead("Rate", TextAlignment.Right), ColumnHead("Amount", TextAlignment.Right));
+        payments.AddHeader(ColumnHead("Payments"), ColumnHead("Units", TextAlignment.Right),
+            ColumnHead("Rate", TextAlignment.Right), ColumnHead("Amount", TextAlignment.Right));
         foreach (MoneyLine line in data.Payments)
         {
             payments.AddRow(
                 Text(line.Label),
-                Text(line.Units is { } units ? units.ToString(CultureInfo.InvariantCulture) : "", align: TextAlignment.Right),
+                Text(line.Units is { } units ? units.ToString(CultureInfo.InvariantCulture) : "",
+                    align: TextAlignment.Right),
                 Text(line.Rate is { } rate ? Money(rate, data) : "", color: Muted, align: TextAlignment.Right),
                 Text(Money(line.Amount, data), align: TextAlignment.Right));
         }
-        payments.AddRow(Text("Gross pay", bold: true), Text(""), Text(""), Text(Money(Sum(data.Payments, l => l.Amount), data), bold: true, align: TextAlignment.Right));
+
+        payments.AddRow(Text("Gross pay", bold: true), Text(""), Text(""),
+            Text(Money(Sum(data.Payments, l => l.Amount), data), bold: true, align: TextAlignment.Right));
 
         Table deductions = new(2f, 1.1f)
         {
@@ -164,9 +172,12 @@ public static class PayslipExample
         {
             deductions.AddRow(Text(line.Label), Text(Money(line.Amount, data), align: TextAlignment.Right));
         }
-        deductions.AddRow(Text("Total deductions", bold: true), Text(Money(Sum(data.Deductions, l => l.Amount), data), bold: true, align: TextAlignment.Right));
 
-        HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 14, Margin = new Thickness(0, 0, 0, 12) };
+        deductions.AddRow(Text("Total deductions", bold: true),
+            Text(Money(Sum(data.Deductions, l => l.Amount), data), bold: true, align: TextAlignment.Right));
+
+        HorizontalStack row = new()
+            { WidthDistribution = WidthDistribution.Weighted, Spacing = 14, Margin = new Thickness(0, 0, 0, 12) };
         row.Add(payments, 1.3f);
         row.Add(deductions, 1f);
         return row;
@@ -217,7 +228,8 @@ public static class PayslipExample
 
     // ── Small helpers ───────────────────────────────────────────────────────────
 
-    private static TextBlock Text(string text, bool bold = false, float size = 8.5f, Color? color = null, TextAlignment align = TextAlignment.Left) => new()
+    private static TextBlock Text(string text, bool bold = false, float size = 8.5f, Color? color = null,
+        TextAlignment align = TextAlignment.Left) => new()
     {
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
@@ -245,7 +257,11 @@ public static class PayslipExample
         Array.Fill(columns, 1f);
         Grid grid = new(columns) { CellPadding = 5, Border = Border.None };
         grid.AddRow(fields);
-        return new Container { BackgroundColor = Panel, Padding = new Thickness(6, 4, 6, 4), Margin = new Thickness(0, 0, 0, 12), Child = grid };
+        return new Container
+        {
+            BackgroundColor = Panel, Padding = new Thickness(6, 4, 6, 4), Margin = new Thickness(0, 0, 0, 12),
+            Child = grid
+        };
     }
 
     private static string Money(decimal value, PayslipData data) =>
@@ -259,15 +275,42 @@ public static class PayslipExample
 
     // ── Domain model (the data-to-document boundary) ─────────────────────────────
 
-    public enum DeductionKind { None, Tax, Ni, Pension, Other }
+    public enum DeductionKind
+    {
+        None,
+        Tax,
+        Ni,
+        Pension,
+        Other
+    }
 
-    public sealed record MoneyLine(string Label, decimal Amount, decimal Ytd, int? Units = null, decimal? Rate = null, DeductionKind Kind = DeductionKind.None);
+    public sealed record MoneyLine(
+        string Label,
+        decimal Amount,
+        decimal Ytd,
+        int? Units = null,
+        decimal? Rate = null,
+        DeductionKind Kind = DeductionKind.None);
 
     public sealed record Employer(string Name, string Address, string PayeReference);
 
-    public sealed record Employee(string Name, string PayrollId, string NiNumber, string NiCategory, string TaxCode, string PayFrequency, string PaidTo);
+    public sealed record Employee(
+        string Name,
+        string PayrollId,
+        string NiNumber,
+        string NiCategory,
+        string TaxCode,
+        string PayFrequency,
+        string PaidTo);
 
     public sealed record PayPeriod(string PayDate, int TaxMonth, string TaxYear);
 
-    public sealed record PayslipData(Employer Employer, Employee Employee, PayPeriod PayPeriod, MoneyLine[] Payments, MoneyLine[] Deductions, string Locale, string Currency);
+    public sealed record PayslipData(
+        Employer Employer,
+        Employee Employee,
+        PayPeriod PayPeriod,
+        MoneyLine[] Payments,
+        MoneyLine[] Deductions,
+        string Locale,
+        string Currency);
 }

@@ -10,7 +10,8 @@ namespace BonniePDF.Examples.Templates.FinancialStatement;
 /// </summary>
 [System.ComponentModel.DisplayName("IFRS Financial Statements")]
 [System.ComponentModel.Category("Reports")]
-[System.ComponentModel.Description("UK/EU statutory financial statements in an IFRS-style format: income statement and financial position with comparatives, note references, bracketed negatives, and subtotal rules.")]
+[System.ComponentModel.Description(
+    "UK/EU statutory financial statements in an IFRS-style format: income statement and financial position with comparatives, note references, bracketed negatives, and subtotal rules.")]
 public static class FinancialStatementExample
 {
     private static readonly Color Navy = ColorPalette.Slate[800];
@@ -63,6 +64,7 @@ public static class FinancialStatementExample
         Line("Total equity", cur: 28135, prior: 22400, kind: Kind.Total),
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new(PdfSize.A4, 54)
@@ -72,7 +74,8 @@ public static class FinancialStatementExample
             Language = "en-GB",
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"Sample Company Ltd  -  Company no. 07741122  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                Text =
+                    $"Sample Company Ltd  -  Company no. 07741122  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8,
                 Color = Muted,
@@ -106,7 +109,8 @@ public static class FinancialStatementExample
         doc.Add(RuleLine(Rule, 0.6f));
         foreach (StatementLine line in Position) doc.Add(RenderLine(line));
         doc.Add(Gap(12));
-        doc.Add(Sub("These financial statements were approved by the Board of Directors and authorised for issue on 20 June 2026, and are signed on its behalf by Sample Director, Director."));
+        doc.Add(Sub(
+            "These financial statements were approved by the Board of Directors and authorised for issue on 20 June 2026, and are signed on its behalf by Sample Director, Director."));
 
         return doc;
     }

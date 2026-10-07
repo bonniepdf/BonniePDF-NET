@@ -13,24 +13,28 @@ namespace BonniePDF.Examples.Templates.PatientSummary;
 /// </summary>
 [System.ComponentModel.DisplayName("Patient Summary")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("A4 portrait healthcare patient-summary sheet built from rounded-corner cards: each card clips a full-bleed coloured header band to its rounded outline - a teal patient card, an indigo vitals grid, and a rose allergies/alerts panel.")]
+[System.ComponentModel.Description(
+    "A4 portrait healthcare patient-summary sheet built from rounded-corner cards: each card clips a full-bleed coloured header band to its rounded outline - a teal patient card, an indigo vitals grid, and a rose allergies/alerts panel.")]
 public static class PatientSummaryExample
 {
     // ── Healthcare palette (Slate neutrals + Teal/Indigo/Rose accents) ────────
-    private static readonly Color Ink = Color.FromHex("#0f172a");      // slate-900  headings / values
-    private static readonly Color Body = Color.FromHex("#334155");     // slate-700  body text
-    private static readonly Color Mute = Color.FromHex("#64748b");     // slate-500  labels / captions
+    private static readonly Color Ink = Color.FromHex("#0f172a"); // slate-900  headings / values
+    private static readonly Color Body = Color.FromHex("#334155"); // slate-700  body text
+    private static readonly Color Mute = Color.FromHex("#64748b"); // slate-500  labels / captions
     private static readonly Color Hairline = Color.FromHex("#e2e8f0"); // slate-200  card border / rules
-    private static readonly Color Card = Color.FromHex("#ffffff");     // card surface
-    private static readonly Color Tint = Color.FromHex("#f8fafc");     // slate-50   page tint
+    private static readonly Color Card = Color.FromHex("#ffffff"); // card surface
+
+    private static readonly Color Tint = Color.FromHex("#f8fafc"); // slate-50   page tint
+
     // #0a7164, not #0d9488: this teal doubles as the band fill (behind white/Cream
     // text) and as small status text on white, and #0d9488 only reaches 3.42-3.74:1
     // either way, below the 4.5:1 WCAG AA threshold. #0a7164 clears it in both roles.
-    private static readonly Color Teal = Color.FromHex("#0a7164");     // patient band
-    private static readonly Color Indigo = Color.FromHex("#4f46e5");   // vitals band
-    private static readonly Color Rose = Color.FromHex("#e11d48");     // allergy band / alerts
-    private static readonly Color Cream = Color.FromHex("#f1f5f9");    // band caption text
+    private static readonly Color Teal = Color.FromHex("#0a7164"); // patient band
+    private static readonly Color Indigo = Color.FromHex("#4f46e5"); // vitals band
+    private static readonly Color Rose = Color.FromHex("#e11d48"); // allergy band / alerts
+    private static readonly Color Cream = Color.FromHex("#f1f5f9"); // band caption text
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new()

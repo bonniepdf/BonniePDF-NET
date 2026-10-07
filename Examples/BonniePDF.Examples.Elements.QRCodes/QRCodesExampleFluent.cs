@@ -4,14 +4,16 @@ using BonniePDF.Fluent;
 namespace BonniePDF.Examples.Elements.QRCodes;
 
 /// <summary>
-/// Demonstrates generating standard and customized QR Codes 
+/// Demonstrates generating standard and customized QR Codes
 /// using the Fluent API.
 /// </summary>
 [System.ComponentModel.DisplayName("QR Codes (Fluent API)")]
 [System.ComponentModel.Category("Elements")]
-[System.ComponentModel.Description("Generating ISO/IEC 18004 compliant QR Codes with customized colors, quiet zones, and error correction levels using the Fluent API.")]
+[System.ComponentModel.Description(
+    "Generating ISO/IEC 18004 compliant QR Codes with customized colors, quiet zones, and error correction levels using the Fluent API.")]
 public static class QRCodesExampleFluent
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         return Pdf.Create(doc =>
@@ -69,86 +71,103 @@ public static class QRCodesExampleFluent
                         row.RelativeItem()
                             .Column(details =>
                             {
-                                details.Item().Text("A simple QR Code").Font(StandardFonts.HelveticaBold).Margin(0, 0, 0, 8);
+                                details.Item().Text("A simple QR Code").Font(StandardFonts.HelveticaBold)
+                                    .Margin(0, 0, 0, 8);
                                 details.Item().Text("Size: 130pt").Margin(0, 0, 0, 4);
                                 details.Item().Text("Quiet Zone: 2 modules").Margin(0, 0, 0, 4);
                                 details.Item().Text("Error Correction: Medium (Default)").Margin(0, 0, 0, 4);
                                 details.Item().Text("Data: https://bonniepdf.com");
                             });
                     });
-                    
+
                     col.Item().Line(1, ColorPalette.Slate[200]).Margin(0, 20, 0, 20);
 
                     // ── Section 2: Error Correction Levels ─────────────────────
                     SectionHeader(col, "Error Correction Levels");
-                    
+
                     col.Item().Text("Higher error correction levels provide more redundancy at the cost of " +
-                                  "denser modules and reduced data capacity. They are useful if the code " +
-                                  "might be damaged or if you intend to overlay a logo.").Margin(0, 0, 0, 15);
+                                    "denser modules and reduced data capacity. They are useful if the code " +
+                                    "might be damaged or if you intend to overlay a logo.").Margin(0, 0, 0, 15);
 
                     col.Item().Row(row =>
                     {
                         row.Spacing(15);
-                        
+
                         string urlData = "https://github.com/bonniepdf";
 
                         // Low (7%)
                         row.RelativeItem().Column(card =>
                         {
-                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
+                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200])
+                                .Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.Low)
                                 .QuietZone(1)
                                 .AltText("QR code linking to https://github.com/bonniepdf with low error correction");
 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Low").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~7% restoration").FontSize(9).Color(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text("~7% restoration").FontSize(9)
+                                .Color(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600])
+                                .Margin(0, 4, 0, 0);
                         });
 
                         // Medium (15%)
                         row.RelativeItem().Column(card =>
                         {
-                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
+                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200])
+                                .Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.Medium)
                                 .QuietZone(1)
-                                .AltText("QR code linking to https://github.com/bonniepdf with medium error correction");
+                                .AltText(
+                                    "QR code linking to https://github.com/bonniepdf with medium error correction");
 
-                            card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Medium").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~15% restoration").FontSize(9).Color(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Medium")
+                                .Font(StandardFonts.HelveticaBold);
+                            card.Item().AlignCenter().Text("~15% restoration").FontSize(9)
+                                .Color(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600])
+                                .Margin(0, 4, 0, 0);
                         });
 
                         // Quartile (25%)
                         row.RelativeItem().Column(card =>
                         {
-                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
+                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200])
+                                .Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.Quartile)
                                 .QuietZone(1)
-                                .AltText("QR code linking to https://github.com/bonniepdf with quartile error correction");
+                                .AltText(
+                                    "QR code linking to https://github.com/bonniepdf with quartile error correction");
 
-                            card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Quartile").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~25% restoration").FontSize(9).Color(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("Quartile")
+                                .Font(StandardFonts.HelveticaBold);
+                            card.Item().AlignCenter().Text("~25% restoration").FontSize(9)
+                                .Color(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600])
+                                .Margin(0, 4, 0, 0);
                         });
 
                         // High (30%)
                         row.RelativeItem().Column(card =>
                         {
-                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200]).Padding(10).AlignCenter()
+                            card.Item().Background(ColorPalette.Slate[50]).Border(1, ColorPalette.Slate[200])
+                                .Padding(10).AlignCenter()
                                 .QRCode(urlData, size: 100)
                                 .ErrorCorrection(QrErrorCorrection.High)
                                 .QuietZone(1)
                                 .AltText("QR code linking to https://github.com/bonniepdf with high error correction");
 
                             card.Item().AlignCenter().Margin(0, 8, 0, 0).Text("High").Font(StandardFonts.HelveticaBold);
-                            card.Item().AlignCenter().Text("~30% restoration").FontSize(9).Color(ColorPalette.Slate[500]);
-                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600]).Margin(0, 4, 0, 0);
+                            card.Item().AlignCenter().Text("~30% restoration").FontSize(9)
+                                .Color(ColorPalette.Slate[500]);
+                            card.Item().AlignCenter().Text(urlData).FontSize(8).Color(ColorPalette.Slate[600])
+                                .Margin(0, 4, 0, 0);
                         });
                     });
-                    
+
                     col.Item().Line(1, ColorPalette.Slate[200]).Margin(0, 20, 0, 20);
 
                     // ── Section 3: Colors and Styling ──────────────────────────
@@ -171,7 +190,8 @@ public static class QRCodesExampleFluent
                                     .ForegroundColor(ColorPalette.Blue[700])
                                     .QuietZone(2)
                                     .AltText("QR code encoding telephone number +1234567890");
-                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("tel:+1234567890").FontSize(9).Color(ColorPalette.Slate[500]);
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("tel:+1234567890").FontSize(9)
+                                    .Color(ColorPalette.Slate[500]);
                             });
 
                             // Custom Colors
@@ -184,13 +204,15 @@ public static class QRCodesExampleFluent
                                     .BackgroundColor(ColorPalette.Rose[50])
                                     .QuietZone(2)
                                     .AltText("QR code encoding email address mailto:hello@example.com");
-                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("mailto:hello@example.com").FontSize(9).Color(ColorPalette.Slate[500]);
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("mailto:hello@example.com").FontSize(9)
+                                    .Color(ColorPalette.Slate[500]);
                             });
 
                             // Transparent Background
                             row.RelativeItem().Column(c =>
                             {
-                                c.Item().Text("Transparent Background").Margin(0, 0, 0, 8).Font(StandardFonts.HelveticaBold);
+                                c.Item().Text("Transparent Background").Margin(0, 0, 0, 8)
+                                    .Font(StandardFonts.HelveticaBold);
                                 c.Item()
                                     .Background(ColorPalette.Amber[100])
                                     .Border(1, ColorPalette.Amber[300])
@@ -201,15 +223,14 @@ public static class QRCodesExampleFluent
                                     .DrawBackground(false) // Let the container's background show through
                                     .QuietZone(2)
                                     .AltText("QR code encoding Wi-Fi network credentials for MyNetwork");
-                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("WIFI:S:MyNetwork;...").FontSize(9).Color(ColorPalette.Slate[500]);
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("WIFI:S:MyNetwork;...").FontSize(9)
+                                    .Color(ColorPalette.Slate[500]);
                             });
                         });
                     });
                 });
             });
-
         }).Build();
-
     }
 
     private static void SectionHeader(ColumnDescriptor col, string title)
@@ -222,4 +243,3 @@ public static class QRCodesExampleFluent
             .Margin(0, 0, 0, 10);
     }
 }
-

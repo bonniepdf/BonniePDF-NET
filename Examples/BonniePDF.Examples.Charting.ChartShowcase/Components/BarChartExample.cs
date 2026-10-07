@@ -9,10 +9,11 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// </summary>
 [System.ComponentModel.DisplayName("Bar Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("BarChart implementation with monthly sales report data, showing vertical bars with customizable colors and spacing.")]
+[System.ComponentModel.Description(
+    "BarChart implementation with monthly sales report data, showing vertical bars with customizable colors and spacing.")]
 public static class BarChartExample
 {
-
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // Create a new PDF document
@@ -22,8 +23,19 @@ public static class BarChartExample
             FooterTemplate = pageNumber =>
             {
                 HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.Add(new TextBlock { Text = "BonniePDF - Bar Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] }, null);
-                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = "BonniePDF - Bar Chart", FontName = StandardFonts.Helvetica, FontSize = 10,
+                        Color = ColorPalette.Slate[500]
+                    }, null);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                        FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500],
+                        Alignment = TextAlignment.Right
+                    }, 1f);
                 return stack;
             }
         });
@@ -110,10 +122,8 @@ public static class BarChartExample
         document.Add(barChart);
 
         // Save the document
-        
+
 
         return document;
     }
 }
-
-

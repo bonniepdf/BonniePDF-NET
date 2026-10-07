@@ -1,19 +1,20 @@
+using System.Globalization;
 using System.IO;
 using BonniePDF;
-using BonniePDF.Examples.Charting.ChartShowcase.Data;
 
 namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
 /// <summary>
-/// Example demonstrating the LineChart implementation.
-/// This shows how a LineChart can be rendered to PDF using the ICanvas interface.
+/// Plot monthly revenue with a line chart, labelled points, and a currency axis.
+/// The sample data is included below the document-building method.
 /// </summary>
 [System.ComponentModel.DisplayName("Line Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("LineChart implementation with monthly revenue trends, showing connected data points with customizable line width and markers.")]
+[System.ComponentModel.Description(
+    "LineChart implementation with monthly revenue trends, showing connected data points with customizable line width and markers.")]
 public static class LineChartExample
 {
-
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // Create a new PDF document
@@ -23,8 +24,19 @@ public static class LineChartExample
             FooterTemplate = pageNumber =>
             {
                 HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.Add(new TextBlock { Text = "BonniePDF - Line Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] }, null);
-                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = "BonniePDF - Line Chart", FontName = StandardFonts.Helvetica, FontSize = 10,
+                        Color = ColorPalette.Slate[500]
+                    }, null);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                        FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500],
+                        Alignment = TextAlignment.Right
+                    }, 1f);
                 return stack;
             }
         });
@@ -59,7 +71,7 @@ public static class LineChartExample
         ChartData chartData = new()
         {
             Title = "Monthly Revenue",
-            Series = [new ChartSeries { DataPoints = ExampleChartData.MonthlySales }],
+            Series = [new ChartSeries { DataPoints = MonthlySales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -79,7 +91,7 @@ public static class LineChartExample
             AltText = "Line chart showing monthly revenue trends from January to December",
             Height = 400,
             StretchToFit = true,
-            LineColor = Color.FromHex(ChartColors.Violet),
+            LineColor = Color.FromHex("#7c3aed"),
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
@@ -90,10 +102,89 @@ public static class LineChartExample
         document.Add(lineChart);
 
         // Save the document
-        
+
 
         return document;
     }
+
+    // Local helpers and sample data for this document.
+
+    // Local helpers and sample data for this document.
+    private static List<string> MonthLabels => Enumerable.Range(1, 12).Select(m => DateTimeFormatInfo.CurrentInfo.GetAbbreviatedMonthName(m)).ToList();
+
+    private static IList<ChartDataPoint> MonthlySales => new List<ChartDataPoint>
+    {
+        new ChartDataPoint
+        {
+            Label = MonthLabels[0],
+            Value = 4500,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[1],
+            Value = 6200,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[2],
+            Value = 5800,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[3],
+            Value = 7200,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[4],
+            Value = 8500,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[5],
+            Value = 9100,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[6],
+            Value = 8200,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[7],
+            Value = 7800,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[8],
+            Value = 9500,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[9],
+            Value = 10200,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[10],
+            Value = 11500,
+            LabelFormat = "N0"
+        },
+        new ChartDataPoint
+        {
+            Label = MonthLabels[11],
+            Value = 12800,
+            LabelFormat = "N0"
+        }
+    };
 }
-
-

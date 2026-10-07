@@ -16,9 +16,11 @@ namespace BonniePDF.Examples.Layout.HorizontalStacks;
 /// </summary>
 [System.ComponentModel.DisplayName("Horizontal Stacks")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("Horizontal layout blocks - width distribution, cross-axis alignment, and side-by-side text, all tagged for screen readers.")]
+[System.ComponentModel.Description(
+    "Horizontal layout blocks - width distribution, cross-axis alignment, and side-by-side text, all tagged for screen readers.")]
 public static class HorizontalStacksExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new()
@@ -54,7 +56,8 @@ public static class HorizontalStacksExample
 
         doc.Add(new TextBlock
         {
-            Text = "HorizontalStack arranges child elements side-by-side. Width distribution controls how available space is divided between columns; cross-axis alignment controls how children of differing heights line up vertically. All text inside stacks is accessible to screen readers.",
+            Text =
+                "HorizontalStack arranges child elements side-by-side. Width distribution controls how available space is divided between columns; cross-axis alignment controls how children of differing heights line up vertically. All text inside stacks is accessible to screen readers.",
             Margin = new Thickness(0, 0, 0, 16),
         });
 
@@ -82,7 +85,8 @@ public static class HorizontalStacksExample
         doc.Add(SectionHeading("Weighted Width Distribution", "s-weighted", 16));
         doc.Add(new TextBlock
         {
-            Text = "Columns with a 1:2:3 weight ratio - the second column is twice as wide as the first, and the third is three times as wide.",
+            Text =
+                "Columns with a 1:2:3 weight ratio - the second column is twice as wide as the first, and the third is three times as wide.",
             Margin = new Thickness(0, 0, 0, 8),
         });
 
@@ -104,7 +108,8 @@ public static class HorizontalStacksExample
         doc.Add(SectionHeading("Cross-Axis Alignment", "s-align", 16));
         doc.Add(new TextBlock
         {
-            Text = "When a stack has a fixed height and its children differ in height, stack.Alignment positions each child along the cross (vertical) axis. The same three boxes - 40pt, 65pt and 90pt tall - are shown top-aligned, centred, and bottom-aligned.",
+            Text =
+                "When a stack has a fixed height and its children differ in height, stack.Alignment positions each child along the cross (vertical) axis. The same three boxes - 40pt, 65pt and 90pt tall - are shown top-aligned, centred, and bottom-aligned.",
             Margin = new Thickness(0, 0, 0, 8),
         });
 
@@ -117,9 +122,9 @@ public static class HorizontalStacksExample
 
         (string caption, HorizontalAlignment align)[] rows =
         {
-            ("Top (Start)",     HorizontalAlignment.Start),
+            ("Top (Start)", HorizontalAlignment.Start),
             ("Centre (Center)", HorizontalAlignment.Center),
-            ("Bottom (End)",    HorizontalAlignment.End),
+            ("Bottom (End)", HorizontalAlignment.End),
         };
 
         foreach ((string caption, HorizontalAlignment align) in rows)
@@ -144,12 +149,14 @@ public static class HorizontalStacksExample
             {
                 row.Add(new Container
                 {
-                    Child = new TextBlock { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 11, Color = Color.White },
+                    Child = new TextBlock
+                        { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 11, Color = Color.White },
                     Padding = new Thickness(12, 6, 12, 6),
                     BackgroundColor = bg,
                     Height = boxHeight,
                 });
             }
+
             doc.Add(row);
         }
 
@@ -162,16 +169,17 @@ public static class HorizontalStacksExample
         doc.Add(SectionHeading("Key-Value Pairs", "s-kv", 16));
         doc.Add(new TextBlock
         {
-            Text = "A practical pattern: a narrow bold key column paired with a wider value column using weighted distribution.",
+            Text =
+                "A practical pattern: a narrow bold key column paired with a wider value column using weighted distribution.",
             Margin = new Thickness(0, 0, 0, 8),
         });
 
         (string key, string value)[] pairs =
         {
             ("Document Title:", "Horizontal Stacks Demo"),
-            ("Author:",         "BonniePDF"),
-            ("Standard:",       "ISO 14289-1 (PDF/UA-1)"),
-            ("Layout Engine:",  "BonniePDF Flow Layout"),
+            ("Author:", "BonniePDF"),
+            ("Standard:", "ISO 14289-1 (PDF/UA-1)"),
+            ("Layout Engine:", "BonniePDF Flow Layout"),
         };
 
         foreach ((string key, string value) in pairs)
@@ -182,7 +190,9 @@ public static class HorizontalStacksExample
                 Spacing = 10,
                 Margin = new Thickness(0, 0, 0, 6),
             };
-            row.Add(new TextBlock { Text = key, FontName = StandardFonts.HelveticaBold, Color = ColorPalette.Slate[700] }, 1f);
+            row.Add(
+                new TextBlock { Text = key, FontName = StandardFonts.HelveticaBold, Color = ColorPalette.Slate[700] },
+                1f);
             row.Add(new TextBlock { Text = value, Color = ColorPalette.Slate[800] }, 3f);
             doc.Add(row);
         }
@@ -192,7 +202,8 @@ public static class HorizontalStacksExample
         doc.Add(SectionHeading("Two-Column Text Layout", "s-twocol", 16));
         doc.Add(new TextBlock
         {
-            Text = "A newspaper-style two-column layout achieved with an equal-weight HorizontalStack containing two TextBlocks.",
+            Text =
+                "A newspaper-style two-column layout achieved with an equal-weight HorizontalStack containing two TextBlocks.",
             Margin = new Thickness(0, 0, 0, 8),
         });
 
@@ -203,15 +214,17 @@ public static class HorizontalStacksExample
         };
         twoCol.Add(new TextBlock
         {
-            Text = "The first column contains flowing prose that demonstrates how text wraps within a constrained width. " +
-                   "HorizontalStack automatically divides the available page width so each child receives its share. " +
-                   "Text inside each column wraps independently, giving a true two-column reading experience.",
+            Text =
+                "The first column contains flowing prose that demonstrates how text wraps within a constrained width. " +
+                "HorizontalStack automatically divides the available page width so each child receives its share. " +
+                "Text inside each column wraps independently, giving a true two-column reading experience.",
         });
         twoCol.Add(new TextBlock
         {
-            Text = "The second column runs in parallel with the first. Both columns sit within a single HorizontalStack " +
-                   "element, meaning they are rendered side-by-side. This pattern is commonly used for newsletters, " +
-                   "product sheets, and comparison tables where parallel content aids comprehension.",
+            Text =
+                "The second column runs in parallel with the first. Both columns sit within a single HorizontalStack " +
+                "element, meaning they are rendered side-by-side. This pattern is commonly used for newsletters, " +
+                "product sheets, and comparison tables where parallel content aids comprehension.",
         });
         doc.Add(twoCol);
 

@@ -1,6 +1,5 @@
 using System.Globalization;
 using BonniePDF;
-using static BonniePDF.Examples.Shared.TradeKit;
 
 namespace BonniePDF.Examples.Templates.ExhibitBundleIndex;
 
@@ -29,7 +28,8 @@ namespace BonniePDF.Examples.Templates.ExhibitBundleIndex;
 /// </summary>
 [System.ComponentModel.DisplayName("Exhibit bundle index")]
 [System.ComponentModel.Category("Legal")]
-[System.ComponentModel.Description("The generated apparatus of a litigation bundle: a cover sheet, an index whose links and page references resolve after layout, and a separator sheet per section, under continuous pagination. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "The generated apparatus of a litigation bundle: a cover sheet, an index whose links and page references resolve after layout, and a separator sheet per section, under continuous pagination. PDF/A-2a + PDF/UA-1.")]
 public static class ExhibitBundleIndexExample
 {
     private const string Reference = "Bundle A — Claimant";
@@ -84,6 +84,7 @@ public static class ExhibitBundleIndexExample
             ]),
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         int totalItems = Sections.Sum(s => s.Items.Length);
@@ -138,8 +139,8 @@ public static class ExhibitBundleIndexExample
         [
             Cell(
                 "This is the generated apparatus of the bundle: this cover sheet, the index that follows, and a "
-                    + "separator sheet introducing each section. The exhibits themselves are separate documents and "
-                    + "are combined with this apparatus at assembly.",
+                + "separator sheet introducing each section. The exhibits themselves are separate documents and "
+                + "are combined with this apparatus at assembly.",
                 size: 9f),
         ]));
 
@@ -150,7 +151,7 @@ public static class ExhibitBundleIndexExample
         doc.Add(H1("Index"));
         doc.Add(Cell(
             "Each section below links to its separator sheet, and the page reference resolves after layout — so it "
-                + "stays correct when the bundle is repaginated.",
+            + "stays correct when the bundle is repaginated.",
             color: Muted,
             marginBottom: 14f));
 
@@ -263,4 +264,117 @@ public static class ExhibitBundleIndexExample
 
         return doc;
     }
+
+    // Local helpers and sample data for this document.
+
+    // Local helpers and sample data for this document.
+    private static readonly Color Ink = ColorPalette.Slate[700];
+
+    /// <summary>600, not 400: 400 never clears 4.5:1 as body text on white.</summary>
+    private static readonly Color Muted = ColorPalette.Slate[600];
+
+    private static readonly Color Heading = ColorPalette.Slate[800];
+
+    private static readonly Color Accent = ColorPalette.Indigo[700];
+
+    private static readonly Color Rule = ColorPalette.Slate[200];
+
+    /// <summary>A styled text cell with trade-document defaults.</summary>
+    private static TextBlock Cell(string text, float size = 9f, bool bold = false, Color? color = null, TextAlignment align = TextAlignment.Left, float marginTop = 0f, float marginBottom = 0f) => new()
+    {
+        Text = text,
+        FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+        FontSize = size,
+        Color = color ?? Ink,
+        Alignment = align,
+        Margin = new Thickness(0, marginTop, 0, marginBottom),
+    };
+
+    /// <summary>Table header cell - white on the accent band.</summary>
+    private static TextBlock Th(string text, TextAlignment align = TextAlignment.Left) => Cell(text, size: 8.5f, bold: true, color: Color.White, align: align);
+
+    /// <summary>Table body cell.</summary>
+    private static TextBlock Td(string text, float size = 8.5f, bool bold = false, Color? color = null, TextAlignment align = TextAlignment.Left) => Cell(text, size: size, bold: bold, color: color, align: align);
+
+    private static Heading H1(string text) => new(text)
+    {
+        Level = 1,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 21,
+        Color = Heading,
+        Margin = new Thickness(0, 0, 0, 4),
+    };
+
+    /// <summary>The full-width accent rule at the top of each document.</summary>
+    private static Container AccentBar(Color? color = null, float height = 4f) => new()
+    {
+        BackgroundColor = color ?? Accent,
+        Height = height,
+        Margin = new Thickness(0, 0, 0, 14),
+    };
+
+    /// <summary>One label/value pair for the reference grid.</summary>
+    private static VerticalStack Field(string label, string value)
+    {
+        VerticalStack stack = new();
+        stack.Add(Cell(label.ToUpperInvariant(), size: 6.5f, bold: true, color: Muted, marginBottom: 2f));
+        stack.Add(Cell(value, size: 9.5f));
+        return stack;
+    }
+
+    /// <summary>A row of evenly weighted elements.</summary>
+    private static HorizontalStack WeightedRow(IEnumerable<IElement> items, float spacing = 14f, float marginTop = 0f, float marginBottom = 14f)
+    {
+        HorizontalStack row = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Spacing = spacing,
+            Margin = new Thickness(0, marginTop, 0, marginBottom),
+        };
+        foreach (IElement item in items)
+        {
+            row.Add(item, 1);
+        }
+
+        return row;
+    }
+
+    /// <summary>A bordered panel with a heading - terms, notes, declarations.</summary>
+    private static Container Panel(string title, IEnumerable<IElement> children, Color? accent = null)
+    {
+        VerticalStack body = new()
+        {
+            Spacing = 4
+        };
+        body.Add(Cell(title, size: 9.5f, bold: true, color: accent ?? Accent, marginBottom: 4f));
+        foreach (IElement child in children)
+        {
+            body.Add(child);
+        }
+
+        return new Container
+        {
+            BackgroundColor = ColorPalette.Slate[50],
+            Border = new Border(0.75f),
+            BorderColors = new BorderColors(Rule),
+            CornerRadius = 6,
+            Padding = new Thickness(12),
+            Margin = new Thickness(0, 4, 0, 12),
+            Child = body,
+        };
+    }
+
+    /// <summary>The running header / footer band.</summary>
+    private static HorizontalStack Band(string left, string right)
+    {
+        HorizontalStack row = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted
+        };
+        row.Add(Cell(left, size: 7.5f, color: Muted), 2.5f);
+        row.Add(Cell(right, size: 7.5f, color: Muted, align: TextAlignment.Right), 2);
+        return row;
+    }
+
+    private static string GbDate(DateTime date) => date.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
 }

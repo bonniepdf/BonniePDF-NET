@@ -1,6 +1,5 @@
 using System.Globalization;
 using BonniePDF;
-using static BonniePDF.Examples.Shared.TradeKit;
 
 namespace BonniePDF.Examples.Templates.TradeDocuments;
 
@@ -21,7 +20,8 @@ namespace BonniePDF.Examples.Templates.TradeDocuments;
 /// </summary>
 [System.ComponentModel.DisplayName("Customer account statement")]
 [System.ComponentModel.Category("Invoices")]
-[System.ComponentModel.Description("A period statement with a computed running balance, a closing figure, and an ageing analysis derived from the open items and reconciled against that closing figure. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "A period statement with a computed running balance, a closing figure, and an ageing analysis derived from the open items and reconciled against that closing figure. PDF/A-2a + PDF/UA-1.")]
 public static class CustomerAccountStatementExample
 {
     private static readonly Color Overdue = ColorPalette.Rose[700];
@@ -56,14 +56,16 @@ public static class CustomerAccountStatementExample
         new("03 Aug 2026", "Invoice", "INV-2026-3312", "Monthly subscription — August", 1450.00m),
         new("05 Aug 2026", "Payment", "BACS-88214", "Payment received, thank you — settles INV-2026-3245", -4820.50m),
         new("07 Aug 2026", "Invoice", "INV-2026-3340", "Professional services — July", 3280.00m),
-        new("11 Aug 2026", "Credit note", "CRN-2026-0118", "Credit — duplicated licence line on INV-2026-3340", -420.00m),
+        new("11 Aug 2026", "Credit note", "CRN-2026-0118", "Credit — duplicated licence line on INV-2026-3340",
+            -420.00m),
         new("12 Aug 2026", "Invoice", "INV-2026-3366", "Additional user seats (14)", 1876.00m),
         new("14 Aug 2026", "Invoice", "INV-2026-3381", "Onsite support visit — 2 days", 1360.00m),
         new("18 Aug 2026", "Payment", "BACS-88903", "Payment received, thank you", -3280.00m),
         new("19 Aug 2026", "Invoice", "INV-2026-3402", "Data migration — phase 1", 5400.00m),
         new("21 Aug 2026", "Adjustment", "ADJ-2026-0041", "Late payment charge — INV-2026-3180", 62.40m),
         new("24 Aug 2026", "Invoice", "INV-2026-3428", "Training workshop — 8 attendees", 2240.00m),
-        new("26 Aug 2026", "Credit note", "CRN-2026-0126", "Credit — training workshop, one attendee withdrew", -280.00m),
+        new("26 Aug 2026", "Credit note", "CRN-2026-0126", "Credit — training workshop, one attendee withdrew",
+            -280.00m),
         new("27 Aug 2026", "Payment", "BACS-89417", "Payment received, thank you", -1456.00m),
         new("28 Aug 2026", "Invoice", "INV-2026-3455", "Monthly subscription — September", 1450.00m),
         new("31 Aug 2026", "Invoice", "INV-2026-3470", "Integration support — retainer", 980.00m),
@@ -131,6 +133,7 @@ public static class CustomerAccountStatementExample
         _ => Ink,
     };
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // The running balance is computed, never transcribed. A statement whose
@@ -179,7 +182,8 @@ public static class CustomerAccountStatementExample
         doc.Metadata.Author = Supplier;
         doc.Metadata.Subject =
             "Customer account statement: opening balance, ledger with running balance, closing balance, ageing analysis, and remittance advice (sample data).";
-        doc.Metadata.Keywords = "account statement, ledger, running balance, ageing, accounts receivable, pdf/ua, pdf/a";
+        doc.Metadata.Keywords =
+            "account statement, ledger, running balance, ageing, accounts receivable, pdf/ua, pdf/a";
 
         // ── Title and parties ─────────────────────────────────────────────────
 
@@ -367,7 +371,7 @@ public static class CustomerAccountStatementExample
 
         doc.Add(Cell(
             $"Total outstanding {Money(ageingTotal)}, of which {Money(overdue)} is overdue."
-                + (reconciles ? " This agrees with the closing balance above." : string.Empty),
+            + (reconciles ? " This agrees with the closing balance above." : string.Empty),
             size: 8.5f,
             color: Muted,
             marginTop: 6f,
@@ -377,7 +381,7 @@ public static class CustomerAccountStatementExample
         {
             doc.Add(Cell(
                 $"The ageing analysis totals {Money(ageingTotal)} but the ledger closes at {Money(closing)}. "
-                    + "This statement does not reconcile and must not be issued.",
+                + "This statement does not reconcile and must not be issued.",
                 size: 9f,
                 bold: true,
                 color: Overdue,
@@ -399,7 +403,7 @@ public static class CustomerAccountStatementExample
         slip.Add(RemittanceRow("Amount enclosed", string.Empty));
         slip.Add(Cell(
             "Payment by bank transfer to the account shown on your invoices. "
-                + "Queries: quote the account number and the reference of the item in question.",
+            + "Queries: quote the account number and the reference of the item in question.",
             size: 8.5f,
             color: Muted,
             marginTop: 4f));
@@ -433,4 +437,106 @@ public static class CustomerAccountStatementExample
         row.Add(valueStack, 1.5f);
         return row;
     }
+
+    // Local helpers and sample data for this document.
+
+    // Local helpers and sample data for this document.
+    private static readonly Color Ink = ColorPalette.Slate[700];
+
+    /// <summary>600, not 400: 400 never clears 4.5:1 as body text on white.</summary>
+    private static readonly Color Muted = ColorPalette.Slate[600];
+
+    private static readonly Color Heading = ColorPalette.Slate[800];
+
+    private static readonly Color Accent = ColorPalette.Indigo[700];
+
+    private static readonly Color Rule = ColorPalette.Slate[200];
+
+    /// <summary>A styled text cell with trade-document defaults.</summary>
+    private static TextBlock Cell(string text, float size = 9f, bool bold = false, Color? color = null, TextAlignment align = TextAlignment.Left, float marginTop = 0f, float marginBottom = 0f) => new()
+    {
+        Text = text,
+        FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+        FontSize = size,
+        Color = color ?? Ink,
+        Alignment = align,
+        Margin = new Thickness(0, marginTop, 0, marginBottom),
+    };
+
+    /// <summary>A block of plain lines (an address), tagged as one paragraph.</summary>
+    private static TextBlock Lines(IEnumerable<string> items, float size = 9f, Color? color = null, TextAlignment align = TextAlignment.Left) => Cell(string.Join('\n', items), size: size, color: color, align: align);
+
+    /// <summary>Table header cell - white on the accent band.</summary>
+    private static TextBlock Th(string text, TextAlignment align = TextAlignment.Left) => Cell(text, size: 8.5f, bold: true, color: Color.White, align: align);
+
+    private static Heading H2(string text, Color? color = null) => new(text)
+    {
+        Level = 2,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 13,
+        Color = color ?? Accent,
+        Margin = new Thickness(0, 16, 0, 8),
+    };
+
+    /// <summary>A labelled address block.</summary>
+    private static VerticalStack PartyBlock(string label, IEnumerable<string> address)
+    {
+        VerticalStack stack = new();
+        stack.Add(Cell(label.ToUpperInvariant(), size: 7f, bold: true, color: Muted, marginBottom: 3f));
+        stack.Add(Lines(address, size: 9f));
+        return stack;
+    }
+
+    /// <summary>A "label ....... value" totals line, weighted so the value hugs the right.</summary>
+    private static HorizontalStack TotalLine(string label, string value, bool bold = false, float size = 9f, Color? color = null)
+    {
+        HorizontalStack row = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Margin = new Thickness(0, 3, 0, 3),
+        };
+        row.Add(Cell(label, size: size, bold: bold, color: color ?? Muted), 3);
+        row.Add(Cell(value, size: size, bold: bold, color: color ?? Ink, align: TextAlignment.Right), 2);
+        return row;
+    }
+
+    /// <summary>A summary tile.</summary>
+    private static Container Tile(string value, string label, Color? accent = null)
+    {
+        VerticalStack body = new();
+        body.Add(Cell(value, size: 14f, bold: true, color: accent ?? Accent, marginBottom: 2f));
+        body.Add(Cell(label, size: 8f, color: Muted));
+        return new Container
+        {
+            BackgroundColor = ColorPalette.Slate[50],
+            Border = new Border(0.75f),
+            BorderColors = new BorderColors(Rule),
+            CornerRadius = 6,
+            Padding = new Thickness(11, 10),
+            Child = body,
+        };
+    }
+
+    /// <summary>The running header / footer band.</summary>
+    private static HorizontalStack Band(string left, string right)
+    {
+        HorizontalStack row = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted
+        };
+        row.Add(Cell(left, size: 7.5f, color: Muted), 2.5f);
+        row.Add(Cell(right, size: 7.5f, color: Muted, align: TextAlignment.Right), 2);
+        return row;
+    }
+
+    /// <summary>
+    /// Sterling, with the sign outside the symbol.
+    ///
+    /// On a statement or a credit note, where the sign is the most important
+    /// character in the cell, it belongs in front of the symbol rather than after
+    /// it - "-£420.00", not "£-420.00".
+    /// </summary>
+    private static string Money(decimal value, string symbol = "£", string culture = "en-GB") => (value < 0 ? "-" : string.Empty) + symbol + Math.Abs(value).ToString("N2", CultureInfo.GetCultureInfo(culture));
+
+    private static string GbDate(DateTime date) => date.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
 }

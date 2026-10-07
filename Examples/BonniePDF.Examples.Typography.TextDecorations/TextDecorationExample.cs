@@ -8,27 +8,29 @@ namespace BonniePDF.Examples.Typography.TextDecorations;
 /// </summary>
 [System.ComponentModel.DisplayName("Text Decorations")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("Underline and strikethrough decorations across alignments and font sizes, with a practical price-list example. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Underline and strikethrough decorations across alignments and font sizes, with a practical price-list example. PDF/A-2a + PDF/UA-1.")]
 public static class TextDecorationExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Text Decorations",
-                Author   = "BonniePDF",
-                Subject  = "Underline and strikethrough decorations across alignments and sizes. PDF/A-2a + PDF/UA-1.",
+                Title = "Text Decorations",
+                Author = "BonniePDF",
+                Subject = "Underline and strikethrough decorations across alignments and sizes. PDF/A-2a + PDF/UA-1.",
                 Keywords = "pdf, text, underline, strikethrough, decorations, pdf/ua, pdf/a, BonniePDF",
             },
             Settings = new DocumentSettings
             {
-                PageSize      = PdfSize.A4,
-                Margin        = 60,
-                Conformance   = PdfAConformance.PdfA2a,
+                PageSize = PdfSize.A4,
+                Margin = 60,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
+                Language = "en-GB",
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(12)
@@ -41,17 +43,17 @@ public static class TextDecorationExample
         doc.Add(new Heading("Text Decorations")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 22,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 10),
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 10),
         });
 
         doc.Add(new TextBlock
         {
-            Text   = "Underline and strikethrough are presentational properties on TextBlock. " +
-                     "They do not change how the text is tagged — a decorated paragraph is still a paragraph.",
+            Text = "Underline and strikethrough are presentational properties on TextBlock. " +
+                   "They do not change how the text is tagged — a decorated paragraph is still a paragraph.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 
@@ -61,9 +63,10 @@ public static class TextDecorationExample
 
         doc.Add(new TextBlock
         {
-            Text           = "This text has an underline applied. Underlines can mark emphasis, hyperlinks, or headings in informal documents.",
+            Text =
+                "This text has an underline applied. Underlines can mark emphasis, hyperlinks, or headings in informal documents.",
             Decoration = TextDecoration.Underline,
-            Margin         = new Thickness(0, 0, 0, 10),
+            Margin = new Thickness(0, 0, 0, 10),
         });
 
         // ── 2. Strikethrough ───────────────────────────────────────────────────
@@ -72,9 +75,10 @@ public static class TextDecorationExample
 
         doc.Add(new TextBlock
         {
-            Text           = "This text has a strikethrough applied. Strikethrough visually signals content that has been withdrawn, revised, or superseded.",
+            Text =
+                "This text has a strikethrough applied. Strikethrough visually signals content that has been withdrawn, revised, or superseded.",
             Decoration = TextDecoration.Strikethrough,
-            Margin         = new Thickness(0, 0, 0, 10),
+            Margin = new Thickness(0, 0, 0, 10),
         });
 
         // ── 3. Combined ────────────────────────────────────────────────────────
@@ -83,10 +87,11 @@ public static class TextDecorationExample
 
         doc.Add(new TextBlock
         {
-            Text           = "Both decorations can be applied simultaneously. TextDecoration is a set of flags — combine them with the | operator: " +
-                             "TextDecoration.Underline | TextDecoration.Strikethrough.",
+            Text =
+                "Both decorations can be applied simultaneously. TextDecoration is a set of flags — combine them with the | operator: " +
+                "TextDecoration.Underline | TextDecoration.Strikethrough.",
             Decoration = TextDecoration.Underline | TextDecoration.Strikethrough,
-            Margin         = new Thickness(0, 0, 0, 10),
+            Margin = new Thickness(0, 0, 0, 10),
         });
 
         // ── 4. Alignment ───────────────────────────────────────────────────────
@@ -95,19 +100,19 @@ public static class TextDecorationExample
 
         (string Text, TextAlignment Align)[] alignments =
         [
-            ("Left-aligned underlined text.",   TextAlignment.Left),
+            ("Left-aligned underlined text.", TextAlignment.Left),
             ("Centre-aligned underlined text.", TextAlignment.Center),
-            ("Right-aligned underlined text.",  TextAlignment.Right),
+            ("Right-aligned underlined text.", TextAlignment.Right),
         ];
 
         foreach (var (text, align) in alignments)
         {
             doc.Add(new TextBlock
             {
-                Text           = text,
+                Text = text,
                 Decoration = TextDecoration.Underline,
-                Alignment      = align,
-                Margin         = new Thickness(0, 0, 0, 8),
+                Alignment = align,
+                Margin = new Thickness(0, 0, 0, 8),
             });
         }
 
@@ -119,10 +124,10 @@ public static class TextDecorationExample
         {
             doc.Add(new TextBlock
             {
-                Text           = $"Underline at {size}pt",
-                FontSize       = size,
+                Text = $"Underline at {size}pt",
+                FontSize = size,
                 Decoration = TextDecoration.Underline,
-                Margin         = new Thickness(0, 0, 0, 6),
+                Margin = new Thickness(0, 0, 0, 6),
             });
         }
 
@@ -130,37 +135,37 @@ public static class TextDecorationExample
 
         doc.Add(new Line
         {
-            Color     = ColorPalette.Slate[300],
+            Color = ColorPalette.Slate[300],
             Thickness = 1,
-            Margin    = new Thickness(0, 12, 0, 0),
+            Margin = new Thickness(0, 12, 0, 0),
         });
 
         Section(doc, "Practical Example: Price List", "s-prices");
 
         doc.Add(new TextBlock
         {
-            Text           = "Original Price: £199.99",
-            FontSize       = 14,
+            Text = "Original Price: £199.99",
+            FontSize = 14,
             // 600, not 400: 400 never clears 4.5:1 as text (2.63:1 here).
-            Color      = ColorPalette.Slate[600],
+            Color = ColorPalette.Slate[600],
             Decoration = TextDecoration.Strikethrough,
-            Margin         = new Thickness(0, 0, 0, 4),
+            Margin = new Thickness(0, 0, 0, 4),
         });
 
         doc.Add(new TextBlock
         {
-            Text           = "Sale Price: £149.99",
-            FontName       = StandardFonts.HelveticaBold,
-            FontSize       = 18,
-            Color      = Color.Red,
+            Text = "Sale Price: £149.99",
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 18,
+            Color = Color.Red,
             Decoration = TextDecoration.Underline,
-            Margin         = new Thickness(0, 0, 0, 4),
+            Margin = new Thickness(0, 0, 0, 4),
         });
 
         doc.Add(new TextBlock
         {
-            Text      = "You save £50.00!",
-            FontSize  = 11,
+            Text = "You save £50.00!",
+            FontSize = 11,
             // 700, not 600: 11pt regular text on white needs 4.5:1 and 600 falls
             // to 3.22:1.
             Color = ColorPalette.Green[700],
@@ -174,11 +179,11 @@ public static class TextDecorationExample
         doc.Add(new Heading(title)
         {
             TocIdentifier = tocId,
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 14,
-            Color     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 12, 0, 6),
+            Level = 2,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 14,
+            Color = ColorPalette.Indigo[600],
+            Margin = new Thickness(0, 12, 0, 6),
         });
     }
 }

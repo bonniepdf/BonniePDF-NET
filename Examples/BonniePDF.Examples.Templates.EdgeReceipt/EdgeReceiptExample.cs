@@ -10,7 +10,8 @@ namespace BonniePDF.Examples.Templates.EdgeReceipt;
 /// </summary>
 [System.ComponentModel.DisplayName("Point-of-Sale Receipt")]
 [System.ComponentModel.Category("Retail")]
-[System.ComponentModel.Description("Point-of-sale receipt on a custom 80mm thermal-printer page, in Courier with a native vector QR digital-receipt link and a Code 128 order barcode. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Point-of-sale receipt on a custom 80mm thermal-printer page, in Courier with a native vector QR digital-receipt link and a Code 128 order barcode. PDF/A-2a + PDF/UA-1.")]
 public static class EdgeReceiptExample
 {
     private const string OrderNo = "4021";
@@ -26,6 +27,7 @@ public static class EdgeReceiptExample
         new(1, "Oat Milk (retail)", 1.95),
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DateTime now = DateTime.Now;

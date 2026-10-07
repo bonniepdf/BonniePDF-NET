@@ -9,27 +9,30 @@ namespace BonniePDF.Examples.Typography.RichTextStyles;
 /// </summary>
 [System.ComponentModel.DisplayName("Rich Text Styles")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("Bold, italic, coloured, highlighted, and mixed-size spans within flowing paragraphs. Reusable style objects, justified alignment, and a practical legal disclaimer. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Bold, italic, coloured, highlighted, and mixed-size spans within flowing paragraphs. Reusable style objects, justified alignment, and a practical legal disclaimer. PDF/A-2a + PDF/UA-1.")]
 public static class RichTextExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Rich Text Styles",
-                Author   = "BonniePDF",
-                Subject  = "Inline mixed-style text using RichText spans. PDF/A-2a + PDF/UA-1.",
-                Keywords = "pdf, rich text, inline styles, bold, italic, underline, highlights, pdf/ua, pdf/a, BonniePDF",
+                Title = "Rich Text Styles",
+                Author = "BonniePDF",
+                Subject = "Inline mixed-style text using RichText spans. PDF/A-2a + PDF/UA-1.",
+                Keywords =
+                    "pdf, rich text, inline styles, bold, italic, underline, highlights, pdf/ua, pdf/a, BonniePDF",
             },
             Settings = new DocumentSettings
             {
-                PageSize      = PdfSize.A4,
-                Margin        = 60,
-                Conformance   = PdfAConformance.PdfA2a,
+                PageSize = PdfSize.A4,
+                Margin = 60,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
+                Language = "en-GB",
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
@@ -42,18 +45,19 @@ public static class RichTextExample
         doc.Add(new Heading("Rich Text Styles")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 22,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 10),
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 10),
         });
 
         doc.Add(new TextBlock
         {
-            Text   = "RichText lets you mix bold, italic, coloured, highlighted, and differently-sized spans within a single " +
-                     "flowing paragraph. All formatting is per-span while the text wraps and aligns as a unit. " +
-                     "Every RichText is automatically structured as a paragraph for screen readers.",
+            Text =
+                "RichText lets you mix bold, italic, coloured, highlighted, and differently-sized spans within a single " +
+                "flowing paragraph. All formatting is per-span while the text wraps and aligns as a unit. " +
+                "Every RichText is automatically structured as a paragraph for screen readers.",
             Margin = new Thickness(0, 0, 0, 16),
         });
 
@@ -81,11 +85,11 @@ public static class RichTextExample
 
         doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 10) }
             .Span("Text can be ")
-            .Span("red",       new TextStyle().WithColor(Color.Red))
+            .Span("red", new TextStyle().WithColor(Color.Red))
             .Span(", ")
-            .Span("blue",      new TextStyle().WithColor(ColorPalette.Blue[600]))
+            .Span("blue", new TextStyle().WithColor(ColorPalette.Blue[600]))
             .Span(", ")
-            .Span("green",     new TextStyle().WithColor(ColorPalette.Green[600]))
+            .Span("green", new TextStyle().WithColor(ColorPalette.Green[600]))
             .Span(", or ")
             .Span("any colour", new TextStyle().WithColor(ColorPalette.Purple[600]))
             .Span(" you choose. Colour combines freely with weight: ")
@@ -99,11 +103,11 @@ public static class RichTextExample
 
         doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 10) }
             .Span("Decorations are per-span: ")
-            .Span("underlined words",     new TextStyle().Underline())
+            .Span("underlined words", new TextStyle().Underline())
             .Span(", ")
-            .Span("strikethrough text",   new TextStyle().Strikethrough())
+            .Span("strikethrough text", new TextStyle().Strikethrough())
             .Span(", and combinations like ")
-            .Span("bold underlined",      new TextStyle().Bold().Underline())
+            .Span("bold underlined", new TextStyle().Bold().Underline())
             .Span(" or ")
             .Span("italic strikethrough", new TextStyle().WithItalic().Strikethrough())
             .Span(" all flow naturally within a single paragraph.")
@@ -117,9 +121,11 @@ public static class RichTextExample
             .Span("Background colours create a ")
             .Span("highlighter pen effect", new TextStyle().WithBackground(Color.FromHex("#fef08a")))
             .Span(" across any span. Combine with colour for ")
-            .Span("bold red alert text", new TextStyle().Bold().WithColor(Color.FromHex("#991b1b")).WithBackground(Color.FromHex("#fecaca")))
+            .Span("bold red alert text",
+                new TextStyle().Bold().WithColor(Color.FromHex("#991b1b")).WithBackground(Color.FromHex("#fecaca")))
             .Span(" or a ")
-            .Span("green success note", new TextStyle().WithColor(Color.FromHex("#166534")).WithBackground(Color.FromHex("#bbf7d0")))
+            .Span("green success note",
+                new TextStyle().WithColor(Color.FromHex("#166534")).WithBackground(Color.FromHex("#bbf7d0")))
             .Span(" without breaking the paragraph flow.")
         );
 
@@ -141,31 +147,34 @@ public static class RichTextExample
         Section(doc, "Justified Alignment", "s-justified");
 
         doc.Add(new RichText
-        {
-            Alignment = TextAlignment.Justify,
-            Margin    = new Thickness(0, 0, 0, 10),
-        }
-        .Span("Rich text supports ")
-        .Span("full justification", new TextStyle().Bold())
-        .Span(" — text is evenly distributed across the line width even when spans carry ")
-        .Span("mixed styles", new TextStyle().WithItalic())
-        .Span(". Each span maintains its own formatting while word-spacing is adjusted to fill the available width. " +
-              "The final line remains left-aligned per typographic convention.")
+            {
+                Alignment = TextAlignment.Justify,
+                Margin = new Thickness(0, 0, 0, 10),
+            }
+            .Span("Rich text supports ")
+            .Span("full justification", new TextStyle().Bold())
+            .Span(" — text is evenly distributed across the line width even when spans carry ")
+            .Span("mixed styles", new TextStyle().WithItalic())
+            .Span(
+                ". Each span maintains its own formatting while word-spacing is adjusted to fill the available width. " +
+                "The final line remains left-aligned per typographic convention.")
         );
 
         // ── 7. Reusable Styles ─────────────────────────────────────────────────
 
         Section(doc, "Reusable Styles", "s-reusable");
 
-        TextStyle labelStyle = new() { FontFamily = StandardFonts.Helvetica, FontWeight = FontWeight.Bold, Color = ColorPalette.Slate[800]  };
-        TextStyle valueStyle = new() { FontFamily = StandardFonts.Helvetica,                               Color = ColorPalette.Indigo[600] };
-        TextStyle unitStyle  = new() { FontFamily = StandardFonts.Helvetica, FontSize   = 9,               Color = ColorPalette.Slate[400]  };
+        TextStyle labelStyle = new()
+            { FontFamily = StandardFonts.Helvetica, FontWeight = FontWeight.Bold, Color = ColorPalette.Slate[800] };
+        TextStyle valueStyle = new() { FontFamily = StandardFonts.Helvetica, Color = ColorPalette.Indigo[600] };
+        TextStyle unitStyle = new()
+            { FontFamily = StandardFonts.Helvetica, FontSize = 9, Color = ColorPalette.Slate[400] };
 
         (string Label, string Value, string Unit)[] rows =
         [
-            ("Temperature:", "23.5",    " °C"),
-            ("Pressure:",    "1013.25", " hPa"),
-            ("Humidity:",    "65",      " %"),
+            ("Temperature:", "23.5", " °C"),
+            ("Pressure:", "1013.25", " hPa"),
+            ("Humidity:", "65", " %"),
         ];
 
         foreach (var row in rows)
@@ -173,38 +182,40 @@ public static class RichTextExample
             doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 4) }
                 .Span(row.Label, labelStyle)
                 .Span(row.Value, valueStyle)
-                .Span(row.Unit,  unitStyle));
+                .Span(row.Unit, unitStyle));
         }
 
         // ── Practical Example ──────────────────────────────────────────────────
 
         doc.Add(new Line
         {
-            Color     = ColorPalette.Slate[300],
+            Color = ColorPalette.Slate[300],
             Thickness = 1,
-            Margin    = new Thickness(0, 12, 0, 0),
+            Margin = new Thickness(0, 12, 0, 0),
         });
 
         Section(doc, "Practical Example: Legal Disclaimer", "s-legal");
 
-        TextStyle disclaimerBase = new() { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[600] };
+        TextStyle disclaimerBase = new()
+            { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[600] };
 
         doc.Add(new RichText
-        {
-            DefaultStyle = disclaimerBase,
-            Alignment    = TextAlignment.Justify,
-            Margin       = new Thickness(0, 0, 0, 10),
-        }
-        .Span("IMPORTANT: ", new TextStyle().Bold().WithColor(Color.Red))
-        .Span("By using this software, you agree to the ")
-        .Span("Terms of Service", new TextStyle().Bold().Underline())
-        .Span(" and ")
-        .Span("Privacy Policy", new TextStyle().Bold().Underline())
-        .Span(". All data is processed in accordance with ")
-        .Span("GDPR", new TextStyle().Bold())
-        .Span(" regulations. For questions, contact ")
-        .Span("support@example.com", new TextStyle { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Blue[600] })
-        .Span(".")
+            {
+                DefaultStyle = disclaimerBase,
+                Alignment = TextAlignment.Justify,
+                Margin = new Thickness(0, 0, 0, 10),
+            }
+            .Span("IMPORTANT: ", new TextStyle().Bold().WithColor(Color.Red))
+            .Span("By using this software, you agree to the ")
+            .Span("Terms of Service", new TextStyle().Bold().Underline())
+            .Span(" and ")
+            .Span("Privacy Policy", new TextStyle().Bold().Underline())
+            .Span(". All data is processed in accordance with ")
+            .Span("GDPR", new TextStyle().Bold())
+            .Span(" regulations. For questions, contact ")
+            .Span("support@example.com",
+                new TextStyle { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Blue[600] })
+            .Span(".")
         );
 
         return doc;
@@ -215,11 +226,11 @@ public static class RichTextExample
         doc.Add(new Heading(title)
         {
             TocIdentifier = tocId,
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 13,
-            Color     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 14, 0, 6),
+            Level = 2,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 13,
+            Color = ColorPalette.Indigo[600],
+            Margin = new Thickness(0, 14, 0, 6),
         });
     }
 }

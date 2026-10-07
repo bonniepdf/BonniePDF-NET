@@ -17,9 +17,11 @@ namespace BonniePDF.Examples.Layout.MultiColumnLayouts;
 /// </summary>
 [System.ComponentModel.DisplayName("Multi-Column Layouts")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("Newspaper-style columns built from stacks: a three-column article with images, divided columns, and balanced versus ragged column heights.")]
+[System.ComponentModel.Description(
+    "Newspaper-style columns built from stacks: a three-column article with images, divided columns, and balanced versus ragged column heights.")]
 public static class MultiColumnLayoutsExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // Deterministic filler from a seeded source; the TypeScript twin of this
@@ -28,9 +30,9 @@ public static class MultiColumnLayoutsExample
 
         (string Heading, string[] Paragraphs, byte[] ImageData)[] articleColumns =
         {
-            ("Front Page",  [source.Paragraph(), source.Paragraph()], source.Image(153, 64)),
-            ("The Brief",   [source.Paragraph(), source.Paragraph()], source.Image(153, 64)),
-            ("Dispatches",  [source.Paragraph(), source.Paragraph()], source.Image(153, 64)),
+            ("Front Page", [source.Paragraph(), source.Paragraph()], source.Image(153, 64)),
+            ("The Brief", [source.Paragraph(), source.Paragraph()], source.Image(153, 64)),
+            ("Dispatches", [source.Paragraph(), source.Paragraph()], source.Image(153, 64)),
         };
 
         string[][] dividerParagraphs =
@@ -53,16 +55,17 @@ public static class MultiColumnLayoutsExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Multi-Column Layouts Demo",
-                Author   = "BonniePDF",
-                Subject  = "Demonstrates newspaper-style multi-column layouts in an accessible PDF/A-2a + PDF/UA-1 document.",
+                Title = "Multi-Column Layouts Demo",
+                Author = "BonniePDF",
+                Subject =
+                    "Demonstrates newspaper-style multi-column layouts in an accessible PDF/A-2a + PDF/UA-1 document.",
                 Keywords = "pdf, accessibility, layout, columns, multi-column, newspaper, BonniePDF",
             },
             Settings = new DocumentSettings
             {
-                Conformance   = PdfAConformance.PdfA2a,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
+                Language = "en-GB",
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
@@ -73,11 +76,11 @@ public static class MultiColumnLayoutsExample
         doc.Add(new Heading("Multi-Column Layouts")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 22,
-            Color         = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 10),
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 10),
         });
 
         doc.Add(new TextBlock
@@ -96,8 +99,8 @@ public static class MultiColumnLayoutsExample
         doc.Add(new Line
         {
             Thickness = 1,
-            Color     = ColorPalette.Slate[300],
-            Margin    = new Thickness(0, 0, 0, 16),
+            Color = ColorPalette.Slate[300],
+            Margin = new Thickness(0, 0, 0, 16),
         });
 
         // ── A three-column article ──────────────────────────────────────────────
@@ -105,14 +108,15 @@ public static class MultiColumnLayoutsExample
         doc.Add(SectionHeading("A Three-Column Article", "s-article", 0));
         doc.Add(new TextBlock
         {
-            Text   = "Three equal columns, each a VerticalStack holding its own heading, image and justified paragraphs. " +
-                     "The number of stack children is the number of columns; the stack\u2019s spacing (18pt here) is the gutter.",
+            Text =
+                "Three equal columns, each a VerticalStack holding its own heading, image and justified paragraphs. " +
+                "The number of stack children is the number of columns; the stack\u2019s spacing (18pt here) is the gutter.",
             Margin = new Thickness(0, 0, 0, 10),
         });
 
         var article = new HorizontalStack
         {
-            Spacing           = 18,
+            Spacing = 18,
             WidthDistribution = WidthDistribution.Equal,
         };
         foreach ((string heading, string[] paragraphs, byte[] imageData) in articleColumns)
@@ -121,32 +125,33 @@ public static class MultiColumnLayoutsExample
 
             column.Add(new TextBlock
             {
-                Text     = heading,
+                Text = heading,
                 FontName = StandardFonts.HelveticaBold,
                 FontSize = 12,
-                Color    = ColorPalette.Slate[800],
+                Color = ColorPalette.Slate[800],
             });
 
             column.Add(new Image
             {
                 ImageData = imageData,
-                AltText   = "Abstract placeholder illustration.",
-                Width     = 153,
-                Height    = 64,
-                FitMode   = ImageFitMode.Cover,
+                AltText = "Abstract placeholder illustration.",
+                Width = 153,
+                Height = 64,
+                FitMode = ImageFitMode.Cover,
             });
 
             foreach (string text in paragraphs)
             {
                 column.Add(new TextBlock
                 {
-                    Text      = text,
+                    Text = text,
                     Alignment = TextAlignment.Justify,
                 });
             }
 
             article.Add(column);
         }
+
         doc.Add(article);
 
         // ── Columns with a divider ──────────────────────────────────────────────
@@ -156,10 +161,10 @@ public static class MultiColumnLayoutsExample
         doc.Add(SectionHeading("Columns with a Divider", "s-divider", 0));
         doc.Add(new TextBlock
         {
-            Text   = "A vertical rule between two weighted text columns. The rule is a fixed-width Container added " +
-                     "without a weight, so it keeps its own 2pt while the remaining width is split evenly between the " +
-                     "text columns. The row carries an explicit height and the rule matches it, so the rule spans the " +
-                     "whole block regardless of how the paragraphs inside fall.",
+            Text = "A vertical rule between two weighted text columns. The rule is a fixed-width Container added " +
+                   "without a weight, so it keeps its own 2pt while the remaining width is split evenly between the " +
+                   "text columns. The row carries an explicit height and the rule matches it, so the rule spans the " +
+                   "whole block regardless of how the paragraphs inside fall.",
             Margin = new Thickness(0, 0, 0, 10),
         });
 
@@ -169,9 +174,9 @@ public static class MultiColumnLayoutsExample
         // share it, so the rule ends where the columns do.
         var divided = new HorizontalStack
         {
-            Spacing           = 20,
+            Spacing = 20,
             WidthDistribution = WidthDistribution.Weighted,
-            Height            = 223,
+            Height = 223,
         };
         divided.Add(ColumnOf(dividerParagraphs[0]), 1f);
         divided.Add(DividerRule(223));
@@ -185,16 +190,16 @@ public static class MultiColumnLayoutsExample
         doc.Add(SectionHeading("Balancing Column Heights", "s-balance", 0));
         doc.Add(new TextBlock
         {
-            Text   = "Each column holds exactly what you place in it, so the split you choose decides the heights. " +
-                     "Below, the same six paragraphs are arranged two ways: pushed into the first column, which leaves " +
-                     "the second standing empty, and divided evenly, which levels the two.",
+            Text = "Each column holds exactly what you place in it, so the split you choose decides the heights. " +
+                   "Below, the same six paragraphs are arranged two ways: pushed into the first column, which leaves " +
+                   "the second standing empty, and divided evenly, which levels the two.",
             Margin = new Thickness(0, 0, 0, 10),
         });
 
         doc.Add(SubCaption("Same material, all in the first column", 12));
         var lumped = new HorizontalStack
         {
-            Spacing           = 20,
+            Spacing = 20,
             WidthDistribution = WidthDistribution.Equal,
         };
         lumped.Add(ColumnOf(balanceParagraphs[..4]));
@@ -204,7 +209,7 @@ public static class MultiColumnLayoutsExample
         doc.Add(SubCaption("Same material, split evenly", 20));
         var balanced = new HorizontalStack
         {
-            Spacing           = 20,
+            Spacing = 20,
             WidthDistribution = WidthDistribution.Equal,
         };
         balanced.Add(ColumnOf(balanceParagraphs[..3]));
@@ -218,21 +223,21 @@ public static class MultiColumnLayoutsExample
     private static Heading SectionHeading(string text, string tocIdentifier, float topMargin) => new(text)
     {
         TocIdentifier = tocIdentifier,
-        Level         = 2,
-        FontName      = StandardFonts.HelveticaBold,
-        FontSize      = 14,
-        Color         = ColorPalette.Indigo[600],
-        Margin        = new Thickness(0, topMargin, 0, 8),
+        Level = 2,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 14,
+        Color = ColorPalette.Indigo[600],
+        Margin = new Thickness(0, topMargin, 0, 8),
     };
 
     /// <summary>The small bold label used above the balancing demonstrations.</summary>
     private static TextBlock SubCaption(string text, float topMargin) => new()
     {
-        Text     = text,
+        Text = text,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 11,
-        Color    = ColorPalette.Slate[600],
-        Margin   = new Thickness(0, topMargin, 0, 6),
+        Color = ColorPalette.Slate[600],
+        Margin = new Thickness(0, topMargin, 0, 6),
     };
 
     /// <summary>A column of justified paragraphs with a uniform gap between them.</summary>
@@ -243,10 +248,11 @@ public static class MultiColumnLayoutsExample
         {
             column.Add(new TextBlock
             {
-                Text      = text,
+                Text = text,
                 Alignment = TextAlignment.Justify,
             });
         }
+
         return column;
     }
 
@@ -257,8 +263,8 @@ public static class MultiColumnLayoutsExample
     /// </summary>
     private static Container DividerRule(float height) => new()
     {
-        Width           = 2,
-        Height          = height,
+        Width = 2,
+        Height = height,
         BackgroundColor = ColorPalette.Slate[400],
     };
 }

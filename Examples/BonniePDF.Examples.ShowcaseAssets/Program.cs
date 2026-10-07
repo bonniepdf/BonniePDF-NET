@@ -129,7 +129,8 @@ internal sealed class Program
             dir = dir.Parent;
 
         return dir?.FullName
-            ?? throw new InvalidOperationException(
-                "Could not locate the repository root (no BonniePDF.slnx found above " + AppContext.BaseDirectory + ").");
+               ?? throw new InvalidOperationException(
+                   "Could not locate the repository root (no BonniePDF.slnx found above " + AppContext.BaseDirectory +
+                   ").");
     }
 }

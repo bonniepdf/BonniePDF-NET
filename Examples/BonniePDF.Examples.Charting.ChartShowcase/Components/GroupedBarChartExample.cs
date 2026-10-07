@@ -10,10 +10,11 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// </summary>
 [System.ComponentModel.DisplayName("Grouped Bar Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("GroupedBarChart implementation with quarterly revenue data by product line, showing multiple bars per category with value labels.")]
+[System.ComponentModel.Description(
+    "GroupedBarChart implementation with quarterly revenue data by product line, showing multiple bars per category with value labels.")]
 public static class GroupedBarChartExample
 {
-
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // Create a new PDF document
@@ -75,7 +76,8 @@ public static class GroupedBarChartExample
         // Create the grouped bar chart with 3 series (3 bars per month)
         GroupedBarChart groupedBarChart = new(chartData)
         {
-            AltText = "Grouped bar chart comparing quarterly revenue across Electronics, Clothing, and Home & Garden product lines",
+            AltText =
+                "Grouped bar chart comparing quarterly revenue across Electronics, Clothing, and Home & Garden product lines",
             Height = 400,
             StretchToFit = true,
             FontFamily = StandardFonts.Helvetica,
@@ -87,10 +89,8 @@ public static class GroupedBarChartExample
         document.Add(groupedBarChart);
 
         // Save the document
-        
+
 
         return document;
     }
 }
-
-

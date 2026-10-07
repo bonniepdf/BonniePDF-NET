@@ -10,7 +10,8 @@ namespace BonniePDF.Examples.Templates.EventTicket;
 /// </summary>
 [System.ComponentModel.DisplayName("Event Ticket")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("Event ticket / boarding-pass style card (PDF/UA-1 + PDF/A-2a) with a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.")]
+[System.ComponentModel.Description(
+    "Event ticket / boarding-pass style card (PDF/UA-1 + PDF/A-2a) with a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.")]
 public static class EventTicketExample
 {
     private const string BgImageKey = "images/danny-howe-bn-D2bCvpik-unsplash.jpg";
@@ -18,12 +19,15 @@ public static class EventTicketExample
     private static readonly Color Ink = ColorPalette.Slate[900];
     private static readonly Color Cream = ColorPalette.Slate[100];
     private static readonly Color Mute = ColorPalette.Slate[400];
+
     private static readonly Color BodyCol = ColorPalette.Slate[300];
+
     // 400, not 500: this text reads against the dark stub panel, where 500 falls
     // to 3.32:1 against the 4.5:1 WCAG AA threshold; 400 clears it (5.13:1).
     private static readonly Color Accent = ColorPalette.Violet[400];
     private static readonly Color Stub = ColorPalette.Slate[800];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         // Landscape boarding-pass style ticket: 640 x 300 pt.

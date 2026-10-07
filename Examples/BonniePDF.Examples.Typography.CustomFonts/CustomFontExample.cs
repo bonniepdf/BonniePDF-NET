@@ -9,27 +9,29 @@ namespace BonniePDF.Examples.Typography.CustomFonts;
 /// </summary>
 [System.ComponentModel.DisplayName("Custom Fonts")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("TrueType font embedding with Unicode coverage — symbols, currency, arrows, maths, dingbats, and Greek. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "TrueType font embedding with Unicode coverage — symbols, currency, arrows, maths, dingbats, and Greek. PDF/A-2a + PDF/UA-1.")]
 public static class CustomFontExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
-        string font = BundledFont.SansPath;
+        string font = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSans-Regular.ttf");
 
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Custom Fonts",
-                Author   = "BonniePDF",
-                Subject  = "TrueType font embedding with Unicode coverage. PDF/A-2a + PDF/UA-1.",
+                Title = "Custom Fonts",
+                Author = "BonniePDF",
+                Subject = "TrueType font embedding with Unicode coverage. PDF/A-2a + PDF/UA-1.",
                 Keywords = "pdf, pdf/ua, pdf/a, accessibility, fonts, unicode, truetype",
             },
             Settings = new DocumentSettings
             {
-                Conformance   = PdfAConformance.PdfA2a,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
+                Language = "en-GB",
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(font)
                     .WithSize(11)
@@ -42,18 +44,18 @@ public static class CustomFontExample
         doc.Add(new Heading("Custom Fonts — TrueType Embedding")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = font,
-            FontSize      = 22,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 10),
+            Level = 1,
+            FontName = font,
+            FontSize = 22,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 10),
         });
 
         doc.Add(new TextBlock
         {
-            Text   = "BonniePDF embeds compact glyph subsets of TrueType fonts directly in the PDF — " +
-                     "only the characters actually used are stored. Fonts with different Unicode coverage " +
-                     "can be mixed within a single document by setting FontName per block.",
+            Text = "BonniePDF embeds compact glyph subsets of TrueType fonts directly in the PDF — " +
+                   "only the characters actually used are stored. Fonts with different Unicode coverage " +
+                   "can be mixed within a single document by setting FontName per block.",
             Margin = new Thickness(0, 0, 0, 16),
         });
 
@@ -62,11 +64,11 @@ public static class CustomFontExample
         Section(doc, "Unicode Symbols", "s-symbols");
 
         foreach (string text in new[]
-        {
-            "• Bullet (U+2022)  © Copyright (U+00A9)  ® Registered (U+00AE)  ™ Trademark (U+2122)",
-            "– En-dash (U+2013)  — Em-dash (U+2014)",
-            "± Plus-minus  × Multiply  ÷ Divide",
-        })
+                 {
+                     "• Bullet (U+2022)  © Copyright (U+00A9)  ® Registered (U+00AE)  ™ Trademark (U+2122)",
+                     "– En-dash (U+2013)  — Em-dash (U+2014)",
+                     "± Plus-minus  × Multiply  ÷ Divide",
+                 })
         {
             doc.Add(new TextBlock { Text = text, Margin = new Thickness(0, 0, 0, 4) });
         }
@@ -77,7 +79,7 @@ public static class CustomFontExample
 
         doc.Add(new TextBlock
         {
-            Text   = "€ Euro  £ Pound  ¥ Yen  ₹ Rupee  ₿ Bitcoin",
+            Text = "€ Euro  £ Pound  ¥ Yen  ₹ Rupee  ₿ Bitcoin",
             Margin = new Thickness(0, 0, 0, 4),
         });
 
@@ -87,9 +89,9 @@ public static class CustomFontExample
 
         doc.Add(new TextBlock
         {
-            Text     = "← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪",
-            FontName = BundledFont.MathPath,
-            Margin   = new Thickness(0, 0, 0, 4),
+            Text = "← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪",
+            FontName = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSansMath-Regular.ttf"),
+            Margin = new Thickness(0, 0, 0, 4),
         });
 
         // ── 4. Mathematical Operators ─────────────────────────────────────────
@@ -97,12 +99,12 @@ public static class CustomFontExample
         Section(doc, "Mathematical Operators (via NotoSansMath)", "s-math");
 
         foreach (string text in new[]
+                 {
+                     "≠ Not equal  ≤ Less-equal  ≥ Greater-equal  ∞ Infinity",
+                     "∑ Sum  ∏ Product  √ Root  ∫ Integral",
+                 })
         {
-            "≠ Not equal  ≤ Less-equal  ≥ Greater-equal  ∞ Infinity",
-            "∑ Sum  ∏ Product  √ Root  ∫ Integral",
-        })
-        {
-            doc.Add(new TextBlock { Text = text, FontName = BundledFont.MathPath, Margin = new Thickness(0, 0, 0, 4) });
+            doc.Add(new TextBlock { Text = text, FontName = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSansMath-Regular.ttf"), Margin = new Thickness(0, 0, 0, 4) });
         }
 
         // ── 5. Dingbats ───────────────────────────────────────────────────────
@@ -111,9 +113,9 @@ public static class CustomFontExample
 
         doc.Add(new TextBlock
         {
-            Text     = "✓ Check  ✗ Cross  ★ Star  ♠ Spade  ♥ Heart  ♦ Diamond  ♣ Club",
-            FontName = BundledFont.SymbolsPath,
-            Margin   = new Thickness(0, 0, 0, 4),
+            Text = "✓ Check  ✗ Cross  ★ Star  ♠ Spade  ♥ Heart  ♦ Diamond  ♣ Club",
+            FontName = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSansSymbols2-Regular.ttf"),
+            Margin = new Thickness(0, 0, 0, 4),
         });
 
         // ── 6. Greek Letters ──────────────────────────────────────────────────
@@ -122,7 +124,7 @@ public static class CustomFontExample
 
         doc.Add(new TextBlock
         {
-            Text   = "α Alpha  β Beta  γ Gamma  δ Delta  π Pi  Ω Omega",
+            Text = "α Alpha  β Beta  γ Gamma  δ Delta  π Pi  Ω Omega",
             Margin = new Thickness(0, 0, 0, 4),
         });
 
@@ -132,9 +134,9 @@ public static class CustomFontExample
 
         doc.Add(new TextBlock
         {
-            Text     = "Standard Helvetica (Type 1) — limited to the WinAnsi charset.",
+            Text = "Standard Helvetica (Type 1) — limited to the WinAnsi charset.",
             FontName = StandardFonts.Helvetica,
-            Margin   = new Thickness(0, 0, 0, 4),
+            Margin = new Thickness(0, 0, 0, 4),
         });
 
         doc.Add(new TextBlock
@@ -150,11 +152,11 @@ public static class CustomFontExample
         doc.Add(new Heading(title)
         {
             TocIdentifier = tocId,
-            Level         = 2,
-            FontName      = BundledFont.SansPath,
-            FontSize      = 13,
-            Color     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 12, 0, 6),
+            Level = 2,
+            FontName = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSans-Regular.ttf"),
+            FontSize = 13,
+            Color = ColorPalette.Indigo[600],
+            Margin = new Thickness(0, 12, 0, 6),
         });
     }
 }

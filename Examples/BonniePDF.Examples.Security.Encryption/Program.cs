@@ -13,11 +13,13 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "encryption_owner_only.pdf"));
         }
+
         Console.WriteLine("Generating Encryption - Password Protected...");
         using (var doc = EncryptionPasswordExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "encryption_password.pdf"));
         }
+
         Console.WriteLine("Generating Encryption - Permission Restrictions...");
         using (var doc = EncryptionPermissionsExample.Generate())
         {
