@@ -49,7 +49,7 @@ public static class AnnualReportExample
 
     // Captured once, when the document is generated - surfaced in the footer.
     private static readonly string Generated =
-        "Generated " + DateTime.Now.ToString("d MMMM yyyy 'at' HH:mm", CultureInfo.InvariantCulture);
+        "Generated " + new DateTime(2026, 6, 16, 10, 30, 0).ToString("d MMMM yyyy 'at' HH:mm", CultureInfo.InvariantCulture);
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)

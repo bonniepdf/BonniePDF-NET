@@ -134,25 +134,6 @@ public static class ShapesAndBordersExample
 
         doc.Add(cardRow);
 
-        // --- Section 4: Fluent API ---
-        doc.Add(CreateSectionHeader("Fluent API (.Rounded())"));
-
-        doc.Add(new TextBlock
-        {
-            Text = "This element uses the fluent .Rounded() extension to apply corner radius via method chaining.",
-            FontSize = 12
-        }.Padding(16).Background(Color.FromHex("#ede9fe")).Rounded(12).Border(Color.FromHex("#8b5cf6"), 1));
-
-        doc.Add(new Container { Margin = new Thickness(0, 12, 0, 0) });
-
-        doc.Add(new TextBlock
-        {
-            Text = "Chaining: .Padding(16).Background(...).Rounded(12).Border(...)",
-            FontSize = 11,
-            Color = ColorPalette.Slate[500],
-            Margin = new Thickness(0, 0, 0, 12)
-        });
-
         // --- Section 5: Varying Radii ---
         // The heading and all six samples stay together: a comparison split across pages defeats its purpose.
         VerticalStack radiusSection = new() { BreakAllowed = false };

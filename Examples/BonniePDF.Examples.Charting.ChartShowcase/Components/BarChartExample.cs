@@ -41,11 +41,13 @@ public static class BarChartExample
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
-        document.Settings.PdfAEnabled = true;
+        document.Settings.Conformance = PdfAConformance.PdfA2a;
+        document.Settings.Accessibility = AccessibilityMode.PdfUa1;
         document.Settings.Language = "en-GB";
+        document.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.Helvetica).WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
-        document.Metadata.Title = "Bar Chart Example";
+        document.Metadata.Title = "Bar Chart";
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Demonstrating the new ICanvas-based chart architecture";
 
@@ -55,19 +57,17 @@ public static class BarChartExample
         // Add a title
         document.Add(new TextBlock
         {
-            Text = "Monthly Sales Report",
+            Text = "Bar Chart: Monthly Sales Report",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 8) });
 
         document.Add(new TextBlock
         {
             Text = "Vertical bars with grid lines and value labels",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 20) });
 
         // Create chart data with all 12 months
         ChartData chartData = new()
@@ -107,7 +107,7 @@ public static class BarChartExample
         BarChart barChart = new(chartData)
         {
             AltText = "Bar chart showing monthly sales report from January to December",
-            Height = 400,
+            Height = 380,
             StretchToFit = true,
             BarColor = Color.FromHex("#4f46e5"),
             FontFamily = StandardFonts.Helvetica,

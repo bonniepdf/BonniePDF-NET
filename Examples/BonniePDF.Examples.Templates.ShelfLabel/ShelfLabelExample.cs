@@ -66,7 +66,7 @@ public static class ShelfLabelExample
     {
         HorizontalStack row = new()
             { WidthDistribution = WidthDistribution.Weighted, Alignment = HorizontalAlignment.Center };
-        row.Add(Tb("SAMPLESHOP", 10, Color.White, bold: true), 1);
+        row.Add(Tb("SAMPLE SHOP", 10, Color.White, bold: true), 1);
         row.Add(Tb("Everyday Low Price", 9.4f, Color.White, bold: true, align: TextAlignment.Right), 1);
 
         return new Container
@@ -93,7 +93,9 @@ public static class ShelfLabelExample
 
         VerticalStack price = new();
         price.Add(Tb("Was " + Money(2.99), 8.5f, Promo, bold: true, align: TextAlignment.Right));
-        price.Add(Tb(Money(2.49), 30, Ink, bold: true, align: TextAlignment.Right));
+        TextBlock currentPrice = Tb(Money(2.49), 30, Ink, bold: true, align: TextAlignment.Right);
+        currentPrice.Margin = new Thickness(0, 0, 0, -1);
+        price.Add(currentPrice);
         price.Add(UnitPriceBadge());
 
         Grid row = new(1.75f, 1)
@@ -164,8 +166,10 @@ public static class ShelfLabelExample
                 AltText = "EAN-13 article number 5012345678900.",
             },
         });
-        stack.Add(Tb("OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY", 6.2f, Body, bold: true,
-            align: TextAlignment.Center, bottom: 1));
+        TextBlock storage = Tb("OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY", 6.2f, Body,
+            bold: true, align: TextAlignment.Center, bottom: 1);
+        storage.Margin = new Thickness(0, 4, 0, 1);
+        stack.Add(storage);
         stack.Add(Tb("SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026", 5.8f, Muted,
             align: TextAlignment.Center));
 

@@ -88,7 +88,9 @@ public static class PublicLibraryMembershipLetterExample
 
         VerticalStack hoursStack = new() { BreakAllowed = false };
         hoursStack.Add(H2("Branch opening hours"));
-        hoursStack.Add(InfoTable(OpeningHours, HoursColumns, LibraryGreen, "Days", "Hours", "Availability"));
+        Table openingHours = InfoTable(OpeningHours, HoursColumns, LibraryGreen, "Days", "Hours", "Availability");
+        openingHours.CellPadding = 8;
+        hoursStack.Add(openingHours);
         doc.Add(hoursStack);
 
         AddHelpSections(doc);

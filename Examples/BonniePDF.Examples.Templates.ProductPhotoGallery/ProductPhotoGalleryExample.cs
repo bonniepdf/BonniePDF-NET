@@ -40,21 +40,21 @@ public static class ProductPhotoGalleryExample
 
     private static readonly Product[] Products =
     [
-        new("Terracotta Planter", "HG-1042", "GBP 28.00",
+        new("Terracotta Planter", "HG-1042", "£28.00",
             "Hand-thrown stoneware planter with a matte terracotta glaze."),
-        new("Linen Throw", "HG-2277", "GBP 54.00",
+        new("Linen Throw", "HG-2277", "£54.00",
             "Stonewashed pure-linen throw in oatmeal, finished with a hand-knotted fringe."),
-        new("Brass Reading Lamp", "LT-0391", "GBP 120.00",
+        new("Brass Reading Lamp", "LT-0391", "£120.00",
             "Adjustable desk lamp in brushed brass with a weighted base and warm-dim LED."),
-        new("Ceramic Pour-Over", "KT-5108", "GBP 36.00",
+        new("Ceramic Pour-Over", "KT-5108", "£36.00",
             "Single-cup pour-over dripper in speckled clay, sized for a standard 02 filter."),
-        new("Wool Floor Cushion", "HG-3315", "GBP 95.00",
+        new("Wool Floor Cushion", "HG-3315", "£95.00",
             "Chunky hand-woven wool floor cushion with a removable, washable cover."),
-        new("Smoked-Glass Carafe", "KT-4420", "GBP 42.00",
+        new("Smoked-Glass Carafe", "KT-4420", "£42.00",
             "Mouth-blown smoked-glass carafe and tumbler set for the bedside or table."),
-        new("Oak Wall Shelf", "FN-0876", "GBP 68.00",
+        new("Oak Wall Shelf", "FN-0876", "£68.00",
             "Solid white-oak floating shelf with concealed brackets and an oiled finish."),
-        new("Rattan Pendant Shade", "LT-1653", "GBP 82.00",
+        new("Rattan Pendant Shade", "LT-1653", "£82.00",
             "Open-weave rattan pendant shade that casts a soft, patterned light."),
     ];
 

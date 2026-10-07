@@ -14,7 +14,7 @@ namespace BonniePDF.Examples.Typography.EmojisAndUnicode;
 public static class EmojiExample
 {
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
     {
         string textFont = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSans-Regular.ttf");
         string mathFont = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSansMath-Regular.ttf");
@@ -43,6 +43,15 @@ public static class EmojiExample
                     .WithColor(ColorPalette.Slate[600]),
             },
         };
+
+        // Keep the fallback faces on this document; generating it cannot alter another example.
+        byte[] ReadFont(string path) => assets is not null && assets.TryGetValue("fonts/" + Path.GetFileName(path), out byte[]? bytes)
+            ? bytes : File.ReadAllBytes(path);
+        textFont = doc.Fonts.Add(ReadFont(textFont)).FontName;
+        mathFont = doc.Fonts.Add(ReadFont(mathFont)).FontName;
+        symbolsFont = doc.Fonts.Add(ReadFont(symbolsFont)).FontName;
+        emojiFont = doc.Fonts.Add(ReadFont(emojiFont)).FontName;
+        doc.Settings.DefaultTextStyle.WithFamily(textFont);
 
         // ── Title ──────────────────────────────────────────────────────────────
 

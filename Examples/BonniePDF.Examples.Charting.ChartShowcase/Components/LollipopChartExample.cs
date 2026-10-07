@@ -41,30 +41,30 @@ public static class LollipopChartExample
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
-        document.Settings.PdfAEnabled = true;
+        document.Settings.Conformance = PdfAConformance.PdfA2a;
+        document.Settings.Accessibility = AccessibilityMode.PdfUa1;
         document.Settings.Language = "en-GB";
+        document.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.Helvetica).WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
-        document.Metadata.Title = "Lollipop Chart Example";
+        document.Metadata.Title = "Lollipop Chart";
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Demonstrating the LollipopChart with ICanvas architecture";
 
         // Add a title
         document.Add(new TextBlock
         {
-            Text = "Quarterly Performance Metrics",
+            Text = "Lollipop Chart: Quarterly Metrics",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 8) });
 
         document.Add(new TextBlock
         {
             Text = "Stems with circular heads - clear and minimal bar alternative",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 20) });
 
         // Create chart data with quarterly data
         ChartData chartData = new()
@@ -72,8 +72,7 @@ public static class LollipopChartExample
             Title = "Quarterly Revenue",
             Series =
             [
-                new ChartSeries
-                {
+                new ChartSeries { Color = Color.FromHex("#ec4899"),
                     DataPoints =
                     [
                         new ChartDataPoint { Label = "Q1", Value = 4500, LabelFormat = "N0" },
@@ -100,7 +99,7 @@ public static class LollipopChartExample
         LollipopChart lollipopChart = new(chartData)
         {
             AltText = "Lollipop chart showing quarterly revenue performance",
-            Height = 400,
+            Height = 380,
             StretchToFit = true,
             LollipopColor = Color.FromHex("#ec4899"),
             FontFamily = StandardFonts.Helvetica,

@@ -41,30 +41,30 @@ public static class DotPlotChartExample
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
-        document.Settings.PdfAEnabled = true;
+        document.Settings.Conformance = PdfAConformance.PdfA2a;
+        document.Settings.Accessibility = AccessibilityMode.PdfUa1;
         document.Settings.Language = "en-GB";
+        document.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.Helvetica).WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
-        document.Metadata.Title = "Dot Plot Chart Example";
+        document.Metadata.Title = "Dot Plot Chart";
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Demonstrating the DotPlotChart with ICanvas architecture";
 
         // Add a title
         document.Add(new TextBlock
         {
-            Text = "Product Performance Analysis",
+            Text = "Dot Plot Chart: Product Performance",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 8) });
 
         document.Add(new TextBlock
         {
             Text = "Circular markers positioned along a value axis",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 20) });
 
         // Create chart data with product data
         ChartData chartData = new()
@@ -72,8 +72,7 @@ public static class DotPlotChartExample
             Title = "Product Sales",
             Series =
             [
-                new ChartSeries
-                {
+                new ChartSeries { Color = Color.FromHex("#14b8a6"),
                     DataPoints =
                     [
                         new ChartDataPoint { Label = "Prod A", Value = 4500, LabelFormat = "N0" },
@@ -104,7 +103,7 @@ public static class DotPlotChartExample
         DotPlotChart dotPlotChart = new(chartData)
         {
             AltText = "Dot plot chart showing product sales performance across eight products",
-            Height = 400,
+            Height = 380,
             StretchToFit = true,
             DotColor = Color.FromHex("#14b8a6"),
             FontFamily = StandardFonts.Helvetica,

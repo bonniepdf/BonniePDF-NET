@@ -154,14 +154,12 @@ public static class UsSalesInvoiceExample
         doc.Add(totalsRow);
 
         // ── Remittance note ─────────────────────────────────────────────────
-        Container note = Labelled(
-            "REMITTANCE",
-            Lines(
-                Muted,
-                "Please reference invoice INV-US-0148 and PO-88213 with payment.",
-                "ACH: Routing 121000248  ·  Account ****4471  ·  Sample Company Inc.",
-                "Checks payable to Sample Company Inc., 500 Market Street, San Francisco, CA 94105."),
-            Accent);
+        TextBlock remittance = Lines(Muted,
+            "Please reference invoice INV-US-0148 and PO-88213 with payment.",
+            "ACH: Routing 121000248  ·  Account ****4471  ·  Sample Company Inc.",
+            "Checks payable to Sample Company Inc., 500 Market Street, San Francisco, CA 94105.");
+        remittance.FontSize = 8;
+        Container note = Labelled("REMITTANCE", remittance, Accent);
         note.Padding = new Thickness(0, 22, 0, 0);
         doc.Add(note);
 

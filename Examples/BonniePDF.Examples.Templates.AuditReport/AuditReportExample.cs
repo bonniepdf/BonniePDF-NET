@@ -101,14 +101,11 @@ public static class AuditReportExample
             "and require remediation before the next surveillance visit: the absence of a completed DPIA for high-risk processing, " +
             "and gaps in the personal-data breach notification procedure against the 72-hour deadline."));
 
-        Grid kpis = new(1, 1, 1, 1) { Border = Border.None, CellPadding = 0, Margin = new Thickness(0, 6, 0, 20) };
-        kpis.AddRow(
-            Kpi("82%", "Overall conformance", Primary),
-            Kpi("71 / 93", "Controls implemented", Primary),
-            // 700, not 600: 600 falls to 2.86:1 against the Indigo-50 tile panel,
-            // below the 3:1 large-text threshold this 20pt bold value gets.
-            Kpi("12", "Open findings", ColorPalette.Amber[700]),
-            Kpi("2", "Critical", ColorPalette.Rose[600]));
+        HorizontalStack kpis = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 12, Margin = new Thickness(0, 6, 0, 20) };
+        kpis.Add(Kpi("82%", "Overall conformance", Primary), 1);
+        kpis.Add(Kpi("71 / 93", "Controls implemented", Primary), 1);
+        kpis.Add(Kpi("12", "Open findings", ColorPalette.Amber[700]), 1);
+        kpis.Add(Kpi("2", "Critical", ColorPalette.Rose[600]), 1);
         doc.Add(kpis);
 
         VerticalStack charts = new() { Spacing = 12, Margin = new Thickness(0, 0, 0, 6) };
@@ -299,7 +296,7 @@ public static class AuditReportExample
         });
         stack.Add(new TextBlock { Text = label, FontName = StandardFonts.Helvetica, FontSize = 8.5f, Color = Muted });
         return new Container
-            { BackgroundColor = ColorPalette.Indigo[50], Padding = new Thickness(14, 12, 14, 12), Child = stack };
+            { BackgroundColor = ColorPalette.Indigo[50], CornerRadius = 8, Padding = new Thickness(14, 12, 14, 12), Child = stack };
     }
 
     private static Container ChartCard(string title, IElement chart)

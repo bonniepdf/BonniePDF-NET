@@ -14,7 +14,7 @@ namespace BonniePDF.Examples.Typography.CustomFonts;
 public static class CustomFontExample
 {
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
     {
         string font = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSans-Regular.ttf");
 
@@ -38,6 +38,13 @@ public static class CustomFontExample
                     .WithColor(ColorPalette.Slate[600]),
             },
         };
+
+        byte[] ReadFont(string filename) => assets is not null && assets.TryGetValue("fonts/" + filename, out byte[]? bytes)
+            ? bytes : File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "fonts", filename));
+        font = doc.Fonts.Add(ReadFont("NotoSans-Regular.ttf")).FontName;
+        string mathFont = doc.Fonts.Add(ReadFont("NotoSansMath-Regular.ttf")).FontName;
+        string symbolsFont = doc.Fonts.Add(ReadFont("NotoSansSymbols2-Regular.ttf")).FontName;
+        doc.Settings.DefaultTextStyle.WithFamily(font);
 
         // ── Title ──────────────────────────────────────────────────────────────
 
@@ -90,7 +97,7 @@ public static class CustomFontExample
         doc.Add(new TextBlock
         {
             Text = "← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪",
-            FontName = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSansMath-Regular.ttf"),
+            FontName = mathFont,
             Margin = new Thickness(0, 0, 0, 4),
         });
 
@@ -104,7 +111,7 @@ public static class CustomFontExample
                      "∑ Sum  ∏ Product  √ Root  ∫ Integral",
                  })
         {
-            doc.Add(new TextBlock { Text = text, FontName = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSansMath-Regular.ttf"), Margin = new Thickness(0, 0, 0, 4) });
+            doc.Add(new TextBlock { Text = text, FontName = mathFont, Margin = new Thickness(0, 0, 0, 4) });
         }
 
         // ── 5. Dingbats ───────────────────────────────────────────────────────
@@ -114,7 +121,7 @@ public static class CustomFontExample
         doc.Add(new TextBlock
         {
             Text = "✓ Check  ✗ Cross  ★ Star  ♠ Spade  ♥ Heart  ♦ Diamond  ♣ Club",
-            FontName = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSansSymbols2-Regular.ttf"),
+            FontName = symbolsFont,
             Margin = new Thickness(0, 0, 0, 4),
         });
 
@@ -153,7 +160,7 @@ public static class CustomFontExample
         {
             TocIdentifier = tocId,
             Level = 2,
-            FontName = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSans-Regular.ttf"),
+            FontName = doc.Fonts.Faces[0].FontName,
             FontSize = 13,
             Color = ColorPalette.Indigo[600],
             Margin = new Thickness(0, 12, 0, 6),
