@@ -33,9 +33,9 @@ public class EncryptionSettings
     public PdfPermissions Permissions { get; set; } = PdfPermissions.All;
 
     /// <summary>
-    /// Gets or sets whether to encrypt document metadata.
-    /// When false, metadata (title, author, etc.) remains readable without password.
-    /// Default is true.
+    /// Gets or sets whether AES-256 encrypts the XMP metadata stream.
+    /// When false, XMP remains readable without a password; other PDF strings stay encrypted.
+    /// Legacy RC4 always encrypts metadata. Default is true.
     /// </summary>
     public bool EncryptMetadata { get; set; } = true;
 

@@ -1,0 +1,203 @@
+{
+  "description": "Independent QR matrix vectors from Project Nayuki, with automatic version, correction boost and mask selection. Hash ASCII rows of 0/1 joined by LF without a trailing LF.",
+  "source": "https://github.com/nayuki/QR-Code-generator/blob/master/python/qrcodegen.py",
+  "sourceSha256": "9f4ed1dd201dcb92b1bc0d6e14f46c754bcff0ce48580c5d7e8ace8f6926c8ef",
+  "cases": [
+    {
+      "text": "https://bonniepdf.com",
+      "requestedCorrection": "low",
+      "version": 2,
+      "mask": 2,
+      "sha256": "515adf2344c8afab0b59446fd71da30d7b0a86f3a6aa7ed7cf806e0f93dcbcc7"
+    },
+    {
+      "text": "https://bonniepdf.com",
+      "requestedCorrection": "medium",
+      "version": 2,
+      "mask": 2,
+      "sha256": "515adf2344c8afab0b59446fd71da30d7b0a86f3a6aa7ed7cf806e0f93dcbcc7"
+    },
+    {
+      "text": "https://bonniepdf.com",
+      "requestedCorrection": "quartile",
+      "version": 3,
+      "mask": 6,
+      "sha256": "114b5abcd9fb474e91b0d170481c71d3c9223343c8a3df37a4d9789b4c4d613a"
+    },
+    {
+      "text": "https://bonniepdf.com",
+      "requestedCorrection": "high",
+      "version": 3,
+      "mask": 6,
+      "sha256": "114b5abcd9fb474e91b0d170481c71d3c9223343c8a3df37a4d9789b4c4d613a"
+    },
+    {
+      "text": "https://github.com/bonniepdf",
+      "requestedCorrection": "low",
+      "version": 2,
+      "mask": 2,
+      "sha256": "190e39c08c57aef2bf9f7d3ee91041f6c33b10d04d7babcf2a30c2a8caa2587a"
+    },
+    {
+      "text": "https://github.com/bonniepdf",
+      "requestedCorrection": "medium",
+      "version": 3,
+      "mask": 2,
+      "sha256": "13e9531133cc88d68c1c81ef17534fcf199c5bdac28a9c6db5652e974e11c1ac"
+    },
+    {
+      "text": "https://github.com/bonniepdf",
+      "requestedCorrection": "quartile",
+      "version": 3,
+      "mask": 2,
+      "sha256": "13e9531133cc88d68c1c81ef17534fcf199c5bdac28a9c6db5652e974e11c1ac"
+    },
+    {
+      "text": "https://github.com/bonniepdf",
+      "requestedCorrection": "high",
+      "version": 4,
+      "mask": 6,
+      "sha256": "dbf37e12bb61cf2fecc10b95e1f34d358181fd91016c058b49b7c21b636d57bd"
+    },
+    {
+      "text": "HELLO WORLD",
+      "requestedCorrection": "low",
+      "version": 1,
+      "mask": 0,
+      "sha256": "7cb519f187a1f6d6294385b11fd9d65487509b897a600c9c5e6398297cd45222"
+    },
+    {
+      "text": "HELLO WORLD",
+      "requestedCorrection": "medium",
+      "version": 1,
+      "mask": 0,
+      "sha256": "7cb519f187a1f6d6294385b11fd9d65487509b897a600c9c5e6398297cd45222"
+    },
+    {
+      "text": "HELLO WORLD",
+      "requestedCorrection": "quartile",
+      "version": 1,
+      "mask": 0,
+      "sha256": "7cb519f187a1f6d6294385b11fd9d65487509b897a600c9c5e6398297cd45222"
+    },
+    {
+      "text": "HELLO WORLD",
+      "requestedCorrection": "high",
+      "version": 2,
+      "mask": 5,
+      "sha256": "7608ba2462cda657ef8f5eacf969f726b55352e2b1783b3ab6de25c4cf6703d3"
+    },
+    {
+      "text": "012345678901234567890123456789",
+      "requestedCorrection": "low",
+      "version": 1,
+      "mask": 6,
+      "sha256": "236301fe71897c96e117eb7df6fdd9964a4ea4686f218a6007b56358d452093f"
+    },
+    {
+      "text": "012345678901234567890123456789",
+      "requestedCorrection": "medium",
+      "version": 1,
+      "mask": 6,
+      "sha256": "236301fe71897c96e117eb7df6fdd9964a4ea4686f218a6007b56358d452093f"
+    },
+    {
+      "text": "012345678901234567890123456789",
+      "requestedCorrection": "quartile",
+      "version": 2,
+      "mask": 1,
+      "sha256": "99547023bf6f041ec04eed16f96b2882c0e201ed9f039673832388c5926386e4"
+    },
+    {
+      "text": "012345678901234567890123456789",
+      "requestedCorrection": "high",
+      "version": 2,
+      "mask": 1,
+      "sha256": "99547023bf6f041ec04eed16f96b2882c0e201ed9f039673832388c5926386e4"
+    },
+    {
+      "text": "Hello, world!",
+      "requestedCorrection": "low",
+      "version": 1,
+      "mask": 2,
+      "sha256": "60e12c4292e429687bcfde01ea5bbfeb22f28963c13cac92d48e3cbfe60cb21a"
+    },
+    {
+      "text": "Hello, world!",
+      "requestedCorrection": "medium",
+      "version": 1,
+      "mask": 2,
+      "sha256": "60e12c4292e429687bcfde01ea5bbfeb22f28963c13cac92d48e3cbfe60cb21a"
+    },
+    {
+      "text": "Hello, world!",
+      "requestedCorrection": "quartile",
+      "version": 2,
+      "mask": 2,
+      "sha256": "98806e3503f7cb757e95d4358205e03204494f415550502ce0cb030707754afe"
+    },
+    {
+      "text": "Hello, world!",
+      "requestedCorrection": "high",
+      "version": 2,
+      "mask": 2,
+      "sha256": "98806e3503f7cb757e95d4358205e03204494f415550502ce0cb030707754afe"
+    },
+    {
+      "text": "Unicode: café Ελληνικά",
+      "requestedCorrection": "low",
+      "version": 2,
+      "mask": 4,
+      "sha256": "d219e5587743956505f0aae1da496d871cb8e79dc12d3efe3cce1a77b3582aef"
+    },
+    {
+      "text": "Unicode: café Ελληνικά",
+      "requestedCorrection": "medium",
+      "version": 3,
+      "mask": 3,
+      "sha256": "2fb0e9f46d05e66f59b35655c023a63949c7e573ff6bcf000682949e240cac41"
+    },
+    {
+      "text": "Unicode: café Ελληνικά",
+      "requestedCorrection": "quartile",
+      "version": 3,
+      "mask": 3,
+      "sha256": "2fb0e9f46d05e66f59b35655c023a63949c7e573ff6bcf000682949e240cac41"
+    },
+    {
+      "text": "Unicode: café Ελληνικά",
+      "requestedCorrection": "high",
+      "version": 4,
+      "mask": 3,
+      "sha256": "fee0f556d3cea4d50feeaaa26c30e62f004fff5824c131da43db9006b38b78c0"
+    },
+    {
+      "text": "Long URL: https://example.com/document/2026/10/07?source=gallery&mode=preview",
+      "requestedCorrection": "low",
+      "version": 4,
+      "mask": 2,
+      "sha256": "a40170dead25faa910b1794425f2285eb0aeb10786c80f3a271288129ad36eb3"
+    },
+    {
+      "text": "Long URL: https://example.com/document/2026/10/07?source=gallery&mode=preview",
+      "requestedCorrection": "medium",
+      "version": 5,
+      "mask": 2,
+      "sha256": "f126c6c11eb805cf9f91e8edea9d067ef56b914da11bd72737995c5dcda6b122"
+    },
+    {
+      "text": "Long URL: https://example.com/document/2026/10/07?source=gallery&mode=preview",
+      "requestedCorrection": "quartile",
+      "version": 7,
+      "mask": 7,
+      "sha256": "1075f7aa2bd6a34c2c44f8eedc4355706055cc33788f6ff703a56fecf9cc0816"
+    },
+    {
+      "text": "Long URL: https://example.com/document/2026/10/07?source=gallery&mode=preview",
+      "requestedCorrection": "high",
+      "version": 8,
+      "mask": 6,
+      "sha256": "797b729eadd8444cf0783587c402fa5a0d770eea5ab70c9d3a3d119690df37c0"
+    }
+  ]
+}

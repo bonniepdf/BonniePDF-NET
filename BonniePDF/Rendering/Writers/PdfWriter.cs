@@ -31,6 +31,11 @@ internal class PdfWriter : IPdfWriter, IDisposable
     private int _currentObjId;
     private int _encryptId;
 
+    private string EncryptObjectStrings(int id, string fragment) =>
+        Encryptor == null || id == _encryptId
+            ? fragment
+            : PdfStringEncryption.EncryptStrings(fragment, bytes => Encryptor.EncryptData(bytes, id));
+
     /// <summary>
     /// Creates a new PDF writer that writes to a file
     /// </summary>
@@ -107,7 +112,7 @@ internal class PdfWriter : IPdfWriter, IDisposable
 
         _writer.WriteLine($"{id} 0 obj");
         _writer.WriteLine("<<");
-        foreach ((string key, string value) in dict) _writer.WriteLine($"  {key} {value}");
+        foreach ((string key, string value) in dict) _writer.WriteLine($"  {key} {EncryptObjectStrings(id, value)}");
 
         if (streamContent != null)
         {
@@ -143,7 +148,7 @@ internal class PdfWriter : IPdfWriter, IDisposable
         _offsets[id] = _stream.Position;
 
         _writer.WriteLine($"{id} 0 obj");
-        _writer.WriteLine(body);
+        _writer.WriteLine(EncryptObjectStrings(id, body));
         _writer.WriteLine("endobj");
     }
 
@@ -414,7 +419,7 @@ internal class PdfWriter : IPdfWriter, IDisposable
 
     /// <summary>
     /// Writes an uncompressed binary stream object, bypassing encryption.
-    /// Used for XMP metadata which must not be encrypted even when encryption is active.
+    /// Used for XMP metadata when metadata encryption is explicitly disabled.
     /// </summary>
     public void WriteUnencryptedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent)
     {
@@ -423,7 +428,7 @@ internal class PdfWriter : IPdfWriter, IDisposable
 
         _writer.Write($"{id} 0 obj\n<<\n");
         foreach (KeyValuePair<string, string> kvp in dict)
-            _writer.Write($"  {kvp.Key} {kvp.Value}\n");
+            _writer.Write($"  {kvp.Key} {EncryptObjectStrings(id, kvp.Value)}\n");
 
         _writer.Write($"  /Length {streamContent.Length}\n");
         _writer.Write(">>\nstream\n");
@@ -483,7 +488,7 @@ internal class PdfWriter : IPdfWriter, IDisposable
 
         _writer.Write($"{id} 0 obj\n<<\n");
         foreach (KeyValuePair<string, string> kvp in dict)
-            _writer.Write($"  {kvp.Key} {kvp.Value}\n");
+            _writer.Write($"  {kvp.Key} {EncryptObjectStrings(id, kvp.Value)}\n");
 
         _writer.Write($"  /Length {contentToWrite.Length}\n");
         _writer.Write(">>\nstream\n");

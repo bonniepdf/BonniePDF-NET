@@ -178,7 +178,8 @@ internal sealed class PdfEncryptor
             [PdfKeys.Encryption.Permissions] = _aesKey.PermissionsValue.ToString(),
             [PdfKeys.Encryption.CryptFilters] = "<< /StdCF << /CFM /AESV3 /AuthEvent /DocOpen /Length 32 >> >>",
             [PdfKeys.Encryption.StreamFilter] = "/StdCF",
-            [PdfKeys.Encryption.StringFilter] = "/StdCF"
+            [PdfKeys.Encryption.StringFilter] = "/StdCF",
+            [PdfKeys.Encryption.EncryptMetadata] = Settings.EncryptMetadata ? "true" : "false"
         };
     }
 
