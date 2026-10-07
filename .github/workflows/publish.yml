@@ -44,6 +44,13 @@ jobs:
 
     - uses: actions/checkout@v4
 
+    - name: Require cross-engine gallery validation
+      env:
+        GH_TOKEN: ${{ secrets.PARITY_WORKFLOW_TOKEN }}
+        PARITY_WORKFLOW_REPOSITORY: ${{ vars.PARITY_WORKFLOW_REPOSITORY }}
+        GALLERY_ENGINE: dotnet
+      run: bash scripts/verify-gallery-gate.sh
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
