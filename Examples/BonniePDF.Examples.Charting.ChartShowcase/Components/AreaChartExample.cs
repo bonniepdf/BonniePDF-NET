@@ -41,30 +41,30 @@ public static class AreaChartExample
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
-        document.Settings.PdfAEnabled = true;
+        document.Settings.Conformance = PdfAConformance.PdfA2a;
+        document.Settings.Accessibility = AccessibilityMode.PdfUa1;
         document.Settings.Language = "en-GB";
+        document.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.Helvetica).WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
-        document.Metadata.Title = "Area Chart Example";
+        document.Metadata.Title = "Area Chart";
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Demonstrating the AreaChart with ICanvas architecture";
 
         // Add a title
         document.Add(new TextBlock
         {
-            Text = "Monthly Sales Performance",
+            Text = "Area Chart: Monthly Sales Performance",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 8) });
 
         document.Add(new TextBlock
         {
             Text = "Filled area under the line with configurable opacity",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 20) });
 
         // Create chart data with all 12 months
         ChartData chartData = new()
@@ -72,8 +72,7 @@ public static class AreaChartExample
             Title = "Monthly Sales",
             Series =
             [
-                new ChartSeries
-                {
+                new ChartSeries { Color = Color.FromHex("#a855f7"),
                     DataPoints =
                     [
                         new ChartDataPoint { Label = "Jan", Value = 4500, LabelFormat = "N0" },
@@ -109,7 +108,7 @@ public static class AreaChartExample
         AreaChart areaChart = new(chartData)
         {
             AltText = "Area chart showing monthly sales performance from January to December",
-            Height = 400,
+            Height = 380,
             StretchToFit = true,
             AreaColor = Color.FromHex("#a855f7"),
             FillOpacity = 0.3f,

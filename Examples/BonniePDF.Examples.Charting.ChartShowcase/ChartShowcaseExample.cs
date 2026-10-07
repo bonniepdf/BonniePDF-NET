@@ -52,13 +52,14 @@ public static class ChartShowcaseExample
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
-        document.Settings.PdfAEnabled = true;
+        document.Settings.Conformance = PdfAConformance.PdfA2a;
+        document.Settings.Accessibility = AccessibilityMode.PdfUa1;
         document.Settings.Language = "en-GB";
         document.Settings.DefaultTextStyle =
             new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
-        document.Metadata.Title = "Charting Examples";
+        document.Metadata.Title = "Chart Showcase";
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Charting Examples demonstrating all chart types";
 
@@ -106,16 +107,18 @@ public static class ChartShowcaseExample
             Text = "Bar Chart: Monthly Sales Report",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10)
+        });
 
         document.Add(new TextBlock
         {
             Text = "Vertical bars with grid lines and value labels",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20)
+        });
 
         // Create chart data with all 12 months
         ChartData chartData = new()
@@ -154,16 +157,18 @@ public static class ChartShowcaseExample
             Text = "Grouped Bar Chart: Quarterly Revenue",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10)
+        });
 
         document.Add(new TextBlock
         {
             Text = "Comparison of three product lines across all months",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20)
+        });
 
         List<string> months = MonthLabels;
         decimal[] electronicsValues = [4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800];
@@ -187,9 +192,9 @@ public static class ChartShowcaseExample
 
         for (int i = 0; i < months.Count; i++)
         {
-            electronicsSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = electronicsValues[i] });
-            clothingSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = clothingValues[i] });
-            homeSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = homeValues[i] });
+            electronicsSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = electronicsValues[i], LabelFormat = "N0" });
+            clothingSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = clothingValues[i], LabelFormat = "N0" });
+            homeSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = homeValues[i], LabelFormat = "N0" });
         }
 
         groupedChartData.Series.Add(electronicsSeries);
@@ -220,22 +225,24 @@ public static class ChartShowcaseExample
             Text = "Line Chart: Monthly Revenue Trends",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10)
+        });
 
         document.Add(new TextBlock
         {
             Text = "Connected data points with markers and value labels",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20)
+        });
 
         // Create chart data with all 12 months
         ChartData chartData = new()
         {
             Title = "Monthly Revenue",
-            Series = [new ChartSeries { DataPoints = MonthlySales }],
+            Series = [new ChartSeries { Color = Color.FromHex("#7c3aed"), DataPoints = MonthlySales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -274,16 +281,18 @@ public static class ChartShowcaseExample
             Text = "Multi-Series Line Chart: Year-over-Year Comparison",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10)
+        });
 
         document.Add(new TextBlock
         {
             Text = $"Comparing {DateTime.Now.Year - 1} and {DateTime.Now.Year} revenue with multiple series",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20)
+        });
 
         // Create chart data with multiple series
         ChartData chartData = new()
@@ -297,18 +306,18 @@ public static class ChartShowcaseExample
                     Color = Color.FromHex("#4f46e5"),
                     DataPoints = new List<ChartDataPoint>
                     {
-                        new ChartDataPoint { Label = "Jan", Value = 65000 },
-                        new ChartDataPoint { Label = "Feb", Value = 69000 },
-                        new ChartDataPoint { Label = "Mar", Value = 80000 },
-                        new ChartDataPoint { Label = "Apr", Value = 72000 },
-                        new ChartDataPoint { Label = "May", Value = 85000 },
-                        new ChartDataPoint { Label = "Jun", Value = 88000 },
-                        new ChartDataPoint { Label = "Jul", Value = 72000 },
-                        new ChartDataPoint { Label = "Aug", Value = 68000 },
-                        new ChartDataPoint { Label = "Sep", Value = 75000 },
-                        new ChartDataPoint { Label = "Oct", Value = 81000 },
-                        new ChartDataPoint { Label = "Nov", Value = 92000 },
-                        new ChartDataPoint { Label = "Dec", Value = 105000 }
+                        new ChartDataPoint { Label = "Jan", Value = 65000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Feb", Value = 69000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Mar", Value = 80000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Apr", Value = 72000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "May", Value = 85000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Jun", Value = 88000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Jul", Value = 72000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Aug", Value = 68000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Sep", Value = 75000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Oct", Value = 81000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Nov", Value = 92000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Dec", Value = 105000, LabelFormat = "N0" }
                     }
                 },
                 new ChartSeries
@@ -317,18 +326,18 @@ public static class ChartShowcaseExample
                     Color = Color.FromHex("#7c3aed"),
                     DataPoints = new List<ChartDataPoint>
                     {
-                        new ChartDataPoint { Label = "Jan", Value = 75000 },
-                        new ChartDataPoint { Label = "Feb", Value = 78000 },
-                        new ChartDataPoint { Label = "Mar", Value = 85000 },
-                        new ChartDataPoint { Label = "Apr", Value = 78000 },
-                        new ChartDataPoint { Label = "May", Value = 92000 },
-                        new ChartDataPoint { Label = "Jun", Value = 95000 },
-                        new ChartDataPoint { Label = "Jul", Value = 87000 },
-                        new ChartDataPoint { Label = "Aug", Value = 78000 },
-                        new ChartDataPoint { Label = "Sep", Value = 82000 },
-                        new ChartDataPoint { Label = "Oct", Value = 91000 },
-                        new ChartDataPoint { Label = "Nov", Value = 97000 },
-                        new ChartDataPoint { Label = "Dec", Value = 118000 }
+                        new ChartDataPoint { Label = "Jan", Value = 75000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Feb", Value = 78000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Mar", Value = 85000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Apr", Value = 78000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "May", Value = 92000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Jun", Value = 95000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Jul", Value = 87000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Aug", Value = 78000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Sep", Value = 82000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Oct", Value = 91000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Nov", Value = 97000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Dec", Value = 118000, LabelFormat = "N0" }
                     }
                 }
             },
@@ -369,22 +378,24 @@ public static class ChartShowcaseExample
             Text = "Area Chart: Monthly Sales Performance",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10)
+        });
 
         document.Add(new TextBlock
         {
             Text = "Filled area under the line with configurable opacity",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20)
+        });
 
         // Create chart data with all 12 months
         ChartData chartData = new()
         {
             Title = "Monthly Sales",
-            Series = [new ChartSeries { DataPoints = MonthlySales }],
+            Series = [new ChartSeries { Color = Color.FromHex("#a855f7"), DataPoints = MonthlySales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -425,22 +436,24 @@ public static class ChartShowcaseExample
             Text = "Lollipop Chart: Quarterly Metrics",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10)
+        });
 
         document.Add(new TextBlock
         {
             Text = "Stems with circular heads - clear and minimal bar alternative",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20)
+        });
 
         // Create chart data with quarterly data
         ChartData chartData = new()
         {
             Title = "Quarterly Revenue",
-            Series = [new ChartSeries { DataPoints = QuarterlyRevenue }],
+            Series = [new ChartSeries { Color = Color.FromHex("#ec4899"), DataPoints = QuarterlyRevenue }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -479,22 +492,24 @@ public static class ChartShowcaseExample
             Text = "Dot Plot Chart: Product Performance",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10)
+        });
 
         document.Add(new TextBlock
         {
             Text = "Circular markers positioned along a value axis",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20)
+        });
 
         // Create chart data with product data
         ChartData chartData = new()
         {
             Title = "Product Sales",
-            Series = [new ChartSeries { DataPoints = ProductSales }],
+            Series = [new ChartSeries { Color = Color.FromHex("#14b8a6"), DataPoints = ProductSales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -533,16 +548,18 @@ public static class ChartShowcaseExample
             Text = $"Pie Chart: Monthly Sales {DateTime.Now.Year}",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10)
+        });
 
         document.Add(new TextBlock
         {
             Text = "Donut chart with legend and total value in the centre",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20)
+        });
 
         // Create chart data with all 12 months
         ChartData chartData = new()
@@ -571,7 +588,7 @@ public static class ChartShowcaseExample
     // Local helpers and sample data for this document.
 
     // Local helpers and sample data for this document.
-    private static List<string> MonthLabels => Enumerable.Range(1, 12).Select(m => DateTimeFormatInfo.CurrentInfo.GetAbbreviatedMonthName(m)).ToList();
+    private static List<string> MonthLabels => new List<string> { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
     private static IList<ChartDataPoint> MonthlySales => new List<ChartDataPoint>
     {

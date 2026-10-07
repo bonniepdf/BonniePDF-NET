@@ -152,11 +152,11 @@ public static class ListsExample
         s9.Add(dashList);
         doc.Add(s9);
 
-        VerticalStack s10 = Section("Custom (★)", "s-custom");
+        VerticalStack s10 = Section("Custom (*)", "s-custom");
         var customList = new UnorderedList
-            { BulletStyle = BulletStyle.Custom, CustomBullet = "★", FontSize = 12, ItemSpacing = 6 };
+            { BulletStyle = BulletStyle.Custom, CustomBullet = "*", FontSize = 12, ItemSpacing = 6 };
         customList.AddItem("Any character can serve as a bullet.");
-        customList.AddItem("Stars, arrows, or checkmarks all work.");
+        customList.AddItem("Choose a marker supported by the selected font.");
         customList.AddItem("Choose one that suits the document tone.");
         s10.Add(customList);
         doc.Add(s10);

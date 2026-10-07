@@ -44,30 +44,30 @@ public static class PieChartExample
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
-        document.Settings.PdfAEnabled = true;
+        document.Settings.Conformance = PdfAConformance.PdfA2a;
+        document.Settings.Accessibility = AccessibilityMode.PdfUa1;
         document.Settings.Language = "en-GB";
+        document.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.Helvetica).WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
-        document.Metadata.Title = "Pie Chart Example";
+        document.Metadata.Title = "Pie Chart";
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Demonstrating the PieChart component";
 
         // Add a title
         document.Add(new TextBlock
         {
-            Text = $"Monthly Sales Report {DateTime.Now.Year}",
+            Text = $"Pie Chart: Monthly Sales {DateTime.Now.Year}",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 8) });
 
         document.Add(new TextBlock
         {
             Text = "Donut chart with legend and total value in the centre",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 20) });
 
         // Create chart data with all 12 months (matching the SVG data)
         ChartData chartData = new()
@@ -80,7 +80,7 @@ public static class PieChartExample
         PieChart pieChart = new(chartData)
         {
             AltText = "Donut-style pie chart showing proportional distribution of monthly sales",
-            Height = 400,
+            Height = 380,
             StretchToFit = true,
             IsDonut = true,
             TotalLabel = "Total",
@@ -101,7 +101,7 @@ public static class PieChartExample
     // Local helpers and sample data for this document.
 
     // Local helpers and sample data for this document.
-    private static List<string> MonthLabels => Enumerable.Range(1, 12).Select(m => DateTimeFormatInfo.CurrentInfo.GetAbbreviatedMonthName(m)).ToList();
+    private static List<string> MonthLabels => new List<string> { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
     private static IList<ChartDataPoint> PieChartSales => new List<ChartDataPoint>()
     {

@@ -8,10 +8,10 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating Barcodes (Fluent API)...");
-        using (var doc = BarcodesExampleFluent.Generate())
+        Console.WriteLine("Generating Barcodes...");
+        using (var doc = BarcodesExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "barcodes_fluent.pdf"));
+            doc.Save(Path.Combine(outputDir, "barcodes.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

@@ -159,10 +159,9 @@ public static class FacturXInvoiceExample
         xmlStack.Add(Cell("factur-x.xml (EN 16931 CII) is embedded in this", size: 8, color: Muted));
         xmlStack.Add(Cell("PDF/A-3 invoice.", size: 8, color: Muted));
 
-        Container payCell = Labelled(
-            "PAYMENT",
-            Lines(Muted, "IBAN: DE21 1001 0000 0012 3456 78", "BIC: SMPLDEFFXXX", "Sample Bank, Berlin"),
-            Accent);
+        TextBlock paymentDetails = Lines(Muted, "IBAN: DE21 1001 0000 0012 3456 78", "BIC: SMPLDEFFXXX", "Sample Bank, Berlin");
+        paymentDetails.FontSize = 8;
+        Container payCell = Labelled("PAYMENT", paymentDetails, Accent);
         payCell.Padding = new Thickness(0, 0, 20, 0);
 
         Grid bottom = new(1.1f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 20, 0, 0) };

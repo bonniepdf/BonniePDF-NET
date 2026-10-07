@@ -70,7 +70,7 @@ public static class WatermarkConfidentialExample
         doc.Add(new TextBlock
         {
             Text = "This report contains proprietary financial data and is intended solely for " +
-                   "authorized recipients. Unauthorized disclosure or distribution is prohibited.",
+                   "authorised recipients. Unauthorised disclosure or distribution is prohibited.",
             FontName = StandardFonts.TimesItalic,
             FontSize = 10,
             Color = ColorPalette.Slate[500],
@@ -91,7 +91,7 @@ public static class WatermarkConfidentialExample
                 Color = Color.White
             },
             BackgroundColor = ColorPalette.Slate[700],
-            Padding = new Thickness(8, 6, 8, 6)
+            Padding = new Thickness(6)
         };
     }
 
@@ -106,7 +106,7 @@ public static class WatermarkConfidentialExample
                 FontSize = 11,
                 Color = ColorPalette.Slate[600]
             },
-            Padding = new Thickness(8, 5, 8, 5),
+            Padding = new Thickness(6),
             Border = new Border(0.5f),
             BorderColors = new BorderColors(ColorPalette.Slate[200])
         };

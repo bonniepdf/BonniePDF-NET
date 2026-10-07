@@ -30,7 +30,7 @@ public static class EdgeReceiptExample
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
-        DateTime now = DateTime.Now;
+        DateTime now = new(2026, 6, 16, 10, 30, 0);
         string stamp = now.ToString("dd MMM yyyy HH:mm", CultureInfo.GetCultureInfo("en-GB"));
 
         DocumentSettings settings = new(new PdfSize(226.77f, 720, "Receipt 80mm"), 16)
@@ -122,7 +122,7 @@ public static class EdgeReceiptExample
         return doc;
     }
 
-    private static string Money(double amount) => "GBP " + amount.ToString("0.00", CultureInfo.InvariantCulture);
+    private static string Money(double amount) => "£" + amount.ToString("0.00", CultureInfo.InvariantCulture);
 
     private static TextBlock Center(string text, float size = 8, Color? color = null, float marginTop = 0)
     {

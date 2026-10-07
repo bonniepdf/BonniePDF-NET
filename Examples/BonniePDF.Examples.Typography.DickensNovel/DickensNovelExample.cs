@@ -30,9 +30,11 @@ public static partial class DickensNovelExample
     /// Requires the Project Gutenberg plain-text file to be present at <see cref="LocalFilePath"/>.
     /// </summary>
     /// <returns>The document, ready to export as PDF or SVG.</returns>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
     {
-        string raw = LoadText();
+        string raw = assets is not null && assets.TryGetValue("novels/pg98.txt", out byte[]? bytes)
+            ? Encoding.UTF8.GetString(bytes)
+            : LoadText();
         List<NovelSection> sections = ParseNovel(raw);
 
         // A4 with 72 pt margins (~1 inch) gives 451 pt content width - ideal for body text.
@@ -41,7 +43,8 @@ public static partial class DickensNovelExample
             PageSize = PdfSize.A4,
             Margin = 72,
             Version = PdfVersion.Pdf17,
-            PdfAEnabled = true,
+            Conformance = PdfAConformance.PdfA2a,
+            Accessibility = AccessibilityMode.PdfUa1,
             Language = "en-GB",
             DisplayDocTitle = true,
             DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11)
@@ -102,9 +105,9 @@ public static partial class DickensNovelExample
         doc.AddPage();
 
         // ── Table of Contents ────────────────────────────────────────────────
-        doc.Add(new TextBlock
+        doc.Add(new Heading("Table of Contents")
         {
-            Text = "Table of Contents",
+            TocIdentifier = "toc", Level = 1,
             FontName = StandardFonts.TimesBold,
             FontSize = 24,
             Color = ColorPalette.Slate[900],
@@ -136,6 +139,7 @@ public static partial class DickensNovelExample
         // Headings gather in `opener` until the first paragraph arrives, then the whole block is added
         // as one keep-together unit: a chapter never opens at the foot of a page with its text on the next.
         VerticalStack? opener = null;
+        bool firstBook = true;
 
         foreach (NovelSection section in sections)
         {
@@ -143,7 +147,8 @@ public static partial class DickensNovelExample
             {
                 case SectionType.BookTitle:
                     // Each book opens a fresh page.
-                    doc.Add(new PageBreak());
+                    if (!firstBook) doc.Add(new PageBreak());
+                    firstBook = false;
                     opener = new() { BreakAllowed = false };
                     AddBookHeading(opener, section.Text, section.Text);
                     break;
@@ -184,9 +189,9 @@ public static partial class DickensNovelExample
     private static void AddTitlePage(Document doc)
     {
         // Large top margin to vertically centre the block on the page.
-        doc.Add(new TextBlock
+        doc.Add(new Heading("A TALE OF TWO CITIES")
         {
-            Text = "A TALE OF TWO CITIES",
+            TocIdentifier = "title", Level = 1,
             FontName = StandardFonts.TimesBold,
             FontSize = 28,
             Color = ColorPalette.Slate[900],
@@ -307,6 +312,7 @@ public static partial class DickensNovelExample
         opener.Add(new Heading
         {
             TocIdentifier = tocId,
+            Level = 2,
             Text = title,
             FontName = StandardFonts.TimesBold,
             FontSize = 17,
@@ -343,11 +349,7 @@ public static partial class DickensNovelExample
     {
         if (File.Exists(LocalFilePath))
             return File.ReadAllText(LocalFilePath, Encoding.UTF8);
-        return string.Empty;
-        //throw new FileNotFoundException(
-        //    $"Novel source file not found at '{LocalFilePath}'. " +
-        //    "Download it from https://www.gutenberg.org/cache/epub/98/pg98.txt " +
-        //    "and save it to that path.");
+        throw new FileNotFoundException("Supply novels/pg98.txt in the asset dictionary or copy pg98.txt beside the application.", LocalFilePath);
     }
 
     // ── Novel parser ─────────────────────────────────────────────────────────

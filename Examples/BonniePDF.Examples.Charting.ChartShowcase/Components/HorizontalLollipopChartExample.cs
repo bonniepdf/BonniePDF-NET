@@ -18,31 +18,38 @@ public static class HorizontalLollipopChartExample
     {
         Document document = new(new DocumentSettings
         {
-            Orientation = PageOrientation.Landscape
+            Orientation = PageOrientation.Landscape,
+            FooterTemplate = pageNumber =>
+            {
+                HorizontalStack footer = new() { WidthDistribution = WidthDistribution.Weighted };
+                footer.Add(new TextBlock { Text = "BonniePDF - Horizontal Lollipop Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] });
+                footer.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                return footer;
+            }
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
-        document.Settings.PdfAEnabled = true;
+        document.Settings.Conformance = PdfAConformance.PdfA2a;
+        document.Settings.Accessibility = AccessibilityMode.PdfUa1;
         document.Settings.Language = "en-GB";
-        document.Metadata.Title = "Horizontal Lollipop Chart Example";
+        document.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.Helvetica).WithSize(12).WithColor(ColorPalette.Slate[600]);
+        document.Metadata.Title = "Horizontal Lollipop Chart";
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Product revenue ranking using a horizontal LollipopChart";
 
         document.Add(new TextBlock
         {
-            Text = "Product Revenue Ranking",
+            Text = "Horizontal Lollipop Chart: Product Revenue Ranking",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 10));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 8) });
 
         document.Add(new TextBlock
         {
             Text = "Year-to-date revenue per product line - lollipop style reduces ink without losing clarity",
-            FontSize = 13,
+            FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 20) });
 
         ChartData chartData = new()
         {

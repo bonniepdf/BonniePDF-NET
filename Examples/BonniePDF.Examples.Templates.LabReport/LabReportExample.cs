@@ -46,8 +46,8 @@ public static class LabReportExample
             new("Sodium", "139", "mmol/L", "133 - 146", ""),
             new("Potassium", "5.3", "mmol/L", "3.5 - 5.3", ""),
             new("Urea", "7.8", "mmol/L", "2.5 - 7.8", ""),
-            new("Creatinine", "96", "umol/L", "49 - 90", "H"),
-            new("eGFR", "62", "mL/min/1.73m2", "> 90", "L"),
+            new("Creatinine", "96", "µmol/L", "49 - 90", "H"),
+            new("eGFR", "62", "mL/min/1.73m²", "> 90", "L"),
         ]),
     ];
 
@@ -90,7 +90,7 @@ public static class LabReportExample
         VerticalStack sign = new() { BreakAllowed = false };
         sign.Add(H2("Clinical interpretation"));
         sign.Add(Body(
-            "Mild normocytic anaemia with a neutrophil leucocytosis, consistent with an acute inflammatory or infective process. Renal function shows a mildly raised creatinine with eGFR 62 mL/min/1.73m2 (CKD stage G2). Suggest clinical correlation and a repeat FBC in 7-10 days. Flags: H = above reference range, L = below reference range."));
+            "Mild normocytic anaemia with a neutrophil leucocytosis, consistent with an acute inflammatory or infective process. Renal function shows a mildly raised creatinine with eGFR 62 mL/min/1.73m² (CKD stage G2). Suggest clinical correlation and a repeat FBC in 7-10 days. Flags: H = above reference range, L = below reference range."));
         sign.Add(Authorisation());
         doc.Add(sign);
 

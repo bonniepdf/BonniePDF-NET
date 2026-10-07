@@ -42,36 +42,36 @@ public static class LineChartExample
         });
 
         document.Settings.Version = PdfVersion.Pdf17;
-        document.Settings.PdfAEnabled = true;
+        document.Settings.Conformance = PdfAConformance.PdfA2a;
+        document.Settings.Accessibility = AccessibilityMode.PdfUa1;
         document.Settings.Language = "en-GB";
+        document.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.Helvetica).WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
-        document.Metadata.Title = "Line Chart Example";
+        document.Metadata.Title = "Line Chart";
         document.Metadata.Author = "BonniePDF";
         document.Metadata.Subject = "Demonstrating the LineChart with ICanvas architecture";
 
         // Add a title
         document.Add(new TextBlock
         {
-            Text = "Monthly Revenue Trends",
+            Text = "Line Chart: Monthly Revenue Trends",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 8) });
 
         document.Add(new TextBlock
         {
             Text = "Connected data points with markers and value labels",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center
-        }.Padding(0, 0, 0, 20));
+            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 20) });
 
         // Create chart data with all 12 months
         ChartData chartData = new()
         {
             Title = "Monthly Revenue",
-            Series = [new ChartSeries { DataPoints = MonthlySales }],
+            Series = [new ChartSeries { Color = Color.FromHex("#7c3aed"), DataPoints = MonthlySales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -89,7 +89,7 @@ public static class LineChartExample
         LineChart lineChart = new(chartData)
         {
             AltText = "Line chart showing monthly revenue trends from January to December",
-            Height = 400,
+            Height = 380,
             StretchToFit = true,
             LineColor = Color.FromHex("#7c3aed"),
             FontFamily = StandardFonts.Helvetica,
@@ -110,7 +110,7 @@ public static class LineChartExample
     // Local helpers and sample data for this document.
 
     // Local helpers and sample data for this document.
-    private static List<string> MonthLabels => Enumerable.Range(1, 12).Select(m => DateTimeFormatInfo.CurrentInfo.GetAbbreviatedMonthName(m)).ToList();
+    private static List<string> MonthLabels => new List<string> { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
     private static IList<ChartDataPoint> MonthlySales => new List<ChartDataPoint>
     {

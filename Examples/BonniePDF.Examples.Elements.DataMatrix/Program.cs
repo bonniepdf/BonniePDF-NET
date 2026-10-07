@@ -8,10 +8,10 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating Data Matrix (Fluent API)...");
-        using (var doc = DataMatrixExampleFluent.Generate())
+        Console.WriteLine("Generating Data Matrix...");
+        using (var doc = DataMatrixExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "datamatrix_fluent.pdf"));
+            doc.Save(Path.Combine(outputDir, "datamatrix.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

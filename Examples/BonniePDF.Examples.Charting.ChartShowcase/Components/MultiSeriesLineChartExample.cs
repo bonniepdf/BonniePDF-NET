@@ -96,8 +96,8 @@ public static class MultiSeriesLineChartExample
 
         for (int i = 0; i < MonthLabels.Length; i++)
         {
-            previousYear.DataPoints.Add(new ChartDataPoint { Label = MonthLabels[i], Value = previousYearValues[i] });
-            currentYear.DataPoints.Add(new ChartDataPoint { Label = MonthLabels[i], Value = currentYearValues[i] });
+            previousYear.DataPoints.Add(new ChartDataPoint { Label = MonthLabels[i], Value = previousYearValues[i], LabelFormat = "N0" });
+            currentYear.DataPoints.Add(new ChartDataPoint { Label = MonthLabels[i], Value = currentYearValues[i], LabelFormat = "N0" });
         }
 
         ChartData chartData = new()
