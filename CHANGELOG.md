@@ -15,6 +15,8 @@ behaviour, so the two files can be read side by side.
 
 ## 2026.10.0
 
+- Publishing now requires successful cross-engine gallery validation of the source commit. Configure `PARITY_WORKFLOW_REPOSITORY` and `PARITY_WORKFLOW_TOKEN` before publishing.
+
 - Fixed stable SVG identifiers for document-owned fonts, background-paint snapshots, and artifact tagging of repeated table-header fragments. Corrected encryption of PDF text strings, XMP metadata handling and AES-256 permissions so accessible encrypted documents pass independent validation.
 
 - Added native `Flip` and `Translate` wrappers, including fluent `FlipHorizontal`, `FlipVertical`, `Translate`, `TranslateX` and `TranslateY`, composed geometry and JSON definitions.
