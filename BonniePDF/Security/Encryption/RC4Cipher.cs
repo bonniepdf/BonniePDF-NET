@@ -73,7 +73,7 @@ internal sealed class RC4Cipher
     /// RC4 encryption and decryption are the same operation (XOR with keystream).
     /// </summary>
     /// <param name="data">The data to transform</param>
-    public void Transform(byte[] data)
+    public void Transform(byte[]? data)
     {
         if (data == null) return;
 
@@ -85,9 +85,10 @@ internal sealed class RC4Cipher
     /// </summary>
     /// <param name="data">The data to transform</param>
     /// <returns>Transformed data</returns>
-    public byte[] TransformCopy(byte[] data)
+    [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(data))]
+    public byte[]? TransformCopy(byte[]? data)
     {
-        if (data == null) return data!;
+        if (data == null) return data;
 
         byte[] result = new byte[data.Length];
         Buffer.BlockCopy(data, 0, result, 0, data.Length);
@@ -101,7 +102,7 @@ internal sealed class RC4Cipher
     /// <param name="data">The data buffer</param>
     /// <param name="offset">Starting offset</param>
     /// <param name="length">Number of bytes to transform</param>
-    public void Transform(byte[] data, int offset, int length)
+    public void Transform(byte[]? data, int offset, int length)
     {
         if (data == null) return;
 

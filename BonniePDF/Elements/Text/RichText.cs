@@ -578,7 +578,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             // Draw each word segment separately when justified (to apply extra spacing)
             if (useJustify && extraWordSpacing > 0 && run.Text.Contains(' '))
             {
-                currentX = DrawJustifiedRun(ctx, run, currentX, runY, line.Height, extraWordSpacing);
+                currentX = DrawJustifiedRun(ctx, run, currentX, runY, extraWordSpacing);
             }
             else if (HasPageToken(run.Text))
             {
@@ -611,7 +611,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     /// Draws a justified run by splitting at spaces and adding extra spacing.
     /// </summary>
     private static float DrawJustifiedRun(RenderContext ctx, StyledRun run,
-        float startX, float y, float lineHeight, float extraWordSpacing)
+        float startX, float y, float extraWordSpacing)
     {
         TextStyle style = run.Style;
         string fontName = style.EffectiveFontName;

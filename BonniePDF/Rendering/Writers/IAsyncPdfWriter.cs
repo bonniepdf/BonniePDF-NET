@@ -65,7 +65,7 @@ internal interface IAsyncPdfWriter : IAsyncDisposable
     /// <summary>
     /// Writes a PDF catalog object with catalog options
     /// </summary>
-    Task WriteCatalogAsync(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions options,
+    Task WriteCatalogAsync(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions? options,
         CancellationToken cancellationToken = default);
 
     /// <summary>

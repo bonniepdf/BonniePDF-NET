@@ -70,7 +70,7 @@ public static class DocumentEncryptionExtensions
     /// <param name="settings">The document settings</param>
     /// <param name="userPassword">The password required to open the document</param>
     /// <returns>The document settings for method chaining</returns>
-    public static DocumentSettings WithPassword(this DocumentSettings settings, string userPassword)
+    public static DocumentSettings WithPassword(this DocumentSettings settings, string? userPassword)
     {
         if (settings == null)
             throw new ArgumentNullException(nameof(settings));
@@ -95,8 +95,8 @@ public static class DocumentEncryptionExtensions
     /// <returns>The document settings for method chaining</returns>
     public static DocumentSettings WithPasswords(
         this DocumentSettings settings,
-        string userPassword,
-        string ownerPassword,
+        string? userPassword,
+        string? ownerPassword,
         PdfPermissions permissions = PdfPermissions.All)
     {
         if (settings == null)

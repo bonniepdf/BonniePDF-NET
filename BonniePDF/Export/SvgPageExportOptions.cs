@@ -16,18 +16,6 @@ public enum SvgImageEmbedding
 }
 
 /// <summary>
-/// How text is represented in exported SVG.
-/// </summary>
-public enum SvgTextMode
-{
-    /// <summary>Selectable, compact text positioned with the document's real font metrics (default).</summary>
-    Text,
-
-    /// <summary>Reserved for a future glyph-outline mode that removes any dependency on viewer-installed fonts.</summary>
-    Paths
-}
-
-/// <summary>
 /// The root <c>shape-rendering</c> hint of exported SVG.
 /// </summary>
 public enum SvgShapeRendering
@@ -62,17 +50,11 @@ public sealed class SvgPageExportOptions
     /// <summary>How raster images should be represented. Defaults to <see cref="SvgImageEmbedding.DataUri"/>.</summary>
     public SvgImageEmbedding EmbedImages { get; init; } = SvgImageEmbedding.DataUri;
 
-    /// <summary>How text should be represented. Defaults to <see cref="SvgTextMode.Text"/>.</summary>
-    public SvgTextMode TextMode { get; init; } = SvgTextMode.Text;
-
     /// <summary>
     /// Value for the root <c>shape-rendering</c> attribute. Defaults to <see cref="SvgShapeRendering.Auto"/>, which
     /// writes no attribute. Set <see cref="SvgShapeRendering.CrispEdges"/> for pages dominated by pixel-grid graphics.
     /// </summary>
     public SvgShapeRendering ShapeRendering { get; init; } = SvgShapeRendering.Auto;
-
-    /// <summary>Include SVG <c>&lt;a&gt;</c> wrappers for PDF hyperlinks where possible. Defaults to <c>false</c>.</summary>
-    public bool IncludeLinks { get; init; }
 
     /// <summary>
     /// Include <c>&lt;title&gt;</c>, <c>role</c>, and <c>aria-label</c> on the root

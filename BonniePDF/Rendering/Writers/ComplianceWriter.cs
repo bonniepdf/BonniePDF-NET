@@ -1,3 +1,4 @@
+using BonniePDF.Rendering.Pdf;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -47,9 +48,9 @@ internal class ComplianceWriter
 
         Dictionary<string, string> dict = new()
         {
-            ["/N"] = "3",
-            ["/Filter"] = "/FlateDecode",
-            ["/Length1"] = iccData.Length.ToString()
+            [PdfKeys.ColorProfile.Components] = "3",
+            [PdfKeys.Stream.Filter] = "/FlateDecode",
+            [PdfKeys.Stream.DecodedLength] = iccData.Length.ToString()
         };
 
         _writer!.WriteBinaryObject(id, dict, compressed);
@@ -74,9 +75,9 @@ internal class ComplianceWriter
 
         Dictionary<string, string> dict = new()
         {
-            ["/N"] = "3",
-            ["/Filter"] = "/FlateDecode",
-            ["/Length1"] = iccData.Length.ToString()
+            [PdfKeys.ColorProfile.Components] = "3",
+            [PdfKeys.Stream.Filter] = "/FlateDecode",
+            [PdfKeys.Stream.DecodedLength] = iccData.Length.ToString()
         };
 
         await _asyncWriter!.WriteBinaryObjectAsync(id, dict, compressed, compressed.Length, cancellationToken).ConfigureAwait(false);
@@ -92,11 +93,11 @@ internal class ComplianceWriter
     {
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/OutputIntent",
-            ["/S"] = "/GTS_PDFA1",
-            ["/OutputConditionIdentifier"] = "(sRGB IEC61966-2.1)",
-            ["/RegistryName"] = "(http://www.color.org)",
-            ["/DestOutputProfile"] = $"{iccProfileId} 0 R"
+            [PdfKeys.Common.Type] = "/OutputIntent",
+            [PdfKeys.OutputIntent.Subtype] = "/GTS_PDFA1",
+            [PdfKeys.OutputIntent.ConditionIdentifier] = "(sRGB IEC61966-2.1)",
+            [PdfKeys.OutputIntent.RegistryName] = "(http://www.color.org)",
+            [PdfKeys.OutputIntent.DestinationProfile] = $"{iccProfileId} 0 R"
         };
 
         _writer!.WriteObject(id, dict);
@@ -113,11 +114,11 @@ internal class ComplianceWriter
     {
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/OutputIntent",
-            ["/S"] = "/GTS_PDFA1",
-            ["/OutputConditionIdentifier"] = "(sRGB IEC61966-2.1)",
-            ["/RegistryName"] = "(http://www.color.org)",
-            ["/DestOutputProfile"] = $"{iccProfileId} 0 R"
+            [PdfKeys.Common.Type] = "/OutputIntent",
+            [PdfKeys.OutputIntent.Subtype] = "/GTS_PDFA1",
+            [PdfKeys.OutputIntent.ConditionIdentifier] = "(sRGB IEC61966-2.1)",
+            [PdfKeys.OutputIntent.RegistryName] = "(http://www.color.org)",
+            [PdfKeys.OutputIntent.DestinationProfile] = $"{iccProfileId} 0 R"
         };
 
         await _asyncWriter!.WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);

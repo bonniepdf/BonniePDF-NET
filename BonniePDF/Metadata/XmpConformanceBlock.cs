@@ -114,22 +114,22 @@ internal sealed class XmpConformanceBlock
     public static XmpConformanceBlock PdfUa1() => new(
         prefix: "pdfuaid",
         namespaceUri: "http://www.aiim.org/pdfua/ns/id/",
-        elements: new[]
-        {
-            new KeyValuePair<string, string>("part", "1"),
-        },
+        elements:
+        [
+            new KeyValuePair<string, string>("part", "1")
+        ],
         extensionSchema: new XmpExtensionSchema(
             namespaceUri: "http://www.aiim.org/pdfua/ns/id/",
             prefix: "pdfuaid",
             schemaName: "PDF/UA identification schema",
-            properties: new[]
-            {
+            properties:
+            [
                 new XmpExtensionSchemaProperty(
                     name: "part",
                     valueType: "Integer",
                     category: "internal",
-                    description: "Indicates, which part of ISO 14289 standard is followed"),
-            }));
+                    description: "Indicates, which part of ISO 14289 standard is followed")
+            ]));
 
     /// <summary>
     /// ZUGFeRD / Factur-X 2.x conformance claim. Emits the four
@@ -146,22 +146,22 @@ internal sealed class XmpConformanceBlock
     public static XmpConformanceBlock FacturX(FacturXMetadata meta) => new(
         prefix: FacturXMetadata.Prefix,
         namespaceUri: FacturXMetadata.NamespaceUri,
-        elements: new[]
-        {
+        elements:
+        [
             new KeyValuePair<string, string>("DocumentType", meta.DocumentType),
             new KeyValuePair<string, string>("DocumentFileName", meta.DocumentFileName),
             new KeyValuePair<string, string>("Version", meta.Version),
-            new KeyValuePair<string, string>("ConformanceLevel", meta.ConformanceLevel),
-        },
+            new KeyValuePair<string, string>("ConformanceLevel", meta.ConformanceLevel)
+        ],
         extensionSchema: new XmpExtensionSchema(
             namespaceUri: FacturXMetadata.NamespaceUri,
             prefix: FacturXMetadata.Prefix,
             schemaName: "Factur-X PDFA Extension Schema",
-            properties: new[]
-            {
+            properties:
+            [
                 new XmpExtensionSchemaProperty("DocumentType", "Text", "external", "INVOICE"),
                 new XmpExtensionSchemaProperty("DocumentFileName", "Text", "external", "Factur-X, ZUGFeRD"),
                 new XmpExtensionSchemaProperty("Version", "Text", "external", "The actual version of the Factur-X XML schema"),
-                new XmpExtensionSchemaProperty("ConformanceLevel", "Text", "external", "The conformance level of the embedded Factur-X data"),
-            }));
+                new XmpExtensionSchemaProperty("ConformanceLevel", "Text", "external", "The conformance level of the embedded Factur-X data")
+            ]));
 }

@@ -7,17 +7,17 @@ namespace BonniePDF;
 /// Represents the size of a PDF page in points.
 /// Includes standard page sizes (A4, Letter, etc.) and helper methods for orientation and unit conversion.
 /// </summary>
-public struct PdfSize
+public readonly struct PdfSize
 {
     /// <summary>
     /// Gets all standard PDF sizes defined in this struct.
     /// </summary>
-    public static IEnumerable<PdfSize> AllSizes => new[]
-    {
+    public static IEnumerable<PdfSize> AllSizes =>
+    [
         A0, A1, A2, A3, A4, A5,
         B0, B1, B2, B3, B4, B5,
         Letter, Legal, Tabloid, Ledger, Statement, Executive
-    };
+    ];
 
     /// <summary>
     /// Gets the width of the page in points.

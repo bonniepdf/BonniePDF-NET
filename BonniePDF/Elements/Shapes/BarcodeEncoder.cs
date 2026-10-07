@@ -80,8 +80,6 @@ internal static class BarcodeEncoder
 
     private const int Code128StartB = 104;
     private const int Code128StartC = 105;
-    private const int Code128CodeC = 99;
-    private const int Code128CodeB = 100;
     private const int Code128Stop = 106;
 
     private static EncodedBarcode EncodeCode128(string value)

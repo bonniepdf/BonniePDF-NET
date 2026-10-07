@@ -25,13 +25,6 @@ public static partial class DickensNovelExample
     [GeneratedRegex(@"^CHAPTER\s+[IVXLC]+\.$")]
     private static partial Regex ChapterLineRegex();
 
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-    /// <inheritdoc/>
-
     /// <summary>
     /// Loads the novel source text, parses it into sections, and renders the full multi-page PDF.
     /// Requires the Project Gutenberg plain-text file to be present at <see cref="LocalFilePath"/>.

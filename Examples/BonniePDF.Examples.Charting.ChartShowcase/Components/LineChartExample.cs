@@ -80,11 +80,9 @@ public static class LineChartExample
             Height = 400,
             StretchToFit = true,
             LineColor = Color.FromHex(ChartColors.Violet),
-            LineWidth = 2.5f,
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            ShowDataPointMarkers = true,
             BackgroundColor = Color.FromHex("#fafafa")
         };
 

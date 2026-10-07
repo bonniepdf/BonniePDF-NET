@@ -228,7 +228,7 @@ public class Document : IDisposable
             AddPage();
         }
 
-        _pages[_pages.Count - 1].Add(element);
+        _pages[^1].Add(element);
     }
 
     /// <summary>
@@ -614,7 +614,7 @@ public class Document : IDisposable
     }
 
     /// <summary>
-    /// Parses every <see cref="Svg"/> element before layout, rasterizing what needs it.
+    /// Parses every <see cref="Svg"/> element before layout, rasterising what needs it.
     /// Sequentially and in document order, so a rasterizer sees a deterministic
     /// sequence of calls.
     /// </summary>

@@ -12,7 +12,6 @@ namespace BonniePDF.Typography.TrueType;
 /// </summary>
 internal class TtfSubsetter
 {
-    private readonly TtfFont _font;
     private readonly byte[] _originalData;
     private readonly Dictionary<string, (uint offset, uint length)> _tables;
     private short _indexToLocFormat; // 0 = short offsets, 1 = long offsets
@@ -23,12 +22,9 @@ internal class TtfSubsetter
     // Mapping from original GID to new GID in the subset. Populated by CreateSubset().
     private Dictionary<ushort, ushort>? _oldToNewGid;
 
-    // Head table info
-    private int _unitsPerEm;
-
     public TtfSubsetter(TtfFont font)
     {
-        _font = font ?? throw new ArgumentNullException(nameof(font));
+        ArgumentNullException.ThrowIfNull(font);
         _originalData = font.GetRawFontData();
         _tables = ParseTableDirectory();
         ReadHeadTable();
@@ -108,7 +104,7 @@ internal class TtfSubsetter
         for (int i = 0; i < numTables; i++)
         {
             string tag = Encoding.ASCII.GetString(reader.ReadBytes(4));
-            uint checkSum = ReadUInt32BE(reader);
+            ReadUInt32BE(reader); // checkSum
             uint offset = ReadUInt32BE(reader);
             uint length = ReadUInt32BE(reader);
             tables[tag] = (offset, length);
@@ -126,7 +122,7 @@ internal class TtfSubsetter
         using BinaryReader reader = new(ms);
 
         reader.BaseStream.Seek(headInfo.offset + 18, SeekOrigin.Begin);
-        _unitsPerEm = ReadUInt16BE(reader);
+        ReadUInt16BE(reader); // unitsPerEm
 
         reader.BaseStream.Seek(headInfo.offset + 50, SeekOrigin.Begin);
         _indexToLocFormat = ReadInt16BE(reader);
@@ -176,8 +172,7 @@ internal class TtfSubsetter
         while (toProcess.Count > 0)
         {
             ushort gid = toProcess.Dequeue();
-            if (processed.Contains(gid)) continue;
-            processed.Add(gid);
+            if (!processed.Add(gid)) continue;
 
             List<ushort> componentGids = GetCompositeComponents(gid, glyfInfo, locaInfo);
             foreach (ushort componentGid in componentGids)
@@ -520,7 +515,7 @@ internal class TtfSubsetter
         WriteUInt16BE(writer, 0); // reservedPad
         foreach (var seg in segments) WriteUInt16BE(writer, seg.startCode);
         foreach (var seg in segments) WriteInt16BE(writer, seg.idDelta);
-        foreach (var seg in segments) WriteUInt16BE(writer, 0);
+        for (int i = 0; i < segments.Count; i++) WriteUInt16BE(writer, 0);
 
         return ms.ToArray();
     }

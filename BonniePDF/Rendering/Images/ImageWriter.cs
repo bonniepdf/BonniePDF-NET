@@ -1,3 +1,4 @@
+using BonniePDF.Rendering.Pdf;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -88,20 +89,20 @@ internal class ImageWriter
     {
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/XObject",
-            ["/Subtype"] = "/Image",
-            ["/Width"] = image.Width.ToString(),
-            ["/Height"] = image.Height.ToString(),
-            ["/ColorSpace"] = colorSpace,
-            ["/BitsPerComponent"] = image.BitsPerComponent.ToString(),
-            ["/Filter"] = "/DCTDecode" // JPEG compression filter
+            [PdfKeys.Common.Type] = "/XObject",
+            [PdfKeys.Common.Subtype] = "/Image",
+            [PdfKeys.Image.Width] = image.Width.ToString(),
+            [PdfKeys.Image.Height] = image.Height.ToString(),
+            [PdfKeys.Image.ColorSpace] = colorSpace,
+            [PdfKeys.Image.BitsPerComponent] = image.BitsPerComponent.ToString(),
+            [PdfKeys.Stream.Filter] = "/DCTDecode" // JPEG compression filter
         };
 
         if (image.InvertCmykColors && image.ColorSpace == ImageColorSpace.DeviceCMYK)
         {
             // Photoshop-exported CMYK JPEGs store inverted ink values; tell PDF
             // to invert each component back during decoding.
-            dict["/Decode"] = "[1 0 1 0 1 0 1 0]";
+            dict[PdfKeys.Image.Decode] = "[1 0 1 0 1 0 1 0]";
         }
 
         return dict;
@@ -132,7 +133,7 @@ internal class ImageWriter
         {
             int smaskId = _writer!.GetNewId();
             WriteSoftMask(smaskId, image);
-            dict["/SMask"] = $"{smaskId} 0 R";
+            dict[PdfKeys.Image.SoftMask] = $"{smaskId} 0 R";
         }
 
         _writer!.WriteBinaryObject(id, dict, compressedData);
@@ -150,13 +151,13 @@ internal class ImageWriter
     {
         return new Dictionary<string, string>
         {
-            ["/Type"] = "/XObject",
-            ["/Subtype"] = "/Image",
-            ["/Width"] = image.Width.ToString(),
-            ["/Height"] = image.Height.ToString(),
-            ["/BitsPerComponent"] = image.BitsPerComponent.ToString(),
-            ["/Filter"] = "/FlateDecode",
-            ["/ColorSpace"] = colorSpace
+            [PdfKeys.Common.Type] = "/XObject",
+            [PdfKeys.Common.Subtype] = "/Image",
+            [PdfKeys.Image.Width] = image.Width.ToString(),
+            [PdfKeys.Image.Height] = image.Height.ToString(),
+            [PdfKeys.Image.BitsPerComponent] = image.BitsPerComponent.ToString(),
+            [PdfKeys.Stream.Filter] = "/FlateDecode",
+            [PdfKeys.Image.ColorSpace] = colorSpace
         };
     }
 
@@ -170,7 +171,7 @@ internal class ImageWriter
     /// </summary>
     private string ResolveColorSpace(ImageInfo image)
     {
-        string baseDevice = GetColorSpaceString(image.ColorSpace, image.Palette);
+        string baseDevice = GetColorSpaceString(image.ColorSpace);
 
         if (ShouldEmbedIccProfile(image))
         {
@@ -188,7 +189,7 @@ internal class ImageWriter
     /// </summary>
     private async Task<string> ResolveColorSpaceAsync(ImageInfo image, CancellationToken cancellationToken)
     {
-        string baseDevice = GetColorSpaceString(image.ColorSpace, image.Palette);
+        string baseDevice = GetColorSpaceString(image.ColorSpace);
 
         if (ShouldEmbedIccProfile(image))
         {
@@ -233,9 +234,9 @@ internal class ImageWriter
     {
         return new Dictionary<string, string>
         {
-            ["/N"] = components.ToString(),
-            ["/Alternate"] = alternate,
-            ["/Filter"] = "/FlateDecode"
+            [PdfKeys.ColorProfile.Components] = components.ToString(),
+            [PdfKeys.ColorProfile.Alternate] = alternate,
+            [PdfKeys.Stream.Filter] = "/FlateDecode"
         };
     }
 
@@ -262,13 +263,13 @@ internal class ImageWriter
     {
         return new Dictionary<string, string>
         {
-            ["/Type"] = "/XObject",
-            ["/Subtype"] = "/Image",
-            ["/Width"] = image.Width.ToString(),
-            ["/Height"] = image.Height.ToString(),
-            ["/ColorSpace"] = "/DeviceGray",
-            ["/BitsPerComponent"] = image.BitsPerComponent.ToString(),
-            ["/Filter"] = "/FlateDecode"
+            [PdfKeys.Common.Type] = "/XObject",
+            [PdfKeys.Common.Subtype] = "/Image",
+            [PdfKeys.Image.Width] = image.Width.ToString(),
+            [PdfKeys.Image.Height] = image.Height.ToString(),
+            [PdfKeys.Image.ColorSpace] = "/DeviceGray",
+            [PdfKeys.Image.BitsPerComponent] = image.BitsPerComponent.ToString(),
+            [PdfKeys.Stream.Filter] = "/FlateDecode"
         };
     }
 
@@ -355,7 +356,7 @@ internal class ImageWriter
     /// <summary>
     /// Gets the PDF color space string for an image
     /// </summary>
-    private static string GetColorSpaceString(ImageColorSpace colorSpace, byte[] palette)
+    private static string GetColorSpaceString(ImageColorSpace colorSpace)
     {
         return colorSpace switch
         {
@@ -429,7 +430,7 @@ internal class ImageWriter
             {
                 int smaskId = _asyncWriter!.GetNewId();
                 await WriteSoftMaskAsync(smaskId, image, cancellationToken).ConfigureAwait(false);
-                dict["/SMask"] = $"{smaskId} 0 R";
+                dict[PdfKeys.Image.SoftMask] = $"{smaskId} 0 R";
             }
 
             // Write using explicit length

@@ -4,7 +4,7 @@ namespace BonniePDF;
 
 /// <summary>
 /// Entry points for the Document Definition: a versioned, language-neutral JSON description of a whole
-/// document. Read one into a <see cref="Document"/> with <see cref="Document.FromDefinitionAsync"/>.
+/// document. Read one into a <see cref="Document"/> with <see cref="Document.FromDefinitionAsync(string, DefinitionReadOptions, System.Threading.CancellationToken)"/>.
 /// </summary>
 public static class DocumentDefinition
 {

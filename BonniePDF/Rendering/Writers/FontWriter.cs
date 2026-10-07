@@ -1,3 +1,4 @@
+using BonniePDF.Rendering.Pdf;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -46,9 +47,9 @@ internal class FontWriter
     {
         _writer!.WriteObject(id, new Dictionary<string, string>
         {
-            ["/Type"] = "/Font",
-            ["/Subtype"] = "/Type1",
-            ["/BaseFont"] = $"/{fontName}"
+            [PdfKeys.Common.Type] = "/Font",
+            [PdfKeys.Common.Subtype] = "/Type1",
+            [PdfKeys.Font.BaseFont] = $"/{fontName}"
         });
     }
 
@@ -127,12 +128,12 @@ internal class FontWriter
         // 7. Write Type0 font (the main font dictionary)
         _writer!.WriteObject(type0Id, new Dictionary<string, string>
         {
-            ["/Type"] = "/Font",
-            ["/Subtype"] = "/Type0",
-            ["/BaseFont"] = $"/{baseFontName}",
-            ["/Encoding"] = "/Identity-H",
-            ["/DescendantFonts"] = $"[ {cidFontId} 0 R ]",
-            ["/ToUnicode"] = $"{toUnicodeId} 0 R"
+            [PdfKeys.Common.Type] = "/Font",
+            [PdfKeys.Common.Subtype] = "/Type0",
+            [PdfKeys.Font.BaseFont] = $"/{baseFontName}",
+            [PdfKeys.Font.Encoding] = "/Identity-H",
+            [PdfKeys.Font.DescendantFonts] = $"[ {cidFontId} 0 R ]",
+            [PdfKeys.Font.ToUnicode] = $"{toUnicodeId} 0 R"
         });
 
         return type0Id;
@@ -145,7 +146,7 @@ internal class FontWriter
     {
         _writer!.WriteCompressedBinaryObject(id, new Dictionary<string, string>
         {
-            ["/Length1"] = fontData.Length.ToString()
+            [PdfKeys.Stream.DecodedLength] = fontData.Length.ToString()
         }, fontData);
     }
 
@@ -167,20 +168,20 @@ internal class FontWriter
 
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/FontDescriptor",
-            ["/FontName"] = $"/{baseFontName}",
-            ["/Flags"] = font.Flags.ToString(),
-            ["/FontBBox"] = $"[ {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]} ]",
-            ["/ItalicAngle"] = font.ItalicAngle.ToString(CultureInfo.InvariantCulture),
-            ["/Ascent"] = ascent.ToString(),
-            ["/Descent"] = descent.ToString(),
-            ["/CapHeight"] = capHeight.ToString(),
-            ["/StemV"] = stemV.ToString(),
-            ["/FontFile2"] = $"{fontFile2Id} 0 R"
+            [PdfKeys.Common.Type] = "/FontDescriptor",
+            [PdfKeys.FontDescriptor.Name] = $"/{baseFontName}",
+            [PdfKeys.FontDescriptor.Flags] = font.Flags.ToString(),
+            [PdfKeys.FontDescriptor.BoundingBox] = $"[ {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]} ]",
+            [PdfKeys.FontDescriptor.ItalicAngle] = font.ItalicAngle.ToString(CultureInfo.InvariantCulture),
+            [PdfKeys.FontDescriptor.Ascent] = ascent.ToString(),
+            [PdfKeys.FontDescriptor.Descent] = descent.ToString(),
+            [PdfKeys.FontDescriptor.CapHeight] = capHeight.ToString(),
+            [PdfKeys.FontDescriptor.VerticalStemWidth] = stemV.ToString(),
+            [PdfKeys.FontDescriptor.TrueTypeProgram] = $"{fontFile2Id} 0 R"
         };
 
         if (cidSetId > 0)
-            dict["/CIDSet"] = $"{cidSetId} 0 R";
+            dict[PdfKeys.FontDescriptor.CidSet] = $"{cidSetId} 0 R";
 
         _writer!.WriteObject(id, dict);
     }
@@ -230,13 +231,13 @@ internal class FontWriter
     {
         _writer!.WriteObject(id, new Dictionary<string, string>
         {
-            ["/Type"] = "/Font",
-            ["/Subtype"] = "/CIDFontType2",
-            ["/BaseFont"] = $"/{baseFontName}",
-            ["/CIDSystemInfo"] = "<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>",
-            ["/FontDescriptor"] = $"{fontDescriptorId} 0 R",
-            ["/W"] = widthArray,
-            ["/CIDToGIDMap"] = cidToGidMapRef
+            [PdfKeys.Common.Type] = "/Font",
+            [PdfKeys.Common.Subtype] = "/CIDFontType2",
+            [PdfKeys.Font.BaseFont] = $"/{baseFontName}",
+            [PdfKeys.Font.CidSystemInfo] = "<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>",
+            [PdfKeys.Font.Descriptor] = $"{fontDescriptorId} 0 R",
+            [PdfKeys.Font.Widths] = widthArray,
+            [PdfKeys.Font.CidToGlyphMap] = cidToGidMapRef
         });
     }
 
@@ -319,9 +320,9 @@ internal class FontWriter
 
         await _asyncWriter!.WriteObjectAsync(id, new Dictionary<string, string>
         {
-            ["/Type"] = "/Font",
-            ["/Subtype"] = "/Type1",
-            ["/BaseFont"] = $"/{fontName}"
+            [PdfKeys.Common.Type] = "/Font",
+            [PdfKeys.Common.Subtype] = "/Type1",
+            [PdfKeys.Font.BaseFont] = $"/{fontName}"
         }, null, cancellationToken).ConfigureAwait(false);
     }
 
@@ -403,12 +404,12 @@ internal class FontWriter
         // 6. Write Type0 font (the main font dictionary)
         await _asyncWriter!.WriteObjectAsync(type0Id, new Dictionary<string, string>
         {
-            ["/Type"] = "/Font",
-            ["/Subtype"] = "/Type0",
-            ["/BaseFont"] = $"/{baseFontName}",
-            ["/Encoding"] = "/Identity-H",
-            ["/DescendantFonts"] = $"[ {cidFontId} 0 R ]",
-            ["/ToUnicode"] = $"{toUnicodeId} 0 R"
+            [PdfKeys.Common.Type] = "/Font",
+            [PdfKeys.Common.Subtype] = "/Type0",
+            [PdfKeys.Font.BaseFont] = $"/{baseFontName}",
+            [PdfKeys.Font.Encoding] = "/Identity-H",
+            [PdfKeys.Font.DescendantFonts] = $"[ {cidFontId} 0 R ]",
+            [PdfKeys.Font.ToUnicode] = $"{toUnicodeId} 0 R"
         }, null, cancellationToken).ConfigureAwait(false);
 
         return type0Id;
@@ -422,7 +423,7 @@ internal class FontWriter
         await _asyncWriter!.WriteCompressedBinaryObjectAsync(id, new Dictionary<string, string>
             {
                 // /Length1 is specific to FontFile2 (TrueType) and represents the length of the font file itself
-                ["/Length1"] = fontData.Length.ToString()
+                [PdfKeys.Stream.DecodedLength] = fontData.Length.ToString()
             },
             fontData,
             fontData.Length,
@@ -448,20 +449,20 @@ internal class FontWriter
 
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/FontDescriptor",
-            ["/FontName"] = $"/{baseFontName}",
-            ["/Flags"] = font.Flags.ToString(),
-            ["/FontBBox"] = $"[ {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]} ]",
-            ["/ItalicAngle"] = font.ItalicAngle.ToString(CultureInfo.InvariantCulture),
-            ["/Ascent"] = ascent.ToString(),
-            ["/Descent"] = descent.ToString(),
-            ["/CapHeight"] = capHeight.ToString(),
-            ["/StemV"] = stemV.ToString(),
-            ["/FontFile2"] = $"{fontFile2Id} 0 R"
+            [PdfKeys.Common.Type] = "/FontDescriptor",
+            [PdfKeys.FontDescriptor.Name] = $"/{baseFontName}",
+            [PdfKeys.FontDescriptor.Flags] = font.Flags.ToString(),
+            [PdfKeys.FontDescriptor.BoundingBox] = $"[ {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]} ]",
+            [PdfKeys.FontDescriptor.ItalicAngle] = font.ItalicAngle.ToString(CultureInfo.InvariantCulture),
+            [PdfKeys.FontDescriptor.Ascent] = ascent.ToString(),
+            [PdfKeys.FontDescriptor.Descent] = descent.ToString(),
+            [PdfKeys.FontDescriptor.CapHeight] = capHeight.ToString(),
+            [PdfKeys.FontDescriptor.VerticalStemWidth] = stemV.ToString(),
+            [PdfKeys.FontDescriptor.TrueTypeProgram] = $"{fontFile2Id} 0 R"
         };
 
         if (cidSetId > 0)
-            dict["/CIDSet"] = $"{cidSetId} 0 R";
+            dict[PdfKeys.FontDescriptor.CidSet] = $"{cidSetId} 0 R";
 
         await _asyncWriter!.WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
     }
@@ -484,13 +485,13 @@ internal class FontWriter
     {
         await _asyncWriter!.WriteObjectAsync(id, new Dictionary<string, string>
         {
-            ["/Type"] = "/Font",
-            ["/Subtype"] = "/CIDFontType2",
-            ["/BaseFont"] = $"/{baseFontName}",
-            ["/CIDSystemInfo"] = "<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>",
-            ["/FontDescriptor"] = $"{fontDescriptorId} 0 R",
-            ["/W"] = widthArray,
-            ["/CIDToGIDMap"] = cidToGidMapRef
+            [PdfKeys.Common.Type] = "/Font",
+            [PdfKeys.Common.Subtype] = "/CIDFontType2",
+            [PdfKeys.Font.BaseFont] = $"/{baseFontName}",
+            [PdfKeys.Font.CidSystemInfo] = "<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>",
+            [PdfKeys.Font.Descriptor] = $"{fontDescriptorId} 0 R",
+            [PdfKeys.Font.Widths] = widthArray,
+            [PdfKeys.Font.CidToGlyphMap] = cidToGidMapRef
         }, null, cancellationToken).ConfigureAwait(false);
     }
 

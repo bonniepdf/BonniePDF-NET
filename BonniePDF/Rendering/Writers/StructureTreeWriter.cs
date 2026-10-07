@@ -1,3 +1,4 @@
+using BonniePDF.Rendering.Pdf;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -182,9 +183,9 @@ internal sealed class StructureTreeWriter
     {
         var dict = new Dictionary<string, string>
         {
-            ["/Type"] = "/StructElem",
-            ["/S"] = "/" + element.Role.ToPdfTag(),
-            ["/P"] = $"{parentObjectId} 0 R",
+            [PdfKeys.Common.Type] = "/StructElem",
+            [PdfKeys.Structure.Role] = "/" + element.Role.ToPdfTag(),
+            [PdfKeys.Structure.Parent] = $"{parentObjectId} 0 R",
         };
 
         // /K + /Pg emission. Three cases:
@@ -195,26 +196,26 @@ internal sealed class StructureTreeWriter
         //   3. MCIDs span multiple pages => /K entries become /MCR dicts
         //      with explicit /Pg + /MCID per entry; no /Pg on the elem.
         BuildKidsAndPg(element, elementIds, pageIds, out string? kids, out int? singlePageObjectId);
-        if (kids != null) dict["/K"] = kids;
-        if (singlePageObjectId.HasValue) dict["/Pg"] = $"{singlePageObjectId.Value} 0 R";
+        if (kids != null) dict[PdfKeys.Structure.Kids] = kids;
+        if (singlePageObjectId.HasValue) dict[PdfKeys.Structure.Page] = $"{singlePageObjectId.Value} 0 R";
 
         // PDF text strings: use EncodeMetadataString so non-Latin-1 chars
         // (em-dash, smart quotes, CJK, etc.) become a UTF-16BE hex literal
         // <FEFF…> rather than getting byte-truncated by the Latin-1 writer.
         if (!string.IsNullOrEmpty(element.Alt))
-            dict["/Alt"] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.Alt);
+            dict[PdfKeys.Structure.AlternativeText] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.Alt);
         if (!string.IsNullOrEmpty(element.ActualText))
-            dict["/ActualText"] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.ActualText);
+            dict[PdfKeys.Structure.ActualText] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.ActualText);
         if (!string.IsNullOrEmpty(element.Lang))
-            dict["/Lang"] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.Lang);
+            dict[PdfKeys.Structure.Language] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.Lang);
         if (!string.IsNullOrEmpty(element.Title))
-            dict["/T"] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.Title);
+            dict[PdfKeys.Structure.Title] = BonniePDF.Rendering.Pdf.PdfSyntax.EncodeMetadataString(element.Title);
 
         // /A - attributes dictionary (raw PDF syntax provided by caller).
         // Tables use this for /ColSpan; future stages may use it for
         // /RowSpan and list characteristics.
         if (!string.IsNullOrEmpty(element.Attributes))
-            dict["/A"] = element.Attributes;
+            dict[PdfKeys.Structure.Attributes] = element.Attributes;
 
         return dict;
     }
@@ -228,13 +229,13 @@ internal sealed class StructureTreeWriter
     {
         var dict = new Dictionary<string, string>
         {
-            ["/Type"] = "/StructTreeRoot",
-            ["/K"] = $"[ {elementIds[documentRoot]} 0 R ]",
+            [PdfKeys.Common.Type] = "/StructTreeRoot",
+            [PdfKeys.Structure.Kids] = $"[ {elementIds[documentRoot]} 0 R ]",
         };
 
         if (parentTreeId > 0)
         {
-            dict["/ParentTree"] = $"{parentTreeId} 0 R";
+            dict[PdfKeys.Structure.ParentTree] = $"{parentTreeId} 0 R";
             // /ParentTreeNextKey = max key used + 1.
             // For pages it's the page count; if there are annotation
             // bindings with higher keys (annotation bindings use 10_000+), use those.
@@ -244,7 +245,7 @@ internal sealed class StructureTreeWriter
                 int maxAnnotKey = annotBindings.Max(b => b.structParentKey);
                 nextKey = Math.Max(nextKey, maxAnnotKey + 1);
             }
-            dict["/ParentTreeNextKey"] = nextKey.ToString(CultureInfo.InvariantCulture);
+            dict[PdfKeys.Structure.ParentTreeNextKey] = nextKey.ToString(CultureInfo.InvariantCulture);
         }
 
         return dict;
@@ -299,7 +300,7 @@ internal sealed class StructureTreeWriter
 
         return new Dictionary<string, string>
         {
-            ["/Nums"] = "[ " + string.Join(" ", parts) + " ]",
+            [PdfKeys.NumberTree.Numbers] = "[ " + string.Join(" ", parts) + " ]",
         };
     }
 

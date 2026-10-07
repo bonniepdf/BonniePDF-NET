@@ -62,31 +62,31 @@ internal class MetadataWriter
         Dictionary<string, string> dict = new();
 
         if (!string.IsNullOrEmpty(metadata.Title))
-            dict["/Title"] = PdfSyntax.EncodeMetadataString(metadata.Title);
+            dict[PdfKeys.Information.Title] = PdfSyntax.EncodeMetadataString(metadata.Title);
 
         if (!string.IsNullOrEmpty(metadata.Author))
-            dict["/Author"] = PdfSyntax.EncodeMetadataString(metadata.Author);
+            dict[PdfKeys.Information.Author] = PdfSyntax.EncodeMetadataString(metadata.Author);
 
         if (!string.IsNullOrEmpty(metadata.Subject))
-            dict["/Subject"] = PdfSyntax.EncodeMetadataString(metadata.Subject);
+            dict[PdfKeys.Information.Subject] = PdfSyntax.EncodeMetadataString(metadata.Subject);
 
         if (!string.IsNullOrEmpty(metadata.Keywords))
-            dict["/Keywords"] = PdfSyntax.EncodeMetadataString(metadata.Keywords);
+            dict[PdfKeys.Information.Keywords] = PdfSyntax.EncodeMetadataString(metadata.Keywords);
 
         if (!string.IsNullOrEmpty(metadata.Creator))
-            dict["/Creator"] = PdfSyntax.EncodeMetadataString(metadata.Creator);
+            dict[PdfKeys.Information.Creator] = PdfSyntax.EncodeMetadataString(metadata.Creator);
 
         if (!string.IsNullOrEmpty(metadata.Producer))
-            dict["/Producer"] = PdfSyntax.EncodeMetadataString(metadata.Producer);
+            dict[PdfKeys.Information.Producer] = PdfSyntax.EncodeMetadataString(metadata.Producer);
 
         if (metadata.CreationDate.HasValue)
-            dict["/CreationDate"] = $"({PdfSyntax.FormatDate(metadata.CreationDate.Value)})";
+            dict[PdfKeys.Information.CreationDate] = $"({PdfSyntax.FormatDate(metadata.CreationDate.Value)})";
 
         if (metadata.ModifiedDate.HasValue)
-            dict["/ModDate"] = $"({PdfSyntax.FormatDate(metadata.ModifiedDate.Value)})";
+            dict[PdfKeys.Information.ModifiedDate] = $"({PdfSyntax.FormatDate(metadata.ModifiedDate.Value)})";
 
         if (metadata.Trapped.HasValue)
-            dict["/Trapped"] = metadata.Trapped.Value ? "/True" : "/False";
+            dict[PdfKeys.Information.Trapped] = metadata.Trapped.Value ? "/True" : "/False";
 
         foreach (KeyValuePair<string, string> kvp in metadata.CustomProperties)
             dict[$"/{PdfSyntax.Escape(kvp.Key)}"] = PdfSyntax.EncodeMetadataString(kvp.Value);
@@ -120,8 +120,8 @@ internal class MetadataWriter
 
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/Metadata",
-            ["/Subtype"] = "/XML"
+            [PdfKeys.Common.Type] = "/Metadata",
+            [PdfKeys.Common.Subtype] = "/XML"
         };
 
         // XMP metadata must NOT be encrypted and must NOT be compressed
@@ -143,8 +143,8 @@ internal class MetadataWriter
 
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/Metadata",
-            ["/Subtype"] = "/XML"
+            [PdfKeys.Common.Type] = "/Metadata",
+            [PdfKeys.Common.Subtype] = "/XML"
         };
 
         await _asyncWriter!.WriteUnencryptedBinaryObjectAsync(id, dict, xmpBytes, cancellationToken).ConfigureAwait(false);

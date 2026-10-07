@@ -30,6 +30,16 @@ public class DefinitionValidationTests
         Assert.Empty(result.Errors);
         Assert.True(result.IsValid);
         Assert.NotNull(result.Definition);
+        using JsonDocument fixture = DefinitionFixtures.Parse("valid", name);
+        if (fixture.RootElement.TryGetProperty("_expectWarnings", out JsonElement warnings))
+        {
+            List<string> expected = warnings.EnumerateArray()
+                .Select(w => $"{w.GetProperty("path").GetString()} {w.GetProperty("code").GetString()}")
+                .Order(StringComparer.Ordinal).ToList();
+            Assert.Equal(expected, result.Warnings.Select(Key).Order(StringComparer.Ordinal));
+            DefinitionValidationResult strict = DocumentDefinition.Validate(fixture.RootElement, new DefinitionValidateOptions { Strict = true });
+            Assert.Equal(expected, strict.Errors.Select(Key).Order(StringComparer.Ordinal));
+        }
     }
 
     [Theory]

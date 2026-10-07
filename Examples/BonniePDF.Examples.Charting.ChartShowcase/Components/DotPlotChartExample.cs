@@ -95,7 +95,6 @@ public static class DotPlotChartExample
             Height = 400,
             StretchToFit = true,
             DotColor = Color.FromHex(ChartColors.Teal),
-            DotRadius = 12,
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,

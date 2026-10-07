@@ -60,7 +60,7 @@ public sealed class DiagnosticsCollector
 {
     private readonly List<Diagnostic> _entries = new();
 
-    public void Add(Diagnostic d)
+    public void Add(Diagnostic? d)
     {
         if (d != null) _entries.Add(d);
     }

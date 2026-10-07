@@ -137,12 +137,12 @@ internal class AttachmentWriter
 
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/EmbeddedFile",
-            ["/Params"] = paramsDict.ToString(),
+            [PdfKeys.Common.Type] = "/EmbeddedFile",
+            [PdfKeys.EmbeddedFile.Parameters] = paramsDict.ToString(),
         };
 
         if (!string.IsNullOrEmpty(a.MediaType))
-            dict["/Subtype"] = "/" + EncodeName(a.MediaType);
+            dict[PdfKeys.Common.Subtype] = "/" + EncodeName(a.MediaType);
 
         return dict;
     }
@@ -151,15 +151,15 @@ internal class AttachmentWriter
     {
         Dictionary<string, string> dict = new()
         {
-            ["/Type"] = "/Filespec",
-            ["/F"] = PdfSyntax.EncodeMetadataString(a.FileName),
-            ["/UF"] = PdfSyntax.EncodeMetadataString(a.FileName),
-            ["/EF"] = $"<< /F {streamId} 0 R /UF {streamId} 0 R >>",
-            ["/AFRelationship"] = "/" + a.Relationship,
+            [PdfKeys.Common.Type] = "/Filespec",
+            [PdfKeys.FileSpecification.FileName] = PdfSyntax.EncodeMetadataString(a.FileName),
+            [PdfKeys.FileSpecification.UnicodeFileName] = PdfSyntax.EncodeMetadataString(a.FileName),
+            [PdfKeys.FileSpecification.EmbeddedFiles] = $"<< /F {streamId} 0 R /UF {streamId} 0 R >>",
+            [PdfKeys.FileSpecification.AssociatedFileRelationship] = "/" + a.Relationship,
         };
 
         if (!string.IsNullOrEmpty(a.Description))
-            dict["/Desc"] = PdfSyntax.EncodeMetadataString(a.Description);
+            dict[PdfKeys.FileSpecification.Description] = PdfSyntax.EncodeMetadataString(a.Description);
 
         return dict;
     }
@@ -171,7 +171,7 @@ internal class AttachmentWriter
             names.Append(PdfSyntax.EncodeMetadataString(name)).Append(' ').Append(filespecId).Append(" 0 R ");
         names.Append(']');
 
-        return new Dictionary<string, string> { ["/Names"] = names.ToString() };
+        return new Dictionary<string, string> { [PdfKeys.NameTree.Names] = names.ToString() };
     }
 
     private static string Md5Hex(byte[] data)

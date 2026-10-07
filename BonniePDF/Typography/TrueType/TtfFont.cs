@@ -256,7 +256,7 @@ internal class TtfFont
         using BigEndianReader reader = new(ms);
 
         // 1. Read offset table
-        float version = reader.ReadFixed();
+        reader.ReadFixed(); // version
         int numTables = reader.ReadUInt16();
         reader.Skip(6); // searchRange, entrySelector, rangeShift
 
@@ -264,7 +264,7 @@ internal class TtfFont
         for (int i = 0; i < numTables; i++)
         {
             string tag = reader.ReadTag();
-            uint checkSum = reader.ReadUInt32();
+            reader.ReadUInt32(); // checkSum
             uint offset = reader.ReadUInt32();
             uint length = reader.ReadUInt32();
             _tables[tag] = (offset, length);
@@ -406,8 +406,8 @@ internal class TtfFont
         int format = reader.ReadUInt16();
         if (format != 4) return;
 
-        int length = reader.ReadUInt16();
-        int language = reader.ReadUInt16();
+        reader.ReadUInt16(); // length
+        reader.ReadUInt16(); // language
         int segCountX2 = reader.ReadUInt16();
         int segCount = segCountX2 / 2;
         reader.Skip(6); // searchRange, entrySelector, rangeShift
@@ -469,8 +469,8 @@ internal class TtfFont
         if (format != 12) return;
 
         reader.ReadUInt16(); // reserved
-        uint length = reader.ReadUInt32();
-        uint language = reader.ReadUInt32();
+        reader.ReadUInt32(); // length
+        reader.ReadUInt32(); // language
         uint numGroups = reader.ReadUInt32();
 
         for (uint i = 0; i < numGroups; i++)
@@ -491,7 +491,7 @@ internal class TtfFont
     {
         reader.Seek(_tables["name"].offset);
 
-        int format = reader.ReadUInt16();
+        reader.ReadUInt16(); // format
         int count = reader.ReadUInt16();
         int stringOffset = reader.ReadUInt16();
         uint storageStart = _tables["name"].offset + (uint)stringOffset;
@@ -500,7 +500,7 @@ internal class TtfFont
         {
             int platformId = reader.ReadUInt16();
             int encodingId = reader.ReadUInt16();
-            int languageId = reader.ReadUInt16();
+            reader.ReadUInt16(); // languageId
             int nameId = reader.ReadUInt16();
             int length = reader.ReadUInt16();
             int offset = reader.ReadUInt16();
@@ -548,8 +548,8 @@ internal class TtfFont
         int version = reader.ReadUInt16();
         reader.Skip(2); // xAvgCharWidth
         int usWeightClass = reader.ReadUInt16();
-        int usWidthClass = reader.ReadUInt16();
-        int fsType = reader.ReadUInt16();
+        reader.ReadUInt16(); // usWidthClass
+        reader.ReadUInt16(); // fsType
 
         reader.Skip(16); // subscript (8) + superscript (8) metrics
 
@@ -567,9 +567,9 @@ internal class TtfFont
 
         reader.Skip(4); // usFirstCharIndex, usLastCharIndex
 
-        int sTypoAscender = reader.ReadInt16();
-        int sTypoDescender = reader.ReadInt16();
-        int sTypoLineGap = reader.ReadInt16();
+        reader.ReadInt16(); // sTypoAscender
+        reader.ReadInt16(); // sTypoDescender
+        reader.ReadInt16(); // sTypoLineGap
 
         reader.Skip(4); // usWinAscent, usWinDescent
 

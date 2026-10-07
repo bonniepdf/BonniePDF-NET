@@ -61,7 +61,7 @@ internal interface IPdfWriter
     /// <summary>
     /// Writes a PDF catalog object with catalog options
     /// </summary>
-    void WriteCatalog(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions options);
+    void WriteCatalog(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions? options);
 
     /// <summary>
     /// Writes an uncompressed binary stream object, bypassing encryption.

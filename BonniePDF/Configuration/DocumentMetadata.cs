@@ -107,7 +107,7 @@ public class DocumentMetadata
     /// Sets the Keywords property from a collection of individual tags,
     /// joining them as a comma-separated string.
     /// </summary>
-    public void SetKeywords(IEnumerable<string> keywords)
+    public void SetKeywords(IEnumerable<string>? keywords)
     {
         if (keywords != null)
             Keywords = string.Join(", ", keywords);

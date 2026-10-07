@@ -33,11 +33,6 @@ public class DotPlotChart : CartesianChartBase
     public Color DotColor { get; set; } = Color.FromHex(DefaultColorHex);
 
     /// <summary>
-    /// Radius of the data point circles (backward compatibility).
-    /// </summary>
-    public float DotRadius { get; set; } = DefaultDotRadiusValue;
-
-    /// <summary>
     /// Draws the dot plot chart elements for a single series (circular data points).
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,

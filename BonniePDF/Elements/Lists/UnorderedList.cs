@@ -49,7 +49,7 @@ public class UnorderedList : ListElementBase
     /// list.AddItem("Second point");
     /// </code>
     /// </example>
-    public void AddItem(string item)
+    public void AddItem(string? item)
     {
         _items.Add(item ?? string.Empty);
     }

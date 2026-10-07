@@ -73,8 +73,8 @@ public class Image : ElementBase, IRoleProvider, IAltTextProvider
 
     protected override float MeasureContentHeight(float contentWidth)
     {
-        ImageInfo info = GetImageInfo();
-        CalculateDimensions(contentWidth, out float displayWidth, out float displayHeight);
+        GetImageInfo();
+        CalculateDimensions(contentWidth, out _, out float displayHeight);
         return displayHeight;
     }
 

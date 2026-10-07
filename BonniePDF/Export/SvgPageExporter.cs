@@ -280,7 +280,7 @@ internal static class SvgPageExporter
     /// (WCAG 2.4.4 / axe <c>link-name</c>).
     /// </para>
     /// </summary>
-    private static string BuildLinkOverlays(IList<Hyperlink> links, float pageHeight)
+    private static string BuildLinkOverlays(IList<Hyperlink>? links, float pageHeight)
     {
         if (links == null || links.Count == 0) return "";
 

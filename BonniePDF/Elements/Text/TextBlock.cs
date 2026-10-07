@@ -408,7 +408,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         else if (alignment == TextAlignment.Right) startX += contentWidth - totalLineWidth;
 
         // 3. Draw Parts
-        string[] parts = line.Split(new[] { TotalPagesToken }, StringSplitOptions.None);
+        string[] parts = line.Split([TotalPagesToken], StringSplitOptions.None);
         float currentX = startX;
 
         for (int i = 0; i < parts.Length; i++)
@@ -471,9 +471,9 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         }
         else
         {
-            lines = new List<string>(ComputeLines(Text, contentWidth));
-            indents = Enumerable.Repeat(0f, lines.Count).ToList();
-            spaceBefore = Enumerable.Repeat(0f, lines.Count).ToList();
+            lines = [.. ComputeLines(Text, contentWidth)];
+            indents = [.. Enumerable.Repeat(0f, lines.Count)];
+            spaceBefore = [.. Enumerable.Repeat(0f, lines.Count)];
         }
 
         if (MaxLines is int max && max > 0 && lines.Count > max)
@@ -519,7 +519,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     /// and carries that indent, and every paragraph after the first carries
     /// <see cref="ParagraphSpacing"/> of leading before its first line.
     /// </summary>
-    private void ComputeParagraphLayout(string text, float contentWidth,
+    private void ComputeParagraphLayout(string? text, float contentWidth,
         out List<string> lines, out List<float> indents, out List<float> spaceBefore)
     {
         lines = new List<string>();
@@ -529,7 +529,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         string[] segments = (text ?? string.Empty).Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
         for (int si = 0; si < segments.Length; si++)
         {
-            List<string> wrapped = WrapWithFirstIndent(segments[si], contentWidth);
+            IList<string> wrapped = WrapWithFirstIndent(segments[si], contentWidth);
             if (wrapped.Count == 0) wrapped.Add(string.Empty);
             for (int li = 0; li < wrapped.Count; li++)
             {
@@ -542,13 +542,13 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 
     /// <summary>
     /// Greedy word-wrap where the first line fits <c>contentWidth - firstLineIndent</c>
-    /// and the remainder fits the full <paramref name="contentWidth"/>.
+    /// and the remainder fits the full <paramref name="maxWidth"/>.
     /// </summary>
     /// <summary>Ordinary word wrapping, or the whitespace-preserving form when <see cref="PreserveWhitespace"/> is set.</summary>
-    protected override List<string> WrapSegment(string text, float maxWidth)
+    protected override IList<string> WrapSegment(string text, float maxWidth)
         => PreserveWhitespace ? WrapPreservingWhitespace(text, maxWidth, maxWidth) : base.WrapSegment(text, maxWidth);
 
-    private List<string> WrapWithFirstIndent(string segment, float contentWidth)
+    private IList<string> WrapWithFirstIndent(string segment, float contentWidth)
     {
         var lines = new List<string>();
         if (segment.Length == 0) return lines;

@@ -29,5 +29,5 @@ public class ChartSeries
     /// Series-specific styling options.
     /// Allows customization of line width, opacity, marker size, etc.
     /// </summary>
-    public ChartSeriesStyle Style { get; set; } = new();
+    public ChartSeriesStyle? Style { get; set; } = new();
 }

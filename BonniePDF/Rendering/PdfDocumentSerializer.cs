@@ -1,3 +1,4 @@
+using BonniePDF.Rendering.Pdf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -145,16 +146,16 @@ internal class PdfDocumentSerializer
             // NOTICE: We removed "/Resources" from here! It will go on the Parent.
             Dictionary<string, string> pageDict = new(StringComparer.OrdinalIgnoreCase)
             {
-                ["/Type"] = "/Page",
-                ["/Parent"] = $"{pagesId} 0 R", // Refers to the parent we write later
-                ["/MediaBox"] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
-                ["/Contents"] = $"{contentId} 0 R",
+                [PdfKeys.Common.Type] = "/Page",
+                [PdfKeys.Page.Parent] = $"{pagesId} 0 R", // Refers to the parent we write later
+                [PdfKeys.Page.MediaBox] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
+                [PdfKeys.Page.Contents] = $"{contentId} 0 R",
                 // PDF/A-2b clause 6.2.2.2 / ISO 32000-1 §7.8.3: every
                 // page whose content stream references external objects
                 // (fonts, images, XObjects) must have an explicitly
                 // associated Resources dict. Inheritance from /Pages is
                 // valid per §7.7.3.4 but veraPDF profile 2b rejects it.
-                ["/Resources"] = $"{resourcesId} 0 R"
+                [PdfKeys.Page.Resources] = $"{resourcesId} 0 R"
             };
 
             // Tagged PDF: each page gets /StructParents equal to its
@@ -163,8 +164,8 @@ internal class PdfDocumentSerializer
             // lookup MCID→StructElem works.
             if (taggingContext != null)
             {
-                pageDict["/StructParents"] = (pageIndex - 1).ToString();
-                pageDict["/Tabs"] = "/S"; // Follow structure order for tab navigation
+                pageDict[PdfKeys.Page.StructureParents] = (pageIndex - 1).ToString();
+                pageDict[PdfKeys.Page.TabOrder] = "/S"; // Follow structure order for tab navigation
             }
 
             // Write link annotations if present
@@ -188,7 +189,7 @@ internal class PdfDocumentSerializer
                     }
                 }
 
-                pageDict["/Annots"] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
+                pageDict[PdfKeys.Page.Annotations] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
             }
 
             writer.WriteObject(pageId, pageDict);
@@ -218,9 +219,9 @@ internal class PdfDocumentSerializer
         writer.WriteObject(pagesId, new Dictionary<string, string>
 (StringComparer.OrdinalIgnoreCase)
         {
-            ["/Type"] = "/Pages",
-            ["/Kids"] = $"[ {kids} ]",
-            ["/Count"] = pageIds.Count.ToString()
+            [PdfKeys.Common.Type] = "/Pages",
+            [PdfKeys.PageTree.Kids] = $"[ {kids} ]",
+            [PdfKeys.PageTree.Count] = pageIds.Count.ToString()
         });
 
         // 6. Write Metadata & Close
@@ -292,7 +293,7 @@ internal class PdfDocumentSerializer
             int pageLabelsId = writer.GetNewId();
             writer.WriteObject(pageLabelsId, new Dictionary<string, string>
             {
-                ["/Nums"] = $"[ 0 << {BuildPageLabelEntry(syncPageLabel)} >> ]"
+                [PdfKeys.NumberTree.Numbers] = $"[ 0 << {BuildPageLabelEntry(syncPageLabel)} >> ]"
             });
             catalogOptions.PageLabelsId = pageLabelsId;
         }
@@ -423,23 +424,23 @@ internal class PdfDocumentSerializer
             // B. Write Page Object IMMEDIATELY
             Dictionary<string, string> pageDict = new(StringComparer.OrdinalIgnoreCase)
             {
-                ["/Type"] = "/Page",
-                ["/Parent"] = $"{pagesId} 0 R", // Refers to the parent we write later
-                ["/MediaBox"] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
-                ["/Contents"] = $"{contentId} 0 R",
+                [PdfKeys.Common.Type] = "/Page",
+                [PdfKeys.Page.Parent] = $"{pagesId} 0 R", // Refers to the parent we write later
+                [PdfKeys.Page.MediaBox] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
+                [PdfKeys.Page.Contents] = $"{contentId} 0 R",
                 // PDF/A-2b clause 6.2.2.2 / ISO 32000-1 §7.8.3: every
                 // page whose content stream references external objects
                 // (fonts, images, XObjects) must have an explicitly
                 // associated Resources dict. Inheritance from /Pages is
                 // valid per §7.7.3.4 but veraPDF profile 2b rejects it.
-                ["/Resources"] = $"{resourcesId} 0 R"
+                [PdfKeys.Page.Resources] = $"{resourcesId} 0 R"
             };
 
             // Tagged PDF: /StructParents keyed by 0-based page index.
             if (taggingContext != null)
             {
-                pageDict["/StructParents"] = (pageIndex - 1).ToString();
-                pageDict["/Tabs"] = "/S"; // Follow structure order for tab navigation
+                pageDict[PdfKeys.Page.StructureParents] = (pageIndex - 1).ToString();
+                pageDict[PdfKeys.Page.TabOrder] = "/S"; // Follow structure order for tab navigation
             }
 
             // Write link annotations if present
@@ -463,7 +464,7 @@ internal class PdfDocumentSerializer
                     }
                 }
 
-                pageDict["/Annots"] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
+                pageDict[PdfKeys.Page.Annotations] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
             }
 
             await writer.WriteObjectAsync(pageId, pageDict, null, cancellationToken).ConfigureAwait(false);
@@ -487,9 +488,9 @@ internal class PdfDocumentSerializer
         await writer.WriteObjectAsync(pagesId, new Dictionary<string, string>
 (StringComparer.OrdinalIgnoreCase)
         {
-            ["/Type"] = "/Pages",
-            ["/Kids"] = $"[ {kids} ]",
-            ["/Count"] = pageIds.Count.ToString()
+            [PdfKeys.Common.Type] = "/Pages",
+            [PdfKeys.PageTree.Kids] = $"[ {kids} ]",
+            [PdfKeys.PageTree.Count] = pageIds.Count.ToString()
         }, null, cancellationToken).ConfigureAwait(false);
 
         // 6. Write Metadata & Close
@@ -561,7 +562,7 @@ internal class PdfDocumentSerializer
             int pageLabelsId = writer.GetNewId();
             await writer.WriteObjectAsync(pageLabelsId, new Dictionary<string, string>
             {
-                ["/Nums"] = $"[ 0 << {BuildPageLabelEntry(asyncPageLabel)} >> ]"
+                [PdfKeys.NumberTree.Numbers] = $"[ 0 << {BuildPageLabelEntry(asyncPageLabel)} >> ]"
             }, cancellationToken: cancellationToken).ConfigureAwait(false);
             catalogOptions.PageLabelsId = pageLabelsId;
         }
