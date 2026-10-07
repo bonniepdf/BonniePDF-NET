@@ -15,7 +15,8 @@ namespace BonniePDF.Examples.Templates.AttachedData;
 /// </summary>
 [System.ComponentModel.DisplayName("Report with Embedded Data")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("A PDF/A-3 report that carries its source CSV inside the file, so a reader can check the numbers without re-keying them.")]
+[System.ComponentModel.Description(
+    "A PDF/A-3 report that carries its source CSV inside the file, so a reader can check the numbers without re-keying them.")]
 public static class AttachedDataExample
 {
     private static readonly Color Ink = ColorPalette.Slate[900];
@@ -31,9 +32,11 @@ public static class AttachedDataExample
         ("Q4 2026", 559_900, 167),
     };
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         #region settings
+
         Document doc = new(new DocumentSettings
         {
             PageSize = PdfSize.A4,
@@ -46,12 +49,14 @@ public static class AttachedDataExample
         doc.Metadata.Title = "Quarterly revenue 2026";
         doc.Metadata.Author = "BonniePDF";
         doc.Metadata.Subject = "PDF/A-3 Report with Embedded Data";
+
         #endregion settings
 
         doc.Add(Tb("Quarterly revenue - 2026", 18, Ink, bold: true, bottom: 4));
         doc.Add(Tb("The source data for this report is embedded as quarterly-revenue.csv.", 9, Mute, bottom: 16));
 
         #region table
+
         Table table = new(2f, 2f, 2f) { Border = Border.None, CellPadding = 6 };
         // Real tabular data → a proper header row (emits TH cells for assistive tech).
         table.AddHeader(
@@ -65,11 +70,15 @@ public static class AttachedDataExample
                 Tb(revenue.ToString("N0"), 10, BodyCol, align: TextAlignment.Right),
                 Tb(customers.ToString(), 10, BodyCol, align: TextAlignment.Right));
         }
+
         doc.Add(table);
+
         #endregion table
 
         // ── Embed the source data as an attachment ────────────────
+
         #region attach
+
         doc.Attach(new FileAttachment
         {
             FileName = "quarterly-revenue.csv",
@@ -78,6 +87,7 @@ public static class AttachedDataExample
             MediaType = "text/csv",
             Description = "Source data for the quarterly revenue report",
         });
+
         #endregion attach
 
         return doc;

@@ -12,7 +12,8 @@ namespace BonniePDF.Examples.Templates.ProductPhotoGallery;
 /// </summary>
 [System.ComponentModel.DisplayName("Product Gallery")]
 [System.ComponentModel.Category("Retail")]
-[System.ComponentModel.Description("A retail look-book: products laid out two-per-row as cards with name, SKU, price, and blurb, paginating automatically. Each card leads with a deterministic colour-blocked tile drawn natively by the engine, so the catalogue is self-contained. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "A retail look-book: products laid out two-per-row as cards with name, SKU, price, and blurb, paginating automatically. Each card leads with a deterministic colour-blocked tile drawn natively by the engine, so the catalogue is self-contained. PDF/A-2a + PDF/UA-1.")]
 public static class ProductPhotoGalleryExample
 {
     private const float CardImageHeight = 128f;
@@ -39,16 +40,25 @@ public static class ProductPhotoGalleryExample
 
     private static readonly Product[] Products =
     [
-        new("Terracotta Planter", "HG-1042", "GBP 28.00", "Hand-thrown stoneware planter with a matte terracotta glaze."),
-        new("Linen Throw", "HG-2277", "GBP 54.00", "Stonewashed pure-linen throw in oatmeal, finished with a hand-knotted fringe."),
-        new("Brass Reading Lamp", "LT-0391", "GBP 120.00", "Adjustable desk lamp in brushed brass with a weighted base and warm-dim LED."),
-        new("Ceramic Pour-Over", "KT-5108", "GBP 36.00", "Single-cup pour-over dripper in speckled clay, sized for a standard 02 filter."),
-        new("Wool Floor Cushion", "HG-3315", "GBP 95.00", "Chunky hand-woven wool floor cushion with a removable, washable cover."),
-        new("Smoked-Glass Carafe", "KT-4420", "GBP 42.00", "Mouth-blown smoked-glass carafe and tumbler set for the bedside or table."),
-        new("Oak Wall Shelf", "FN-0876", "GBP 68.00", "Solid white-oak floating shelf with concealed brackets and an oiled finish."),
-        new("Rattan Pendant Shade", "LT-1653", "GBP 82.00", "Open-weave rattan pendant shade that casts a soft, patterned light."),
+        new("Terracotta Planter", "HG-1042", "GBP 28.00",
+            "Hand-thrown stoneware planter with a matte terracotta glaze."),
+        new("Linen Throw", "HG-2277", "GBP 54.00",
+            "Stonewashed pure-linen throw in oatmeal, finished with a hand-knotted fringe."),
+        new("Brass Reading Lamp", "LT-0391", "GBP 120.00",
+            "Adjustable desk lamp in brushed brass with a weighted base and warm-dim LED."),
+        new("Ceramic Pour-Over", "KT-5108", "GBP 36.00",
+            "Single-cup pour-over dripper in speckled clay, sized for a standard 02 filter."),
+        new("Wool Floor Cushion", "HG-3315", "GBP 95.00",
+            "Chunky hand-woven wool floor cushion with a removable, washable cover."),
+        new("Smoked-Glass Carafe", "KT-4420", "GBP 42.00",
+            "Mouth-blown smoked-glass carafe and tumbler set for the bedside or table."),
+        new("Oak Wall Shelf", "FN-0876", "GBP 68.00",
+            "Solid white-oak floating shelf with concealed brackets and an oiled finish."),
+        new("Rattan Pendant Shade", "LT-1653", "GBP 82.00",
+            "Open-weave rattan pendant shade that casts a soft, patterned light."),
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new()
@@ -69,7 +79,8 @@ public static class ProductPhotoGalleryExample
                 return footer;
             },
         };
-        settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[700]);
+        settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[700]);
 
         Document doc = new(settings);
         doc.Metadata.Title = "Product Gallery - Spring Collection";

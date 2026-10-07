@@ -29,8 +29,7 @@ public static partial class DickensNovelExample
     /// Loads the novel source text, parses it into sections, and renders the full multi-page PDF.
     /// Requires the Project Gutenberg plain-text file to be present at <see cref="LocalFilePath"/>.
     /// </summary>
-    /// <param name="outputPath">The full file path where the generated PDF will be saved.</param>
-    /// <returns>The path of the generated PDF file.</returns>
+    /// <returns>The document, ready to export as PDF or SVG.</returns>
     public static Document Generate()
     {
         string raw = LoadText();
@@ -39,13 +38,14 @@ public static partial class DickensNovelExample
         // A4 with 72 pt margins (~1 inch) gives 451 pt content width - ideal for body text.
         DocumentSettings settings = new()
         {
-            PageSize    = PdfSize.A4,
-            Margin      = 72,
-            Version     = PdfVersion.Pdf17,
+            PageSize = PdfSize.A4,
+            Margin = 72,
+            Version = PdfVersion.Pdf17,
             PdfAEnabled = true,
-            Language    = "en-GB",
+            Language = "en-GB",
             DisplayDocTitle = true,
-            DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11).WithColor(ColorPalette.Slate[900]),
+            DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.TimesRoman).WithSize(11)
+                .WithColor(ColorPalette.Slate[900]),
 
             // Running header: book title on the left, author on the right, on every page.
             HeaderTemplate = pageNum =>
@@ -59,17 +59,17 @@ public static partial class DickensNovelExample
                 };
                 stack.Add(new TextBlock
                 {
-                    Text      = "A Tale of Two Cities",
-                    FontName  = StandardFonts.TimesItalic,
-                    FontSize  = 9,
+                    Text = "A Tale of Two Cities",
+                    FontName = StandardFonts.TimesItalic,
+                    FontSize = 9,
                     Color = ColorPalette.Slate[500],
                     Alignment = TextAlignment.Left,
                 }, 1f);
                 stack.Add(new TextBlock
                 {
-                    Text      = "Charles Dickens",
-                    FontName  = StandardFonts.TimesItalic,
-                    FontSize  = 9,
+                    Text = "Charles Dickens",
+                    FontName = StandardFonts.TimesItalic,
+                    FontSize = 9,
                     Color = ColorPalette.Slate[500],
                     Alignment = TextAlignment.Right,
                 }, 1f);
@@ -82,19 +82,19 @@ public static partial class DickensNovelExample
                 if (pageNum <= 1) return null;
                 return new TextBlock
                 {
-                    Text      = pageNum.ToString(),
-                    FontName  = StandardFonts.TimesRoman,
-                    FontSize  = 9,
+                    Text = pageNum.ToString(),
+                    FontName = StandardFonts.TimesRoman,
+                    FontSize = 9,
                     Color = ColorPalette.Slate[500],
                     Alignment = TextAlignment.Center,
-                    Margin    = new Thickness(0, 2, 0, 0)
+                    Margin = new Thickness(0, 2, 0, 0)
                 };
             }
         };
 
         Document doc = new(settings);
-        doc.Metadata.Title   = "A Tale of Two Cities";
-        doc.Metadata.Author  = "Charles Dickens";
+        doc.Metadata.Title = "A Tale of Two Cities";
+        doc.Metadata.Author = "Charles Dickens";
         doc.Metadata.Subject = "Project Gutenberg eBook #98 - A public domain classic.";
 
         // ── Title Page ───────────────────────────────────────────────────────
@@ -166,6 +166,7 @@ public static partial class DickensNovelExample
                     {
                         doc.Add(paragraph);
                     }
+
                     break;
             }
         }
@@ -185,22 +186,22 @@ public static partial class DickensNovelExample
         // Large top margin to vertically centre the block on the page.
         doc.Add(new TextBlock
         {
-            Text      = "A TALE OF TWO CITIES",
-            FontName  = StandardFonts.TimesBold,
-            FontSize  = 28,
+            Text = "A TALE OF TWO CITIES",
+            FontName = StandardFonts.TimesBold,
+            FontSize = 28,
             Color = ColorPalette.Slate[900],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 100, 0, 12)
+            Margin = new Thickness(0, 100, 0, 12)
         });
 
         doc.Add(new TextBlock
         {
-            Text      = "A Story of the French Revolution",
-            FontName  = StandardFonts.TimesItalic,
-            FontSize  = 15,
+            Text = "A Story of the French Revolution",
+            FontName = StandardFonts.TimesItalic,
+            FontSize = 15,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 0, 0, 40)
+            Margin = new Thickness(0, 0, 0, 40)
         });
 
         // The ornamental rule and attribution lines below were Slate[300]/[400] -
@@ -209,39 +210,39 @@ public static partial class DickensNovelExample
         // quiet title-page tone while meeting WCAG 2.2 AA.
         doc.Add(new TextBlock
         {
-            Text      = "---------------",
-            FontName  = StandardFonts.TimesRoman,
-            FontSize  = 13,
+            Text = "---------------",
+            FontName = StandardFonts.TimesRoman,
+            FontSize = 13,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 0, 0, 40)
+            Margin = new Thickness(0, 0, 0, 40)
         });
 
         doc.Add(new TextBlock
         {
-            Text      = "Charles Dickens",
-            FontName  = StandardFonts.TimesBold,
-            FontSize  = 20,
+            Text = "Charles Dickens",
+            FontName = StandardFonts.TimesBold,
+            FontSize = 20,
             Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 0, 0, 60)
+            Margin = new Thickness(0, 0, 0, 60)
         });
 
         doc.Add(new TextBlock
         {
-            Text      = "Project Gutenberg Edition · eBook #98",
-            FontName  = StandardFonts.TimesRoman,
-            FontSize  = 10,
+            Text = "Project Gutenberg Edition · eBook #98",
+            FontName = StandardFonts.TimesRoman,
+            FontSize = 10,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 0, 0, 4)
+            Margin = new Thickness(0, 0, 0, 4)
         });
 
         doc.Add(new TextBlock
         {
-            Text      = "Public domain - free to read, copy, and share.",
-            FontName  = StandardFonts.TimesItalic,
-            FontSize  = 9,
+            Text = "Public domain - free to read, copy, and share.",
+            FontName = StandardFonts.TimesItalic,
+            FontSize = 9,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center
         });
@@ -256,33 +257,33 @@ public static partial class DickensNovelExample
     {
         opener.Add(new TextBlock
         {
-            Text      = "---------------",
-            FontName  = StandardFonts.TimesRoman,
-            FontSize  = 11,
+            Text = "---------------",
+            FontName = StandardFonts.TimesRoman,
+            FontSize = 11,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 56, 0, 14)
+            Margin = new Thickness(0, 56, 0, 14)
         });
 
         opener.Add(new Heading
         {
             TocIdentifier = tocId,
-            Text      = title.ToUpperInvariant(),
-            FontName  = StandardFonts.TimesBold,
-            FontSize  = 14,
+            Text = title.ToUpperInvariant(),
+            FontName = StandardFonts.TimesBold,
+            FontSize = 14,
             Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 0, 0, 14)
+            Margin = new Thickness(0, 0, 0, 14)
         });
 
         opener.Add(new TextBlock
         {
-            Text      = "---------------",
-            FontName  = StandardFonts.TimesRoman,
-            FontSize  = 11,
+            Text = "---------------",
+            FontName = StandardFonts.TimesRoman,
+            FontSize = 11,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 0, 0, 32)
+            Margin = new Thickness(0, 0, 0, 32)
         });
     }
 
@@ -295,23 +296,23 @@ public static partial class DickensNovelExample
     {
         opener.Add(new TextBlock
         {
-            Text      = number,
-            FontName  = StandardFonts.TimesBold,
-            FontSize  = 10,
+            Text = number,
+            FontName = StandardFonts.TimesBold,
+            FontSize = 10,
             Color = ColorPalette.Slate[500],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 32, 0, 6)
+            Margin = new Thickness(0, 32, 0, 6)
         });
 
         opener.Add(new Heading
         {
             TocIdentifier = tocId,
-            Text      = title,
-            FontName  = StandardFonts.TimesBold,
-            FontSize  = 17,
+            Text = title,
+            FontName = StandardFonts.TimesBold,
+            FontSize = 17,
             Color = ColorPalette.Slate[900],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 0, 0, 18)
+            Margin = new Thickness(0, 0, 0, 18)
         });
     }
 
@@ -324,9 +325,9 @@ public static partial class DickensNovelExample
     {
         return new TextBlock
         {
-            Text      = text,
+            Text = text,
             Alignment = TextAlignment.Justify,
-            Margin    = new Thickness(0, 0, 0, 7)
+            Margin = new Thickness(0, 0, 0, 7)
         };
     }
 
@@ -373,7 +374,7 @@ public static partial class DickensNovelExample
         // Skip everything up to and including the Gutenberg header, then skip
         // the indented Table of Contents, landing at the first real "Book the" line.
         bool pastHeader = false;
-        int  bodyStart  = 0;
+        int bodyStart = 0;
 
         for (int i = 0; i < lines.Length; i++)
         {
@@ -395,9 +396,9 @@ public static partial class DickensNovelExample
         }
 
         // ── Step 2: parse body into sections ─────────────────────────────────
-        var    paraBuilder    = new StringBuilder();
-        bool   nextIsChTitle  = false;
-        string pendingChNum   = "";
+        var paraBuilder = new StringBuilder();
+        bool nextIsChTitle = false;
+        string pendingChNum = "";
 
         void FlushParagraph()
         {
@@ -410,7 +411,7 @@ public static partial class DickensNovelExample
         for (int i = bodyStart; i < lines.Length; i++)
         {
             string rawLine = lines[i];
-            string line     = rawLine.Trim();
+            string line = rawLine.Trim();
 
             // ── end of book content ───────────────────────────────────────────
             if (line.StartsWith("*** END OF THE PROJECT GUTENBERG", StringComparison.OrdinalIgnoreCase))
@@ -431,7 +432,7 @@ public static partial class DickensNovelExample
             if (ChapterLineRegex().IsMatch(line))
             {
                 FlushParagraph();
-                pendingChNum  = line;
+                pendingChNum = line;
                 nextIsChTitle = true;
                 continue;
             }
@@ -442,7 +443,7 @@ public static partial class DickensNovelExample
                 if (string.IsNullOrWhiteSpace(line)) continue; // skip inter-line blanks
                 sections.Add(new NovelSection(SectionType.Chapter, pendingChNum, line));
                 nextIsChTitle = false;
-                pendingChNum  = "";
+                pendingChNum = "";
                 continue;
             }
 
@@ -466,7 +467,12 @@ public static partial class DickensNovelExample
 // ── Supporting types ──────────────────────────────────────────────────────────
 
 /// <summary>Discriminates between the three kinds of content parsed from the Project Gutenberg source.</summary>
-internal enum SectionType { BookTitle, Chapter, Paragraph }
+internal enum SectionType
+{
+    BookTitle,
+    Chapter,
+    Paragraph
+}
 
 /// <summary>
 /// Represents a single parsed section of the novel - a book division, chapter heading, or body paragraph.
@@ -483,22 +489,21 @@ internal sealed class NovelSection
     /// <summary>Creates a Chapter section with a separate number and title.</summary>
     public NovelSection(SectionType type, string number, string title)
     {
-        Type   = type;
+        Type = type;
         Number = number;
-        Title  = title;
-        Text   = $"{number} - {title}";
+        Title = title;
+        Text = $"{number} - {title}";
     }
 
     /// <summary>Gets the type of this section (BookTitle, Chapter, or Paragraph).</summary>
-    public SectionType Type   { get; }
+    public SectionType Type { get; }
 
     /// <summary>Full text (BookTitle / Paragraph) or "CHAPTER X. - Title" (Chapter).</summary>
-    public string Text   { get; }
+    public string Text { get; }
 
     /// <summary>e.g. "CHAPTER I."  (Chapter sections only)</summary>
     public string Number { get; }
 
     /// <summary>e.g. "The Period"  (Chapter sections only)</summary>
-    public string Title  { get; }
+    public string Title { get; }
 }
-

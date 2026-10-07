@@ -8,6 +8,7 @@ namespace BonniePDF.Examples.Basics.SimpleDocument;
 [System.ComponentModel.Description("A concise PDF/A-2a and PDF/UA-1 example showing settings and responsibilities.")]
 public static class PdfComplianceExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability", "MA0051:Method is too long",
         Justification = "The example intentionally keeps generation inline.")]
@@ -40,7 +41,8 @@ public static class PdfComplianceExample
         });
         doc.Add(new TextBlock
         {
-            Text = "BonniePDF treats archival conformance and accessibility as separate settings, so a document can use either standard or combine both.",
+            Text =
+                "BonniePDF treats archival conformance and accessibility as separate settings, so a document can use either standard or combine both.",
             FontSize = 11,
             Color = ColorPalette.Slate[600],
             Margin = new Thickness(0, 0, 0, 12),
@@ -83,14 +85,16 @@ public static class PdfComplianceExample
         });
         doc.Add(new TextBlock
         {
-            Text = "BonniePDF handles the PDF version, conformance metadata, colour profiles, embedded standard-font substitutes, semantic tags, setting validation, and honest-claim resource checks.",
+            Text =
+                "BonniePDF handles the PDF version, conformance metadata, colour profiles, embedded standard-font substitutes, semantic tags, setting validation, and honest-claim resource checks.",
             FontSize = 10,
             Color = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 8),
         });
         doc.Add(new TextBlock
         {
-            Text = "The author supplies the required profile, title and language, logical reading order, alt text and table headers, and validates the final PDF against the required external profile.",
+            Text =
+                "The author supplies the required profile, title and language, logical reading order, alt text and table headers, and validates the final PDF against the required external profile.",
             FontSize = 10,
             Color = ColorPalette.Slate[700],
             Margin = new Thickness(0, 0, 0, 16),
@@ -103,7 +107,8 @@ public static class PdfComplianceExample
         });
         doc.Add(new TextBlock
         {
-            Text = "Legacy compatibility: PdfAEnabled reads true for any PDF/A profile. Assigning true selects PdfA2b; assigning false selects None. New code should use Conformance.",
+            Text =
+                "Legacy compatibility: PdfAEnabled reads true for any PDF/A profile. Assigning true selects PdfA2b; assigning false selects None. New code should use Conformance.",
             FontName = StandardFonts.HelveticaOblique,
             FontSize = 9,
             Color = ColorPalette.Slate[500],

@@ -14,11 +14,13 @@ namespace BonniePDF.Examples.Templates.Quotation;
 /// </summary>
 [System.ComponentModel.DisplayName("Quotation")]
 [System.ComponentModel.Category("Sales")]
-[System.ComponentModel.Description("A B2B sales quotation built around a three-tier pricing comparison rather than a flat line-item table, with a numbered scope of work, priced optional add-ons, a validity band, and an acceptance block with ruled signature fields. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "A B2B sales quotation built around a three-tier pricing comparison rather than a flat line-item table, with a numbered scope of work, priced optional add-ons, a validity band, and an acceptance block with ruled signature fields. PDF/A-2a + PDF/UA-1.")]
 public static class QuotationExample
 {
     // ── Design tokens ─────────────────────────────────────────────────────────
     private static readonly Color Ink = ColorPalette.Slate[800];
+
     // 600, not 500/400: both fall short of 4.5:1 on this document's backgrounds
     // (500 to 4.34:1 on a violet-tinted panel, 400 to 2.51-2.63:1 everywhere).
     private static readonly Color Muted = ColorPalette.Slate[600];
@@ -36,8 +38,10 @@ public static class QuotationExample
 
     // ── Deterministic sample fixture ──────────────────────────────────────────
     private static readonly QuotationData Sample = new(
-        new Supplier("Sample Company Ltd", "12 Harbour Square, Bristol BS1 4QA, United Kingdom", "proposals@example.com", "Company No. 09876543 · VAT GB 123 4567 89"),
-        new Customer("Sample Customer Ltd", "Sample Recipient, Head of Platform", "Sample Business Park, Kent TN23 7HL"),
+        new Supplier("Sample Company Ltd", "12 Harbour Square, Bristol BS1 4QA, United Kingdom",
+            "proposals@example.com", "Company No. 09876543 · VAT GB 123 4567 89"),
+        new Customer("Sample Customer Ltd", "Sample Recipient, Head of Platform",
+            "Sample Business Park, Kent TN23 7HL"),
         new Reference("QTE-2026-0417", "30 August 2026", "29 September 2026", "Sample Account Manager"),
         Scope:
         [
@@ -89,6 +93,7 @@ public static class QuotationExample
         Locale: "en-GB",
         Currency: "GBP");
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new(PdfSize.A4, PageOrientation.Portrait, 40)
@@ -314,8 +319,11 @@ public static class QuotationExample
     private static Container ValidityBand(QuotationData data)
     {
         VerticalStack copy = new() { Spacing = 2 };
-        copy.Add(Text($"This quotation is valid until {data.Reference.ValidUntil}", bold: true, size: 10, color: AccentDeep));
-        copy.Add(Text("Prices are held for the period shown. After that date we are happy to re-quote at prevailing rates.", size: 8, color: Muted));
+        copy.Add(Text($"This quotation is valid until {data.Reference.ValidUntil}", bold: true, size: 10,
+            color: AccentDeep));
+        copy.Add(Text(
+            "Prices are held for the period shown. After that date we are happy to re-quote at prevailing rates.",
+            size: 8, color: Muted));
 
         return new Container
         {
@@ -370,7 +378,10 @@ public static class QuotationExample
         fields.Add(SignatureField("Name and position"), 1.5f);
         fields.Add(SignatureField("Date"), 1f);
 
-        TextBlock intro = Text($"To accept, please sign below and return to {data.Supplier.Email}, quoting {data.Reference.QuoteNumber}.", color: Muted);
+        TextBlock intro =
+            Text(
+                $"To accept, please sign below and return to {data.Supplier.Email}, quoting {data.Reference.QuoteNumber}.",
+                color: Muted);
         intro.Margin = new Thickness(0, 0, 0, 4);
 
         VerticalStack body = new();
@@ -391,7 +402,8 @@ public static class QuotationExample
 
     // ── Small helpers ─────────────────────────────────────────────────────────
 
-    private static TextBlock Text(string text, bool bold = false, float size = 9f, Color? color = null, TextAlignment align = TextAlignment.Left) => new()
+    private static TextBlock Text(string text, bool bold = false, float size = 9f, Color? color = null,
+        TextAlignment align = TextAlignment.Left) => new()
     {
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
@@ -439,9 +451,24 @@ public static class QuotationExample
     public sealed record Reference(string QuoteNumber, string Issued, string ValidUntil, string Owner);
 
     /// <summary>One purchasable tier. Exactly one tier should set <paramref name="Recommended"/>.</summary>
-    public sealed record QuoteTier(string Name, string Tagline, decimal Price, string Cadence, string[] Includes, bool Recommended = false);
+    public sealed record QuoteTier(
+        string Name,
+        string Tagline,
+        decimal Price,
+        string Cadence,
+        string[] Includes,
+        bool Recommended = false);
 
     public sealed record QuoteAddOn(string Label, string Detail, decimal Price, string Cadence);
 
-    public sealed record QuotationData(Supplier Supplier, Customer Customer, Reference Reference, string[] Scope, QuoteTier[] Tiers, QuoteAddOn[] AddOns, string[] Assumptions, string Locale, string Currency);
+    public sealed record QuotationData(
+        Supplier Supplier,
+        Customer Customer,
+        Reference Reference,
+        string[] Scope,
+        QuoteTier[] Tiers,
+        QuoteAddOn[] AddOns,
+        string[] Assumptions,
+        string Locale,
+        string Currency);
 }

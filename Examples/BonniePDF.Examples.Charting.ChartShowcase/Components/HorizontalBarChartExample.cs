@@ -10,9 +10,11 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// </summary>
 [System.ComponentModel.DisplayName("Horizontal Bar Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("BarChart with Orientation = ChartOrientation.Horizontal - regional sales ranking where long category labels sit naturally on the left axis.")]
+[System.ComponentModel.Description(
+    "BarChart with Orientation = ChartOrientation.Horizontal - regional sales ranking where long category labels sit naturally on the left axis.")]
 public static class HorizontalBarChartExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document document = new(new DocumentSettings
@@ -50,15 +52,15 @@ public static class HorizontalBarChartExample
             [
                 new ChartSeries
                 {
-                    Color = Color.FromHex(ChartColors.Indigo),
+                    Color = Color.FromHex("#4f46e5"),
                     DataPoints =
                     [
-                        new ChartDataPoint { Label = "North East",  Value = 142000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "North West",  Value = 187000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Midlands",    Value = 203000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "East Anglia", Value = 96000,  LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "South East",  Value = 261000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "South West",  Value = 118000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "North East", Value = 142000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "North West", Value = 187000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Midlands", Value = 203000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "East Anglia", Value = 96000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "South East", Value = 261000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "South West", Value = 118000, LabelFormat = "N0" },
                     ]
                 }
             ],
@@ -79,7 +81,7 @@ public static class HorizontalBarChartExample
             Orientation = ChartOrientation.Horizontal,
             Height = 380,
             StretchToFit = true,
-            BarColor = Color.FromHex(ChartColors.Indigo),
+            BarColor = Color.FromHex("#4f46e5"),
             BarWidthRatio = 0.55f,
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
@@ -88,7 +90,7 @@ public static class HorizontalBarChartExample
         };
 
         document.Add(barChart);
-        
+
 
         //string svgChartPath = outputPath.Replace(".pdf", "_chart.svg");
         //File.WriteAllText(svgChartPath, barChart.ToSvg(chartData));
@@ -97,6 +99,8 @@ public static class HorizontalBarChartExample
         //File.WriteAllText(svgPagePath, document.Pages[0].ToSvg());
         return document;
     }
+
+    // Local helpers and sample data for this document.
+
+
 }
-
-

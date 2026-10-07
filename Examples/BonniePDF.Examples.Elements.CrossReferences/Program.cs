@@ -13,6 +13,7 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "crossreferences_example.pdf"));
         }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

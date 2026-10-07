@@ -16,7 +16,8 @@ namespace BonniePDF.Examples.Templates.CourseCertificate;
 /// </summary>
 [System.ComponentModel.DisplayName("Course Certificate")]
 [System.ComponentModel.Category("Education")]
-[System.ComponentModel.Description("A landscape course completion certificate: a drawn ornamental frame layered behind the wording, a compact monogram crest built from vectors, centred serif typography, and a verification code that makes the credential checkable. Decorative artwork is kept out of the reading order. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "A landscape course completion certificate: a drawn ornamental frame layered behind the wording, a compact monogram crest built from vectors, centred serif typography, and a verification code that makes the credential checkable. Decorative artwork is kept out of the reading order. PDF/A-2a + PDF/UA-1.")]
 public static class CourseCertificateExample
 {
     // ── Design tokens ─────────────────────────────────────────────────────────
@@ -40,7 +41,8 @@ public static class CourseCertificateExample
         new Institution("Sample Institute", "School of Applied Computing"),
         Recipient: "Sample Recipient",
         new Course("Accessible Document Engineering", 45, "Distinction"),
-        new Award("has successfully completed the programme of study and assessment in", "30 August 2026", "SI-ADE-2026-04188"),
+        new Award("has successfully completed the programme of study and assessment in", "30 August 2026",
+            "SI-ADE-2026-04188"),
         Signatories:
         [
             new Signatory("Sample Registrar", "Registrar"),
@@ -49,6 +51,7 @@ public static class CourseCertificateExample
         VerificationUrl: "https://example.com/verify/SI-ADE-2026-04188",
         Locale: "en-GB");
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new(PdfSize.A4, PageOrientation.Landscape, PageMargin)
@@ -167,13 +170,14 @@ public static class CourseCertificateExample
         canvas.FillCircle(cx, cy, outer - 4.5f, AccentSoft);
 
         string monogram = string.Concat(institutionName
-            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-            .Take(2)
-            .Select(word => word[0]))
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Take(2)
+                .Select(word => word[0]))
             .ToUpperInvariant();
         const float fontSize = 13f;
         float monogramWidth = canvas.MeasureText(monogram, fontSize, StandardFonts.TimesBold).Width;
-        canvas.DrawText(cx - monogramWidth / 2, cy - fontSize / 2, monogram, Accent, fontSize, StandardFonts.TimesBold, 0);
+        canvas.DrawText(cx - monogramWidth / 2, cy - fontSize / 2, monogram, Accent, fontSize, StandardFonts.TimesBold,
+            0);
     })
     {
         DrawWidth = 52,
@@ -184,7 +188,8 @@ public static class CourseCertificateExample
     /// <summary>A small crest, centred above the institution name.</summary>
     private static HorizontalStack InstitutionCrest(string name)
     {
-        HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 0, 0, 7) };
+        HorizontalStack row = new()
+            { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 0, 0, 7) };
         row.Add(new Spacer(1), 1f);
         row.Add(new Container { Child = SealMedallion(name) }, 0.15f);
         row.Add(new Spacer(1), 1f);
@@ -200,7 +205,8 @@ public static class CourseCertificateExample
 
         stack.Add(InstitutionCrest(data.Institution.Name));
 
-        stack.Add(Text(data.Institution.Name.ToUpperInvariant(), font: StandardFonts.Helvetica, size: 9, color: Accent, align: TextAlignment.Center));
+        stack.Add(Text(data.Institution.Name.ToUpperInvariant(), font: StandardFonts.Helvetica, size: 9, color: Accent,
+            align: TextAlignment.Center));
 
         TextBlock department = Caption(data.Institution.Department);
         department.Margin = new Thickness(0, 2, 0, 14);
@@ -224,19 +230,24 @@ public static class CourseCertificateExample
             Margin = new Thickness(210, 0, 210, 16),
         });
 
-        stack.Add(Text("This is to certify that", font: StandardFonts.TimesItalic, size: 11, color: Muted, align: TextAlignment.Center));
+        stack.Add(Text("This is to certify that", font: StandardFonts.TimesItalic, size: 11, color: Muted,
+            align: TextAlignment.Center));
 
-        TextBlock recipient = Text(data.Recipient, font: StandardFonts.TimesBold, size: 24, color: Accent, align: TextAlignment.Center);
+        TextBlock recipient = Text(data.Recipient, font: StandardFonts.TimesBold, size: 24, color: Accent,
+            align: TextAlignment.Center);
         recipient.Margin = new Thickness(0, 6, 0, 6);
         stack.Add(recipient);
 
-        stack.Add(Text(data.Award.Statement, font: StandardFonts.TimesItalic, size: 11, color: Muted, align: TextAlignment.Center));
+        stack.Add(Text(data.Award.Statement, font: StandardFonts.TimesItalic, size: 11, color: Muted,
+            align: TextAlignment.Center));
 
-        TextBlock course = Text(data.Course.Title, font: StandardFonts.TimesBold, size: 16, align: TextAlignment.Center);
+        TextBlock course = Text(data.Course.Title, font: StandardFonts.TimesBold, size: 16,
+            align: TextAlignment.Center);
         course.Margin = new Thickness(0, 6, 0, 6);
         stack.Add(course);
 
-        stack.Add(Text($"{data.Course.CreditHours} credit hours · Awarded with {data.Course.Grade} · {data.Award.Awarded}",
+        stack.Add(Text(
+            $"{data.Course.CreditHours} credit hours · Awarded with {data.Course.Grade} · {data.Award.Awarded}",
             font: StandardFonts.Helvetica, size: 9, color: Muted, align: TextAlignment.Center));
 
         return stack;
@@ -313,7 +324,8 @@ public static class CourseCertificateExample
     private static TextBlock Caption(string content, float size = 7.5f, Color? color = null) =>
         Text(content, font: StandardFonts.Helvetica, size: size, color: color ?? Muted, align: TextAlignment.Center);
 
-    private static TextBlock Text(string content, string? font = null, float size = 11f, Color? color = null, TextAlignment align = TextAlignment.Left) => new()
+    private static TextBlock Text(string content, string? font = null, float size = 11f, Color? color = null,
+        TextAlignment align = TextAlignment.Left) => new()
     {
         Text = content,
         FontName = font ?? StandardFonts.TimesRoman,
@@ -332,5 +344,12 @@ public static class CourseCertificateExample
 
     public sealed record Signatory(string Name, string Role);
 
-    public sealed record CertificateData(Institution Institution, string Recipient, Course Course, Award Award, Signatory[] Signatories, string VerificationUrl, string Locale);
+    public sealed record CertificateData(
+        Institution Institution,
+        string Recipient,
+        Course Course,
+        Award Award,
+        Signatory[] Signatories,
+        string VerificationUrl,
+        string Locale);
 }

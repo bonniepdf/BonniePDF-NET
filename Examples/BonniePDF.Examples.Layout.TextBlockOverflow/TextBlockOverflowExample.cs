@@ -13,7 +13,8 @@ namespace BonniePDF.Examples.Layout.TextBlockOverflow;
 /// </summary>
 [System.ComponentModel.DisplayName("TextBlock Overflow")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("Long-form text flowing across multiple pages - self-documenting sections stay tagged as they paginate, with a decorative page-number footer.")]
+[System.ComponentModel.Description(
+    "Long-form text flowing across multiple pages - self-documenting sections stay tagged as they paginate, with a decorative page-number footer.")]
 public static class TextBlockOverflowExample
 {
     private static readonly (string Title, string Intro)[] Sections =
@@ -28,22 +29,24 @@ public static class TextBlockOverflowExample
             "The \"Page N of M\" line at the foot of every page comes from a footer template. It is marked as decorative, so assistive technology skips it; the total page count is resolved after layout, once the number of pages is known."),
     };
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "TextBlock Overflow Demo",
-                Author   = "BonniePDF",
-                Subject  = "Demonstrates long-form text flowing across page boundaries in an accessible PDF/A-2a + PDF/UA-1 document.",
+                Title = "TextBlock Overflow Demo",
+                Author = "BonniePDF",
+                Subject =
+                    "Demonstrates long-form text flowing across page boundaries in an accessible PDF/A-2a + PDF/UA-1 document.",
                 Keywords = "pdf, accessibility, text, overflow, pagination, BonniePDF",
             },
             Settings = new DocumentSettings
             {
-                Conformance   = PdfAConformance.PdfA2a,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
+                Language = "en-GB",
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
@@ -52,9 +55,9 @@ public static class TextBlockOverflowExample
                 // Page numbers in the footer are decorative - screen readers skip them.
                 FooterTemplate = pageNum => new TextBlock
                 {
-                    Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
-                    FontName  = StandardFonts.Helvetica,
-                    FontSize  = 9,
+                    Text = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
+                    FontName = StandardFonts.Helvetica,
+                    FontSize = 9,
                     Color = ColorPalette.Slate[400],
                     Alignment = TextAlignment.Right,
                 },
@@ -64,16 +67,17 @@ public static class TextBlockOverflowExample
         doc.Add(new Heading("Long-Form Text & Automatic Pagination")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 24,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 12),
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 24,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 12),
         });
 
         doc.Add(new TextBlock
         {
-            Text   = "This document shows how BonniePDF flows long-form text across page boundaries while keeping it fully tagged. The three sections below describe what to look for; the body text is intentionally long enough to span several pages.",
+            Text =
+                "This document shows how BonniePDF flows long-form text across page boundaries while keeping it fully tagged. The three sections below describe what to look for; the body text is intentionally long enough to span several pages.",
             Margin = new Thickness(0, 0, 0, 16),
         });
 
@@ -86,16 +90,16 @@ public static class TextBlockOverflowExample
             doc.Add(new Heading(title)
             {
                 TocIdentifier = $"section-{i + 1}",
-                Level         = 2,
-                FontName      = StandardFonts.HelveticaBold,
-                FontSize      = 14,
-                Color     = ColorPalette.Indigo[600],
-                Margin        = new Thickness(0, 16, 0, 6),
+                Level = 2,
+                FontName = StandardFonts.HelveticaBold,
+                FontSize = 14,
+                Color = ColorPalette.Indigo[600],
+                Margin = new Thickness(0, 16, 0, 6),
             });
 
             doc.Add(new TextBlock
             {
-                Text   = intro,
+                Text = intro,
                 Margin = new Thickness(0, 0, 0, 8),
             });
 
@@ -104,7 +108,7 @@ public static class TextBlockOverflowExample
             {
                 doc.Add(new TextBlock
                 {
-                    Text   = source.Paragraph(),
+                    Text = source.Paragraph(),
                     Margin = new Thickness(0, 0, 0, 8),
                 });
             }

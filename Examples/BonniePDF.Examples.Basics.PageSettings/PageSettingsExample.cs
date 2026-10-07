@@ -7,6 +7,7 @@ namespace BonniePDF.Examples.Basics.PageSettings;
 [System.ComponentModel.Description("Demonstrates orientation, sizes, and backgrounds.")]
 public static class PageSettingsExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new(new DocumentSettings
@@ -26,7 +27,8 @@ public static class PageSettingsExample
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Standard PDF Page Formats Gallery";
 
@@ -65,17 +67,20 @@ public static class PageSettingsExample
                     Color = ColorPalette.Slate[800]
                 });
 
-                content.Add(new TextBlock { Text = "Technical Specifications", FontSize = 14, Color = ColorPalette.Slate[500] });
+                content.Add(new TextBlock
+                    { Text = "Technical Specifications", FontSize = 14, Color = ColorPalette.Slate[500] });
                 content.Add(new Line { Color = ColorPalette.Slate[200], Thickness = 1 });
 
                 // Data Table Simulation
                 content.Add(CreateSpecLine("Points:", $"{current.Width:F2}pt x {current.Height:F2}pt"));
                 content.Add(CreateSpecLine("Inches:", $"{current.Width / 72:F2}\" x {current.Height / 72:F2}\""));
-                content.Add(CreateSpecLine("Millimeters:", $"{(current.Width / 72 * 25.4f):F1}mm x {(current.Height / 72 * 25.4f):F1}mm"));
+                content.Add(CreateSpecLine("Millimeters:",
+                    $"{(current.Width / 72 * 25.4f):F1}mm x {(current.Height / 72 * 25.4f):F1}mm"));
 
                 doc.Add(content);
             }
         }
+
         return doc;
     }
 
@@ -90,4 +95,3 @@ public static class PageSettingsExample
         };
     }
 }
-

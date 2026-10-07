@@ -92,6 +92,10 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Include="..\CHANGELOG.md">
+	    <Pack>False</Pack>
+	    <PackagePath>\</PackagePath>
+    </None>
     <!-- Pack the README so it renders on the NuGet.org listing page. -->
     <None Include="..\README.md">
       <Pack>True</Pack>

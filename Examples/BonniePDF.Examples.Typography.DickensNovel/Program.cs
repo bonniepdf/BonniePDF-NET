@@ -13,6 +13,7 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "dickens_a_tale_of_two_cities.pdf"));
         }
+
         Console.WriteLine("Generating Dickens: A Tale of Two Cities (Tagged / PDF/UA-1)...");
         using (var doc = DickensNovelTaggedExample.Generate())
         {

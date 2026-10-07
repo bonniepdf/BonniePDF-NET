@@ -20,18 +20,23 @@ namespace BonniePDF.Examples.Templates.PolicySchedule;
 /// </summary>
 [System.ComponentModel.DisplayName("Policy Schedule")]
 [System.ComponentModel.Category("Insurance")]
-[System.ComponentModel.Description("An insurance policy schedule: property details, coverage limits and deductibles, a premium breakdown, endorsements, and a QR link to a self-service portal.")]
+[System.ComponentModel.Description(
+    "An insurance policy schedule: property details, coverage limits and deductibles, a premium breakdown, endorsements, and a QR link to a self-service portal.")]
 public static class PolicyScheduleExample
 {
     // ── Brand tokens ──────────────────────────────────────────────────────────
     private static readonly Color Ink = ColorPalette.Slate[800];
+
     private static readonly Color Muted = ColorPalette.Slate[500];
+
     // 600, not 400: 400 never clears 4.5:1 as text (2.63:1 on this document's backgrounds).
     private static readonly Color Faint = ColorPalette.Slate[600];
     private static readonly Color HeaderBg = ColorPalette.Slate[100];
     private static readonly Color Rule = ColorPalette.Slate[200];
     private static readonly Color Brand = ColorPalette.Teal[700];
+
     private static readonly Color BrandSoft = ColorPalette.Teal[50];
+
     // 700, not 600: this table cell text on white needs 4.5:1 and 600 falls to 3.20:1.
     private static readonly Color Accent = ColorPalette.Amber[700];
     private static readonly Color Danger = ColorPalette.Rose[700];
@@ -75,8 +80,10 @@ public static class PolicyScheduleExample
             "Sample Home Insurance Ltd",
             "20 Sample Street\nLondon EC3M 8AF\nAuthorised by the FCA (sample)",
             "SHIL-FC-0099"),
-        Policy: new Policy("HOM-2026-8842139", "HomeShield Buildings & Contents", "01 Sep 2026", "01 Sep 2027", "Active"),
-        Policyholder: new Policyholder("Sample Policyholder", "47 Sample Walk\nSample City SC6 1QR", "policyholder@sample.example"),
+        Policy: new Policy("HOM-2026-8842139", "HomeShield Buildings & Contents", "01 Sep 2026", "01 Sep 2027",
+            "Active"),
+        Policyholder: new Policyholder("Sample Policyholder", "47 Sample Walk\nSample City SC6 1QR",
+            "policyholder@sample.example"),
         InsuredRisk: new InsuredRisk("Semi-detached house", "47 Sample Walk, Sample City SC6 1QR", 1936, 412000m),
         Coverages:
         [
@@ -106,17 +113,21 @@ public static class PolicyScheduleExample
             new Endorsement("EN-04", "Home business extension", "Covers incidental office use up to £15,000.", false),
             new Endorsement("EX-12", "Wear and tear / gradual deterioration", "Excluded in all sections.", true),
             new Endorsement("EX-22", "Acts of terrorism", "Excluded unless Pool Re extension purchased.", true),
-            new Endorsement("EX-27", "Unoccupied property beyond 60 days", "Theft and water damage excluded if unoccupied > 60 consecutive days.", true),
-            new Endorsement("EN-09", "Smart-water property marking", "£50 excess reduction on approved theft claims.", false),
+            new Endorsement("EX-27", "Unoccupied property beyond 60 days",
+                "Theft and water damage excluded if unoccupied > 60 consecutive days.", true),
+            new Endorsement("EN-09", "Smart-water property marking", "£50 excess reduction on approved theft claims.",
+                false),
         ],
         Claims: new Claims("0800 555 0142", "claims@sample-home-insurance.example", "24 hours / 7 days"),
         PortalUrl: "https://portal.sample-home-insurance.example/p/HOM-2026-8842139");
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate() => BuildDocument(Sample);
 
     // ── Local helpers ─────────────────────────────────────────────────────────
 
-    private static TextBlock Cell(string text, float size = 9f, bool bold = false, Color? color = null, TextAlignment align = TextAlignment.Left) => new()
+    private static TextBlock Cell(string text, float size = 9f, bool bold = false, Color? color = null,
+        TextAlignment align = TextAlignment.Left) => new()
     {
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
@@ -166,7 +177,8 @@ public static class PolicyScheduleExample
             DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9f).WithColor(Ink),
             HeaderTemplate = pageNumber => new TextBlock
             {
-                Text = $"{data.Insurer.Name} · Policy {data.Policy.Number} · Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                Text =
+                    $"{data.Insurer.Name} · Policy {data.Policy.Number} · Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7.5f,
                 Color = Faint,
@@ -174,7 +186,8 @@ public static class PolicyScheduleExample
             },
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"{data.Policy.Product} · Renewal {data.Policy.Renewal} · Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                Text =
+                    $"{data.Policy.Product} · Renewal {data.Policy.Renewal} · Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7.5f,
                 Color = Faint,
@@ -192,7 +205,8 @@ public static class PolicyScheduleExample
 
         VerticalStack status = new();
         status.Add(Cell("POLICY SCHEDULE", size: 11f, bold: true, color: Brand));
-        status.Add(Cell($"{data.Policy.Status.ToUpperInvariant()} · renews {data.Policy.Renewal}", size: 8f, color: Muted));
+        status.Add(Cell($"{data.Policy.Status.ToUpperInvariant()} · renews {data.Policy.Renewal}", size: 8f,
+            color: Muted));
         Container statusBox = new()
         {
             BackgroundColor = BrandSoft,
@@ -313,7 +327,8 @@ public static class PolicyScheduleExample
                 AltText = $"QR code linking to the policy portal for policy {data.Policy.Number}",
             },
         });
-        qrBody.Add(Cell("Scan to view documents and report a claim", size: 7.5f, color: Faint, align: TextAlignment.Center));
+        qrBody.Add(Cell("Scan to view documents and report a claim", size: 7.5f, color: Faint,
+            align: TextAlignment.Center));
         Container qrCard = new()
         {
             BackgroundColor = Color.White,
@@ -386,7 +401,7 @@ public static class PolicyScheduleExample
             Margin = new Thickness(0, 14, 0, 0),
             Child = Cell(
                 $"This schedule is a summary; the full policy wording prevails. Cover continues until {data.Policy.Renewal} "
-                    + "unless renewed or cancelled. This is a fictional document for demonstration only and is not insurance advice.",
+                + "unless renewed or cancelled. This is a fictional document for demonstration only and is not insurance advice.",
                 size: 7.5f,
                 color: Faint),
         });

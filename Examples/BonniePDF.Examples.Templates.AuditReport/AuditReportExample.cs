@@ -10,11 +10,14 @@ namespace BonniePDF.Examples.Templates.AuditReport;
 /// </summary>
 [System.ComponentModel.DisplayName("GDPR ISO 27001 Audit Report")]
 [System.ComponentModel.Category("Compliance")]
-[System.ComponentModel.Description("Enterprise data-protection and security audit report with running confidential header/footer, KPI tiles, charts, findings register, and recommendations. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Enterprise data-protection and security audit report with running confidential header/footer, KPI tiles, charts, findings register, and recommendations. PDF/A-2a + PDF/UA-1.")]
 public static class AuditReportExample
 {
     private static readonly Color Primary = ColorPalette.Indigo[700];
+
     private static readonly Color Ink = ColorPalette.Slate[700];
+
     // 600, not 500: several usages read against the Indigo-50 KPI panel, and 500
     // falls to 4.26:1 there against the 4.5:1 WCAG AA threshold.
     private static readonly Color Muted = ColorPalette.Slate[600];
@@ -37,6 +40,7 @@ public static class AuditReportExample
         new("F-12", "Subject access request (SAR) SLA", "GDPR Art. 12(3)", Severity.High, "Open"),
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         string longDate = DateTime.Now.ToString("d MMMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
@@ -48,7 +52,8 @@ public static class AuditReportExample
             HeaderTemplate = pageNumber => pageNumber == 1
                 ? null
                 : BandRow("Sample Company - Audit AR-2026-014", "CONFIDENTIAL", ColorPalette.Rose[600]),
-            FooterTemplate = pageNumber => BandRow("CONFIDENTIAL - not for distribution", $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", Muted),
+            FooterTemplate = pageNumber => BandRow("CONFIDENTIAL - not for distribution",
+                $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", Muted),
         };
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(Ink);
 
@@ -81,7 +86,8 @@ public static class AuditReportExample
             "ISO/IEC 27001:2022.",
             Muted));
 
-        HorizontalStack meta = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 4, 0, 20) };
+        HorizontalStack meta = new()
+            { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 4, 0, 20) };
         meta.Add(MetaItem("Report ref", "AR-2026-014"), 1);
         meta.Add(MetaItem("Audit period", "Apr-Jun 2026"), 1);
         meta.Add(MetaItem("Issued", longDate), 1);
@@ -136,7 +142,10 @@ public static class AuditReportExample
                 SeverityCell(finding.Severity),
                 // Emerald[700], not [600]: regular 9pt text on white needs 4.5:1 and
                 // 600 falls to 3.65:1.
-                Td(finding.Status, string.Equals(finding.Status, "Remediated", StringComparison.Ordinal) ? ColorPalette.Emerald[700] : Ink));
+                Td(finding.Status,
+                    string.Equals(finding.Status, "Remediated", StringComparison.Ordinal)
+                        ? ColorPalette.Emerald[700]
+                        : Ink));
         }
 
         doc.Add(table);
@@ -146,8 +155,10 @@ public static class AuditReportExample
     {
         doc.Add(H2("Priority recommendations"));
         doc.Add(Body("1. Complete and sign off the outstanding DPIA (F-02) for high-risk profiling before go-live."));
-        doc.Add(Body("2. Rework the breach-response runbook (F-05) to guarantee supervisory-authority notification within 72 hours."));
-        doc.Add(Body("3. Establish a Subject Access Request workflow (F-12) that meets the one-month statutory deadline."));
+        doc.Add(Body(
+            "2. Rework the breach-response runbook (F-05) to guarantee supervisory-authority notification within 72 hours."));
+        doc.Add(Body(
+            "3. Establish a Subject Access Request workflow (F-12) that meets the one-month statutory deadline."));
 
         doc.Add(H2("Scope & methodology"));
         doc.Add(Body(
@@ -220,7 +231,12 @@ public static class AuditReportExample
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
         row.Add(new TextBlock { Text = left, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Muted }, 3);
-        row.Add(new TextBlock { Text = right, FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = rightColor, Alignment = TextAlignment.Right }, 2);
+        row.Add(
+            new TextBlock
+            {
+                Text = right, FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = rightColor,
+                Alignment = TextAlignment.Right
+            }, 2);
         return row;
     }
 
@@ -264,7 +280,11 @@ public static class AuditReportExample
     private static VerticalStack MetaItem(string label, string value)
     {
         VerticalStack stack = new();
-        stack.Add(new TextBlock { Text = label.ToUpperInvariant(), FontName = StandardFonts.HelveticaBold, FontSize = 7, Color = Muted, Margin = new Thickness(0, 0, 0, 2) });
+        stack.Add(new TextBlock
+        {
+            Text = label.ToUpperInvariant(), FontName = StandardFonts.HelveticaBold, FontSize = 7, Color = Muted,
+            Margin = new Thickness(0, 0, 0, 2)
+        });
         stack.Add(new TextBlock { Text = value, FontName = StandardFonts.Helvetica, FontSize = 10, Color = Ink });
         return stack;
     }
@@ -272,9 +292,14 @@ public static class AuditReportExample
     private static Container Kpi(string value, string label, Color accent)
     {
         VerticalStack stack = new();
-        stack.Add(new TextBlock { Text = value, FontName = StandardFonts.HelveticaBold, FontSize = 20, Color = accent, Margin = new Thickness(0, 0, 0, 3) });
+        stack.Add(new TextBlock
+        {
+            Text = value, FontName = StandardFonts.HelveticaBold, FontSize = 20, Color = accent,
+            Margin = new Thickness(0, 0, 0, 3)
+        });
         stack.Add(new TextBlock { Text = label, FontName = StandardFonts.Helvetica, FontSize = 8.5f, Color = Muted });
-        return new Container { BackgroundColor = ColorPalette.Indigo[50], Padding = new Thickness(14, 12, 14, 12), Child = stack };
+        return new Container
+            { BackgroundColor = ColorPalette.Indigo[50], Padding = new Thickness(14, 12, 14, 12), Child = stack };
     }
 
     private static Container ChartCard(string title, IElement chart)
@@ -300,9 +325,11 @@ public static class AuditReportExample
         };
     }
 
-    private static TextBlock Th(string text) => new() { Text = text, FontName = StandardFonts.HelveticaBold, FontSize = 9, Color = Color.White };
+    private static TextBlock Th(string text) => new()
+        { Text = text, FontName = StandardFonts.HelveticaBold, FontSize = 9, Color = Color.White };
 
-    private static TextBlock Td(string text, Color color) => new() { Text = text, FontName = StandardFonts.Helvetica, FontSize = 9, Color = color };
+    private static TextBlock Td(string text, Color color) => new()
+        { Text = text, FontName = StandardFonts.Helvetica, FontSize = 9, Color = color };
 
     private static TextBlock SeverityCell(Severity severity) => new()
     {
@@ -324,7 +351,13 @@ public static class AuditReportExample
         _ => ColorPalette.Emerald[700],
     };
 
-    private enum Severity { Critical, High, Medium, Low }
+    private enum Severity
+    {
+        Critical,
+        High,
+        Medium,
+        Low
+    }
 
     private sealed record Finding(string Id, string Area, string Requirement, Severity Severity, string Status);
 }

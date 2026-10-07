@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\BonniePDF\BonniePDF.csproj" />
-    <Compile Include="..\TradeKit.cs" Link="TradeKit.cs" />
   </ItemGroup>
 
   <PropertyGroup>

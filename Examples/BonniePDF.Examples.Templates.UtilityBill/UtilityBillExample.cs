@@ -16,12 +16,15 @@ namespace BonniePDF.Examples.Templates.UtilityBill;
 /// </summary>
 [System.ComponentModel.DisplayName("Utility Bill")]
 [System.ComponentModel.Category("Utilities")]
-[System.ComponentModel.Description("A domestic energy bill that derives every figure from meter readings rather than asserting a total: a headline amount due, a full tariff breakdown, a twelve-month consumption chart, and a detachable payment slip below a dashed cut line carrying a scannable payment reference. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "A domestic energy bill that derives every figure from meter readings rather than asserting a total: a headline amount due, a full tariff breakdown, a twelve-month consumption chart, and a detachable payment slip below a dashed cut line carrying a scannable payment reference. PDF/A-2a + PDF/UA-1.")]
 public static class UtilityBillExample
 {
     // ── Design tokens ─────────────────────────────────────────────────────────
     private static readonly Color Ink = ColorPalette.Slate[800];
+
     private static readonly Color Muted = ColorPalette.Slate[500];
+
     // 600, not 400: 400 never clears 4.5:1 as text (2.51-2.63:1 on this
     // document's backgrounds).
     private static readonly Color Faint = ColorPalette.Slate[600];
@@ -33,7 +36,8 @@ public static class UtilityBillExample
 
     // ── Deterministic sample fixture ──────────────────────────────────────────
     private static readonly UtilityBillData Sample = new(
-        new Supplier("Sample Energy", "PO Box 4120, Cardiff CF10 3RT", "0800 000 0000", "Supply licence held with the energy regulator"),
+        new Supplier("Sample Energy", "PO Box 4120, Cardiff CF10 3RT", "0800 000 0000",
+            "Supply licence held with the energy regulator"),
         new Customer("Sample Customer", "48 Sample Road, Bristol BS6 6DR", "SE-8842-01773"),
         new BillingPeriod("1 May 2026", "31 July 2026", "5 August 2026", "19 August 2026"),
         Charges:
@@ -54,6 +58,7 @@ public static class UtilityBillExample
         Locale: "en-GB",
         Currency: "GBP");
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new(PdfSize.A4, PageOrientation.Portrait, 38)
@@ -99,7 +104,8 @@ public static class UtilityBillExample
 
     public static decimal VatAmount(UtilityBillData data) => Round2(NetTotal(data) * data.VatRatePercent / 100m);
 
-    public static decimal AmountDue(UtilityBillData data) => Round2(NetTotal(data) + VatAmount(data) + data.BroughtForward);
+    public static decimal AmountDue(UtilityBillData data) =>
+        Round2(NetTotal(data) + VatAmount(data) + data.BroughtForward);
 
     private static decimal Round2(decimal value) => Math.Round(value, 2, MidpointRounding.AwayFromZero);
 
@@ -169,7 +175,8 @@ public static class UtilityBillExample
 
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
         row.Add(label, 1);
-        row.Add(Text(Money(AmountDue(data), data), bold: true, size: 20, color: AccentDeep, align: TextAlignment.Right), 1);
+        row.Add(Text(Money(AmountDue(data), data), bold: true, size: 20, color: AccentDeep, align: TextAlignment.Right),
+            1);
 
         return new Container
         {
@@ -207,15 +214,18 @@ public static class UtilityBillExample
         {
             table.AddRow(
                 Text($"{charge.Fuel} — energy", bold: true),
-                Text($"{charge.MeterSerial}  ·  {charge.PreviousReading} → {charge.CurrentReading}", size: 8, color: Muted),
+                Text($"{charge.MeterSerial}  ·  {charge.PreviousReading} → {charge.CurrentReading}", size: 8,
+                    color: Muted),
                 Text(UnitsUsed(charge).ToString(CultureInfo.InvariantCulture), align: TextAlignment.Right),
-                Text($"{charge.UnitRatePence.ToString("F2", CultureInfo.InvariantCulture)}p", align: TextAlignment.Right),
+                Text($"{charge.UnitRatePence.ToString("F2", CultureInfo.InvariantCulture)}p",
+                    align: TextAlignment.Right),
                 Text(Money(EnergyCost(charge), data), align: TextAlignment.Right));
             table.AddRow(
                 Text($"{charge.Fuel} — standing charge"),
                 Text($"{charge.Days} days", size: 8, color: Muted),
                 Text(charge.Days.ToString(CultureInfo.InvariantCulture), align: TextAlignment.Right),
-                Text($"{charge.StandingChargePence.ToString("F2", CultureInfo.InvariantCulture)}p", align: TextAlignment.Right),
+                Text($"{charge.StandingChargePence.ToString("F2", CultureInfo.InvariantCulture)}p",
+                    align: TextAlignment.Right),
                 Text(Money(StandingCost(charge), data), align: TextAlignment.Right));
         }
 
@@ -232,6 +242,7 @@ public static class UtilityBillExample
         {
             TotalRow("Balance brought forward", Money(data.BroughtForward, data));
         }
+
         TotalRow("Total amount due", Money(AmountDue(data), data), bold: true);
 
         VerticalStack stack = new() { Margin = new Thickness(0, 0, 0, 14) };
@@ -245,7 +256,13 @@ public static class UtilityBillExample
     {
         ChartData chartData = new()
         {
-            Series = [new ChartSeries { DataPoints = [.. data.History.Select(h => new ChartDataPoint { Label = h.Month, Value = h.Units })] }],
+            Series =
+            [
+                new ChartSeries
+                {
+                    DataPoints = [.. data.History.Select(h => new ChartDataPoint { Label = h.Month, Value = h.Units })]
+                }
+            ],
         };
 
         int min = data.History.Min(h => h.Units);
@@ -254,7 +271,8 @@ public static class UtilityBillExample
         BarChart chart = new()
         {
             Data = chartData,
-            AltText = $"Monthly energy use over the last twelve months, from {data.History[0].Month} to {data.History[^1].Month}, ranging from {min} to {max} units. Use peaks in winter and falls through the summer.",
+            AltText =
+                $"Monthly energy use over the last twelve months, from {data.History[0].Month} to {data.History[^1].Month}, ranging from {min} to {max} units. Use peaks in winter and falls through the summer.",
             Height = 120,
             StretchToFit = true,
             BarColor = Accent,
@@ -263,7 +281,9 @@ public static class UtilityBillExample
             BackgroundColor = Color.FromHex("#ffffff"),
         };
 
-        TextBlock caption = Text("Units per month, including both fuels. Winter peaks are normal for a home of this size.", size: 8, color: Muted);
+        TextBlock caption =
+            Text("Units per month, including both fuels. Winter peaks are normal for a home of this size.", size: 8,
+                color: Muted);
         caption.Margin = new Thickness(0, 4, 0, 0);
 
         VerticalStack stack = new() { Margin = new Thickness(0, 0, 0, 14) };
@@ -283,7 +303,8 @@ public static class UtilityBillExample
         canvas.BeginPath();
         canvas.MoveTo(0, height / 2);
         canvas.LineTo(width, height / 2);
-        canvas.StrokeCurrentPath(new StrokeStyle { Paint = Color.FromHex("#94a3b8"), Width = 0.75f, DashPattern = [3, 3] });
+        canvas.StrokeCurrentPath(new StrokeStyle
+            { Paint = Color.FromHex("#94a3b8"), Width = 0.75f, DashPattern = [3, 3] });
     })
     {
         DrawHeight = 10,
@@ -362,7 +383,8 @@ public static class UtilityBillExample
         return stack;
     }
 
-    private static TextBlock Text(string text, bool bold = false, float size = 9f, Color? color = null, TextAlignment align = TextAlignment.Left) => new()
+    private static TextBlock Text(string text, bool bold = false, float size = 9f, Color? color = null,
+        TextAlignment align = TextAlignment.Left) => new()
     {
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
@@ -383,11 +405,28 @@ public static class UtilityBillExample
     public sealed record BillingPeriod(string From, string To, string Issued, string DueBy);
 
     /// <summary>One metered fuel, with the readings its charge derives from.</summary>
-    public sealed record MeterCharge(string Fuel, string MeterSerial, int PreviousReading, int CurrentReading, decimal UnitRatePence, decimal StandingChargePence, int Days);
+    public sealed record MeterCharge(
+        string Fuel,
+        string MeterSerial,
+        int PreviousReading,
+        int CurrentReading,
+        decimal UnitRatePence,
+        decimal StandingChargePence,
+        int Days);
 
     public sealed record MonthUsage(string Month, int Units);
 
     public sealed record PaymentDetails(string Reference, string SortCode, string AccountNumber);
 
-    public sealed record UtilityBillData(Supplier Supplier, Customer Customer, BillingPeriod Period, MeterCharge[] Charges, decimal BroughtForward, decimal VatRatePercent, MonthUsage[] History, PaymentDetails Payment, string Locale, string Currency);
+    public sealed record UtilityBillData(
+        Supplier Supplier,
+        Customer Customer,
+        BillingPeriod Period,
+        MeterCharge[] Charges,
+        decimal BroughtForward,
+        decimal VatRatePercent,
+        MonthUsage[] History,
+        PaymentDetails Payment,
+        string Locale,
+        string Currency);
 }

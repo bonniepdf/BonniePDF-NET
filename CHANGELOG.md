@@ -28,6 +28,8 @@ behaviour, so the two files can be read side by side.
 
 ### Changed
 
+- Made example document builders self-contained by including their own helpers, chart data, palettes, and font paths. Added entry-point guidance while retaining explicit asset inputs and the standalone project runners.
+
 - Centralized PDF dictionary keys in documented, context-specific internal constants. Serialized PDF output is unchanged.
 
 - **Breaking: removed options that had no effect.** `LineChart.LineWidth` and `ShowDataPointMarkers` are replaced by `DefaultLineWidth` and `DefaultShowMarkers`; use `DotPlotChart.DefaultDotRadius` and `LollipopChart.DefaultStemWidth`/`DefaultHeadRadius` instead of `DotRadius`, `StemWidth` and `HeadRadius`. Series styles still override these defaults. Removed `PieChart.TotalLabelFontSize`/`TotalValueFontSize` and SVG export `TextMode`/`IncludeLinks` (including `SvgTextMode`); they never controlled rendering. Remove these keys from document definitions: ordinary validation warns, and strict validation rejects them.

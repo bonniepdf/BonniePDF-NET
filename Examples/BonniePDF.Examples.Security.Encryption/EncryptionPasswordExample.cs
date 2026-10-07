@@ -8,9 +8,11 @@ namespace BonniePDF.Examples.Security.Encryption;
 /// </summary>
 [System.ComponentModel.DisplayName("Encryption - Password Protected")]
 [System.ComponentModel.Category("Security")]
-[System.ComponentModel.Description("Generates a password-protected PDF (128-bit RC4 encryption) that requires a password to open.")]
+[System.ComponentModel.Description(
+    "Generates a password-protected PDF (128-bit RC4 encryption) that requires a password to open.")]
 public static class EncryptionPasswordExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new() { Language = "en-GB" };
@@ -18,7 +20,8 @@ public static class EncryptionPasswordExample
 
         Document doc = new(settings);
         doc.Metadata.Title = "Password-Protected Encryption Example";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Add(new TextBlock
         {
@@ -48,4 +51,3 @@ public static class EncryptionPasswordExample
         return doc;
     }
 }
-

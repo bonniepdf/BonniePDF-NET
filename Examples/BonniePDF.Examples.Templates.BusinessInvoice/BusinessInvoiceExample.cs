@@ -7,11 +7,13 @@ namespace BonniePDF.Examples.Templates.BusinessInvoice;
 /// </summary>
 [System.ComponentModel.DisplayName("Business Invoice")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("Generates a modern QuickBooks-style invoice with company branding, line items table, payment details, and professional styling.")]
+[System.ComponentModel.Description(
+    "Generates a modern QuickBooks-style invoice with company branding, line items table, payment details, and professional styling.")]
 public static class BusinessInvoiceExample
 {
     // Brand accent color - a professional green similar to QuickBooks
     private static readonly Color AccentGreen = Color.FromHex("#0B9444");
+
     // A darker step of AccentGreen for small/regular text painted in the brand
     // colour (headers, labels): AccentGreen itself only clears 4.5:1 at the 28pt
     // bold size of the "Invoice" heading (3.94:1 elsewhere on white, 3.51:1 on
@@ -21,10 +23,13 @@ public static class BusinessInvoiceExample
     private static readonly Color HeaderGray = Color.FromHex("#F5F5F5");
     private static readonly Color BorderGray = Color.FromHex("#D9D9D9");
     private static readonly Color TextDark = Color.FromHex("#333333");
+
     private static readonly Color TextMedium = Color.FromHex("#555555");
+
     // #707070, not #888888: 3.54:1 on white, below the 4.5:1 WCAG AA threshold.
     private static readonly Color TextLight = Color.FromHex("#707070");
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new(new DocumentSettings
@@ -75,7 +80,8 @@ public static class BusinessInvoiceExample
             Margin = new Thickness(0, 0, 0, 4)
         });
         // The address lines share one style, so they flow as a single paragraph.
-        companyStack.Add(new TextBlock { Text = "42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@example.com" });
+        companyStack.Add(new TextBlock
+            { Text = "42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@example.com" });
 
         // Right: Invoice title - Heading (H1) instead of plain TextBlock so it
         // carries the semantic role for screen readers (PDF/UA-1 Matterhorn §14-1).
@@ -119,7 +125,8 @@ public static class BusinessInvoiceExample
         });
         // One TextBlock with hard line breaks: the address tags as a single
         // paragraph under PDF/UA instead of four.
-        billToStack.Add(new TextBlock { Text = "Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701" });
+        billToStack.Add(new TextBlock
+            { Text = "Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701" });
 
         // Ship To column
         VerticalStack shipToStack = new();
@@ -131,7 +138,8 @@ public static class BusinessInvoiceExample
             Color = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        shipToStack.Add(new TextBlock { Text = "Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701" });
+        shipToStack.Add(new TextBlock
+            { Text = "Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701" });
 
         // Details column
         VerticalStack detailsStack = new();
@@ -199,7 +207,8 @@ public static class BusinessInvoiceExample
         // Line items data - generated via Placeholders for prototyping
         var invoiceSource = Placeholders.WithSeed(42);
         var lineItems = invoiceSource.InvoiceLines(5);
-        var items = lineItems.Select(li => new { Service = li.Service, Desc = li.Description, Qty = li.Quantity, Price = li.UnitPrice }).ToArray();
+        var items = lineItems.Select(li => new
+            { Service = li.Service, Desc = li.Description, Qty = li.Quantity, Price = li.UnitPrice }).ToArray();
 
         decimal subtotal = 0;
         foreach (var item in items)
@@ -271,7 +280,8 @@ public static class BusinessInvoiceExample
         });
         // The three greeting lines share one style and flow as a single paragraph
         // via hard line breaks; "Thanks!" stays separate for its top margin.
-        messageStack.Add(new TextBlock { Text = "Hello!\nThank you for choosing Sample Company.\nPlease return this invoice with payment." });
+        messageStack.Add(new TextBlock
+            { Text = "Hello!\nThank you for choosing Sample Company.\nPlease return this invoice with payment." });
         messageStack.Add(new TextBlock { Text = "Thanks!", Margin = new Thickness(0, 4, 0, 0) });
 
         // Right: Totals
@@ -453,7 +463,8 @@ public static class BusinessInvoiceExample
             Margin = new Thickness(0, 0, 0, 4)
         });
         // Each column's lines share one style and flow as a single paragraph.
-        bankStack.Add(new TextBlock { Text = "Sample Bank\nRouting: 021000021\nAccount: ****7842", FontSize = 8, Color = TextMedium });
+        bankStack.Add(new TextBlock
+            { Text = "Sample Bank\nRouting: 021000021\nAccount: ****7842", FontSize = 8, Color = TextMedium });
 
         // Other payment
         VerticalStack otherStack = new();
@@ -465,7 +476,8 @@ public static class BusinessInvoiceExample
             Color = AccentGreenText,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        otherStack.Add(new TextBlock { Text = "PayPal: payments@example.com\nWise: @sample-company", FontSize = 8, Color = TextMedium });
+        otherStack.Add(new TextBlock
+            { Text = "PayPal: payments@example.com\nWise: @sample-company", FontSize = 8, Color = TextMedium });
 
         // Reference
         VerticalStack refStack = new();
@@ -477,7 +489,8 @@ public static class BusinessInvoiceExample
             Color = AccentGreenText,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        refStack.Add(new TextBlock { Text = "Please include invoice\nnumber with payment", FontSize = 8, Color = TextMedium });
+        refStack.Add(new TextBlock
+            { Text = "Please include invoice\nnumber with payment", FontSize = 8, Color = TextMedium });
 
         paymentTable.AddRow(
             bankStack,
@@ -488,4 +501,3 @@ public static class BusinessInvoiceExample
         return paymentTable;
     }
 }
-

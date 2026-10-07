@@ -8,12 +8,14 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// </summary>
 [System.ComponentModel.DisplayName("Multi-Series Line Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("Two-series line chart comparing previous and current year revenue on a shared axis with markers and value labels.")]
+[System.ComponentModel.Description(
+    "Two-series line chart comparing previous and current year revenue on a shared axis with markers and value labels.")]
 public static class MultiSeriesLineChartExample
 {
     private static readonly string[] MonthLabels =
         ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         int year = DateTime.Now.Year;
@@ -76,8 +78,10 @@ public static class MultiSeriesLineChartExample
             Margin = new Thickness(0, 0, 0, 20)
         });
 
-        decimal[] previousYearValues = [65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000];
-        decimal[] currentYearValues = [75000, 78000, 85000, 78000, 92000, 95000, 87000, 78000, 82000, 91000, 97000, 118000];
+        decimal[] previousYearValues =
+            [65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000];
+        decimal[] currentYearValues =
+            [75000, 78000, 85000, 78000, 92000, 95000, 87000, 78000, 82000, 91000, 97000, 118000];
 
         ChartSeries previousYear = new()
         {

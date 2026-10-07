@@ -47,6 +47,7 @@ public static class ColorPaletteExample
         ("rose", ColorPalette.Rose),
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new(new DocumentSettings
@@ -56,7 +57,8 @@ public static class ColorPaletteExample
             Language = "en-GB"
         });
 
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "ColorPalette Swatches";
         doc.Metadata.Author = "BonniePDF";
@@ -72,7 +74,8 @@ public static class ColorPaletteExample
 
         doc.Add(new TextBlock
         {
-            Text = "Every Tailwind v4 ramp in the palette - 22 colours × 11 shades, drawn as ColorPalette[name][shade].",
+            Text =
+                "Every Tailwind v4 ramp in the palette - 22 colours × 11 shades, drawn as ColorPalette[name][shade].",
             FontName = StandardFonts.Helvetica,
             FontSize = 9,
             Color = ColorPalette.Slate[500],
@@ -95,6 +98,7 @@ public static class ColorPaletteExample
         {
             header.Add(HeaderCell(shade.ToString(System.Globalization.CultureInfo.InvariantCulture)), 1f);
         }
+
         grid.Add(header);
 
         // One row per palette, lightest (50) on the left to darkest (950) on the right.
@@ -111,6 +115,7 @@ public static class ColorPaletteExample
             {
                 row.Add(Swatch(ramp, shade), 1f);
             }
+
             grid.Add(row);
         }
 

@@ -14,12 +14,15 @@ namespace BonniePDF.Examples.Templates.EmploymentContract;
 /// </summary>
 [System.ComponentModel.DisplayName("Employment Contract")]
 [System.ComponentModel.Category("HR")]
-[System.ComponentModel.Description("A multi-page written statement of employment particulars: numbered clauses with indented sub-clauses, a defined-terms section, a running header, a schedule on its own page, and an execution block with signature and witness fields. Carries a document outline so a reader can jump to a clause. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "A multi-page written statement of employment particulars: numbered clauses with indented sub-clauses, a defined-terms section, a running header, a schedule on its own page, and an execution block with signature and witness fields. Carries a document outline so a reader can jump to a clause. PDF/A-2a + PDF/UA-1.")]
 public static class EmploymentContractExample
 {
     // ── Design tokens ─────────────────────────────────────────────────────────
     private static readonly Color Ink = ColorPalette.Slate[800];
+
     private static readonly Color Muted = ColorPalette.Slate[500];
+
     // 600, not 400: 400 never clears 4.5:1 as text (2.51:1 on this document's
     // background).
     private static readonly Color Faint = ColorPalette.Slate[600];
@@ -29,7 +32,8 @@ public static class EmploymentContractExample
 
     // ── Deterministic sample fixture ──────────────────────────────────────────
     private static readonly ContractData Sample = new(
-        new Employer("Sample Company Ltd", "12 Harbour Square, Bristol BS1 4QA, United Kingdom", "Company No. 09876543"),
+        new Employer("Sample Company Ltd", "12 Harbour Square, Bristol BS1 4QA, United Kingdom",
+            "Company No. 09876543"),
         new Employee("Sample Employee", "48 Sample Road, Bristol BS6 6DR, United Kingdom"),
         new Role("Senior Platform Engineer", "Engineering", "Head of Platform", "1 October 2026"),
         new Terms(
@@ -43,9 +47,12 @@ public static class EmploymentContractExample
         Definitions:
         [
             new Definition("Commencement Date", "The date shown in the particulars above, on which employment begins."),
-            new Definition("Confidential Information", "Information not in the public domain relating to the business, clients, or systems of the Employer."),
-            new Definition("Garden Leave", "A period during notice in which the Employee remains employed but is not required to attend work."),
-            new Definition("Intellectual Property", "Inventions, designs, code, and works of authorship created in the course of employment."),
+            new Definition("Confidential Information",
+                "Information not in the public domain relating to the business, clients, or systems of the Employer."),
+            new Definition("Garden Leave",
+                "A period during notice in which the Employee remains employed but is not required to attend work."),
+            new Definition("Intellectual Property",
+                "Inventions, designs, code, and works of authorship created in the course of employment."),
         ],
         Clauses:
         [
@@ -87,6 +94,7 @@ public static class EmploymentContractExample
         Outline: new OutlinePages(Particulars: 0, Definitions: 0, Clauses: [0, 1, 1, 1, 1], Schedule: 2, Execution: 2),
         Locale: "en-GB");
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate() => BuildDocument(Sample, CreateSettings(Sample));
 
     /// <summary>Base page and document settings, including the outline.</summary>
@@ -125,13 +133,15 @@ public static class EmploymentContractExample
         BookmarkItem clauses = new() { Title = "Clauses", PageIndex = pages.Clauses.Length > 0 ? pages.Clauses[0] : 0 };
         for (int i = 0; i < data.Clauses.Length; i++)
         {
-            clauses.Children.Add(new BookmarkItem { Title = $"{i + 1}. {data.Clauses[i].Heading}", PageIndex = pages.Clauses[i] });
+            clauses.Children.Add(new BookmarkItem
+                { Title = $"{i + 1}. {data.Clauses[i].Heading}", PageIndex = pages.Clauses[i] });
         }
 
         settings.Bookmarks.Add(new BookmarkItem { Title = "Particulars", PageIndex = pages.Particulars });
         settings.Bookmarks.Add(new BookmarkItem { Title = "Definitions", PageIndex = pages.Definitions });
         settings.Bookmarks.Add(clauses);
-        settings.Bookmarks.Add(new BookmarkItem { Title = "Schedule 1 — Benefits and allowances", PageIndex = pages.Schedule });
+        settings.Bookmarks.Add(new BookmarkItem
+            { Title = "Schedule 1 — Benefits and allowances", PageIndex = pages.Schedule });
         settings.Bookmarks.Add(new BookmarkItem { Title = "Execution", PageIndex = pages.Execution });
 
         return settings;
@@ -153,6 +163,7 @@ public static class EmploymentContractExample
         {
             doc.Add(ClauseSection(data.Clauses[i], i));
         }
+
         doc.Add(new PageBreak());
         doc.Add(Schedule(data));
         doc.Add(Execution(data));
@@ -210,6 +221,7 @@ public static class EmploymentContractExample
         {
             stack.Add(Text(extra, size: 8.5f, color: Faint));
         }
+
         return stack;
     }
 
@@ -245,6 +257,7 @@ public static class EmploymentContractExample
             entry.Add(Text(definition.Meaning, size: 8.5f, color: Muted));
             stack.Add(entry);
         }
+
         return stack;
     }
 
@@ -279,6 +292,7 @@ public static class EmploymentContractExample
         {
             list.AddItem(paragraph);
         }
+
         stack.Add(list);
         return stack;
     }
@@ -295,7 +309,9 @@ public static class EmploymentContractExample
             ("Training budget", "£1,500 per year, subject to prior approval"),
         ];
 
-        TextBlock intro = Text($"This schedule forms part of the agreement between {data.Employer.Name} and {data.Employee.Name}.", size: 8.5f, color: Muted);
+        TextBlock intro =
+            Text($"This schedule forms part of the agreement between {data.Employer.Name} and {data.Employee.Name}.",
+                size: 8.5f, color: Muted);
         intro.Margin = new Thickness(0, 0, 0, 8);
 
         VerticalStack stack = new();
@@ -307,7 +323,8 @@ public static class EmploymentContractExample
 
     private static VerticalStack Execution(ContractData data)
     {
-        TextBlock intro = Text("By signing below the parties agree to the terms set out in this statement and its schedules.");
+        TextBlock intro =
+            Text("By signing below the parties agree to the terms set out in this statement and its schedules.");
         intro.Margin = new Thickness(0, 0, 0, 6);
 
         VerticalStack stack = new() { Margin = new Thickness(0, 8, 0, 0) };
@@ -355,6 +372,7 @@ public static class EmploymentContractExample
         {
             table.AddRow(Text(label, bold: true, size: 9), Text(value));
         }
+
         return table;
     }
 
@@ -371,7 +389,8 @@ public static class EmploymentContractExample
 
     private static TextBlock ColumnHead(string text) => Text(text, bold: true, size: 7.5f, color: Muted);
 
-    private static TextBlock Text(string text, bool bold = false, float size = 9.5f, Color? color = null, TextAlignment align = TextAlignment.Left) => new()
+    private static TextBlock Text(string text, bool bold = false, float size = 9.5f, Color? color = null,
+        TextAlignment align = TextAlignment.Left) => new()
     {
         Text = text,
         FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
@@ -388,7 +407,13 @@ public static class EmploymentContractExample
 
     public sealed record Role(string Title, string Department, string ReportsTo, string StartDate);
 
-    public sealed record Terms(string Salary, string Hours, string Holiday, string Probation, string Notice, string Location);
+    public sealed record Terms(
+        string Salary,
+        string Hours,
+        string Holiday,
+        string Probation,
+        string Notice,
+        string Location);
 
     public sealed record Definition(string Term, string Meaning);
 
@@ -398,5 +423,14 @@ public static class EmploymentContractExample
     /// <summary>0-based page each outline entry targets; Clauses[i] is clause i + 1.</summary>
     public sealed record OutlinePages(int Particulars, int Definitions, int[] Clauses, int Schedule, int Execution);
 
-    public sealed record ContractData(Employer Employer, Employee Employee, Role Role, Terms Terms, string Reference, Definition[] Definitions, Clause[] Clauses, OutlinePages Outline, string Locale);
+    public sealed record ContractData(
+        Employer Employer,
+        Employee Employee,
+        Role Role,
+        Terms Terms,
+        string Reference,
+        Definition[] Definitions,
+        Clause[] Clauses,
+        OutlinePages Outline,
+        string Locale);
 }

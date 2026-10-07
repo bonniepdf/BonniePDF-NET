@@ -1,4 +1,5 @@
 namespace BonniePDF.Examples.Basics.PageSettings;
+
 internal sealed class Program
 {
     private static void Main()
@@ -12,6 +13,7 @@ internal sealed class Program
         {
             doc.Save(Path.Combine(outputDir, "all_page_sizes.pdf"));
         }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

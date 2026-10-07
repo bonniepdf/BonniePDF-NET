@@ -9,9 +9,11 @@ namespace BonniePDF.Examples.Elements.DataMatrix;
 /// </summary>
 [System.ComponentModel.DisplayName("Data Matrix (Fluent API)")]
 [System.ComponentModel.Category("Elements")]
-[System.ComponentModel.Description("Generating ISO/IEC 16022 compliant Data Matrix symbols with automatic encodation, rectangular sizes, quiet zones, and custom colours using the Fluent API.")]
+[System.ComponentModel.Description(
+    "Generating ISO/IEC 16022 compliant Data Matrix symbols with automatic encodation, rectangular sizes, quiet zones, and custom colours using the Fluent API.")]
 public static class DataMatrixExampleFluent
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         return Pdf.Create(doc =>
@@ -70,7 +72,8 @@ public static class DataMatrixExampleFluent
                         row.RelativeItem()
                             .Column(details =>
                             {
-                                details.Item().Text("A simple square symbol").Font(StandardFonts.HelveticaBold).Margin(0, 0, 0, 8);
+                                details.Item().Text("A simple square symbol").Font(StandardFonts.HelveticaBold)
+                                    .Margin(0, 0, 0, 8);
                                 details.Item().Text("Size: 120pt").Margin(0, 0, 0, 4);
                                 details.Item().Text("Quiet Zone: 2 modules").Margin(0, 0, 0, 4);
                                 details.Item().Text("Encodation: chosen automatically").Margin(0, 0, 0, 4);
@@ -84,8 +87,8 @@ public static class DataMatrixExampleFluent
                     SectionHeader(col, "Automatic Encodation");
 
                     col.Item().Text("The encoder analyses the message and selects the most compact scheme " +
-                                  "automatically - numeric, alphanumeric, structured, or raw bytes for Unicode - " +
-                                  "so dense data still fits a small symbol.").Margin(0, 0, 0, 15);
+                                    "automatically - numeric, alphanumeric, structured, or raw bytes for Unicode - " +
+                                    "so dense data still fits a small symbol.").Margin(0, 0, 0, 15);
 
                     col.Item().Row(row =>
                     {
@@ -105,9 +108,10 @@ public static class DataMatrixExampleFluent
                     {
                         SectionHeader(section, "Rectangular Symbols");
 
-                        section.Item().Text("Unlike QR codes, Data Matrix supports rectangular symbols - handy for marking " +
-                                      "long, narrow parts and labels. Set Rectangular(true) and a short message will use " +
-                                      "the most compact rectangular size.").Margin(0, 0, 0, 15);
+                        section.Item()
+                            .Text("Unlike QR codes, Data Matrix supports rectangular symbols - handy for marking " +
+                                  "long, narrow parts and labels. Set Rectangular(true) and a short message will use " +
+                                  "the most compact rectangular size.").Margin(0, 0, 0, 15);
 
                         section.Item().Row(row =>
                         {
@@ -139,7 +143,8 @@ public static class DataMatrixExampleFluent
                                     .ForegroundColor(ColorPalette.Blue[700])
                                     .QuietZone(2)
                                     .AltText("Data matrix encoding ID-7782");
-                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("ID-7782").FontSize(9).Color(ColorPalette.Slate[500]);
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("ID-7782").FontSize(9)
+                                    .Color(ColorPalette.Slate[500]);
                             });
 
                             // Custom Background
@@ -152,7 +157,8 @@ public static class DataMatrixExampleFluent
                                     .BackgroundColor(ColorPalette.Rose[50])
                                     .QuietZone(2)
                                     .AltText("Data matrix encoding BATCH-44");
-                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("BATCH-44").FontSize(9).Color(ColorPalette.Slate[500]);
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("BATCH-44").FontSize(9)
+                                    .Color(ColorPalette.Slate[500]);
                             });
 
                             // High Contrast (transparent, container background shows through)
@@ -169,13 +175,13 @@ public static class DataMatrixExampleFluent
                                     .DrawBackground(false)
                                     .QuietZone(2)
                                     .AltText("Data matrix encoding A-1029");
-                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("A-1029").FontSize(9).Color(ColorPalette.Slate[500]);
+                                c.Item().AlignCenter().Margin(0, 8, 0, 0).Text("A-1029").FontSize(9)
+                                    .Color(ColorPalette.Slate[500]);
                             });
                         });
                     });
                 });
             });
-
         }).Build();
     }
 

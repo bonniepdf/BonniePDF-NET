@@ -13,7 +13,8 @@ namespace BonniePDF.Examples.Layout.HeadersFooters;
 /// </summary>
 [System.ComponentModel.DisplayName("Headers &amp; Footers")]
 [System.ComponentModel.Category("Layout")]
-[System.ComponentModel.Description("Header/footer templates on every page - template content marked decorative, numbered body sections tagged semantically.")]
+[System.ComponentModel.Description(
+    "Header/footer templates on every page - template content marked decorative, numbered body sections tagged semantically.")]
 public static class HeadersFootersExample
 {
     private static readonly (string Title, string Body)[] Sections =
@@ -43,13 +44,14 @@ public static class HeadersFootersExample
             "Header and footer templates are automatically marked as decorative elements. This means assistive technologies skip over them when reading the document, preventing repeated announcement of decorative running headers on every page turn."),
     };
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new(new DocumentSettings
         {
-            Conformance   = PdfAConformance.PdfA2a,
+            Conformance = PdfAConformance.PdfA2a,
             Accessibility = AccessibilityMode.PdfUa1,
-            Language      = "en-GB",
+            Language = "en-GB",
             DefaultTextStyle = new TextStyle()
                 .WithFamily(StandardFonts.Helvetica)
                 .WithSize(11)
@@ -58,17 +60,17 @@ public static class HeadersFootersExample
             // Header/footer template content is marked decorative - screen readers skip it.
             HeaderTemplate = pageNum => new TextBlock
             {
-                Text      = $"BonniePDF - Headers & Footers - Page {pageNum}",
-                FontName  = StandardFonts.Helvetica,
-                FontSize  = 9,
+                Text = $"BonniePDF - Headers & Footers - Page {pageNum}",
+                FontName = StandardFonts.Helvetica,
+                FontSize = 9,
                 Color = ColorPalette.Slate[500],
                 Alignment = TextAlignment.Center,
             },
             FooterTemplate = pageNum => new TextBlock
             {
-                Text      = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
-                FontName  = StandardFonts.Helvetica,
-                FontSize  = 9,
+                Text = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
+                FontName = StandardFonts.Helvetica,
+                FontSize = 9,
                 Color = ColorPalette.Slate[400],
                 Alignment = TextAlignment.Center,
             },
@@ -76,9 +78,9 @@ public static class HeadersFootersExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Headers and Footers Demo",
-                Author   = "BonniePDF",
-                Subject  = "Demonstrates page headers and footers in an accessible PDF/A-2a + PDF/UA-1 document.",
+                Title = "Headers and Footers Demo",
+                Author = "BonniePDF",
+                Subject = "Demonstrates page headers and footers in an accessible PDF/A-2a + PDF/UA-1 document.",
                 Keywords = "pdf, accessibility, headers, footers, page numbers, BonniePDF",
             },
         };
@@ -86,16 +88,17 @@ public static class HeadersFootersExample
         doc.Add(new Heading("Chapter 1: Headers & Footers")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 22,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 14),
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 14),
         });
 
         doc.Add(new TextBlock
         {
-            Text   = "Headers and footers are rendered as decorative elements - they are visible on every page but are skipped by screen readers. The numbered sections below describe how the template system works.",
+            Text =
+                "Headers and footers are rendered as decorative elements - they are visible on every page but are skipped by screen readers. The numbered sections below describe how the template system works.",
             Margin = new Thickness(0, 0, 0, 12),
         });
 
@@ -106,11 +109,11 @@ public static class HeadersFootersExample
             doc.Add(new Heading($"1.{i + 1} {title}")
             {
                 TocIdentifier = Slug(title),
-                Level         = 2,
-                FontName      = StandardFonts.HelveticaBold,
-                FontSize      = 14,
-                Color     = ColorPalette.Indigo[600],
-                Margin        = new Thickness(0, 14, 0, 6),
+                Level = 2,
+                FontName = StandardFonts.HelveticaBold,
+                FontSize = 14,
+                Color = ColorPalette.Indigo[600],
+                Margin = new Thickness(0, 14, 0, 6),
             });
 
             doc.Add(new TextBlock { Text = body, Margin = new Thickness(0, 0, 0, 8) });
@@ -137,6 +140,7 @@ public static class HeadersFootersExample
             if (char.IsAsciiLetterLower(c) || char.IsAsciiDigit(c)) sb.Append(c);
             else if (sb.Length > 0 && sb[^1] != '-') sb.Append('-');
         }
+
         return sb.ToString().Trim('-');
     }
 }

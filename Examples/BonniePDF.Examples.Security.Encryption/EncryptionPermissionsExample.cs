@@ -9,9 +9,11 @@ namespace BonniePDF.Examples.Security.Encryption;
 /// </summary>
 [System.ComponentModel.DisplayName("Encryption - Permission Restrictions")]
 [System.ComponentModel.Category("Security")]
-[System.ComponentModel.Description("Generates a PDF with restricted permissions. Users can open with user password but have limited actions. Owner password unlocks all permissions.")]
+[System.ComponentModel.Description(
+    "Generates a PDF with restricted permissions. Users can open with user password but have limited actions. Owner password unlocks all permissions.")]
 public static class EncryptionPermissionsExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new() { Language = "en-GB" };
@@ -23,7 +25,8 @@ public static class EncryptionPermissionsExample
 
         Document doc = new(settings);
         doc.Metadata.Title = "Permission-Restricted Encryption Example";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Add(new TextBlock
         {
@@ -55,4 +58,3 @@ public static class EncryptionPermissionsExample
         return doc;
     }
 }
-

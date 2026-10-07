@@ -10,6 +10,7 @@ namespace BonniePDF.Examples.Basics.Margins;
 [System.ComponentModel.Description("Shows how margins space elements apart and padding spaces content inside them.")]
 public static class MarginsAndPadding
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new();
@@ -17,7 +18,8 @@ public static class MarginsAndPadding
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Margins and Padding";
         doc.Metadata.Author = "BonniePDF";
@@ -92,7 +94,7 @@ public static class MarginsAndPadding
         doc.Add(new Container
         {
             Margin = new Thickness(20), // 20pt margin on all sides
-            Width = 100,  // Fixed size so the label's stated dimensions are honest.
+            Width = 100, // Fixed size so the label's stated dimensions are honest.
             Height = 60,
             BackgroundColor = ColorPalette.Amber[400],
             Child = new TextBlock

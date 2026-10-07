@@ -13,13 +13,15 @@ namespace BonniePDF.Examples.Typography.AdvancedTypography;
 [System.ComponentModel.Description("Super/subscript and decoration styling (overline, coloured/thick decorations).")]
 public static class AdvancedTypographyExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new();
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[700]);
         doc.Settings.DisplayDocTitle = true;
 
         doc.Metadata.Title = "Advanced Typography";
@@ -123,7 +125,8 @@ public static class AdvancedTypographyExample
         var spell = new RichText { Margin = new Thickness(0, 6, 0, 16) };
         spell.Span("Spell-check style: ", new TextStyle().WithSize(13).WithColor(ColorPalette.Slate[800]));
         spell.Span("mispeled",
-            new TextStyle().WithSize(13).WithColor(ColorPalette.Slate[800]).WavyUnderline().WithDecorationColor(Color.Red));
+            new TextStyle().WithSize(13).WithColor(ColorPalette.Slate[800]).WavyUnderline()
+                .WithDecorationColor(Color.Red));
         spell.Span(" word.", new TextStyle().WithSize(13).WithColor(ColorPalette.Slate[800]));
         doc.Add(spell);
 
@@ -152,7 +155,8 @@ public static class AdvancedTypographyExample
         });
         doc.Add(new TextBlock
         {
-            Text = "This description is clamped to two lines: however much copy the product team writes, the card stays a fixed height and the overflow is replaced with an ellipsis so the layout never breaks.",
+            Text =
+                "This description is clamped to two lines: however much copy the product team writes, the card stays a fixed height and the overflow is replaced with an ellipsis so the layout never breaks.",
             FontSize = 12, Color = ColorPalette.Slate[700], MaxLines = 2, Margin = new Thickness(0, 0, 0, 16),
         });
 
@@ -164,8 +168,9 @@ public static class AdvancedTypographyExample
         });
         doc.Add(new TextBlock
         {
-            Text = "The first line of each paragraph is indented and a little air is inserted between paragraphs, the way a printed book sets body copy.\n" +
-                   "This second paragraph shows the inter-paragraph spacing and the matching first-line indent, all resolved during layout without manual spacers.",
+            Text =
+                "The first line of each paragraph is indented and a little air is inserted between paragraphs, the way a printed book sets body copy.\n" +
+                "This second paragraph shows the inter-paragraph spacing and the matching first-line indent, all resolved during layout without manual spacers.",
             FontSize = 12, Color = ColorPalette.Slate[700], FirstLineIndent = 24, ParagraphSpacing = 8,
         });
 

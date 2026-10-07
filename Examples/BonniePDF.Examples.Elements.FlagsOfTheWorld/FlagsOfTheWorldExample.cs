@@ -15,7 +15,8 @@ namespace BonniePDF.Examples.Elements.FlagsOfTheWorld;
 /// </summary>
 [System.ComponentModel.DisplayName("Flags of the World")]
 [System.ComponentModel.Category("Elements")]
-[System.ComponentModel.Description("SVG import: twelve national flags drawn as vector content, from a few shapes to a coat of arms with eight gradients, and one flag at full page width that stays sharp at any zoom. Every flag carries alt text.")]
+[System.ComponentModel.Description(
+    "SVG import: twelve national flags drawn as vector content, from a few shapes to a coat of arms with eight gradients, and one flag at full page width that stays sharp at any zoom. Every flag carries alt text.")]
 public static class FlagsOfTheWorldExample
 {
     /// <summary>A flag's <c>flag-icons</c> country code and its display name. Mexico first: it is the full-width flag.</summary>
@@ -48,23 +49,25 @@ public static class FlagsOfTheWorldExample
     /// <summary>The asset paths (relative to <c>Examples/assets/</c>) the example needs pre-loaded.</summary>
     public static IReadOnlyList<string> RequiredAssets { get; } = Flags.Select(AssetPath).ToArray();
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Flags of the World",
-                Author   = "BonniePDF",
-                Subject  = "SVG import - twelve national flags drawn as vector content, one shown at full page width.",
+                Title = "Flags of the World",
+                Author = "BonniePDF",
+                Subject = "SVG import - twelve national flags drawn as vector content, one shown at full page width.",
                 Keywords = "pdf, pdf/ua, pdf/a, accessibility, svg, vector, flags, figure, alt-text",
             },
             Settings = new DocumentSettings
             {
-                Conformance   = PdfAConformance.PdfA2a,
+                Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
-                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(ColorPalette.Slate[700]),
+                Language = "en-GB",
+                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10)
+                    .WithColor(ColorPalette.Slate[700]),
             },
         };
 
@@ -81,25 +84,26 @@ public static class FlagsOfTheWorldExample
         doc.Add(new Heading("Flags of the World")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 24,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 8),
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 24,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 8),
         });
 
         doc.Add(new TextBlock
         {
-            Text   = "Each flag below is an SVG file imported as vector content: paths, fills and gradients become native PDF " +
-                     "drawing operations. The set runs from Iceland and Colombia, a few shapes each, to South Georgia, whose " +
-                     "coat of arms carries eight gradients.",
+            Text =
+                "Each flag below is an SVG file imported as vector content: paths, fills and gradients become native PDF " +
+                "drawing operations. The set runs from Iceland and Colombia, a few shapes each, to South Georgia, whose " +
+                "coat of arms carries eight gradients.",
             Margin = new Thickness(0, 0, 0, 12),
         });
 
         Grid grid = new(1, 1, 1)
         {
             CellPadding = 6,
-            Border      = Border.None,
+            Border = Border.None,
         };
         for (int i = 0; i < Flags.Length; i += Columns)
             grid.AddRow(Flags.Skip(i).Take(Columns).Select(flag => FlagCard(flag, assets)).ToArray());
@@ -114,25 +118,26 @@ public static class FlagsOfTheWorldExample
         doc.Add(new Heading("Mexico at Full Width")
         {
             TocIdentifier = "s-full-width",
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 15,
-            Color     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 0, 0, 6),
+            Level = 2,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 15,
+            Color = ColorPalette.Indigo[600],
+            Margin = new Thickness(0, 0, 0, 6),
         });
 
         doc.Add(new TextBlock
         {
-            Text      = "The flag of Mexico is 356 paths and four gradients. Zoom in: the eagle, the serpent and every feather stay " +
-                        "crisp at any scale.",
+            Text =
+                "The flag of Mexico is 356 paths and four gradients. Zoom in: the eagle, the serpent and every feather stay " +
+                "crisp at any scale.",
             Color = ColorPalette.Slate[500],
-            Margin    = new Thickness(0, 0, 0, 10),
+            Margin = new Thickness(0, 0, 0, 10),
         });
 
         doc.Add(new Svg
         {
             SvgData = FlagMarkup(Flags[0], assets),
-            Width   = PageContentWidth,
+            Width = PageContentWidth,
             AltText = AltText(Flags[0]),
         });
     }
@@ -143,17 +148,17 @@ public static class FlagsOfTheWorldExample
         doc.Add(new Heading("Credits")
         {
             TocIdentifier = "s-credits",
-            Level         = 2,
-            FontName      = StandardFonts.HelveticaBold,
-            FontSize      = 15,
-            Color     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 16, 0, 6),
+            Level = 2,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 15,
+            Color = ColorPalette.Indigo[600],
+            Margin = new Thickness(0, 16, 0, 6),
         });
 
         doc.Add(new TextBlock
         {
-            Text      = "Flag artwork: flag-icons 7.2.3 (MIT licence), https://github.com/lipis/flag-icons.",
-            FontSize  = 9,
+            Text = "Flag artwork: flag-icons 7.2.3 (MIT licence), https://github.com/lipis/flag-icons.",
+            FontSize = 9,
             Color = ColorPalette.Slate[500],
         });
     }
@@ -177,24 +182,24 @@ public static class FlagsOfTheWorldExample
         stack.Add(new Svg
         {
             SvgData = FlagMarkup(flag, assets),
-            Width   = CardFlagWidth,
+            Width = CardFlagWidth,
             AltText = AltText(flag),
         });
         stack.Add(new TextBlock
         {
-            Text      = flag.Name,
-            FontSize  = 9,
+            Text = flag.Name,
+            FontSize = 9,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
         });
 
         return new Container
         {
-            Padding      = new Thickness(8),
-            Border       = new Border(0.75f),
+            Padding = new Thickness(8),
+            Border = new Border(0.75f),
             BorderColors = new BorderColors(ColorPalette.Slate[300]),
             CornerRadius = 4,
-            Child        = stack,
+            Child = stack,
         };
     }
 }

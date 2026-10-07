@@ -12,7 +12,7 @@ namespace BonniePDF.Examples.Elements.ShapesAndBorders;
 [System.ComponentModel.Description("Drawing basic shapes and styling borders.")]
 public static class ShapesAndBordersExample
 {
-    
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new(new DocumentSettings
@@ -24,7 +24,8 @@ public static class ShapesAndBordersExample
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(12).WithColor(ColorPalette.Slate[600]);
 
         doc.Metadata.Title = "Rounded Rectangles";
         doc.Metadata.Author = "BonniePDF";
@@ -66,7 +67,8 @@ public static class ShapesAndBordersExample
             Margin = new Thickness(0, 0, 0, 12),
             Child = new TextBlock
             {
-                Text = "A container with a larger 16pt corner radius. The arcs become more pronounced as the radius increases.",
+                Text =
+                    "A container with a larger 16pt corner radius. The arcs become more pronounced as the radius increases.",
                 FontSize = 12,
                 Color = ColorPalette.Green[800]
             }
@@ -120,9 +122,15 @@ public static class ShapesAndBordersExample
         // Each title is bold 14pt text on its own tint - Blue/Purple[500] and
         // Teal[500] all fall short of 4.5:1 there (3.46/3.84/2.32:1); one step
         // darker clears it in every case.
-        cardRow.Add(CreateCard("Feature A", "Rounded corners make UI elements feel modern and approachable.", ColorPalette.Blue[600], ColorPalette.Blue[50]), 1f);
-        cardRow.Add(CreateCard("Feature B", "Bezier curves approximate perfect quarter-circle arcs.", ColorPalette.Purple[600], Color.FromHex("#faf5ff")), 1f);
-        cardRow.Add(CreateCard("Feature C", "Works with backgrounds, borders, or both combined.", ColorPalette.Teal[700], Color.FromHex("#f0fdfa")), 1f);
+        cardRow.Add(
+            CreateCard("Feature A", "Rounded corners make UI elements feel modern and approachable.",
+                ColorPalette.Blue[600], ColorPalette.Blue[50]), 1f);
+        cardRow.Add(
+            CreateCard("Feature B", "Bezier curves approximate perfect quarter-circle arcs.", ColorPalette.Purple[600],
+                Color.FromHex("#faf5ff")), 1f);
+        cardRow.Add(
+            CreateCard("Feature C", "Works with backgrounds, borders, or both combined.", ColorPalette.Teal[700],
+                Color.FromHex("#f0fdfa")), 1f);
 
         doc.Add(cardRow);
 
@@ -168,6 +176,7 @@ public static class ShapesAndBordersExample
                 }
             });
         }
+
         doc.Add(radiusSection);
 
         // --- Section 6: Practical Examples ---
@@ -297,4 +306,3 @@ public static class ShapesAndBordersExample
         };
     }
 }
-

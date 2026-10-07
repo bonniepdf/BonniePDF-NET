@@ -13,18 +13,20 @@ namespace BonniePDF.Examples.Security.Encryption;
 /// </summary>
 [System.ComponentModel.DisplayName("Encryption")]
 [System.ComponentModel.Category("Security")]
-[System.ComponentModel.Description("Three encryption scenarios: simple password, user/owner passwords with permissions, and owner-only restrictions.")]
+[System.ComponentModel.Description(
+    "Three encryption scenarios: simple password, user/owner passwords with permissions, and owner-only restrictions.")]
 public static class EncryptionExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new()
         {
-            PageSize      = PdfSize.A4,
-            Margin        = 60,
-            Conformance   = PdfAConformance.None,
+            PageSize = PdfSize.A4,
+            Margin = 60,
+            Conformance = PdfAConformance.None,
             Accessibility = AccessibilityMode.PdfUa1,
-            Language      = "en-GB",
+            Language = "en-GB",
             DefaultTextStyle = new TextStyle()
                 .WithFamily(StandardFonts.Helvetica)
                 .WithSize(12)
@@ -45,32 +47,33 @@ public static class EncryptionExample
         doc.Add(Title("AES-256 Password Protection"));
         doc.Add(new TextBlock
         {
-            Text     = "This document is encrypted with AES-256 encryption (V5, R6). You needed to enter the password to open it.",
+            Text =
+                "This document is encrypted with AES-256 encryption (V5, R6). You needed to enter the password to open it.",
             FontSize = 12,
-            Margin   = new Thickness(0, 20, 0, 10),
+            Margin = new Thickness(0, 20, 0, 10),
         });
         doc.Add(new TextBlock { Text = "Password: demo123", FontSize = 14, Color = ColorPalette.Slate[700] });
         doc.Add(new TextBlock
         {
-            Text     = "Printing and copying are allowed, but modification and annotation are restricted.",
+            Text = "Printing and copying are allowed, but modification and annotation are restricted.",
             FontSize = 12,
-            Margin   = new Thickness(0, 20, 0, 10),
+            Margin = new Thickness(0, 20, 0, 10),
         });
         doc.Add(Code("""
-            API usage:
-              settings.WithEncryptionAes256(opts => opts
-                  .WithUserPassword("demo123")
-                  .WithOwnerPassword("demo123")
-                  .AllowPrinting()
-                  .AllowCopying()
-                  .AllowAccessibility());
+                     API usage:
+                       settings.WithEncryptionAes256(opts => opts
+                           .WithUserPassword("demo123")
+                           .WithOwnerPassword("demo123")
+                           .AllowPrinting()
+                           .AllowCopying()
+                           .AllowAccessibility());
 
-              // Or for 128-bit RC4:
-              // settings.WithEncryption128(opts => ...)
+                       // Or for 128-bit RC4:
+                       // settings.WithEncryption128(opts => ...)
 
-              // Or the simplest form:
-              // settings.WithPassword("demo123");
-            """));
+                       // Or the simplest form:
+                       // settings.WithPassword("demo123");
+                     """));
 
         // ── Page 2: User + owner passwords with permissions ──
         doc.AddPage();
@@ -78,9 +81,9 @@ public static class EncryptionExample
         doc.Add(Title("Permission Restrictions"));
         doc.Add(new TextBlock
         {
-            Text     = "Encryption supports granular permission flags via user and owner passwords:",
+            Text = "Encryption supports granular permission flags via user and owner passwords:",
             FontSize = 12,
-            Margin   = new Thickness(0, 20, 0, 10),
+            Margin = new Thickness(0, 20, 0, 10),
         });
         doc.Add(Allowed("  - Printing: Allowed"));
         doc.Add(Allowed("  - Copying: Allowed"));
@@ -90,13 +93,13 @@ public static class EncryptionExample
         doc.Add(new TextBlock { Text = "  User password: user" });
         doc.Add(new TextBlock { Text = "  Owner password: owner (unlocks all permissions)" });
         doc.Add(Code("""
-            API usage:
-              settings.WithEncryptionAes256(opts => opts
-                  .WithUserPassword("user")
-                  .WithOwnerPassword("owner")
-                  .AllowPrinting()
-                  .AllowCopying());
-            """));
+                     API usage:
+                       settings.WithEncryptionAes256(opts => opts
+                           .WithUserPassword("user")
+                           .WithOwnerPassword("owner")
+                           .AllowPrinting()
+                           .AllowCopying());
+                     """));
 
         // ── Page 3: Owner password only (restricted actions) ──
         doc.AddPage();
@@ -104,9 +107,10 @@ public static class EncryptionExample
         doc.Add(Title("Owner-Only Restrictions"));
         doc.Add(new TextBlock
         {
-            Text     = "This page demonstrates an owner-password-only document: it opens freely but most actions are restricted.",
+            Text =
+                "This page demonstrates an owner-password-only document: it opens freely but most actions are restricted.",
             FontSize = 12,
-            Margin   = new Thickness(0, 20, 0, 10),
+            Margin = new Thickness(0, 20, 0, 10),
         });
         doc.Add(new TextBlock { Text = "Restricted permissions in this scenario:", FontSize = 12 });
         doc.Add(Allowed("  - Low-quality printing: Allowed"));
@@ -116,28 +120,28 @@ public static class EncryptionExample
         doc.Add(Denied("  - High-quality printing: Denied"));
         doc.Add(new TextBlock
         {
-            Text      = "Owner password: secret",
-            FontSize  = 14,
+            Text = "Owner password: secret",
+            FontSize = 14,
             Color = ColorPalette.Red[600],
-            Margin    = new Thickness(0, 20, 0, 0),
+            Margin = new Thickness(0, 20, 0, 0),
         });
         doc.Add(Code("""
-            API usage:
-              settings.WithEncryptionAes256(opts => opts
-                  .WithOwnerPassword("secret")
-                  .DenyAll()
-                  .AllowPrinting(highQuality: false)
-                  .AllowAccessibility());
-            """));
+                     API usage:
+                       settings.WithEncryptionAes256(opts => opts
+                           .WithOwnerPassword("secret")
+                           .DenyAll()
+                           .AllowPrinting(highQuality: false)
+                           .AllowAccessibility());
+                     """));
 
         return doc;
     }
 
     private static TextBlock Title(string text) => new()
     {
-        Text      = text,
-        FontName  = StandardFonts.HelveticaBold,
-        FontSize  = 24,
+        Text = text,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 24,
         Color = ColorPalette.Blue[700],
     };
 
@@ -148,11 +152,11 @@ public static class EncryptionExample
 
     private static TextBlock Code(string text) => new()
     {
-        Text      = text,
-        FontName  = StandardFonts.Courier,
-        FontSize  = 10,
+        Text = text,
+        FontName = StandardFonts.Courier,
+        FontSize = 10,
         Color = ColorPalette.Slate[600],
-        Margin    = new Thickness(0, 20, 0, 0),
+        Margin = new Thickness(0, 20, 0, 0),
     };
 
     /// <summary>
@@ -165,7 +169,8 @@ public static class EncryptionExample
         settings.WithPassword("demo123");
 
         Document doc = new(settings);
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Add(new TextBlock
         {
@@ -211,7 +216,8 @@ public static class EncryptionExample
         );
 
         Document doc = new(settings);
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Add(new TextBlock
         {
@@ -259,7 +265,8 @@ public static class EncryptionExample
         );
 
         Document doc = new(settings);
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Add(new TextBlock
         {
@@ -297,5 +304,3 @@ public static class EncryptionExample
         doc.Save(path);
     }
 }
-
-

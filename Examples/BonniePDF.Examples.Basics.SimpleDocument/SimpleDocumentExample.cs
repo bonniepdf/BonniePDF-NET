@@ -16,6 +16,7 @@ namespace BonniePDF.Examples.Basics.SimpleDocument;
 [System.ComponentModel.Description("A 3-page PDF/UA-1 tagged text document using the core Document API.")]
 public static class SimpleDocumentExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // Headings use the standard-14 "Helvetica-Bold" name. Under PDF/A
@@ -97,7 +98,8 @@ public static class SimpleDocumentExample
 
         doc.Add(new TextBlock
         {
-            Text = "Existing elements (Heading, TextBlock, UnorderedList, Image, QRCode) tag themselves automatically - no semantic verbs required.",
+            Text =
+                "Existing elements (Heading, TextBlock, UnorderedList, Image, QRCode) tag themselves automatically - no semantic verbs required.",
             Margin = new Thickness(0, 0, 0, 16)
         });
 

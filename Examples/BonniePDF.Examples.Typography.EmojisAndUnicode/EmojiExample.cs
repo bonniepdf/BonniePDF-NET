@@ -9,32 +9,34 @@ namespace BonniePDF.Examples.Typography.EmojisAndUnicode;
 /// </summary>
 [System.ComponentModel.DisplayName("Emojis & Unicode")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("Full Unicode range — BMP symbols, Greek, Cyrillic, dingbats, and supplementary emoji across multiple embedded fonts. PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Full Unicode range — BMP symbols, Greek, Cyrillic, dingbats, and supplementary emoji across multiple embedded fonts. PDF/UA-1.")]
 public static class EmojiExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
-        string textFont    = BundledFont.SansPath;
-        string mathFont    = BundledFont.MathPath;
-        string symbolsFont = BundledFont.SymbolsPath;
-        string emojiFont   = BundledFont.EmojiPath;
+        string textFont = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSans-Regular.ttf");
+        string mathFont = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSansMath-Regular.ttf");
+        string symbolsFont = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoSansSymbols2-Regular.ttf");
+        string emojiFont = Path.Combine(AppContext.BaseDirectory, "fonts", "NotoEmoji-Regular.ttf");
 
         Document doc = new()
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "Emojis & Unicode",
-                Author   = "BonniePDF",
-                Subject  = "Full Unicode range including supplementary planes. PDF/UA-1.",
+                Title = "Emojis & Unicode",
+                Author = "BonniePDF",
+                Subject = "Full Unicode range including supplementary planes. PDF/UA-1.",
                 Keywords = "pdf, pdf/ua, accessibility, emoji, unicode, fonts",
             },
             Settings = new DocumentSettings
             {
                 // PDF/A intentionally not claimed: emoji fonts include COLR/CBDT tables
                 // that archival validators reject.
-                Conformance   = PdfAConformance.None,
+                Conformance = PdfAConformance.None,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
+                Language = "en-GB",
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(textFont)
                     .WithSize(11)
@@ -47,18 +49,18 @@ public static class EmojiExample
         doc.Add(new Heading("Emojis & Supplementary Unicode")
         {
             TocIdentifier = "intro",
-            Level         = 1,
-            FontName      = textFont,
-            FontSize      = 20,
-            Color     = ColorPalette.Slate[800],
-            Margin        = new Thickness(0, 0, 0, 8),
+            Level = 1,
+            FontName = textFont,
+            FontSize = 20,
+            Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 8),
         });
 
         doc.Add(new TextBlock
         {
-            Text   = "BonniePDF embeds TrueType subsets for the full Unicode range. " +
-                     "Latin, Greek, and Cyrillic via NotoSans; arrows and maths via NotoSansMath; " +
-                     "symbols and dingbats via NotoSansSymbols2; emoji via NotoEmoji.",
+            Text = "BonniePDF embeds TrueType subsets for the full Unicode range. " +
+                   "Latin, Greek, and Cyrillic via NotoSans; arrows and maths via NotoSansMath; " +
+                   "symbols and dingbats via NotoSansSymbols2; emoji via NotoEmoji.",
             Margin = new Thickness(0, 0, 0, 16),
         });
 
@@ -74,8 +76,14 @@ public static class EmojiExample
             "€  £  ¥  ¢  ₹  ₩  ₿  ₪  ₫  ₽", textFont);
 
         VerticalStack greek = Section("Greek Alphabet", "s-greek");
-        greek.Add(new TextBlock { Text = "α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ τ υ φ χ ψ ω", FontSize = 12, Margin = new Thickness(0, 0, 0, 2) });
-        greek.Add(new TextBlock { Text = "Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω", FontSize = 12, Margin = new Thickness(0, 0, 0, 4) });
+        greek.Add(new TextBlock
+        {
+            Text = "α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ τ υ φ χ ψ ω", FontSize = 12, Margin = new Thickness(0, 0, 0, 2)
+        });
+        greek.Add(new TextBlock
+        {
+            Text = "Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω", FontSize = 12, Margin = new Thickness(0, 0, 0, 4)
+        });
         doc.Add(greek);
 
         BmpSection(doc, "Cyrillic", "s-cyrillic",
@@ -110,8 +118,8 @@ public static class EmojiExample
 
         mixed.Add(new TextBlock
         {
-            Text   = "Emoji appear inline with regular text using RichText spans — Latin text keeps its " +
-                     "text-font metrics while each emoji span switches to the emoji font:",
+            Text = "Emoji appear inline with regular text using RichText spans — Latin text keeps its " +
+                   "text-font metrics while each emoji span switches to the emoji font:",
             Margin = new Thickness(0, 0, 0, 6),
         });
 
@@ -120,19 +128,20 @@ public static class EmojiExample
         // font designed for it.
         TextStyle emojiStyle = new TextStyle().WithFamily(emojiFont);
         foreach (var (label, emoji, rest) in new[]
-        {
-            ("Status: ", "✅", " All systems operational"),
-            ("Build: ", "🚀", " Deployed to production"),
-            ("Tests: ", "🎯", " 245/245 passed"),
-            ("Coverage: ", "📊", " 94.2%"),
-            ("Performance: ", "⚡", " Response time < 100 ms"),
-        })
+                 {
+                     ("Status: ", "✅", " All systems operational"),
+                     ("Build: ", "🚀", " Deployed to production"),
+                     ("Tests: ", "🎯", " 245/245 passed"),
+                     ("Coverage: ", "📊", " 94.2%"),
+                     ("Performance: ", "⚡", " Response time < 100 ms"),
+                 })
         {
             mixed.Add(new RichText { Margin = new Thickness(12, 0, 0, 4) }
                 .Span(label)
                 .Span(emoji, emojiStyle)
                 .Span(rest));
         }
+
         doc.Add(mixed);
 
         return doc;
@@ -148,10 +157,10 @@ public static class EmojiExample
         stack.Add(new Heading(title)
         {
             TocIdentifier = tocId,
-            Level         = 2,
-            FontSize      = 13,
-            Color     = ColorPalette.Indigo[600],
-            Margin        = new Thickness(0, 12, 0, 4),
+            Level = 2,
+            FontSize = 13,
+            Color = ColorPalette.Indigo[600],
+            Margin = new Thickness(0, 12, 0, 4),
         });
         return stack;
     }
@@ -159,14 +168,22 @@ public static class EmojiExample
     private static void BmpSection(Document doc, string title, string tocId, string content, string font)
     {
         VerticalStack section = Section(title, tocId);
-        section.Add(new TextBlock { Text = content, FontName = font, FontSize = 12, Color = ColorPalette.Slate[600], Margin = new Thickness(0, 0, 0, 4) });
+        section.Add(new TextBlock
+        {
+            Text = content, FontName = font, FontSize = 12, Color = ColorPalette.Slate[600],
+            Margin = new Thickness(0, 0, 0, 4)
+        });
         doc.Add(section);
     }
 
     private static void EmojiSection(Document doc, string title, string tocId, string content, string font)
     {
         VerticalStack section = Section(title, tocId);
-        section.Add(new TextBlock { Text = content, FontName = font, FontSize = 20, Color = ColorPalette.Slate[800], Margin = new Thickness(0, 0, 0, 4) });
+        section.Add(new TextBlock
+        {
+            Text = content, FontName = font, FontSize = 20, Color = ColorPalette.Slate[800],
+            Margin = new Thickness(0, 0, 0, 4)
+        });
         doc.Add(section);
     }
 }

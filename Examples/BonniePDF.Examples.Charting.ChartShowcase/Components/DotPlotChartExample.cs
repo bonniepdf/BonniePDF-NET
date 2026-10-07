@@ -9,10 +9,11 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// </summary>
 [System.ComponentModel.DisplayName("Dot Plot Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("DotPlotChart implementation with product performance data, showing dots at data points with customizable radius and colors.")]
+[System.ComponentModel.Description(
+    "DotPlotChart implementation with product performance data, showing dots at data points with customizable radius and colors.")]
 public static class DotPlotChartExample
 {
-
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // Create a new PDF document
@@ -22,8 +23,19 @@ public static class DotPlotChartExample
             FooterTemplate = pageNumber =>
             {
                 HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.Add(new TextBlock { Text = "BonniePDF - Dot Plot Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] }, null);
-                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = "BonniePDF - Dot Plot Chart", FontName = StandardFonts.Helvetica, FontSize = 10,
+                        Color = ColorPalette.Slate[500]
+                    }, null);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                        FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500],
+                        Alignment = TextAlignment.Right
+                    }, 1f);
                 return stack;
             }
         });
@@ -94,7 +106,7 @@ public static class DotPlotChartExample
             AltText = "Dot plot chart showing product sales performance across eight products",
             Height = 400,
             StretchToFit = true,
-            DotColor = Color.FromHex(ChartColors.Teal),
+            DotColor = Color.FromHex("#14b8a6"),
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
@@ -105,10 +117,12 @@ public static class DotPlotChartExample
         document.Add(dotPlotChart);
 
         // Save the document
-        
+
 
         return document;
     }
+
+    // Local helpers and sample data for this document.
+
+
 }
-
-

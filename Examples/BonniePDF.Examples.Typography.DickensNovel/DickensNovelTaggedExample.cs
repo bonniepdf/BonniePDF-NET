@@ -19,7 +19,8 @@ namespace BonniePDF.Examples.Typography.DickensNovel;
 /// </summary>
 [System.ComponentModel.DisplayName("Dickens: A Tale of Two Cities (PDF/UA-1)")]
 [System.ComponentModel.Category("Typography")]
-[System.ComponentModel.Description("PDF/UA-1 tagged complete Project Gutenberg novel - book and chapter headings tagged semantically.")]
+[System.ComponentModel.Description(
+    "PDF/UA-1 tagged complete Project Gutenberg novel - book and chapter headings tagged semantically.")]
 public static partial class DickensNovelTaggedExample
 {
     private static readonly string LocalFilePath = Path.Combine(AppContext.BaseDirectory, "pg98.txt");
@@ -27,6 +28,7 @@ public static partial class DickensNovelTaggedExample
     [GeneratedRegex(@"^CHAPTER\s+[IVXLC]+\.$")]
     private static partial Regex ChapterLineRegex();
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         string raw = LoadText();
@@ -36,18 +38,18 @@ public static partial class DickensNovelTaggedExample
         {
             Metadata = new DocumentMetadata
             {
-                Title    = "A Tale of Two Cities - Tagged (PDF/UA-1)",
-                Author   = "Charles Dickens",
-                Subject  = "Project Gutenberg eBook #98 - A public domain classic.",
+                Title = "A Tale of Two Cities - Tagged (PDF/UA-1)",
+                Author = "Charles Dickens",
+                Subject = "Project Gutenberg eBook #98 - A public domain classic.",
                 Keywords = "pdf, pdf/ua, accessibility, dickens, novel, gutenberg",
             },
             Settings = new DocumentSettings
             {
-                PageSize      = PdfSize.A4,
-                Margin        = 72,
-                Version       = PdfVersion.Pdf17,
+                PageSize = PdfSize.A4,
+                Margin = 72,
+                Version = PdfVersion.Pdf17,
                 Accessibility = AccessibilityMode.PdfUa1,
-                Language      = "en-GB",
+                Language = "en-GB",
                 DisplayDocTitle = true,
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.TimesRoman)
@@ -60,12 +62,12 @@ public static partial class DickensNovelTaggedExample
                     if (pageNum <= 1) return null;
                     return new TextBlock
                     {
-                        Text      = pageNum % 2 == 0 ? "A Tale of Two Cities" : "Charles Dickens",
-                        FontName  = StandardFonts.TimesItalic,
-                        FontSize  = 9,
+                        Text = pageNum % 2 == 0 ? "A Tale of Two Cities" : "Charles Dickens",
+                        FontName = StandardFonts.TimesItalic,
+                        FontSize = 9,
                         Color = ColorPalette.Slate[500],
                         Alignment = pageNum % 2 == 0 ? TextAlignment.Left : TextAlignment.Right,
-                        Margin    = new Thickness(0, 0, 0, 2),
+                        Margin = new Thickness(0, 0, 0, 2),
                     };
                 },
 
@@ -75,12 +77,12 @@ public static partial class DickensNovelTaggedExample
                     if (pageNum <= 1) return null;
                     return new TextBlock
                     {
-                        Text      = pageNum.ToString(),
-                        FontName  = StandardFonts.TimesRoman,
-                        FontSize  = 9,
+                        Text = pageNum.ToString(),
+                        FontName = StandardFonts.TimesRoman,
+                        FontSize = 9,
                         Color = ColorPalette.Slate[500],
                         Alignment = TextAlignment.Center,
-                        Margin    = new Thickness(0, 2, 0, 0),
+                        Margin = new Thickness(0, 2, 0, 0),
                     };
                 },
             },
@@ -90,38 +92,38 @@ public static partial class DickensNovelTaggedExample
 
         doc.Add(new TextBlock
         {
-            Text      = "A TALE OF TWO CITIES",
-            FontName  = StandardFonts.TimesBold,
-            FontSize  = 28,
+            Text = "A TALE OF TWO CITIES",
+            FontName = StandardFonts.TimesBold,
+            FontSize = 28,
             Color = ColorPalette.Slate[900],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 100, 0, 12),
+            Margin = new Thickness(0, 100, 0, 12),
         });
 
         doc.Add(new TextBlock
         {
-            Text      = "A Story of the French Revolution",
-            FontName  = StandardFonts.TimesItalic,
-            FontSize  = 15,
+            Text = "A Story of the French Revolution",
+            FontName = StandardFonts.TimesItalic,
+            FontSize = 15,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 0, 0, 40),
+            Margin = new Thickness(0, 0, 0, 40),
         });
 
         doc.Add(new TextBlock
         {
-            Text      = "Charles Dickens",
-            FontName  = StandardFonts.TimesBold,
-            FontSize  = 20,
+            Text = "Charles Dickens",
+            FontName = StandardFonts.TimesBold,
+            FontSize = 20,
             Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center,
-            Margin    = new Thickness(0, 0, 0, 60),
+            Margin = new Thickness(0, 0, 0, 60),
         });
 
         doc.Add(new TextBlock
         {
-            Text      = "Project Gutenberg Edition · eBook #98",
-            FontSize  = 10,
+            Text = "Project Gutenberg Edition · eBook #98",
+            FontSize = 10,
             // 600, not 400: 400 never clears 4.5:1 as text (2.63:1 here).
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
@@ -134,12 +136,12 @@ public static partial class DickensNovelTaggedExample
         doc.Add(new Heading("Table of Contents")
         {
             TocIdentifier = "toc",
-            Level         = 1,
-            FontName      = StandardFonts.TimesBold,
-            FontSize      = 24,
-            Color     = ColorPalette.Slate[900],
-            Alignment     = TextAlignment.Center,
-            Margin        = new Thickness(0, 40, 0, 30),
+            Level = 1,
+            FontName = StandardFonts.TimesBold,
+            FontSize = 24,
+            Color = ColorPalette.Slate[900],
+            Alignment = TextAlignment.Center,
+            Margin = new Thickness(0, 40, 0, 30),
         });
 
         // Collect TOC entries from the parsed sections and emit as paragraphs
@@ -149,22 +151,22 @@ public static partial class DickensNovelTaggedExample
             {
                 doc.Add(new TextBlock
                 {
-                    Text      = title,
-                    FontName  = StandardFonts.TimesBold,
-                    FontSize  = 11,
+                    Text = title,
+                    FontName = StandardFonts.TimesBold,
+                    FontSize = 11,
                     Color = ColorPalette.Slate[800],
-                    Margin    = new Thickness(0, 8, 0, 2),
+                    Margin = new Thickness(0, 8, 0, 2),
                 });
             }
             else if (kind == SectionKind.Chapter)
             {
                 doc.Add(new TextBlock
                 {
-                    Text      = "    " + title,
-                    FontName  = StandardFonts.TimesRoman,
-                    FontSize  = 10,
+                    Text = "    " + title,
+                    FontName = StandardFonts.TimesRoman,
+                    FontSize = 10,
                     Color = ColorPalette.Slate[600],
-                    Margin    = new Thickness(0, 2, 0, 2),
+                    Margin = new Thickness(0, 2, 0, 2),
                 });
             }
         }
@@ -188,12 +190,12 @@ public static partial class DickensNovelTaggedExample
                     opener.Add(new Heading(title.ToUpperInvariant())
                     {
                         TocIdentifier = tocId,
-                        Level         = 1,
-                        FontName      = StandardFonts.TimesBold,
-                        FontSize      = 14,
-                        Color     = ColorPalette.Slate[800],
-                        Alignment     = TextAlignment.Center,
-                        Margin        = new Thickness(0, 56, 0, 14),
+                        Level = 1,
+                        FontName = StandardFonts.TimesBold,
+                        FontSize = 14,
+                        Color = ColorPalette.Slate[800],
+                        Alignment = TextAlignment.Center,
+                        Margin = new Thickness(0, 56, 0, 14),
                     });
                     break;
 
@@ -202,22 +204,22 @@ public static partial class DickensNovelTaggedExample
                     opener ??= new() { BreakAllowed = false };
                     opener.Add(new TextBlock
                     {
-                        Text      = number,
-                        FontName  = StandardFonts.TimesBold,
-                        FontSize  = 10,
+                        Text = number,
+                        FontName = StandardFonts.TimesBold,
+                        FontSize = 10,
                         Color = ColorPalette.Slate[500],
                         Alignment = TextAlignment.Center,
-                        Margin    = new Thickness(0, 32, 0, 6),
+                        Margin = new Thickness(0, 32, 0, 6),
                     });
                     opener.Add(new Heading(title)
                     {
                         TocIdentifier = tocId,
-                        Level         = 2,
-                        FontName      = StandardFonts.TimesBold,
-                        FontSize      = 17,
-                        Color     = ColorPalette.Slate[900],
-                        Alignment     = TextAlignment.Center,
-                        Margin        = new Thickness(0, 0, 0, 18),
+                        Level = 2,
+                        FontName = StandardFonts.TimesBold,
+                        FontSize = 17,
+                        Color = ColorPalette.Slate[900],
+                        Alignment = TextAlignment.Center,
+                        Margin = new Thickness(0, 0, 0, 18),
                     });
                     break;
 
@@ -226,11 +228,11 @@ public static partial class DickensNovelTaggedExample
                     {
                         TextBlock paragraph = new()
                         {
-                            Text      = title,
-                            FontSize  = 11,
+                            Text = title,
+                            FontSize = 11,
                             Color = ColorPalette.Slate[900],
                             Alignment = TextAlignment.Justify,
-                            Margin    = new Thickness(0, 0, 0, 7),
+                            Margin = new Thickness(0, 0, 0, 7),
                         };
                         if (opener is not null)
                         {
@@ -243,6 +245,7 @@ public static partial class DickensNovelTaggedExample
                             doc.Add(paragraph);
                         }
                     }
+
                     break;
             }
         }
@@ -267,15 +270,20 @@ public static partial class DickensNovelTaggedExample
 
     // ── Novel parser ──────────────────────────────────────────────────────────
 
-    private enum SectionKind { BookTitle, Chapter, Paragraph }
+    private enum SectionKind
+    {
+        BookTitle,
+        Chapter,
+        Paragraph
+    }
 
     private static List<(SectionKind Kind, string Number, string Title, string TocId)> ParseNovel(string raw)
     {
         var result = new List<(SectionKind, string, string, string)>();
         string[] lines = raw.Replace("\r\n", "\n").Split('\n');
 
-        bool pastHeader  = false;
-        int  bodyStart   = 0;
+        bool pastHeader = false;
+        int bodyStart = 0;
 
         for (int i = 0; i < lines.Length; i++)
         {
@@ -293,9 +301,9 @@ public static partial class DickensNovelTaggedExample
             }
         }
 
-        var    para        = new StringBuilder();
-        bool   nextIsTitle = false;
-        string pendingNum  = "";
+        var para = new StringBuilder();
+        bool nextIsTitle = false;
+        string pendingNum = "";
 
         void FlushParagraph()
         {
@@ -308,13 +316,13 @@ public static partial class DickensNovelTaggedExample
         for (int i = bodyStart; i < lines.Length; i++)
         {
             string rawLine = lines[i];
-            string line    = rawLine.Trim();
+            string line = rawLine.Trim();
 
             if (line.StartsWith("*** END OF THE PROJECT GUTENBERG", StringComparison.OrdinalIgnoreCase))
                 break;
 
             if (rawLine.Length > 0 && !char.IsWhiteSpace(rawLine[0])
-                && line.StartsWith("Book the ", StringComparison.OrdinalIgnoreCase))
+                                   && line.StartsWith("Book the ", StringComparison.OrdinalIgnoreCase))
             {
                 FlushParagraph();
                 nextIsTitle = false;
@@ -325,7 +333,7 @@ public static partial class DickensNovelTaggedExample
             if (ChapterLineRegex().IsMatch(line))
             {
                 FlushParagraph();
-                pendingNum  = line;
+                pendingNum = line;
                 nextIsTitle = true;
                 continue;
             }
@@ -335,11 +343,15 @@ public static partial class DickensNovelTaggedExample
                 if (string.IsNullOrWhiteSpace(line)) continue;
                 result.Add((SectionKind.Chapter, pendingNum, line, line));
                 nextIsTitle = false;
-                pendingNum  = "";
+                pendingNum = "";
                 continue;
             }
 
-            if (string.IsNullOrWhiteSpace(line)) { FlushParagraph(); continue; }
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                FlushParagraph();
+                continue;
+            }
 
             if (para.Length > 0) para.Append(' ');
             para.Append(line);

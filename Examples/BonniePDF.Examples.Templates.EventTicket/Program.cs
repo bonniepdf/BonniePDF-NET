@@ -28,6 +28,7 @@ internal sealed class Program
             if (Directory.Exists(candidate)) return candidate;
             dir = Path.GetDirectoryName(dir);
         }
+
         return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
     }
 
@@ -40,6 +41,7 @@ internal sealed class Program
             if (File.Exists(fullPath))
                 assets[path] = File.ReadAllBytes(fullPath);
         }
+
         return assets;
     }
 }

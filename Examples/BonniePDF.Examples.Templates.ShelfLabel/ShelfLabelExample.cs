@@ -10,7 +10,8 @@ namespace BonniePDF.Examples.Templates.ShelfLabel;
 /// </summary>
 [System.ComponentModel.DisplayName("Retail Shelf Label (EU/UK)")]
 [System.ComponentModel.Category("Retail")]
-[System.ComponentModel.Description("EU/UK retail shelf-edge label on a custom 110x75mm card: product details, promotional pricing, mandatory unit price, shelf metadata, and EAN-13 barcode. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "EU/UK retail shelf-edge label on a custom 110x75mm card: product details, promotional pricing, mandatory unit price, shelf metadata, and EAN-13 barcode. PDF/A-2a + PDF/UA-1.")]
 public static class ShelfLabelExample
 {
     private const float DetailTileHeight = 31;
@@ -21,11 +22,14 @@ public static class ShelfLabelExample
     private static readonly Color Ink = ColorPalette.Slate[900];
     private static readonly Color Body = ColorPalette.Slate[600];
     private static readonly Color Muted = ColorPalette.Slate[500];
+
     private static readonly Color Rule = ColorPalette.Slate[200];
+
     // 700, not 600: this text reads against a Slate-50 panel, and 600 falls to
     // 4.33:1 there against the 4.5:1 WCAG AA threshold.
     private static readonly Color Promo = ColorPalette.Rose[700];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new(new PdfSize(311.8f, 212.6f, "Shelf Label 110x75"), 8)
@@ -60,7 +64,8 @@ public static class ShelfLabelExample
 
     private static Container RetailerStrip()
     {
-        HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Alignment = HorizontalAlignment.Center };
+        HorizontalStack row = new()
+            { WidthDistribution = WidthDistribution.Weighted, Alignment = HorizontalAlignment.Center };
         row.Add(Tb("SAMPLESHOP", 10, Color.White, bold: true), 1);
         row.Add(Tb("Everyday Low Price", 9.4f, Color.White, bold: true, align: TextAlignment.Right), 1);
 
@@ -146,7 +151,8 @@ public static class ShelfLabelExample
     private static Container BarcodePanel()
     {
         VerticalStack stack = new();
-        stack.Add(Tb("EAN-13 / GS1 UK article number", 6.5f, Muted, bold: true, align: TextAlignment.Center, bottom: 2));
+        stack.Add(Tb("EAN-13 / GS1 UK article number", 6.5f, Muted, bold: true, align: TextAlignment.Center,
+            bottom: 2));
         stack.Add(new Container
         {
             HorizontalAlignment = HorizontalAlignment.Center,
@@ -158,8 +164,10 @@ public static class ShelfLabelExample
                 AltText = "EAN-13 article number 5012345678900.",
             },
         });
-        stack.Add(Tb("OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY", 6.2f, Body, bold: true, align: TextAlignment.Center, bottom: 1));
-        stack.Add(Tb("SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026", 5.8f, Muted, align: TextAlignment.Center));
+        stack.Add(Tb("OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY", 6.2f, Body, bold: true,
+            align: TextAlignment.Center, bottom: 1));
+        stack.Add(Tb("SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026", 5.8f, Muted,
+            align: TextAlignment.Center));
 
         return new Container
         {

@@ -10,7 +10,8 @@ namespace BonniePDF.Examples.Templates.ShippingLabel;
 /// </summary>
 [System.ComponentModel.DisplayName("Shipping Label")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("Carrier-style 4x6in shipping label (PDF/UA-1 + PDF/A-2a) with a Code 128 tracking barcode, an ITF-14 carton code, and a QR parcel link - native vector barcodes, exact label sizing.")]
+[System.ComponentModel.Description(
+    "Carrier-style 4x6in shipping label (PDF/UA-1 + PDF/A-2a) with a Code 128 tracking barcode, an ITF-14 carton code, and a QR parcel link - native vector barcodes, exact label sizing.")]
 public static class ShippingLabelExample
 {
     private static readonly Color Ink = ColorPalette.Slate[900];
@@ -18,6 +19,7 @@ public static class ShippingLabelExample
     private static readonly Color Mute = ColorPalette.Slate[500];
     private static readonly Color LineCol = ColorPalette.Slate[300];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // 4 x 6 inch label = 288 x 432 pt.
@@ -134,7 +136,8 @@ public static class ShippingLabelExample
     }
 
     // A full-bleed coloured band with bold text (carrier header / routing).
-    private static Container Band(string text, float size, Color bg, Color fg, TextAlignment align = TextAlignment.Left) => new()
+    private static Container Band(string text, float size, Color bg, Color fg,
+        TextAlignment align = TextAlignment.Left) => new()
     {
         BackgroundColor = bg,
         Padding = new Thickness(10, 5, 10, 5),

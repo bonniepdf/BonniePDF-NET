@@ -1,0 +1,123 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/removed-chart-options",
+    "description": "Removed chart options warn as unknown keys in ordinary reads and fail strict validation; effective defaults remain supported.",
+    "spec": "15 §8.9, §12.4"
+  },
+  "_expect": {
+    "pages": 1
+  },
+  "_expectWarnings": [
+    {
+      "path": "/pages/0/content/0/lineWidth",
+      "code": "unknown-key"
+    },
+    {
+      "path": "/pages/0/content/0/showDataPointMarkers",
+      "code": "unknown-key"
+    },
+    {
+      "path": "/pages/0/content/1/dotRadius",
+      "code": "unknown-key"
+    },
+    {
+      "path": "/pages/0/content/2/stemWidth",
+      "code": "unknown-key"
+    },
+    {
+      "path": "/pages/0/content/2/headRadius",
+      "code": "unknown-key"
+    },
+    {
+      "path": "/pages/0/content/3/totalLabelFontSize",
+      "code": "unknown-key"
+    },
+    {
+      "path": "/pages/0/content/3/totalValueFontSize",
+      "code": "unknown-key"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "LineChart",
+          "width": 150,
+          "height": 100,
+          "data": {
+            "series": [
+              {
+                "dataPoints": [
+                  {
+                    "label": "A",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          "lineWidth": 9,
+          "showDataPointMarkers": false
+        },
+        {
+          "type": "DotPlotChart",
+          "width": 150,
+          "height": 100,
+          "data": {
+            "series": [
+              {
+                "dataPoints": [
+                  {
+                    "label": "A",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          "dotRadius": 9
+        },
+        {
+          "type": "LollipopChart",
+          "width": 150,
+          "height": 100,
+          "data": {
+            "series": [
+              {
+                "dataPoints": [
+                  {
+                    "label": "A",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          "stemWidth": 9,
+          "headRadius": 9
+        },
+        {
+          "type": "PieChart",
+          "width": 150,
+          "height": 100,
+          "data": {
+            "series": [
+              {
+                "dataPoints": [
+                  {
+                    "label": "A",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          "totalLabelFontSize": 9,
+          "totalValueFontSize": 9
+        }
+      ]
+    }
+  ]
+}

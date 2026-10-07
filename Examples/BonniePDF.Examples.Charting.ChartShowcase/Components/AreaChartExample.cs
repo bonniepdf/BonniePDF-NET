@@ -9,10 +9,11 @@ namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 /// </summary>
 [System.ComponentModel.DisplayName("Area Chart")]
 [System.ComponentModel.Category("Charting")]
-[System.ComponentModel.Description("AreaChart implementation with monthly sales performance data, showing filled areas under the line with customizable opacity.")]
+[System.ComponentModel.Description(
+    "AreaChart implementation with monthly sales performance data, showing filled areas under the line with customizable opacity.")]
 public static class AreaChartExample
 {
-
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // Create a new PDF document
@@ -22,8 +23,19 @@ public static class AreaChartExample
             FooterTemplate = pageNumber =>
             {
                 HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.Add(new TextBlock { Text = "BonniePDF - Area Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] }, null);
-                stack.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = "BonniePDF - Area Chart", FontName = StandardFonts.Helvetica, FontSize = 10,
+                        Color = ColorPalette.Slate[500]
+                    }, null);
+                stack.Add(
+                    new TextBlock
+                    {
+                        Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                        FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500],
+                        Alignment = TextAlignment.Right
+                    }, 1f);
                 return stack;
             }
         });
@@ -99,7 +111,7 @@ public static class AreaChartExample
             AltText = "Area chart showing monthly sales performance from January to December",
             Height = 400,
             StretchToFit = true,
-            AreaColor = Color.FromHex(ChartColors.Purple),
+            AreaColor = Color.FromHex("#a855f7"),
             FillOpacity = 0.3f,
             LineWidth = 2.5f,
             FontFamily = StandardFonts.Helvetica,
@@ -112,10 +124,12 @@ public static class AreaChartExample
         document.Add(areaChart);
 
         // Save the document
-        
+
 
         return document;
     }
+
+    // Local helpers and sample data for this document.
+
+
 }
-
-

@@ -9,15 +9,20 @@ namespace BonniePDF.Examples.Templates.UkDegreeTranscript;
 /// </summary>
 [System.ComponentModel.DisplayName("UK Degree Transcript")]
 [System.ComponentModel.Category("Education")]
-[System.ComponentModel.Description("Official-style fictional UK university degree transcript with honours classification, FHEQ module register, credits, marks, and QR verification link. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Official-style fictional UK university degree transcript with honours classification, FHEQ module register, credits, marks, and QR verification link. PDF/A-2a + PDF/UA-1.")]
 public static class UkDegreeTranscriptExample
 {
     private static readonly Color Navy = ColorPalette.Blue[900];
+
     private static readonly Color Ink = ColorPalette.Slate[700];
+
     // 600, not 500: reads against a Blue-50 panel elsewhere in the document, and
     // 500 falls to 4.38:1 there against the 4.5:1 WCAG AA threshold.
     private static readonly Color Muted = ColorPalette.Slate[600];
+
     private static readonly Color Rule = ColorPalette.Slate[200];
+
     // 700, not 500: bold 12pt text on white needs 4.5:1 and 500 falls to 2.13:1.
     private static readonly Color Gold = ColorPalette.Amber[700];
 
@@ -42,6 +47,7 @@ public static class UkDegreeTranscriptExample
         new(6, "CS6305", "Ethics & Society in Computing", 20, 67),
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new(PdfSize.A4, 50)
@@ -51,7 +57,8 @@ public static class UkDegreeTranscriptExample
             Language = "en-GB",
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"Sample University  -  Transcript 20458812  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                Text =
+                    $"Sample University  -  Transcript 20458812  -  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 8,
                 Color = Muted,
@@ -80,8 +87,12 @@ public static class UkDegreeTranscriptExample
         Grid header = new(2.4f, 1) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 0, 0, 6) };
 
         VerticalStack uni = new();
-        uni.Add(new TextBlock { Text = "SAMPLE UNIVERSITY", FontName = StandardFonts.HelveticaBold, FontSize = 16, Color = Navy });
-        uni.Add(new TextBlock { Text = "Founded 1887 - Registrar's Office", FontSize = 9, Color = Muted, Margin = new Thickness(0, 2, 0, 0) });
+        uni.Add(new TextBlock
+            { Text = "SAMPLE UNIVERSITY", FontName = StandardFonts.HelveticaBold, FontSize = 16, Color = Navy });
+        uni.Add(new TextBlock
+        {
+            Text = "Founded 1887 - Registrar's Office", FontSize = 9, Color = Muted, Margin = new Thickness(0, 2, 0, 0)
+        });
 
         header.AddRow(
             uni,
@@ -130,14 +141,16 @@ public static class UkDegreeTranscriptExample
                           (double)Modules.Where(m => m.Level >= 5).Sum(m => (m.Level == 6 ? 2 : 1) * m.Credits);
 
         VerticalStack stack = new();
-        stack.Add(new TextBlock { Text = "AWARD", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Muted });
+        stack.Add(new TextBlock
+            { Text = "AWARD", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Muted });
         // The award is the transcript's primary heading (H1). Tagging it as the
         // first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede any H2);
         // the section headings below are H2. Styling is unchanged.
         stack.Add(H1("Upper Second-Class Honours (2:1)"));
         stack.Add(new TextBlock
         {
-            Text = $"Weighted average {weighted.ToString("0.0", CultureInfo.InvariantCulture)}%  -  {total} credits  -  FHEQ Level 6",
+            Text =
+                $"Weighted average {weighted.ToString("0.0", CultureInfo.InvariantCulture)}%  -  {total} credits  -  FHEQ Level 6",
             FontSize = 9,
             Color = Ink,
         });
@@ -164,7 +177,8 @@ public static class UkDegreeTranscriptExample
             HeaderTextColor = Color.White,
             Margin = new Thickness(0, 4, 0, 18),
         };
-        table.AddHeader(Th("Level", TextAlignment.Left), Th("Code", TextAlignment.Left), Th("Module", TextAlignment.Left), Th("Credits", TextAlignment.Right), Th("Mark", TextAlignment.Right));
+        table.AddHeader(Th("Level", TextAlignment.Left), Th("Code", TextAlignment.Left),
+            Th("Module", TextAlignment.Left), Th("Credits", TextAlignment.Right), Th("Mark", TextAlignment.Right));
 
         foreach (Module module in Modules)
         {
@@ -175,7 +189,8 @@ public static class UkDegreeTranscriptExample
                 Td(module.Credits.ToString(CultureInfo.InvariantCulture), TextAlignment.Right, Ink),
                 // Emerald[700], not [600]: regular-weight text on white needs
                 // 4.5:1 and 600 falls to 3.65:1.
-                Td(module.Mark.ToString(CultureInfo.InvariantCulture) + "%", TextAlignment.Right, module.Mark >= 70 ? ColorPalette.Emerald[700] : Ink));
+                Td(module.Mark.ToString(CultureInfo.InvariantCulture) + "%", TextAlignment.Right,
+                    module.Mark >= 70 ? ColorPalette.Emerald[700] : Ink));
         }
 
         return table;
@@ -236,7 +251,8 @@ public static class UkDegreeTranscriptExample
 
     private static HorizontalStack Kv(string label, string value)
     {
-        HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 0, 0, 5) };
+        HorizontalStack row = new()
+            { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 0, 0, 5) };
         row.Add(new TextBlock { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 9, Color = Muted }, 2);
         row.Add(new TextBlock { Text = value, FontSize = 10, Color = Ink }, 3);
         return row;

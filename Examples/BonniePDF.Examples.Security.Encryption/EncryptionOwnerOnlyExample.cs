@@ -8,9 +8,11 @@ namespace BonniePDF.Examples.Security.Encryption;
 /// </summary>
 [System.ComponentModel.DisplayName("Encryption - Owner Password Only")]
 [System.ComponentModel.Category("Security")]
-[System.ComponentModel.Description("Generates a PDF that opens without a password but has restricted actions. Only the owner password can unlock full permissions.")]
+[System.ComponentModel.Description(
+    "Generates a PDF that opens without a password but has restricted actions. Only the owner password can unlock full permissions.")]
 public static class EncryptionOwnerOnlyExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new() { Language = "en-GB" };
@@ -23,7 +25,8 @@ public static class EncryptionOwnerOnlyExample
 
         Document doc = new(settings);
         doc.Metadata.Title = "Owner-Password-Only Encryption Example";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         doc.Add(new TextBlock
         {
@@ -60,4 +63,3 @@ public static class EncryptionOwnerOnlyExample
         return doc;
     }
 }
-

@@ -19,10 +19,12 @@ namespace BonniePDF.Examples.Templates.FacturXInvoice;
 /// </summary>
 [System.ComponentModel.DisplayName("EU E-Invoice (Factur-X / ZUGFeRD, EN 16931)")]
 [System.ComponentModel.Category("Templates")]
-[System.ComponentModel.Description("A cross-border EU e-invoice following EN 16931 / Factur-X: a polished PDF/A-3 invoice carrying the machine-readable CII invoice XML inside it.")]
+[System.ComponentModel.Description(
+    "A cross-border EU e-invoice following EN 16931 / Factur-X: a polished PDF/A-3 invoice carrying the machine-readable CII invoice XML inside it.")]
 public static class FacturXInvoiceExample
 {
     private static readonly Color Ink = ColorPalette.Slate[700];
+
     // 600, not 500: reads against tinted panels elsewhere in the document, and
     // 500 falls to 4.35-4.38:1 there against the 4.5:1 WCAG AA threshold.
     private static readonly Color Muted = ColorPalette.Slate[600];
@@ -41,6 +43,7 @@ public static class FacturXInvoiceExample
         ("Software license (annual)", "12-month term", 1, 600m),
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         Document doc = new(new DocumentSettings
@@ -68,7 +71,8 @@ public static class FacturXInvoiceExample
 
         VerticalStack titleStack = new();
         titleStack.Add(Cell("E-INVOICE", size: 24, bold: true, color: Accent, align: TextAlignment.Right));
-        titleStack.Add(Cell("EN 16931 · Factur-X / ZUGFeRD", size: 8, color: Muted, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0)));
+        titleStack.Add(Cell("EN 16931 · Factur-X / ZUGFeRD", size: 8, color: Muted, align: TextAlignment.Right,
+            margin: new Thickness(0, 2, 0, 0)));
         titleStack.Add(Cell("INV-2026-1001", color: Muted, align: TextAlignment.Right));
 
         Grid header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
@@ -90,7 +94,8 @@ public static class FacturXInvoiceExample
             Margin = new Thickness(0, 0, 0, 18),
         };
         meta.AddRow(
-            Labelled("BILLED TO", Lines(Muted, "Sample Customer", "1 Example Way", "EC1A 1BB London", "United Kingdom"), Accent),
+            Labelled("BILLED TO", Lines(Muted, "Sample Customer", "1 Example Way", "EC1A 1BB London", "United Kingdom"),
+                Accent),
             Labelled("DETAILS", details, Accent));
         doc.Add(meta);
 
@@ -142,7 +147,8 @@ public static class FacturXInvoiceExample
             BackgroundColor = ColorPalette.Blue[50],
             CornerRadius = 8,
         };
-        HorizontalStack totalsRow = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 6, 0, 0) };
+        HorizontalStack totalsRow = new()
+            { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 6, 0, 0) };
         totalsRow.Add(new Container(), 1);
         totalsRow.Add(totalsBox, 1);
         doc.Add(totalsRow);
@@ -162,7 +168,10 @@ public static class FacturXInvoiceExample
         Grid bottom = new(1.1f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 20, 0, 0) };
         bottom.AddRow(
             payCell,
-            new Container { BackgroundColor = HeaderBg, CornerRadius = 6, Padding = new Thickness(12, 10, 12, 10), Child = xmlStack });
+            new Container
+            {
+                BackgroundColor = HeaderBg, CornerRadius = 6, Padding = new Thickness(12, 10, 12, 10), Child = xmlStack
+            });
         doc.Add(bottom);
 
 
@@ -214,9 +223,11 @@ public static class FacturXInvoiceExample
         return new Container { Child = stack };
     }
 
-    private static HorizontalStack TotalLine(string label, string value, bool bold = false, float size = 9f, Color? color = null)
+    private static HorizontalStack TotalLine(string label, string value, bool bold = false, float size = 9f,
+        Color? color = null)
     {
-        HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 3, 0, 3) };
+        HorizontalStack row = new()
+            { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 3, 0, 3) };
         row.Add(Cell(label, size: size, bold: bold, color: color ?? Muted), 3);
         row.Add(Cell(value, size: size, bold: bold, color: color ?? Ink, align: TextAlignment.Right), 2);
         return row;

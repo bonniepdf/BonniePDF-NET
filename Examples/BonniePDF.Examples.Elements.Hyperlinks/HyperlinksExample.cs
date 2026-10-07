@@ -10,6 +10,7 @@ namespace BonniePDF.Examples.Elements.Hyperlinks;
 [System.ComponentModel.Description("Internal and external clickable links.")]
 public static class HyperlinksExample
 {
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         // Create a document with metadata
@@ -18,7 +19,8 @@ public static class HyperlinksExample
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
+        doc.Settings.DefaultTextStyle =
+            new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]);
 
         // Set document metadata
         doc.Metadata.Title = "Hyperlink Examples";
@@ -141,4 +143,3 @@ public static class HyperlinksExample
         return doc;
     }
 }
-

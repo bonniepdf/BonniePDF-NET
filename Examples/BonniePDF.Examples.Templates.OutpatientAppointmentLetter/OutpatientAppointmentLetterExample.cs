@@ -12,7 +12,8 @@ namespace BonniePDF.Examples.Templates.OutpatientAppointmentLetter;
 /// </summary>
 [System.ComponentModel.DisplayName("Outpatient Appointment")]
 [System.ComponentModel.Category("Healthcare")]
-[System.ComponentModel.Description("Accessible fictional outpatient appointment letter with clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data disclaimers. PDF/A-2a + PDF/UA-1.")]
+[System.ComponentModel.Description(
+    "Accessible fictional outpatient appointment letter with clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data disclaimers. PDF/A-2a + PDF/UA-1.")]
 public static class OutpatientAppointmentLetterExample
 {
     private const float Margin = 48;
@@ -45,6 +46,7 @@ public static class OutpatientAppointmentLetterExample
         "Contact us before your visit if you need an interpreter, step-free access, or information in another format.",
     ];
 
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
         DocumentSettings settings = new(PdfSize.A4, Margin)
@@ -55,7 +57,8 @@ public static class OutpatientAppointmentLetterExample
             DisplayDocTitle = true,
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any health service provider  |  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                Text =
+                    $"SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any health service provider  |  Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7.5f,
                 Color = Muted,
@@ -138,8 +141,10 @@ public static class OutpatientAppointmentLetterExample
         brand.Add(new TextBlock { Text = "Outpatient services", FontSize = 10, Color = Muted });
 
         VerticalStack reference = new() { Spacing = 3 };
-        reference.Add(new TextBlock { Text = "Issued 1 August 2026", FontSize = 9.5f, Color = Muted, Alignment = TextAlignment.Right });
-        reference.Add(new TextBlock { Text = "Reference SAMPLE-OP-1042", FontSize = 9.5f, Color = Muted, Alignment = TextAlignment.Right });
+        reference.Add(new TextBlock
+            { Text = "Issued 1 August 2026", FontSize = 9.5f, Color = Muted, Alignment = TextAlignment.Right });
+        reference.Add(new TextBlock
+            { Text = "Reference SAMPLE-OP-1042", FontSize = 9.5f, Color = Muted, Alignment = TextAlignment.Right });
 
         masthead.AddRow(brand, reference);
         return masthead;
