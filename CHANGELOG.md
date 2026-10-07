@@ -78,6 +78,8 @@ behaviour, so the two files can be read side by side.
 
 ### Fixed
 
+- **Value labels on a `GroupedBarChart` sit on their own bars.** Every series' label was drawn at the middle of the category, so the labels of neighbouring bars printed on top of each other. Each label is now centred above its bar, or beside it on a horizontal chart.
+
 - **A heading, figure or table inside a pagination wrapper keeps its structure tag.** `EnsureSpace`, `PreventPageBreak`, `ShowEntire`, `ShowIf`, `ShowOnce`, `SkipOnce`, `StopPaging` and `Unconstrained` rendered their child without opening its semantic role, so a `Heading` wrapped in one dropped out of the structure tree (and out of the bookmarks and contents that read it) in a PDF/UA-1 document. The wrapper now opens the child's role as a stack or `Container` does.
 
 - **`DefinitionException` derives from `BonniePdfException`**, so one `catch` handles

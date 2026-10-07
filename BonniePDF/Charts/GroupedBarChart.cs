@@ -47,41 +47,90 @@ public class GroupedBarChart : CartesianChartBase
 
         if (Orientation == ChartOrientation.Horizontal)
         {
-            float totalGroupSpace = chartAreaHeight / categoryCount;
-            float groupPadding = totalGroupSpace * GroupGapRatio;
-            float barGroupHeight = totalGroupSpace - groupPadding;
-            float barHeight = (barGroupHeight / seriesCount) * BarWidthRatio;
             float topAreaY = baselineY - chartAreaHeight;
 
             for (int i = 0; i < coordinates.Count; i++)
             {
                 var p = coordinates[i];
                 float barWidth = p.X - LeftPadding;
-
-                float groupStartY = topAreaY + i * totalGroupSpace + groupPadding / 2;
-                float barY = groupStartY + seriesIndex * (barGroupHeight / seriesCount)
-                             + (barGroupHeight / seriesCount - barHeight) / 2;
+                (float barY, float barHeight) = BarSlot(i, seriesIndex, seriesCount, categoryCount, topAreaY, chartAreaHeight);
 
                 canvas.FillRect(LeftPadding, barY, barWidth, barHeight, series.Color);
             }
         }
         else
         {
-            float totalGroupSpace = chartAreaWidth / categoryCount;
-            float groupPadding = totalGroupSpace * GroupGapRatio;
-            float barGroupWidth = totalGroupSpace - groupPadding;
-            float barWidth = (barGroupWidth / seriesCount) * BarWidthRatio;
-
             for (int i = 0; i < coordinates.Count; i++)
             {
                 var p = coordinates[i];
                 float barHeight = baselineY - p.Y;
-
-                float groupStartX = LeftPadding + i * totalGroupSpace + groupPadding / 2;
-                float barX = groupStartX + seriesIndex * (barGroupWidth / seriesCount)
-                             + (barGroupWidth / seriesCount - barWidth) / 2;
+                (float barX, float barWidth) = BarSlot(i, seriesIndex, seriesCount, categoryCount, LeftPadding, chartAreaWidth);
 
                 canvas.FillRect(barX, p.Y, barWidth, barHeight, series.Color);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Where one bar sits along the category axis: its leading edge and its thickness.
+    /// The axis runs from <paramref name="axisStart"/> for <paramref name="axisLength"/>
+    /// (left to right in vertical mode, top to bottom in horizontal mode). Bars and their
+    /// value labels both take their position from here, so a label always follows its bar.
+    /// </summary>
+    private (float Start, float Thickness) BarSlot(int categoryIndex, int seriesIndex, int seriesCount,
+        int categoryCount, float axisStart, float axisLength)
+    {
+        float totalGroupSpace = axisLength / categoryCount;
+        float groupPadding = totalGroupSpace * GroupGapRatio;
+        float barGroupSize = totalGroupSpace - groupPadding;
+        float thickness = (barGroupSize / seriesCount) * BarWidthRatio;
+
+        float groupStart = axisStart + categoryIndex * totalGroupSpace + groupPadding / 2;
+        float start = groupStart + seriesIndex * (barGroupSize / seriesCount)
+                      + (barGroupSize / seriesCount - thickness) / 2;
+
+        return (start, thickness);
+    }
+
+    /// <summary>
+    /// Draws each value label against its own bar: centred above it in vertical mode, and to the
+    /// right of it, centred on its thickness, in horizontal mode. The base implementation places
+    /// labels at the middle of the category, which is right for one mark per category but would
+    /// print the labels of every series in a group on top of each other.
+    /// </summary>
+    protected override void DrawValueLabels(ICanvas canvas, ChartData data,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
+    {
+        if (!ShowValueLabels) return;
+
+        int seriesCount = data.Series.Count;
+        float topAreaY = baselineY - chartAreaHeight;
+
+        for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++)
+        {
+            ChartSeries series = data.Series[seriesIndex];
+            int categoryCount = series.DataPoints.Count;
+            IList<Point> coordinates = CalculateSeriesCoordinates(
+                series, data, chartAreaWidth, chartAreaHeight, baselineY);
+            float offset = GetLabelVerticalOffset(series);
+
+            for (int i = 0; i < categoryCount; i++)
+            {
+                var point = coordinates[i];
+                string text = series.DataPoints[i].FormattedValue;
+
+                if (Orientation == ChartOrientation.Horizontal)
+                {
+                    (float barY, float barHeight) = BarSlot(i, seriesIndex, seriesCount, categoryCount, topAreaY, chartAreaHeight);
+                    canvas.DrawText(point.X + offset, barY + barHeight / 2 - LabelFontSize / 2, text,
+                        series.Color, LabelFontSize, FontFamily, TextAlignment.Left);
+                }
+                else
+                {
+                    (float barX, float barWidth) = BarSlot(i, seriesIndex, seriesCount, categoryCount, LeftPadding, chartAreaWidth);
+                    canvas.DrawText(barX + barWidth / 2, point.Y - offset - LabelFontSize, text,
+                        series.Color, LabelFontSize, FontFamily, TextAlignment.Center);
+                }
             }
         }
     }

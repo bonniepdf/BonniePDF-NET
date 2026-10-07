@@ -447,6 +447,64 @@ public class ChartTests
         Assert.True(rectOps.Count >= 4);
     }
 
+    [Theory]
+    [InlineData(ChartOrientation.Vertical)]
+    [InlineData(ChartOrientation.Horizontal)]
+    public void GroupedBarChart_ValueLabels_SitOnTheirOwnBars(ChartOrientation orientation)
+    {
+        var chart = new GroupedBarChart { Orientation = orientation };
+        var canvas = new MockCanvas();
+        var data = new ChartData
+        {
+            YAxis = { MaxValue = 30 },
+            Series =
+            [
+                new ChartSeries
+                {
+                    Name = "Product A",
+                    DataPoints = [new() { Label = "Q1", Value = 10 }, new() { Label = "Q2", Value = 15 }]
+                },
+                new ChartSeries
+                {
+                    Name = "Product B",
+                    DataPoints = [new() { Label = "Q1", Value = 20 }, new() { Label = "Q2", Value = 25 }]
+                }
+            ]
+        };
+
+        chart.Draw(canvas, data);
+
+        // The bars are the first rectangles drawn, series by series: A/Q1, A/Q2, B/Q1, B/Q2.
+        float[][] bars = canvas.Operations
+            .FindAll(op => op.StartsWith("FillRect(", StringComparison.Ordinal))
+            .GetRange(0, 4)
+            .ConvertAll(op => OperationNumbers(op, 4))
+            .ToArray();
+        string[] values = ["10", "15", "20", "25"];
+
+        for (int i = 0; i < values.Length; i++)
+        {
+            string label = canvas.Operations.Single(op =>
+                op.StartsWith("DrawText(", StringComparison.Ordinal) && op.Contains($",'{values[i]}',", StringComparison.Ordinal));
+            float[] position = OperationNumbers(label, 2);
+            float[] bar = bars[i];
+
+            if (orientation == ChartOrientation.Vertical)
+                Assert.Equal(bar[0] + bar[2] / 2, position[0], 3);
+            else
+                Assert.Equal(bar[1] + bar[3] / 2, position[1] + chart.LabelFontSize / 2, 3);
+        }
+    }
+
+    /// <summary>Reads the first <paramref name="count"/> numeric arguments of a recorded canvas operation.</summary>
+    private static float[] OperationNumbers(string operation, int count)
+    {
+        string arguments = operation[(operation.IndexOf('(') + 1)..operation.LastIndexOf(')')];
+        return arguments.Split(',').Take(count)
+            .Select(text => float.Parse(text, System.Globalization.CultureInfo.CurrentCulture))
+            .ToArray();
+    }
+
     [Fact]
     public void ChartData_WithNoTitle_SkipsTitleDrawing()
     {
