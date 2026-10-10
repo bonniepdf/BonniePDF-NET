@@ -20,11 +20,13 @@ namespace BonniePDF.Typography.Engine
         private readonly int[] kerningLookups;
         internal bool HasKerning { get { return kerningLookups.Length != 0; } }
         private int operations;
+        private readonly Action charge;
         private readonly ShapingLimits limits;
         internal ShapingLimits Limits { get { return limits; } }
 
         internal GlyphPositioning(byte[] bytes, byte[] gdef, ShapingLimits limits = null, ShapeOptions options = null)
         {
+            charge = Tick;
             this.limits = limits ?? new ShapingLimits();
             filter = new GlyphFilter(gdef);
             this.options = options ?? new ShapeOptions();
@@ -79,12 +81,12 @@ namespace BonniePDF.Typography.Engine
                     if (filter.IsMark(glyphs[i])) continue;
                     if (previous >= 0)
                     {
-                        if (options.FeatureValue("kern", glyphs[previous].FeatureCluster, 1, Tick) == 0 ||
-                            options.FeatureValue("kern", glyphs[i].FeatureCluster, 1, Tick) == 0) { previous = i; continue; }
+                        if (options.FeatureValue("kern", glyphs[previous].FeatureCluster, 1, charge) == 0 ||
+                            options.FeatureValue("kern", glyphs[i].FeatureCluster, 1, charge) == 0) { previous = i; continue; }
                         int first, second;
                         for (int step = 0; step < legacyKerning.WorkPerPair; step++) Tick();
                         legacyKerning.Split(glyphs[previous].Id, glyphs[i].Id, out first, out second);
-                        if (first != 0 || second != 0) UnsafeRange.Mark(glyphs, previous, i, Tick);
+                        if (first != 0 || second != 0) UnsafeRange.Mark(glyphs, previous, i, charge);
                         adjustments[previous].XAdvance = checked(adjustments[previous].XAdvance + first);
                         adjustments[i].XAdvance = checked(adjustments[i].XAdvance + second);
                         adjustments[i].XPlacement = checked(adjustments[i].XPlacement + second);
@@ -115,7 +117,7 @@ namespace BonniePDF.Typography.Engine
                 throw new InvalidDataException("Invalid GPOS lookup index.");
             if (at < 0 || at >= glyphs.Count)
                 return 0;
-            if (depth == 0 && activeRule != null && activeRule.Value(glyphs[at].FeatureCluster, Tick) == 0) return 0;
+            if (depth == 0 && activeRule != null && activeRule.Value(glyphs[at].FeatureCluster, charge) == 0) return 0;
             int lookup = Offset(lookupList, lookupList + 2 + index * 2);
             int type = data.U16(lookup), flags = data.U16(lookup + 2), count = data.U16(lookup + 4);
             data.Check(lookup + 6, count * 2);
@@ -180,7 +182,7 @@ namespace BonniePDF.Typography.Engine
             int secondFormat = data.U16(sub + 6), secondSize = ValueSize(secondFormat);
             if (next >= glyphs.Count)
                 return 0;
-            if (activeRule != null && activeRule.Value(glyphs[next].FeatureCluster, Tick) == 0) return 0;
+            if (activeRule != null && activeRule.Value(glyphs[next].FeatureCluster, charge) == 0) return 0;
             int pair, valueOrigin = sub;
             if (format == 1)
             {
@@ -229,7 +231,7 @@ namespace BonniePDF.Typography.Engine
             Value(valueOrigin, pair + firstSize, secondFormat, adjustments[next]);
             if (oldFirstAdvance != adjustments[at].XAdvance || oldFirstX != adjustments[at].XPlacement || oldFirstY != adjustments[at].YPlacement ||
                 oldSecondAdvance != adjustments[next].XAdvance || oldSecondX != adjustments[next].XPlacement || oldSecondY != adjustments[next].YPlacement)
-                UnsafeRange.Mark(glyphs, at, next, Tick);
+                UnsafeRange.Mark(glyphs, at, next, charge);
             // A null second ValueRecord permits overlapping pairs (AV, VA in AVA).
             return secondFormat == 0 ? 1 : -1;
         }
@@ -283,7 +285,7 @@ namespace BonniePDF.Typography.Engine
             FontAnchor markAnchor = Anchor(Offset(marks, record + 2));
             FontAnchor baseAnchor = Anchor(Offset(anchorOrigin, baseField));
             var adjustment = adjustments[at];
-            UnsafeRange.Mark(glyphs, parent, at, Tick);
+            UnsafeRange.Mark(glyphs, parent, at, charge);
             adjustment.Parent = parent;
             adjustment.CursiveParent = -1;
             adjustment.XPlacement = checked(baseAnchor.X - markAnchor.X);
@@ -440,7 +442,7 @@ namespace BonniePDF.Typography.Engine
                 adjustments[next].XAdvance = checked(adjustments[next].XAdvance - entryAdjustment);
                 adjustments[next].XPlacement = checked(adjustments[next].XPlacement - entryAdjustment);
             }
-            UnsafeRange.Mark(glyphs, at, next, Tick);
+            UnsafeRange.Mark(glyphs, at, next, charge);
             int child = (flags & 1) == 0 ? next : at, parent = (flags & 1) == 0 ? at : next;
             // Reversing an existing cursive connection must not create a cycle.
             // Keep the old parent's current baseline when breaking that connection.

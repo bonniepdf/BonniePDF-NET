@@ -22,6 +22,8 @@ namespace BonniePDF;
 internal sealed class ResolvedTextRun
 {
     internal GlyphUsageTracker? Tracker { get; init; }
+    // A shared parsed face can back multiple PDF resources with separate trackers.
+    internal bool CanTrackPreparedGlyphs { get; init; }
     /// <summary>PDF resource name (e.g. <c>/F1</c>) of the font for this run.</summary>
     public required string ResourceName { get; init; }
 
@@ -439,6 +441,16 @@ internal class PdfResourceRegistry
             };
         }
 
+        var primaryInfo = EmbeddedFonts.Values.FirstOrDefault(f => ReferenceEquals(f.Font, primaryFont));
+        if (TextRunShaper.PrimaryCovers(text, primaryFont))
+            return new List<ResolvedTextRun>
+            {
+                new() { ResourceName = resourceName, EmbeddedFont = primaryFont,
+                    Tracker = primaryInfo?.Tracker,
+                    CanTrackPreparedGlyphs = primaryInfo?.ResourceName == resourceName,
+                    FontIdentifier = primaryFontIdentifier, Text = text }
+            };
+
         // candidates[0] is the primary font; fallbackByIndex is aligned to
         // candidates (index 0 is the primary and has no FallbackFont entry).
         var candidates = new List<ShaperFont> { new() { FontIdentifier = primaryFontIdentifier, Font = primaryFont } };
@@ -475,7 +487,8 @@ internal class PdfResourceRegistry
                 {
                     ResourceName = resourceName,
                     EmbeddedFont = primaryFont,
-                    Tracker = EmbeddedFonts.Values.FirstOrDefault(f=>ReferenceEquals(f.Font,primaryFont))?.Tracker,
+                    Tracker = primaryInfo?.Tracker,
+                    CanTrackPreparedGlyphs = primaryInfo?.ResourceName == resourceName,
                     FontIdentifier = primaryFontIdentifier,
                     Text = run.Text
                 });
@@ -486,11 +499,13 @@ internal class PdfResourceRegistry
             string fbIdentifier = candidates[run.FontIndex].FontIdentifier;
             string fbResource = RegisterEmbeddedFontFromBytes(fb.Bytes, fbIdentifier);
             TtfFont? fbFont = ResolveEmbeddedFont(fbIdentifier);
+            var fbInfo = EmbeddedFonts.Values.FirstOrDefault(f => ReferenceEquals(f.Font, fbFont));
             result.Add(new ResolvedTextRun
             {
                 ResourceName = fbResource,
                 EmbeddedFont = fbFont,
-                Tracker = EmbeddedFonts.Values.FirstOrDefault(f=>ReferenceEquals(f.Font,fbFont))?.Tracker,
+                Tracker = fbInfo?.Tracker,
+                CanTrackPreparedGlyphs = fbInfo?.ResourceName == fbResource,
                 FontIdentifier = fbIdentifier,
                 Text = run.Text
             });

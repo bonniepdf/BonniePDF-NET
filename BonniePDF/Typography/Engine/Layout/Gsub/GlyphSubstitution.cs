@@ -17,10 +17,12 @@ namespace BonniePDF.Typography.Engine
         private LookupRule activeRule;
         private readonly bool arabic;
         private int operations;
+        private readonly Action charge;
         private readonly ShapingLimits limits;
         internal GlyphSubstitution(byte[] bytes, int glyphCount, byte[] gdef, ShapingLimits limits = null, ShapeOptions options = null)
         {
             arabic = options != null && options.Script == "arab";
+            charge = Tick;
             this.limits = limits ?? new ShapingLimits();
             this.glyphCount = glyphCount;
             filter = new GlyphFilter(gdef);
@@ -71,7 +73,7 @@ namespace BonniePDF.Typography.Engine
         }
 
         private bool Ignored(ShapingGlyph glyph, int flags, int set) { return (arabic && glyph.Scalar != 0x200c && glyph.Scalar != 0x200d && UnicodeData.IsIgnorable(glyph.Scalar)) || filter.Ignored(glyph.Id, flags, set); }
-        private bool Enabled(ShapingGlyph glyph) { return activeRule == null || activeRule.Value(glyph.FeatureCluster, Tick, glyph.Mirrored, glyph.JoiningForm) != 0; }
+        private bool Enabled(ShapingGlyph glyph) { return activeRule == null || activeRule.Value(glyph.FeatureCluster, charge, glyph.Mirrored, glyph.JoiningForm) != 0; }
 
         private int ApplyAt(int index, List<ShapingGlyph> glyphs, int at, int depth)
         {
@@ -173,7 +175,7 @@ namespace BonniePDF.Typography.Engine
                     throw new InvalidDataException("Invalid alternate substitution.");
                 int set = data.Relative16(sub, sub + 6 + coverage * 2), count = data.U16(set);
                 data.Check(set + 2, count * 2);
-                int value = activeRule == null ? 1 : activeRule.Value(glyphs[at].FeatureCluster, Tick, glyphs[at].Mirrored, glyphs[at].JoiningForm);
+                int value = activeRule == null ? 1 : activeRule.Value(glyphs[at].FeatureCluster, charge, glyphs[at].Mirrored, glyphs[at].JoiningForm);
                 if (value < 1 || value > count) return 0;
                 SetGlyph(glyphs[at], data.U16(set + value * 2));
                 return 1;
@@ -203,7 +205,7 @@ namespace BonniePDF.Typography.Engine
                 int count = data.U16(p);
                 data.Check(p + 2, count * 2);
                 if (coverage >= count) throw new InvalidDataException("Invalid reverse chaining coverage index.");
-                UnsafeRange.Mark(glyphs, first, position, Tick);
+                UnsafeRange.Mark(glyphs, first, position, charge);
                 SetGlyph(glyphs[at], data.U16(p + 2 + coverage * 2));
                 return 1;
             }
@@ -320,7 +322,7 @@ namespace BonniePDF.Typography.Engine
             int mode, int classDefinition, int sub, int flags, int markSet, out List<ShapingGlyph> matched, bool requireFeature = false)
         {
             data.Check(record, count * 2);
-            matched = new List<ShapingGlyph>();
+            matched = count == 0 ? new List<ShapingGlyph>() : null;
             if (count > glyphs.Count)
                 return false;
             int position = start;
@@ -335,6 +337,7 @@ namespace BonniePDF.Typography.Engine
                     (mode == 1 ? Class(classDefinition, id) : id) == expected;
                 if (!same)
                     return false;
+                if (matched == null) matched = new List<ShapingGlyph>();
                 matched.Add(glyphs[position]);
                 if (j + 1 < count)
                     position = Walk(glyphs, position, direction, flags, markSet);
@@ -384,7 +387,7 @@ namespace BonniePDF.Typography.Engine
                     records = data.U16(p);
                     p += 2;
                 }
-                if (match) UnsafeRange.Mark(glyphs, contextFirst, Math.Max(contextLast, glyphs.IndexOf(matched[matched.Count - 1])), Tick);
+                if (match) UnsafeRange.Mark(glyphs, contextFirst, Math.Max(contextLast, glyphs.IndexOf(matched[matched.Count - 1])), charge);
                 return match ? ApplyRecords(p, records, matched, glyphs, at, depth) : 0;
             }
             if (format != 1 && format != 2)
@@ -435,7 +438,7 @@ namespace BonniePDF.Typography.Engine
                 if (!chained)
                     p += 2;
                 match &= Match(glyphs, Walk(glyphs, at, 1, flags, markSet), 1, input - 1, p, mode, inputClass, sub, flags, markSet, out matched, true);
-                matched.Insert(0, glyphs[at]);
+                if (match) matched.Insert(0, glyphs[at]);
                 p += (input - 1) * 2;
                 if (chained)
                 {
@@ -454,7 +457,7 @@ namespace BonniePDF.Typography.Engine
                 }
                 if (match)
                 {
-                    UnsafeRange.Mark(glyphs, contextFirst, Math.Max(contextLast, glyphs.IndexOf(matched[matched.Count - 1])), Tick);
+                    UnsafeRange.Mark(glyphs, contextFirst, Math.Max(contextLast, glyphs.IndexOf(matched[matched.Count - 1])), charge);
                     return ApplyRecords(p, records, matched, glyphs, at, depth);
                 }
             }

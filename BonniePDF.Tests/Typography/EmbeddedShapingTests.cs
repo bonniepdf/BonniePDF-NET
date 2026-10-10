@@ -127,6 +127,60 @@ public sealed class EmbeddedShapingTests
         string? output=Environment.GetEnvironmentVariable("SHAPING_OUTPUT");
         if(output is not null) {Directory.CreateDirectory(output);File.WriteAllBytes(Path.Combine(output,"dotnet.pdf"),stream.ToArray());File.WriteAllText(Path.Combine(output,"dotnet.svg"),doc.GenerateSvgPages()[0]);}
     }
+    [Fact]
+    public void CachedShapingUsesFeatureValuesAndOriginalSources()
+    {
+        var font = new TtfFont(FontPath);
+        var features = new Dictionary<string, int>(StringComparer.Ordinal) { ["liga"] = 0, ["kern"] = 1 };
+        var separate = font.Shape("ffi", features);
+        Assert.Equal(3, separate.Count);
+        Assert.Same(separate, font.Shape("ffi", new Dictionary<string, int>(StringComparer.Ordinal) { ["kern"] = 1, ["liga"] = 0 }));
+        features["liga"] = 1;
+        Assert.Single(font.Shape("ffi", features));
+        Assert.Equal(3, separate.Count);
+        Assert.Same(font.Shape("ffi"), font.Shape("ffi", new Dictionary<string, int>(StringComparer.Ordinal)));
+        Assert.NotSame(font.Shape("é"), font.Shape("e\u0301"));
+        Assert.Throws<NotSupportedException>(() => ((IList<BonniePDF.Typography.Engine.GlyphInfo>)separate).Clear());
+    }
+    [Fact]
+    public void RepeatedDefaultShapingDoesNotReallocateTheRun()
+    {
+        var font = new TtfFont(FontPath);
+        font.Shape("office AV ffi");
+        font.Shape("office AV ffi");
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < 1000; i++) font.Shape("office AV ffi");
+        Assert.True(GC.GetAllocatedBytesForCurrentThread() - before < 1024);
+    }
+    [Fact]
+    public void ShapingCacheEvictsUniqueTextAndBypassesLongRuns()
+    {
+        var font = new TtfFont(FontPath);
+        var first = font.Shape("first");
+        for (int i = 0; i < 300; i++) font.Shape("unique " + i.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        Assert.NotSame(first, font.Shape("first"));
+        string budgetText = new('a', 500);
+        var budgetFirst = font.Shape(budgetText + "0");
+        for (int i = 1; i < 40; i++) font.Shape(budgetText + i.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        Assert.NotSame(budgetFirst, font.Shape(budgetText + "0"));
+        string longText = new('a', 513);
+        Assert.NotSame(font.Shape(longText), font.Shape(longText));
+        var parallel = new IReadOnlyList<BonniePDF.Typography.Engine.GlyphInfo>[32];
+        System.Threading.Tasks.Parallel.For(0, parallel.Length, i => parallel[i] = font.Shape("shared ffi"));
+        Assert.All(parallel, run => Assert.Same(parallel[0], run));
+    }
+    [Fact]
+    public void PrimaryCoverageFastPathStillFiltersControlsAndReportsMissingGlyphs()
+    {
+        var font = new TtfFont(FontPath);
+        var candidates = new[] { new ShaperFont { FontIdentifier = "primary", Font = font } };
+        Assert.Equal("office", Assert.Single(TextRunShaper.ShapeTextRuns("office", candidates).Runs).Text);
+        var filtered = TextRunShaper.ShapeTextRuns("a\tb\u200bc", candidates);
+        Assert.Equal("abc", Assert.Single(filtered.Runs).Text);
+        var missing = TextRunShaper.ShapeTextRuns("a\U0010ffffb", candidates);
+        Assert.Equal("ab", Assert.Single(missing.Runs).Text);
+        Assert.Equal(new[] { 0x10ffff }, missing.Unsupported);
+    }
     private static BonniePDF.Document Create(string text,IReadOnlyDictionary<string,int>? features=null)
     {
         var doc=new BonniePDF.Document();doc.Add(new TextBlock(text){FontName=FontPath,FontSize=12,FontFeatures=features});return doc;
