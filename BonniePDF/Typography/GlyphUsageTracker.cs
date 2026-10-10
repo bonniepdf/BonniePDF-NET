@@ -27,10 +27,11 @@ internal class GlyphUsageTracker
         for(int i=0;i<glyphs.Count;) {
             var first=glyphs[i];int end=i+1;
             while(end<glyphs.Count && glyphs[end].Cluster==first.Cluster)end++;
-            var chars=text.Substring(first.Cluster,first.SourceLength).EnumerateRunes().Select(r=>r.ToString()).ToArray();
+            string clusterSource = text.Substring(first.Cluster, first.SourceLength);
+            var chars = end == i + 1 ? null : clusterSource.EnumerateRunes().Select(r => r.ToString()).ToArray();
             for(int j=i;j<end;j++) {
                 ushort id=checked((ushort)glyphs[j].Id);_usedGlyphs.Add(id);
-                string source=j==end-1?string.Concat(chars.Skip(j-i)):j-i<chars.Length?chars[j-i]:string.Empty;
+                string source = chars is null ? clusterSource : j == end - 1 ? string.Concat(chars.Skip(j - i)) : j - i < chars.Length ? chars[j - i] : string.Empty;
                 if(!_sourceCids.TryGetValue((id,source),out ushort code)) {
                     int value=_sources.ContainsKey(id)?Math.Max(_nextCid,_font.NumberOfGlyphs):id;
                     if(value>ushort.MaxValue)throw new InvalidOperationException("PDF font character-code capacity exceeded.");
@@ -101,10 +102,15 @@ internal class GlyphUsageTracker
     public void MarkUsed(string text)
     {
         if (string.IsNullOrEmpty(text)) return;
-        MarkShaped(text,_font.Shape(text));
+        MarkUsed(text, _font.Shape(text));
+    }
 
+    internal IReadOnlyList<ushort> MarkUsed(string text, IReadOnlyList<Typography.Engine.GlyphInfo> glyphs)
+    {
+        var codes = MarkShaped(text, glyphs);
         foreach (Rune rune in text.EnumerateRunes())
             MarkUsed(rune.Value);
+        return codes;
     }
 
     /// <summary>

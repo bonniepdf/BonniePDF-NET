@@ -19,35 +19,52 @@ namespace BonniePDF.Typography.Engine
                 throw new ArgumentException("Text exceeds the configured UTF-16 limit.", "text");
             settings.ValidateText(text);
             bool hebrew = settings.Script == "hebr", arabic = settings.Script == "arab", nativeRtl = hebrew || arabic;
-            var input = EmojiClusters.Scalars(text, nativeRtl || itemized, arabic);
-            var tokens = new List<SourceScalar>();
-            int offset = 0;
-            foreach (int scalar in input)
-            {
-                int end = offset + (scalar > 65535 ? 2 : 1);
-                tokens.Add(new SourceScalar(scalar, offset, end)); offset = end;
-            }
-            tokens = new CanonicalNormalizer(limits, face.Covers, hebrew ? (Func<int, int>)HebrewShaper.CombiningClass : null,
-                hebrew ? (Func<int, bool>)(cp => cp >= 0xfb1d && cp <= 0xfb4e && face.Covers(cp)) : null, hebrew ? 32 : int.MaxValue).Normalize(tokens);
-            if (hebrew) tokens = HebrewShaper.Compose(face, tokens);
-            if (arabic) tokens = ArabicShaper.Reorder(face, tokens);
-            var scalars = new List<int>();
-            foreach (var token in tokens)
-            {
-                int scalar = token.Scalar;
-                if (settings.Direction == TextDirection.RightToLeft)
-                {
-                    int mirrored = UnicodeData.Mirror(scalar);
-                    if (face.Covers(mirrored)) scalar = mirrored;
-                }
-                scalars.Add(scalar);
-            }
             var run = new List<ShapingGlyph>();
-            foreach (var cluster in EmojiClusters.Split(scalars, !arabic))
+            // Printable ASCII has no canonical decomposition or multi-scalar
+            // clusters. Keep the same lookup pipeline and all bounded error paths.
+            bool ascii = settings.Script == "latn" && settings.Direction == TextDirection.LeftToRight &&
+                text.Length <= limits.MaxGlyphs && text.Length * 3 <= limits.MaxOperations;
+            for (int i = 0; ascii && i < text.Length; i++) ascii = text[i] >= 32 && text[i] <= 126;
+            if (ascii)
             {
-                int sourceOffset = tokens[cluster.Start].Start;
-                for (int i = cluster.Start + 1; i < cluster.End; i++) sourceOffset = Math.Min(sourceOffset, tokens[i].Start);
-                AppendCluster(face, scalars, cluster, sourceOffset, run, tokens, nativeRtl);
+                for (int i = 0; i < text.Length; i++)
+                {
+                    int id = face.Font.GlyphIndex(text[i]);
+                    if (id == 0) throw new NotSupportedException("Font has no glyph for U+" + ((int)text[i]).ToString("X4") + ".");
+                    run.Add(new ShapingGlyph(id, text[i], i));
+                }
+            }
+            else
+            {
+                var input = EmojiClusters.Scalars(text, nativeRtl || itemized, arabic);
+                var tokens = new List<SourceScalar>();
+                int offset = 0;
+                foreach (int scalar in input)
+                {
+                    int end = offset + (scalar > 65535 ? 2 : 1);
+                    tokens.Add(new SourceScalar(scalar, offset, end)); offset = end;
+                }
+                tokens = new CanonicalNormalizer(limits, face.Covers, hebrew ? (Func<int, int>)HebrewShaper.CombiningClass : null,
+                    hebrew ? (Func<int, bool>)(cp => cp >= 0xfb1d && cp <= 0xfb4e && face.Covers(cp)) : null, hebrew ? 32 : int.MaxValue).Normalize(tokens);
+                if (hebrew) tokens = HebrewShaper.Compose(face, tokens);
+                if (arabic) tokens = ArabicShaper.Reorder(face, tokens);
+                var scalars = new List<int>();
+                foreach (var token in tokens)
+                {
+                    int scalar = token.Scalar;
+                    if (settings.Direction == TextDirection.RightToLeft)
+                    {
+                        int mirrored = UnicodeData.Mirror(scalar);
+                        if (face.Covers(mirrored)) scalar = mirrored;
+                    }
+                    scalars.Add(scalar);
+                }
+                foreach (var cluster in EmojiClusters.Split(scalars, !arabic))
+                {
+                    int sourceOffset = tokens[cluster.Start].Start;
+                    for (int i = cluster.Start + 1; i < cluster.End; i++) sourceOffset = Math.Min(sourceOffset, tokens[i].Start);
+                    AppendCluster(face, scalars, cluster, sourceOffset, run, tokens, nativeRtl);
+                }
             }
             if ((!nativeRtl && settings.Direction == TextDirection.RightToLeft) || (nativeRtl && settings.Direction == TextDirection.LeftToRight))
             {

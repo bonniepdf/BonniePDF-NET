@@ -337,7 +337,13 @@ public abstract class TextElementBase : ElementBase
             }
 
             int count = lo;
-            for(int safe=count;safe>0;safe--)if(FontMetrics.IsSafeTextBreak(string.Concat(rest),FontName,string.Concat(rest.GetRange(0,safe)).Length,FontFeatures)){count=safe;break;}
+            var isSafeBreak = FontMetrics.GetTextBreakPredicate(string.Concat(rest), FontName, FontFeatures);
+            int breakOffset = string.Concat(rest.GetRange(0, count)).Length;
+            for (int safe = count; safe > 0; safe--)
+            {
+                if (isSafeBreak(breakOffset)) { count = safe; break; }
+                breakOffset -= rest[safe - 1].Length;
+            }
             int cut = -1;
             if (rest[count] == " " && HasNonSpace(count))
             {

@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "text-engine-dotnet",
   "source": {
-    "commit": "7a03218fb4fc0694f0a4c7b03ee9e372a95b58ea",
+    "commit": "cba6602a7b19d9cd4c24b6a58d283ba294c90f24",
     "dirty": false
   },
   "files": {
@@ -44,14 +44,14 @@
     "Layout/Common/UnsafeRange.cs": "64657cae11f640cad80ae616d34e7705dd7a268505843009fcc5ec034dfc307c",
     "Layout/Gpos/FontAnchor.cs": "cfc3e8b85a0b508d7f6206b998c3800acb6354f7ab7f632bd5226316b24a2647",
     "Layout/Gpos/GlyphAdjustment.cs": "cc56a2d8fbca6364abbc21a7f7cb6b4d66ac297b61e3f710efec85b376a68a1e",
-    "Layout/Gpos/GlyphPositioning.Context.cs": "11345a393d5e8016ee81b2dbd99c29850aef6cc7524cf58b21457a51271aa017",
+    "Layout/Gpos/GlyphPositioning.Context.cs": "15bc09190590c795ac5d353d817f485a0747b86cc8f87403b341c16e38a806f9",
     "Layout/Gpos/GlyphPositioning.Kerning.cs": "8086730a560d95aaf7175c84501c31d6f5788c404845b3ab3a77ae575afe1f75",
-    "Layout/Gpos/GlyphPositioning.cs": "d9007913903f315cee94575f1a17b79ad36d8aae1f4dd2d1a825834deb0b7997",
-    "Layout/Gsub/GlyphSubstitution.cs": "19f3e0ee1f02f5f38ce067acc937ce6bea4edca55f2d58223ef74da7599de626",
+    "Layout/Gpos/GlyphPositioning.cs": "cae8efa152bff8b63b30b7b844bfb48bf3ebe891816792f614f919cf1ac1d390",
+    "Layout/Gsub/GlyphSubstitution.cs": "ddbd5b9e70c19b5dcdbe8ce12ac3c080a92d1350894c65e563d4bbba2462cdfb",
     "Shaping/ArabicJoining.cs": "be1eace2a73db72596868f447635700ce621d7d8c371ccd3788f848e734ea94f",
     "Shaping/FallbackMarkPositioning.cs": "bdab8f4a5344d10470ba857b8c3f13891b948db5acb43969e6b844b73de7020b",
     "Shaping/ItemizedParagraph.cs": "ca4a7c2bab44aec91d5406de8022e1102f6a67a941b096c9401f690c8b970e5e",
-    "Shaping/Shaper.cs": "056de2dfd1de10453f639bf4659e0b161c6589e188a114d80e796b5a66cd8d43",
+    "Shaping/Shaper.cs": "d08810fcd5a6831832d019d025aeb337d47df2b8a0cee69188d1ccb34493bbc6",
     "Shaping/Shapers/ArabicShaper.cs": "2e8e1f124e4d970db07a162c1febcbfce7b29d0a87f0222f67847f6582ac9c12",
     "Shaping/Shapers/HebrewShaper.cs": "09542e2765920d45a0c471456d8a14359d1cbc3c5c0502ea35240337d3a9e82c",
     "Shaping/ShapingProgram.cs": "62d764e969b652eea74078530d75832b757110134395583cb3b7308fb1f39b9f",

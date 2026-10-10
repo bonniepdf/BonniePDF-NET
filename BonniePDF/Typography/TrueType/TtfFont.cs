@@ -32,9 +32,10 @@ internal class TtfFont
 #endif
     private Typography.Engine.FontFace? _engineFace;
     internal Typography.Engine.FontFace EngineFace => _engineFace ??= new Typography.Engine.FontFace(_rawData);
+    private readonly ShapedTextCache _shapedText = new();
     internal IReadOnlyList<Typography.Engine.GlyphInfo> Shape(string text, IReadOnlyDictionary<string, int>? features = null)
     {
-        lock (_shapeGate) return EmbeddedTextShaping.Shape(this, text, features);
+        lock (_shapeGate) return _shapedText.Get(this, text, features);
     }
 
     // =====================================================

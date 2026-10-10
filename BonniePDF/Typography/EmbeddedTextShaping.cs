@@ -8,7 +8,14 @@ internal static class EmbeddedTextShaping
 {
     internal static IReadOnlyList<GlyphInfo> Shape(TtfFont font, string text, IReadOnlyDictionary<string,int>? features)
     {
-        ShapeOptions? options = features is null ? null : new ShapeOptions(features:features.Select(f=>new ShapeFeature(f.Key,f.Value)));
+        ShapeOptions? options = features is null || features.Count == 0 ? null : new ShapeOptions(features:features.Select(f=>new ShapeFeature(f.Key,f.Value)));
+        bool ascii = text.Length > 0;
+        for (int i = 0; ascii && i < text.Length; i++) ascii = text[i] >= 32 && text[i] <= 126;
+        if (ascii)
+        {
+            try { return Shaper.Shape(font.EngineFace, text, options).Glyphs; }
+            catch (System.NotSupportedException) { /* Preserve the direct-mapping fallback below. */ }
+        }
         var glyphs=new List<GlyphInfo>(); int start=0, cluster=0; var span=new StringBuilder();
         GlyphInfo Direct(int id,int offset,int length) => new(id,offset,font.GetGlyphWidth((ushort)id),0,0,0,1,false,false,length);
         void Flush()

@@ -314,6 +314,8 @@ public static class FontMetrics
         // font metrics are integers and the scale is an exact promotion, so this
         // makes the two agree. The result narrows to float to keep the layout
         // contract unchanged.
+        if (TextRunShaper.PrimaryCovers(text, font))
+            return (float)(font.Shape(text, features).Sum(g => (double)g.AdvanceX) * fontSize / font.UnitsPerEm);
         var candidates=new List<ShaperFont> { new() {FontIdentifier="primary",Font=font} };
         foreach(var fallback in (ActiveDocumentFonts?.FallbackFonts()??[]).Concat(FontManager.GetFallbackFonts()))
             if(!ReferenceEquals(fallback.Font,font))candidates.Add(new ShaperFont {FontIdentifier=fallback.Key,Font=fallback.Font});
@@ -341,7 +343,7 @@ public static class FontMetrics
             {
                 try
                 {
-                    return new TtfFont(path);
+                    return TtfFont.LoadFromFileCached(path);
                 }
                 catch
                 {
@@ -399,13 +401,21 @@ public static class FontMetrics
     internal static int GetGlyphCount(string text,string identifier,IReadOnlyDictionary<string,int>? features=null)
     {
         var font=MetricFace(identifier);if(font is null)return text.EnumerateRunes().Count(c=>c.Value>=32);
+        if (TextRunShaper.PrimaryCovers(text, font)) return font.Shape(text, features).Count;
         var candidates=new List<ShaperFont>{new(){FontIdentifier="primary",Font=font}};
         foreach(var fallback in (ActiveDocumentFonts?.FallbackFonts()??[]).Concat(FontManager.GetFallbackFonts()))if(!ReferenceEquals(fallback.Font,font))candidates.Add(new ShaperFont {FontIdentifier=fallback.Key,Font=fallback.Font});
         return TextRunShaper.ShapeTextRuns(text,candidates).Runs.Sum(run=>candidates[run.FontIndex].Font.Shape(run.Text,features).Count);
     }
     internal static bool IsSafeTextBreak(string text,string identifier,int offset,IReadOnlyDictionary<string,int>? features=null)
     {
-        var face=MetricFace(identifier);return face is null || face.Shape(text,features).All(g=>!(g.Cluster<offset&&offset<g.Cluster+g.SourceLength)&&!(g.Cluster==offset&&g.UnsafeToBreak));
+        return GetTextBreakPredicate(text, identifier, features)(offset);
+    }
+
+    internal static Func<int, bool> GetTextBreakPredicate(string text, string identifier, IReadOnlyDictionary<string,int>? features = null)
+    {
+        var glyphs = MetricFace(identifier)?.Shape(text, features);
+        return offset => glyphs is null || glyphs.All(g =>
+            !(g.Cluster < offset && offset < g.Cluster + g.SourceLength) && !(g.Cluster == offset && g.UnsafeToBreak));
     }
 
     private static int[]? GetStandardFontTable(string fontName) => fontName switch

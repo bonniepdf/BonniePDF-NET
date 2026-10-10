@@ -186,7 +186,7 @@ internal partial class SvgCanvas : ICanvas
             if (only == null) return result;
             var candidates = new List<ShaperFont> { new() { FontIdentifier = fontFamily, Font = only } };
             foreach (ShapedRun run in TextRunShaper.ShapeTextRuns(text, candidates).Runs)
-                result.Add(new SvgTextRun(fontFamily, only, run.Text));
+                result.Add(new SvgTextRun(fontFamily, only, run.Text, only.Shape(run.Text, _fontFeatures)));
             return result;
         }
 
@@ -194,14 +194,14 @@ internal partial class SvgCanvas : ICanvas
         foreach (ResolvedTextRun run in TextRunResolver(fontFamily, text))
         {
             if (run.EmbeddedFont == null) continue;
-            result.Add(new SvgTextRun(run.FontIdentifier, run.EmbeddedFont, run.Text));
+            result.Add(new SvgTextRun(run.FontIdentifier, run.EmbeddedFont, run.Text, run.EmbeddedFont.Shape(run.Text, _fontFeatures)));
         }
 
         return result;
     }
 
     /// <summary>A maximal substring of a draw call renderable by one embedded face.</summary>
-    private readonly record struct SvgTextRun(string FontFamily, TtfFont Font, string Text);
+    private readonly record struct SvgTextRun(string FontFamily, TtfFont Font, string Text, IReadOnlyList<Typography.Engine.GlyphInfo> Glyphs);
 
     /// <summary>
     /// Total advance width of a resolved run list, kerned within each run, so a
@@ -213,7 +213,7 @@ internal partial class SvgCanvas : ICanvas
         foreach (SvgTextRun run in runs)
         {
             var font=run.Font;
-            foreach(var g in font.Shape(run.Text,_fontFeatures)) {width+=(float)((double)g.AdvanceX*fontSize/font.UnitsPerEm)+_letterSpacing;if(run.Text.Substring(g.Cluster,g.SourceLength)==" ")width+=_wordSpacing;}
+            foreach(var g in run.Glyphs) {width+=(float)((double)g.AdvanceX*fontSize/font.UnitsPerEm)+_letterSpacing;if(run.Text.Substring(g.Cluster,g.SourceLength)==" ")width+=_wordSpacing;}
 
         }
 
@@ -255,7 +255,7 @@ internal partial class SvgCanvas : ICanvas
             var xs = new List<string>();
             var chars = new StringBuilder();
 
-            var glyphs=runFont.Shape(run.Text,_fontFeatures);
+            var glyphs=run.Glyphs;
             bool simple=glyphs.Count==run.Text.EnumerateRunes().Take(glyphs.Count+1).Count() && glyphs.All(g=>g.SourceLength==(char.IsSurrogatePair(run.Text,g.Cluster)?2:1) && g.Id==runFont.GetGlyphId(char.ConvertToUtf32(run.Text,g.Cluster)) && g.OffsetY==0 && !g.IsMark);
             if(!simple)
             {
@@ -650,7 +650,7 @@ internal partial class SvgCanvas : ICanvas
             // the subset must carry every digit, not just those in "00".
             for (int cp = '0'; cp <= '9'; cp++)
                 FontUsageSink?.Invoke(fontFamily, ttfFont, cp);
-            var runs = new List<SvgTextRun> { new(fontFamily, ttfFont, placeholder) };
+            var runs = new List<SvgTextRun> { new(fontFamily, ttfFont, placeholder, ttfFont.Shape(placeholder, _fontFeatures)) };
             _sb.AppendLf(GlyphPositionedRuns(sx, baselineY, runs, fill, fontSize, 0f, attr));
             return;
         }
