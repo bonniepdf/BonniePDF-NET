@@ -88,7 +88,8 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Update="assets/unicode/LICENSE.txt" Pack="True" PackagePath="assets/unicode/" />
+    <None Remove="assets/unicode/LICENSE.txt" />
+    <None Include="assets/unicode/LICENSE.txt" Pack="True" PackagePath="assets/unicode/" />
     <None Include="..\THIRD-PARTY-NOTICES.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
