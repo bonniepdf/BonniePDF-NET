@@ -16,6 +16,7 @@ internal class GlyphUsageTracker
     private readonly Dictionary<ushort,string> _sources = new();
     private readonly Dictionary<ushort,ushort> _cidGlyphs = new();
     private readonly Dictionary<(ushort Glyph,string Source),ushort> _sourceCids = new();
+    private readonly Dictionary<uint, ushort> _singleCharacterCids = new();
     private int _nextCid;
     internal IReadOnlyDictionary<ushort,string> GlyphSources => _sources;
     internal IReadOnlyDictionary<ushort,ushort> CidToGlyphMap {
@@ -23,26 +24,48 @@ internal class GlyphUsageTracker
     }
     internal IReadOnlyList<ushort> MarkShaped(string text, IReadOnlyList<Typography.Engine.GlyphInfo> glyphs)
     {
-        var codes=new List<ushort>();
+        var codes=new ushort[glyphs.Count];
         for(int i=0;i<glyphs.Count;) {
             var first=glyphs[i];int end=i+1;
             while(end<glyphs.Count && glyphs[end].Cluster==first.Cluster)end++;
+            if (end == i + 1 && first.SourceLength == 1)
+            {
+                ushort id = checked((ushort)first.Id);
+                _usedGlyphs.Add(id);
+                char character = text[first.Cluster];
+                uint key = ((uint)id << 16) | character;
+                if (!_singleCharacterCids.TryGetValue(key, out ushort code))
+                {
+                    code = RegisterSource(id, character.ToString());
+                    _singleCharacterCids.Add(key, code);
+                }
+                codes[i] = code;
+                i = end;
+                continue;
+            }
             string clusterSource = text.Substring(first.Cluster, first.SourceLength);
             var chars = end == i + 1 ? null : clusterSource.EnumerateRunes().Select(r => r.ToString()).ToArray();
             for(int j=i;j<end;j++) {
                 ushort id=checked((ushort)glyphs[j].Id);_usedGlyphs.Add(id);
                 string source = chars is null ? clusterSource : j == end - 1 ? string.Concat(chars.Skip(j - i)) : j - i < chars.Length ? chars[j - i] : string.Empty;
-                if(!_sourceCids.TryGetValue((id,source),out ushort code)) {
-                    int value=_sources.ContainsKey(id)?Math.Max(_nextCid,_font.NumberOfGlyphs):id;
-                    if(value>ushort.MaxValue)throw new InvalidOperationException("PDF font character-code capacity exceeded.");
-                    code=(ushort)value;if(value>=_font.NumberOfGlyphs)_nextCid=value+1;
-                    _sources.Add(code,source);_sourceCids.Add((id,source),code);_cidGlyphs.Add(code,id);
-                }
-                codes.Add(code);
+                codes[j] = RegisterSource(id, source);
             }
             i=end;
         }
         return codes;
+    }
+
+    private ushort RegisterSource(ushort id, string source)
+    {
+        if (_sourceCids.TryGetValue((id, source), out ushort code)) return code;
+        int value = _sources.ContainsKey(id) ? Math.Max(_nextCid, _font.NumberOfGlyphs) : id;
+        if (value > ushort.MaxValue) throw new InvalidOperationException("PDF font character-code capacity exceeded.");
+        code = (ushort)value;
+        if (value >= _font.NumberOfGlyphs) _nextCid = value + 1;
+        _sources.Add(code, source);
+        _sourceCids.Add((id, source), code);
+        _cidGlyphs.Add(code, id);
+        return code;
     }
     private readonly TtfFont _font;
     private readonly HashSet<int> _usedCodepoints = new();

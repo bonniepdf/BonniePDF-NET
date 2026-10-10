@@ -744,34 +744,74 @@ internal class PdfCanvas : ICanvas
                 if (glyphs is not null) codes = run.Tracker?.MarkShaped(run.Text, glyphs) ?? glyphs.Select(g => (ushort)g.Id).ToArray();
             }
             PdfOperators.SetFont(_stream,run.ResourceName,fontSize);
-            if(font is null) { PdfOperators.ShowText(_stream,$"({PdfSyntax.Escape(run.Text)})"); continue; }
-
-            _stream.AppendLf($"/Span << /ActualText {PdfSyntax.EncodeMetadataString(run.Text)} >> BDC");
-            if(glyphs!.All(g=>g.OffsetY==0))
+            if (font is null)
             {
-                var hex=new StringBuilder();var array=new StringBuilder("[");bool adjusted=false;
-                void Adjust(double n) { if(n==0)return;array.Append('<').Append(hex).Append("> ").Append(PdfSyntax.FormatDecimal((float)n)).Append(' ');hex.Clear();adjusted=true; }
-                for(int index=0;index<glyphs.Count;index++) {var g=glyphs[index];
-                    Adjust(-(double)g.OffsetX*1000/font.UnitsPerEm);hex.Append(codes![index].ToString("X4",System.Globalization.CultureInfo.InvariantCulture));
-                    Adjust((double)(font.GetGlyphWidth((ushort)g.Id)+g.OffsetX-g.AdvanceX)*1000/font.UnitsPerEm-(run.Text.Substring(g.Cluster,g.SourceLength)==" "&&fontSize>0?(wordSpacing??_wordSpacing)*1000/fontSize:0));
-                }
-                if(adjusted)PdfOperators.ShowTextPositioned(_stream,array.Append('<').Append(hex).Append(">]").ToString());else PdfOperators.ShowText(_stream,$"<{hex}>");
-                _stream.AppendLf("EMC");continue;
+                _stream.Append('(');
+                PdfSyntax.AppendEscaped(_stream, run.Text);
+                _stream.Append(") Tj\n");
+                continue;
             }
-            for(int index=0;index<glyphs.Count;index++)
+
+            _stream.Append("/Span << /ActualText ");
+            PdfSyntax.AppendMetadataString(_stream, run.Text);
+            _stream.Append(" >> BDC\n");
+            bool horizontal = true;
+            for (int i = 0; i < glyphs.Count; i++)
+                if (glyphs[i].OffsetY != 0) { horizontal = false; break; }
+            if (horizontal)
             {
-                var g=glyphs[index];
-                double rise=(double)g.OffsetY*fontSize/font.UnitsPerEm;
-                if(rise!=0) _stream.AppendLf($"{PdfSyntax.FormatDecimal((float)rise)} Ts");
-                double before=-(double)g.OffsetX*1000/font.UnitsPerEm;
-                double after=(double)(font.GetGlyphWidth((ushort)g.Id)+g.OffsetX-g.AdvanceX)*1000/font.UnitsPerEm-(run.Text.Substring(g.Cluster,g.SourceLength)==" " && fontSize>0?(wordSpacing??_wordSpacing)*1000/fontSize:0);
-                string hex=$"<{codes![index]:X4}>";
-                if(before==0 && after==0) PdfOperators.ShowText(_stream,hex);
-                else PdfOperators.ShowTextPositioned(_stream,$"[{(before!=0?PdfSyntax.FormatDecimal((float)before)+" ":"")}{hex}{(after!=0?" "+PdfSyntax.FormatDecimal((float)after):"")}]");
-                if(rise!=0) _stream.AppendLf("0 Ts");
+                // Select the operator before writing, then append directly to the page.
+                // Keep empty hex groups around adjustments exactly as in the general encoding.
+                bool adjusted = false;
+                for (int i = 0; i < glyphs.Count; i++)
+                    if (glyphs[i].OffsetX != 0 || AfterAdvance(glyphs[i], run.Text, font, fontSize, wordSpacing ?? _wordSpacing) != 0)
+                    { adjusted = true; break; }
+                if (adjusted) _stream.Append('[');
+                _stream.Append('<');
+                for (int i = 0; i < glyphs.Count; i++)
+                {
+                    var g = glyphs[i];
+                    double before = -(double)g.OffsetX * 1000 / font.UnitsPerEm;
+                    if (before != 0) AppendTextAdjustment(before);
+                    PdfSyntax.AppendHex4(_stream, codes![i]);
+                    double after = AfterAdvance(g, run.Text, font, fontSize, wordSpacing ?? _wordSpacing);
+                    if (after != 0) AppendTextAdjustment(after);
+                }
+                _stream.Append(adjusted ? ">] TJ\n" : "> Tj\n");
+                _stream.AppendLf("EMC");
+                continue;
+            }
+            for (int i = 0; i < glyphs.Count; i++)
+            {
+                var g = glyphs[i];
+                double rise = (double)g.OffsetY * fontSize / font.UnitsPerEm;
+                if (rise != 0) _stream.Append(PdfSyntax.FormatDecimal((float)rise)).Append(" Ts\n");
+                double before = -(double)g.OffsetX * 1000 / font.UnitsPerEm;
+                double after = AfterAdvance(g, run.Text, font, fontSize, wordSpacing ?? _wordSpacing);
+                bool adjusted = before != 0 || after != 0;
+                if (adjusted) _stream.Append('[');
+                if (before != 0) _stream.Append(PdfSyntax.FormatDecimal((float)before)).Append(' ');
+                _stream.Append('<');
+                PdfSyntax.AppendHex4(_stream, codes![i]);
+                _stream.Append('>');
+                if (after != 0) _stream.Append(' ').Append(PdfSyntax.FormatDecimal((float)after));
+                _stream.Append(adjusted ? "] TJ\n" : " Tj\n");
+                if (rise != 0) _stream.AppendLf("0 Ts");
             }
             _stream.AppendLf("EMC");
         }
+    }
+
+    private void AppendTextAdjustment(double value)
+    {
+        _stream.Append("> ").Append(PdfSyntax.FormatDecimal((float)value)).Append(" <");
+    }
+
+    private static double AfterAdvance(Typography.Engine.GlyphInfo glyph, string text, TtfFont font, float fontSize, float wordSpacing)
+    {
+        bool space = glyph.SourceLength == 1 && text[glyph.Cluster] == ' ';
+        return (double)(font.GetGlyphWidth((ushort)glyph.Id) + glyph.OffsetX - glyph.AdvanceX) * 1000 / font.UnitsPerEm
+            - (space && fontSize > 0 ? wordSpacing * 1000 / fontSize : 0);
     }
 
     /// <summary>
