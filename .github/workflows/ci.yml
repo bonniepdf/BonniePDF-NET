@@ -54,6 +54,11 @@ jobs:
     - name: Test
       run: dotnet test BonniePDF.Tests/BonniePDF.Tests.csproj --no-build --configuration Release --verbosity normal
 
+    - name: Test image processing without hardware intrinsics
+      env:
+        DOTNET_EnableHWIntrinsic: '0'
+      run: dotnet test BonniePDF.Tests/BonniePDF.Tests.csproj --no-build --configuration Release --filter "FullyQualifiedName~Image|FullyQualifiedName~PngPixelOperations" --verbosity normal
+
     - name: Pack
       run: dotnet pack BonniePDF/BonniePDF.csproj --configuration Release --output nupkgs
 
@@ -79,3 +84,15 @@ jobs:
         name: nupkg
         path: nupkgs/*.nupkg
         retention-days: 14
+
+  image-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          10.0.x
+    - name: Test image processing on ARM64
+      run: dotnet test BonniePDF.Tests/BonniePDF.Tests.csproj --configuration Release --filter "FullyQualifiedName~Image|FullyQualifiedName~PngPixelOperations" --verbosity normal

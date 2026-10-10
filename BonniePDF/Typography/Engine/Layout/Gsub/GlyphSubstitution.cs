@@ -10,6 +10,7 @@ namespace BonniePDF.Typography.Engine
     internal sealed class GlyphSubstitution
     {
         private readonly BigEndianData data;
+        private readonly LayoutReadCache reads = new LayoutReadCache();
         private readonly GlyphFilter filter;
         private readonly int lookupList, glyphCount;
         private readonly int[] lookups;
@@ -292,11 +293,11 @@ namespace BonniePDF.Typography.Engine
 
         private int Coverage(int offset, int glyph)
         {
-            return OpenTypeLayout.Coverage(data, offset, glyph);
+            return reads.Coverage(data, offset, glyph);
         }
         private int Class(int offset, int glyph)
         {
-            return OpenTypeLayout.Class(data, offset, glyph);
+            return reads.Class(data, offset, glyph);
         }
 
         private void Tick()

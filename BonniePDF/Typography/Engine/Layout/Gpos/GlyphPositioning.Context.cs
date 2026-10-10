@@ -182,7 +182,7 @@ namespace BonniePDF.Typography.Engine
             return glyphs.IndexOf(matched[matched.Count - 1]) + 1 - at;
         }
 
-        private int Coverage(int offset, int glyph) { return OpenTypeLayout.Coverage(data, offset, glyph); }
-        private int Class(int offset, int glyph) { return OpenTypeLayout.Class(data, offset, glyph); }
+        private int Coverage(int offset, int glyph) { return reads.Coverage(data, offset, glyph); }
+        private int Class(int offset, int glyph) { return reads.Class(data, offset, glyph); }
     }
 }

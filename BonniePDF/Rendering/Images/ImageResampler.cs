@@ -60,6 +60,7 @@ internal static class ImageResampler
     /// </summary>
     internal static ImageInfo Resample(ImageInfo source, int targetWidth, int targetHeight)
     {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.ImageResizing);
         byte[] color = Resample(source.Data, source.HasAlpha ? source.AlphaData : null,
             source.Width, source.Height, source.Components, targetWidth, targetHeight, out byte[]? alpha);
 
@@ -92,6 +93,17 @@ internal static class ImageResampler
     internal static byte[] Resample(byte[] color, byte[]? alpha, int sourceWidth, int sourceHeight,
         int components, int targetWidth, int targetHeight, out byte[]? alphaOut)
     {
+        // Constant opaque alpha cancels out of the premultiplied average exactly. Keep the
+        // alpha plane (and therefore the PDF representation), but avoid weighting it per pixel.
+        if (alpha != null && alpha.AsSpan().IndexOfAnyExcept((byte)255) < 0)
+        {
+            byte[] opaqueColor = Resample(color, null, sourceWidth, sourceHeight, components,
+                targetWidth, targetHeight, out _);
+            alphaOut = new byte[checked(targetWidth * targetHeight)];
+            alphaOut.AsSpan().Fill(255);
+            return opaqueColor;
+        }
+
         int cc = components;
         byte[] outColor = new byte[checked(targetWidth * targetHeight * cc)];
         alphaOut = alpha == null ? null : new byte[targetWidth * targetHeight];

@@ -317,6 +317,7 @@ internal class ImageWriter
 
     private static byte[] Deflate(byte[] data, ImageCompressionLevel level)
     {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.ImageCompression);
         using MemoryStream output = new(Math.Max(256, data.Length / 4));
         using (ZLibStream zlib = new(output, ToZlibLevel(level), true))
         {

@@ -2,9 +2,37 @@
 // Do not edit it here. A hand edit fails the vendored-files check; see VENDORED.json.
 #nullable disable
 using System.IO;
+using System.Collections.Generic;
 
 namespace BonniePDF.Typography.Engine
 {
+    // Per immutable layout table, bounded independently of input text diversity.
+    // Only successful reads are retained; callers still charge every lookup step.
+    internal sealed class LayoutReadCache
+    {
+        private const int Capacity = 2048;
+        private readonly Dictionary<long, int> coverage = new Dictionary<long, int>();
+        private readonly Dictionary<long, int> classes = new Dictionary<long, int>();
+        internal int Coverage(BigEndianData data, int offset, int glyph)
+        {
+            long key = ((long)offset << 32) | (uint)glyph;
+            int value;
+            if (coverage.TryGetValue(key, out value)) return value;
+            value = OpenTypeLayout.Coverage(data, offset, glyph);
+            if (coverage.Count < Capacity) coverage.Add(key, value);
+            return value;
+        }
+        internal int Class(BigEndianData data, int offset, int glyph)
+        {
+            long key = ((long)offset << 32) | (uint)glyph;
+            int value;
+            if (classes.TryGetValue(key, out value)) return value;
+            value = OpenTypeLayout.Class(data, offset, glyph);
+            if (classes.Count < Capacity) classes.Add(key, value);
+            return value;
+        }
+    }
+
     internal static class OpenTypeLayout
     {
         internal static int Offset16(BigEndianData data, int origin, int field)

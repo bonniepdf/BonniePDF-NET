@@ -15,6 +15,14 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Reduce shaping allocations for ordered clusters and independent glyph positioning, and reuse bounded OpenType coverage/class reads. Glyph output and shaping limits are preserved.
+- Reuse compression of identical embedded font programs in a process-wide cache capped at 4 MiB and 16 entries. Subsets and text mappings remain document-owned; streams are encrypted separately. `FontCache.Clear()` releases these entries and `FontCache.MaxFiles = 0` disables retention.
+
+- Add opt-in EventSource scopes for synchronous generation profiling, covering measurement, font loading/shaping/embedding, image decoding/resizing/compression, painting and PDF writing. Profiling preserves PDF output and is inactive without a diagnostic listener.
+
+- Faster processing of opaque RGBA images through exact opaque-alpha resampling and guarded SIMD channel separation. Pixel values, transparency and resolution settings are preserved, with a scalar fallback on other hardware.
+- Optimise the RGBA separation loop on its first invocation, avoiding per-pixel-group span helper calls while tiered compilation is warming up.
+
 - Embedded Latin text now uses OpenType ligatures, GPOS kerning and accent positioning consistently in measurement, PDF and SVG. `FontFeatures` on text elements and TextStyle allows overrides such as `kern: 0` and `liga: 0`. Improved advances can change line and page breaks. Standard-14 text retains its existing behavior.
 - Font subsets retain substituted glyphs; cluster ToUnicode mappings and ActualText preserve ligatures and original accent spellings during extraction. SVG outlines substitutions to prevent viewer reshaping. Fallback prefers a whole combining cluster, and emergency wrapping and ellipsis preserve graphemes.
 

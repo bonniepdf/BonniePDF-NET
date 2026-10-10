@@ -80,32 +80,57 @@ namespace BonniePDF.Typography.Engine
             var program = face.Program(options);
             var adjustments = PositionRun(program.Substitution, program.Positioning, run, face.Font, nativeRtl, arabic);
             if (nativeRtl) { run.Reverse(); Array.Reverse(adjustments); }
-            var starts = new SortedSet<int>();
-            var unsafeClusters = new HashSet<int>();
-            foreach (var glyph in run)
-            {
-                starts.Add(glyph.Cluster);
-                if (glyph.UnsafeBefore) unsafeClusters.Add(glyph.Cluster);
-            }
-            var lengths = new Dictionary<int, int>();
-            int previous = -1;
-            foreach (int start in starts)
-            {
-                if (previous >= 0) lengths.Add(previous, start - previous);
-                previous = start;
-            }
-            if (previous >= 0) lengths.Add(previous, text.Length - previous);
             var output = new GlyphInfo[run.Count];
-            for (int i = 0; i < run.Count; i++)
+            bool ordered = true;
+            for (int i = 1; i < run.Count; i++)
+                if (run[i].Cluster < run[i - 1].Cluster) { ordered = false; break; }
+            if (ordered)
             {
-                if (run[i].Id == 0) throw new NotSupportedException("A glyph remained unmapped after substitution.");
-                output[i] = new GlyphInfo(run[i].Id, run[i].Cluster,
-                    checked(face.Font.AdvanceWidth(run[i].Id) + adjustments[i].XAdvance), adjustments[i].YAdvance,
-                    adjustments[i].XPlacement, adjustments[i].YPlacement, run[i].ComponentCount,
-                    adjustments[i].ZeroMarkAdvance, run[i].Ligature, lengths[run[i].Cluster],
-                    unsafeClusters.Contains(run[i].Cluster), run[i].MarkComponent);
+                // Logical LTR clusters are usually already ordered. Walk each
+                // equal-cluster group once instead of building per-glyph trees,
+                // sets and dictionaries merely to recover source lengths.
+                for (int first = 0; first < run.Count;)
+                {
+                    int end = first + 1;
+                    bool unsafeBefore = run[first].UnsafeBefore;
+                    while (end < run.Count && run[end].Cluster == run[first].Cluster)
+                    { unsafeBefore |= run[end].UnsafeBefore; end++; }
+                    int length = (end < run.Count ? run[end].Cluster : text.Length) - run[first].Cluster;
+                    for (int i = first; i < end; i++)
+                        output[i] = Output(face, run[i], adjustments[i], length, unsafeBefore);
+                    first = end;
+                }
+            }
+            else
+            {
+                var starts = new SortedSet<int>();
+                var unsafeClusters = new HashSet<int>();
+                foreach (var glyph in run)
+                {
+                    starts.Add(glyph.Cluster);
+                    if (glyph.UnsafeBefore) unsafeClusters.Add(glyph.Cluster);
+                }
+                var lengths = new Dictionary<int, int>();
+                int previous = -1;
+                foreach (int start in starts)
+                {
+                    if (previous >= 0) lengths.Add(previous, start - previous);
+                    previous = start;
+                }
+                if (previous >= 0) lengths.Add(previous, text.Length - previous);
+                for (int i = 0; i < run.Count; i++)
+                    output[i] = Output(face, run[i], adjustments[i], lengths[run[i].Cluster], unsafeClusters.Contains(run[i].Cluster));
             }
             return new ShapedRun(text, output);
+        }
+
+        private static GlyphInfo Output(FontFace face, ShapingGlyph glyph, GlyphAdjustment adjustment, int length, bool unsafeBefore)
+        {
+            if (glyph.Id == 0) throw new NotSupportedException("A glyph remained unmapped after substitution.");
+            return new GlyphInfo(glyph.Id, glyph.Cluster,
+                checked(face.Font.AdvanceWidth(glyph.Id) + adjustment.XAdvance), adjustment.YAdvance,
+                adjustment.XPlacement, adjustment.YPlacement, glyph.ComponentCount,
+                adjustment.ZeroMarkAdvance, glyph.Ligature, length, unsafeBefore, glyph.MarkComponent);
         }
 
         internal static void AppendCluster(FontFace face, List<int> scalars, ScalarCluster cluster,

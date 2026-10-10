@@ -153,6 +153,7 @@ internal static class PdfRenderPipeline
 
     private static void RenderElementWithOverflowCore(IElement element, RenderContext ctx, float contentWidth, ChildTagToken token = default)
     {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.Painting);
         if (element is IStatefulElement statefulElement)
         {
             // Check if this element disallows breaking across pages

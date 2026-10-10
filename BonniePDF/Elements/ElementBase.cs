@@ -30,6 +30,7 @@ public abstract class ElementBase : IElement, IMargin, ICaptureMetadata
     /// <returns>The total height including margins</returns>
     public float MeasureHeight(float availableWidth)
     {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.Measurement);
         float contentWidth = GetContentWidth(availableWidth);
         float contentHeight = MeasureContentHeight(contentWidth);
         return contentHeight + Margin.Top + Margin.Bottom;

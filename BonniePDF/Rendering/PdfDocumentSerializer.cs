@@ -34,6 +34,7 @@ internal class PdfDocumentSerializer
     /// </summary>
     public void Serialize(IPdfWriter writer)
     {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.PdfWriting);
         using IDisposable fontScope = FontMetrics.BeginDocumentScope(UsesEmbeddedStandardFonts(), _document.Fonts);
 
         // 0. Set up encryption if configured
