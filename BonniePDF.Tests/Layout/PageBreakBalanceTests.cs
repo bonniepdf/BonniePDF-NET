@@ -100,8 +100,8 @@ public sealed partial class PageBreakBalanceTests
 
         for (int i = 0; i < streams.Count; i++)
         {
-            int q = SaveRegex().Matches(streams[i]).Count;
-            int qq = RestoreRegex().Matches(streams[i]).Count;
+            int q = SaveRegex().Count(streams[i]);
+            int qq = RestoreRegex().Count(streams[i]);
             Assert.True(q == qq, $"content stream {i + 1} has {q} q operators and {qq} Q operators");
         }
     }

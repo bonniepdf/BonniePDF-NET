@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -88,6 +88,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Update="assets/unicode/LICENSE.txt" Pack="True" PackagePath="assets/unicode/" />
     <None Include="..\THIRD-PARTY-NOTICES.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

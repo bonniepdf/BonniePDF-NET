@@ -18,7 +18,7 @@ internal static class TextSpacing
     /// <param name="letterSpacing">Additional advance after every glyph, in points.</param>
     /// <param name="wordSpacing">Additional advance after every space, in points.</param>
     /// <returns>The extra advance in points.</returns>
-    public static float GetWidth(string text, float letterSpacing, float wordSpacing)
+    public static float GetWidth(string text, float letterSpacing, float wordSpacing, string? fontIdentifier=null, System.Collections.Generic.IReadOnlyDictionary<string,int>? features=null)
     {
         if (letterSpacing == 0 && wordSpacing == 0) return 0;
 
@@ -31,6 +31,7 @@ internal static class TextSpacing
             if (rune.Value == ' ') spaces++;
         }
 
+        if(fontIdentifier is not null)glyphs=FontMetrics.GetGlyphCount(text,fontIdentifier,features);
         return glyphs * letterSpacing + spaces * wordSpacing;
     }
 }

@@ -1,0 +1,40 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/font-features",
+    "description": "OpenType features survive text-element and nested TextStyle round trips.",
+    "spec": "19"
+  },
+  "_expect": {
+    "pages": 1,
+    "roundTrip": true
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "office AV",
+          "fontFeatures": {
+            "liga": 0,
+            "kern": 0
+          }
+        },
+        {
+          "type": "RichText",
+          "spans": [
+            {
+              "text": "office",
+              "style": {
+                "fontFeatures": {
+                  "smcp": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -50,7 +50,7 @@ public partial class ContainerAndRowSplittingTests
     }
 
     private static List<int> RowsPerPage(List<string> pages) =>
-        pages.Select(p => RowLabel().Matches(p).Count).ToList();
+        pages.Select(p => RowLabel().Count(p)).ToList();
 
     [Fact]
     public void ATableInsidePaddingAndABorder_StartsOnTheFirstPageAndSplits()

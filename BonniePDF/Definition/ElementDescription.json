@@ -536,6 +536,9 @@
       "lineHeight": {
         "kind": "number",
         "min": 0
+      },
+      "fontFeatures": {
+        "kind": "fontFeatures"
       }
     },
     "TextBlockKeys": {
@@ -702,6 +705,9 @@
         "lineHeight": {
           "kind": "number",
           "min": 0
+        },
+        "fontFeatures": {
+          "kind": "fontFeatures"
         }
       }
     },

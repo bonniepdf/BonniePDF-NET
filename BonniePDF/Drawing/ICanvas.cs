@@ -7,6 +7,9 @@ namespace BonniePDF.Drawing;
 /// </summary>
 public interface ICanvas
 {
+    /// <summary>Selects OpenType features for following text operations; null restores defaults.</summary>
+    void SetTextFeatures(IReadOnlyDictionary<string,int>? features) { }
+
     // --- 1. Dimensions & State ---
     /// <summary>Gets the width of the canvas</summary>
     float Width { get; }

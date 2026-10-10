@@ -151,6 +151,6 @@ public sealed partial class SvgGlyphPositioningTests
         // reset, which a presentation attribute would lose to; the generic keeps text
         // broadly right if the @font-face never loads.
         Assert.Contains("style=\"font-family:'bpf-", svg, StringComparison.Ordinal);
-        Assert.Matches(@"style=""font-family:'bpf-[^']+',(serif|sans-serif|monospace)""", svg);
+        Assert.Matches(@"style=""font-family:'bpf-[^']+',(serif|sans-serif|monospace);font-kerning:none;font-variant-ligatures:none""", svg);
     }
 }

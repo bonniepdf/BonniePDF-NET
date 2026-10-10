@@ -502,6 +502,12 @@ internal sealed partial class DefinitionValidator
             case "array":
                 CheckArray(arg, spec, value, path, owner, depth);
                 return;
+            case "fontFeatures":
+                if(value.ValueKind!=JsonValueKind.Object) {WrongType(path,"an object",value,owner);return;}
+                var entries=value.EnumerateObject().ToArray();
+                if(entries.Length>256 || entries.Any(e=>e.Name.Length!=4 || e.Name.Any(c=>c<' ' || c>'~') || e.Value.ValueKind!=JsonValueKind.Number || !e.Value.TryGetInt32(out int n) || n<0 || n>65535))
+                    BadValue(path,"Font features require four printable ASCII characters and integer values from 0 to 65535 (at most 256 tags).",owner);
+                return;
             case "map":
                 CheckMap(arg, spec, value, path, owner, depth);
                 return;

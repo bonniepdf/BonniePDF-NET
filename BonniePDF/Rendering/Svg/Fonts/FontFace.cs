@@ -50,11 +50,8 @@ internal readonly record struct GlyphSegment(
 /// its <c>ICanvas</c>.
 /// </para>
 /// <para>
-/// Unlike <c>IVectorSink</c> this is not a copy of a BonniePDF interface, because
-/// BonniePDF has nothing to copy: it embeds and subsets TrueType fonts but has never
-/// decoded a glyph outline. <see cref="TrueTypeFace"/> is the reference
-/// implementation, and whether its decoding moves upstream into BonniePDF's
-/// <c>TtfFont</c> at fold-in is an open decision.
+/// Consumers adapt their shared font reader to this seam. The SVG engine owns
+/// no font decoder or font cache.
 /// </para>
 /// </remarks>
 internal interface IFontFace

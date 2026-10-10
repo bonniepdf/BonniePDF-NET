@@ -1,0 +1,39 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/font-features",
+    "description": "Reject invalid feature tags and values before constructing a document.",
+    "spec": "19"
+  },
+  "_expectErrors": [
+    {
+      "path": "/pages/0/content/0/fontFeatures",
+      "code": "invalid-value"
+    },
+    {
+      "path": "/pages/0/content/1/fontFeatures",
+      "code": "invalid-value"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "office",
+          "fontFeatures": {
+            "bad": 1
+          }
+        },
+        {
+          "type": "TextBlock",
+          "text": "AV",
+          "fontFeatures": {
+            "kern": 65536
+          }
+        }
+      ]
+    }
+  ]
+}

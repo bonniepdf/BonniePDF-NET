@@ -66,7 +66,7 @@ internal sealed class BonniePdfFontProvider : IFontProvider
     {
         try
         {
-            return new TrueTypeFace(bytes, family);
+            return new TextFontFaceAdapter(bytes, family);
         }
 #pragma warning disable CA1031 // A font the importer cannot outline is skipped like an absent one.
         catch (Exception)

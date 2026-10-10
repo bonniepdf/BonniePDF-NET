@@ -210,7 +210,7 @@ internal static class PdfSyntax
 
             if (hasPrev)
             {
-                short kern = font.GetKerning(prevGid, gid);
+                int kern = font.GetKerning(prevGid, gid);
                 // TJ subtracts its numbers from the displacement, so negate; scale
                 // font units to thousandths of an em. Math.Floor(x + 0.5) matches
                 // the TypeScript port's Math.round (half toward +infinity) - C#'s
@@ -265,7 +265,7 @@ internal static class PdfSyntax
 
             if (hasPrev)
             {
-                short kern = font.GetKerning(prevGid, gid);
+                int kern = font.GetKerning(prevGid, gid);
                 int adjustment = (int)Math.Floor(-kern * 1000.0 / font.UnitsPerEm + 0.5);
                 if (prevWasSpace) adjustment += wordAdjustment;
                 if (adjustment != 0)

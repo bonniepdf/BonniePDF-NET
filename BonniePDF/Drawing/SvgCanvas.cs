@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -41,6 +42,9 @@ internal class SvgIdAllocator
 /// </summary>
 internal partial class SvgCanvas : ICanvas
 {
+    private IReadOnlyDictionary<string,int>? _fontFeatures;
+    public void SetTextFeatures(IReadOnlyDictionary<string,int>? features) => _fontFeatures=features;
+
     private readonly StringBuilder _sb;
     private readonly float _xOffset;
     private readonly float _yOffset;
@@ -208,22 +212,9 @@ internal partial class SvgCanvas : ICanvas
         float width = 0f;
         foreach (SvgTextRun run in runs)
         {
-            TtfFont font = run.Font;
-            float scale = fontSize / font.UnitsPerEm;
-            ushort prevGid = 0;
-            bool hasPrev = false;
-            foreach (Rune rune in run.Text.EnumerateRunes())
-            {
-                ushort gid = font.GetGlyphId(rune.Value);
-                if (gid == 0) continue;
-                if (hasPrev && font.HasKerning) width += font.GetKerning(prevGid, gid) * scale;
-                width += font.GetGlyphWidth(gid) * scale;
-                // Per-glyph letter spacing and per-space word spacing.
-                width += _letterSpacing;
-                if (rune.Value == ' ') width += _wordSpacing;
-                prevGid = gid;
-                hasPrev = true;
-            }
+            var font=run.Font;
+            foreach(var g in font.Shape(run.Text,_fontFeatures)) {width+=(float)((double)g.AdvanceX*fontSize/font.UnitsPerEm)+_letterSpacing;if(run.Text.Substring(g.Cluster,g.SourceLength)==" ")width+=_wordSpacing;}
+
         }
 
         return width;
@@ -264,31 +255,25 @@ internal partial class SvgCanvas : ICanvas
             var xs = new List<string>();
             var chars = new StringBuilder();
 
-            ushort prevGid = 0;
-            bool hasPrev = false;
-
-            foreach (Rune rune in run.Text.EnumerateRunes())
+            var glyphs=runFont.Shape(run.Text,_fontFeatures);
+            bool simple=glyphs.Count==run.Text.EnumerateRunes().Take(glyphs.Count+1).Count() && glyphs.All(g=>g.SourceLength==(char.IsSurrogatePair(run.Text,g.Cluster)?2:1) && g.Id==runFont.GetGlyphId(char.ConvertToUtf32(run.Text,g.Cluster)) && g.OffsetY==0 && !g.IsMark);
+            if(!simple)
             {
-                ushort gid = runFont.GetGlyphId(rune.Value);
-                // The run resolver already dropped anything unrenderable; a zero
-                // GID here would mean a face changed under us. Skip rather than
-                // emit a character the embedded subset cannot draw.
-                if (gid == 0) continue;
-
-                FontUsageSink?.Invoke(run.FontFamily, runFont, rune.Value);
-
-                if (hasPrev && runFont.HasKerning)
-                    cursor += runFont.GetKerning(prevGid, gid) * scale;
-
-                xs.Add(N(cursor));
-                chars.Append(rune.ToString());
-                cursor += runFont.GetGlyphWidth(gid) * scale;
-                // Letter spacing after every glyph; word spacing after spaces
-                // (extraPerSpace also carries justification spacing when present).
-                cursor += letterSpacing;
-                if (rune.Value == ' ') cursor += extraPerSpace;
-                prevGid = gid;
-                hasPrev = true;
+                elements.Append($"<g fill=\"{fillHex}\" aria-label=\"{XmlEscape.EscapeXml(run.Text)}\"{extraAttributes}{transformAttr}>");
+                foreach(var g in glyphs)
+                {
+                    string d=runFont.GlyphOutline(g.Id);
+                    if(d.Length>0) elements.Append($"<path d=\"{d}\" transform=\"translate({N(cursor+g.OffsetX*scale)} {N(baselineY-g.OffsetY*scale)}) scale({scale.ToString("0.#########", CultureInfo.InvariantCulture)} {(-scale).ToString("0.#########", CultureInfo.InvariantCulture)})\"/>");
+                    cursor+=g.AdvanceX*scale+letterSpacing;if(run.Text.Substring(g.Cluster,g.SourceLength)==" ")cursor+=extraPerSpace;
+                }
+                elements.Append("</g>");continue;
+            }
+            foreach(var g in glyphs)
+            {
+                string source=run.Text.Substring(g.Cluster,g.SourceLength);
+                FontUsageSink?.Invoke(run.FontFamily,runFont,char.ConvertToUtf32(source,0));
+                xs.Add(N(cursor+g.OffsetX*scale));chars.Append(source);cursor+=g.AdvanceX*scale+letterSpacing;
+                if(source==" ")cursor+=extraPerSpace;
             }
 
             if (xs.Count == 0) continue;
@@ -296,7 +281,7 @@ internal partial class SvgCanvas : ICanvas
             string familyStyle =
                 $"font-family:'{XmlEscape.EscapeXml(EmbeddedFontFamily(run.FontFamily))}',{GenericFontFallback(runFont)}";
             elements.Append(
-                $"<text x=\"{string.Join(" ", xs)}\" y=\"{N(baselineY)}\" fill=\"{fillHex}\" font-size=\"{N(fontSize)}\" style=\"{familyStyle}\" xml:space=\"preserve\"{extraAttributes}{transformAttr}>")
+                $"<text x=\"{string.Join(" ", xs)}\" y=\"{N(baselineY)}\" fill=\"{fillHex}\" font-size=\"{N(fontSize)}\" style=\"{familyStyle};font-kerning:none;font-variant-ligatures:none\" xml:space=\"preserve\"{extraAttributes}{transformAttr}>")
                 .Append(XmlEscape.EscapeXml(chars.ToString()))
                 .Append("</text>");
         }

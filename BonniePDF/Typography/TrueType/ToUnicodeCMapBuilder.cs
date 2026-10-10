@@ -13,7 +13,7 @@ namespace BonniePDF.Typography.TrueType;
 /// </summary>
 internal class ToUnicodeCMapBuilder
 {
-    private readonly List<(ushort glyphId, int unicode)> _mappings = new();
+    private readonly List<(ushort glyphId, string unicode)> _mappings = new();
 
     /// <summary>
     /// Gets the number of mappings added
@@ -28,7 +28,12 @@ internal class ToUnicodeCMapBuilder
         // Skip .notdef (GID 0) as it doesn't map to a real character
         if (glyphId == 0) return;
 
-        _mappings.Add((glyphId, unicode));
+        AddSourceMapping(glyphId,char.ConvertFromUtf32(unicode));
+    }
+
+    internal void AddSourceMapping(ushort glyphId,string unicode)
+    {
+        if(glyphId!=0 && unicode.Length>0) _mappings.Add((glyphId,unicode));
     }
 
     /// <summary>
@@ -65,9 +70,9 @@ internal class ToUnicodeCMapBuilder
         sb.AppendLf("endcodespacerange");
 
         // Sort mappings by glyph ID for consistent output
-        List<(ushort glyphId, int unicode)> sorted = _mappings
+        List<(ushort glyphId, string unicode)> sorted = _mappings
             .OrderBy(m => m.glyphId)
-            .Distinct()
+            .DistinctBy(m=>m.glyphId)
             .ToList();
 
         // Write bfchar entries in chunks of 100 (PDF limit per block)
@@ -79,7 +84,7 @@ internal class ToUnicodeCMapBuilder
 
             for (int j = 0; j < chunkSize; j++)
             {
-                (ushort gid, int unicode) = sorted[i + j];
+                (ushort gid, string unicode) = sorted[i + j];
                 sb.AppendLf($"<{gid:X4}> {FormatUnicode(unicode)}");
             }
 
@@ -99,16 +104,9 @@ internal class ToUnicodeCMapBuilder
     /// Formats a Unicode codepoint for the ToUnicode CMap.
     /// BMP codepoints use 4-digit hex; supplementary codepoints use UTF-16 surrogate pairs.
     /// </summary>
-    private static string FormatUnicode(int codepoint)
+    private static string FormatUnicode(string text)
     {
-        if (codepoint <= 0xFFFF)
-            return $"<{codepoint:X4}>";
-
-        // Supplementary plane: encode as UTF-16 surrogate pair
-        int offset = codepoint - 0x10000;
-        int highSurrogate = 0xD800 + (offset >> 10);
-        int lowSurrogate = 0xDC00 + (offset & 0x3FF);
-        return $"<{highSurrogate:X4}{lowSurrogate:X4}>";
+        var hex=new StringBuilder("<"); foreach(char c in text) hex.Append(((int)c).ToString("X4",System.Globalization.CultureInfo.InvariantCulture)); return hex.Append('>').ToString();
     }
 
     private static string BuildEmptyCMap()

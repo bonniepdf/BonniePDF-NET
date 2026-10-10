@@ -293,7 +293,7 @@ internal class PdfWriter : IPdfWriter, IDisposable
             // For a new file, they should be the same.
             
             byte[] idBytes = Guid.NewGuid().ToByteArray();
-            string hexId = BitConverter.ToString(idBytes).Replace("-", "");
+            string hexId = Convert.ToHexString(idBytes);
             trailerParts.Add($"/ID [<{hexId}> <{hexId}>]");
         }
 

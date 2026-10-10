@@ -217,7 +217,7 @@ internal class ImageWriter
         {
             // Indexed color: [/Indexed /DeviceRGB maxIndex paletteHexString]
             int maxIndex = image.Palette.Length / 3 - 1;
-            string paletteHex = "<" + BitConverter.ToString(image.Palette).Replace("-", "") + ">";
+            string paletteHex = "<" + Convert.ToHexString(image.Palette) + ">";
             return $"[/Indexed /DeviceRGB {maxIndex} {paletteHex}]";
         }
 

@@ -96,7 +96,11 @@ internal static class ImageCache
         public long Cost;
     }
 
+#if NET9_0_OR_GREATER
+    private static readonly System.Threading.Lock Gate = new();
+#else
     private static readonly object Gate = new();
+#endif
     private static readonly Dictionary<string, LinkedListNode<Entry>> Map = new(StringComparer.Ordinal);
     private static readonly LinkedList<Entry> Recent = new();
     private static long _bytes;

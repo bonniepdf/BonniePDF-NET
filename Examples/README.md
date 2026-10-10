@@ -1,7 +1,7 @@
 # BonniePDF examples
 
 Each example's document-building file contains its own sample data and helpers.
-You can copy it into a .NET 8 project with a reference to `BonniePDF` and implicit
+You can copy it into a .NET 8 or .NET 10 project with a reference to `BonniePDF` and implicit
 usings enabled. The `Program.cs` files are runners that save the generated PDFs.
 
 Start with `BonniePDF.Examples.Basics.SimpleDocument/SimpleDocumentExample.cs`.
