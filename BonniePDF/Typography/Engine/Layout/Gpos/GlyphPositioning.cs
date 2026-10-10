@@ -11,6 +11,7 @@ namespace BonniePDF.Typography.Engine
     internal sealed partial class GlyphPositioning
     {
         private readonly BigEndianData data;
+        private readonly LayoutReadCache reads = new LayoutReadCache();
         private readonly GlyphFilter filter;
         private readonly int lookupList;
         private readonly int[] lookups;
@@ -161,7 +162,7 @@ namespace BonniePDF.Typography.Engine
                 throw new NotSupportedException("Unsupported GPOS lookup type " + type + ".");
             if (format != 1 && format != 2)
                 throw new InvalidDataException("Invalid GPOS adjustment format.");
-            int coverage = OpenTypeLayout.Coverage(data, Offset(sub, sub + 2), glyphs[at].Id);
+            int coverage = reads.Coverage(data, Offset(sub, sub + 2), glyphs[at].Id);
             if (coverage < 0)
                 return 0;
             int firstFormat = data.U16(sub + 4), firstSize = ValueSize(firstFormat);
@@ -216,8 +217,8 @@ namespace BonniePDF.Typography.Engine
             }
             else
             {
-                int c1 = OpenTypeLayout.Class(data, Offset(sub, sub + 8), glyphs[at].Id);
-                int c2 = OpenTypeLayout.Class(data, Offset(sub, sub + 10), glyphs[next].Id);
+                int c1 = reads.Class(data, Offset(sub, sub + 8), glyphs[at].Id);
+                int c2 = reads.Class(data, Offset(sub, sub + 10), glyphs[next].Id);
                 int rows = data.U16(sub + 12), columns = data.U16(sub + 14);
                 if (c1 >= rows || c2 >= columns)
                     throw new InvalidDataException("Invalid GPOS pair class index.");
@@ -241,7 +242,7 @@ namespace BonniePDF.Typography.Engine
         {
             if (data.U16(sub) != 1)
                 throw new InvalidDataException("Invalid GPOS mark attachment format.");
-            int markIndex = OpenTypeLayout.Coverage(data, Offset(sub, sub + 2), glyphs[at].Id);
+            int markIndex = reads.Coverage(data, Offset(sub, sub + 2), glyphs[at].Id);
             if (markIndex < 0)
                 return 0;
             int parent = Previous(glyphs, at, type != 6, flags, markSet);
@@ -250,7 +251,7 @@ namespace BonniePDF.Typography.Engine
             if (type == 6 && glyphs[at].MarkLigature != null && glyphs[parent].MarkLigature == glyphs[at].MarkLigature &&
                 glyphs[parent].MarkComponent != glyphs[at].MarkComponent)
                 return 0;
-            int baseIndex = OpenTypeLayout.Coverage(data, Offset(sub, sub + 4), glyphs[parent].Id);
+            int baseIndex = reads.Coverage(data, Offset(sub, sub + 4), glyphs[parent].Id);
             if (baseIndex < 0)
                 return 0;
             int classes = data.U16(sub + 6), marks = Offset(sub, sub + 8), bases = Offset(sub, sub + 10);
@@ -342,6 +343,25 @@ namespace BonniePDF.Typography.Engine
 
         private void Resolve(List<ShapingGlyph> glyphs, GlyphAdjustment[] adjustments, Func<int, int> advanceWidth)
         {
+            bool attached = false;
+            foreach (var adjustment in adjustments)
+                if (adjustment.Parent >= 0 || adjustment.CursiveParent >= 0) { attached = true; break; }
+            if (!attached)
+            {
+                // Independent placements already contain their final offsets.
+                // Retain the pen overflow checks and exactly the same operation
+                // charges as Placements/ResolveAxis, without their scratch arrays.
+                int x = 0, y = 0;
+                for (int i = 0; i < glyphs.Count; i++)
+                {
+                    Tick();
+                    x = checked(x + (advanceWidth == null ? 0 : advanceWidth(glyphs[i].Id)) + adjustments[i].XAdvance);
+                    y = checked(y + adjustments[i].YAdvance);
+                }
+                for (int axis = 0; axis < 2; axis++)
+                    for (int i = 0; i < glyphs.Count; i++) { Tick(); Tick(); }
+                return;
+            }
             int[] penX, penY, placedX, placedY;
             Placements(glyphs, adjustments, advanceWidth, out penX, out penY, out placedX, out placedY);
             for (int i = 0; i < adjustments.Length; i++)

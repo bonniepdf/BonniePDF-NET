@@ -199,6 +199,10 @@ public static class FontCache
         }
     }
 
-    /// <summary>Drops every parsed font file held by the cache.</summary>
-    public static void Clear() => BonniePDF.Typography.TrueType.TtfFont.ClearFileCache();
+    /// <summary>Drops cached parsed font files and compressed embedding programs.</summary>
+    public static void Clear()
+    {
+        BonniePDF.Typography.TrueType.TtfFont.ClearFileCache();
+        BonniePDF.Typography.TrueType.FontProgramCompressionCache.Shared.Clear();
+    }
 }

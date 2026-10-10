@@ -29,6 +29,7 @@ public static class ImageLoader
     /// </summary>
     public static ImageInfo Load(byte[] data)
     {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.ImageDecoding);
         if (data == null || data.Length < 8)
             throw new ArgumentException("Image data is empty or too small", nameof(data));
 
@@ -669,15 +670,10 @@ public static class ImageLoader
 
             if (colorBytesPerPixel == 3 && alphaBytesPerPixel == 1)
             {
-                // 8-bit RGBA
-                for (int x = 0, o = 0; x < width; x++, o += 4)
-                {
-                    colorOut[colorPos] = row[o];
-                    colorOut[colorPos + 1] = row[o + 1];
-                    colorOut[colorPos + 2] = row[o + 2];
-                    colorPos += 3;
-                    alphaOut[alphaPos++] = row[o + 3];
-                }
+                PngPixelOperations.SplitRgbaRow(row, colorOut.AsSpan(colorPos, width * 3),
+                    alphaOut.AsSpan(alphaPos, width));
+                colorPos += width * 3;
+                alphaPos += width;
             }
             else if (colorBytesPerPixel == 1 && alphaBytesPerPixel == 1)
             {

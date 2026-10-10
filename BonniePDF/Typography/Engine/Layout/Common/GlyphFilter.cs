@@ -10,6 +10,7 @@ namespace BonniePDF.Typography.Engine
     internal sealed class GlyphFilter
     {
         private readonly BigEndianData data;
+        private readonly LayoutReadCache reads = new LayoutReadCache();
 
         internal GlyphFilter(byte[] bytes)
         {
@@ -21,7 +22,7 @@ namespace BonniePDF.Typography.Engine
         {
             if (data == null || data.U16(4) == 0)
                 return 0;
-            int kind = OpenTypeLayout.Class(data, data.U16(4), glyph);
+            int kind = reads.Class(data, data.U16(4), glyph);
             if (kind > 4)
                 throw new InvalidDataException("Invalid GDEF glyph class.");
             return kind;
@@ -72,9 +73,9 @@ namespace BonniePDF.Typography.Engine
                 int sets = data.U16(12), delta = data.Offset32(sets + 4 + markSet * 4);
                 if (delta == 0)
                     throw new InvalidDataException("Missing GDEF mark set coverage.");
-                return OpenTypeLayout.Coverage(data, checked(sets + delta), glyph) < 0;
+                return reads.Coverage(data, checked(sets + delta), glyph) < 0;
             }
-            return (flags & 0xff00) != 0 && OpenTypeLayout.Class(data, data.U16(10), glyph) != flags >> 8;
+            return (flags & 0xff00) != 0 && reads.Class(data, data.U16(10), glyph) != flags >> 8;
         }
     }
 }

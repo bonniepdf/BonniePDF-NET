@@ -63,6 +63,7 @@ internal class FontWriter
     /// <returns>The Type0 font object ID</returns>
     public int WriteEmbeddedTtfFont(int type0Id, EmbeddedFontInfo fontInfo, bool enableSubsetting = true)
     {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.FontEmbedding);
         TtfFont font = fontInfo.Font;
         GlyphUsageTracker tracker = fontInfo.Tracker;
 
@@ -150,10 +151,18 @@ internal class FontWriter
     /// </summary>
     private void WriteFontFile2(int id, byte[] fontData)
     {
-        _writer!.WriteCompressedBinaryObject(id, new Dictionary<string, string>
+        var dict = new Dictionary<string, string>
         {
             [PdfKeys.Stream.DecodedLength] = fontData.Length.ToString()
-        }, fontData);
+        };
+        if (!InternalConfiguration.EnableCompression)
+        {
+            _writer!.WriteBinaryObject(id, dict, fontData);
+            return;
+        }
+        byte[] compressed = FontProgramCompressionCache.Shared.Compress(fontData, FontCache.MaxFiles > 0);
+        dict[PdfKeys.Stream.Filter] = "/FlateDecode";
+        _writer!.WriteBinaryObject(id, dict, compressed);
     }
 
     /// <summary>
@@ -433,14 +442,16 @@ internal class FontWriter
     /// </summary>
     private async Task WriteFontFile2Async(int id, byte[] fontData, CancellationToken cancellationToken)
     {
-        await _asyncWriter!.WriteCompressedBinaryObjectAsync(id, new Dictionary<string, string>
-            {
-                // /Length1 is specific to FontFile2 (TrueType) and represents the length of the font file itself
-                [PdfKeys.Stream.DecodedLength] = fontData.Length.ToString()
-            },
-            fontData,
-            fontData.Length,
-            cancellationToken).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        var dict = new Dictionary<string, string>
+        {
+            [PdfKeys.Stream.DecodedLength] = fontData.Length.ToString()
+        };
+        // The asynchronous writer historically compresses font streams regardless of the sync setting.
+        byte[] compressed = FontProgramCompressionCache.Shared.Compress(fontData, FontCache.MaxFiles > 0);
+        dict[PdfKeys.Stream.Filter] = "/FlateDecode";
+        await _asyncWriter!.WriteBinaryObjectAsync(id, dict, compressed, compressed.Length, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>

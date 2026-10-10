@@ -264,6 +264,7 @@ public abstract class TextElementBase : ElementBase
     /// <returns>A list of lines, each fitting within the maximum width</returns>
     protected IList<string> ComputeLines(string text, float maxWidth)
     {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.Measurement);
         List<string> lines = [];
         if (string.IsNullOrEmpty(text)) return lines;
 

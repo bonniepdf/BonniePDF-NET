@@ -31,10 +31,16 @@ internal class TtfFont
     private readonly object _shapeGate = new();
 #endif
     private Typography.Engine.FontFace? _engineFace;
-    internal Typography.Engine.FontFace EngineFace => _engineFace ??= new Typography.Engine.FontFace(_rawData);
+    internal Typography.Engine.FontFace EngineFace => _engineFace ??= CreateEngineFace();
+    private Typography.Engine.FontFace CreateEngineFace()
+    {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.FontLoading);
+        return new Typography.Engine.FontFace(_rawData);
+    }
     private readonly ShapedTextCache _shapedText = new();
     internal IReadOnlyList<Typography.Engine.GlyphInfo> Shape(string text, IReadOnlyDictionary<string, int>? features = null)
     {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.Shaping);
         lock (_shapeGate) return _shapedText.Get(this, text, features);
     }
 
@@ -44,6 +50,7 @@ internal class TtfFont
 
     public TtfFont(string filePath)
     {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.FontLoading);
         if (!File.Exists(filePath))
             throw new FileNotFoundException("Font file not found", filePath);
 
@@ -66,6 +73,7 @@ internal class TtfFont
 
     private TtfFont(byte[] bytes)
     {
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.FontLoading);
         FilePath = "<from bytes>";
         _rawData = bytes;
         Parse();
