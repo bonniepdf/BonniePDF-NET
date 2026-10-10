@@ -15,6 +15,8 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Reduce transient allocations while painting text: append PDF operands and Unicode metadata directly, reuse document-owned CIDs for repeated single-character sources, and size glyph-code arrays once. Text operators, character mappings and extraction are preserved.
+
 - Reduce shaping allocations for ordered clusters and independent glyph positioning, and reuse bounded OpenType coverage/class reads. Glyph output and shaping limits are preserved.
 - Reuse compression of identical embedded font programs in a process-wide cache capped at 4 MiB and 16 entries. Subsets and text mappings remain document-owned; streams are encrypted separately. `FontCache.Clear()` releases these entries and `FontCache.MaxFiles = 0` disables retention.
 

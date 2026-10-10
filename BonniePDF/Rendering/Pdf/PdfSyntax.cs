@@ -17,25 +17,51 @@ internal static class PdfSyntax
     /// </summary>
     internal static string EncodeMetadataString(string input)
     {
+        if (string.IsNullOrEmpty(input)) return "()";
+        StringBuilder result = new(input.Length + 10);
+        AppendMetadataString(result, input);
+        return result.ToString();
+    }
+
+    internal static void AppendMetadataString(StringBuilder result, string input)
+    {
         if (string.IsNullOrEmpty(input))
-            return "()";
+        {
+            result.Append("()");
+            return;
+        }
 
         foreach (char c in input)
         {
             if (c > '\xFF')
             {
                 // Encode as UTF-16 BE hex string with BOM (0xFEFF)
-                byte[] utf16be = Encoding.BigEndianUnicode.GetBytes(input);
-                StringBuilder sb = new(utf16be.Length * 2 + 8);
-                sb.Append("<FEFF");
-                foreach (byte b in utf16be)
-                    sb.Append(b.ToString("X2"));
-                sb.Append('>');
-                return sb.ToString();
+                result.Append("<FEFF");
+                for (int i = 0; i < input.Length; i++)
+                {
+                    char value = input[i];
+                    if (char.IsHighSurrogate(value) && i + 1 < input.Length && char.IsLowSurrogate(input[i + 1]))
+                    {
+                        AppendHex4(result, value);
+                        AppendHex4(result, input[++i]);
+                    }
+                    else AppendHex4(result, char.IsSurrogate(value) ? (ushort)0xfffd : value);
+                }
+                result.Append('>');
+                return;
             }
         }
 
-        return $"({Escape(input)})";
+        result.Append('(');
+        AppendEscaped(result, input);
+        result.Append(')');
+    }
+
+    internal static void AppendHex4(StringBuilder result, ushort value)
+    {
+        const string digits = "0123456789ABCDEF";
+        result.Append(digits[value >> 12]).Append(digits[(value >> 8) & 15])
+            .Append(digits[(value >> 4) & 15]).Append(digits[value & 15]);
     }
 
     /// <summary>
@@ -51,6 +77,12 @@ internal static class PdfSyntax
         // (Assuming average 10% expansion for escaped chars)
         StringBuilder sb = new(input.Length + 10);
 
+        AppendEscaped(sb, input);
+        return sb.ToString();
+    }
+
+    internal static void AppendEscaped(StringBuilder sb, string input)
+    {
         foreach (char c in input)
             switch (c)
             {
@@ -65,7 +97,6 @@ internal static class PdfSyntax
                 default: sb.Append(c); break;
             }
 
-        return sb.ToString();
     }
 
     /// <summary>
