@@ -69,6 +69,8 @@ jobs:
           unzip -l "$nupkg" | grep -q "lib/$tfm/BonniePDF.dll" \
             || { echo "::error::BonniePDF.dll ($tfm) missing from package"; exit 1; }
         done
+        unzip -l "$nupkg" | grep -q "assets/unicode/LICENSE.txt" \
+          || { echo "::error::Unicode license missing from package"; exit 1; }
         echo "Package contains BonniePDF.dll for net8.0 and net10.0 ✓"
 
     - name: Upload package artifact
