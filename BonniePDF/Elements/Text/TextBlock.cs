@@ -278,6 +278,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         // painters advance by the same amount the layout reserved. No-op (and
         // byte-identical) when both are zero.
         bool spaced = LetterSpacing != 0 || WordSpacing != 0;
+        ctx.Canvas.SetTextFeatures(FontFeatures);
         if (spaced) ctx.Canvas.SetTextSpacing(LetterSpacing, WordSpacing);
         try
         {
@@ -286,6 +287,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         finally
         {
             if (spaced) ctx.Canvas.SetTextSpacing(0, 0);
+            ctx.Canvas.SetTextFeatures(null);
         }
     }
 
@@ -506,7 +508,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         while (last.Length > 0 && MeasureTextWidth(last + Ellipsis) > contentWidth)
         {
             int lastSpace = last.TrimEnd().LastIndexOf(' ');
-            last = lastSpace > 0 ? last[..lastSpace].TrimEnd() : last[..^1].TrimEnd();
+            last = lastSpace > 0 ? last[..lastSpace].TrimEnd() : last[..Typography.Engine.Graphemes.Boundaries(last)[^2]].TrimEnd();
         }
 
         kept[lastIndex] = last + Ellipsis;

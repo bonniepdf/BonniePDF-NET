@@ -11,6 +11,10 @@ namespace BonniePDF;
 /// </summary>
 public abstract class TextElementBase : ElementBase
 {
+    private readonly TextStyle _featureStyle=new();
+    /// <summary>OpenType feature overrides for embedded text, such as kern=0 or liga=0.</summary>
+    public System.Collections.Generic.IReadOnlyDictionary<string,int>? FontFeatures {get=>_featureStyle.FontFeatures;set=>_featureStyle.FontFeatures=value;}
+
     /// <summary>
     /// Ambient default text style that is applied to new text elements during construction.
     /// Set by PdfBuilder/PageDescriptor during fluent API document building.
@@ -58,6 +62,7 @@ public abstract class TextElementBase : ElementBase
 
     private void ApplyDefaultStyle(TextStyle style)
     {
+        FontFeatures ??= style.FontFeatures;
         if (style.FontFamily != null)
             FontFamily = style.FontFamily;
         if (style.FontWeight != FontWeight.Normal)
@@ -225,6 +230,7 @@ public abstract class TextElementBase : ElementBase
     public void ApplyDefaultStyleIfNotSet(TextStyle? style)
     {
         if (style == null) return;
+        FontFeatures ??= style.FontFeatures;
 
         if (!_fontExplicit)
         {
@@ -293,7 +299,8 @@ public abstract class TextElementBase : ElementBase
         if (string.IsNullOrEmpty(text)) return lines;
 
         List<string> rest = [];
-        foreach (Rune rune in text.EnumerateRunes()) rest.Add(rune.ToString());
+        var bounds=Typography.Engine.Graphemes.Boundaries(text);
+        for(int i=0;i+1<bounds.Count;i++)rest.Add(text.Substring(bounds[i],bounds[i+1]-bounds[i]));
         float limit = firstWidth;
 
         bool Fits(int count) => MeasureTextWidth(string.Concat(rest.GetRange(0, count))) <= limit;
@@ -330,6 +337,7 @@ public abstract class TextElementBase : ElementBase
             }
 
             int count = lo;
+            for(int safe=count;safe>0;safe--)if(FontMetrics.IsSafeTextBreak(string.Concat(rest),FontName,string.Concat(rest.GetRange(0,safe)).Length,FontFeatures)){count=safe;break;}
             int cut = -1;
             if (rest[count] == " " && HasNonSpace(count))
             {
@@ -414,7 +422,7 @@ public abstract class TextElementBase : ElementBase
     {
         // Replace tokens with estimated placeholders (2 digits) for measurement
         string measuredText = text.Replace(TotalPagesToken, "00").Replace(CurrentPageToken, "00");
-        return FontMetrics.GetStringWidth(measuredText, FontName, FontSize) + SpacingWidth(measuredText);
+        return FontMetrics.GetStringWidth(measuredText, FontName, FontSize, FontFeatures) + SpacingWidth(measuredText);
     }
 
     /// <summary>
@@ -425,6 +433,6 @@ public abstract class TextElementBase : ElementBase
     /// </summary>
     protected float SpacingWidth(string text)
     {
-        return TextSpacing.GetWidth(text, LetterSpacing, WordSpacing);
+        return TextSpacing.GetWidth(text, LetterSpacing, WordSpacing, FontName, FontFeatures);
     }
 }

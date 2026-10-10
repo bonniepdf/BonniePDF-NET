@@ -70,7 +70,7 @@ public class PdfKernedTextTests
             doc.Add(t);
         });
 
-        Assert.Contains("[<0024> 129 <0039>] TJ", pdf);
+        Assert.Contains("[<0024> 128.906 <0039>] TJ", pdf);
         Assert.DoesNotContain("<00240039> Tj", pdf);
     }
 

@@ -378,6 +378,12 @@ internal sealed partial class DefinitionWriter
                 foreach (object? item in (IEnumerable)value) array.Add(Wire(arg, item));
                 return array;
             }
+            case "fontFeatures":
+            {
+                var map=new JsonObject();
+                foreach(var entry in (IReadOnlyDictionary<string,int>)value) map[entry.Key]=entry.Value;
+                return map;
+            }
             case "map":
             {
                 var map = new JsonObject();

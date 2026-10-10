@@ -7,6 +7,21 @@ namespace BonniePDF;
 /// </summary>
 public class TextStyle
 {
+    private System.Collections.Generic.IReadOnlyDictionary<string,int>? _fontFeatures;
+    /// <summary>OpenType feature overrides, such as kern=0, liga=0 or smcp=1. Null inherits font defaults.</summary>
+    public System.Collections.Generic.IReadOnlyDictionary<string,int>? FontFeatures
+    {
+        get => _fontFeatures;
+        set
+        {
+            if(value is null) { _fontFeatures=null; return; }
+            if(value.Count>256) throw new System.ArgumentOutOfRangeException(nameof(value), "At most 256 font features are supported.");
+            var copy=new System.Collections.Generic.Dictionary<string,int>(System.StringComparer.Ordinal);
+            foreach(var feature in value) { _ = new Typography.Engine.ShapeFeature(feature.Key,feature.Value); copy.Add(feature.Key,feature.Value); }
+            _fontFeatures=new System.Collections.ObjectModel.ReadOnlyDictionary<string,int>(copy);
+        }
+    }
+
     /// <summary>
     /// Font family name (e.g. "Helvetica") or TTF file path.
     /// When used with FontWeight/Italic, the FontFamilyResolver maps
@@ -124,6 +139,7 @@ public class TextStyle
                 : baseStyle.BaselineAlignment,
             BaselineShift = BaselineShift ?? baseStyle.BaselineShift,
             LetterSpacing = LetterSpacing ?? baseStyle.LetterSpacing,
+            FontFeatures = FontFeatures ?? baseStyle.FontFeatures,
             WordSpacing = WordSpacing ?? baseStyle.WordSpacing,
             DecorationStyle = DecorationStyle != DecorationStyle.Solid ? DecorationStyle : baseStyle.DecorationStyle,
             LineHeight = LineHeight ?? baseStyle.LineHeight,

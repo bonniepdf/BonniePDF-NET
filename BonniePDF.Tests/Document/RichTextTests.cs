@@ -160,6 +160,15 @@ public class RichTextTests
         Close(500 - W("Hello"), FirstDrawX(TextAlignment.Right), 0.05f);
     }
 
+    [Fact]
+    public void EmbeddedJustificationKeepsShapingAcrossSpaces()
+    {
+        var rt=new RichText();rt.DefaultStyle.FontFamily=BonniePDF.Tests.Support.TestFonts.SerifRegularPath;
+        rt.DefaultStyle.FontSize=12;rt.Span("A A A");rt.Alignment=TextAlignment.Justify;
+        var (ctx,canvas)=MakeContext();rt.Render(ctx,20);
+        Assert.Equal(new[]{"A A"},canvas.Texts.Where(t=>Math.Abs(t.Y)<0.001f).Select(t=>t.Text));
+    }
+
     // --- Justify ---
 
     [Fact]

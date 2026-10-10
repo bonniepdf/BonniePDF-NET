@@ -25,7 +25,17 @@ internal class TtfFont
     private int _numberOfHMetrics;
 
     // Kern pairs: (leftGid, rightGid) -> adjustment in font units
-    private readonly Dictionary<(ushort left, ushort right), short> _kernPairs = new();
+#if NET9_0_OR_GREATER
+    private readonly System.Threading.Lock _shapeGate = new();
+#else
+    private readonly object _shapeGate = new();
+#endif
+    private Typography.Engine.FontFace? _engineFace;
+    internal Typography.Engine.FontFace EngineFace => _engineFace ??= new Typography.Engine.FontFace(_rawData);
+    internal IReadOnlyList<Typography.Engine.GlyphInfo> Shape(string text, IReadOnlyDictionary<string, int>? features = null)
+    {
+        lock (_shapeGate) return EmbeddedTextShaping.Shape(this, text, features);
+    }
 
     // =====================================================
     // CONSTRUCTOR
@@ -62,7 +72,11 @@ internal class TtfFont
 
     // A parsed font is read-only, so one parse can serve every document and thread that uses the font.
     private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<byte[], TtfFont> ByBytes = new();
+#if NET9_0_OR_GREATER
+    private static readonly System.Threading.Lock FileCacheGate = new();
+#else
     private static readonly object FileCacheGate = new();
+#endif
     private static readonly Dictionary<string, (long Length, long Ticks, TtfFont Font)> ByFile = new(StringComparer.Ordinal);
 
     /// <summary>
@@ -212,15 +226,20 @@ internal class TtfFont
     /// Gets the kerning adjustment in font units between two adjacent glyphs.
     /// Returns 0 if no kerning pair exists or the font has no kern table.
     /// </summary>
-    public short GetKerning(ushort leftGid, ushort rightGid)
+    internal string GlyphOutline(int glyphId)
     {
-        return _kernPairs.TryGetValue((leftGid, rightGid), out short kern) ? kern : (short)0;
+        lock (_shapeGate) return GlyphOutlinePath.Build(EngineFace, glyphId);
+    }
+
+    public int GetKerning(ushort leftGid, ushort rightGid)
+    {
+        lock (_shapeGate) return EngineFace.GetPairKerning(leftGid, rightGid);
     }
 
     /// <summary>
     /// Returns true if this font has any kern pairs defined.
     /// </summary>
-    public bool HasKerning => _kernPairs.Count > 0;
+    public bool HasKerning => _tables.ContainsKey("kern") || _tables.ContainsKey("GPOS");
 
     /// <summary>
     /// Gets the raw font data for embedding
@@ -292,9 +311,6 @@ internal class TtfFont
 
         if (_tables.ContainsKey("post"))
             ParsePostTable(reader);
-
-        if (_tables.ContainsKey("kern"))
-            ParseKernTable(reader);
     }
 
     private void ParseHeadTable(BigEndianReader reader)
@@ -629,40 +645,4 @@ internal class TtfFont
         ItalicAngle = reader.ReadFixed();
     }
 
-    private void ParseKernTable(BigEndianReader reader)
-    {
-        if (!_tables.TryGetValue("kern", out var info)) return;
-
-        reader.Seek(info.offset);
-        reader.ReadUInt16(); // version
-        int nTables = reader.ReadUInt16();
-
-        for (int t = 0; t < nTables; t++)
-        {
-            long tableStart = reader.Position;
-            reader.ReadUInt16(); // version
-            int length = reader.ReadUInt16();
-            int coverage = reader.ReadUInt16();
-            int format = coverage >> 8;
-            bool isHorizontal = (coverage & 0x01) != 0;
-
-            if (format != 0 || !isHorizontal)
-            {
-                // Skip unsupported formats
-                reader.Seek(tableStart + length);
-                continue;
-            }
-
-            int nPairs = reader.ReadUInt16();
-            reader.Skip(6); // searchRange, entrySelector, rangeShift
-
-            for (int i = 0; i < nPairs; i++)
-            {
-                ushort left = reader.ReadUInt16();
-                ushort right = reader.ReadUInt16();
-                short value = reader.ReadInt16();
-                _kernPairs[(left, right)] = value;
-            }
-        }
-    }
 }

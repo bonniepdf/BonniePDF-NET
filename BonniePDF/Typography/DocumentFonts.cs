@@ -67,7 +67,11 @@ public sealed class DocumentFonts
     ];
 
     private readonly int _serial = Interlocked.Increment(ref _nextSerial);
+#if NET9_0_OR_GREATER
+    private readonly System.Threading.Lock _gate = new();
+#else
     private readonly object _gate = new();
+#endif
     // Insertion-ordered; replacing an identity keeps its place.
     private readonly List<string> _order = [];
     private readonly Dictionary<string, DocumentFontFace> _byIdentity = new(StringComparer.Ordinal);

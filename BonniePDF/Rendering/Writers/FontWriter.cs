@@ -91,13 +91,18 @@ internal class FontWriter
 
         WriteFontFile2(fontFile2Id, fontData);
 
+        var codes=tracker.CidToGlyphMap;
+        var cidMap=new Dictionary<ushort,ushort>(subsetter?.OldToNewGidMap??codes);
+        foreach(var entry in codes)cidMap[entry.Key]=subsetter?.OldToNewGidMap?[entry.Value]??entry.Value;
+        ushort maxCid=cidMap.Keys.Max();
+
         // 2. Write CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap
         //    domain (0..MaxOriginalGid) - see BuildCIDSetData.
         int cidSetId = 0;
         if (enableSubsetting && subsetter != null)
         {
             cidSetId = _writer!.GetNewId();
-            WriteCIDSet(cidSetId, subsetter.MaxOriginalGid);
+            WriteCIDSet(cidSetId, maxCid);
         }
 
         // 3. Write FontDescriptor
@@ -105,10 +110,10 @@ internal class FontWriter
 
         // 4. Write CIDToGIDMap (maps original GIDs to new subset GIDs)
         string cidToGidMapRef;
-        if (enableSubsetting)
+        if (subsetter is not null || codes.Any(e=>e.Key!=e.Value))
         {
             int cidToGidMapId = _writer!.GetNewId();
-            WriteCIDToGIDMap(cidToGidMapId, subsetter!.OldToNewGidMap!, subsetter.MaxOriginalGid);
+            WriteCIDToGIDMap(cidToGidMapId, cidMap, maxCid);
             cidToGidMapRef = $"{cidToGidMapId} 0 R";
         }
         else
@@ -122,6 +127,7 @@ internal class FontWriter
 
         // 6. Write ToUnicode CMap
         ToUnicodeCMapBuilder cmapBuilder = new();
+        foreach(var entry in tracker.GlyphSources) cmapBuilder.AddSourceMapping(entry.Key,entry.Value);
         cmapBuilder.AddMappings(tracker.GetUsedCharToGlyphMap());
         WriteToUnicodeCMap(toUnicodeId, cmapBuilder.Build());
 
@@ -282,9 +288,10 @@ internal class FontWriter
     /// </summary>
     private static string GenerateWidthArray(TtfFont font, GlyphUsageTracker tracker)
     {
-        float scale = 1000f / font.UnitsPerEm;
+        double scale = 1000d / font.UnitsPerEm;
         StringBuilder sb = new("[ ");
-        List<ushort> glyphs = tracker.UsedGlyphIds.Order().ToList();
+        var codes=tracker.CidToGlyphMap;
+        List<ushort> glyphs = codes.Keys.Order().ToList();
 
         int i = 0;
         while (i < glyphs.Count)
@@ -295,7 +302,7 @@ internal class FontWriter
             int j = i;
             while (j < glyphs.Count && glyphs[j] == startGid + (j - i))
             {
-                int scaledWidth = (int)(font.GetGlyphWidth(glyphs[j]) * scale);
+                string scaledWidth = BonniePDF.Rendering.Pdf.PdfSyntax.FormatDecimal((float)(font.GetGlyphWidth(codes[glyphs[j]]) * scale));
                 sb.Append(scaledWidth).Append(' ');
                 j++;
             }
@@ -364,13 +371,18 @@ internal class FontWriter
 
         await WriteFontFile2Async(fontFile2Id, fontData, cancellationToken).ConfigureAwait(false);
 
+        var codes=tracker.CidToGlyphMap;
+        var cidMap=new Dictionary<ushort,ushort>(subsetter?.OldToNewGidMap??codes);
+        foreach(var entry in codes)cidMap[entry.Key]=subsetter?.OldToNewGidMap?[entry.Value]??entry.Value;
+        ushort maxCid=cidMap.Keys.Max();
+
         // 2. Write CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap
         //    domain (0..MaxOriginalGid) - see BuildCIDSetData.
         int cidSetId = 0;
         if (enableSubsetting && subsetter != null)
         {
             cidSetId = _asyncWriter!.GetNewId();
-            await WriteCIDSetAsync(cidSetId, subsetter.MaxOriginalGid, cancellationToken).ConfigureAwait(false);
+            await WriteCIDSetAsync(cidSetId, maxCid, cancellationToken).ConfigureAwait(false);
         }
 
         // 3. Write FontDescriptor
@@ -379,10 +391,10 @@ internal class FontWriter
 
         // 4. Write CIDToGIDMap (maps original GIDs to new subset GIDs)
         string cidToGidMapRef;
-        if (enableSubsetting && subsetter != null)
+        if (subsetter is not null || codes.Any(e=>e.Key!=e.Value))
         {
             int cidToGidMapId = _asyncWriter!.GetNewId();
-            await WriteCIDToGIDMapAsync(cidToGidMapId, subsetter.OldToNewGidMap!, subsetter.MaxOriginalGid,
+            await WriteCIDToGIDMapAsync(cidToGidMapId, cidMap, maxCid,
                 cancellationToken).ConfigureAwait(false);
             cidToGidMapRef = $"{cidToGidMapId} 0 R";
         }
@@ -398,6 +410,7 @@ internal class FontWriter
 
         // 5. Write ToUnicode CMap
         ToUnicodeCMapBuilder cmapBuilder = new();
+        foreach(var entry in tracker.GlyphSources) cmapBuilder.AddSourceMapping(entry.Key,entry.Value);
         cmapBuilder.AddMappings(tracker.GetUsedCharToGlyphMap());
         await WriteToUnicodeCMapAsync(toUnicodeId, cmapBuilder.Build(), cancellationToken).ConfigureAwait(false);
 

@@ -411,7 +411,7 @@ internal class PdfCanvas : ICanvas
         PdfOperators.SetWordSpacing(_stream, wordSpacing);
         PdfOperators.SetTextPosition(_stream, pdfX, pdfY);
 
-        EmitShowText(runs, fontSize);
+        EmitShowText(runs, fontSize, wordSpacing);
 
         // Reset word spacing to 0 so it doesn't leak to subsequent text
         PdfOperators.SetWordSpacing(_stream, 0);
@@ -664,6 +664,9 @@ internal class PdfCanvas : ICanvas
     }
 
     /// <summary>Sums the rendered width of <paramref name="runs"/> at <paramref name="fontSize"/>, each run in its own font.</summary>
+    private IReadOnlyDictionary<string,int>? _fontFeatures;
+    public void SetTextFeatures(IReadOnlyDictionary<string,int>? features) => _fontFeatures=features;
+
     private float MeasureRuns(IList<ResolvedTextRun> runs, float fontSize)
     {
         float total = 0;
@@ -672,17 +675,13 @@ internal class PdfCanvas : ICanvas
             TtfFont? font = run.EmbeddedFont;
             if (font != null)
             {
-                foreach (System.Text.Rune rune in run.Text.EnumerateRunes())
-                {
-                    if (rune.Value < 32) continue; // matches ToGlyphIdHexString
-                    total += font.GetCharWidthInPoints(rune.Value, fontSize);
-                }
+                total += (float)(font.Shape(run.Text,_fontFeatures).Sum(g=>(double)g.AdvanceX)*fontSize/font.UnitsPerEm);
             }
             else
             {
                 total += FontMetrics.GetStringWidth(run.Text, run.FontIdentifier, fontSize);
             }
-            total += SpacingWidth(run.Text);
+            total += SpacingWidth(run.Text) + (font is null?0:(font.Shape(run.Text,_fontFeatures).Count-run.Text.EnumerateRunes().Count())*_letterSpacing);
         }
         return total;
     }
@@ -715,39 +714,41 @@ internal class PdfCanvas : ICanvas
     /// point by its glyph widths (plus <c>TJ</c> adjustments), so consecutive
     /// runs flow on naturally.
     /// </summary>
-    private void EmitShowText(IList<ResolvedTextRun> runs, float fontSize)
+    private void EmitShowText(IList<ResolvedTextRun> runs, float fontSize, float? wordSpacing=null)
     {
-        foreach (ResolvedTextRun run in runs)
+        foreach(var run in runs)
         {
-            if (run.Text.Length == 0) continue;
-            _glyphTracker(run.FontIdentifier, run.Text);
-            PdfOperators.SetFont(_stream, run.ResourceName, fontSize);
-            if (run.EmbeddedFont != null)
+            if(run.Text.Length==0) continue;
+            _glyphTracker(run.FontIdentifier,run.Text);
+            PdfOperators.SetFont(_stream,run.ResourceName,fontSize);
+            var font=run.EmbeddedFont;
+            if(font is null) { PdfOperators.ShowText(_stream,$"({PdfSyntax.Escape(run.Text)})"); continue; }
+            var glyphs=font.Shape(run.Text,_fontFeatures); var codes=run.Tracker?.MarkShaped(run.Text,glyphs)??glyphs.Select(g=>(ushort)g.Id).ToArray();
+            _stream.AppendLf($"/Span << /ActualText {PdfSyntax.EncodeMetadataString(run.Text)} >> BDC");
+            if(glyphs.All(g=>g.OffsetY==0))
             {
-                // Word spacing (Tw) does not apply to composite fonts, so when
-                // it is set, inject it into the TJ array (combined with any kerning).
-                // Letter spacing is handled universally by Tc, above.
-                if (_wordSpacing != 0 && run.Text.Contains(' '))
-                {
-                    PdfOperators.ShowTextPositioned(_stream,
-                        PdfSyntax.ToSpacedGlyphArray(run.Text, run.EmbeddedFont, fontSize, _wordSpacing));
-                    continue;
+                var hex=new StringBuilder();var array=new StringBuilder("[");bool adjusted=false;
+                void Adjust(double n) { if(n==0)return;array.Append('<').Append(hex).Append("> ").Append(PdfSyntax.FormatDecimal((float)n)).Append(' ');hex.Clear();adjusted=true; }
+                for(int index=0;index<glyphs.Count;index++) {var g=glyphs[index];
+                    Adjust(-(double)g.OffsetX*1000/font.UnitsPerEm);hex.Append(codes[index].ToString("X4",System.Globalization.CultureInfo.InvariantCulture));
+                    Adjust((double)(font.GetGlyphWidth((ushort)g.Id)+g.OffsetX-g.AdvanceX)*1000/font.UnitsPerEm-(run.Text.Substring(g.Cluster,g.SourceLength)==" "&&fontSize>0?(wordSpacing??_wordSpacing)*1000/fontSize:0));
                 }
-                // Embedded fonts with kern pairs paint with `TJ` so the PDF
-                // matches the kerned widths the layout engine reserved (and the
-                // kerned SVG export). Unkerned strings keep the `Tj` path.
-                string? kerned = run.EmbeddedFont.HasKerning
-                    ? PdfSyntax.ToKernedGlyphArray(run.Text, run.EmbeddedFont)
-                    : null;
-                if (kerned != null)
-                    PdfOperators.ShowTextPositioned(_stream, kerned);
-                else
-                    PdfOperators.ShowText(_stream, PdfSyntax.ToGlyphIdHexString(run.Text, run.EmbeddedFont));
+                if(adjusted)PdfOperators.ShowTextPositioned(_stream,array.Append('<').Append(hex).Append(">]").ToString());else PdfOperators.ShowText(_stream,$"<{hex}>");
+                _stream.AppendLf("EMC");continue;
             }
-            else
+            for(int index=0;index<glyphs.Count;index++)
             {
-                PdfOperators.ShowText(_stream, $"({PdfSyntax.Escape(run.Text)})");
+                var g=glyphs[index];
+                double rise=(double)g.OffsetY*fontSize/font.UnitsPerEm;
+                if(rise!=0) _stream.AppendLf($"{PdfSyntax.FormatDecimal((float)rise)} Ts");
+                double before=-(double)g.OffsetX*1000/font.UnitsPerEm;
+                double after=(double)(font.GetGlyphWidth((ushort)g.Id)+g.OffsetX-g.AdvanceX)*1000/font.UnitsPerEm-(run.Text.Substring(g.Cluster,g.SourceLength)==" " && fontSize>0?(wordSpacing??_wordSpacing)*1000/fontSize:0);
+                string hex=$"<{codes[index]:X4}>";
+                if(before==0 && after==0) PdfOperators.ShowText(_stream,hex);
+                else PdfOperators.ShowTextPositioned(_stream,$"[{(before!=0?PdfSyntax.FormatDecimal((float)before)+" ":"")}{hex}{(after!=0?" "+PdfSyntax.FormatDecimal((float)after):"")}]");
+                if(rise!=0) _stream.AppendLf("0 Ts");
             }
+            _stream.AppendLf("EMC");
         }
     }
 

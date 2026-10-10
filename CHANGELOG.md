@@ -13,6 +13,11 @@ change lands in both and is described in both changelogs. Word the entry for
 this language — C# spellings, C# type names — but describe the same
 behaviour, so the two files can be read side by side.
 
+## Unreleased
+
+- Embedded Latin text now uses OpenType ligatures, GPOS kerning and accent positioning consistently in measurement, PDF and SVG. `FontFeatures` on text elements and TextStyle allows overrides such as `kern: 0` and `liga: 0`. Improved advances can change line and page breaks. Standard-14 text retains its existing behavior.
+- Font subsets retain substituted glyphs; cluster ToUnicode mappings and ActualText preserve ligatures and original accent spellings during extraction. SVG outlines substitutions to prevent viewer reshaping. Fallback prefers a whole combining cluster, and emergency wrapping and ellipsis preserve graphemes.
+
 ## 2026.10.0
 
 - Publishing now requires successful cross-engine gallery validation of the source commit. Configure `PARITY_WORKFLOW_REPOSITORY` and `PARITY_WORKFLOW_TOKEN` before publishing.

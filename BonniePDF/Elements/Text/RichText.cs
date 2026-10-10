@@ -278,6 +278,18 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     /// Builds word-wrapped lines from the spans. Each line contains a list of styled runs.
     /// Words from different spans can coexist on the same line.
     /// </summary>
+    private static float WidthWithWord(RichTextLine line,StyledWord word)
+    {
+        var runs=line.Runs.Select(r=>new StyledRun{Text=r.Text,Style=r.Style}).ToList();
+        void Append(string text,TextStyle style) {
+            if(runs.Count>0 && StylesEqual(runs[^1].Style,style))runs[^1].Text+=text;
+            else runs.Add(new StyledRun{Text=text,Style=style});
+        }
+        if(runs.Count>0 && word.HasLeadingSpace)Append(" ",word.LeadingSpaceStyle??word.Style);
+        Append(word.Text!,word.Style);
+        return runs.Sum(r=>MeasureRunWidth(r,0));
+    }
+
     private List<RichTextLine> ComputeLines(float maxWidth)
     {
         // 1. Break spans into styled words (word = text + style)
@@ -309,9 +321,9 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
             float wordWidth = word.Width;
             float spaceWidth = word.LeadingSpaceWidth;
-            float totalNeeded = currentWidth > 0 ? spaceWidth + wordWidth : wordWidth;
+            float candidateWidth = WidthWithWord(currentLine,word);
 
-            if (currentWidth + totalNeeded > maxWidth && currentWidth > 0)
+            if (candidateWidth > maxWidth && currentWidth > 0)
             {
                 // Line is full - wrap to next line
                 currentLine.TotalWidth = currentWidth;
@@ -321,7 +333,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
                 currentWidth = 0;
                 // Don't add leading space at start of new line
                 spaceWidth = 0;
-                totalNeeded = wordWidth;
+                candidateWidth = wordWidth;
             }
 
             // Add leading space with its own style (may differ from the word's style at span
@@ -343,7 +355,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             else
                 currentLine.Runs.Add(new StyledRun { Text = word.Text!, Style = word.Style });
 
-            currentWidth += word.Width;
+            currentWidth = candidateWidth;
         }
 
         // Add the final line. A paragraph that ends immediately after a raw
@@ -447,10 +459,10 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
                     string measuredPart = Measured(part);
                     float partWidth = FontMetrics.GetStringWidth(
-                        measuredPart, resolved.EffectiveFontName, resolved.EffectiveFontSize)
+                        measuredPart, resolved.EffectiveFontName, resolved.EffectiveFontSize, resolved.FontFeatures)
                         + StyleSpacing(measuredPart, resolved);
                     float spaceWidth = hasLeadingSpace
-                        ? FontMetrics.GetStringWidth(" ", spaceStyle.EffectiveFontName, spaceStyle.EffectiveFontSize)
+                        ? FontMetrics.GetStringWidth(" ", spaceStyle.EffectiveFontName, spaceStyle.EffectiveFontSize, spaceStyle.FontFeatures)
                           + StyleSpacing(" ", spaceStyle)
                         : 0;
 
@@ -573,6 +585,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             float ls = style.LetterSpacing ?? 0;
             float ws = style.WordSpacing ?? 0;
             bool spaced = ls != 0 || ws != 0;
+            ctx.Canvas.SetTextFeatures(style.FontFeatures);
             if (spaced) ctx.Canvas.SetTextSpacing(ls, ws);
 
             // Draw each word segment separately when justified (to apply extra spacing)
@@ -594,7 +607,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
                 // Draw the run as a single text call
                 ctx.Canvas.DrawText(currentX, runY, run.Text, color, fontSize, fontName, TextAlignment.Left);
 
-                float runWidth = FontMetrics.GetStringWidth(run.Text, fontName, fontSize) + StyleSpacing(run.Text, style);
+                float runWidth = FontMetrics.GetStringWidth(run.Text, fontName, fontSize, style.FontFeatures) + StyleSpacing(run.Text, style);
 
                 // Draw decorations
                 if (style.Decoration != TextDecoration.None)
@@ -604,6 +617,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             }
 
             if (spaced) ctx.Canvas.SetTextSpacing(0, 0);
+            ctx.Canvas.SetTextFeatures(null);
         }
     }
 
@@ -618,6 +632,18 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         float fontSize = style.EffectiveFontSize;
         Color color = style.EffectiveColor;
 
+        // Shape embedded runs across spaces, including cross-word positioning.
+        if (!HasPageToken(run.Text) && FontMetrics.UsesEmbeddedMetrics(fontName))
+        {
+            ctx.Canvas.SetTextSpacing(style.LetterSpacing ?? 0,(style.WordSpacing ?? 0)+extraWordSpacing);
+            float width=MeasureRunWidth(run,extraWordSpacing);
+            try {
+                ctx.Canvas.DrawText(startX,y,run.Text,color,fontSize,fontName,TextAlignment.Left);
+                if(style.Decoration!=TextDecoration.None)DrawRunDecorations(ctx,style,startX,y,width,fontSize);
+            } finally {ctx.Canvas.SetTextSpacing(style.LetterSpacing ?? 0,style.WordSpacing ?? 0);}
+            return startX+width;
+        }
+
         float currentX = startX;
         string[] words = run.Text.Split(' ');
 
@@ -629,7 +655,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             // letter/word spacing in addition to the justification spread.
             if (i > 0)
             {
-                float spaceWidth = FontMetrics.GetStringWidth(" ", fontName, fontSize) + StyleSpacing(" ", style);
+                float spaceWidth = FontMetrics.GetStringWidth(" ", fontName, fontSize, style.FontFeatures) + StyleSpacing(" ", style);
                 currentX += spaceWidth + extraWordSpacing;
             }
 
@@ -643,7 +669,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
                 else
                 {
                     ctx.Canvas.DrawText(currentX, y, word, color, fontSize, fontName, TextAlignment.Left);
-                    wordWidth = FontMetrics.GetStringWidth(word, fontName, fontSize) + StyleSpacing(word, style);
+                    wordWidth = FontMetrics.GetStringWidth(word, fontName, fontSize, style.FontFeatures) + StyleSpacing(word, style);
                 }
 
                 if (style.Decoration != TextDecoration.None)
@@ -683,7 +709,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     /// </summary>
     private static float StyleSpacing(string text, TextStyle style)
     {
-        return TextSpacing.GetWidth(text, style.LetterSpacing ?? 0, style.WordSpacing ?? 0);
+        return TextSpacing.GetWidth(text, style.LetterSpacing ?? 0, style.WordSpacing ?? 0,style.EffectiveFontName,style.FontFeatures);
     }
 
     // --- Page tokens ---
@@ -712,7 +738,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     private static float ActualRunWidth(RenderContext ctx, StyledRun run)
     {
         string actual = WithCurrentPage(ctx, run.Text).Replace(TextElementBase.TotalPagesToken, "00");
-        return FontMetrics.GetStringWidth(actual, run.Style.EffectiveFontName, run.Style.EffectiveFontSize)
+        return FontMetrics.GetStringWidth(actual, run.Style.EffectiveFontName, run.Style.EffectiveFontSize, run.Style.FontFeatures)
             + StyleSpacing(actual, run.Style);
     }
 
@@ -752,7 +778,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             if (part.Length > 0)
             {
                 ctx.Canvas.DrawText(currentX, y, part, color, fontSize, fontName, TextAlignment.Left);
-                currentX += FontMetrics.GetStringWidth(part, fontName, fontSize) + StyleSpacing(part, style);
+                currentX += FontMetrics.GetStringWidth(part, fontName, fontSize, style.FontFeatures) + StyleSpacing(part, style);
             }
 
             if (i == parts.Length - 1) continue;
@@ -769,7 +795,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
                 ctx.Canvas.DrawFormXObject(ctx.RegisterDeferredXObject(fontName, fontSize, color), currentX, y);
             }
 
-            currentX += FontMetrics.GetStringWidth("00", fontName, fontSize) + StyleSpacing("00", style);
+            currentX += FontMetrics.GetStringWidth("00", fontName, fontSize, style.FontFeatures) + StyleSpacing("00", style);
         }
 
         return currentX - x;
@@ -787,7 +813,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     {
         string measured = Measured(run.Text);
         float baseWidth = FontMetrics.GetStringWidth(
-            measured, run.Style.EffectiveFontName, run.Style.EffectiveFontSize)
+            measured, run.Style.EffectiveFontName, run.Style.EffectiveFontSize, run.Style.FontFeatures)
             + StyleSpacing(measured, run.Style);
 
         if (extraWordSpacing > 0)
@@ -804,6 +830,9 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     private static bool StylesEqual(TextStyle a, TextStyle b)
     {
         return string.Equals(a.EffectiveFontName, b.EffectiveFontName, StringComparison.Ordinal) &&
+               (a.FontFeatures??new Dictionary<string,int>(StringComparer.Ordinal)).OrderBy(p=>p.Key,StringComparer.Ordinal).SequenceEqual((b.FontFeatures??new Dictionary<string,int>(StringComparer.Ordinal)).OrderBy(p=>p.Key,StringComparer.Ordinal)) &&
+               a.LetterSpacing==b.LetterSpacing && a.WordSpacing==b.WordSpacing &&
+               a.BaselineAlignment==b.BaselineAlignment && a.BaselineShift==b.BaselineShift &&
                Math.Abs(a.EffectiveFontSize - b.EffectiveFontSize) < 0.01f &&
                a.EffectiveColor.Equals(b.EffectiveColor) &&
                a.Decoration == b.Decoration &&

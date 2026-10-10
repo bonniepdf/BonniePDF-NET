@@ -38,6 +38,8 @@ public abstract class ListElementBase : TextElementBase
     /// </summary>
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
+        ctx.Canvas.SetTextFeatures(FontFeatures);
+        ctx.Canvas.SetTextSpacing(LetterSpacing,WordSpacing);
         TaggingContext? tagging = ctx.Tagging;
         if (tagging is not null)
         {
@@ -50,6 +52,8 @@ public abstract class ListElementBase : TextElementBase
         }
         finally
         {
+            ctx.Canvas.SetTextFeatures(null);
+            ctx.Canvas.SetTextSpacing(0,0);
             if (tagging is not null)
             {
                 ctx.Canvas.EndMarkedContent();
@@ -171,6 +175,8 @@ public abstract class ListElementBase : TextElementBase
     {
         if (lines.Count == 0) return;
 
+        ctx.Canvas.SetTextFeatures(FontFeatures);
+        ctx.Canvas.SetTextSpacing(LetterSpacing,WordSpacing);
         TaggingContext? tagging = ctx.Tagging;
 
         // Open LI container around the whole item when tagging
@@ -226,6 +232,8 @@ public abstract class ListElementBase : TextElementBase
         }
         finally
         {
+            ctx.Canvas.SetTextFeatures(null);
+            ctx.Canvas.SetTextSpacing(0,0);
             if (tagging is not null)
             {
                 ctx.Canvas.EndMarkedContent(); // end LI BMC

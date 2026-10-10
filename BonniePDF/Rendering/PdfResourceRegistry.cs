@@ -21,6 +21,7 @@ namespace BonniePDF;
 /// </summary>
 internal sealed class ResolvedTextRun
 {
+    internal GlyphUsageTracker? Tracker { get; init; }
     /// <summary>PDF resource name (e.g. <c>/F1</c>) of the font for this run.</summary>
     public required string ResourceName { get; init; }
 
@@ -474,6 +475,7 @@ internal class PdfResourceRegistry
                 {
                     ResourceName = resourceName,
                     EmbeddedFont = primaryFont,
+                    Tracker = EmbeddedFonts.Values.FirstOrDefault(f=>ReferenceEquals(f.Font,primaryFont))?.Tracker,
                     FontIdentifier = primaryFontIdentifier,
                     Text = run.Text
                 });
@@ -488,6 +490,7 @@ internal class PdfResourceRegistry
             {
                 ResourceName = fbResource,
                 EmbeddedFont = fbFont,
+                Tracker = EmbeddedFonts.Values.FirstOrDefault(f=>ReferenceEquals(f.Font,fbFont))?.Tracker,
                 FontIdentifier = fbIdentifier,
                 Text = run.Text
             });

@@ -299,7 +299,7 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
         else
         {
             byte[] idBytes = Guid.NewGuid().ToByteArray();
-            string hexId = BitConverter.ToString(idBytes).Replace("-", "");
+            string hexId = Convert.ToHexString(idBytes);
             trailerParts.Add($"/ID [<{hexId}> <{hexId}>]");
         }
 

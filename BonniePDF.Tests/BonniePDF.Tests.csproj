@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Version>2026.10.0</Version>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Typography/Fixtures/**" CopyToOutputDirectory="PreserveNewest" />
     <None Include="image.png" CopyToOutputDirectory="PreserveNewest" />
     <!-- The shared Document Definition conformance fixtures, generated from the specification. -->
     <None Include="Definition\Fixtures\**\*.json" CopyToOutputDirectory="PreserveNewest" />

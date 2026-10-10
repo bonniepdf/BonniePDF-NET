@@ -1,6 +1,6 @@
 # BonniePDF (.NET) — agent guide
 
-The .NET implementation of BonniePDF. C#, targets `net8.0` (every project in the solution — core, tests, examples — targets the same TFM; check `BonniePDF/BonniePDF.csproj` for the authoritative value before assuming otherwise), zero native dependencies, no GDI+/SkiaSharp. NuGet package name: `BonniePDF`.
+The .NET implementation of BonniePDF. C#. The library and its tests multi-target `net8.0;net10.0` (.NET 8 for reach until it is dropped in 2027, .NET 10 as the current LTS); the example apps target `net10.0` only. Check `BonniePDF/BonniePDF.csproj` for the authoritative value before assuming otherwise. Building needs the .NET 10 SDK (the source uses C# 14), and running the tests needs both the .NET 8 and .NET 10 runtimes, zero native dependencies, no GDI+/SkiaSharp. NuGet package name: `BonniePDF`.
 
 > **This repository is public.** Keep this file, the README, and code comments useful to an outside contributor who has cloned only this repo. Don't reference internal documents, private sibling repositories, or unshipped plans here.
 

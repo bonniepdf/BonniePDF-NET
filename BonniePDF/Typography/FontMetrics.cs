@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -254,23 +255,23 @@ public static class FontMetrics
     /// <param name="fontIdentifier">Font name (e.g., "Helvetica") or TTF file path (e.g., "C:/Fonts/arial.ttf")</param>
     /// <param name="fontSize">The font size in points</param>
     /// <returns>The width of the text in points</returns>
-    public static float GetStringWidth(string text, string fontIdentifier, float fontSize)
+    public static float GetStringWidth(string text, string fontIdentifier, float fontSize, IReadOnlyDictionary<string,int>? features = null)
     {
         if (string.IsNullOrEmpty(text)) return 0;
 
         // A. IS IT A CUSTOM TTF FILE (direct path)?
         if (fontIdentifier.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) ||
             fontIdentifier.EndsWith(".otf", StringComparison.OrdinalIgnoreCase))
-            return GetTtfWidth(text, fontIdentifier, fontSize);
+            return GetTtfWidth(text, fontIdentifier, fontSize, features);
 
         DocumentAliasScope? scope = CurrentDocumentScope.Value;
         if (scope != null)
         {
             if (scope.InstanceAliases.TryGetValue(fontIdentifier, out TtfFont? scopedInstance))
-                return GetKernedStringWidth(text, scopedInstance, fontSize);
+                return GetKernedStringWidth(text, scopedInstance, fontSize, features);
 
             if (scope.PathAliases.TryGetValue(fontIdentifier, out string? scopedPath))
-                return GetTtfWidth(text, scopedPath, fontSize);
+                return GetTtfWidth(text, scopedPath, fontSize, features);
 
             // PDF/A and PDF/UA embed bundled substitutes for the standard 12
             // Latin Type-1 fonts. Resolve that exact face before the first layout
@@ -278,7 +279,7 @@ public static class FontMetrics
             if (scope.EmbedStandardFonts && FontManager.GetParsedStandardFont(fontIdentifier) is TtfFont embedded)
             {
                 scope.InstanceAliases[fontIdentifier] = embedded;
-                return GetKernedStringWidth(text, embedded, fontSize);
+                return GetKernedStringWidth(text, embedded, fontSize, features);
             }
 
             return GetStandardFontWidth(text, fontIdentifier, fontSize);
@@ -286,10 +287,10 @@ public static class FontMetrics
 
         // Outside document generation, preserve explicitly registered global aliases.
         if (GlobalFontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont? instanceFont))
-            return GetKernedStringWidth(text, instanceFont, fontSize);
+            return GetKernedStringWidth(text, instanceFont, fontSize, features);
 
         if (GlobalFontPathAliases.TryGetValue(fontIdentifier, out string? aliasedPath))
-            return GetTtfWidth(text, aliasedPath, fontSize);
+            return GetTtfWidth(text, aliasedPath, fontSize, features);
 
         // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
         return GetStandardFontWidth(text, fontIdentifier, fontSize);
@@ -297,11 +298,10 @@ public static class FontMetrics
 
     /// <summary>
     /// Measures the width of a string using actual per-glyph advances and kerning
-    /// from an embedded TrueType font. More accurate than <see cref="GetStringWidth"/> for
-    /// embedded fonts because it accounts for kern pairs.
+    /// from an embedded TrueType font, including shaping, feature overrides and fallback.
     /// Returns 0 if font is null or text is empty.
     /// </summary>
-    internal static float GetKernedStringWidth(string? text, TtfFont? font, float fontSize)
+    internal static float GetKernedStringWidth(string? text, TtfFont? font, float fontSize, IReadOnlyDictionary<string,int>? features = null)
     {
         if (string.IsNullOrEmpty(text) || font == null) return 0;
 
@@ -314,36 +314,16 @@ public static class FontMetrics
         // font metrics are integers and the scale is an exact promotion, so this
         // makes the two agree. The result narrows to float to keep the layout
         // contract unchanged.
-        double scale = (double)fontSize / font.UnitsPerEm;
-        double width = 0;
-
-        ushort prevGid = 0;
-        bool hasPrev = false;
-
-        foreach (Rune rune in text.EnumerateRunes())
-        {
-            if (Rune.IsControl(rune)) continue;
-
-            ushort gid = font.GetGlyphId(rune.Value);
-
-            if (hasPrev && font.HasKerning)
-            {
-                short kern = font.GetKerning(prevGid, gid);
-                width += kern * scale;
-            }
-
-            width += font.GetGlyphWidth(gid) * scale;
-            prevGid = gid;
-            hasPrev = true;
-        }
-
-        return (float)width;
+        var candidates=new List<ShaperFont> { new() {FontIdentifier="primary",Font=font} };
+        foreach(var fallback in (ActiveDocumentFonts?.FallbackFonts()??[]).Concat(FontManager.GetFallbackFonts()))
+            if(!ReferenceEquals(fallback.Font,font))candidates.Add(new ShaperFont {FontIdentifier=fallback.Key,Font=fallback.Font});
+        return (float)TextRunShaper.ShapeTextRuns(text,candidates).Runs.Sum(run=>{var face=candidates[run.FontIndex].Font;return face.Shape(run.Text,features).Sum(g=>(double)g.AdvanceX)*fontSize/face.UnitsPerEm;});
     }
 
     // =====================================================
     // 2. CUSTOM TTF LOGIC
     // =====================================================
-    private static float GetTtfWidth(string text, string filepath, float fontSize)
+    private static float GetTtfWidth(string text, string filepath, float fontSize, IReadOnlyDictionary<string,int>? features = null)
     {
         // Prefer the full TtfFont path: it enumerates Unicode runes (handling
         // surrogate pairs correctly for emoji and other supplementary-plane
@@ -370,7 +350,7 @@ public static class FontMetrics
                 }
             });
             if (fullFont != null)
-                return GetKernedStringWidth(text, fullFont, fontSize);
+                return GetKernedStringWidth(text, fullFont, fontSize, features);
         }
 
         // Legacy fallback: ASCII-only width table for fonts that fail to parse
@@ -403,6 +383,31 @@ public static class FontMetrics
     // =====================================================
     // 3. STANDARD FONT LOGIC (Hardcoded Tables)
     // =====================================================
+    private static TtfFont? MetricFace(string identifier)
+    {
+        var scope=CurrentDocumentScope.Value;
+        if(scope?.InstanceAliases.TryGetValue(identifier,out var scoped)==true)return scoped;
+        if(GlobalFontInstanceAliases.TryGetValue(identifier,out var global))return global;
+        if(scope?.EmbedStandardFonts==true && FontManager.GetParsedStandardFont(identifier) is TtfFont standard)return standard;
+        if(scope?.PathAliases.TryGetValue(identifier,out var scopedPath)==true)identifier=scopedPath;
+        else if(GlobalFontPathAliases.TryGetValue(identifier,out var globalPath))identifier=globalPath;
+        if(identifier.EndsWith(".ttf",StringComparison.OrdinalIgnoreCase)||identifier.EndsWith(".otf",StringComparison.OrdinalIgnoreCase)) {try{return TtfFont.LoadFromFileCached(identifier);}catch(IOException){return null;}}
+        return null;
+    }
+    internal static bool UsesEmbeddedMetrics(string identifier) => MetricFace(identifier) is not null;
+
+    internal static int GetGlyphCount(string text,string identifier,IReadOnlyDictionary<string,int>? features=null)
+    {
+        var font=MetricFace(identifier);if(font is null)return text.EnumerateRunes().Count(c=>c.Value>=32);
+        var candidates=new List<ShaperFont>{new(){FontIdentifier="primary",Font=font}};
+        foreach(var fallback in (ActiveDocumentFonts?.FallbackFonts()??[]).Concat(FontManager.GetFallbackFonts()))if(!ReferenceEquals(fallback.Font,font))candidates.Add(new ShaperFont {FontIdentifier=fallback.Key,Font=fallback.Font});
+        return TextRunShaper.ShapeTextRuns(text,candidates).Runs.Sum(run=>candidates[run.FontIndex].Font.Shape(run.Text,features).Count);
+    }
+    internal static bool IsSafeTextBreak(string text,string identifier,int offset,IReadOnlyDictionary<string,int>? features=null)
+    {
+        var face=MetricFace(identifier);return face is null || face.Shape(text,features).All(g=>!(g.Cluster<offset&&offset<g.Cluster+g.SourceLength)&&!(g.Cluster==offset&&g.UnsafeToBreak));
+    }
+
     private static int[]? GetStandardFontTable(string fontName) => fontName switch
     {
         "Helvetica"             => HelveticaWidths,

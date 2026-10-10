@@ -34,7 +34,7 @@ internal static class TestFonts
                               ?? throw new InvalidOperationException(
                                   $"Embedded font resource ending in '{fileSuffix}' was not found in {asm.GetName().Name}.");
 
-        string path = Path.Combine(Path.GetTempPath(), $"bonniepdf-test-{fileSuffix}");
+        string path = Path.Combine(Path.GetTempPath(), $"bonniepdf-test-{Environment.ProcessId}-{fileSuffix}");
         using Stream stream = asm.GetManifestResourceStream(resourceName)!;
         using FileStream fs = File.Create(path);
         stream.CopyTo(fs);

@@ -638,6 +638,8 @@ internal sealed class DefinitionReader
                 return ToEnum(type, arg, value.GetString()!);
             case "array":
                 return ConvertList(type, arg, value);
+            case "fontFeatures":
+                return ConvertMap(type,"integer",value);
             case "map":
                 return ConvertMap(type, arg, value);
             case "object":

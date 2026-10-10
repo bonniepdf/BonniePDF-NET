@@ -2,15 +2,13 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "svg-engine-dotnet",
   "source": {
-    "commit": "0a5693738fce522311c9e7bffa42bd019efef499",
+    "commit": "7a03218fb4fc0694f0a4c7b03ee9e372a95b58ea",
     "dirty": false
   },
   "files": {
     "Emitter.cs": "610b642a1b741caa47e6ac00012a71a321a1dd5c0f4b9900a8921fdc81e8371f",
-    "Fonts/FontFace.cs": "c22b4195c46e56153e26a684f929ad57fe91ed54a1f8756851636aafb616a84a",
+    "Fonts/FontFace.cs": "58d2015c008b1f1c63b1cff9ca1a9de5b7f969e6505e684ab6ceb80a3e9dddb9",
     "Fonts/FontSet.cs": "e8d916352f0180df4b4ca8dc19e1459a5d843f06d7429a84b8b200d7b77822e9",
-    "Fonts/Kerning.cs": "fcf1b23adbfc2d793ae5b2395106014eb445bab2add7a2d998bfb8b3d1870267",
-    "Fonts/TrueTypeFace.cs": "8910bd4ab5fe9acdfdc771f20e8072698eb61da3ddaa2b826136b1dbbc2acea2",
     "Geometry/Matrix.cs": "1191255c2be67dac89052854bfdfd0ce75bc8c608a02516d8981934ceaf769a6",
     "Ir/BoundingBox.cs": "02b28e797e75291e767b2f476421209dbb45ab941e2917a8d0094cab4ac600ae",
     "Ir/Clipping.cs": "82f5160c650bc265cb32846a55dce47a5f42ffc80915c58ca1bdf1891f210892",

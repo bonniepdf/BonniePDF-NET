@@ -173,7 +173,7 @@ public class SvgElementTests
     private static string OutlineOf(IFontFace face) => JsonSerializer.Serialize(face.Outline(face.GlyphIndex(0x41)).Select(s => s.ToString()));
 
     private static string Liberation(string family, string subfamily) =>
-        OutlineOf(new TrueTypeFace(FontManager.GetBytesForFamily(family, subfamily)!, "reference"));
+        OutlineOf(new BonniePDF.Drawing.TextFontFaceAdapter(FontManager.GetBytesForFamily(family, subfamily)!, "reference"));
 
     [Fact]
     public void AliasResolvesArialIsHelveticaDrawnFromLiberationSans()

@@ -139,3 +139,9 @@ This Font Software is licensed under the SIL Open Font License, Version 1.1.
 The full licence text is reproduced in BonniePDF/Typography/Fonts/OFL.txt and
 is available with a FAQ at https://openfontlicense.org
 ```
+
+## Unicode data
+
+Unicode 17.0.0 property and normalization tables are derived from the Unicode
+Character Database. Copyright Unicode, Inc. Distributed under Unicode License
+v3; the full licence is included in `assets/unicode/LICENSE.txt`.

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using BonniePDF.Typography.TrueType;
@@ -62,46 +63,18 @@ internal static class TextRunShaper
         var result = new ShapeResult();
         if (string.IsNullOrEmpty(text) || candidates.Count == 0) return result;
 
-        ShapedRun? current = null;
-        StringBuilder? currentText = null;
-
-        foreach (System.Text.Rune rune in text.EnumerateRunes())
+        ShapedRun? current=null;
+        void Append(int chosen,string source) { if(current is not null && current.FontIndex==chosen)current.Text+=source;else {current=new ShapedRun {FontIndex=chosen,Text=source};result.Runs.Add(current);} }
+        var bounds=Typography.Engine.Graphemes.Boundaries(text);
+        for(int b=0;b+1<bounds.Count;b++)
         {
-            int cp = rune.Value;
-            if (!TextEncoding.IsRenderableCodePoint(cp)) continue;
-
-            int chosen = -1;
-            for (int i = 0; i < candidates.Count; i++)
-            {
-                if (candidates[i].Font.GetGlyphId(cp) != 0)
-                {
-                    chosen = i;
-                    break;
-                }
-            }
-
-            if (chosen == -1)
-            {
-                result.Unsupported.Add(cp);
-                continue;
-            }
-
-            if (current != null && current.FontIndex == chosen)
-            {
-                currentText!.Append(rune.ToString());
-            }
-            else
-            {
-                // Flush the previous run's accumulated text before starting a new one.
-                if (current != null) current.Text = currentText!.ToString();
-                currentText = new StringBuilder();
-                currentText.Append(rune.ToString());
-                current = new ShapedRun { FontIndex = chosen, Text = string.Empty };
-                result.Runs.Add(current);
-            }
+            var chars=text.Substring(bounds[b],bounds[b+1]-bounds[b]).EnumerateRunes().Where(c=>TextEncoding.IsRenderableCodePoint(c.Value)).ToArray();
+            if(chars.Length==0)continue;
+            int whole=-1;
+            for(int i=0;i<candidates.Count;i++)if(chars.All(c=>candidates[i].Font.GetGlyphId(c.Value)!=0)){whole=i;break;}
+            if(whole>=0){Append(whole,string.Concat(chars.Select(c=>c.ToString())));continue;}
+            foreach(var ch in chars) {int chosen=-1;for(int i=0;i<candidates.Count;i++)if(candidates[i].Font.GetGlyphId(ch.Value)!=0){chosen=i;break;}if(chosen>=0)Append(chosen,ch.ToString());else result.Unsupported.Add(ch.Value);}
         }
-
-        if (current != null) current.Text = currentText!.ToString();
         return result;
     }
 }
