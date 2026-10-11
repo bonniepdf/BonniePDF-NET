@@ -15,6 +15,8 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Default `QRCode.QuietZone` to four modules, matching the QR standard and TypeScript implementation. Set it to `0` explicitly for borderless codes.
+
 - Add opt-in colour emoji with `DocumentSettings.EmojiRendering = EmojiRendering.Colour`: COLRv0 vector layers and CBDT PNG artwork in PDF and SVG, preserving original Unicode sequences for extraction. `Outline` remains the default; the existing Emojis & Unicode example stays monochrome.
 - Decode indexed PNG transparency, including packed 1/2/4-bit palette indices, partial alpha and omitted opaque entries.
 
