@@ -11,9 +11,17 @@ namespace BonniePDF;
 /// </summary>
 public abstract class TextElementBase : ElementBase
 {
-    private readonly TextStyle _featureStyle=new();
+    private TextStyle? _featureStyle;
     /// <summary>OpenType feature overrides for embedded text, such as kern=0 or liga=0.</summary>
-    public System.Collections.Generic.IReadOnlyDictionary<string,int>? FontFeatures {get=>_featureStyle.FontFeatures;set=>_featureStyle.FontFeatures=value;}
+    public System.Collections.Generic.IReadOnlyDictionary<string,int>? FontFeatures
+    {
+        get => _featureStyle?.FontFeatures;
+        set
+        {
+            if (value is null) _featureStyle = null;
+            else (_featureStyle ??= new TextStyle()).FontFeatures = value;
+        }
+    }
 
     /// <summary>
     /// Ambient default text style that is applied to new text elements during construction.
