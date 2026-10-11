@@ -464,8 +464,8 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 
         bool paragraphs = FirstLineIndent != 0 || ParagraphSpacing != 0;
         List<string> lines;
-        List<float> indents;
-        List<float> spaceBefore;
+        List<float>? indents = null;
+        List<float>? spaceBefore = null;
 
         if (paragraphs)
         {
@@ -474,15 +474,13 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         else
         {
             lines = [.. ComputeLines(Text, contentWidth)];
-            indents = [.. Enumerable.Repeat(0f, lines.Count)];
-            spaceBefore = [.. Enumerable.Repeat(0f, lines.Count)];
         }
 
         if (MaxLines is int max && max > 0 && lines.Count > max)
         {
             lines = ClampLines(lines, contentWidth, max);
-            indents = indents.GetRange(0, lines.Count);
-            spaceBefore = spaceBefore.GetRange(0, lines.Count);
+            indents = indents?.GetRange(0, lines.Count);
+            spaceBefore = spaceBefore?.GetRange(0, lines.Count);
         }
 
         _cachedLines = lines;

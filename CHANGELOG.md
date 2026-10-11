@@ -15,6 +15,8 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Reduce retained text-layout memory by allocating font-feature storage only when overrides are supplied and omitting zero-valued paragraph metadata caches. Text layout, feature validation and PDF output are preserved.
+
 - Reduce transient allocations while painting text: append PDF operands and Unicode metadata directly, reuse document-owned CIDs for repeated single-character sources, and size glyph-code arrays once. Text operators, character mappings and extraction are preserved.
 
 - Reduce shaping allocations for ordered clusters and independent glyph positioning, and reuse bounded OpenType coverage/class reads. Glyph output and shaping limits are preserved.
