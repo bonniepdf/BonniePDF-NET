@@ -115,7 +115,7 @@ public class HorizontalStack : ElementBase, IStatefulElement
         (List<float> childWidths, _) = CalculateChildWidths(GetContentWidth(width));
         if (first) ctx.CurrentY += Margin.Top;
         float startY = ctx.CurrentY;
-        float x = ctx.CurrentX + Margin.Left;
+        float x = ctx.CurrentX + Margin.Left + (IsRightToLeft ? GetContentWidth(width) : 0);
         float endY = startY;
         bool progress = false;
         bool allDone = true;
@@ -123,6 +123,7 @@ public class HorizontalStack : ElementBase, IStatefulElement
         for (int i = 0; i < _children.Count; i++)
         {
             IElement child = _children[i];
+            if (IsRightToLeft) x -= childWidths[i];
             if (!_done[i])
             {
                 ctx.CurrentX = x;
@@ -157,7 +158,7 @@ public class HorizontalStack : ElementBase, IStatefulElement
             }
 
             if (!_done[i]) allDone = false;
-            x += childWidths[i] + Spacing;
+            x += IsRightToLeft ? -Spacing : childWidths[i] + Spacing;
         }
 
         ctx.CurrentX = entryX;
@@ -230,12 +231,14 @@ public class HorizontalStack : ElementBase, IStatefulElement
         }
 
         float originalX = ctx.CurrentX;
+        float offset = 0;
 
         // Render each child
         for (int i = 0; i < _children.Count; i++)
         {
             IElement child = _children[i];
             float childWidth = childWidths[i];
+            ctx.CurrentX = originalX + (IsRightToLeft ? contentWidth - offset - childWidth : offset);
             float childHeight = childHeights[i];
 
             // Calculate vertical offset based on alignment
@@ -263,7 +266,7 @@ public class HorizontalStack : ElementBase, IStatefulElement
             }
 
             ctx.CurrentY = yBefore;
-            ctx.CurrentX += childWidth + Spacing;
+            offset += childWidth + Spacing;
         }
 
         // Restore original X and advance Y by max height

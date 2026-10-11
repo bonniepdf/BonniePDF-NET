@@ -435,6 +435,7 @@ public abstract class TextElementBase : ElementBase
     /// <returns>The width of the text in points</returns>
     protected float MeasureTextWidth(string text)
     {
+        using var directionScope = TextFlow.Enter(EffectiveContentDirection);
         // Replace tokens with estimated placeholders (2 digits) for measurement
         string measuredText = text.Replace(TotalPagesToken, "00").Replace(CurrentPageToken, "00");
         return FontMetrics.GetStringWidth(measuredText, FontName, FontSize, FontFeatures) + SpacingWidth(measuredText);

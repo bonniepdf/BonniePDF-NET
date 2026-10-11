@@ -21,11 +21,11 @@ internal sealed class ShapedTextCache
 
     internal IReadOnlyList<GlyphInfo> Get(TtfFont font, string text, IReadOnlyDictionary<string, int>? features)
     {
-        if (text.Length > MaxTextLength) return EmbeddedTextShaping.Shape(font, text, features);
+        if (text.Length > MaxTextLength || TextFlow.CurrentLine?.Paragraph.Length > MaxTextLength) return EmbeddedTextShaping.Shape(font, text, features);
         string featureKey = features is null || features.Count == 0 ? string.Empty :
             string.Join(";", features.OrderBy(f => f.Key, StringComparer.Ordinal).Select(f =>
                 f.Key.Length.ToString(CultureInfo.InvariantCulture) + ":" + f.Key + "=" + f.Value.ToString(CultureInfo.InvariantCulture)));
-        var key = (text, featureKey);
+        var key = (text, featureKey + "|" + TextFlow.CacheKey);
         if (_entries.TryGetValue(key, out var existing))
         {
             _recent.Remove(existing);

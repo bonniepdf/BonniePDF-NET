@@ -239,8 +239,8 @@ public static class ContainerStyleExtensions
 
         /// <summary>
         /// Rounds the container's corners <em>and</em> clips its content to that
-        /// rounded outline. Unlike <see cref="CornerRadius"/> — which only
-        /// rounds the background fill and border stroke — this masks the child too, so
+        /// rounded outline. Unlike <see cref="CornerRadius"/> â€” which only
+        /// rounds the background fill and border stroke â€” this masks the child too, so
         /// a full-bleed image or any overflowing content is cut to the rounded box.
         /// This is the idiomatic way to build rounded image cards and avatars.
         /// <example>
@@ -262,7 +262,7 @@ public static class ContainerStyleExtensions
         /// Renders the container's subtree inside a crisp-edge region: on SVG
         /// export, thin axis-aligned strokes/rects (grid/table lines, dividers) snap to
         /// the pixel grid instead of being antialiased. No-op on PDF output. Apply only
-        /// to axis-aligned content — rounded shapes, diagonals, and text want
+        /// to axis-aligned content â€” rounded shapes, diagonals, and text want
         /// antialiasing.
         /// </summary>
         public IContentContainer CrispEdges()
@@ -356,6 +356,38 @@ public static class ContainerStyleExtensions
         public IContentContainer AlignRight()
         {
             var container = GetOrCreateContainer(c);
+            container.HorizontalAlignment = HorizontalAlignment.Right;
+            return container;
+        }
+
+        /// <summary>Sets right-to-left progression for this container and descendants.</summary>
+        public IContentContainer ContentFromRightToLeft()
+        {
+            var container = GetOrCreateContainer(c);
+            container.ContentDirection = ContentDirection.RightToLeft;
+            return container;
+        }
+
+        /// <summary>Sets left-to-right progression for this container and descendants.</summary>
+        public IContentContainer ContentFromLeftToRight()
+        {
+            var container = GetOrCreateContainer(c);
+            container.ContentDirection = ContentDirection.LeftToRight;
+            return container;
+        }
+
+        /// <summary>Aligns content to inline start.</summary>
+        public IContentContainer AlignStart()
+        {
+            var container = GetOrCreateContainer(c);
+            container.HorizontalAlignment = HorizontalAlignment.Start;
+            return container;
+        }
+
+        /// <summary>Aligns content to inline end.</summary>
+        public IContentContainer AlignEnd()
+        {
+            var container = GetOrCreateContainer(c);
             container.HorizontalAlignment = HorizontalAlignment.End;
             return container;
         }
@@ -364,7 +396,7 @@ public static class ContainerStyleExtensions
         public IContentContainer AlignLeft()
         {
             var container = GetOrCreateContainer(c);
-            container.HorizontalAlignment = HorizontalAlignment.Start;
+            container.HorizontalAlignment = HorizontalAlignment.Left;
             return container;
         }
     }

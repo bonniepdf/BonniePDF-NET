@@ -46,8 +46,16 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     }
 
     /// <summary>The alignment this render actually uses: the explicit value, or the render context's ambient.</summary>
-    private TextAlignment EffectiveAlignment(RenderContext ctx) =>
-        _alignmentExplicit ? _alignment : ctx.AmbientHorizontalTextAlignment ?? TextAlignment.Left;
+    private TextAlignment EffectiveAlignment(RenderContext ctx)
+    {
+        var alignment = _alignmentExplicit ? _alignment : ctx.AmbientHorizontalTextAlignment ?? TextAlignment.Start;
+        return alignment switch
+        {
+            TextAlignment.Start => IsRightToLeft ? TextAlignment.Right : TextAlignment.Left,
+            TextAlignment.End => IsRightToLeft ? TextAlignment.Left : TextAlignment.Right,
+            _ => alignment,
+        };
+    }
 
     /// <summary>
     /// Default style inherited by all spans. Span-level styles override these values.

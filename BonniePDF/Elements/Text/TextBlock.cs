@@ -14,6 +14,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 {
     private float _cachedContentWidth = -1;
     private IList<string>? _cachedLines;
+    private TextFlow.Line?[]? _bidiLines;
     // Per-line paragraph metadata parallel to _cachedLines.
     private IList<float>? _cachedIndents;
     private IList<float>? _cachedSpaceBefore;
@@ -38,8 +39,16 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     }
 
     /// <summary>The alignment this render actually uses: the explicit value, or the render context's ambient.</summary>
-    private TextAlignment EffectiveAlignment(RenderContext ctx) =>
-        _alignmentExplicit ? _alignment : ctx.AmbientHorizontalTextAlignment ?? TextAlignment.Left;
+    private TextAlignment EffectiveAlignment(RenderContext ctx)
+    {
+        var alignment = _alignmentExplicit ? _alignment : ctx.AmbientHorizontalTextAlignment ?? TextAlignment.Start;
+        return alignment switch
+        {
+            TextAlignment.Start => IsRightToLeft ? TextAlignment.Right : TextAlignment.Left,
+            TextAlignment.End => IsRightToLeft ? TextAlignment.Left : TextAlignment.Right,
+            _ => alignment,
+        };
+    }
 
     /// <summary>
     /// Line clamp: maximum number of lines to render. When set and the text
@@ -198,7 +207,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         {
             bool isLastLine = i == lines.Count - 1;
             localY += SpaceBeforeOf(i); // paragraph leading (0 when unused)
-            DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX + Margin.Left + IndentOf(i), isLastLine);
+            DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX + Margin.Left, isLastLine, i);
             localY += ComputedLineHeight;
         }
 
@@ -221,6 +230,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     {
         _lastLineRendered = -1;
         _cachedLines = null;
+        _bidiLines = null;
         _cachedIndents = null;
         _cachedSpaceBefore = null;
         _cachedContentWidth = -1;
@@ -254,7 +264,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         {
             bool isLastLine = i == lines.Count - 1;
             localY += SpaceBeforeOf(i); // paragraph leading (0 when unused)
-            DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX + IndentOf(i), isLastLine);
+            DrawSingleLine(ctx, lines[i], contentWidth, localY, ctx.CurrentX, isLastLine, i);
             localY += ComputedLineHeight;
         }
 
@@ -272,8 +282,12 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     /// <param name="baseX">The starting X position</param>
     /// <param name="isLastLine">Whether this is the last line of the text block (last lines are not justified)</param>
     private void DrawSingleLine(RenderContext ctx, string line, float contentWidth, float y, float baseX,
-        bool isLastLine)
+        bool isLastLine, int lineIndex)
     {
+        using var directionScope = TextFlow.Enter(EffectiveContentDirection, _bidiLines?[lineIndex]);
+        float indent = IndentOf(lineIndex);
+        contentWidth -= indent;
+        if (!IsRightToLeft) baseX += indent;
         // Apply letter/word spacing as canvas state around this line so the
         // painters advance by the same amount the layout reserved. No-op (and
         // byte-identical) when both are zero.
@@ -321,7 +335,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
             return;
         }
 
-        // Determine effective alignment: justified text uses left for the last line
+        // The last justified line follows the paragraph start.
         TextAlignment alignment = EffectiveAlignment(ctx);
         bool useJustify = alignment == TextAlignment.Justify && !isLastLine && line.Contains(' ');
 
@@ -334,8 +348,8 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         }
         else
         {
-            // For justified last lines, fall back to left alignment
-            TextAlignment effectiveAlign = alignment == TextAlignment.Justify ? TextAlignment.Left : alignment;
+            // Align the last justified line to the paragraph start.
+            TextAlignment effectiveAlign = alignment == TextAlignment.Justify ? (IsRightToLeft ? TextAlignment.Right : TextAlignment.Left) : alignment;
 
             float x = baseX;
             if (effectiveAlign == TextAlignment.Center)
@@ -483,6 +497,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
             spaceBefore = spaceBefore?.GetRange(0, lines.Count);
         }
 
+        _bidiLines = IsRightToLeft || TextFlow.NeedsBidi(Text) ? TextFlow.MapLines(Text, lines) : null;
         _cachedLines = lines;
         _cachedIndents = indents;
         _cachedSpaceBefore = spaceBefore;
@@ -546,13 +561,13 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     /// </summary>
     /// <summary>Ordinary word wrapping, or the whitespace-preserving form when <see cref="PreserveWhitespace"/> is set.</summary>
     protected override IList<string> WrapSegment(string text, float maxWidth)
-        => PreserveWhitespace ? WrapPreservingWhitespace(text, maxWidth, maxWidth) : base.WrapSegment(text, maxWidth);
+        => PreserveWhitespace || IsRightToLeft || TextFlow.NeedsBidi(text) ? WrapPreservingWhitespace(text, maxWidth, maxWidth) : base.WrapSegment(text, maxWidth);
 
     private IList<string> WrapWithFirstIndent(string segment, float contentWidth)
     {
         var lines = new List<string>();
         if (segment.Length == 0) return lines;
-        if (PreserveWhitespace)
+        if (PreserveWhitespace || IsRightToLeft || TextFlow.NeedsBidi(segment))
             return WrapPreservingWhitespace(segment, contentWidth - FirstLineIndent, contentWidth);
 
         string[] words = segment.Split(' ');

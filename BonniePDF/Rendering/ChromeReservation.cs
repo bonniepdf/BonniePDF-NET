@@ -47,14 +47,15 @@ internal static class ChromeReservationFactory
         {
             float contentWidth = ctx.PageSize.Width - ctx.Margin * 2f;
             return new ChromeReservation(
-                Measure(header?.Invoke(pageNumber), contentWidth),
-                Measure(footer?.Invoke(pageNumber), contentWidth));
+                Measure(header?.Invoke(pageNumber), contentWidth, settings.ContentDirection),
+                Measure(footer?.Invoke(pageNumber), contentWidth, settings.ContentDirection));
         };
     }
 
-    private static float Measure(IElement? element, float contentWidth)
+    private static float Measure(IElement? element, float contentWidth, ContentDirection direction)
     {
         if (element == null) return 0f;
+        ContentDirectionResolver.Apply(element, direction);
         float height = element.MeasureHeight(contentWidth);
         return float.IsFinite(height) && height > 0f ? height : 0f;
     }
