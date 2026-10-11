@@ -11,6 +11,9 @@ internal static partial class PdfKeys
         /// <summary>Character encoding or CMap used to interpret the font's character codes.</summary>
         internal const string Encoding = "/Encoding";
 
+        /// <summary>Name identifying an embedded character mapping.</summary>
+        internal const string CMapName = "/CMapName";
+
         /// <summary>Array containing the descendant CID font of a composite font.</summary>
         internal const string DescendantFonts = "/DescendantFonts";
 

@@ -15,6 +15,7 @@ namespace BonniePDF.Typography.Engine
         private readonly Dictionary<int, DecodedOutline> cache = new Dictionary<int, DecodedOutline>();
         private readonly OutlineReadLimits outlineLimits;
         private int cachedPoints;
+        internal readonly CffFont Cff;
         private readonly int[] locations;
         private readonly int metricCount;
         private readonly CharacterMap characterMap;
@@ -112,6 +113,7 @@ namespace BonniePDF.Typography.Engine
             tables = directory.Tables;
             FaceCount = directory.FaceCount;
             FaceIndex = faceIndex;
+            if (tables.ContainsKey("CFF2")) throw new NotSupportedException("CFF2 fonts are unsupported; supply a static CFF 1 font.");
             if (tables.ContainsKey("fvar"))
                 throw new NotSupportedException("Variable fonts are unsupported; use a static font.");
             int head = TableOffset("head", 54), hhea = TableOffset("hhea", 36);
@@ -141,8 +143,9 @@ namespace BonniePDF.Typography.Engine
                     locations[i] = glyf + relative;
                 }
             }
-            else if (!tables.ContainsKey("CBDT"))
+            else if (!tables.ContainsKey("CBDT") && !tables.ContainsKey("CFF "))
                 throw new NotSupportedException("Font must contain TrueType outlines or CBDT colour bitmaps.");
+            Cff = tables.ContainsKey("CFF ") ? new CffFont(GetTableData("CFF "), GlyphCount, UnitsPerEm, outlineLimits) : null;
             characterMap = new CharacterMap(GetTableData("cmap"), GlyphCount);
             Metrics = new FontMetrics(GetTableData("head"), GetTableData("hhea"), GetTableData("OS/2"), GetTableData("post"));
             Names = new FontNames(GetTableData("name"));
@@ -174,6 +177,8 @@ namespace BonniePDF.Typography.Engine
 
         public Glyph ReadGlyph(int id)
         {
+            ValidateGlyph(id);
+            if (Cff != null) return Cff.ReadGlyph(id);
             Glyph source = ReadGlyph(id, 0, new OutlineReadContext(outlineLimits)).Glyph;
             var result = new Glyph { XMin = source.XMin, YMin = source.YMin, XMax = source.XMax, YMax = source.YMax };
             foreach (var contour in source.Contours)

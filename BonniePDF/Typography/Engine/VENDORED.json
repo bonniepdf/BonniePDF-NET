@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "text-engine-dotnet",
   "source": {
-    "commit": "9656e91c990d7c229fdcd0dcebcbd8f82f09d6dd",
+    "commit": "c2d9a81a3723a69b84dcad1cf4cd7a0dfa2954db",
     "dirty": false
   },
   "files": {
@@ -21,15 +21,16 @@
     "Fonts/Colour/ColourLayers.cs": "6beb47b9c835e1e2bc7d5007cc78629ab8c8f7d3ebc1df7ec74f85a448fef7aa",
     "Fonts/Colour/PaletteColour.cs": "d3dc55fc512337a0c5169e87d05ef214833e5d4401d56a8582164834bba3764f",
     "Fonts/FontFace.cs": "74c2578a2d45fa04e5b5c300e2cb69eb73daa54c8686f393e677f62d11bd4f84",
+    "Fonts/Outlines/CffFont.cs": "92e562715034df9df3aff6e0891ebe2b41a22c30bd78bbe73b2bd6ac2ce5b4f6",
     "Fonts/Outlines/DecodedOutline.cs": "a0c09f742e3b9efe78ea01b7288752966c850b518ca612a3828becbf05d437f9",
     "Fonts/Outlines/FontPoint.cs": "17bb482034907c52371a571d150c5b887cdd3ecbd3edfa2f4f1357b567db9a42",
-    "Fonts/Outlines/Glyph.cs": "e05fb1522896cf4aec3c1574ba14b22c9976d2019d5186ef210d1610251d238a",
+    "Fonts/Outlines/Glyph.cs": "f43bff44099acf3fe3929022692a000e24c3cb975e85a63aa880698980ae4daf",
     "Fonts/Outlines/GlyphDataReader.cs": "e8ba4a8e6b67bb609f0668827fe3f7453ec9047997aec9861d3892d970bbe134",
     "Fonts/Outlines/OutlineReadContext.cs": "ecb5de1a220df916de9eed0b2888f79c211f37596f615c23e575b4438c99343d",
     "Fonts/Outlines/OutlineReadLimits.cs": "1daac5c558439b0495ea19803a3435cca0fd862f33734a50756980f2520f869d",
     "Fonts/Sfnt/FontTable.cs": "fa8fd67ace1392b791f06fc0b5a6f3a35c679bf99e69fb379f9226c0b7c80de4",
-    "Fonts/Sfnt/SfntDirectory.cs": "e287ad702dea17c24b950286316b23a3edb97f2075ea2105092d744e7a628e51",
-    "Fonts/Sfnt/TrueTypeFont.cs": "b5316f146e457efb80e6ef29ff3005a7cce4aa2f0d6aa4d24c7b376ea51a189b",
+    "Fonts/Sfnt/SfntDirectory.cs": "c00a3508056829bbcdb1d9c88da75229bbe42a5fed1f97084ffc1f6b14bd05d1",
+    "Fonts/Sfnt/TrueTypeFont.cs": "4adbbfae4bbd4c572faa3f0fe2071ecc8606fb179bfff904c2472a23b819e3ac",
     "Fonts/Tables/CharacterMap.cs": "7ec999b1c2977833f8d33e075106f49f34de0e4323787c8a7e0efad95989c0e1",
     "Fonts/Tables/FontMetrics.cs": "2ea009363ca4c72e502617dbd005a09f4c4356a70247550e1e557628a09a3506",
     "Fonts/Tables/FontNameRecord.cs": "cf297121bf6fba2bb9d2118e63d673ed28be4d44c99e9498045d173acfad9685",

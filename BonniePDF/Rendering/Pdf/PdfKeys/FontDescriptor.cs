@@ -29,6 +29,9 @@ internal static partial class PdfKeys
         /// <summary>Width of a representative vertical stem, in glyph-space units.</summary>
         internal const string VerticalStemWidth = "/StemV";
 
+        /// <summary>Reference to the embedded CFF font-program stream.</summary>
+        internal const string CffProgram = "/FontFile3";
+
         /// <summary>Reference to the embedded TrueType font-program stream.</summary>
         internal const string TrueTypeProgram = "/FontFile2";
 

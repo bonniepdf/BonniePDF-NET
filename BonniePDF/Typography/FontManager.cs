@@ -84,7 +84,7 @@ public static class FontManager
     // ── Public API ────────────────────────────────────────────────
 
     /// <summary>
-    /// Registers a TrueType font from a byte array.
+    /// Registers a TrueType or static CFF OpenType font from a byte array.
     /// The family and subfamily names are read from the font's name table unless overridden.
     /// </summary>
     /// <param name="bytes">Raw TTF font data.</param>
@@ -100,7 +100,7 @@ public static class FontManager
     }
 
     /// <summary>
-    /// Registers a TrueType font from a stream.
+    /// Registers a TrueType or static CFF OpenType font from a stream.
     /// The stream is read to completion and the data is stored in memory.
     /// </summary>
     /// <param name="stream">Readable stream containing raw TTF data.</param>

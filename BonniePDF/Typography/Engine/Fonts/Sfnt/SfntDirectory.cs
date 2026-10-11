@@ -58,8 +58,9 @@ namespace BonniePDF.Typography.Engine
                 throw new ArgumentOutOfRangeException("faceIndex");
             if (countOnly && data.Tag(0) == "ttcf") return offset;
             uint sfnt = data.U32(offset);
-            if (sfnt != 0x10000 && sfnt != 0x74727565)
-                throw new NotSupportedException("Use static TrueType outlines or CBDT bitmaps. CFF and WOFF are unsupported.");
+            if (sfnt != 0x10000 && sfnt != 0x74727565 && sfnt != 0x4f54544f)
+                throw new NotSupportedException("Use static TrueType or CFF 1 OpenType fonts, or CBDT bitmaps. WOFF is unsupported.");
+            if (data.Tag(0) == "ttcf" && sfnt == 0x4f54544f) throw new NotSupportedException("CFF collections are unsupported; supply an individual OTF.");
             return offset;
         }
 

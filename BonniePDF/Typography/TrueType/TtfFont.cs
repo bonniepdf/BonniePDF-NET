@@ -23,7 +23,8 @@ internal class TtfFont
     // Table directory
     private readonly Dictionary<string, (uint offset, uint length)> _tables = new();
     internal bool HasColour => _tables.ContainsKey("COLR") || _tables.ContainsKey("CBDT");
-    internal bool HasOutlines => _tables.ContainsKey("glyf") && _tables.ContainsKey("loca");
+    internal bool HasOutlines => HasCff || (_tables.ContainsKey("glyf") && _tables.ContainsKey("loca"));
+    internal bool HasCff => _tables.ContainsKey("CFF ");
     private int _numberOfHMetrics;
 
     // Kern pairs: (leftGid, rightGid) -> adjustment in font units
