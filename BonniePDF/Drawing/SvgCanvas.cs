@@ -42,6 +42,8 @@ internal class SvgIdAllocator
 /// </summary>
 internal partial class SvgCanvas : ICanvas
 {
+    internal System.Func<EmojiRendering>? EmojiRenderingResolver { get; set; }
+
     private IReadOnlyDictionary<string,int>? _fontFeatures;
     public void SetTextFeatures(IReadOnlyDictionary<string,int>? features) => _fontFeatures=features;
 
@@ -235,7 +237,7 @@ internal partial class SvgCanvas : ICanvas
     /// </summary>
     private string GlyphPositionedRuns(float startX, float baselineY, List<SvgTextRun> runs, string fillHex,
         float fontSize, float extraPerSpace, string extraAttributes = "", string? transform = null,
-        float letterSpacing = 0f)
+        float letterSpacing = 0f, float colourAlpha = 1f)
     {
         string transformAttr = transform is null ? "" : $" transform=\"{transform}\"";
         var elements = new StringBuilder();
@@ -256,6 +258,21 @@ internal partial class SvgCanvas : ICanvas
             var chars = new StringBuilder();
 
             var glyphs=run.Glyphs;
+            if (runFont.HasColour && EmojiRenderingResolver?.Invoke() == EmojiRendering.Colour)
+            {
+                var graphics = new SvgCanvas(Width, Height, includeHeader: false) { Options = Options };
+                if (colourAlpha < 1f) graphics.SetGlobalAlpha(colourAlpha);
+                foreach (var g in glyphs)
+                {
+                    string source = run.Text.Substring(g.Cluster, g.SourceLength);
+                    ColourGlyphPainter.Draw(graphics, runFont, g, source, (float)cursor, baselineY, fontSize, Color.FromHex(fillHex));
+                    cursor += g.AdvanceX * scale + letterSpacing;
+                    if (source == " ") cursor += extraPerSpace;
+                }
+                elements.Append($"<g aria-label=\"{XmlEscape.EscapeXml(run.Text)}\"{extraAttributes}{transformAttr}>").Append(graphics.GetInnerSvg()).Append("</g>");
+                continue;
+            }
+            if (runFont.HasColour && !runFont.HasOutlines) throw new NotSupportedException("The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.");
             bool simple=glyphs.Count==run.Text.EnumerateRunes().Take(glyphs.Count+1).Count() && glyphs.All(g=>g.SourceLength==(char.IsSurrogatePair(run.Text,g.Cluster)?2:1) && g.Id==runFont.GetGlyphId(char.ConvertToUtf32(run.Text,g.Cluster)) && g.OffsetY==0 && !g.IsMark);
             if(!simple)
             {
@@ -608,7 +625,7 @@ internal partial class SvgCanvas : ICanvas
                 cursorX -= totalWidth;
 
             _sb.AppendLf(GlyphPositionedRuns(cursorX, baselineY, runs, fill, fontSize, _wordSpacing,
-                letterSpacing: _letterSpacing));
+                letterSpacing: _letterSpacing, colourAlpha: color.ScA));
         }
         else if (ResolveFont(fontFamily) != null)
         {
@@ -651,7 +668,7 @@ internal partial class SvgCanvas : ICanvas
             for (int cp = '0'; cp <= '9'; cp++)
                 FontUsageSink?.Invoke(fontFamily, ttfFont, cp);
             var runs = new List<SvgTextRun> { new(fontFamily, ttfFont, placeholder, ttfFont.Shape(placeholder, _fontFeatures)) };
-            _sb.AppendLf(GlyphPositionedRuns(sx, baselineY, runs, fill, fontSize, 0f, attr));
+            _sb.AppendLf(GlyphPositionedRuns(sx, baselineY, runs, fill, fontSize, 0f, attr, colourAlpha: color.ScA));
             return;
         }
 
@@ -711,7 +728,7 @@ internal partial class SvgCanvas : ICanvas
         List<SvgTextRun> runs = ResolveRuns(fontFamily, text);
         if (runs.Count > 0)
         {
-            _sb.AppendLf(GlyphPositionedRuns(sx, baselineY, runs, fill, fontSize, 0f, "", transform));
+            _sb.AppendLf(GlyphPositionedRuns(sx, baselineY, runs, fill, fontSize, 0f, "", transform, colourAlpha: color.ScA));
             return;
         }
 
@@ -758,7 +775,7 @@ internal partial class SvgCanvas : ICanvas
         List<SvgTextRun> runs = ResolveRuns(fontFamily, text);
         if (runs.Count > 0)
         {
-            _sb.AppendLf(GlyphPositionedRuns(sx, baselineY, runs, fill, fontSize, extraPerSpace));
+            _sb.AppendLf(GlyphPositionedRuns(sx, baselineY, runs, fill, fontSize, extraPerSpace, colourAlpha: color.ScA));
             return;
         }
 

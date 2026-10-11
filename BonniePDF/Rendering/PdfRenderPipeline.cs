@@ -34,7 +34,7 @@ internal static class PdfRenderPipeline
             throw new ArgumentException("Document must have at least one page", nameof(pages));
 
         PdfSize orientedPageSize = settings.GetOrientedPageSize();
-        RenderContext ctx = new(orientedPageSize, settings.Margin);
+        RenderContext ctx = new(orientedPageSize, settings.Margin) { EmojiRendering = settings.EmojiRendering };
         // Header/footer consume body content height (spec: Layout & Pagination
         // §5.1). Installed before any layout so the very first page's cursor and
         // break threshold already account for the chrome.
@@ -258,6 +258,7 @@ internal static class PdfRenderPipeline
     {
         ArgumentNullException.ThrowIfNull(pages);
         ArgumentNullException.ThrowIfNull(ctx);
+        ctx.EmojiRendering = settings.EmojiRendering;
 
         // Get the oriented page size from settings - this respects orientation changes
         // made after the document was created (e.g., doc.Settings.Orientation = Landscape)

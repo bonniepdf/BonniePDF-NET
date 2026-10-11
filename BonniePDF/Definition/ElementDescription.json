@@ -144,6 +144,13 @@
       ],
       "via": "options"
     },
+    "EmojiRendering": {
+      "tokens": [
+        "outline",
+        "colour"
+      ],
+      "via": "options"
+    },
     "AccessibilityMode": {
       "tokens": [
         "none",
@@ -2052,6 +2059,9 @@
         },
         "accessibility": {
           "kind": "enum:AccessibilityMode"
+        },
+        "emojiRendering": {
+          "kind": "enum:EmojiRendering"
         },
         "language": {
           "kind": "string"

@@ -104,7 +104,7 @@ internal static class TextRunShaper
             if(chars.Length==0)continue;
             int whole=-1;
             for(int i=0;i<candidates.Count;i++)if(chars.All(c=>candidates[i].Font.GetGlyphId(c.Value)!=0)){whole=i;break;}
-            if(whole>=0){Append(whole,string.Concat(chars.Select(c=>c.ToString())));continue;}
+            if(whole>=0){Append(whole,candidates[whole].Font.HasColour ? text.Substring(bounds[b],bounds[b+1]-bounds[b]) : string.Concat(chars.Select(c=>c.ToString())));continue;}
             foreach(var ch in chars) {int chosen=-1;for(int i=0;i<candidates.Count;i++)if(candidates[i].Font.GetGlyphId(ch.Value)!=0){chosen=i;break;}if(chosen>=0)Append(chosen,ch.ToString());else result.Unsupported.Add(ch.Value);}
         }
         Flush();

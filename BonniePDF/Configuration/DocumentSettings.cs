@@ -9,6 +9,18 @@ namespace BonniePDF;
 /// </summary>
 public class DocumentSettings
 {
+    private EmojiRendering _emojiRendering;
+    /// <summary>Emoji paint mode. Defaults to monochrome outlines; colour requires a registered colour font.</summary>
+    public EmojiRendering EmojiRendering
+    {
+        get => _emojiRendering;
+        set
+        {
+            if (!System.Enum.IsDefined(value)) throw new System.ArgumentOutOfRangeException(nameof(value));
+            _emojiRendering = value;
+        }
+    }
+
     /// <summary>
     /// Creates a new instance of DocumentSettings with default values
     /// </summary>

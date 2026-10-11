@@ -4,8 +4,7 @@ namespace BonniePDF.Examples.Typography.EmojisAndUnicode;
 
 /// <summary>
 /// Full Unicode range — BMP symbols, Greek, Cyrillic, dingbats, and supplementary emoji.
-/// PDF/A is intentionally not claimed: emoji fonts include COLR/CBDT tables that archival
-/// validators reject. PDF/UA-1 accessibility is still applied.
+/// Keeps the Noto Emoji outline sample monochrome. PDF/UA-1 accessibility is applied.
 /// </summary>
 [System.ComponentModel.DisplayName("Emojis & Unicode")]
 [System.ComponentModel.Category("Typography")]
@@ -32,8 +31,8 @@ public static class EmojiExample
             },
             Settings = new DocumentSettings
             {
-                // PDF/A intentionally not claimed: emoji fonts include COLR/CBDT tables
-                // that archival validators reject.
+                // This example keeps its original monochrome outline appearance.
+                EmojiRendering = EmojiRendering.Outline,
                 Conformance = PdfAConformance.None,
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language = "en-GB",

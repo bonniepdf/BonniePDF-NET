@@ -22,3 +22,5 @@ package size is unaffected.
 The Noto fonts are © The Noto Project Authors and licensed under the
 **SIL Open Font License, Version 1.1** (see [`OFL.txt`](OFL.txt)), which permits
 bundling and embedding. Source: https://github.com/notofonts
+
+`TwemojiMozilla.ttf` supplies COLRv0 vector colour artwork for the separate Colour Emojis example. The original Noto Emoji outline example is unchanged. Twemoji graphics are licensed under CC-BY-4.0; font-building software is Apache-2.0. The bundled `TwemojiMozilla-LICENSE.md`, `TwemojiMozilla-CC-BY-4.0.txt` and `TwemojiMozilla-APACHE-2.0.txt` carry upstream notices. Source: https://github.com/mozilla/twemoji-colr

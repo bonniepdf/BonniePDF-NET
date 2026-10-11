@@ -116,7 +116,8 @@ internal static class SvgPageExporter
         PdfSize oriented = settings.GetOrientedPageSize();
         RenderContext ctx = new(oriented, settings.Margin, isSvgMode: true, svgOptions, svgContentOnly: true)
         {
-            Conformance = settings.Conformance
+            Conformance = settings.Conformance,
+            EmojiRendering = settings.EmojiRendering
         };
         // Mirror PdfDocumentSerializer: PDF/UA-1 substitutes embedded Liberation for
         // the standard-14 references, so the preview must resolve them the same way.

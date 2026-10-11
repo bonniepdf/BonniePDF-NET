@@ -78,7 +78,7 @@ internal class FontWriter
         // 1. Write FontFile2 (embedded TTF binary data)
         byte[] fontData;
         TtfSubsetter? subsetter = null;
-        if (enableSubsetting)
+        if (enableSubsetting || !font.HasOutlines && font.HasColour)
         {
             // Create subset font with only the used glyphs
             subsetter = new TtfSubsetter(font);
@@ -100,7 +100,7 @@ internal class FontWriter
         // 2. Write CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap
         //    domain (0..MaxOriginalGid) - see BuildCIDSetData.
         int cidSetId = 0;
-        if (enableSubsetting && subsetter != null)
+        if (subsetter != null)
         {
             cidSetId = _writer!.GetNewId();
             WriteCIDSet(cidSetId, maxCid);
@@ -366,7 +366,7 @@ internal class FontWriter
         // 1. Write FontFile2 (embedded TTF binary data)
         byte[] fontData;
         TtfSubsetter? subsetter = null;
-        if (enableSubsetting)
+        if (enableSubsetting || !font.HasOutlines && font.HasColour)
         {
             // Create subset font with only the used glyphs
             subsetter = new TtfSubsetter(font);
@@ -388,7 +388,7 @@ internal class FontWriter
         // 2. Write CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap
         //    domain (0..MaxOriginalGid) - see BuildCIDSetData.
         int cidSetId = 0;
-        if (enableSubsetting && subsetter != null)
+        if (subsetter != null)
         {
             cidSetId = _asyncWriter!.GetNewId();
             await WriteCIDSetAsync(cidSetId, maxCid, cancellationToken).ConfigureAwait(false);
