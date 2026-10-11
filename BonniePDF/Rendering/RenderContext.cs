@@ -27,6 +27,7 @@ file static class ContainerRoleTags
 /// </summary>
 public class RenderContext
 {
+    internal EmojiRendering EmojiRendering { get; set; }
     internal (float Top, float Bottom)? AtomicLayoutBounds { get; set; }
     internal BonniePDF.Drawing.PaintTransform? ElementTransform { get; set; }
     /// <summary>
@@ -352,6 +353,7 @@ public class RenderContext
                 ResolveEmbeddedFont)
             {
                 Options = SvgOptions,
+                EmojiRenderingResolver = () => EmojiRendering,
                 FontUsageSink = TrackSvgFontUsage,
                 RegisterFontCallback = RegisterFont,
                 // Both render paths share one run resolver, so the SVG preview
@@ -365,6 +367,7 @@ public class RenderContext
             var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
                 ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage,
                 RegisterShading, Resources.NoteImagePlacement);
+        pdfCanvas.EmojiRenderingResolver = () => EmojiRendering;
             if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
             Canvas = pdfCanvas;
         }
@@ -388,6 +391,7 @@ public class RenderContext
                 ChildOffsetX = x,
                 ChildOffsetY = y,
                 Options = SvgOptions,
+                EmojiRenderingResolver = () => EmojiRendering,
                 FontUsageSink = TrackSvgFontUsage,
                 RegisterFontCallback = RegisterFont,
                 // Both render paths share one run resolver, so the SVG preview
@@ -399,6 +403,7 @@ public class RenderContext
         var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource,
             ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage,
             RegisterShading, Resources.NoteImagePlacement);
+        pdfCanvas.EmojiRenderingResolver = () => EmojiRendering;
         if (Tagging != null)
         {
             pdfCanvas.SetTaggingContext(Tagging);
@@ -630,6 +635,7 @@ public class RenderContext
         return new SvgCanvas(PageSize.Width, PageSize.Height, 0, 0, CurrentStream, false, ResolveEmbeddedFont)
         {
             Options = SvgOptions,
+                EmojiRenderingResolver = () => EmojiRendering,
             FontUsageSink = TrackSvgFontUsage,
             RegisterFontCallback = RegisterFont,
             TextRunResolver = ResolveTextRuns,

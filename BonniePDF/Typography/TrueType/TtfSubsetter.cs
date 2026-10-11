@@ -307,6 +307,10 @@ internal class TtfSubsetter
         Array.Copy(_originalData, info.offset, data, 0, info.length);
 
         // Update numGlyphs
+        if (!_tables.ContainsKey("glyf") && _tables.ContainsKey("CBDT"))
+        {
+            data = new byte[32]; data[1] = 1; data[15] = 1; // maxp 1.0, one glyph zone, empty outlines.
+        }
         ushort numGlyphs = (ushort)_newToOldGid!.Count;
         data[4] = (byte)(numGlyphs >> 8);
         data[5] = (byte)(numGlyphs & 0xFF);
@@ -595,6 +599,8 @@ internal class TtfSubsetter
 
     private (byte[] glyfData, byte[] locaData) BuildGlyfAndLocaTables()
     {
+        if (!_tables.ContainsKey("glyf") && !_tables.ContainsKey("loca") && _tables.ContainsKey("CBDT"))
+            return (new byte[4], new byte[(_newToOldGid!.Count + 1) * 4]);
         if (!_tables.TryGetValue("glyf", out (uint offset, uint length) glyfInfo) ||
             !_tables.TryGetValue("loca", out (uint offset, uint length) locaInfo))
             throw new Exception("Missing 'glyf' or 'loca' table");
@@ -658,7 +664,7 @@ internal class TtfSubsetter
         // Write final offset to loca
         WriteUInt32BE(locaWriter, (uint)glyfMs.Position);
 
-        return (glyfMs.ToArray(), locaMs.ToArray());
+        return (glyfMs.Length == 0 && (_tables.ContainsKey("COLR") || _tables.ContainsKey("CBDT")) ? new byte[4] : glyfMs.ToArray(), locaMs.ToArray());
     }
 
     private byte[] RemapCompositeGlyph(byte[] glyphData)

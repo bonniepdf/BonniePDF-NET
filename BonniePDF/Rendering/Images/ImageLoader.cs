@@ -400,6 +400,7 @@ public static class ImageLoader
         ImageInfo info = new() { Format = ImageFormat.Png, OriginalData = data };
         List<(int Start, int Length)> idatChunks = new();
         byte[]? palette = null;
+        byte[]? paletteAlpha = null;
         byte[]? compressedIccProfile = null;
         int colorType = 0;
         int bitDepth = 8;
@@ -470,6 +471,10 @@ public static class ImageLoader
                     Array.Copy(data, pos, palette, 0, chunkLength);
                     break;
 
+                case "tRNS" when colorType == 3:
+                    paletteAlpha = data.AsSpan(pos, chunkLength).ToArray();
+                    break;
+
                 case "IDAT":
                     // Image data chunk (compressed)
                     idatChunks.Add((pos, chunkLength));
@@ -538,8 +543,8 @@ public static class ImageLoader
             compressedLength = totalLength;
         }
 
-        int bytesPerPixel = info.Components * (bitDepth / 8);
-        int scanlineLength = info.Width * bytesPerPixel;
+        int bytesPerPixel = Math.Max(1, (info.Components * bitDepth + 7) / 8);
+        int scanlineLength = checked((info.Width * info.Components * bitDepth + 7) / 8);
         int stride = scanlineLength + 1; // each row is a filter byte, then the row
         long inflatedLength = (long)stride * info.Height;
         if (inflatedLength > Array.MaxLength)
@@ -593,7 +598,7 @@ public static class ImageLoader
             else
             {
                 // No alpha - just remove filter bytes
-                pixelData = new byte[info.Width * info.Height * bytesPerPixel];
+                pixelData = new byte[info.Height * scanlineLength];
                 for (int y = 0; y < info.Height; y++)
                     Buffer.BlockCopy(inflated, y * stride + 1, pixelData, y * scanlineLength, scanlineLength);
             }
@@ -607,6 +612,26 @@ public static class ImageLoader
         }
 
         info.Palette = palette ?? Array.Empty<byte>();
+        if (colorType == 3 && paletteAlpha is not null)
+        {
+            // Palette transparency is per index, not an interleaved alpha channel.
+            // Expand to RGB so PDF/A-1 flattening also composites actual colours.
+            byte[] rgb = new byte[checked(info.Width * info.Height * 3)];
+            byte[] alpha = new byte[checked(info.Width * info.Height)];
+            int mask = (1 << bitDepth) - 1;
+            for (int y = 0; y < info.Height; y++)
+                for (int x = 0; x < info.Width; x++)
+                {
+                    int index = (info.Data[y * scanlineLength + x * bitDepth / 8] >> (8 - bitDepth - x * bitDepth % 8)) & mask;
+                    if (index * 3 + 2 >= info.Palette.Length) throw new InvalidOperationException("PNG pixel index exceeds its palette.");
+                    int pixel = y * info.Width + x;
+                    Buffer.BlockCopy(info.Palette, index * 3, rgb, pixel * 3, 3);
+                    alpha[pixel] = index < paletteAlpha.Length ? paletteAlpha[index] : (byte)255;
+                }
+            info.Data = rgb; info.AlphaData = alpha; info.HasAlpha = true;
+            info.ColorSpace = ImageColorSpace.DeviceRGB; info.Components = 3; info.BitsPerComponent = 8;
+            info.Palette = [];
+        }
 
         // Inflate the iCCP profile if one was carried. The profile stream is
         // zlib-wrapped like IDAT; .NET can inflate it synchronously (the

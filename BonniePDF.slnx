@@ -3,6 +3,7 @@
   <Project Path="BonniePDF/BonniePDF.csproj" />
 
   <Folder Name="/Examples/">
+    <Project Path="Examples/BonniePDF.Examples.Typography.ColourEmojis/BonniePDF.Examples.Typography.ColourEmojis.csproj" />
     <Project Path="Examples/BonniePDF.Examples.ShowcaseAssets/BonniePDF.Examples.ShowcaseAssets.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Basics.Margins/BonniePDF.Examples.Basics.Margins.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Basics.PageSettings/BonniePDF.Examples.Basics.PageSettings.csproj" />

@@ -9,6 +9,11 @@ internal static class EmbeddedTextShaping
     internal static IReadOnlyList<GlyphInfo> Shape(TtfFont font, string text, IReadOnlyDictionary<string,int>? features)
     {
         ShapeOptions? options = features is null || features.Count == 0 ? null : new ShapeOptions(features:features.Select(f=>new ShapeFeature(f.Key,f.Value)));
+        if (font.HasColour)
+        {
+            try { return Shaper.Shape(font.EngineFace, text, options).Glyphs; }
+            catch (System.NotSupportedException) { /* Preserve direct mapping for unsupported scripts. */ }
+        }
         bool ascii = text.Length > 0;
         for (int i = 0; ascii && i < text.Length; i++) ascii = text[i] >= 32 && text[i] <= 126;
         if (ascii)

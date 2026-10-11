@@ -14,6 +14,8 @@ namespace BonniePDF.Drawing;
 /// </summary>
 internal class PdfCanvas : ICanvas
 {
+    internal System.Func<EmojiRendering>? EmojiRenderingResolver { get; set; }
+
     private readonly Func<string, TtfFont?> _embeddedFontResolver;
     private readonly Func<string, string> _fontResolver;
     private readonly Func<ImageInfo, string> _imageResolver;
@@ -312,6 +314,7 @@ internal class PdfCanvas : ICanvas
 
         EndTextSpacing();
         PdfOperators.EndText(_stream);
+        PaintColourRuns(runs, fontSize, pdfX - _xOffset, Height - pdfY - _yOffset, color);
         EndColorAlpha(color);
     }
 
@@ -375,6 +378,7 @@ internal class PdfCanvas : ICanvas
 
         EndTextSpacing();
         PdfOperators.EndText(_stream);
+        PaintColourRuns(runs, fontSize, -_xOffset, Height - _yOffset, color);
         PdfOperators.RestoreState(_stream);
     }
 
@@ -417,6 +421,7 @@ internal class PdfCanvas : ICanvas
         // Reset word spacing to 0 so it doesn't leak to subsequent text
         PdfOperators.SetWordSpacing(_stream, 0);
         PdfOperators.EndText(_stream);
+        PaintColourRuns(runs, fontSize, pdfX - _xOffset, Height - pdfY - _yOffset, color, wordSpacing);
         EndColorAlpha(color);
     }
 
@@ -752,6 +757,9 @@ internal class PdfCanvas : ICanvas
                 continue;
             }
 
+            bool colourFont = font.HasColour && EmojiRenderingResolver?.Invoke() == EmojiRendering.Colour;
+            if (font.HasColour && !font.HasOutlines && !colourFont) throw new NotSupportedException("The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.");
+            if (colourFont) _stream.AppendLf("3 Tr");
             _stream.Append("/Span << /ActualText ");
             PdfSyntax.AppendMetadataString(_stream, run.Text);
             _stream.Append(" >> BDC\n");
@@ -779,6 +787,7 @@ internal class PdfCanvas : ICanvas
                 }
                 _stream.Append(adjusted ? ">] TJ\n" : "> Tj\n");
                 _stream.AppendLf("EMC");
+                if (colourFont) _stream.AppendLf("0 Tr");
                 continue;
             }
             for (int i = 0; i < glyphs.Count; i++)
@@ -799,6 +808,25 @@ internal class PdfCanvas : ICanvas
                 if (rise != 0) _stream.AppendLf("0 Ts");
             }
             _stream.AppendLf("EMC");
+            if (colourFont) _stream.AppendLf("0 Tr");
+        }
+    }
+
+    private void PaintColourRuns(PreparedTextRun[] runs, float size, float x, float baseline, Color colour, float? wordSpacing = null)
+    {
+        if (EmojiRenderingResolver?.Invoke() != EmojiRendering.Colour) return;
+        double cursor = x;
+        foreach (var prepared in runs)
+        {
+            var run = prepared.Run; var font = run.EmbeddedFont;
+            if (font is null) { cursor += FontMetrics.GetStringWidth(run.Text, run.FontIdentifier, size) + SpacingWidth(run.Text); continue; }
+            foreach (var glyph in prepared.Glyphs!)
+            {
+                string source = run.Text.Substring(glyph.Cluster, glyph.SourceLength);
+                if (font.HasColour) ColourGlyphPainter.Draw(this, font, glyph, source, (float)cursor, baseline, size, colour);
+                cursor += (double)glyph.AdvanceX * size / font.UnitsPerEm + _letterSpacing;
+                if (source == " ") cursor += wordSpacing ?? _wordSpacing;
+            }
         }
     }
 

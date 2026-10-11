@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "id": "face",
+      "text": "😀"
+    },
+    {
+      "id": "zwj",
+      "text": "👩‍💻"
+    },
+    {
+      "id": "modifier",
+      "text": "👍🏽"
+    },
+    {
+      "id": "flag",
+      "text": "🇬🇧"
+    },
+    {
+      "id": "variation",
+      "text": "❤️"
+    },
+    {
+      "id": "keycap",
+      "text": "1️⃣"
+    },
+    {
+      "id": "text-presentation",
+      "text": "❤︎"
+    },
+    {
+      "id": "mixed",
+      "text": "Ready 😀 👩‍💻 👍🏽 🇬🇧 ❤️ 1️⃣"
+    },
+    {
+      "id": "repeated",
+      "text": "😀😀😀"
+    }
+  ],
+  "palettePng": [
+    {
+      "bits": 1,
+      "base64": "iVBORw0KGgoAAAANSUhEUgAAAAMAAAABAQMAAAAhLob3AAAABlBMVEX/AAAA/wDSh+9xAAAAAnRSTlMAgJsrThgAAAANSURBVHgBAQIA/f8AQABCAEEgsJnLAAAAAElFTkSuQmCC",
+      "rgb": [
+        255,
+        0,
+        0,
+        0,
+        255,
+        0,
+        255,
+        0,
+        0
+      ],
+      "alpha": [
+        0,
+        128,
+        0
+      ]
+    },
+    {
+      "bits": 2,
+      "base64": "iVBORw0KGgoAAAANSUhEUgAAAAMAAAABAgMAAABmjvwnAAAACVBMVEX/AAAA/wAAAP8tSs2KAAAAAnRSTlMAgJsrThgAAAANSURBVHgBAQIA/f8AGAAaABkvzLsPAAAAAElFTkSuQmCC",
+      "rgb": [
+        255,
+        0,
+        0,
+        0,
+        255,
+        0,
+        0,
+        0,
+        255
+      ],
+      "alpha": [
+        0,
+        128,
+        255
+      ]
+    },
+    {
+      "bits": 4,
+      "base64": "iVBORw0KGgoAAAANSUhEUgAAAAMAAAABBAMAAADpzgmHAAAACVBMVEX/AAAA/wAAAP8tSs2KAAAAAnRSTlMAgJsrThgAAAAOSURBVHgBAQMA/P8AASAAJQAiPj1SfwAAAABJRU5ErkJggg==",
+      "rgb": [
+        255,
+        0,
+        0,
+        0,
+        255,
+        0,
+        0,
+        0,
+        255
+      ],
+      "alpha": [
+        0,
+        128,
+        255
+      ]
+    },
+    {
+      "bits": 8,
+      "base64": "iVBORw0KGgoAAAANSUhEUgAAAAMAAAABCAMAAAAsPuSGAAAACVBMVEX/AAAA/wAAAP8tSs2KAAAAAnRSTlMAgJsrThgAAAAPSURBVHgBAQQA+/8AAAECAAgABK2lTk4AAAAASUVORK5CYII=",
+      "rgb": [
+        255,
+        0,
+        0,
+        0,
+        255,
+        0,
+        0,
+        0,
+        255
+      ],
+      "alpha": [
+        0,
+        128,
+        255
+      ]
+    }
+  ],
+  "fonts": [
+    {
+      "file": "TwemojiMozilla-Fixture.ttf",
+      "sha256": "7e65929cae461a6ad1d4cd1099b1080e69639b58c3cfd62c57cc95db88c96100",
+      "sourceSha256": "6d90152ee0d29e82fe2a87793af5aa4b7ad13e6538360889e141e81ed299ee8e",
+      "bytes": 6320
+    },
+    {
+      "file": "NotoColorEmoji-Fixture.ttf",
+      "sha256": "0e9e19056057daf93abfa5b9322299d538d1f1cee2452af3ceeee7a61594486f",
+      "sourceSha256": "39ee3c587e10e89669b9ff32703261d10d5f9c4dd5ad147b6b5a1c5200591817",
+      "bytes": 51728
+    }
+  ]
+}

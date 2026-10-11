@@ -133,6 +133,8 @@ public class LengthUnitsTests
     private static BonniePDF.Document Build(bool inches)
     {
         var doc = new BonniePDF.Document();
+        doc.Metadata.CreationDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        doc.Metadata.ModifiedDate = doc.Metadata.CreationDate;
         doc.Settings.PageSize = PdfSize.A4;
         doc.Settings.Margin = inches ? 0.5f.Inches() : 36f;
 

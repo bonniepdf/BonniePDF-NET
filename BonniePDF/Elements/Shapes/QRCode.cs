@@ -69,10 +69,10 @@ public class QRCode : ElementBase, IRoleProvider, IAltTextProvider
     public QrErrorCorrection ErrorCorrection { get; set; } = QrErrorCorrection.Medium;
 
     /// <summary>
-    /// Number of quiet-zone modules around the QR code. The spec recommends 4.
-    /// Set to 0 to disable the quiet zone.
+    /// Number of quiet-zone modules around the QR code. The ISO/IEC 18004 standard
+    /// specifies 4 modules. Default is 4. Set to 0 to disable the quiet zone.
     /// </summary>
-    public int QuietZone { get; set; }
+    public int QuietZone { get; set; } = 4;
 
     protected override float GetPreferredContentWidth()
     {
