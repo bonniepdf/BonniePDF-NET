@@ -13,6 +13,7 @@ namespace BonniePDF.Typography.Engine
         private readonly LayoutReadCache reads = new LayoutReadCache();
         private readonly GlyphFilter filter;
         private readonly int lookupList, glyphCount;
+        private readonly LookupHeaderCache headers;
         private readonly int[] lookups;
         private readonly LookupRule[] rules;
         private LookupRule activeRule;
@@ -32,6 +33,7 @@ namespace BonniePDF.Typography.Engine
             if (bytes == null) return;
             data = new BigEndianData(bytes);
             lookupList = OpenTypeLayout.Offset16(data, 0, 8);
+            headers = new LookupHeaderCache(data, lookupList, filter, false);
         }
         internal void Apply(List<ShapingGlyph> glyphs)
         {
@@ -84,14 +86,8 @@ namespace BonniePDF.Typography.Engine
             if (at < 0 || at >= glyphs.Count)
                 return 0;
             if (depth == 0 && !Enabled(glyphs[at])) return 0;
-            if (index >= data.U16(lookupList))
-                throw new InvalidDataException("Invalid GSUB lookup index.");
-            int lookup = data.Relative16(lookupList, lookupList + 2 + index * 2);
-            int type = data.U16(lookup), flags = data.U16(lookup + 2);
-            int count = data.U16(lookup + 4);
-            data.Check(lookup + 6, count * 2);
-            int markSet = (flags & 16) != 0 ? data.U16(lookup + 6 + count * 2) : -1;
-            filter.Validate(flags, markSet);
+            var header = headers.Get(index);
+            int lookup = header.Offset, type = header.Type, flags = header.Flags, count = header.Count, markSet = header.MarkSet;
             if (Ignored(glyphs[at], flags, markSet))
                 return 0;
             for (int i = 0; i < count; i++)
@@ -323,7 +319,8 @@ namespace BonniePDF.Typography.Engine
             int mode, int classDefinition, int sub, int flags, int markSet, out List<ShapingGlyph> matched, bool requireFeature = false)
         {
             data.Check(record, count * 2);
-            matched = count == 0 ? new List<ShapingGlyph>() : null;
+            // A successful empty match owns no glyphs; materialize only when input is added.
+            matched = null;
             if (count > glyphs.Count)
                 return false;
             int position = start;
@@ -361,7 +358,7 @@ namespace BonniePDF.Typography.Engine
                     int back = data.U16(p);
                     p += 2;
                     match = Match(glyphs, Walk(glyphs, at, -1, flags, markSet), -1, back, p, 2, 0, sub, flags, markSet, out ignored);
-                    if (match && ignored.Count > 0) contextFirst = glyphs.IndexOf(ignored[ignored.Count - 1]);
+                    if (match && ignored != null) contextFirst = glyphs.IndexOf(ignored[ignored.Count - 1]);
                     p += back * 2;
                 }
                 int input = data.U16(p);
@@ -382,7 +379,7 @@ namespace BonniePDF.Typography.Engine
                     {
                         int last = glyphs.IndexOf(matched[matched.Count - 1]);
                         match = Match(glyphs, Walk(glyphs, last, 1, flags, markSet), 1, ahead, p, 2, 0, sub, flags, markSet, out ignored);
-                        if (match && ignored.Count > 0) contextLast = glyphs.IndexOf(ignored[ignored.Count - 1]);
+                        if (match && ignored != null) contextLast = glyphs.IndexOf(ignored[ignored.Count - 1]);
                     }
                     p += ahead * 2;
                     records = data.U16(p);
@@ -428,7 +425,7 @@ namespace BonniePDF.Typography.Engine
                     int back = data.U16(p);
                     p += 2;
                     match = Match(glyphs, Walk(glyphs, at, -1, flags, markSet), -1, back, p, mode, backClass, sub, flags, markSet, out ignored);
-                    if (match && ignored.Count > 0) contextFirst = glyphs.IndexOf(ignored[ignored.Count - 1]);
+                    if (match && ignored != null) contextFirst = glyphs.IndexOf(ignored[ignored.Count - 1]);
                     p += back * 2;
                 }
                 int input = data.U16(p);
@@ -439,7 +436,11 @@ namespace BonniePDF.Typography.Engine
                 if (!chained)
                     p += 2;
                 match &= Match(glyphs, Walk(glyphs, at, 1, flags, markSet), 1, input - 1, p, mode, inputClass, sub, flags, markSet, out matched, true);
-                if (match) matched.Insert(0, glyphs[at]);
+                if (match)
+                {
+                    if (matched == null) matched = new List<ShapingGlyph>();
+                    matched.Insert(0, glyphs[at]);
+                }
                 p += (input - 1) * 2;
                 if (chained)
                 {
@@ -450,7 +451,7 @@ namespace BonniePDF.Typography.Engine
                     {
                         int last = glyphs.IndexOf(matched[matched.Count - 1]);
                         match = Match(glyphs, Walk(glyphs, last, 1, flags, markSet), 1, ahead, p, mode, aheadClass, sub, flags, markSet, out ignored);
-                        if (match && ignored.Count > 0) contextLast = glyphs.IndexOf(ignored[ignored.Count - 1]);
+                        if (match && ignored != null) contextLast = glyphs.IndexOf(ignored[ignored.Count - 1]);
                     }
                     p += ahead * 2;
                     records = data.U16(p);
