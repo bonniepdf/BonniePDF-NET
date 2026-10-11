@@ -145,3 +145,7 @@ is available with a FAQ at https://openfontlicense.org
 Unicode 17.0.0 property and normalization tables are derived from the Unicode
 Character Database. Copyright Unicode, Inc. Distributed under Unicode License
 v3; the full licence is included in `assets/unicode/LICENSE.txt`.
+
+## Arabic and Hebrew test fonts
+
+Unmodified Noto Sans Arabic and Noto Sans Hebrew fonts are redistributed only as test fixtures under the SIL Open Font License 1.1. Their complete copyright and licence notices are included beside each font: [Noto Sans Arabic](BonniePDF.Tests/Typography/Fixtures/NotoSansArabic-LICENSE.txt) and [Noto Sans Hebrew](BonniePDF.Tests/Typography/Fixtures/NotoSansHebrew-LICENSE.txt). The RTL fixture pins each font by SHA-256. These fonts are not bundled in the runtime package.

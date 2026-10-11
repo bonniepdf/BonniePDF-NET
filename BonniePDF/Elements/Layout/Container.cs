@@ -138,11 +138,13 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
     /// descendant text (spec 01 "Document Model" §3.2). Start/Center/End map to Left/Center/Right; Stretch
     /// and unset (null) return null, leaving whatever ambient an enclosing container established untouched.
     /// </summary>
-    private static TextAlignment? AmbientTextAlignmentFor(BonniePDF.HorizontalAlignment? alignment) => alignment switch
+    private TextAlignment? AmbientTextAlignmentFor(BonniePDF.HorizontalAlignment? alignment) => alignment switch
     {
-        BonniePDF.HorizontalAlignment.Start => TextAlignment.Left,
+        BonniePDF.HorizontalAlignment.Start => IsRightToLeft ? TextAlignment.Right : TextAlignment.Left,
+        BonniePDF.HorizontalAlignment.Left => TextAlignment.Left,
+        BonniePDF.HorizontalAlignment.Right => TextAlignment.Right,
         BonniePDF.HorizontalAlignment.Center => TextAlignment.Center,
-        BonniePDF.HorizontalAlignment.End => TextAlignment.Right,
+        BonniePDF.HorizontalAlignment.End => IsRightToLeft ? TextAlignment.Left : TextAlignment.Right,
         _ => null,
     };
 
@@ -188,6 +190,10 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         float childWidth = effectiveWidth - Padding.Left - Padding.Right - inset.HorizontalWidth;
         float childX = boxX + inset.Left + Padding.Left;
         var align = HorizontalAlignment;
+        if (align == BonniePDF.HorizontalAlignment.Left) align = BonniePDF.HorizontalAlignment.Start;
+        else if (align == BonniePDF.HorizontalAlignment.Right) align = BonniePDF.HorizontalAlignment.End;
+        else if (IsRightToLeft && align == BonniePDF.HorizontalAlignment.Start) align = BonniePDF.HorizontalAlignment.End;
+        else if (IsRightToLeft && align == BonniePDF.HorizontalAlignment.End) align = BonniePDF.HorizontalAlignment.Start;
         if (align == BonniePDF.HorizontalAlignment.Center || align == BonniePDF.HorizontalAlignment.End)
         {
             float preferred = Child!.GetPreferredWidth();
@@ -443,6 +449,10 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         // Horizontal alignment: when the child is narrower than the available
         // inner width, position it within that width rather than pinning it left.
         var align = HorizontalAlignment;
+        if (align == BonniePDF.HorizontalAlignment.Left) align = BonniePDF.HorizontalAlignment.Start;
+        else if (align == BonniePDF.HorizontalAlignment.Right) align = BonniePDF.HorizontalAlignment.End;
+        else if (IsRightToLeft && align == BonniePDF.HorizontalAlignment.Start) align = BonniePDF.HorizontalAlignment.End;
+        else if (IsRightToLeft && align == BonniePDF.HorizontalAlignment.End) align = BonniePDF.HorizontalAlignment.Start;
         if (align == BonniePDF.HorizontalAlignment.Center || align == BonniePDF.HorizontalAlignment.End)
         {
             float preferred = Child.GetPreferredWidth();

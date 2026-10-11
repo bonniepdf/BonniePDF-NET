@@ -361,9 +361,9 @@ internal static class PdfRenderPipeline
             // the painter's-model stream. A per-page Page.PageBackground element
             // overrides the document-level template for this page.
             if (pageDimensions.TryGetValue(i, out var bgDims) && bgDims.PageBackground != null)
-                RenderPageSlotElement(ctx, bgDims.PageBackground, i, isBackground: true);
+                RenderPageSlotElement(ctx, bgDims.PageBackground, i, isBackground: true, settings.ContentDirection);
             else
-                RenderPageSlot(ctx, settings.PageBackground, i, isBackground: true);
+                RenderPageSlot(ctx, settings.PageBackground, i, isBackground: true, settings.ContentDirection);
 
             // Solid page colour: prepended last so it lands at the very front of
             // the stream (the backmost position in the painter's model), behind
@@ -386,9 +386,9 @@ internal static class PdfRenderPipeline
             // ignoring margins (explicit stamps / overlays). A per-page
             // Page.PageForeground element overrides the document-level template.
             if (pageDimensions.TryGetValue(i, out var fgDims) && fgDims.PageForeground != null)
-                RenderPageSlotElement(ctx, fgDims.PageForeground, i, isBackground: false);
+                RenderPageSlotElement(ctx, fgDims.PageForeground, i, isBackground: false, settings.ContentDirection);
             else
-                RenderPageSlot(ctx, settings.PageForeground, i, isBackground: false);
+                RenderPageSlot(ctx, settings.PageForeground, i, isBackground: false, settings.ContentDirection);
 
             PageRenderOutput output = new()
             {
@@ -566,6 +566,7 @@ internal static class PdfRenderPipeline
             if (hasHeader)
             {
                 IElement? headerElement = settings.HeaderTemplate!(pageNumber);
+                ContentDirectionResolver.Apply(headerElement, settings.ContentDirection);
                 if (headerElement != null)
                 {
                     float headerHeight = headerElement.MeasureHeight(contentWidth);
@@ -583,6 +584,7 @@ internal static class PdfRenderPipeline
                 return;
             }
             IElement? footerElement = settings.FooterTemplate!(pageNumber);
+            ContentDirectionResolver.Apply(footerElement, settings.ContentDirection);
             if (footerElement == null)
             {
                 return;
@@ -619,14 +621,14 @@ internal static class PdfRenderPipeline
     /// content (including the watermark); otherwise they are appended so they
     /// paint on top of everything.
     /// </summary>
-    private static void RenderPageSlot(RenderContext ctx, Func<int, IElement?>? template, int pageIndex, bool isBackground)
+    private static void RenderPageSlot(RenderContext ctx, Func<int, IElement?>? template, int pageIndex, bool isBackground, ContentDirection direction)
     {
         if (template == null) return;
 
         IElement? element = template(pageIndex + 1);
         if (element == null) return;
 
-        RenderPageSlotElement(ctx, element, pageIndex, isBackground);
+        RenderPageSlotElement(ctx, element, pageIndex, isBackground, direction);
     }
 
     /// <summary>
@@ -636,8 +638,9 @@ internal static class PdfRenderPipeline
     /// so they paint on top. Shared by the document-level template path
     /// (<see cref="RenderPageSlot"/>) and the per-page element override path.
     /// </summary>
-    private static void RenderPageSlotElement(RenderContext ctx, IElement element, int pageIndex, bool isBackground)
+    private static void RenderPageSlotElement(RenderContext ctx, IElement element, int pageIndex, bool isBackground, ContentDirection direction)
     {
+        ContentDirectionResolver.Apply(element, direction);
         // For the background slot we render into the freshly-emptied stream and
         // re-append the captured content afterwards, leaving the slot operators
         // at the very front. The foreground slot renders straight onto the end.

@@ -9,6 +9,18 @@ internal static class EmbeddedTextShaping
     internal static IReadOnlyList<GlyphInfo> Shape(TtfFont font, string text, IReadOnlyDictionary<string,int>? features)
     {
         ShapeOptions? options = features is null || features.Count == 0 ? null : new ShapeOptions(features:features.Select(f=>new ShapeFeature(f.Key,f.Value)));
+        if (text.Length > 0 && (TextFlow.RightToLeft || TextFlow.NeedsBidi(text)))
+        {
+            var line = TextFlow.CurrentLine;
+            if (line is not null && line.Paragraph.Substring(line.Start, line.End - line.Start) != text) line = null;
+            string paragraph = line?.Paragraph ?? text;
+            int lineStart = line?.Start ?? 0, lineEnd = line?.End ?? text.Length;
+            var resolved = TextItemizer.Resolve(paragraph, (_, _, _, _) => font.EngineFace,
+                TextFlow.RightToLeft ? "rtl" : "ltr");
+            return resolved.ShapeLine(lineStart, lineEnd, options).SelectMany(item => item.Glyphs)
+                .Select(g => new GlyphInfo(g.Id, g.Cluster - lineStart, g.AdvanceX, g.AdvanceY, g.OffsetX, g.OffsetY,
+                    g.ComponentCount, g.IsMark, g.IsLigature, g.SourceLength, g.UnsafeToBreak, g.ComponentIndex)).ToArray();
+        }
         if (font.HasColour)
         {
             try { return Shaper.Shape(font.EngineFace, text, options).Glyphs; }

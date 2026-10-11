@@ -15,5 +15,9 @@ public enum HorizontalAlignment
     End,
 
     /// <summary>Stretch to fill available space</summary>
-    Stretch
+    Stretch,
+    /// <summary>Physical left edge, independent of direction.</summary>
+    Left,
+    /// <summary>Physical right edge, independent of direction.</summary>
+    Right
 }

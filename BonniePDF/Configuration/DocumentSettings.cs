@@ -9,6 +9,18 @@ namespace BonniePDF;
 /// </summary>
 public class DocumentSettings
 {
+    private ContentDirection _contentDirection;
+    /// <summary>Default inline progression and paragraph base direction.</summary>
+    public ContentDirection ContentDirection
+    {
+        get => _contentDirection;
+        set
+        {
+            if (!System.Enum.IsDefined(value)) throw new System.ArgumentOutOfRangeException(nameof(value));
+            _contentDirection = value;
+        }
+    }
+
     private EmojiRendering _emojiRendering;
     /// <summary>Emoji paint mode. Defaults to monochrome outlines; colour requires a registered colour font.</summary>
     public EmojiRendering EmojiRendering

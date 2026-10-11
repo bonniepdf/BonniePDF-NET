@@ -227,3 +227,9 @@ Issues and pull requests are welcome in the [BonniePDF-NET repository](https://g
 ### Emoji rendering
 
 Monochrome outlines remain the default. To use a registered colour font, set `doc.Settings.EmojiRendering = EmojiRendering.Colour`. COLRv0 artwork renders as vector fills and CBDT/CBLC PNG artwork as embedded images in PDF and SVG. Register the font bytes with the document; no system emoji font is selected automatically. Original ZWJ, variation-selector, skin-tone and flag sequences remain selectable and extractable. A bitmap-only font requires colour mode because it has no monochrome outlines.
+
+## Content direction
+
+`DocumentSettings.ContentDirection` selects left-to-right (the default) or right-to-left layout. Elements inherit direction and can override it locally; `ContentFromRightToLeft()` / `ContentFromLeftToRight()` configures a local override. Row children and table columns mirror visually while source collections retain logical order. Text start/end alignment follows direction; explicit left/right alignment, margins and padding stay physical.
+
+Embedded Arabic and Hebrew plain text uses Unicode bidi and script shaping. Register a font that covers the entire paragraph, such as an Arabic/Hebrew-capable TrueType font. RTL paragraphs with styled spans, fallback-font boundaries, lists or deferred page-number tokens are outside the currently supported scope.

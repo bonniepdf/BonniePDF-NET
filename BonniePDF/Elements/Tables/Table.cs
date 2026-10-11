@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -492,7 +492,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         try
         {
             float startX = ctx.CurrentX;
-            float currentX = startX;
+            float currentX = startX + (IsRightToLeft ? widths.Sum() : 0);
 
             // `col` tracks the column the cell starts in, which runs ahead of the
             // cell index `i` once any cell in the row spans more than one column.
@@ -510,6 +510,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 for (int j = 0; j < span && col + j < widths.Length; j++)
                     colWidth += widths[col + j];
 
+                if (IsRightToLeft) currentX -= colWidth;
                 capture.OpenCell(cell, currentX, colWidth);
 
                 ChildTagToken childTag = default;
@@ -550,7 +551,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                     capture.CloseCell(cell);
                 }
 
-                currentX += colWidth;
+                if (!IsRightToLeft) currentX += colWidth;
                 col += span;
             }
 
@@ -718,9 +719,11 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 Text = tb.Text,
                 FontName = tb.FontName,
                 FontSize = tb.FontSize,
-                Color = color.Value,
-                Alignment = tb.Alignment
+                Color = color.Value
             };
+            var source = (TextBlock)cell.Content;
+            if (source.AlignmentIsExplicit) tb.Alignment = source.Alignment;
+            ContentDirectionResolver.Apply(tb, source.EffectiveContentDirection);
             content = tb;
         }
 

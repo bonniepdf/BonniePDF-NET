@@ -8,6 +8,21 @@ namespace BonniePDF;
 /// </summary>
 public abstract class ElementBase : IElement, IMargin, ICaptureMetadata
 {
+    private ContentDirection? _contentDirection;
+    /// <summary>Inline direction override. Null inherits the enclosing direction.</summary>
+    public ContentDirection? ContentDirection
+    {
+        get => _contentDirection;
+        set
+        {
+            if (value.HasValue && !System.Enum.IsDefined(value.Value)) throw new System.ArgumentOutOfRangeException(nameof(value));
+            _contentDirection = value;
+        }
+    }
+    internal ContentDirection InheritedContentDirection { get; set; }
+    internal ContentDirection EffectiveContentDirection => ContentDirection ?? InheritedContentDirection;
+    internal bool IsRightToLeft => EffectiveContentDirection == BonniePDF.ContentDirection.RightToLeft;
+
     /// <summary>
     /// The starting Y position when rendering begins (used for Y-position tracking)
     /// </summary>

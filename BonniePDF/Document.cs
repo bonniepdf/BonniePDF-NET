@@ -656,6 +656,9 @@ public class Document : IDisposable
     /// </summary>
     private void ApplyDefaultStyleToTree()
     {
+        foreach (Page page in _pages)
+            foreach (IElement element in page.Elements)
+                ContentDirectionResolver.Apply(element, Settings.ContentDirection);
         TextStyle? style = Settings.DefaultTextStyle;
         if (style == null) return;
         foreach (Page page in _pages)
