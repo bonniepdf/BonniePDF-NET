@@ -7,6 +7,7 @@ namespace BonniePDF.Typography.Engine
 {
     internal sealed class Glyph
     {
+        public readonly List<double[]> Commands = new List<double[]>();
         public readonly List<List<FontPoint>> Contours = new List<List<FontPoint>>();
         public int XMin, YMin, XMax, YMax;
     }

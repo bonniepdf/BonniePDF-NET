@@ -164,7 +164,7 @@ Native [rotation](https://www.bonniepdf.dev/docs/dotnet/rotation) supports const
 | Area                  | Included                                                                                                                                |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Layout                | Automatic page flow, stacks, weighted rows, grids, containers, layers, clipping, rounded corners, headers, footers and page backgrounds |
-| Text                  | Standard PDF fonts, embedded TrueType/OpenType fonts with subsetting, Unicode, rich text, alignment, decoration and fallback fonts      |
+| Text                  | Standard PDF fonts, embedded TrueType fonts with subsetting and static CFF OpenType (.otf) fonts, Unicode, rich text, alignment, decoration and fallback fonts      |
 | Tables and lists      | Weighted columns, styled cells, repeating headers, ordered/unordered lists and nested content                                           |
 | Charts                | Bar, grouped bar, line, area, pie, lollipop and dot-plot charts rendered as PDF vectors or exported as SVG                              |
 | Images and codes      | JPEG, PNG with alpha, SVG drawn as vectors, contain/cover/fill modes, image masking, QR, Data Matrix and linear barcodes                                      |

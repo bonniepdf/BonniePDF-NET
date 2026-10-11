@@ -15,6 +15,8 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Support static CFF 1 OpenType (`.otf`) fonts through existing font registration: shaping and measurement, cubic SVG outlines, and PDF embedding with source-preserving text extraction. Complete CFF programs retain original hints and subroutines; CFF subsetting, CFF2, `.otc` and WOFF are unsupported.
+
 - Default `QRCode.QuietZone` to four modules, matching the QR standard and TypeScript implementation. Set it to `0` explicitly for borderless codes.
 
 - Add opt-in colour emoji with `DocumentSettings.EmojiRendering = EmojiRendering.Colour`: COLRv0 vector layers and CBDT PNG artwork in PDF and SVG, preserving original Unicode sequences for extraction. `Outline` remains the default; the existing Emojis & Unicode example stays monochrome.

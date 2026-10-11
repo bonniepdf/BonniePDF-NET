@@ -274,7 +274,7 @@ internal partial class SvgCanvas : ICanvas
             }
             if (runFont.HasColour && !runFont.HasOutlines) throw new NotSupportedException("The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.");
             bool simple=glyphs.Count==run.Text.EnumerateRunes().Take(glyphs.Count+1).Count() && glyphs.All(g=>g.SourceLength==(char.IsSurrogatePair(run.Text,g.Cluster)?2:1) && g.Id==runFont.GetGlyphId(char.ConvertToUtf32(run.Text,g.Cluster)) && g.OffsetY==0 && !g.IsMark);
-            if(!simple)
+            if(runFont.HasCff || !simple)
             {
                 elements.Append($"<g fill=\"{fillHex}\" aria-label=\"{XmlEscape.EscapeXml(run.Text)}\"{extraAttributes}{transformAttr}>");
                 foreach(var g in glyphs)

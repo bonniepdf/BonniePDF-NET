@@ -15,7 +15,7 @@ namespace BonniePDF.Rendering.Writers;
 /// Writes font objects to PDF, handling both standard Type1 fonts and embedded TrueType fonts.
 /// Supports both synchronous (IPdfWriter) and asynchronous (IAsyncPdfWriter) operations.
 /// </summary>
-internal class FontWriter
+internal partial class FontWriter
 {
     // Exactly one is non-null, depending on which constructor was used - see
     // StructureTreeWriter for the same pattern.
@@ -66,6 +66,7 @@ internal class FontWriter
         using var performanceScope = PerformanceEvents.Measure(PerformanceStage.FontEmbedding);
         TtfFont font = fontInfo.Font;
         GlyphUsageTracker tracker = fontInfo.Tracker;
+        if (font.HasCff) return WriteEmbeddedCff(type0Id, fontInfo);
 
         // Allocate object IDs for all components
         int cidFontId = _writer!.GetNewId();
@@ -192,7 +193,7 @@ internal class FontWriter
             [PdfKeys.FontDescriptor.Descent] = descent.ToString(),
             [PdfKeys.FontDescriptor.CapHeight] = capHeight.ToString(),
             [PdfKeys.FontDescriptor.VerticalStemWidth] = stemV.ToString(),
-            [PdfKeys.FontDescriptor.TrueTypeProgram] = $"{fontFile2Id} 0 R"
+            [font.HasCff ? PdfKeys.FontDescriptor.CffProgram : PdfKeys.FontDescriptor.TrueTypeProgram] = $"{fontFile2Id} 0 R"
         };
 
         if (cidSetId > 0)
@@ -354,6 +355,7 @@ internal class FontWriter
 
         TtfFont font = fontInfo.Font;
         GlyphUsageTracker tracker = fontInfo.Tracker;
+        if (font.HasCff) return await WriteEmbeddedCffAsync(type0Id, fontInfo, cancellationToken).ConfigureAwait(false);
 
         // Allocate object IDs for all components
         int cidFontId = _asyncWriter!.GetNewId();
@@ -482,7 +484,7 @@ internal class FontWriter
             [PdfKeys.FontDescriptor.Descent] = descent.ToString(),
             [PdfKeys.FontDescriptor.CapHeight] = capHeight.ToString(),
             [PdfKeys.FontDescriptor.VerticalStemWidth] = stemV.ToString(),
-            [PdfKeys.FontDescriptor.TrueTypeProgram] = $"{fontFile2Id} 0 R"
+            [font.HasCff ? PdfKeys.FontDescriptor.CffProgram : PdfKeys.FontDescriptor.TrueTypeProgram] = $"{fontFile2Id} 0 R"
         };
 
         if (cidSetId > 0)

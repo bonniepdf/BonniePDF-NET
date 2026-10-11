@@ -8,7 +8,9 @@ internal static class GlyphOutlinePath
     internal static string Build(FontFace face,int glyph)
     {
         var parts=new List<string>();
-        foreach(var contour in face.Font.ReadGlyph(glyph).Contours)
+        var outline=face.Font.ReadGlyph(glyph);
+        foreach(var c in outline.Commands)parts.Add(c[0]==0?$"M{c[1].ToString(CultureInfo.InvariantCulture)} {c[2].ToString(CultureInfo.InvariantCulture)}":c[0]==1?$"L{c[1].ToString(CultureInfo.InvariantCulture)} {c[2].ToString(CultureInfo.InvariantCulture)}":c[0]==2?"C"+string.Join(" ",System.Linq.Enumerable.Select(System.Linq.Enumerable.Skip(c,1),n=>n.ToString(CultureInfo.InvariantCulture))):"Z");
+        foreach(var contour in outline.Contours)
         {
             if(contour.Count<2)continue;
             var points=new List<FontPoint>();
