@@ -15,6 +15,10 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Reuse bounded validated OpenType lookup headers to reduce repeated shaping work while preserving lazy validation, lookup order and operation limits.
+
+- Avoid allocating empty contextual-substitution match lists while preserving glyph output, checked font reads and shaping operation limits.
+
 - Reduce retained text-layout memory by allocating font-feature storage only when overrides are supplied and omitting zero-valued paragraph metadata caches. Text layout, feature validation and PDF output are preserved.
 
 - Reduce transient allocations while painting text: append PDF operands and Unicode metadata directly, reuse document-owned CIDs for repeated single-character sources, and size glyph-code arrays once. Text operators, character mappings and extraction are preserved.

@@ -14,6 +14,7 @@ namespace BonniePDF.Typography.Engine
         private readonly LayoutReadCache reads = new LayoutReadCache();
         private readonly GlyphFilter filter;
         private readonly int lookupList;
+        private readonly LookupHeaderCache headers;
         private readonly int[] lookups;
         private readonly LookupRule[] rules;
         private readonly ShapeOptions options;
@@ -36,6 +37,7 @@ namespace BonniePDF.Typography.Engine
             if (bytes == null) return;
             data = new BigEndianData(bytes);
             lookupList = OpenTypeLayout.Offset16(data, 0, 8);
+            headers = new LookupHeaderCache(data, lookupList, filter, true);
         }
 
 
@@ -114,16 +116,13 @@ namespace BonniePDF.Typography.Engine
             if (options.Script == "arab" && UnicodeData.IsIgnorable(glyphs[at].Scalar)) return 0;
             if (depth > limits.MaxNesting)
                 throw new InvalidDataException("GPOS recursion limit exceeded.");
-            if (index < 0 || index >= data.U16(lookupList))
+            if (index < 0 || index >= headers.Count)
                 throw new InvalidDataException("Invalid GPOS lookup index.");
             if (at < 0 || at >= glyphs.Count)
                 return 0;
             if (depth == 0 && activeRule != null && activeRule.Value(glyphs[at].FeatureCluster, charge) == 0) return 0;
-            int lookup = Offset(lookupList, lookupList + 2 + index * 2);
-            int type = data.U16(lookup), flags = data.U16(lookup + 2), count = data.U16(lookup + 4);
-            data.Check(lookup + 6, count * 2);
-            int markSet = (flags & 16) != 0 ? data.U16(lookup + 6 + count * 2) : -1;
-            filter.Validate(flags, markSet);
+            var header = headers.Get(index);
+            int lookup = header.Offset, type = header.Type, flags = header.Flags, count = header.Count, markSet = header.MarkSet;
             if (filter.Ignored(glyphs[at].Id, flags, markSet))
                 return 0;
             int next = Walk(glyphs, at, 1, flags, markSet);
