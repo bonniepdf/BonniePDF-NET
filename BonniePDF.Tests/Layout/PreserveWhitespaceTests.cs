@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using Xunit;
 
@@ -18,9 +17,6 @@ public class PreserveWhitespaceTests
 {
     private const float CodePoint = 6f;
 
-    private static readonly MethodInfo GetOrComputeLines =
-        typeof(TextBlock).GetMethod("GetOrComputeLines", BindingFlags.Instance | BindingFlags.NonPublic)!;
-
     private static IList<string> Lines(string text, float widthPoints, bool preserve, int firstLineIndentColumns = 0, bool heading = false)
     {
         TextBlock block = heading ? new Heading(text) : new TextBlock { Text = text };
@@ -28,7 +24,7 @@ public class PreserveWhitespaceTests
         block.FontSize = 10;
         block.PreserveWhitespace = preserve;
         block.FirstLineIndent = firstLineIndentColumns * CodePoint;
-        return (IList<string>)GetOrComputeLines.Invoke(block, [widthPoints])!;
+        return block.LinesAt(widthPoints);
     }
 
     private static IList<string> Lines(string text, int columns, bool preserve, int firstLineIndentColumns = 0)

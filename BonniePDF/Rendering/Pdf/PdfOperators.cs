@@ -80,14 +80,14 @@ internal static class PdfOperators
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=287"/>
     /// </summary>
     internal static void SetFillColor(StringBuilder s, Color color)
-        => s.AppendLf($"{PdfSyntax.FormatColor(color)} rg");
+        => PdfSyntax.AppendColor(s, color).Append(" rg\n");
 
     /// <summary>
     /// <c>RG</c> - Set the stroke color in DeviceRGB.
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=287"/>
     /// </summary>
     internal static void SetStrokeColor(StringBuilder s, Color color)
-        => s.AppendLf($"{PdfSyntax.FormatColor(color)} RG");
+        => PdfSyntax.AppendColor(s, color).Append(" RG\n");
 
     // ── Line/Path Graphics (PDF Ref 8.5.3) ──────────────────────────────
 
@@ -266,7 +266,8 @@ internal static class PdfOperators
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=398"/>
     /// </summary>
     internal static void SetFont(StringBuilder s, string fontResourceName, float size)
-        => s.AppendLf($"{fontResourceName} {size} Tf");
+        // Append(float) formats exactly as the interpolation it replaces did (current culture, no format).
+        => s.Append(fontResourceName).Append(' ').Append(size).Append(" Tf\n");
 
     /// <summary>
     /// <c>Tm</c> - Set the text matrix.

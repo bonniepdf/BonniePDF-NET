@@ -20,7 +20,16 @@ internal class PdfCanvas : ICanvas
     private readonly Func<string, string> _fontResolver;
     private readonly Func<ImageInfo, string> _imageResolver;
     private readonly Action<string, string> _glyphTracker;
-    private readonly record struct PreparedTextRun(ResolvedTextRun Run, Typography.Engine.GlyphRun? Glyphs);
+    private readonly record struct PreparedTextRun(TextRunFont Run, string Text, Typography.Engine.GlyphRun? Glyphs);
+
+    /// <summary>
+    /// The font that draws a whole string, or null when the string needs more than one; asked
+    /// before the general run resolver, so the common case allocates no runs.
+    /// </summary>
+    internal Func<string, string, TextRunFont?>? WholeTextFontResolver { get; init; }
+
+    // The one-run result ResolveRuns hands out, refilled per call; each caller is done with it before the next.
+    private readonly PreparedTextRun[] _wholeRun = new PreparedTextRun[1];
     private readonly Func<float, string> _alphaGraphicsStateResolver;
     private readonly Func<string, string, IList<ResolvedTextRun>>? _textRunResolver;
     private readonly Action? _reportUntaggedImage;
@@ -656,6 +665,11 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     private PreparedTextRun[] ResolveRuns(string text, string fontFamily)
     {
+        if (WholeTextFontResolver?.Invoke(fontFamily, text) is { } whole)
+        {
+            _wholeRun[0] = new(whole, text, whole.EmbeddedFont?.Shape(text, _fontFeatures));
+            return _wholeRun;
+        }
         var runs = _textRunResolver != null ? _textRunResolver(fontFamily, text) : new List<ResolvedTextRun>
         {
             new()
@@ -670,7 +684,7 @@ internal class PdfCanvas : ICanvas
         // for the font cache. Alignment and emission use the exact same result.
         var prepared = new PreparedTextRun[runs.Count];
         for (int i = 0; i < runs.Count; i++)
-            prepared[i] = new(runs[i], runs[i].EmbeddedFont?.Shape(runs[i].Text, _fontFeatures));
+            prepared[i] = new(TextRunFont.Of(runs[i]), runs[i].Text, runs[i].EmbeddedFont?.Shape(runs[i].Text, _fontFeatures));
         return prepared;
     }
 
@@ -691,9 +705,9 @@ internal class PdfCanvas : ICanvas
             }
             else
             {
-                total += FontMetrics.GetStringWidth(run.Text, run.FontIdentifier, fontSize);
+                total += FontMetrics.GetStringWidth(prepared.Text, run.FontIdentifier, fontSize);
             }
-            total += SpacingWidth(run.Text) + (font is null?0:(prepared.Glyphs!.Count-run.Text.EnumerateRunes().Count())*_letterSpacing);
+            total += SpacingWidth(prepared.Text) + (font is null?0:(prepared.Glyphs!.Count-prepared.Text.EnumerateRunes().Count())*_letterSpacing);
         }
         return total;
     }
@@ -731,28 +745,36 @@ internal class PdfCanvas : ICanvas
         foreach(var prepared in runs)
         {
             var run = prepared.Run;
-            if(run.Text.Length==0) continue;
+            if(prepared.Text.Length==0) continue;
             var font = run.EmbeddedFont;
             var glyphs = prepared.Glyphs!;
-            IReadOnlyList<ushort>? codes = null;
+            // The codes are written into a buffer the canvas keeps; only the first glyphs.Count are read.
+            ushort[]? codes = null;
             if (run.CanTrackPreparedGlyphs && run.Tracker is not null && font is not null)
             {
                 // Keep default-feature tracking first: its source CIDs and subset
                 // membership are observable even when emission overrides features.
                 bool defaults = _fontFeatures is null || _fontFeatures.Count == 0;
-                codes = run.Tracker.MarkUsed(run.Text, defaults ? glyphs! : font.Shape(run.Text));
-                if (!defaults) codes = run.Tracker.MarkShaped(run.Text, glyphs!);
+                var tracked = defaults ? glyphs! : font.Shape(prepared.Text);
+                codes = CodeBuffer(tracked.Count);
+                run.Tracker.MarkUsed(prepared.Text, tracked, codes);
+                if (!defaults) run.Tracker.MarkShaped(prepared.Text, glyphs!, codes = CodeBuffer(glyphs!.Count));
             }
             else
             {
-                _glyphTracker(run.FontIdentifier, run.Text);
-                if (glyphs is not null) codes = run.Tracker?.MarkShaped(run.Text, glyphs) ?? GlyphIds(glyphs);
+                _glyphTracker(run.FontIdentifier, prepared.Text);
+                if (glyphs is not null)
+                {
+                    codes = CodeBuffer(glyphs.Count);
+                    if (run.Tracker is not null) run.Tracker.MarkShaped(prepared.Text, glyphs, codes);
+                    else for (int i = 0; i < glyphs.Count; i++) codes[i] = (ushort)glyphs.Id(i);
+                }
             }
             PdfOperators.SetFont(_stream,run.ResourceName,fontSize);
             if (font is null)
             {
                 _stream.Append('(');
-                PdfSyntax.AppendEscaped(_stream, run.Text);
+                PdfSyntax.AppendEscaped(_stream, prepared.Text);
                 _stream.Append(") Tj\n");
                 continue;
             }
@@ -761,7 +783,7 @@ internal class PdfCanvas : ICanvas
             if (font.HasColour && !font.HasOutlines && !colourFont) throw new NotSupportedException("The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.");
             if (colourFont) _stream.AppendLf("3 Tr");
             _stream.Append("/Span << /ActualText ");
-            PdfSyntax.AppendMetadataString(_stream, run.Text);
+            PdfSyntax.AppendMetadataString(_stream, prepared.Text);
             _stream.Append(" >> BDC\n");
             bool horizontal = true;
             for (int i = 0; i < glyphs.Count; i++)
@@ -772,7 +794,7 @@ internal class PdfCanvas : ICanvas
                 // Keep empty hex groups around adjustments exactly as in the general encoding.
                 bool adjusted = false;
                 for (int i = 0; i < glyphs.Count; i++)
-                    if (glyphs.OffsetX(i) != 0 || AfterAdvance(glyphs, i, run.Text, font, fontSize, wordSpacing ?? _wordSpacing) != 0)
+                    if (glyphs.OffsetX(i) != 0 || AfterAdvance(glyphs, i, prepared.Text, font, fontSize, wordSpacing ?? _wordSpacing) != 0)
                     { adjusted = true; break; }
                 if (adjusted) _stream.Append('[');
                 _stream.Append('<');
@@ -781,7 +803,7 @@ internal class PdfCanvas : ICanvas
                     double before = -(double)glyphs.OffsetX(i) * 1000 / font.UnitsPerEm;
                     if (before != 0) AppendTextAdjustment(before);
                     PdfSyntax.AppendHex4(_stream, codes![i]);
-                    double after = AfterAdvance(glyphs, i, run.Text, font, fontSize, wordSpacing ?? _wordSpacing);
+                    double after = AfterAdvance(glyphs, i, prepared.Text, font, fontSize, wordSpacing ?? _wordSpacing);
                     if (after != 0) AppendTextAdjustment(after);
                 }
                 _stream.Append(adjusted ? ">] TJ\n" : "> Tj\n");
@@ -794,7 +816,7 @@ internal class PdfCanvas : ICanvas
                 double rise = (double)glyphs.OffsetY(i) * fontSize / font.UnitsPerEm;
                 if (rise != 0) _stream.Append(PdfSyntax.FormatDecimal((float)rise)).Append(" Ts\n");
                 double before = -(double)glyphs.OffsetX(i) * 1000 / font.UnitsPerEm;
-                double after = AfterAdvance(glyphs, i, run.Text, font, fontSize, wordSpacing ?? _wordSpacing);
+                double after = AfterAdvance(glyphs, i, prepared.Text, font, fontSize, wordSpacing ?? _wordSpacing);
                 bool adjusted = before != 0 || after != 0;
                 if (adjusted) _stream.Append('[');
                 if (before != 0) _stream.Append(PdfSyntax.FormatDecimal((float)before)).Append(' ');
@@ -817,11 +839,11 @@ internal class PdfCanvas : ICanvas
         foreach (var prepared in runs)
         {
             var run = prepared.Run; var font = run.EmbeddedFont;
-            if (font is null) { cursor += FontMetrics.GetStringWidth(run.Text, run.FontIdentifier, size) + SpacingWidth(run.Text); continue; }
+            if (font is null) { cursor += FontMetrics.GetStringWidth(prepared.Text, run.FontIdentifier, size) + SpacingWidth(prepared.Text); continue; }
             var glyphs = prepared.Glyphs!;
             for (int glyph = 0; glyph < glyphs.Count; glyph++)
             {
-                string source = run.Text.Substring(glyphs.Cluster(glyph), glyphs.SourceLength(glyph));
+                string source = prepared.Text.Substring(glyphs.Cluster(glyph), glyphs.SourceLength(glyph));
                 if (font.HasColour) ColourGlyphPainter.Draw(this, font, glyphs, glyph, source, (float)cursor, baseline, size, colour);
                 cursor += (double)glyphs.AdvanceX(glyph) * size / font.UnitsPerEm + _letterSpacing;
                 if (source == " ") cursor += wordSpacing ?? _wordSpacing;
@@ -841,11 +863,13 @@ internal class PdfCanvas : ICanvas
             - (space && fontSize > 0 ? wordSpacing * 1000 / fontSize : 0);
     }
 
-    private static ushort[] GlyphIds(Typography.Engine.GlyphRun glyphs)
+    private ushort[] _codes = new ushort[64];
+
+    /// <summary>The canvas's code buffer, grown to hold at least <paramref name="count"/> codes.</summary>
+    private ushort[] CodeBuffer(int count)
     {
-        var ids = new ushort[glyphs.Count];
-        for (int i = 0; i < ids.Length; i++) ids[i] = (ushort)glyphs.Id(i);
-        return ids;
+        if (_codes.Length < count) _codes = new ushort[Math.Max(count, _codes.Length * 2)];
+        return _codes;
     }
 
     /// <summary>

@@ -15,7 +15,8 @@ namespace BonniePDF;
 /// compact entry with the real <see cref="TableRow"/> and keeps it, so a caller always sees
 /// the same object and its changes stay. Layout reads rows through <see cref="ForLayout"/>,
 /// which builds a temporary row for a compact entry instead: the same values, discarded after
-/// use, so a long table does not hold three objects per row for the whole of its layout.
+/// use, so a long table does not hold three objects per row for the whole of its layout, or
+/// with reuse one scratch row loaded with each entry in turn, so it does not allocate them either.
 /// </remarks>
 internal sealed class TableRowStore : IList<TableRow>
 {
@@ -29,6 +30,9 @@ internal sealed class TableRowStore : IList<TableRow>
     // A single null content stays in an array, so it is not mistaken for a null row.
     internal void AddContents(IElement[] contents) =>
         _entries.Add(contents.Length == 1 && contents[0] is not null ? contents[0] : (IElement[])contents.Clone());
+
+    /// <summary>Adds a one-cell row holding <paramref name="content"/>, as <see cref="AddContents"/> does.</summary>
+    internal void AddContent(IElement content) => _entries.Add(content is not null ? content : new IElement[1]);
 
     /// <summary>Whether row <paramref name="index"/> is kept as its content alone.</summary>
     internal bool IsCompact(int index) => _entries[index] is not (TableRow or null);
@@ -45,7 +49,28 @@ internal sealed class TableRowStore : IList<TableRow>
     /// Row <paramref name="index"/> for measuring and drawing: the stored row, or for a compact
     /// entry a temporary row equal to the one <see cref="TableRow.From(IElement[])"/> builds.
     /// </summary>
-    internal TableRow ForLayout(int index) => _entries[index] is TableRow or null ? (TableRow)_entries[index]! : Build(_entries[index]!);
+    /// <remarks>
+    /// With <paramref name="reuse"/>, a compact entry is loaded into one scratch row kept by the
+    /// store, valid until the next call: for a caller that is done with each row before reading
+    /// the next and keeps no reference to it (a layout recorder keys its nodes by row and cell, so
+    /// recording passes false).
+    /// </remarks>
+    internal TableRow ForLayout(int index, bool reuse = false)
+    {
+        object? entry = _entries[index];
+        if (entry is TableRow or null) return (TableRow)entry!;
+        if (!reuse) return Build(entry);
+        IElement[]? contents = entry as IElement[];
+        int count = contents?.Length ?? 1;
+        if (_scratch is null || _scratch.Cells.Length != count) _scratch = TableRow.From(new IElement[count]);
+        TableCell[] cells = _scratch.Cells;
+        if (contents is null) cells[0].Content = (IElement)entry;
+        else for (int i = 0; i < count; i++) cells[i].Content = contents[i];
+        return _scratch;
+    }
+
+    // The scratch row ForLayout fills; its cells are never changed except for their content.
+    private TableRow? _scratch;
 
     /// <summary>The cell contents of row <paramref name="index"/>, in order, without materialising it.</summary>
     internal void AddContentsTo(int index, List<IElement> children)

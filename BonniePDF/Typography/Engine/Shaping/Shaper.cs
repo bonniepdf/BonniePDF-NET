@@ -34,38 +34,7 @@ namespace BonniePDF.Typography.Engine
                     run.Add(face.RentGlyph(id, text[i], i));
                 }
             }
-            else
-            {
-                var input = EmojiClusters.Scalars(text, nativeRtl || itemized, arabic);
-                var tokens = new List<SourceScalar>();
-                int offset = 0;
-                foreach (int scalar in input)
-                {
-                    int end = offset + (scalar > 65535 ? 2 : 1);
-                    tokens.Add(new SourceScalar(scalar, offset, end)); offset = end;
-                }
-                tokens = new CanonicalNormalizer(limits, face.Covers, hebrew ? (Func<int, int>)HebrewShaper.CombiningClass : null,
-                    hebrew ? (Func<int, bool>)(cp => cp >= 0xfb1d && cp <= 0xfb4e && face.Covers(cp)) : null, hebrew ? 32 : int.MaxValue).Normalize(tokens);
-                if (hebrew) tokens = HebrewShaper.Compose(face, tokens);
-                if (arabic) tokens = ArabicShaper.Reorder(face, tokens);
-                var scalars = new List<int>();
-                foreach (var token in tokens)
-                {
-                    int scalar = token.Scalar;
-                    if (settings.Direction == TextDirection.RightToLeft)
-                    {
-                        int mirrored = UnicodeData.Mirror(scalar);
-                        if (face.Covers(mirrored)) scalar = mirrored;
-                    }
-                    scalars.Add(scalar);
-                }
-                foreach (var cluster in EmojiClusters.Split(scalars, !arabic))
-                {
-                    int sourceOffset = tokens[cluster.Start].Start;
-                    for (int i = cluster.Start + 1; i < cluster.End; i++) sourceOffset = Math.Min(sourceOffset, tokens[i].Start);
-                    AppendCluster(face, scalars, cluster, sourceOffset, run, tokens, nativeRtl);
-                }
-            }
+            else AppendScalars(face, text, settings, limits, run, hebrew, arabic, nativeRtl, itemized);
             if ((!nativeRtl && settings.Direction == TextDirection.RightToLeft) || (nativeRtl && settings.Direction == TextDirection.LeftToRight))
             {
                 run.Reverse();
@@ -83,10 +52,16 @@ namespace BonniePDF.Typography.Engine
             bool wide = false;
             for (int i = 0; i < run.Count && !wide; i++)
                 wide = GlyphRun.NeedsWide(adjustments[i].YAdvance, adjustments[i].YPlacement, run[i].ComponentCount, run[i].MarkComponent);
-            var output = new GlyphRun(run.Count, wide);
             bool ordered = true;
             for (int i = 1; i < run.Count; i++)
                 if (run[i].Cluster < run[i - 1].Cluster) { ordered = false; break; }
+            // One glyph per UTF-16 unit, clusters consecutive to the end of the text, and nothing
+            // offset, marked or ligated: the compact layout holds it (see GlyphRun).
+            bool compact = !wide && ordered && run.Count > 0 && run[0].Cluster + run.Count == text.Length;
+            for (int i = 0; i < run.Count && compact; i++)
+                compact = run[i].Cluster == run[0].Cluster + i && adjustments[i].XPlacement == 0 &&
+                    !adjustments[i].ZeroMarkAdvance && !run[i].Ligature;
+            var output = compact ? GlyphRun.CompactRun(run.Count, run[0].Cluster) : new GlyphRun(run.Count, wide);
             if (ordered)
             {
                 // Logical LTR clusters are usually already ordered. Walk each
@@ -125,6 +100,43 @@ namespace BonniePDF.Typography.Engine
                     Output(face, output, i, run[i], adjustments[i], lengths[run[i].Cluster], unsafeClusters.Contains(run[i].Cluster));
             }
             return new ShapedRun(text, output);
+        }
+
+        // Text other than printable ASCII: canonical normalisation, script reordering and clusters.
+        // A method of its own because its closures capture face, which would otherwise allocate
+        // their closure object on every call, ASCII included.
+        private static void AppendScalars(FontFace face, string text, ShapeOptions settings, ShapingLimits limits,
+            List<ShapingGlyph> run, bool hebrew, bool arabic, bool nativeRtl, bool itemized)
+        {
+            var input = EmojiClusters.Scalars(text, nativeRtl || itemized, arabic);
+            var tokens = new List<SourceScalar>();
+            int offset = 0;
+            foreach (int scalar in input)
+            {
+                int end = offset + (scalar > 65535 ? 2 : 1);
+                tokens.Add(new SourceScalar(scalar, offset, end)); offset = end;
+            }
+            tokens = new CanonicalNormalizer(limits, face.Covers, hebrew ? (Func<int, int>)HebrewShaper.CombiningClass : null,
+                hebrew ? (Func<int, bool>)(cp => cp >= 0xfb1d && cp <= 0xfb4e && face.Covers(cp)) : null, hebrew ? 32 : int.MaxValue).Normalize(tokens);
+            if (hebrew) tokens = HebrewShaper.Compose(face, tokens);
+            if (arabic) tokens = ArabicShaper.Reorder(face, tokens);
+            var scalars = new List<int>();
+            foreach (var token in tokens)
+            {
+                int scalar = token.Scalar;
+                if (settings.Direction == TextDirection.RightToLeft)
+                {
+                    int mirrored = UnicodeData.Mirror(scalar);
+                    if (face.Covers(mirrored)) scalar = mirrored;
+                }
+                scalars.Add(scalar);
+            }
+            foreach (var cluster in EmojiClusters.Split(scalars, !arabic))
+            {
+                int sourceOffset = tokens[cluster.Start].Start;
+                for (int i = cluster.Start + 1; i < cluster.End; i++) sourceOffset = Math.Min(sourceOffset, tokens[i].Start);
+                AppendCluster(face, scalars, cluster, sourceOffset, run, tokens, nativeRtl);
+            }
         }
 
         private static void Output(FontFace face, GlyphRun output, int i, ShapingGlyph glyph, GlyphAdjustment adjustment, int length, bool unsafeBefore)

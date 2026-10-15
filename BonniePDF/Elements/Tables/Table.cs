@@ -109,8 +109,13 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     /// <inheritdoc /> - every cell's content across headers, body rows, and footers.
     public IEnumerable<IElement> GetChildren()
     {
-        // Read without materialising compact body rows (see TableRowStore).
-        var children = new List<IElement>();
+        // Read without materialising compact body rows (see TableRowStore), into a list sized
+        // for every cell, so a long table's walk does not regrow it.
+        int cells = 0;
+        foreach (TableRow row in _headers) cells += row.Cells.Length;
+        for (int i = 0; i < _rows.Count; i++) cells += _rows.CellCount(i);
+        foreach (TableRow row in _footers) cells += row.Cells.Length;
+        var children = new List<IElement>(cells);
         foreach (TableRow row in _headers)
             foreach (TableCell cell in row.Cells)
                 if (cell.Content is not null) children.Add(cell.Content);
@@ -205,6 +210,13 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         // (TableRowStore); a TableCell among the elements is the caller's and is kept as given.
         if (Array.TrueForAll(cells, cell => cell is not TableCell)) _rows.AddContents(cells);
         else _rows.Add(TableRow.From(cells));
+    }
+
+    /// <summary><see cref="AddRow(IElement[])"/> with one element, without the array.</summary>
+    internal void AddRow(IElement cell)
+    {
+        if (cell is TableCell) _rows.Add(TableRow.From(cell));
+        else _rows.AddContent(cell);
     }
 
     /// <summary>
@@ -306,7 +318,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         bool tbodyOpen = false;
         for (int i = startRow; i < _rows.Count; i++)
         {
-            TableRow row = _rows.ForLayout(i);
+            TableRow row = _rows.ForLayout(i, reuse: ctx.LayoutRecorder is null);
             float rowHeight = MeasureRowHeight(row, widths);
 
             // Pagination check
@@ -424,7 +436,9 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
 
     private void RecordRowBottoms(RenderContext ctx, TableRow row, float[] widths)
     {
-        var bottoms = new (float Width, Color? Color)[widths.Length];
+        // The row above's array is read only while planning this row's edges, so it is refilled in place.
+        var bottoms = _bottomsAbove is { } reused && reused.Length == widths.Length ? reused : new (float Width, Color? Color)[widths.Length];
+        Array.Clear(bottoms);
         int col = 0;
         foreach (TableCell cell in row.Cells)
         {
@@ -602,7 +616,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         foreach (TableRow row in _headers) totalHeight += MeasureRowHeight(row, widths);
 
         // Data rows
-        for (int i = 0; i < _rows.Count; i++) totalHeight += MeasureRowHeight(_rows.ForLayout(i), widths);
+        for (int i = 0; i < _rows.Count; i++) totalHeight += MeasureRowHeight(_rows.ForLayout(i, reuse: true), widths);
 
         // Footers
         foreach (TableRow row in _footers) totalHeight += MeasureRowHeight(row, widths);
@@ -657,7 +671,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             {
                 for (int i = 0; i < _rows.Count; i++)
                 {
-                    TableRow row = _rows.ForLayout(i);
+                    TableRow row = _rows.ForLayout(i, reuse: ctx.LayoutRecorder is null);
                     float rowHeight = MeasureRowHeight(row, widths);
 
                     // Pagination check

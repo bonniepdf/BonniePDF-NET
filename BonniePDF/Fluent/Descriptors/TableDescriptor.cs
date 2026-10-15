@@ -147,6 +147,11 @@ public sealed class TableDescriptor
             for (int i = 0; i < currentSlots.Count; i += colCount)
             {
                 int cellsInRow = Math.Min(colCount, currentSlots.Count - i);
+                if (cellsInRow == 1)
+                {
+                    table.AddRow(currentSlots[i].Child ?? new TextBlock { Text = "" });
+                    continue;
+                }
                 var cells = new IElement[cellsInRow];
 
                 for (int j = 0; j < cellsInRow; j++)

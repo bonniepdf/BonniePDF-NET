@@ -25,6 +25,13 @@ internal class GlyphUsageTracker
     internal IReadOnlyList<ushort> MarkShaped(string text, Typography.Engine.GlyphRun glyphs)
     {
         var codes=new ushort[glyphs.Count];
+        MarkShaped(text, glyphs, codes);
+        return codes;
+    }
+
+    /// <summary>As <see cref="MarkShaped(string, Typography.Engine.GlyphRun)"/>, writing the codes into the first <c>glyphs.Count</c> entries of <paramref name="codes"/>.</summary>
+    internal void MarkShaped(string text, Typography.Engine.GlyphRun glyphs, ushort[] codes)
+    {
         for(int i=0;i<glyphs.Count;) {
             int firstCluster=glyphs.Cluster(i), end=i+1;
             while(end<glyphs.Count && glyphs.Cluster(end)==firstCluster)end++;
@@ -52,7 +59,6 @@ internal class GlyphUsageTracker
             }
             i=end;
         }
-        return codes;
     }
 
     private ushort RegisterSource(ushort id, string source)
@@ -130,10 +136,17 @@ internal class GlyphUsageTracker
 
     internal IReadOnlyList<ushort> MarkUsed(string text, Typography.Engine.GlyphRun glyphs)
     {
-        var codes = MarkShaped(text, glyphs);
+        var codes = new ushort[glyphs.Count];
+        MarkUsed(text, glyphs, codes);
+        return codes;
+    }
+
+    /// <summary>As <see cref="MarkUsed(string, Typography.Engine.GlyphRun)"/>, writing the codes into <paramref name="codes"/>.</summary>
+    internal void MarkUsed(string text, Typography.Engine.GlyphRun glyphs, ushort[] codes)
+    {
+        MarkShaped(text, glyphs, codes);
         foreach (Rune rune in text.EnumerateRunes())
             MarkUsed(rune.Value);
-        return codes;
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using BonniePDF.Rendering.Writers;
 
@@ -40,6 +41,7 @@ internal sealed record SealedPageBody(byte[] Bytes, bool Compressed)
 internal sealed class FinishedPageStore
 {
     private readonly Dictionary<int, SealedPageBody> _bodies = new();
+    private MemoryStream? _compressed;
 
     internal FinishedPageStorage Storage { get; set; }
 
@@ -63,7 +65,7 @@ internal sealed class FinishedPageStore
                 at += Encoding.Latin1.GetBytes(chunk.Span, buffer.AsSpan(at));
             ReadOnlySpan<byte> content = buffer.AsSpan(0, length);
             bool compressed = Storage == FinishedPageStorage.Compressed;
-            _bodies[index] = new SealedPageBody(compressed ? ContentCompression.Compress(content) : content.ToArray(), compressed);
+            _bodies[index] = new SealedPageBody(compressed ? ContentCompression.Compress(content, _compressed ??= new MemoryStream()) : content.ToArray(), compressed);
         }
         finally
         {
