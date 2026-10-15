@@ -24,7 +24,8 @@ namespace BonniePDF.Rendering.Writers;
 internal class AsyncPdfWriter : IAsyncPdfWriter
 {
     private static readonly Encoding Iso88591 = Encoding.GetEncoding("ISO-8859-1");
-    private readonly FileStream? _fs;
+    private readonly Stream _destination;
+    private readonly PdfOutputStream _output;
     private readonly bool _leaveOpen;
 
     // Maps object ID to file position for the xref table
@@ -46,8 +47,9 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="version">The PDF version to emit</param>
     public AsyncPdfWriter(string filename, PdfVersion version = PdfVersion.Pdf14)
     {
-        _fs = new FileStream(filename, FileMode.Create);
-        _stream = _fs;
+        _destination = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.Read, 4096, useAsync: true);
+        _output = new PdfOutputStream(_destination);
+        _stream = _output;
         _leaveOpen = false;
         _writer = new StreamWriter(_stream, Iso88591, leaveOpen: true) { NewLine = "\n" };
         _writer.WriteLine(version == PdfVersion.Pdf20 ? "%PDF-2.0" : version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
@@ -68,8 +70,9 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
         if (!stream.CanWrite)
             throw new ArgumentException("Stream must be writable", nameof(stream));
 
-        _fs = null;
-        _stream = stream;
+        _destination = stream;
+        _output = new PdfOutputStream(stream);
+        _stream = _output;
         _leaveOpen = leaveOpen;
         _writer = new StreamWriter(_stream, Iso88591, leaveOpen: true) { NewLine = "\n" };
         _writer.WriteLine(version == PdfVersion.Pdf20 ? "%PDF-2.0" : version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
@@ -537,25 +540,16 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        // Always flush the writer to ensure all buffered data is written
-        if (_writer != null)
+        try
+        {
             await _writer.FlushAsync().ConfigureAwait(false);
-
-        if (!_leaveOpen)
-        {
-            // Only dispose the writer and streams when we're not leaving them open
-            if (_writer != null)
-                await _writer.DisposeAsync().ConfigureAwait(false);
-            if (_stream != null)
-                await _stream.DisposeAsync().ConfigureAwait(false);
-            if (_fs != null)
-                await _fs.DisposeAsync().ConfigureAwait(false);
+            await _output.CompleteAsync().ConfigureAwait(false);
+            await _writer.DisposeAsync().ConfigureAwait(false);
         }
-        else
+        finally
         {
-            // When leaving the stream open, still dispose the writer since it now has leaveOpen: true
-            if (_writer != null)
-                await _writer.DisposeAsync().ConfigureAwait(false);
+            await _output.DisposeAsync().ConfigureAwait(false);
+            if (!_leaveOpen) await _destination.DisposeAsync().ConfigureAwait(false);
         }
 
         GC.SuppressFinalize(this);

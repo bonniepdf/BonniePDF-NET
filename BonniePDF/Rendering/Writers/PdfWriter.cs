@@ -21,7 +21,8 @@ internal class PdfWriter : IPdfWriter, IDisposable
     // characters like £ (U+00A3) are encoded as single byte 0xA3 instead of
     // UTF-8's two-byte sequence (0xC2 0xA3) which would display as "Â£"
     private static readonly Encoding Iso88591 = Encoding.GetEncoding("ISO-8859-1");
-    private readonly FileStream? _fs;
+    private readonly Stream _destination;
+    private readonly PdfOutputStream _output;
     private readonly bool _leaveOpen;
 
     // Maps object ID to file position for the xref table
@@ -43,10 +44,11 @@ internal class PdfWriter : IPdfWriter, IDisposable
     /// <param name="version">The PDF version to emit</param>
     public PdfWriter(string filename, PdfVersion version = PdfVersion.Pdf14)
     {
-        _fs = new FileStream(filename, FileMode.Create);
-        _stream = _fs;
+        _destination = new FileStream(filename, FileMode.Create);
+        _output = new PdfOutputStream(_destination);
+        _stream = _output;
         _leaveOpen = false;
-        _writer = new StreamWriter(_stream, Iso88591) { NewLine = "\n" };
+        _writer = new StreamWriter(_stream, Iso88591, 1024, leaveOpen: true) { NewLine = "\n" };
         _writer.WriteLine(version == PdfVersion.Pdf20 ? "%PDF-2.0" : version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
         _writer.WriteLine("%\u00E2\u00E3\u00CF\u00D3");
     }
@@ -65,10 +67,11 @@ internal class PdfWriter : IPdfWriter, IDisposable
         if (!stream.CanWrite)
             throw new ArgumentException("Stream must be writable", nameof(stream));
 
-        _fs = null;
-        _stream = stream;
+        _destination = stream;
+        _output = new PdfOutputStream(stream);
+        _stream = _output;
         _leaveOpen = leaveOpen;
-        _writer = new StreamWriter(_stream, Iso88591, 1024, leaveOpen) { NewLine = "\n" };
+        _writer = new StreamWriter(_stream, Iso88591, 1024, leaveOpen: true) { NewLine = "\n" };
         _writer.WriteLine(version == PdfVersion.Pdf20 ? "%PDF-2.0" : version == PdfVersion.Pdf17 ? "%PDF-1.7" : "%PDF-1.4");
         _writer.WriteLine("%\u00E2\u00E3\u00CF\u00D3");
     }
@@ -78,11 +81,15 @@ internal class PdfWriter : IPdfWriter, IDisposable
     /// </summary>
     public void Dispose()
     {
-        _writer.Dispose();
-        if (!_leaveOpen)
+        try
         {
-            _stream.Dispose();
-            _fs?.Dispose();
+            _writer.Dispose();
+            _output.Complete();
+        }
+        finally
+        {
+            _output.Dispose();
+            if (!_leaveOpen) _destination.Dispose();
         }
     }
 
