@@ -60,6 +60,10 @@ internal class TtfFont
         return _shapedText.Get(this, text, features);
     }
 
+    /// <summary>Records glyphs known to equal shaping <paramref name="text"/> (see <see cref="ShapedTextCache.Seed"/>).</summary>
+    internal void SeedShaped(string text, IReadOnlyDictionary<string, int>? features, Typography.Engine.GlyphInfo[] glyphs) =>
+        _shapedText.Seed(text, features, glyphs);
+
     // Engine faces carry per-call shaping state and caches, so one face serves one shaping
     // call at a time. Concurrent documents using this font each borrow a face instead of
     // queueing behind one lock. Faces are retained up to the processor count; each is a

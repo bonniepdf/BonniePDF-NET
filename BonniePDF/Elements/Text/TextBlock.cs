@@ -571,24 +571,30 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
             return WrapPreservingWhitespace(segment, contentWidth - FirstLineIndent, contentWidth);
 
         string[] words = segment.Split(' ');
-        string current = string.Empty;
+        ParagraphWidths? widths = words.Length >= 3 ? ParagraphWidthsFor(segment) : null;
         float widthLimit = contentWidth - FirstLineIndent;
 
+        // As in WrapSegment, the current line and each candidate are spans of the segment.
+        int lineStart = 0, lineEnd = 0, wordStart = 0;
         foreach (string word in words)
         {
-            string test = current.Length == 0 ? word : current + ' ' + word;
-            if (MeasureTextWidth(test) > widthLimit && current.Length != 0)
+            int wordEnd = wordStart + word.Length;
+            bool lineEmpty = lineStart == lineEnd;
+            int testStart = lineEmpty ? wordStart : lineStart;
+            if (MeasureSpan(segment, testStart, wordEnd, widths) > widthLimit && !lineEmpty)
             {
-                lines.Add(current);
-                current = word;
+                AddLine(lines, segment, lineStart, lineEnd, widths);
+                lineStart = wordStart;
                 widthLimit = contentWidth; // subsequent lines are full width
             }
             else
             {
-                current = test;
+                lineStart = testStart;
             }
+            lineEnd = wordEnd;
+            wordStart = wordEnd + 1;
         }
-        if (current.Length != 0) lines.Add(current);
+        if (lineStart != lineEnd) AddLine(lines, segment, lineStart, lineEnd, widths);
         return lines;
     }
 }
