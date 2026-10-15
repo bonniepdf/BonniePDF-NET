@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
+using BonniePDF.Typography.Engine;
 using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF;
@@ -315,11 +316,26 @@ public static class FontMetrics
         // makes the two agree. The result narrows to float to keep the layout
         // contract unchanged.
         if (TextRunShaper.PrimaryCovers(text, font))
-            return (float)(font.Shape(text, features).Sum(g => (double)g.AdvanceX) * fontSize / font.UnitsPerEm);
+            return (float)(SumAdvances(font.Shape(text, features)) * fontSize / font.UnitsPerEm);
+        return GetFallbackKernedStringWidth(text, font, fontSize, features);
+    }
+
+    // Kept out of GetKernedStringWidth so the common path does not allocate the closure
+    // this path needs.
+    private static float GetFallbackKernedStringWidth(string text, TtfFont font, float fontSize, IReadOnlyDictionary<string,int>? features)
+    {
         var candidates=new List<ShaperFont> { new() {FontIdentifier="primary",Font=font} };
         foreach(var fallback in (ActiveDocumentFonts?.FallbackFonts()??[]).Concat(FontManager.GetFallbackFonts()))
             if(!ReferenceEquals(fallback.Font,font))candidates.Add(new ShaperFont {FontIdentifier=fallback.Key,Font=fallback.Font});
         return (float)TextRunShaper.ShapeTextRuns(text,candidates).Runs.Sum(run=>{var face=candidates[run.FontIndex].Font;return face.Shape(run.Text,features).Sum(g=>(double)g.AdvanceX)*fontSize/face.UnitsPerEm;});
+    }
+
+    // The same left-to-right double sum Enumerable.Sum computes, without an enumerator.
+    private static double SumAdvances(IReadOnlyList<GlyphInfo> glyphs)
+    {
+        double sum = 0;
+        for (int i = 0; i < glyphs.Count; i++) sum += glyphs[i].AdvanceX;
+        return sum;
     }
 
     // =====================================================

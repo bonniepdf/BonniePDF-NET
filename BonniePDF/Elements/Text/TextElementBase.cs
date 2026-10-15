@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -273,9 +274,16 @@ public abstract class TextElementBase : ElementBase
     protected IList<string> ComputeLines(string text, float maxWidth)
     {
         using var performanceScope = PerformanceEvents.Measure(PerformanceStage.Measurement);
-        List<string> lines = [];
-        if (string.IsNullOrEmpty(text)) return lines;
+        if (string.IsNullOrEmpty(text)) return new List<string>();
 
+        // No hard breaks: the text is one segment, so its wrapped lines are the result.
+        if (text.AsSpan().IndexOfAny('\r', '\n') < 0)
+        {
+            IList<string> single = WrapSegment(text, maxWidth);
+            return single.Count == 0 ? new List<string> { "" } : single;
+        }
+
+        List<string> lines = [];
         // Normalise CRLF / CR to LF, then split on hard breaks.
         string[] segments = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
 

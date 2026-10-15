@@ -425,6 +425,15 @@ internal class PdfResourceRegistry
     /// When the primary font covers the whole string (or is a non-embedded
     /// Type1 font) the result is a single run identical to the legacy path.
     /// </remarks>
+    // The first registration of font, in the order EmbeddedFonts enumerates (as Values would),
+    // without the snapshot Values takes or a closure per call.
+    private EmbeddedFontInfo? EmbeddedFontInfoFor(TtfFont font)
+    {
+        foreach (KeyValuePair<string, EmbeddedFontInfo> entry in EmbeddedFonts)
+            if (ReferenceEquals(entry.Value.Font, font)) return entry.Value;
+        return null;
+    }
+
     public IList<ResolvedTextRun> ResolveTextRuns(string primaryFontIdentifier, string text)
     {
         string resourceName = RegisterFont(primaryFontIdentifier);
@@ -440,7 +449,7 @@ internal class PdfResourceRegistry
             };
         }
 
-        var primaryInfo = EmbeddedFonts.Values.FirstOrDefault(f => ReferenceEquals(f.Font, primaryFont));
+        var primaryInfo = EmbeddedFontInfoFor(primaryFont);
         if (TextRunShaper.PrimaryCovers(text, primaryFont))
             return new List<ResolvedTextRun>
             {

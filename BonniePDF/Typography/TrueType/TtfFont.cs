@@ -68,12 +68,17 @@ internal class TtfFont
     private readonly System.Collections.Concurrent.ConcurrentBag<Typography.Engine.FontFace> _shapingFaces = new();
     private static readonly int MaxShapingFaces = Math.Clamp(Environment.ProcessorCount, 1, 16);
 
-    internal T WithShapingFace<T>(Func<Typography.Engine.FontFace, T> shape)
+    internal T WithShapingFace<T>(Func<Typography.Engine.FontFace, T> shape) =>
+        WithShapingFace(shape, static (face, shape) => shape(face));
+
+    /// <inheritdoc cref="WithShapingFace{T}(Func{Typography.Engine.FontFace, T})"/>
+    /// <remarks>Takes the call's arguments as state, so a static lambda can avoid a closure per call.</remarks>
+    internal T WithShapingFace<TState, T>(TState state, Func<Typography.Engine.FontFace, TState, T> shape)
     {
         if (!_shapingFaces.TryTake(out Typography.Engine.FontFace? face)) face = CreateEngineFace();
         try
         {
-            return shape(face);
+            return shape(face, state);
         }
         finally
         {
