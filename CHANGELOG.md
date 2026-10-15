@@ -15,6 +15,9 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- A top-level element that does not fit even on an empty page is still skipped after two fresh pages, and now reports a `Render` warning (source `pagination`) in `Document.Diagnostics` instead of disappearing silently.
+- Tagged (PDF/UA) documents: a top-level element that continues onto another page now reopens its marked content before its graphics state on every page, as on its first page, instead of interleaving the two.
+
 - Add inherited content direction through `DocumentSettings.ContentDirection` and per-element overrides. Rows and table columns mirror visually while retaining source order; start/end alignment follows direction and left/right stays physical. Embedded Arabic and Hebrew TextBlock content uses bidi and script shaping, including wrapped paragraph context. Styled spans, font-fallback boundaries, lists and page-number tokens require further RTL integration.
 
 - Support static CFF 1 OpenType (`.otf`) fonts through existing font registration: shaping and measurement, cubic SVG outlines, and PDF embedding with source-preserving text extraction. Complete CFF programs retain original hints and subroutines; CFF subsetting, CFF2, `.otc` and WOFF are unsupported.
