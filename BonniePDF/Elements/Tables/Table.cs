@@ -452,13 +452,21 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         // row/cell nodes either — the cell contents (tagged in reading order) nest
         // directly under the table's Div node, mirroring the structure tree.
         LayoutRecorder? rec = IsLayoutGrid ? null : ctx.LayoutRecorder;
-        int page = ctx.CurrentPageIndex;
-        float endY = rowY + rowHeight;
-        rec?.OpenNode(row, LayoutRecorder.CaptureTypeOf(row), LayoutRecorder.CaptureNameOf(row), page, rowX, rowY, rowWidth);
+        // Without a recorder (every PDF save), share no-op callbacks instead of allocating three per row.
+        return rec is null ? NoRowCapture : CaptureRow(rec, row, ctx.CurrentPageIndex, rowX, rowY, rowWidth, rowY + rowHeight);
+    }
+
+    private static readonly (System.Action<TableCell, float, float> OpenCell, System.Action<TableCell> CloseCell, System.Action CloseRow)
+        NoRowCapture = (static (_, _, _) => { }, static _ => { }, static () => { });
+
+    private static (System.Action<TableCell, float, float> OpenCell, System.Action<TableCell> CloseCell, System.Action CloseRow)
+        CaptureRow(LayoutRecorder rec, TableRow row, int page, float rowX, float rowY, float rowWidth, float endY)
+    {
+        rec.OpenNode(row, LayoutRecorder.CaptureTypeOf(row), LayoutRecorder.CaptureNameOf(row), page, rowX, rowY, rowWidth);
         return (
-            (cell, x, width) => rec?.OpenNode(cell, LayoutRecorder.CaptureTypeOf(cell), LayoutRecorder.CaptureNameOf(cell), page, x, rowY, width),
-            cell => rec?.CloseNode(cell, page, endY, true),
-            () => rec?.CloseNode(row, page, endY, true)
+            (cell, x, width) => rec.OpenNode(cell, LayoutRecorder.CaptureTypeOf(cell), LayoutRecorder.CaptureNameOf(cell), page, x, rowY, width),
+            cell => rec.CloseNode(cell, page, endY, true),
+            () => rec.CloseNode(row, page, endY, true)
         );
     }
 

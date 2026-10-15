@@ -631,9 +631,14 @@ public class Document : IDisposable
         var seen = new HashSet<IElement>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
         void Walk(IElement? element)
         {
-            if (element is null || !seen.Add(element)) return;
+            if (element is null) return;
+            IEnumerable<IElement> children = element.GetChildren();
+            // A leaf other than an Svg finds nothing however often it is walked, so only Svg
+            // elements and containers need a visited entry; most of a document is leaves.
+            bool leaf = element is not Svg && children is ICollection<IElement> { Count: 0 };
+            if (!leaf && !seen.Add(element)) return;
             if (element is Svg svg) found.Add(svg);
-            foreach (IElement child in element.GetChildren()) Walk(child);
+            foreach (IElement child in children) Walk(child);
         }
 
         foreach (Page page in _pages)
