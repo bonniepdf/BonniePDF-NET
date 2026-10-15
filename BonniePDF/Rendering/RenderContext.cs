@@ -123,6 +123,9 @@ public class RenderContext
     /// </summary>
     internal FinishedPageStore FinishedPages { get; } = new();
 
+    // 32,768 UTF-16 characters is 64 KiB, below the 85,000-byte large object heap threshold.
+    private const int MaxPageCapacityHint = 32_768;
+
     /// <summary>
     /// Whether this context is a layout dry run whose page content is never written, so
     /// finished pages can be dropped instead of held.
@@ -603,8 +606,11 @@ public class RenderContext
         for (int i = 0; i < reopenStateDepth; i++)
             Canvas.RestoreState();
 
+        // Size the next page's builder from this one, so it does not regrow from empty by
+        // doubling; capped below the large object heap threshold.
+        int capacity = Math.Min(Pages[CurrentPageIndex].Length, MaxPageCapacityHint);
         SealPage(CurrentPageIndex);
-        Pages.Add(new StringBuilder());
+        Pages.Add(new StringBuilder(Math.Max(capacity, 16)));
         CurrentPageIndex++;
         // The new page measures its own chrome: header/footer templates are
         // functions of the page number, so a taller header on page 2 moves page

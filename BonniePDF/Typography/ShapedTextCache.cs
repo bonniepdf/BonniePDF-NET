@@ -57,5 +57,5 @@ internal sealed class ShapedTextCache
     }
 
     private static IReadOnlyList<GlyphInfo> Shape(TtfFont font, string text, IReadOnlyDictionary<string, int>? features) =>
-        font.WithShapingFace(face => EmbeddedTextShaping.Shape(font, face, text, features));
+        font.WithShapingFace((font, text, features), static (face, call) => EmbeddedTextShaping.Shape(call.font, face, call.text, call.features));
 }
