@@ -93,10 +93,8 @@ internal partial class FontWriter
 
         WriteFontFile2(fontFile2Id, fontData);
 
-        var codes=tracker.CidToGlyphMap;
-        var cidMap=new Dictionary<ushort,ushort>(subsetter?.OldToNewGidMap??codes);
-        foreach(var entry in codes)cidMap[entry.Key]=subsetter?.OldToNewGidMap?[entry.Value]??entry.Value;
-        ushort maxCid=cidMap.Keys.Max();
+        var codes = tracker.CidToGlyphMap;
+        Dictionary<ushort, ushort> cidMap = BuildCidMap(subsetter, codes, out ushort maxCid);
 
         // 2. Write CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap
         //    domain (0..MaxOriginalGid) - see BuildCIDSetData.
@@ -112,7 +110,7 @@ internal partial class FontWriter
 
         // 4. Write CIDToGIDMap (maps original GIDs to new subset GIDs)
         string cidToGidMapRef;
-        if (subsetter is not null || codes.Any(e=>e.Key!=e.Value))
+        if (subsetter is not null || HasRemappedCids(codes))
         {
             int cidToGidMapId = _writer!.GetNewId();
             WriteCIDToGIDMap(cidToGidMapId, cidMap, maxCid);
@@ -200,6 +198,39 @@ internal partial class FontWriter
             dict[PdfKeys.FontDescriptor.CidSet] = $"{cidSetId} 0 R";
 
         _writer!.WriteObject(id, dict);
+    }
+
+    /// <summary>
+    /// Builds the CID to GID map for the CIDToGIDMap stream and finds the highest CID in the same pass.
+    /// With a subsetter the map starts from its original-to-subset GID map, whose highest key is
+    /// <see cref="TtfSubsetter.MaxOriginalGid"/>.
+    /// </summary>
+    private static Dictionary<ushort, ushort> BuildCidMap(TtfSubsetter? subsetter,
+        IReadOnlyDictionary<ushort, ushort> codes, out ushort maxCid)
+    {
+        IReadOnlyDictionary<ushort, ushort>? subsetMap = subsetter?.OldToNewGidMap;
+        Dictionary<ushort, ushort> cidMap = new(subsetMap ?? codes);
+        maxCid = subsetter?.MaxOriginalGid ?? 0;
+
+        foreach (KeyValuePair<ushort, ushort> entry in codes)
+        {
+            cidMap[entry.Key] = subsetMap is null ? entry.Value : subsetMap[entry.Value];
+            if (entry.Key > maxCid) maxCid = entry.Key;
+        }
+
+        return cidMap;
+    }
+
+    /// <summary>
+    /// Whether any CID maps to a different GID, so that an explicit CIDToGIDMap is needed.
+    /// </summary>
+    private static bool HasRemappedCids(IReadOnlyDictionary<ushort, ushort> codes)
+    {
+        foreach (KeyValuePair<ushort, ushort> entry in codes)
+            if (entry.Key != entry.Value)
+                return true;
+
+        return false;
     }
 
     /// <summary>
@@ -382,10 +413,8 @@ internal partial class FontWriter
 
         await WriteFontFile2Async(fontFile2Id, fontData, cancellationToken).ConfigureAwait(false);
 
-        var codes=tracker.CidToGlyphMap;
-        var cidMap=new Dictionary<ushort,ushort>(subsetter?.OldToNewGidMap??codes);
-        foreach(var entry in codes)cidMap[entry.Key]=subsetter?.OldToNewGidMap?[entry.Value]??entry.Value;
-        ushort maxCid=cidMap.Keys.Max();
+        var codes = tracker.CidToGlyphMap;
+        Dictionary<ushort, ushort> cidMap = BuildCidMap(subsetter, codes, out ushort maxCid);
 
         // 2. Write CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap
         //    domain (0..MaxOriginalGid) - see BuildCIDSetData.
@@ -402,7 +431,7 @@ internal partial class FontWriter
 
         // 4. Write CIDToGIDMap (maps original GIDs to new subset GIDs)
         string cidToGidMapRef;
-        if (subsetter is not null || codes.Any(e=>e.Key!=e.Value))
+        if (subsetter is not null || HasRemappedCids(codes))
         {
             int cidToGidMapId = _asyncWriter!.GetNewId();
             await WriteCIDToGIDMapAsync(cidToGidMapId, cidMap, maxCid,

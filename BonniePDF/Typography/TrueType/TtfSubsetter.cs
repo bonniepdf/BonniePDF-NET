@@ -16,8 +16,8 @@ internal class TtfSubsetter
     private readonly Dictionary<string, (uint offset, uint length)> _tables;
     private short _indexToLocFormat; // 0 = short offsets, 1 = long offsets
 
-    // Mapping from new GID to original GID. Populated by CreateSubset().
-    private Dictionary<ushort, ushort>? _newToOldGid;
+    // Original GID for each new GID (the index). Populated by CreateSubset().
+    private ushort[]? _newToOldGid;
 
     // Mapping from original GID to new GID in the subset. Populated by CreateSubset().
     private Dictionary<ushort, ushort>? _oldToNewGid;
@@ -49,13 +49,10 @@ internal class TtfSubsetter
     /// <returns>The subset font data as a byte array</returns>
     public byte[] CreateSubset(IReadOnlySet<ushort> usedGlyphIds, IDictionary<int, ushort> charToGlyphMap)
     {
-        // 1. Build the GID remapping (always include GID 0 = .notdef)
-        BuildGidMapping(usedGlyphIds);
-
-        // 2. Get composite glyph dependencies (glyphs that reference other glyphs)
+        // 1. Get composite glyph dependencies (glyphs that reference other glyphs)
         HashSet<ushort> allGlyphs = GetAllRequiredGlyphs(usedGlyphIds);
 
-        // Rebuild mapping with composite dependencies
+        // 2. Build the GID remapping for the glyphs and their dependencies (always includes GID 0 = .notdef)
         BuildGidMapping(allGlyphs);
 
         // 3. Build each required table
@@ -134,24 +131,21 @@ internal class TtfSubsetter
 
     private void BuildGidMapping(IReadOnlySet<ushort> usedGlyphs)
     {
-        _oldToNewGid = new Dictionary<ushort, ushort>();
-        _newToOldGid = new Dictionary<ushort, ushort>();
+        // Always include GID 0 (.notdef); as the smallest GID it sorts first.
+        int notdef = usedGlyphs.Contains(0) ? 0 : 1;
+        ushort[] sortedGlyphs = new ushort[usedGlyphs.Count + notdef];
+        int count = notdef;
+        foreach (ushort oldGid in usedGlyphs)
+            sortedGlyphs[count++] = oldGid;
+        Array.Sort(sortedGlyphs);
 
-        // Always include GID 0 (.notdef)
-        List<ushort> sortedGlyphs = usedGlyphs.Order().ToList();
-        if (!sortedGlyphs.Contains(0))
-            sortedGlyphs.Insert(0, 0);
+        // Track max original GID for CIDToGIDMap size (the last entry once sorted)
+        MaxOriginalGid = sortedGlyphs[^1];
 
-        // Track max original GID for CIDToGIDMap size
-        MaxOriginalGid = sortedGlyphs.Count > 0 ? sortedGlyphs.Max() : (ushort)0;
-
-        ushort newGid = 0;
-        foreach (ushort oldGid in sortedGlyphs)
-        {
-            _oldToNewGid[oldGid] = newGid;
-            _newToOldGid[newGid] = oldGid;
-            newGid++;
-        }
+        _newToOldGid = sortedGlyphs;
+        _oldToNewGid = new Dictionary<ushort, ushort>(sortedGlyphs.Length);
+        for (int newGid = 0; newGid < sortedGlyphs.Length; newGid++)
+            _oldToNewGid[sortedGlyphs[newGid]] = (ushort)newGid;
     }
 
     private HashSet<ushort> GetAllRequiredGlyphs(IReadOnlySet<ushort> usedGlyphs)
@@ -290,7 +284,7 @@ internal class TtfSubsetter
         Array.Copy(_originalData, info.offset, data, 0, info.length);
 
         // Update numberOfHMetrics to match subset glyph count
-        ushort numGlyphs = (ushort)_newToOldGid!.Count;
+        ushort numGlyphs = (ushort)_newToOldGid!.Length;
         data[34] = (byte)(numGlyphs >> 8);
         data[35] = (byte)(numGlyphs & 0xFF);
 
@@ -311,7 +305,7 @@ internal class TtfSubsetter
         {
             data = new byte[32]; data[1] = 1; data[15] = 1; // maxp 1.0, one glyph zone, empty outlines.
         }
-        ushort numGlyphs = (ushort)_newToOldGid!.Count;
+        ushort numGlyphs = (ushort)_newToOldGid!.Length;
         data[4] = (byte)(numGlyphs >> 8);
         data[5] = (byte)(numGlyphs & 0xFF);
 
@@ -323,7 +317,7 @@ internal class TtfSubsetter
         if (!_tables.TryGetValue("hmtx", out (uint offset, uint length) hmtxInfo))
             throw new Exception("Missing 'hmtx' table");
 
-        int numGlyphs = _newToOldGid!.Count;
+        int numGlyphs = _newToOldGid!.Length;
 
         // Each glyph gets 4 bytes: advanceWidth (2) + leftSideBearing (2)
         byte[] data = new byte[numGlyphs * 4];
@@ -600,12 +594,12 @@ internal class TtfSubsetter
     private (byte[] glyfData, byte[] locaData) BuildGlyfAndLocaTables()
     {
         if (!_tables.ContainsKey("glyf") && !_tables.ContainsKey("loca") && _tables.ContainsKey("CBDT"))
-            return (new byte[4], new byte[(_newToOldGid!.Count + 1) * 4]);
+            return (new byte[4], new byte[(_newToOldGid!.Length + 1) * 4]);
         if (!_tables.TryGetValue("glyf", out (uint offset, uint length) glyfInfo) ||
             !_tables.TryGetValue("loca", out (uint offset, uint length) locaInfo))
             throw new Exception("Missing 'glyf' or 'loca' table");
 
-        int numGlyphs = _newToOldGid!.Count;
+        int numGlyphs = _newToOldGid!.Length;
 
         using MemoryStream glyfMs = new();
         using MemoryStream locaMs = new();

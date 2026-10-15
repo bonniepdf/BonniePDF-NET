@@ -27,6 +27,7 @@ Text layout and document generation are faster and use less memory. Output is un
 - **Concurrent documents no longer queue on a shared font.** Each concurrent shaping call borrows its own copy of the font's shaping data, so four 20,000-line documents generated at once take about 2.8 s instead of 4.2 s.
 - **Fonts are parsed once.** `Document.Fonts.Add` reuses the parse of a byte array it has seen before and the PDF writer shares it; a small two-face document takes about 20% less time and allocates about 75% less. Identical embedded font programs are compressed once in a process-wide cache capped at 4 MiB and 16 entries; `FontCache.Clear()` releases the entries and `FontCache.MaxFiles = 0` disables retention.
 - **Faster opaque images.** Fully opaque RGBA images are resampled exactly and separated into channels with guarded SIMD, with a scalar fallback on other hardware; the separation loop is also optimised for its first invocation while tiered compilation warms up. Pixel values, transparency and resolution settings are preserved.
+- **Leaner font embedding.** Font subsetting builds its glyph mapping once, without LINQ, and the CIDToGIDMap is built in one pass, so a one-line document compiles 14 fewer methods at start-up. Subset fonts and PDF output are byte-identical.
 
 ### Added
 
