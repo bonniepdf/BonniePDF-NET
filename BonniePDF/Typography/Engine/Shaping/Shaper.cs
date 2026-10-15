@@ -80,7 +80,10 @@ namespace BonniePDF.Typography.Engine
             var program = face.Program(options);
             var adjustments = PositionRun(program.Substitution, program.Positioning, run, face.Font, nativeRtl, arabic);
             if (nativeRtl) { run.Reverse(); Array.Reverse(adjustments); }
-            var output = new GlyphInfo[run.Count];
+            bool wide = false;
+            for (int i = 0; i < run.Count && !wide; i++)
+                wide = GlyphRun.NeedsWide(adjustments[i].YAdvance, adjustments[i].YPlacement, run[i].ComponentCount, run[i].MarkComponent);
+            var output = new GlyphRun(run.Count, wide);
             bool ordered = true;
             for (int i = 1; i < run.Count; i++)
                 if (run[i].Cluster < run[i - 1].Cluster) { ordered = false; break; }
@@ -97,7 +100,7 @@ namespace BonniePDF.Typography.Engine
                     { unsafeBefore |= run[end].UnsafeBefore; end++; }
                     int length = (end < run.Count ? run[end].Cluster : text.Length) - run[first].Cluster;
                     for (int i = first; i < end; i++)
-                        output[i] = Output(face, run[i], adjustments[i], length, unsafeBefore);
+                        Output(face, output, i, run[i], adjustments[i], length, unsafeBefore);
                     first = end;
                 }
             }
@@ -119,15 +122,15 @@ namespace BonniePDF.Typography.Engine
                 }
                 if (previous >= 0) lengths.Add(previous, text.Length - previous);
                 for (int i = 0; i < run.Count; i++)
-                    output[i] = Output(face, run[i], adjustments[i], lengths[run[i].Cluster], unsafeClusters.Contains(run[i].Cluster));
+                    Output(face, output, i, run[i], adjustments[i], lengths[run[i].Cluster], unsafeClusters.Contains(run[i].Cluster));
             }
-            return new ShapedRun(text, output, owned: true);
+            return new ShapedRun(text, output);
         }
 
-        private static GlyphInfo Output(FontFace face, ShapingGlyph glyph, GlyphAdjustment adjustment, int length, bool unsafeBefore)
+        private static void Output(FontFace face, GlyphRun output, int i, ShapingGlyph glyph, GlyphAdjustment adjustment, int length, bool unsafeBefore)
         {
             if (glyph.Id == 0) throw new NotSupportedException("A glyph remained unmapped after substitution.");
-            return new GlyphInfo(glyph.Id, glyph.Cluster,
+            output.Set(i, glyph.Id, glyph.Cluster,
                 checked(face.Font.AdvanceWidth(glyph.Id) + adjustment.XAdvance), adjustment.YAdvance,
                 adjustment.XPlacement, adjustment.YPlacement, glyph.ComponentCount,
                 adjustment.ZeroMarkAdvance, glyph.Ligature, length, unsafeBefore, glyph.MarkComponent);

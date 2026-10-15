@@ -22,17 +22,17 @@ internal class GlyphUsageTracker
     internal IReadOnlyDictionary<ushort,ushort> CidToGlyphMap {
         get {var map=_usedGlyphs.ToDictionary(g=>g,g=>g);foreach(var e in _cidGlyphs)map[e.Key]=e.Value;return map;}
     }
-    internal IReadOnlyList<ushort> MarkShaped(string text, IReadOnlyList<Typography.Engine.GlyphInfo> glyphs)
+    internal IReadOnlyList<ushort> MarkShaped(string text, Typography.Engine.GlyphRun glyphs)
     {
         var codes=new ushort[glyphs.Count];
         for(int i=0;i<glyphs.Count;) {
-            var first=glyphs[i];int end=i+1;
-            while(end<glyphs.Count && glyphs[end].Cluster==first.Cluster)end++;
-            if (end == i + 1 && first.SourceLength == 1)
+            int firstCluster=glyphs.Cluster(i), end=i+1;
+            while(end<glyphs.Count && glyphs.Cluster(end)==firstCluster)end++;
+            if (end == i + 1 && glyphs.SourceLength(i) == 1)
             {
-                ushort id = checked((ushort)first.Id);
+                ushort id = checked((ushort)glyphs.Id(i));
                 _usedGlyphs.Add(id);
-                char character = text[first.Cluster];
+                char character = text[firstCluster];
                 uint key = ((uint)id << 16) | character;
                 if (!_singleCharacterCids.TryGetValue(key, out ushort code))
                 {
@@ -43,10 +43,10 @@ internal class GlyphUsageTracker
                 i = end;
                 continue;
             }
-            string clusterSource = text.Substring(first.Cluster, first.SourceLength);
+            string clusterSource = text.Substring(firstCluster, glyphs.SourceLength(i));
             var chars = end == i + 1 ? null : clusterSource.EnumerateRunes().Select(r => r.ToString()).ToArray();
             for(int j=i;j<end;j++) {
-                ushort id=checked((ushort)glyphs[j].Id);_usedGlyphs.Add(id);
+                ushort id=checked((ushort)glyphs.Id(j));_usedGlyphs.Add(id);
                 string source = chars is null ? clusterSource : j == end - 1 ? string.Concat(chars.Skip(j - i)) : j - i < chars.Length ? chars[j - i] : string.Empty;
                 codes[j] = RegisterSource(id, source);
             }
@@ -128,7 +128,7 @@ internal class GlyphUsageTracker
         MarkUsed(text, _font.Shape(text));
     }
 
-    internal IReadOnlyList<ushort> MarkUsed(string text, IReadOnlyList<Typography.Engine.GlyphInfo> glyphs)
+    internal IReadOnlyList<ushort> MarkUsed(string text, Typography.Engine.GlyphRun glyphs)
     {
         var codes = MarkShaped(text, glyphs);
         foreach (Rune rune in text.EnumerateRunes())

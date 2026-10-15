@@ -1,3 +1,4 @@
+using BonniePDF.Tests.Support;
 using System.Security.Cryptography;
 using System.Text.Json;
 using BonniePDF.Typography.TrueType;
@@ -28,7 +29,7 @@ public sealed partial class ContentDirectionTests
             Assert.Equal(expected.Length, actual.Count);
             for (int i = 0; i < actual.Count; i++)
             {
-                var g = actual[i];
+                var g = actual.Info(i);
                 Assert.Equal(expected[i], new[] { g.Id, g.Cluster, g.AdvanceX, g.AdvanceY, g.OffsetX, g.OffsetY, g.SourceLength });
             }
         }
@@ -39,11 +40,11 @@ public sealed partial class ContentDirectionTests
     {
         var font = new TtfFont(FixturePath("NotoSansHebrew-Regular.ttf"));
         const string text = "שלום ";
-        var ltr = font.Shape(text).Select(g => g.Cluster).ToArray();
+        var ltr = font.Shape(text).Records().Select(g => g.Cluster).ToArray();
         using (TextFlow.Enter(ContentDirection.RightToLeft))
-            Assert.Equal(new[] { 4, 3, 2, 1, 0 }, font.Shape(text).Select(g => g.Cluster));
+            Assert.Equal(new[] { 4, 3, 2, 1, 0 }, font.Shape(text).Records().Select(g => g.Cluster));
         Assert.Equal(new[] { 3, 2, 1, 0, 4 }, ltr);
-        Assert.Equal(ltr, font.Shape(text).Select(g => g.Cluster));
+        Assert.Equal(ltr, font.Shape(text).Records().Select(g => g.Cluster));
     }
 
     [Theory]

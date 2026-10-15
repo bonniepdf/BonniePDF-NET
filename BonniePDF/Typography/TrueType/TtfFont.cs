@@ -54,14 +54,14 @@ internal class TtfFont
         return new Typography.Engine.FontFace(_rawData);
     }
     private readonly ShapedTextCache _shapedText = new();
-    internal IReadOnlyList<Typography.Engine.GlyphInfo> Shape(string text, IReadOnlyDictionary<string, int>? features = null)
+    internal Typography.Engine.GlyphRun Shape(string text, IReadOnlyDictionary<string, int>? features = null)
     {
         using var performanceScope = PerformanceEvents.Measure(PerformanceStage.Shaping);
         return _shapedText.Get(this, text, features);
     }
 
     /// <summary>Records glyphs known to equal shaping <paramref name="text"/> (see <see cref="ShapedTextCache.Seed"/>).</summary>
-    internal void SeedShaped(string text, IReadOnlyDictionary<string, int>? features, Typography.Engine.GlyphInfo[] glyphs) =>
+    internal void SeedShaped(string text, IReadOnlyDictionary<string, int>? features, Typography.Engine.GlyphRun glyphs) =>
         _shapedText.Seed(text, features, glyphs);
 
     // Engine faces carry per-call shaping state and caches, so one face serves one shaping

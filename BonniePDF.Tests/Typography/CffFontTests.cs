@@ -1,3 +1,4 @@
+using BonniePDF.Tests.Support;
 using System.Text;
 using System.Text.Json;
 using BonniePDF.Typography.TrueType;
@@ -19,7 +20,7 @@ public sealed class CffFontTests
             {
                 var features=c.GetProperty("features").EnumerateObject().ToDictionary(p=>p.Name,p=>p.Value.GetInt32(),StringComparer.Ordinal);
                 var expected=c.GetProperty("glyphs").EnumerateArray().Select(g=>g.EnumerateArray().Select(n=>n.GetInt32()).ToArray()).ToArray();
-                var actual=font.Shape(c.GetProperty("text").GetString()!,features).Select(g=>new[]{g.Id,g.Cluster,g.AdvanceX,g.AdvanceY,g.OffsetX,g.OffsetY}).ToArray();
+                var actual=font.Shape(c.GetProperty("text").GetString()!,features).Records().Select(g=>new[]{g.Id,g.Cluster,g.AdvanceX,g.AdvanceY,g.OffsetX,g.OffsetY}).ToArray();
                 Assert.Equal(expected.Length,actual.Length);for(int i=0;i<expected.Length;i++)Assert.Equal(expected[i],actual[i]);
             }
             var program=CffProgramWriter.Build(font,font.PostScriptName);var embedded=new CffFont(program,font.EngineFace.GlyphCount,font.UnitsPerEm,new OutlineReadLimits());

@@ -343,16 +343,12 @@ public static class FontMetrics
         var candidates=new List<ShaperFont> { new() {FontIdentifier="primary",Font=font} };
         foreach(var fallback in (ActiveDocumentFonts?.FallbackFonts()??[]).Concat(FontManager.GetFallbackFonts()))
             if(!ReferenceEquals(fallback.Font,font))candidates.Add(new ShaperFont {FontIdentifier=fallback.Key,Font=fallback.Font});
-        return (float)TextRunShaper.ShapeTextRuns(text,candidates).Runs.Sum(run=>{var face=candidates[run.FontIndex].Font;return face.Shape(run.Text,features).Sum(g=>(double)g.AdvanceX)*fontSize/face.UnitsPerEm;});
+        return (float)TextRunShaper.ShapeTextRuns(text,candidates).Runs.Sum(run=>{var face=candidates[run.FontIndex].Font;return SumAdvances(face.Shape(run.Text,features))*fontSize/face.UnitsPerEm;});
     }
 
-    // The same left-to-right double sum Enumerable.Sum computes, without an enumerator.
-    private static double SumAdvances(IReadOnlyList<GlyphInfo> glyphs)
-    {
-        double sum = 0;
-        for (int i = 0; i < glyphs.Count; i++) sum += glyphs[i].AdvanceX;
-        return sum;
-    }
+    // The left-to-right double sum Enumerable.Sum computes. Advances are integers and the sum
+    // stays far below 2^53, so the exact integer total converted once is the same value.
+    private static double SumAdvances(GlyphRun glyphs) => glyphs.TotalAdvanceX();
 
     // =====================================================
     // 2. CUSTOM TTF LOGIC
@@ -452,8 +448,16 @@ public static class FontMetrics
     internal static Func<int, bool> GetTextBreakPredicate(string text, string identifier, IReadOnlyDictionary<string,int>? features = null)
     {
         var glyphs = MetricFace(identifier)?.Shape(text, features);
-        return offset => glyphs is null || glyphs.All(g =>
-            !(g.Cluster < offset && offset < g.Cluster + g.SourceLength) && !(g.Cluster == offset && g.UnsafeToBreak));
+        return offset =>
+        {
+            if (glyphs is null) return true;
+            for (int i = 0; i < glyphs.Count; i++)
+            {
+                int cluster = glyphs.Cluster(i);
+                if ((cluster < offset && offset < cluster + glyphs.SourceLength(i)) || (cluster == offset && glyphs.UnsafeToBreak(i))) return false;
+            }
+            return true;
+        };
     }
 
     private static int[]? GetStandardFontTable(string fontName) => fontName switch
