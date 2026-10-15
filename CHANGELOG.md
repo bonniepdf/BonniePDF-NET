@@ -15,6 +15,7 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Faster shaping of embedded fonts: each OpenType lookup now skips glyphs it cannot act on, while charging exactly the same work against the shaping limits. Shaping a short Latin line takes about a third less time. Output and limit behaviour are unchanged.
 - `Save(Stream)` and `SaveAsync(Stream)` accept a stream that cannot seek, such as an HTTP response body or a pipe, so a service can stream a PDF without buffering it first. The writers buffer their output and flush the destination once at the end instead of before every object. Output is unchanged, including offsets when the destination already holds data.
 - Faster text with feature overrides (`FontFeatures`) and right-to-left or mixed-direction text: shaping no longer rebuilds the font's layout program for every line. A 5,000-line document using `tnum` takes about a third less time and allocates about 84% less. Output is unchanged.
 - `Document.Fonts.Add` reuses the parse of a byte array it has seen before, and the PDF writer shares it, so a font is no longer parsed twice per document. A service that keeps its font bytes in memory parses each font once: a small two-face document takes about 20% less time and allocates about 75% less. Family resolution is memoised per document.

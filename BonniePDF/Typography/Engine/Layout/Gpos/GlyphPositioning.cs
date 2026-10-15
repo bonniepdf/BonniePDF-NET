@@ -15,6 +15,7 @@ namespace BonniePDF.Typography.Engine
         private readonly GlyphFilter filter;
         private readonly int lookupList;
         private readonly LookupHeaderCache headers;
+        private readonly Dictionary<int, FirstGlyphSet> firstGlyphs = new Dictionary<int, FirstGlyphSet>();
         private readonly int[] lookups;
         private readonly LookupRule[] rules;
         private readonly ShapeOptions options;
@@ -101,16 +102,83 @@ namespace BonniePDF.Typography.Engine
             {
                 activeRule = null;
                 foreach (var rule in rules) { Tick(); if (rule.Index == index) { activeRule = rule; break; } }
+                var first = FirstGlyphs(index);
+                int rejectedCharge = first == null ? -1 : RejectedCharge(index);
                 for (int at = 0; at < glyphs.Count;)
-                    at += Math.Max(1, ApplyAt(index, glyphs, adjustments, at, 0, advanceWidth));
+                {
+                    bool rejected = first != null && !first.Contains(glyphs[at].Id);
+                    if (rejected && rejectedCharge >= 0) { ChargeSubtables(rejectedCharge); at++; }
+                    else at += Math.Max(1, ApplyAt(index, glyphs, adjustments, at, 0, advanceWidth, rejected));
+                }
             }
             activeRule = null;
             Resolve(glyphs, adjustments, advanceWidth);
             return adjustments;
         }
 
+        // A lookup's first-glyph set, or null when any subtable reads before its coverage
+        // test (contextual format 3) or fails the checks that precede it.
+        private FirstGlyphSet FirstGlyphs(int index)
+        {
+            FirstGlyphSet first;
+            if (firstGlyphs.TryGetValue(index, out first)) return first;
+            first = BuildFirstGlyphs(index);
+            firstGlyphs.Add(index, first);
+            return first;
+        }
+
+        private FirstGlyphSet BuildFirstGlyphs(int index)
+        {
+            try
+            {
+                var header = headers.Get(index);
+                var first = new FirstGlyphSet();
+                for (int i = 0; i < header.Count; i++)
+                {
+                    int sub = Offset(header.Offset, header.Offset + 6 + i * 2), type = header.Type, format = data.U16(sub);
+                    if (type == 9)
+                    {
+                        int extended = data.U16(sub + 2), delta = data.Offset32(sub + 4);
+                        if (format != 1 || extended < 1 || extended > 8 || delta == 0) return null;
+                        type = extended; sub = checked(sub + delta); format = data.U16(sub);
+                    }
+                    if ((type == 7 || type == 8) && format == 3) return null;
+                    if (type == 3)
+                    {
+                        if (format != 1) return null;
+                        data.Check(sub + 6, data.U16(sub + 4) * 4);
+                    }
+                    else if (type >= 4 && type <= 6) { if (format != 1) return null; }
+                    else if (type == 1 || type == 2) { if (format != 1 && format != 2) return null; }
+                    else if (type != 7 && type != 8) return null;
+                    if (!first.AddCoverage(data, Offset(sub, sub + 2))) return null;
+                }
+                return first;
+            }
+            catch (Exception) { return null; }
+        }
+
+        // What ApplyAt charges for every rejected glyph of this lookup, when that cannot
+        // depend on the glyph: a constant feature rule, no glyph filtering (so the walk to
+        // the next glyph is one step) and no Arabic ignorables. Otherwise -1.
+        private int RejectedCharge(int index)
+        {
+            var header = headers.Get(index);
+            if (options.Script == "arab" || (header.Flags & 0xff1e) != 0 || limits.MaxNesting < 0) return -1;
+            int value = 1, ticks = 0;
+            if (activeRule != null && !activeRule.Constant(out value, out ticks)) return -1;
+            return 1 + ticks + (value != 0 ? 1 + header.Count : 0);
+        }
+
+        // Charges what the subtable loop would charge for a glyph no subtable covers.
+        private void ChargeSubtables(int count)
+        {
+            if (count > 0 && (operations += count) > limits.MaxOperations)
+                throw new InvalidDataException("GPOS operation limit exceeded.");
+        }
+
         private int ApplyAt(int index, List<ShapingGlyph> glyphs, GlyphAdjustment[] adjustments,
-            int at, int depth, Func<int, int> advanceWidth)
+            int at, int depth, Func<int, int> advanceWidth, bool rejected = false)
         {
             Tick();
             if (options.Script == "arab" && UnicodeData.IsIgnorable(glyphs[at].Scalar)) return 0;
@@ -126,6 +194,7 @@ namespace BonniePDF.Typography.Engine
             if (filter.Ignored(glyphs[at].Id, flags, markSet))
                 return 0;
             int next = Walk(glyphs, at, 1, flags, markSet);
+            if (rejected) { ChargeSubtables(count); return 0; }
             for (int i = 0; i < count; i++)
             {
                 Tick();

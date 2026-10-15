@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "text-engine-dotnet",
   "source": {
-    "commit": "5cff387d0b0f19ca68a17634230b167778f76f39",
+    "commit": "29b157cec7751b3df3f17a5b7fbd78c88f7e9e35",
     "dirty": false
   },
   "files": {
@@ -37,9 +37,10 @@
     "Fonts/Tables/FontNames.cs": "055f82ae2235b668db065c5442129352bffe1f5af3d9f278d193497a0d30fd23",
     "Fonts/Tables/LegacyKerning.cs": "028d34a48ab519e44a4f8dffd5796c006400fba62de36f48aa5f15b2391c3608",
     "Fonts/Tables/LegacyKerningSubtable.cs": "aa9bfdc8abb46811656ea595a6f219e7899df9ec263f81cc63be2194a6699510",
+    "Layout/Common/FirstGlyphSet.cs": "b032e94a9cdaf034a679016a4fc5774057785da30cda05674bdc59e920829849",
     "Layout/Common/GlyphFilter.cs": "85bc452659ae0864e2a0cfc152f37e7f2e876f20de3a946e83e88c4e6c785f6a",
     "Layout/Common/LookupHeaderCache.cs": "76444a8742ae12da99416837271583685476a299953b00daf304dd4574cbb731",
-    "Layout/Common/LookupRule.cs": "e1dfba6b403de7b3c8805c91954469ab7594ac4b298a09971c035b4fe6c181e5",
+    "Layout/Common/LookupRule.cs": "35044355ef57dc9ecd94296c26fb63a6a7ac9c35434a8c26e1dac043b6d93bdb",
     "Layout/Common/OpenTypeLayout.cs": "60b6b639072b50cf66d33f4fe873193fa6113096228a350861220652cb205040",
     "Layout/Common/ShapePlan.cs": "b6dec8ee9a3fbf14acb219d7fd4a929cfdf817151559589206209a98549f893f",
     "Layout/Common/ShapingGlyph.cs": "d97cd535058d565530d3e0e84c21a0b2e1a4e9e22e78bc4ad81865f6c8c8b572",
@@ -48,8 +49,8 @@
     "Layout/Gpos/GlyphAdjustment.cs": "cc56a2d8fbca6364abbc21a7f7cb6b4d66ac297b61e3f710efec85b376a68a1e",
     "Layout/Gpos/GlyphPositioning.Context.cs": "7b76ac2436cceef2a3b750844000ea24e70ccfbbfb659adcbd3d7e9ffb5e3261",
     "Layout/Gpos/GlyphPositioning.Kerning.cs": "8086730a560d95aaf7175c84501c31d6f5788c404845b3ab3a77ae575afe1f75",
-    "Layout/Gpos/GlyphPositioning.cs": "b66b2b229517362957249cb6f283122d4083e879dff6168bfa3f441fe5782edd",
-    "Layout/Gsub/GlyphSubstitution.cs": "708d13e434b05c584cb76e8d2da775d65fa84173c67d80deed679f7a9ecd4910",
+    "Layout/Gpos/GlyphPositioning.cs": "af1167b1abe74bad7166e194151db66d9a0a71e08dd66c9584c2922f5d9ad7c8",
+    "Layout/Gsub/GlyphSubstitution.cs": "5a69f76c5c18dc2e2f8c14f70a16724b3795b0cb6f7696dce79473d9f5c300fb",
     "Shaping/ArabicJoining.cs": "be1eace2a73db72596868f447635700ce621d7d8c371ccd3788f848e734ea94f",
     "Shaping/FallbackMarkPositioning.cs": "bdab8f4a5344d10470ba857b8c3f13891b948db5acb43969e6b844b73de7020b",
     "Shaping/ItemizedParagraph.cs": "ca4a7c2bab44aec91d5406de8022e1102f6a67a941b096c9401f690c8b970e5e",

@@ -20,6 +20,35 @@ namespace BonniePDF.Typography.Engine
             required |= isRequired;
             if (added.Add(tag)) { tags.Add(tag); defaults.Add(value); }
         }
+        private bool constantKnown;
+        private int constantValue = -1, constantTicks;
+
+        // The value and operation charge of Value when they cannot depend on the glyph: no
+        // Arabic joining forms, no rtlm, and every feature override covering the whole text.
+        internal bool Constant(out int value, out int ticks)
+        {
+            if (!constantKnown) { constantKnown = true; ComputeConstant(); }
+            value = constantValue; ticks = constantTicks;
+            return constantValue >= 0;
+        }
+
+        private void ComputeConstant()
+        {
+            if (required) { constantValue = 1; constantTicks = 0; return; }
+            if (options.Script == "arab" || tags.Contains("rtlm")) return;
+            foreach (var feature in options.Features)
+                if (feature.Start != 0 || feature.End != int.MaxValue) return;
+            int ticks = 0;
+            for (int i = 0; i < tags.Count; i++)
+            {
+                ticks++;
+                int value = defaults[i];
+                foreach (var feature in options.Features) { ticks++; if (feature.Tag == tags[i]) value = feature.Value; }
+                if (value != 0) { constantValue = value; constantTicks = ticks; return; }
+            }
+            constantValue = 0; constantTicks = ticks;
+        }
+
         internal int Value(int cluster, System.Action tick, bool mirrored = false, string joiningForm = "")
         {
             if (required) return 1;

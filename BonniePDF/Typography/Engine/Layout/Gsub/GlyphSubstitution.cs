@@ -14,6 +14,7 @@ namespace BonniePDF.Typography.Engine
         private readonly GlyphFilter filter;
         private readonly int lookupList, glyphCount;
         private readonly LookupHeaderCache headers;
+        private readonly Dictionary<int, FirstGlyphSet> firstGlyphs = new Dictionary<int, FirstGlyphSet>();
         private readonly int[] lookups;
         private readonly LookupRule[] rules;
         private LookupRule activeRule;
@@ -44,14 +45,24 @@ namespace BonniePDF.Typography.Engine
             {
                 activeRule = rules[i];
                 int lookup = lookups[i];
+                var first = FirstGlyphs(lookup);
+                int rejectedCharge = first == null ? -1 : RejectedCharge(lookup);
                 if (IsReverse(lookup))
                 {
-                    for (int at = glyphs.Count - 1; at >= 0; at--) ApplyAt(lookup, glyphs, at, 0);
+                    for (int at = glyphs.Count - 1; at >= 0; at--)
+                    {
+                        bool rejected = Rejects(first, glyphs[at]);
+                        if (rejected && rejectedCharge >= 0) ChargeSubtables(rejectedCharge);
+                        else ApplyAt(lookup, glyphs, at, 0, rejected);
+                    }
                 }
                 else
                     for (int at = 0; at < glyphs.Count;)
                     {
-                        int consumed = ApplyAt(lookup, glyphs, at, 0);
+                        bool rejected = Rejects(first, glyphs[at]);
+                        int consumed;
+                        if (rejected && rejectedCharge >= 0) { ChargeSubtables(rejectedCharge); consumed = 0; }
+                        else consumed = ApplyAt(lookup, glyphs, at, 0, rejected);
                         at += Math.Max(consumed, 1);
                         if (glyphs.Count > limits.MaxGlyphs)
                             throw new InvalidDataException("GSUB expansion exceeds the glyph limit.");
@@ -78,7 +89,61 @@ namespace BonniePDF.Typography.Engine
         private bool Ignored(ShapingGlyph glyph, int flags, int set) { return (arabic && glyph.Scalar != 0x200c && glyph.Scalar != 0x200d && UnicodeData.IsIgnorable(glyph.Scalar)) || filter.Ignored(glyph.Id, flags, set); }
         private bool Enabled(ShapingGlyph glyph) { return activeRule == null || activeRule.Value(glyph.FeatureCluster, charge, glyph.Mirrored, glyph.JoiningForm) != 0; }
 
-        private int ApplyAt(int index, List<ShapingGlyph> glyphs, int at, int depth)
+        private static bool Rejects(FirstGlyphSet first, ShapingGlyph glyph) { return first != null && !first.Contains(glyph.Id); }
+
+        // A lookup's first-glyph set, or null when any subtable reads before its coverage
+        // test (contextual format 3) or fails the checks that precede it.
+        private FirstGlyphSet FirstGlyphs(int index)
+        {
+            FirstGlyphSet first;
+            if (firstGlyphs.TryGetValue(index, out first)) return first;
+            first = BuildFirstGlyphs(index);
+            firstGlyphs.Add(index, first);
+            return first;
+        }
+
+        private FirstGlyphSet BuildFirstGlyphs(int index)
+        {
+            try
+            {
+                var header = headers.Get(index);
+                var first = new FirstGlyphSet();
+                for (int i = 0; i < header.Count; i++)
+                {
+                    int sub = data.Relative16(header.Offset, header.Offset + 6 + i * 2), type = header.Type;
+                    if (type == 7)
+                    {
+                        if (data.U16(sub) != 1 || data.U16(sub + 2) == 7) return null;
+                        type = data.U16(sub + 2);
+                        sub = checked(sub + data.Offset32(sub + 4));
+                    }
+                    if ((type == 5 || type == 6) && data.U16(sub) == 3) return null;
+                    if (!first.AddCoverage(data, data.Relative16(sub, sub + 2))) return null;
+                }
+                return first;
+            }
+            catch (Exception) { return null; }
+        }
+
+        // What ApplyAt charges for every rejected glyph of this lookup, when that cannot
+        // depend on the glyph: a constant feature rule and no glyph filtering. Otherwise -1.
+        private int RejectedCharge(int index)
+        {
+            var header = headers.Get(index);
+            if (arabic || (header.Flags & 0xff1e) != 0 || limits.MaxNesting < 0) return -1;
+            int value = 1, ticks = 0;
+            if (activeRule != null && !activeRule.Constant(out value, out ticks)) return -1;
+            return 1 + ticks + (value != 0 ? header.Count : 0);
+        }
+
+        // Charges what the subtable loop would charge for a glyph no subtable covers.
+        private void ChargeSubtables(int count)
+        {
+            if (count > 0 && (operations += count) > limits.MaxOperations)
+                throw new InvalidDataException("GSUB operation limit exceeded.");
+        }
+
+        private int ApplyAt(int index, List<ShapingGlyph> glyphs, int at, int depth, bool rejected = false)
         {
             Tick();
             if (depth > limits.MaxNesting)
@@ -90,6 +155,7 @@ namespace BonniePDF.Typography.Engine
             int lookup = header.Offset, type = header.Type, flags = header.Flags, count = header.Count, markSet = header.MarkSet;
             if (Ignored(glyphs[at], flags, markSet))
                 return 0;
+            if (rejected) { ChargeSubtables(count); return 0; }
             for (int i = 0; i < count; i++)
             {
                 Tick();
