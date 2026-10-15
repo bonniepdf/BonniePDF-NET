@@ -9,9 +9,10 @@ namespace BonniePDF;
 public static class FontFamilyResolver
 {
     /// <summary>
-    /// Registered custom font families mapping family name to variant paths.
+    /// Registered custom font families mapping family name to variant paths. Read by every
+    /// document being generated, so registration may happen while another document renders.
     /// </summary>
-    private static readonly Dictionary<string, FontFamilyDefinition> CustomFamilies = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, FontFamilyDefinition> CustomFamilies = new();
 
     /// <summary>
     /// Standard font family lookup: (family, isBold, isItalic) → PDF font name.
