@@ -38,6 +38,26 @@ namespace BonniePDF.Typography.Engine
             return true;
         }
 
+        // Adds every glyph listed in a coverage table to masks (grown as needed) as bit `bit`.
+        // A glyph a table does not list cannot be found by its binary search, so a clear bit
+        // proves the table does not cover the glyph. Returns false for a table AddCoverage rejects.
+        internal static bool AddCoverageBit(BigEndianData data, int offset, ref uint[] masks, int bit)
+        {
+            int format = data.U16(offset), count = data.U16(offset + 2);
+            if (format != 1 && format != 2) return false;
+            int stride = format == 1 ? 2 : 6;
+            data.Check(offset + 4, count * stride);
+            for (int i = 0; i < count; i++)
+            {
+                int record = offset + 4 + i * stride;
+                int start = data.U16(record), end = format == 1 ? start : data.U16(record + 2);
+                if (end < start) return false;
+                if (end >= masks.Length) Array.Resize(ref masks, end + 1);
+                for (int glyph = start; glyph <= end; glyph++) masks[glyph] |= 1U << bit;
+            }
+            return true;
+        }
+
         private void Grow(int glyph)
         {
             int words = (glyph >> 6) + 1;
