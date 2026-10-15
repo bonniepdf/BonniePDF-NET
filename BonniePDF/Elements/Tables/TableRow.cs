@@ -7,6 +7,10 @@ namespace BonniePDF;
 /// </summary>
 public class TableRow : IBackgroundColor, IRoleProvider
 {
+    // Text colour and padding (and, on a row, minimum height and background), shared with every
+    // cell or row that has the same values.
+    private CellOptions _cell = CellOptions.Default;
+
     /// <inheritdoc />
     public SemanticRole SemanticRole => SemanticRole.TR;
 
@@ -18,12 +22,20 @@ public class TableRow : IBackgroundColor, IRoleProvider
     /// <summary>
     /// TextBlock color for this row (applied to cells without their own text color)
     /// </summary>
-    public Color? Color { get; set; }
+    public Color? Color
+    {
+        get => _cell.Color;
+        set => _cell = _cell.With(value, static (o, v) => o with { Color = v });
+    }
 
     /// <summary>
     /// Custom padding for this row (applied to cells without their own padding)
     /// </summary>
-    public Thickness? Padding { get; set; }
+    public Thickness? Padding
+    {
+        get => _cell.Padding;
+        set => _cell = _cell.With(value, static (o, v) => o with { Padding = v });
+    }
 
     /// <summary>
     /// Whether this is a header row
@@ -38,12 +50,20 @@ public class TableRow : IBackgroundColor, IRoleProvider
     /// <summary>
     /// Minimum height for this row (optional)
     /// </summary>
-    public float? MinHeight { get; set; }
+    public float? MinHeight
+    {
+        get => _cell.MinHeight;
+        set => _cell = _cell.With(value, static (o, v) => o with { MinHeight = v });
+    }
 
     /// <summary>
     /// Background color for this row (applied to cells without their own background)
     /// </summary>
-    public Color? BackgroundColor { get; set; }
+    public Color? BackgroundColor
+    {
+        get => _cell.BackgroundColor;
+        set => _cell = _cell.With(value, static (o, v) => o with { BackgroundColor = v });
+    }
 
     /// <summary>
     /// Creates a TableRow from an array of IElements

@@ -7,25 +7,44 @@ namespace BonniePDF;
 /// </summary>
 public abstract class BorderedElementBase : ElementBase, IBackgroundColor
 {
+    // Border, colours, background and radius, shared with every element that has the same values.
+    private BoxOptions _box = BoxOptions.Default;
+
     /// <summary>
     /// Border widths for each side of the element
     /// </summary>
-    public Border Border { get; set; } = new(0);
+    public Border Border
+    {
+        get => _box.Border;
+        set => _box = _box.With(value, static (o, v) => o with { Border = v });
+    }
 
     /// <summary>
     /// Border colors for each side of the element
     /// </summary>
-    public BorderColors BorderColors { get; set; }
+    public BorderColors BorderColors
+    {
+        get => _box.BorderColors;
+        set => _box = _box.With(value, static (o, v) => o with { BorderColors = v });
+    }
 
     /// <summary>
     /// Background color for this element (null = transparent)
     /// </summary>
-    public Color? BackgroundColor { get; set; }
+    public Color? BackgroundColor
+    {
+        get => _box.BackgroundColor;
+        set => _box = _box.With(value, static (o, v) => o with { BackgroundColor = v });
+    }
 
     /// <summary>
     /// Corner radius for rounded rectangles. 0 = sharp corners (default).
     /// </summary>
-    public float CornerRadius { get; set; }
+    public float CornerRadius
+    {
+        get => _box.CornerRadius;
+        set => _box = _box.With(value, static (o, v) => o with { CornerRadius = v });
+    }
 
     /// <summary>
     /// Draws a background rectangle with the specified color.
