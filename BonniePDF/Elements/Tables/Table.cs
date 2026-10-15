@@ -37,7 +37,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     private readonly float[] _columnWeights;
     private readonly List<TableRow> _footers = new();
     private readonly List<TableRow> _headers = new();
-    private readonly List<TableRow> _rows = new();
+    private readonly TableRowStore _rows = new();
 
     // State tracking for multipage rendering
     private int _lastRowRendered = -1;
@@ -107,8 +107,19 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         _headers.Concat(_rows).Concat(_footers).ToList().AsReadOnly();
 
     /// <inheritdoc /> - every cell's content across headers, body rows, and footers.
-    public IEnumerable<IElement> GetChildren() =>
-        GetAllRows().SelectMany(row => row.Cells).Where(cell => cell.Content is not null).Select(cell => cell.Content);
+    public IEnumerable<IElement> GetChildren()
+    {
+        // Read without materialising compact body rows (see TableRowStore).
+        var children = new List<IElement>();
+        foreach (TableRow row in _headers)
+            foreach (TableCell cell in row.Cells)
+                if (cell.Content is not null) children.Add(cell.Content);
+        for (int i = 0; i < _rows.Count; i++) _rows.AddContentsTo(i, children);
+        foreach (TableRow row in _footers)
+            foreach (TableCell cell in row.Cells)
+                if (cell.Content is not null) children.Add(cell.Content);
+        return children;
+    }
 
     /// <summary>
     /// Adds a header row to the table
@@ -189,8 +200,11 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     /// </example>
     public void AddRow(params IElement[] cells)
     {
-        TableRow row = TableRow.From(cells);
-        _rows.Add(row);
+        ArgumentNullException.ThrowIfNull(cells);
+        // A row of plain content gets default cells, so it is kept as the content alone
+        // (TableRowStore); a TableCell among the elements is the caller's and is kept as given.
+        if (Array.TrueForAll(cells, cell => cell is not TableCell)) _rows.AddContents(cells);
+        else _rows.Add(TableRow.From(cells));
     }
 
     /// <summary>
@@ -292,7 +306,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         bool tbodyOpen = false;
         for (int i = startRow; i < _rows.Count; i++)
         {
-            TableRow row = _rows[i];
+            TableRow row = _rows.ForLayout(i);
             float rowHeight = MeasureRowHeight(row, widths);
 
             // Pagination check
@@ -588,7 +602,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         foreach (TableRow row in _headers) totalHeight += MeasureRowHeight(row, widths);
 
         // Data rows
-        foreach (TableRow row in _rows) totalHeight += MeasureRowHeight(row, widths);
+        for (int i = 0; i < _rows.Count; i++) totalHeight += MeasureRowHeight(_rows.ForLayout(i), widths);
 
         // Footers
         foreach (TableRow row in _footers) totalHeight += MeasureRowHeight(row, widths);
@@ -641,8 +655,9 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
             if (groupTagging != null) groupTagging.Tree.Begin(SemanticRole.TBody);
             try
             {
-                foreach (TableRow row in _rows)
+                for (int i = 0; i < _rows.Count; i++)
                 {
+                    TableRow row = _rows.ForLayout(i);
                     float rowHeight = MeasureRowHeight(row, widths);
 
                     // Pagination check
@@ -861,7 +876,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     {
         int columns = _columnWeights.Length;
 
-        foreach (List<TableRow> rows in (List<TableRow>[])[_headers, _rows, _footers])
+        foreach (List<TableRow> rows in (List<TableRow>[])[_headers, _footers])
         {
             foreach (TableRow row in rows)
             {
@@ -869,6 +884,14 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
                 foreach (TableCell cell in row.Cells) spanned += Math.Max(1, cell.ColumnSpan);
                 if (spanned > columns) columns = spanned;
             }
+        }
+        // Body rows, without materialising compact ones: their default cells each span one column.
+        for (int i = 0; i < _rows.Count; i++)
+        {
+            int spanned = 0;
+            if (_rows.IsCompact(i)) spanned = _rows.CellCount(i);
+            else foreach (TableCell cell in _rows[i].Cells) spanned += Math.Max(1, cell.ColumnSpan);
+            if (spanned > columns) columns = spanned;
         }
 
         return columns;
