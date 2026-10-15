@@ -260,19 +260,36 @@ public static class FontMetrics
     {
         if (string.IsNullOrEmpty(text)) return 0;
 
+        TtfFont? font = ResolveShapingFont(fontIdentifier, out string? unparsedPath);
+        if (font != null) return GetKernedStringWidth(text, font, fontSize, features);
+        if (unparsedPath != null) return GetUnparsedTtfWidth(text, unparsedPath, fontSize);
+
+        // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
+        return GetStandardFontWidth(text, fontIdentifier, fontSize);
+    }
+
+    /// <summary>
+    /// The font <see cref="GetStringWidth"/> measures <paramref name="fontIdentifier"/> with by
+    /// shaping (through <see cref="GetKernedStringWidth"/>), or null when it uses a width table:
+    /// a standard font, or a TrueType file that failed to parse (<paramref name="unparsedPath"/>).
+    /// </summary>
+    internal static TtfFont? ResolveShapingFont(string fontIdentifier, out string? unparsedPath)
+    {
+        unparsedPath = null;
+
         // A. IS IT A CUSTOM TTF FILE (direct path)?
         if (fontIdentifier.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) ||
             fontIdentifier.EndsWith(".otf", StringComparison.OrdinalIgnoreCase))
-            return GetTtfWidth(text, fontIdentifier, fontSize, features);
+            return LoadMeasuringTtf(fontIdentifier, out unparsedPath);
 
         DocumentAliasScope? scope = CurrentDocumentScope.Value;
         if (scope != null)
         {
             if (scope.InstanceAliases.TryGetValue(fontIdentifier, out TtfFont? scopedInstance))
-                return GetKernedStringWidth(text, scopedInstance, fontSize, features);
+                return scopedInstance;
 
             if (scope.PathAliases.TryGetValue(fontIdentifier, out string? scopedPath))
-                return GetTtfWidth(text, scopedPath, fontSize, features);
+                return LoadMeasuringTtf(scopedPath, out unparsedPath);
 
             // PDF/A and PDF/UA embed bundled substitutes for the standard 12
             // Latin Type-1 fonts. Resolve that exact face before the first layout
@@ -280,21 +297,20 @@ public static class FontMetrics
             if (scope.EmbedStandardFonts && FontManager.GetParsedStandardFont(fontIdentifier) is TtfFont embedded)
             {
                 scope.InstanceAliases[fontIdentifier] = embedded;
-                return GetKernedStringWidth(text, embedded, fontSize, features);
+                return embedded;
             }
 
-            return GetStandardFontWidth(text, fontIdentifier, fontSize);
+            return null;
         }
 
         // Outside document generation, preserve explicitly registered global aliases.
         if (GlobalFontInstanceAliases.TryGetValue(fontIdentifier, out TtfFont? instanceFont))
-            return GetKernedStringWidth(text, instanceFont, fontSize, features);
+            return instanceFont;
 
         if (GlobalFontPathAliases.TryGetValue(fontIdentifier, out string? aliasedPath))
-            return GetTtfWidth(text, aliasedPath, fontSize, features);
+            return LoadMeasuringTtf(aliasedPath, out unparsedPath);
 
-        // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
-        return GetStandardFontWidth(text, fontIdentifier, fontSize);
+        return null;
     }
 
     /// <summary>
@@ -341,8 +357,10 @@ public static class FontMetrics
     // =====================================================
     // 2. CUSTOM TTF LOGIC
     // =====================================================
-    private static float GetTtfWidth(string text, string filepath, float fontSize, IReadOnlyDictionary<string,int>? features = null)
+    // The parsed font for a TrueType path, or null (with unparsedPath set) when it fails to parse.
+    private static TtfFont? LoadMeasuringTtf(string filepath, out string? unparsedPath)
     {
+        unparsedPath = null;
         // Prefer the full TtfFont path: it enumerates Unicode runes (handling
         // surrogate pairs correctly for emoji and other supplementary-plane
         // characters) and queries real per-glyph advances. Without this, the
@@ -367,10 +385,14 @@ public static class FontMetrics
                     return null;
                 }
             });
-            if (fullFont != null)
-                return GetKernedStringWidth(text, fullFont, fontSize, features);
+            if (fullFont != null) return fullFont;
         }
+        unparsedPath = filepath;
+        return null;
+    }
 
+    private static float GetUnparsedTtfWidth(string text, string filepath, float fontSize)
+    {
         // Legacy fallback: ASCII-only width table for fonts that fail to parse
         // as a full TtfFont. Kept for robustness; not exercised in the common case.
         int[] widths;

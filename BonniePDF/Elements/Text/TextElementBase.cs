@@ -405,35 +405,76 @@ public abstract class TextElementBase : ElementBase
         if (string.IsNullOrEmpty(text)) return lines;
 
         string[] words = text.Split(' ');
-        string currentLine = "";
+        ParagraphWidths? widths = words.Length >= 3 ? ParagraphWidthsFor(text) : null;
 
+        // The current line and each candidate are spans of text: words joined by the single
+        // spaces between them are exactly the text between their ends.
+        int lineStart = 0, lineEnd = 0, wordStart = 0;
         foreach (string word in words)
         {
-            string testLine = string.IsNullOrEmpty(currentLine) ? word : currentLine + ' ' + word;
+            int wordEnd = wordStart + word.Length;
+            bool lineEmpty = lineStart == lineEnd;
+            int testStart = lineEmpty ? wordStart : lineStart;
 
             // Calculate exact width of the test line (handling tokens)
-            float testWidth = MeasureTextWidth(testLine);
+            float testWidth = MeasureSpan(text, testStart, wordEnd, widths);
 
             if (testWidth > maxWidth)
             {
                 // Current line is full, add it and start new line with current word
-                if (!string.IsNullOrEmpty(currentLine))
-                    lines.Add(currentLine);
-                currentLine = word;
+                if (!lineEmpty)
+                    AddLine(lines, text, lineStart, lineEnd, widths);
+                lineStart = wordStart;
             }
             else
             {
                 // Word fits, add it to current line
-                currentLine = testLine;
+                lineStart = testStart;
             }
+            lineEnd = wordEnd;
+            wordStart = wordEnd + 1;
         }
 
         // Don't forget the last line
-        if (!string.IsNullOrEmpty(currentLine))
-            lines.Add(currentLine);
+        if (lineStart != lineEnd)
+            AddLine(lines, text, lineStart, lineEnd, widths);
 
         return lines;
     }
+
+    /// <summary>
+    /// Candidate-line widths from one shaping of <paramref name="text"/>, or null when the
+    /// element measures in a way one shaping cannot answer (spacing, page-number tokens,
+    /// right-to-left text, or what <see cref="ParagraphWidths.TryCreate"/> declines).
+    /// </summary>
+    private protected ParagraphWidths? ParagraphWidthsFor(string text)
+    {
+        if (LetterSpacing != 0 || WordSpacing != 0 || IsRightToLeft) return null;
+        if (text.Contains(TotalPagesToken, StringComparison.Ordinal) || text.Contains(CurrentPageToken, StringComparison.Ordinal)) return null;
+        using var directionScope = TextFlow.Enter(EffectiveContentDirection);
+        return ParagraphWidths.TryCreate(text, FontName, FontSize, FontFeatures);
+    }
+
+    /// <summary>
+    /// Adds a wrapped line, handing its glyphs from the paragraph's shaping to the shaping cache
+    /// so drawing the line does not shape it again. Seeded under the text flow drawing uses for
+    /// left-to-right text; under any other flow the entry is simply never read.
+    /// </summary>
+    private protected void AddLine(List<string> lines, string text, int start, int end, ParagraphWidths? widths)
+    {
+        string line = text.Substring(start, end - start);
+        lines.Add(line);
+        if (widths?.TryGetGlyphs(start, end) is not { } glyphs) return;
+        using var directionScope = TextFlow.Enter(EffectiveContentDirection);
+        widths.Font.SeedShaped(line, FontFeatures, glyphs);
+    }
+
+    /// <summary>
+    /// <see cref="MeasureTextWidth"/> of <c>text[start..end)</c>, read from
+    /// <paramref name="widths"/> when it knows the span.
+    /// </summary>
+    private protected float MeasureSpan(string text, int start, int end, ParagraphWidths? widths) =>
+        widths != null && widths.TryGetWidth(start, end, out float width) ? width : MeasureTextWidth(text.Substring(start, end - start));
 
     /// <summary>
     /// Measures the width of a text string using the current font settings.
