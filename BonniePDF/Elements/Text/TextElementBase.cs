@@ -426,17 +426,23 @@ public abstract class TextElementBase : ElementBase
     protected virtual IList<string> WrapSegment(string text, float maxWidth)
     {
         List<string> lines = [];
-        if (string.IsNullOrEmpty(text)) return lines;
+        if (!string.IsNullOrEmpty(text)) WrapWords(text, maxWidth, lines);
+        return lines;
+    }
 
-        string[] words = text.Split(' ');
-        ParagraphWidths? widths = words.Length >= 3 ? ParagraphWidthsFor(text) : null;
+    /// <summary>The word wrapping of <see cref="WrapSegment"/>, appending the lines of a non-empty <paramref name="text"/> to <paramref name="lines"/>.</summary>
+    private protected void WrapWords(string text, float maxWidth, List<string> lines)
+    {
+        // Words are the spans between single spaces; only their ends are needed, so the text is not split.
+        ParagraphWidths? widths = text.AsSpan().Count(' ') >= 2 ? ParagraphWidthsFor(text) : null;
 
         // The current line and each candidate are spans of text: words joined by the single
         // spaces between them are exactly the text between their ends.
         int lineStart = 0, lineEnd = 0, wordStart = 0;
-        foreach (string word in words)
+        while (wordStart <= text.Length)
         {
-            int wordEnd = wordStart + word.Length;
+            int space = text.IndexOf(' ', wordStart);
+            int wordEnd = space < 0 ? text.Length : space;
             bool lineEmpty = lineStart == lineEnd;
             int testStart = lineEmpty ? wordStart : lineStart;
 
@@ -462,8 +468,6 @@ public abstract class TextElementBase : ElementBase
         // Don't forget the last line
         if (lineStart != lineEnd)
             AddLine(lines, text, lineStart, lineEnd, widths);
-
-        return lines;
     }
 
     /// <summary>

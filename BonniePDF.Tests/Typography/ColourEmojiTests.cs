@@ -63,7 +63,7 @@ public sealed class ColourEmojiTests
                 if (c.GetProperty("id").GetString() is "mixed" or "repeated" or "text-presentation") continue;
                 string cluster = c.GetProperty("text").GetString()!;
                 var block = new TextBlock(cluster + cluster) { FontName = path, FontSize = 24, PreserveWhitespace = true };
-                var lines = (IList<string>)typeof(TextBlock).GetMethod("GetOrComputeLines", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.Invoke(block, new object[] { 1f })!;
+                var lines = block.LinesAt(1f);
                 Assert.Equal(new[] { cluster, cluster }, lines);
             }
         }

@@ -45,7 +45,7 @@ public sealed class EmbeddedShapingTests
         static IList<string> Lines(string text,float width)
         {
             var block=new TextBlock(text){FontName=FontPath,FontSize=12,PreserveWhitespace=true};
-            return (IList<string>)typeof(TextBlock).GetMethod("GetOrComputeLines",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.Invoke(block,new object[]{width})!;
+            return block.LinesAt(width);
         }
         Assert.Equal(new[]{"a\u0308\u0301","a\u0308\u0301"},Lines("a\u0308\u0301a\u0308\u0301",1));
         Assert.Equal(new[]{"ff","i"},Lines("ffi",8.4f));Assert.Single(new TtfFont(FontPath).Shape("ff").Records());

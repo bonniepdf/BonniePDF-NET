@@ -100,6 +100,31 @@ public sealed partial class CompactTableRowTests
     }
 
     [Fact]
+    public void LayoutCaptureRecordsEachCompactRowOnce()
+    {
+        // Layout reuses one scratch row for compact entries, except under layout capture, which
+        // keys its nodes by row and cell: there every row must still be its own node.
+        var document = new BonniePDF.Document();
+        var table = new Table(1);
+        for (int i = 0; i < 5; i++) table.AddRow(new TextBlock($"Row {i}"));
+        document.Add(table);
+        LayoutSnapshot? snapshot = document.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
+        List<LayoutNode> rows = Walk(snapshot.Root).Where(n => n.Type == nameof(TableRow)).ToList();
+        Assert.Equal(5, rows.Count);
+        Assert.Equal(5, rows.Select(r => r.Rects[0].Y).Distinct().Count());
+        Assert.All(rows, r => Assert.Single(r.Children, c => c.Type == nameof(TableCell)));
+    }
+
+    private static IEnumerable<LayoutNode> Walk(LayoutNode node)
+    {
+        yield return node;
+        foreach (LayoutNode child in node.Children)
+            foreach (LayoutNode descendant in Walk(child))
+                yield return descendant;
+    }
+
+    [Fact]
     public void RowsWithACallersCellAreKeptAsGiven()
     {
         var table = new Table(2);

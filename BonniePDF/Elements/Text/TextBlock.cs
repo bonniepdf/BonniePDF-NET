@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using BonniePDF.Drawing;
 
 namespace BonniePDF;
@@ -25,9 +27,15 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         internal readonly TextFlow.Line?[]? Bidi = bidi;
     }
 
-    private IList<string>? _cachedLines => _layout switch { null => null, string line => new[] { line }, LineLayout l => l.Lines, _ => null };
+    // The computed lines, read without copying a single line into an array.
+    private readonly struct Lines(object layout)
+    {
+        internal int Count => layout is string ? 1 : ((LineLayout)layout).Lines.Length;
+        internal string this[int index] => layout is string line && index == 0 ? line : ((LineLayout)layout).Lines[index];
+    }
+
     private TextFlow.Line?[]? _bidiLines => (_layout as LineLayout)?.Bidi;
-    // Per-line paragraph metadata parallel to _cachedLines.
+    // Per-line paragraph metadata parallel to the lines.
     private IList<float>? _cachedIndents => (_layout as LineLayout)?.Indents;
     private IList<float>? _cachedSpaceBefore => (_layout as LineLayout)?.SpaceBefore;
 
@@ -168,7 +176,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         if (_lastLineRendered < 0) ctx.CurrentY += Margin.Top;
 
         float contentWidth = width - Margin.Left - Margin.Right;
-        IList<string> lines = GetOrComputeLines(contentWidth);
+        Lines lines = GetOrComputeLines(contentWidth);
 
         // Start from the next unrendered line
         int startLine = _lastLineRendered + 1;
@@ -240,7 +248,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Renders lines from startLine (inclusive) to endLine (exclusive).
     /// </summary>
-    private RenderStatus RenderLines(RenderContext ctx, IList<string> lines, int startLine, int endLine,
+    private RenderStatus RenderLines(RenderContext ctx, Lines lines, int startLine, int endLine,
         float contentWidth, float localY)
     {
         for (int i = startLine; i < endLine; i++)
@@ -280,7 +288,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 
     protected override float MeasureContentHeight(float contentWidth)
     {
-        IList<string> lines = GetOrComputeLines(contentWidth);
+        Lines lines = GetOrComputeLines(contentWidth);
         float height = lines.Count * ComputedLineHeight;
         for (int i = 0; i < lines.Count; i++) height += SpaceBeforeOf(i);
         return height;
@@ -294,7 +302,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
-        IList<string> lines = GetOrComputeLines(contentWidth);
+        Lines lines = GetOrComputeLines(contentWidth);
         float localY = ctx.CurrentY;
 
         for (int i = 0; i < lines.Count; i++)
@@ -504,14 +512,23 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         }
     }
 
+    /// <summary>The wrapped lines at <paramref name="contentWidth"/>, as a list (for tests).</summary>
+    internal IList<string> LinesAt(float contentWidth)
+    {
+        Lines lines = GetOrComputeLines(contentWidth);
+        var list = new List<string>(lines.Count);
+        for (int i = 0; i < lines.Count; i++) list.Add(lines[i]);
+        return list;
+    }
+
     /// <summary>
     /// Gets cached lines or computes them if needed.
     /// Caching prevents re-computation during multipage rendering.
     /// </summary>
-    private IList<string> GetOrComputeLines(float contentWidth)
+    private Lines GetOrComputeLines(float contentWidth)
     {
         // Use tolerance for floating point comparison
-        if (_layout != null && Math.Abs(_cachedContentWidth - contentWidth) < 0.001f) return _cachedLines;
+        if (_layout != null && Math.Abs(_cachedContentWidth - contentWidth) < 0.001f) return new Lines(_layout);
 
         bool paragraphs = FirstLineIndent != 0 || ParagraphSpacing != 0;
         List<string> lines;
@@ -522,9 +539,16 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         {
             ComputeParagraphLayout(Text, contentWidth, out lines, out indents, out spaceBefore);
         }
+        else if (TryWrapPlainText(contentWidth, out List<string>? wrapped))
+        {
+            if (wrapped is null) return new Lines(_layout!);
+            lines = wrapped;
+        }
         else
         {
-            lines = [.. ComputeLines(Text, contentWidth)];
+            // ComputeLines returns a new list, so it is kept rather than copied.
+            IList<string> computed = ComputeLines(Text, contentWidth);
+            lines = computed as List<string> ?? [.. computed];
         }
 
         if (MaxLines is int max && max > 0 && lines.Count > max)
@@ -540,7 +564,44 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
             ? (string.Equals(lines[0], Text, StringComparison.Ordinal) ? Text : lines[0])
             : new LineLayout(lines.ToArray(), indents?.ToArray(), spaceBefore?.ToArray(), bidi);
         _cachedContentWidth = contentWidth;
-        return _cachedLines!;
+        return new Lines(_layout);
+    }
+
+    // Lines wrapped by TryWrapPlainText, reused by the next call on the thread.
+    [ThreadStatic] private static List<string>? t_wrapped;
+
+    // Whether a type's WrapSegment is TextBlock's own, so wrapping may bypass it.
+    private static readonly ConcurrentDictionary<Type, bool> s_ownWrapSegment = new();
+
+    /// <summary>
+    /// <see cref="ComputeLines"/> for text that word-wraps as one segment (no breaks, no preserved
+    /// whitespace, left-to-right), without a list per call: false when the text is not like that.
+    /// One line is stored as the layout at once and <paramref name="lines"/> is null; otherwise
+    /// <paramref name="lines"/> holds them.
+    /// </summary>
+    private bool TryWrapPlainText(float contentWidth, out List<string>? lines)
+    {
+        lines = null;
+        string text = Text;
+        if (string.IsNullOrEmpty(text) || PreserveWhitespace || IsRightToLeft || text.AsSpan().IndexOfAny('\r', '\n') >= 0 ||
+            TextFlow.NeedsBidi(text) || !s_ownWrapSegment.GetOrAdd(GetType(), static type =>
+                type.GetMethod(nameof(WrapSegment), BindingFlags.Instance | BindingFlags.NonPublic, [typeof(string), typeof(float)])!.DeclaringType == typeof(TextBlock)))
+            return false;
+
+        using var performanceScope = PerformanceEvents.Measure(PerformanceStage.Measurement);
+        List<string> wrapped = t_wrapped ??= [];
+        wrapped.Clear();
+        WrapWords(text, contentWidth, wrapped);
+        // As ComputeLines: a segment that wraps to nothing is one blank line.
+        if (wrapped.Count <= 1)
+        {
+            string line = wrapped.Count == 0 ? "" : wrapped[0];
+            _layout = string.Equals(line, text, StringComparison.Ordinal) ? text : line;
+            _cachedContentWidth = contentWidth;
+            return true;
+        }
+        lines = [.. wrapped];
+        return true;
     }
 
     /// <summary>
@@ -608,15 +669,16 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         if (PreserveWhitespace || IsRightToLeft || TextFlow.NeedsBidi(segment))
             return WrapPreservingWhitespace(segment, contentWidth - FirstLineIndent, contentWidth);
 
-        string[] words = segment.Split(' ');
-        ParagraphWidths? widths = words.Length >= 3 ? ParagraphWidthsFor(segment) : null;
+        // Words are the spans between single spaces; only their ends are needed, so the text is not split.
+        ParagraphWidths? widths = segment.AsSpan().Count(' ') >= 2 ? ParagraphWidthsFor(segment) : null;
         float widthLimit = contentWidth - FirstLineIndent;
 
         // As in WrapSegment, the current line and each candidate are spans of the segment.
         int lineStart = 0, lineEnd = 0, wordStart = 0;
-        foreach (string word in words)
+        while (wordStart <= segment.Length)
         {
-            int wordEnd = wordStart + word.Length;
+            int space = segment.IndexOf(' ', wordStart);
+            int wordEnd = space < 0 ? segment.Length : space;
             bool lineEmpty = lineStart == lineEnd;
             int testStart = lineEmpty ? wordStart : lineStart;
             if (MeasureSpan(segment, testStart, wordEnd, widths) > widthLimit && !lineEmpty)

@@ -27,6 +27,10 @@ namespace BonniePDF.Typography.Engine
         internal bool HasKerning { get { return kerningLookups.Length != 0; } }
         private int operations;
         private readonly List<GlyphAdjustment> adjustmentPool = new List<GlyphAdjustment>();
+        // Result arrays for runs of up to ReusedLengths glyphs, by length, reused like the records:
+        // an array of exactly the run's length, so callers that read Length see the same value.
+        private const int ReusedLengths = 64;
+        private readonly GlyphAdjustment[][] adjustmentArrays = new GlyphAdjustment[ReusedLengths + 1][];
         private readonly Action charge;
         private readonly ShapingLimits limits;
         internal ShapingLimits Limits { get { return limits; } }
@@ -67,8 +71,10 @@ namespace BonniePDF.Typography.Engine
         {
             if (glyphs.Count > limits.MaxGlyphs)
                 throw new InvalidDataException("GPOS glyph limit exceeded.");
-            var adjustments = new GlyphAdjustment[glyphs.Count];
-            // The records are reused across calls: a program serves one shape call at a time
+            int count = glyphs.Count;
+            var adjustments = count > ReusedLengths ? new GlyphAdjustment[count]
+                : adjustmentArrays[count] ?? (adjustmentArrays[count] = new GlyphAdjustment[count]);
+            // The records and arrays are reused across calls: a program serves one shape call at a time
             // (operations is per-call state too), and callers read the adjustments before the
             // next call.
             while (adjustmentPool.Count < glyphs.Count) adjustmentPool.Add(new GlyphAdjustment());

@@ -183,6 +183,14 @@ internal static class PdfSyntax
         return $"{FormatDecimal(c.ScR)} {FormatDecimal(c.ScG)} {FormatDecimal(c.ScB)}";
     }
 
+    /// <summary>Appends <see cref="FormatColor"/>'s triplet without building it as a string.</summary>
+    internal static StringBuilder AppendColor(StringBuilder s, Color c)
+    {
+        AppendDecimal(s, c.ScR).Append(' ');
+        AppendDecimal(s, c.ScG).Append(' ');
+        return AppendDecimal(s, c.ScB);
+    }
+
     /// <summary>
     /// Converts a string into a PDF hex string of Glyph IDs (GIDs) for a specific font.
     /// Example: "£" -&gt; "&lt;00A3&gt;"

@@ -38,6 +38,26 @@ internal sealed class ResolvedTextRun
 }
 
 /// <summary>
+/// The font half of a <see cref="ResolvedTextRun"/>: everything but the text. One font that draws
+/// a whole string needs no per-call run object, so the canvas keeps the text beside this instead.
+/// </summary>
+internal sealed class TextRunFont(string resourceName, TtfFont? embeddedFont, GlyphUsageTracker? tracker, bool canTrackPreparedGlyphs, string fontIdentifier)
+{
+    internal GlyphUsageTracker? Tracker { get; } = tracker;
+    internal bool CanTrackPreparedGlyphs { get; } = canTrackPreparedGlyphs;
+    internal string ResourceName { get; } = resourceName;
+    internal TtfFont? EmbeddedFont { get; } = embeddedFont;
+    internal string FontIdentifier { get; } = fontIdentifier;
+
+    internal static TextRunFont Of(ResolvedTextRun run) =>
+        new(run.ResourceName, run.EmbeddedFont, run.Tracker, run.CanTrackPreparedGlyphs, run.FontIdentifier);
+
+    internal bool Matches(string resourceName, TtfFont? embeddedFont, GlyphUsageTracker? tracker, bool canTrackPreparedGlyphs, string fontIdentifier) =>
+        ResourceName == resourceName && ReferenceEquals(EmbeddedFont, embeddedFont) && ReferenceEquals(Tracker, tracker) &&
+        CanTrackPreparedGlyphs == canTrackPreparedGlyphs && FontIdentifier == fontIdentifier;
+}
+
+/// <summary>
 /// Manages PDF resources (fonts, images, XObjects) for a document.
 /// Tracks used resources during rendering and handles their serialization.
 /// </summary>
@@ -432,6 +452,32 @@ internal class PdfResourceRegistry
         foreach (KeyValuePair<string, EmbeddedFontInfo> entry in EmbeddedFonts)
             if (ReferenceEquals(entry.Value.Font, font)) return entry.Value;
         return null;
+    }
+
+    private readonly Dictionary<string, TextRunFont> _wholeTextFonts = new();
+
+    /// <summary>
+    /// The font that draws all of <paramref name="text"/>, when <see cref="ResolveTextRuns"/> would
+    /// return a single run for it, or null when it would not. Registers the font as that does.
+    /// </summary>
+    internal TextRunFont? WholeTextFont(string primaryFontIdentifier, string text)
+    {
+        string resourceName = RegisterFont(primaryFontIdentifier);
+        TtfFont? primaryFont = ResolveEmbeddedFont(primaryFontIdentifier);
+        EmbeddedFontInfo? primaryInfo = null;
+        if (primaryFont != null)
+        {
+            primaryInfo = EmbeddedFontInfoFor(primaryFont);
+            if (!TextRunShaper.PrimaryCovers(text, primaryFont)) return null;
+        }
+        GlyphUsageTracker? tracker = primaryInfo?.Tracker;
+        bool canTrack = primaryInfo?.ResourceName == resourceName;
+        if (_wholeTextFonts.TryGetValue(primaryFontIdentifier, out TextRunFont? kept) &&
+            kept.Matches(resourceName, primaryFont, tracker, canTrack, primaryFontIdentifier))
+            return kept;
+        var font = new TextRunFont(resourceName, primaryFont, tracker, canTrack, primaryFontIdentifier);
+        _wholeTextFonts[primaryFontIdentifier] = font;
+        return font;
     }
 
     public IList<ResolvedTextRun> ResolveTextRuns(string primaryFontIdentifier, string text)

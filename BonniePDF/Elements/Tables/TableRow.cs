@@ -72,10 +72,10 @@ public class TableRow : IBackgroundColor, IRoleProvider
     /// </summary>
     public static TableRow From(params IElement[] elements)
     {
-        return new TableRow
-        {
-            Cells = elements.Select(e => e is TableCell tc ? tc : new TableCell { Content = e }).ToArray()
-        };
+        var cells = new TableCell[elements.Length];
+        for (int i = 0; i < cells.Length; i++)
+            cells[i] = elements[i] is TableCell cell ? cell : new TableCell { Content = elements[i] };
+        return new TableRow { Cells = cells };
     }
 
     /// <summary>

@@ -9,21 +9,9 @@ internal static class EmbeddedTextShaping
     internal static GlyphRun Shape(TtfFont font, FontFace face, string text, IReadOnlyDictionary<string,int>? features)
     {
         ShapeOptions? options = features is null || features.Count == 0 ? null : new ShapeOptions(features:features.Select(f=>new ShapeFeature(f.Key,f.Value)));
-        if (text.Length > 0 && (TextFlow.RightToLeft || TextFlow.NeedsBidi(text)))
-        {
-            var line = TextFlow.CurrentLine;
-            if (line is not null && line.Paragraph.Substring(line.Start, line.End - line.Start) != text) line = null;
-            string paragraph = line?.Paragraph ?? text;
-            int lineStart = line?.Start ?? 0, lineEnd = line?.End ?? text.Length;
-            var resolved = TextItemizer.Resolve(paragraph, (_, _, _, _) => face,
-                TextFlow.RightToLeft ? "rtl" : "ltr");
-            var shapedLine = new GlyphRun.Builder();
-            foreach (var item in resolved.ShapeLine(lineStart, lineEnd, options))
-                foreach (var g in item.Glyphs)
-                    shapedLine.Add(g.Id, g.Cluster - lineStart, g.AdvanceX, g.AdvanceY, g.OffsetX, g.OffsetY,
-                        g.ComponentCount, g.IsMark, g.IsLigature, g.SourceLength, g.UnsafeToBreak, g.ComponentIndex);
-            return shapedLine.Build();
-        }
+        // The bidirectional and mixed-script paths are separate methods: their closures capture
+        // parameters, which would otherwise allocate the closure object on every call.
+        if (text.Length > 0 && (TextFlow.RightToLeft || TextFlow.NeedsBidi(text))) return ShapeBidi(face, text, options);
         if (font.HasColour)
         {
             try { return Shaper.Shape(face, text, options).Run; }
@@ -36,6 +24,28 @@ internal static class EmbeddedTextShaping
             try { return Shaper.Shape(face, text, options).Run; }
             catch (System.NotSupportedException) { /* Preserve the direct-mapping fallback below. */ }
         }
+        return ShapeByScript(font, face, text, options);
+    }
+
+    private static GlyphRun ShapeBidi(FontFace face, string text, ShapeOptions? options)
+    {
+        var line = TextFlow.CurrentLine;
+        if (line is not null && line.Paragraph.Substring(line.Start, line.End - line.Start) != text) line = null;
+        string paragraph = line?.Paragraph ?? text;
+        int lineStart = line?.Start ?? 0, lineEnd = line?.End ?? text.Length;
+        var resolved = TextItemizer.Resolve(paragraph, (_, _, _, _) => face,
+            TextFlow.RightToLeft ? "rtl" : "ltr");
+        var shapedLine = new GlyphRun.Builder();
+        foreach (var item in resolved.ShapeLine(lineStart, lineEnd, options))
+            foreach (var g in item.Glyphs)
+                shapedLine.Add(g.Id, g.Cluster - lineStart, g.AdvanceX, g.AdvanceY, g.OffsetX, g.OffsetY,
+                    g.ComponentCount, g.IsMark, g.IsLigature, g.SourceLength, g.UnsafeToBreak, g.ComponentIndex);
+        return shapedLine.Build();
+    }
+
+    // Latin spans through the shaper, everything else mapped directly.
+    private static GlyphRun ShapeByScript(TtfFont font, FontFace face, string text, ShapeOptions? options)
+    {
         var glyphs=new GlyphRun.Builder(text.Length); int start=0, cluster=0; var span=new StringBuilder();
         void Direct(int id,int offset,int length) => glyphs.Add(id,offset,font.GetGlyphWidth((ushort)id),0,0,0,1,false,false,length,false,0);
         void Flush()

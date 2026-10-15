@@ -393,7 +393,10 @@ public class RenderContext
     {
         CanvasCallbacks c = _canvasCallbacks ??= new CanvasCallbacks(this);
         return new PdfCanvas(CurrentStream, PageSize.Height, x, y, c.RegisterFont, c.ResolveImage, c.ResolveEmbeddedFont,
-            c.TrackGlyphUsage, c.RegisterAlpha, c.ResolveTextRuns, c.ReportUntaggedImage, c.RegisterShading, c.NoteImagePlacement);
+            c.TrackGlyphUsage, c.RegisterAlpha, c.ResolveTextRuns, c.ReportUntaggedImage, c.RegisterShading, c.NoteImagePlacement)
+        {
+            WholeTextFontResolver = c.WholeTextFont
+        };
     }
 
     /// <summary>The context's canvas callbacks, created once instead of per canvas.</summary>
@@ -405,6 +408,7 @@ public class RenderContext
         internal readonly Action<string, string> TrackGlyphUsage = ctx.TrackGlyphUsage;
         internal readonly Func<float, string> RegisterAlpha = ctx.RegisterAlphaGraphicsState;
         internal readonly Func<string, string, IList<ResolvedTextRun>> ResolveTextRuns = ctx.ResolveTextRuns;
+        internal readonly Func<string, string, TextRunFont?> WholeTextFont = ctx.Resources.WholeTextFont;
         internal readonly Action ReportUntaggedImage = ctx.ReportUntaggedImage;
         internal readonly Func<ShadingRequest, ShadingResources?> RegisterShading = ctx.RegisterShading;
         internal readonly Action<ImageInfo, float, float> NoteImagePlacement = ctx.Resources.NoteImagePlacement;
@@ -628,9 +632,11 @@ public class RenderContext
 
         // Size the next page's builder from this one, so it does not regrow from empty by
         // doubling; capped below the large object heap threshold.
-        int capacity = Math.Min(Pages[CurrentPageIndex].Length, MaxPageCapacityHint);
-        SealPage(CurrentPageIndex);
-        Pages.Add(new StringBuilder(Math.Max(capacity, 16)));
+        // A sealed page's builder is reused for the next page when it is that size or smaller.
+        StringBuilder outgoing = Pages[CurrentPageIndex];
+        int capacity = Math.Min(outgoing.Length, MaxPageCapacityHint);
+        bool sealedPage = SealPage(CurrentPageIndex);
+        Pages.Add(sealedPage && outgoing.Capacity <= MaxPageCapacityHint ? outgoing.Clear() : new StringBuilder(Math.Max(capacity, 16)));
         CurrentPageIndex++;
         // The new page measures its own chrome: header/footer templates are
         // functions of the page number, so a taller header on page 2 moves page
@@ -706,10 +712,12 @@ public class RenderContext
     /// Hands a page whose body layout is complete to <see cref="FinishedPages"/>. Nothing
     /// writes to a page's body after layout leaves it; page chrome is added later, around it.
     /// </summary>
-    internal void SealPage(int index)
+    /// <returns>Whether the page was sealed, leaving its old builder free for reuse.</returns>
+    internal bool SealPage(int index)
     {
-        if (IsSvgMode) return;
-        if (FinishedPages.Seal(index, Pages[index])) Pages[index] = new StringBuilder();
+        if (IsSvgMode || !FinishedPages.Seal(index, Pages[index])) return false;
+        Pages[index] = new StringBuilder();
+        return true;
     }
 
     /// <summary>

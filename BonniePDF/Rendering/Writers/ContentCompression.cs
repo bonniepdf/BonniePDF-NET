@@ -15,11 +15,21 @@ internal static class ContentCompression
     internal static byte[] Compress(ReadOnlySpan<byte> content)
     {
         using MemoryStream compressed = new();
-        using (ZLibStream zlib = new(compressed, CompressionLevel.SmallestSize))
+        return Compress(content, compressed);
+    }
+
+    /// <summary>
+    /// Compresses <paramref name="content"/> through <paramref name="scratch"/>, which is emptied
+    /// first and keeps its buffer, so a caller compressing page after page does not regrow one each time.
+    /// </summary>
+    internal static byte[] Compress(ReadOnlySpan<byte> content, MemoryStream scratch)
+    {
+        scratch.SetLength(0);
+        using (ZLibStream zlib = new(scratch, CompressionLevel.SmallestSize, leaveOpen: true))
         {
             zlib.Write(content);
         }
-        return compressed.ToArray();
+        return scratch.ToArray();
     }
 
     /// <summary>Reverses <see cref="Compress"/>.</summary>
