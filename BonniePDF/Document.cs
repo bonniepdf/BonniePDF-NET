@@ -686,10 +686,9 @@ public class Document : IDisposable
             foreach (ListElementBase child in list.GetNestedLists())
                 ApplyStyleToElement(child, style);
         else if (el is Table t)
-            foreach (TableRow row in t.GetAllRows())
-                foreach (TableCell cell in row.Cells)
-                    if (cell.Content != null)
-                        ApplyStyleToElement(cell.Content, style);
+            // Every cell's non-null content, in row order, as GetAllRows would give it.
+            foreach (IElement content in t.GetChildren())
+                ApplyStyleToElement(content, style);
     }
 
 
