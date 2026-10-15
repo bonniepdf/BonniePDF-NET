@@ -1,3 +1,4 @@
+using BonniePDF.Tests.Support;
 using System.Security.Cryptography;
 using BonniePDF.Drawing;
 using System.Text.Json;
@@ -38,11 +39,12 @@ public sealed class ColourEmojiTests
         var font = new TtfFont(Path.Combine(Fixtures, "NotoColorEmoji-Fixture.ttf"));
         var resources = new PdfResourceRegistry();
         var canvas = new PdfCanvas(new System.Text.StringBuilder(), 800, imageResolver: image => "/I" + resources.RegisterImage(image));
-        var glyph = Assert.Single(font.Shape("😀"));
-        for (int i = 0; i < 10; i++) ColourGlyphPainter.Draw(canvas, font, glyph, "😀", i * 24, 40, 24, Color.Black);
+        var glyphs = font.Shape("😀");
+        Assert.Equal(1, glyphs.Count);
+        for (int i = 0; i < 10; i++) ColourGlyphPainter.Draw(canvas, font, glyphs, 0, "😀", i * 24, 40, 24, Color.Black);
         var first = Assert.Single(resources.LoadedImages).Value;
         Assert.True(first.HasAlpha); Assert.Equal(0, first.AlphaData[0]);
-        ColourGlyphPainter.Draw(canvas, font, glyph, "😀", 0, 40, 24, Color.Black);
+        ColourGlyphPainter.Draw(canvas, font, glyphs, 0, "😀", 0, 40, 24, Color.Black);
         Assert.Same(first, Assert.Single(resources.LoadedImages).Value);
     }
     [Fact]
@@ -89,7 +91,7 @@ public sealed class ColourEmojiTests
                 if (id == "mixed") continue;
                 var result = TextRunShaper.ShapeTextRuns(text, new[] { new ShaperFont { FontIdentifier = "emoji", Font = font } });
                 Assert.Empty(result.Unsupported); Assert.Equal(text, string.Concat(result.Runs.Select(r => r.Text)));
-                var glyphs = font.Shape(text); Assert.NotEmpty(glyphs); Assert.All(glyphs, g => Assert.NotEqual(0, g.Id));
+                var glyphs = font.Shape(text).Records(); Assert.NotEmpty(glyphs); Assert.All(glyphs, g => Assert.NotEqual(0, g.Id));
                 if (id != "repeated") Assert.Single(glyphs);
                 if (id != "text-presentation") sources.Add(text);
             }

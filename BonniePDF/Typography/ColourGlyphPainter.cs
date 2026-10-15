@@ -66,13 +66,13 @@ internal static class ColourGlyphPainter
         }
     }
 
-    internal static void Draw(ICanvas canvas, TtfFont font, GlyphInfo glyph, string source,
+    internal static void Draw(ICanvas canvas, TtfFont font, GlyphRun glyphs, int glyph, string source,
         float x, float baseline, float size, Color foreground)
     {
         if (string.IsNullOrWhiteSpace(source)) return;
-        var art = Read(font, glyph.Id, Math.Clamp((int)Math.Round(size * 96 / 72, MidpointRounding.AwayFromZero), 1, 65535), source.Contains('\ufe0e'));
+        var art = Read(font, glyphs.Id(glyph), Math.Clamp((int)Math.Round(size * 96 / 72, MidpointRounding.AwayFromZero), 1, 65535), source.Contains('\ufe0e'));
         double scale = (double)size / font.UnitsPerEm;
-        x += (float)(glyph.OffsetX * scale); baseline -= (float)(glyph.OffsetY * scale);
+        x += (float)(glyphs.OffsetX(glyph) * scale); baseline -= (float)(glyphs.OffsetY(glyph) * scale);
         if (art.Image is not null && art.Bitmap is not null)
         {
             var b = art.Bitmap;

@@ -203,7 +203,7 @@ internal partial class SvgCanvas : ICanvas
     }
 
     /// <summary>A maximal substring of a draw call renderable by one embedded face.</summary>
-    private readonly record struct SvgTextRun(string FontFamily, TtfFont Font, string Text, IReadOnlyList<Typography.Engine.GlyphInfo> Glyphs);
+    private readonly record struct SvgTextRun(string FontFamily, TtfFont Font, string Text, Typography.Engine.GlyphRun Glyphs);
 
     /// <summary>
     /// Total advance width of a resolved run list, kerned within each run, so a
@@ -215,7 +215,8 @@ internal partial class SvgCanvas : ICanvas
         foreach (SvgTextRun run in runs)
         {
             var font=run.Font;
-            foreach(var g in run.Glyphs) {width+=(float)((double)g.AdvanceX*fontSize/font.UnitsPerEm)+_letterSpacing;if(run.Text.Substring(g.Cluster,g.SourceLength)==" ")width+=_wordSpacing;}
+            var glyphs=run.Glyphs;
+            for(int g=0;g<glyphs.Count;g++) {width+=(float)((double)glyphs.AdvanceX(g)*fontSize/font.UnitsPerEm)+_letterSpacing;if(run.Text.Substring(glyphs.Cluster(g),glyphs.SourceLength(g))==" ")width+=_wordSpacing;}
 
         }
 
@@ -262,34 +263,36 @@ internal partial class SvgCanvas : ICanvas
             {
                 var graphics = new SvgCanvas(Width, Height, includeHeader: false) { Options = Options };
                 if (colourAlpha < 1f) graphics.SetGlobalAlpha(colourAlpha);
-                foreach (var g in glyphs)
+                for (int g = 0; g < glyphs.Count; g++)
                 {
-                    string source = run.Text.Substring(g.Cluster, g.SourceLength);
-                    ColourGlyphPainter.Draw(graphics, runFont, g, source, (float)cursor, baselineY, fontSize, Color.FromHex(fillHex));
-                    cursor += g.AdvanceX * scale + letterSpacing;
+                    string source = run.Text.Substring(glyphs.Cluster(g), glyphs.SourceLength(g));
+                    ColourGlyphPainter.Draw(graphics, runFont, glyphs, g, source, (float)cursor, baselineY, fontSize, Color.FromHex(fillHex));
+                    cursor += glyphs.AdvanceX(g) * scale + letterSpacing;
                     if (source == " ") cursor += extraPerSpace;
                 }
                 elements.Append($"<g aria-label=\"{XmlEscape.EscapeXml(run.Text)}\"{extraAttributes}{transformAttr}>").Append(graphics.GetInnerSvg()).Append("</g>");
                 continue;
             }
             if (runFont.HasColour && !runFont.HasOutlines) throw new NotSupportedException("The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.");
-            bool simple=glyphs.Count==run.Text.EnumerateRunes().Take(glyphs.Count+1).Count() && glyphs.All(g=>g.SourceLength==(char.IsSurrogatePair(run.Text,g.Cluster)?2:1) && g.Id==runFont.GetGlyphId(char.ConvertToUtf32(run.Text,g.Cluster)) && g.OffsetY==0 && !g.IsMark);
+            bool simple=glyphs.Count==run.Text.EnumerateRunes().Take(glyphs.Count+1).Count();
+            for(int g=0;simple && g<glyphs.Count;g++)
+                simple=glyphs.SourceLength(g)==(char.IsSurrogatePair(run.Text,glyphs.Cluster(g))?2:1) && glyphs.Id(g)==runFont.GetGlyphId(char.ConvertToUtf32(run.Text,glyphs.Cluster(g))) && glyphs.OffsetY(g)==0 && !glyphs.IsMark(g);
             if(runFont.HasCff || !simple)
             {
                 elements.Append($"<g fill=\"{fillHex}\" aria-label=\"{XmlEscape.EscapeXml(run.Text)}\"{extraAttributes}{transformAttr}>");
-                foreach(var g in glyphs)
+                for(int g=0;g<glyphs.Count;g++)
                 {
-                    string d=runFont.GlyphOutline(g.Id);
-                    if(d.Length>0) elements.Append($"<path d=\"{d}\" transform=\"translate({N(cursor+g.OffsetX*scale)} {N(baselineY-g.OffsetY*scale)}) scale({scale.ToString("0.#########", CultureInfo.InvariantCulture)} {(-scale).ToString("0.#########", CultureInfo.InvariantCulture)})\"/>");
-                    cursor+=g.AdvanceX*scale+letterSpacing;if(run.Text.Substring(g.Cluster,g.SourceLength)==" ")cursor+=extraPerSpace;
+                    string d=runFont.GlyphOutline(glyphs.Id(g));
+                    if(d.Length>0) elements.Append($"<path d=\"{d}\" transform=\"translate({N(cursor+glyphs.OffsetX(g)*scale)} {N(baselineY-glyphs.OffsetY(g)*scale)}) scale({scale.ToString("0.#########", CultureInfo.InvariantCulture)} {(-scale).ToString("0.#########", CultureInfo.InvariantCulture)})\"/>");
+                    cursor+=glyphs.AdvanceX(g)*scale+letterSpacing;if(run.Text.Substring(glyphs.Cluster(g),glyphs.SourceLength(g))==" ")cursor+=extraPerSpace;
                 }
                 elements.Append("</g>");continue;
             }
-            foreach(var g in glyphs)
+            for(int g=0;g<glyphs.Count;g++)
             {
-                string source=run.Text.Substring(g.Cluster,g.SourceLength);
+                string source=run.Text.Substring(glyphs.Cluster(g),glyphs.SourceLength(g));
                 FontUsageSink?.Invoke(run.FontFamily,runFont,char.ConvertToUtf32(source,0));
-                xs.Add(N(cursor+g.OffsetX*scale));chars.Append(source);cursor+=g.AdvanceX*scale+letterSpacing;
+                xs.Add(N(cursor+glyphs.OffsetX(g)*scale));chars.Append(source);cursor+=glyphs.AdvanceX(g)*scale+letterSpacing;
                 if(source==" ")cursor+=extraPerSpace;
             }
 

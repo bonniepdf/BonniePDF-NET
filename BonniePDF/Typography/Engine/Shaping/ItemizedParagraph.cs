@@ -56,9 +56,12 @@ namespace BonniePDF.Typography.Engine
                 var settings = new ShapeOptions(item.Script == "Zyyy" || item.Script == "Zinh" ? "DFLT" : item.Script.ToLowerInvariant(), options.Language,
                     item.Level % 2 != 0 ? TextDirection.RightToLeft : TextDirection.LeftToRight, features, options.Limits ?? Limits);
                 var result = Shaper.Shape(item.Face, text.Substring(item.Start, item.End - item.Start), settings, true);
-                count = checked(count + result.Glyphs.Count); if (count > Math.Min(Limits.MaxGlyphs, options.Limits == null ? Limits.MaxGlyphs : options.Limits.MaxGlyphs)) throw new InvalidDataException("Paragraph glyph limit exceeded.");
-                var glyphs = result.Glyphs.Select(g => new GlyphInfo(g.Id, item.Start + g.Cluster, g.AdvanceX, g.AdvanceY, g.OffsetX, g.OffsetY,
-                    g.ComponentCount, g.IsMark, g.IsLigature, g.SourceLength, g.UnsafeToBreak, g.ComponentIndex)).ToArray();
+                var packed = result.Run;
+                count = checked(count + packed.Count); if (count > Math.Min(Limits.MaxGlyphs, options.Limits == null ? Limits.MaxGlyphs : options.Limits.MaxGlyphs)) throw new InvalidDataException("Paragraph glyph limit exceeded.");
+                var glyphs = new GlyphInfo[packed.Count];
+                for (int g = 0; g < glyphs.Length; g++)
+                    glyphs[g] = new GlyphInfo(packed.Id(g), item.Start + packed.Cluster(g), packed.AdvanceX(g), packed.AdvanceY(g), packed.OffsetX(g), packed.OffsetY(g),
+                        packed.ComponentCount(g), packed.IsMark(g), packed.IsLigature(g), packed.SourceLength(g), packed.UnsafeToBreak(g), packed.ComponentIndex(g));
                 shaped.Add(new ShapedTextItem(item, glyphs));
             }
             int max = 0, minOdd = 127;

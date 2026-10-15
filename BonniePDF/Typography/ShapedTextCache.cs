@@ -17,11 +17,11 @@ internal sealed class ShapedTextCache
     private readonly Dictionary<(string Text, string Features), LinkedListNode<Entry>> _entries = new();
     private readonly LinkedList<Entry> _recent = new();
     private int _glyphCount;
-    private readonly record struct Entry((string Text, string Features) Key, IReadOnlyList<GlyphInfo> Glyphs);
+    private readonly record struct Entry((string Text, string Features) Key, GlyphRun Glyphs);
 
     // Thread-safe: concurrent documents share a font. The lock covers only the cache; a miss
     // shapes outside it, and two threads missing the same key at once keep the first result.
-    internal IReadOnlyList<GlyphInfo> Get(TtfFont font, string text, IReadOnlyDictionary<string, int>? features)
+    internal GlyphRun Get(TtfFont font, string text, IReadOnlyDictionary<string, int>? features)
     {
         if (!Cacheable(text)) return Shape(font, text, features);
         var key = KeyOf(text, features);
@@ -36,8 +36,7 @@ internal sealed class ShapedTextCache
         }
         var shaped = Shape(font, text, features);
         if (shaped.Count > MaxGlyphs) return shaped;
-        var glyphs = shaped is System.Collections.ObjectModel.ReadOnlyCollection<GlyphInfo> readOnly ? readOnly : Array.AsReadOnly(shaped.ToArray());
-        return Add(key, glyphs);
+        return Add(key, shaped);
     }
 
     /// <summary>
@@ -45,10 +44,10 @@ internal sealed class ShapedTextCache
     /// key <see cref="Get"/> would use in the current text flow. The caller guarantees they are
     /// exactly what shaping would return (see <see cref="ParagraphWidths.TryGetGlyphs"/>).
     /// </summary>
-    internal void Seed(string text, IReadOnlyDictionary<string, int>? features, GlyphInfo[] glyphs)
+    internal void Seed(string text, IReadOnlyDictionary<string, int>? features, GlyphRun glyphs)
     {
-        if (!Cacheable(text) || glyphs.Length > MaxGlyphs) return;
-        Add(KeyOf(text, features), Array.AsReadOnly(glyphs));
+        if (!Cacheable(text) || glyphs.Count > MaxGlyphs) return;
+        Add(KeyOf(text, features), glyphs);
     }
 
     private static bool Cacheable(string text) =>
@@ -63,7 +62,7 @@ internal sealed class ShapedTextCache
     }
 
     // Inserts glyphs under key unless another thread got there first; returns the entry kept.
-    private IReadOnlyList<GlyphInfo> Add((string Text, string Features) key, IReadOnlyList<GlyphInfo> glyphs)
+    private GlyphRun Add((string Text, string Features) key, GlyphRun glyphs)
     {
         lock (_entries)
         {
@@ -87,6 +86,6 @@ internal sealed class ShapedTextCache
         return glyphs;
     }
 
-    private static IReadOnlyList<GlyphInfo> Shape(TtfFont font, string text, IReadOnlyDictionary<string, int>? features) =>
+    private static GlyphRun Shape(TtfFont font, string text, IReadOnlyDictionary<string, int>? features) =>
         font.WithShapingFace((font, text, features), static (face, call) => EmbeddedTextShaping.Shape(call.font, face, call.text, call.features));
 }

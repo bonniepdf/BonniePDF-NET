@@ -24,7 +24,7 @@ internal sealed class ParagraphWidths
     /// <summary>The font the paragraph was shaped with.</summary>
     internal TtfFont Font { get; }
     private readonly IReadOnlyDictionary<string, int>? _features;
-    private readonly IReadOnlyList<GlyphInfo> _glyphs;
+    private readonly GlyphRun _glyphs;
     private readonly int[] _firstGlyph;
     private readonly long[] _advanceBefore;
     private readonly bool[] _safe;
@@ -36,7 +36,7 @@ internal sealed class ParagraphWidths
     private int _windowStart = -1;
 
     private ParagraphWidths(string text, string fontIdentifier, IReadOnlyDictionary<string, int>? features,
-        TtfFont font, IReadOnlyList<GlyphInfo> glyphs, int[] firstGlyph, long[] advanceBefore, bool[] safe, float fontSize, int unitsPerEm)
+        TtfFont font, GlyphRun glyphs, int[] firstGlyph, long[] advanceBefore, bool[] safe, float fontSize, int unitsPerEm)
     {
         Font = font;
         _glyphs = glyphs;
@@ -63,7 +63,7 @@ internal sealed class ParagraphWidths
         TtfFont? font = FontMetrics.ResolveShapingFont(fontIdentifier, out _);
         if (font is null || !TextRunShaper.PrimaryCovers(text, font)) return null;
 
-        IReadOnlyList<GlyphInfo> glyphs;
+        GlyphRun glyphs;
         try
         {
             glyphs = font.Shape(text, features);
@@ -81,17 +81,17 @@ internal sealed class ParagraphWidths
         int previousCluster = -1;
         for (int i = 0; i < glyphs.Count; i++)
         {
-            GlyphInfo glyph = glyphs[i];
-            if (glyph.Cluster < previousCluster || glyph.Cluster >= text.Length) return null;
-            if (glyph.Cluster != previousCluster)
+            int cluster = glyphs.Cluster(i);
+            if (cluster < previousCluster || cluster >= text.Length) return null;
+            if (cluster != previousCluster)
             {
                 // The first glyph of each cluster carries whether a break before it is safe.
-                advanceBefore[glyph.Cluster] = total;
-                firstGlyph[glyph.Cluster] = i;
-                safe[glyph.Cluster] = glyph.Cluster == 0 || !glyph.UnsafeToBreak;
-                previousCluster = glyph.Cluster;
+                advanceBefore[cluster] = total;
+                firstGlyph[cluster] = i;
+                safe[cluster] = cluster == 0 || !glyphs.UnsafeToBreak(i);
+                previousCluster = cluster;
             }
-            total += glyph.AdvanceX;
+            total += glyphs.AdvanceX(i);
         }
         advanceBefore[text.Length] = total;
         firstGlyph[text.Length] = glyphs.Count;
@@ -129,22 +129,14 @@ internal sealed class ParagraphWidths
     /// <paramref name="start"/>, when they can be read from a shaping under the same rule as
     /// <see cref="TryGetWidth"/>; otherwise null.
     /// </summary>
-    internal GlyphInfo[]? TryGetGlyphs(int start, int end)
+    internal GlyphRun? TryGetGlyphs(int start, int end)
     {
         if (start >= end) return null;
         if (!_safe[start]) return WindowAt(start, end)?.TryGetGlyphs(0, end - start);
         if (!_safe[end]) return null;
-        int first = _firstGlyph[start], last = _firstGlyph[end];
-        var line = new GlyphInfo[last - first];
-        for (int i = first; i < last; i++)
-        {
-            GlyphInfo g = _glyphs[i];
-            // A cluster's source length runs to the next cluster, which at the line's end is `end`
-            // in both shapings, so every field carries over with the cluster rebased.
-            line[i - first] = new GlyphInfo(g.Id, g.Cluster - start, g.AdvanceX, g.AdvanceY, g.OffsetX, g.OffsetY,
-                g.ComponentCount, g.IsMark, g.IsLigature, g.SourceLength, g.UnsafeToBreak, g.ComponentIndex);
-        }
-        return line;
+        // A cluster's source length runs to the next cluster, which at the line's end is `end`
+        // in both shapings, so every field carries over with the cluster rebased.
+        return _glyphs.Slice(_firstGlyph[start], _firstGlyph[end], -start);
     }
 
     // The shaping of text from an unsafe line start, covering end; created once per line start.

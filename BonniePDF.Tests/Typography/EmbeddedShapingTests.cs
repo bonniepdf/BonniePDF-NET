@@ -1,3 +1,4 @@
+using BonniePDF.Tests.Support;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -18,7 +19,7 @@ public sealed class EmbeddedShapingTests
             string text=c.GetProperty("text").GetString()!;
             var features=c.GetProperty("features").EnumerateObject().ToDictionary(p=>p.Name,p=>p.Value.GetInt32(),StringComparer.Ordinal);
             var expected=c.GetProperty("glyphs").EnumerateArray().Select(g=>g.EnumerateArray().Select(n=>n.GetInt32()).ToArray()).ToArray();
-            var actual=font.Shape(text,features).Select(g=>new[]{g.Id,g.Cluster,g.AdvanceX,g.AdvanceY,g.OffsetX,g.OffsetY,g.UnsafeToBreak?1:0,g.SourceLength}).ToArray();
+            var actual=font.Shape(text,features).Records().Select(g=>new[]{g.Id,g.Cluster,g.AdvanceX,g.AdvanceY,g.OffsetX,g.OffsetY,g.UnsafeToBreak?1:0,g.SourceLength}).ToArray();
             Assert.True(expected.Length==actual.Length,c.GetProperty("id").GetString());
             for(int i=0;i<expected.Length;i++) Assert.Equal(expected[i],actual[i]);
             Assert.Equal(expected.Sum(g=>g[2])*12d/1000,FontMetrics.GetStringWidth(text,FontPath,12,features),3);
@@ -28,7 +29,7 @@ public sealed class EmbeddedShapingTests
     public void KeepsSourceCoordinatesAcrossControlsAndOtherScripts()
     {
         var font=new TtfFont(FontPath);const string source="fi\t\u03b1fi";
-        Assert.Equal(new[]{"fi","\u03b1","fi"},font.Shape(source).Select(g=>source.Substring(g.Cluster,g.SourceLength)));
+        Assert.Equal(new[]{"fi","\u03b1","fi"},font.Shape(source).Records().Select(g=>source.Substring(g.Cluster,g.SourceLength)));
     }
     [Fact]
     public void FallbackKeepsTheCombiningGraphemeTogether()
@@ -47,7 +48,7 @@ public sealed class EmbeddedShapingTests
             return (IList<string>)typeof(TextBlock).GetMethod("GetOrComputeLines",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!.Invoke(block,new object[]{width})!;
         }
         Assert.Equal(new[]{"a\u0308\u0301","a\u0308\u0301"},Lines("a\u0308\u0301a\u0308\u0301",1));
-        Assert.Equal(new[]{"ff","i"},Lines("ffi",8.4f));Assert.Single(new TtfFont(FontPath).Shape("ff"));
+        Assert.Equal(new[]{"ff","i"},Lines("ffi",8.4f));Assert.Single(new TtfFont(FontPath).Shape("ff").Records());
     }
     [Fact]
     public void PdfCodesDistinguishDifferentSourcesOfTheSameGlyph()
@@ -85,7 +86,7 @@ public sealed class EmbeddedShapingTests
     [Fact]
     public void LigaturesAreTrackedWithTheirSourceAndKerningCanBeDisabled()
     {
-        var font=new TtfFont(FontPath);var glyph=Assert.Single(font.Shape("ffi"));var tracker=new GlyphUsageTracker(font);tracker.MarkShaped("ffi",new[]{glyph});
+        var font=new TtfFont(FontPath);var ligature=font.Shape("ffi");var glyph=Assert.Single(ligature.Records());var tracker=new GlyphUsageTracker(font);tracker.MarkShaped("ffi",ligature);
         Assert.Contains((ushort)glyph.Id,tracker.UsedGlyphIds);Assert.Equal("ffi",tracker.GlyphSources[(ushort)glyph.Id]);
         var cmap=new ToUnicodeCMapBuilder();cmap.AddSourceMapping((ushort)glyph.Id,"ffi");Assert.Contains("006600660069",cmap.Build(),StringComparison.Ordinal);
         Assert.Equal(3,font.Shape("ffi",new Dictionary<string,int>(StringComparer.Ordinal){{"liga",0}}).Count);
@@ -136,11 +137,12 @@ public sealed class EmbeddedShapingTests
         Assert.Equal(3, separate.Count);
         Assert.Same(separate, font.Shape("ffi", new Dictionary<string, int>(StringComparer.Ordinal) { ["kern"] = 1, ["liga"] = 0 }));
         features["liga"] = 1;
-        Assert.Single(font.Shape("ffi", features));
+        Assert.Single(font.Shape("ffi", features).Records());
         Assert.Equal(3, separate.Count);
         Assert.Same(font.Shape("ffi"), font.Shape("ffi", new Dictionary<string, int>(StringComparer.Ordinal)));
         Assert.NotSame(font.Shape("é"), font.Shape("e\u0301"));
-        Assert.Throws<NotSupportedException>(() => ((IList<BonniePDF.Typography.Engine.GlyphInfo>)separate).Clear());
+        // A packed run has no way to change its glyphs; later shaping leaves this one as it was.
+        Assert.Equal(new[] { separate.Id(0), separate.Id(1), separate.Id(2) }, font.Shape("ffi", new Dictionary<string, int>(StringComparer.Ordinal) { ["kern"] = 1, ["liga"] = 0 }).Records().Select(g => g.Id));
     }
     [Fact]
     public void RepeatedDefaultShapingDoesNotReallocateTheRun()
@@ -165,7 +167,7 @@ public sealed class EmbeddedShapingTests
         Assert.NotSame(budgetFirst, font.Shape(budgetText + "0"));
         string longText = new('a', 513);
         Assert.NotSame(font.Shape(longText), font.Shape(longText));
-        var parallel = new IReadOnlyList<BonniePDF.Typography.Engine.GlyphInfo>[32];
+        var parallel = new BonniePDF.Typography.Engine.GlyphRun[32];
         System.Threading.Tasks.Parallel.For(0, parallel.Length, i => parallel[i] = font.Shape("shared ffi"));
         Assert.All(parallel, run => Assert.Same(parallel[0], run));
     }

@@ -2,23 +2,39 @@
 // Do not edit it here. A hand edit fails the vendored-files check; see VENDORED.json.
 #nullable disable
 using System.Collections.Generic;
+using System.Threading;
 
 namespace BonniePDF.Typography.Engine
 {
     internal sealed class ShapedRun
     {
-        internal readonly IReadOnlyList<GlyphInfo> Glyphs;
+        // The glyphs, packed. Glyphs gives the same values as records, built on first use.
+        internal readonly GlyphRun Run;
         internal readonly string Text;
+        private IReadOnlyList<GlyphInfo> glyphs;
 
-        internal ShapedRun(string text, GlyphInfo[] glyphs) : this(text, glyphs, false)
-        {
-        }
-
-        // owned: the caller hands over an array nothing else references, so no copy is needed.
-        internal ShapedRun(string text, GlyphInfo[] glyphs, bool owned)
+        internal ShapedRun(string text, GlyphInfo[] glyphs)
         {
             Text = text;
-            Glyphs = System.Array.AsReadOnly(owned ? glyphs : (GlyphInfo[])glyphs.Clone());
+            Run = GlyphRun.From(glyphs);
+        }
+
+        internal ShapedRun(string text, GlyphRun run)
+        {
+            Text = text;
+            Run = run;
+        }
+
+        internal IReadOnlyList<GlyphInfo> Glyphs
+        {
+            get
+            {
+                var current = Volatile.Read(ref glyphs);
+                if (current != null) return current;
+                var records = new GlyphInfo[Run.Count];
+                for (int i = 0; i < records.Length; i++) records[i] = Run.Info(i);
+                return Interlocked.CompareExchange(ref glyphs, System.Array.AsReadOnly(records), null) ?? glyphs;
+            }
         }
     }
 }

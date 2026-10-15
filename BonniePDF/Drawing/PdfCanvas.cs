@@ -20,7 +20,7 @@ internal class PdfCanvas : ICanvas
     private readonly Func<string, string> _fontResolver;
     private readonly Func<ImageInfo, string> _imageResolver;
     private readonly Action<string, string> _glyphTracker;
-    private readonly record struct PreparedTextRun(ResolvedTextRun Run, IReadOnlyList<Typography.Engine.GlyphInfo>? Glyphs);
+    private readonly record struct PreparedTextRun(ResolvedTextRun Run, Typography.Engine.GlyphRun? Glyphs);
     private readonly Func<float, string> _alphaGraphicsStateResolver;
     private readonly Func<string, string, IList<ResolvedTextRun>>? _textRunResolver;
     private readonly Action? _reportUntaggedImage;
@@ -687,7 +687,7 @@ internal class PdfCanvas : ICanvas
             TtfFont? font = run.EmbeddedFont;
             if (font != null)
             {
-                total += (float)(prepared.Glyphs!.Sum(g=>(double)g.AdvanceX)*fontSize/font.UnitsPerEm);
+                total += (float)((double)prepared.Glyphs!.TotalAdvanceX()*fontSize/font.UnitsPerEm);
             }
             else
             {
@@ -746,7 +746,7 @@ internal class PdfCanvas : ICanvas
             else
             {
                 _glyphTracker(run.FontIdentifier, run.Text);
-                if (glyphs is not null) codes = run.Tracker?.MarkShaped(run.Text, glyphs) ?? glyphs.Select(g => (ushort)g.Id).ToArray();
+                if (glyphs is not null) codes = run.Tracker?.MarkShaped(run.Text, glyphs) ?? GlyphIds(glyphs);
             }
             PdfOperators.SetFont(_stream,run.ResourceName,fontSize);
             if (font is null)
@@ -765,24 +765,23 @@ internal class PdfCanvas : ICanvas
             _stream.Append(" >> BDC\n");
             bool horizontal = true;
             for (int i = 0; i < glyphs.Count; i++)
-                if (glyphs[i].OffsetY != 0) { horizontal = false; break; }
+                if (glyphs.OffsetY(i) != 0) { horizontal = false; break; }
             if (horizontal)
             {
                 // Select the operator before writing, then append directly to the page.
                 // Keep empty hex groups around adjustments exactly as in the general encoding.
                 bool adjusted = false;
                 for (int i = 0; i < glyphs.Count; i++)
-                    if (glyphs[i].OffsetX != 0 || AfterAdvance(glyphs[i], run.Text, font, fontSize, wordSpacing ?? _wordSpacing) != 0)
+                    if (glyphs.OffsetX(i) != 0 || AfterAdvance(glyphs, i, run.Text, font, fontSize, wordSpacing ?? _wordSpacing) != 0)
                     { adjusted = true; break; }
                 if (adjusted) _stream.Append('[');
                 _stream.Append('<');
                 for (int i = 0; i < glyphs.Count; i++)
                 {
-                    var g = glyphs[i];
-                    double before = -(double)g.OffsetX * 1000 / font.UnitsPerEm;
+                    double before = -(double)glyphs.OffsetX(i) * 1000 / font.UnitsPerEm;
                     if (before != 0) AppendTextAdjustment(before);
                     PdfSyntax.AppendHex4(_stream, codes![i]);
-                    double after = AfterAdvance(g, run.Text, font, fontSize, wordSpacing ?? _wordSpacing);
+                    double after = AfterAdvance(glyphs, i, run.Text, font, fontSize, wordSpacing ?? _wordSpacing);
                     if (after != 0) AppendTextAdjustment(after);
                 }
                 _stream.Append(adjusted ? ">] TJ\n" : "> Tj\n");
@@ -792,11 +791,10 @@ internal class PdfCanvas : ICanvas
             }
             for (int i = 0; i < glyphs.Count; i++)
             {
-                var g = glyphs[i];
-                double rise = (double)g.OffsetY * fontSize / font.UnitsPerEm;
+                double rise = (double)glyphs.OffsetY(i) * fontSize / font.UnitsPerEm;
                 if (rise != 0) _stream.Append(PdfSyntax.FormatDecimal((float)rise)).Append(" Ts\n");
-                double before = -(double)g.OffsetX * 1000 / font.UnitsPerEm;
-                double after = AfterAdvance(g, run.Text, font, fontSize, wordSpacing ?? _wordSpacing);
+                double before = -(double)glyphs.OffsetX(i) * 1000 / font.UnitsPerEm;
+                double after = AfterAdvance(glyphs, i, run.Text, font, fontSize, wordSpacing ?? _wordSpacing);
                 bool adjusted = before != 0 || after != 0;
                 if (adjusted) _stream.Append('[');
                 if (before != 0) _stream.Append(PdfSyntax.FormatDecimal((float)before)).Append(' ');
@@ -820,11 +818,12 @@ internal class PdfCanvas : ICanvas
         {
             var run = prepared.Run; var font = run.EmbeddedFont;
             if (font is null) { cursor += FontMetrics.GetStringWidth(run.Text, run.FontIdentifier, size) + SpacingWidth(run.Text); continue; }
-            foreach (var glyph in prepared.Glyphs!)
+            var glyphs = prepared.Glyphs!;
+            for (int glyph = 0; glyph < glyphs.Count; glyph++)
             {
-                string source = run.Text.Substring(glyph.Cluster, glyph.SourceLength);
-                if (font.HasColour) ColourGlyphPainter.Draw(this, font, glyph, source, (float)cursor, baseline, size, colour);
-                cursor += (double)glyph.AdvanceX * size / font.UnitsPerEm + _letterSpacing;
+                string source = run.Text.Substring(glyphs.Cluster(glyph), glyphs.SourceLength(glyph));
+                if (font.HasColour) ColourGlyphPainter.Draw(this, font, glyphs, glyph, source, (float)cursor, baseline, size, colour);
+                cursor += (double)glyphs.AdvanceX(glyph) * size / font.UnitsPerEm + _letterSpacing;
                 if (source == " ") cursor += wordSpacing ?? _wordSpacing;
             }
         }
@@ -835,11 +834,18 @@ internal class PdfCanvas : ICanvas
         PdfSyntax.AppendDecimal(_stream.Append("> "), (float)value).Append(" <");
     }
 
-    private static double AfterAdvance(Typography.Engine.GlyphInfo glyph, string text, TtfFont font, float fontSize, float wordSpacing)
+    private static double AfterAdvance(Typography.Engine.GlyphRun glyphs, int i, string text, TtfFont font, float fontSize, float wordSpacing)
     {
-        bool space = glyph.SourceLength == 1 && text[glyph.Cluster] == ' ';
-        return (double)(font.GetGlyphWidth((ushort)glyph.Id) + glyph.OffsetX - glyph.AdvanceX) * 1000 / font.UnitsPerEm
+        bool space = glyphs.SourceLength(i) == 1 && text[glyphs.Cluster(i)] == ' ';
+        return (double)(font.GetGlyphWidth((ushort)glyphs.Id(i)) + glyphs.OffsetX(i) - glyphs.AdvanceX(i)) * 1000 / font.UnitsPerEm
             - (space && fontSize > 0 ? wordSpacing * 1000 / fontSize : 0);
+    }
+
+    private static ushort[] GlyphIds(Typography.Engine.GlyphRun glyphs)
+    {
+        var ids = new ushort[glyphs.Count];
+        for (int i = 0; i < ids.Length; i++) ids[i] = (ushort)glyphs.Id(i);
+        return ids;
     }
 
     /// <summary>

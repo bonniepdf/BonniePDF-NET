@@ -1,3 +1,4 @@
+using BonniePDF.Tests.Support;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
@@ -80,10 +81,10 @@ public class ParagraphWidthsTests(ITestOutputHelper output)
                             var sliced = widths.TryGetGlyphs(s, e);
                             Assert.NotNull(sliced);
                             var shaped = parsed.Shape(text.Substring(s, e - s), features);
-                            Assert.Equal(shaped.Count, sliced!.Length);
+                            Assert.Equal(shaped.Count, sliced!.Count);
                             for (int g = 0; g < shaped.Count; g++)
                             {
-                                var (x, y) = (shaped[g], sliced[g]);
+                                var (x, y) = (shaped.Info(g), sliced.Info(g));
                                 Assert.True(x.Id == y.Id && x.Cluster == y.Cluster && x.AdvanceX == y.AdvanceX && x.AdvanceY == y.AdvanceY &&
                                     x.OffsetX == y.OffsetX && x.OffsetY == y.OffsetY && x.ComponentCount == y.ComponentCount && x.IsMark == y.IsMark &&
                                     x.IsLigature == y.IsLigature && x.SourceLength == y.SourceLength && x.UnsafeToBreak == y.UnsafeToBreak &&
