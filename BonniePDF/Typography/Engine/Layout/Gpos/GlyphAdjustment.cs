@@ -12,5 +12,16 @@ namespace BonniePDF.Typography.Engine
         internal int Parent = -1;
         internal int CursiveParent = -1;
         internal bool ZeroMarkAdvance;
+
+        // Returns this record to its initial state, for reuse by a later shape call on the
+        // same positioning program. A new field must be reset here too.
+        internal GlyphAdjustment Reset()
+        {
+            XPlacement = YPlacement = XAdvance = YAdvance = 0;
+            Parent = -1;
+            CursiveParent = -1;
+            ZeroMarkAdvance = false;
+            return this;
+        }
     }
 }

@@ -70,6 +70,7 @@ internal class PdfDocumentSerializer
             {
                 Conformance = _document.Settings.Conformance,
                 TocEntries = new Dictionary<string, int>(),
+                DiscardFinishedPages = true,
             };
 
             foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
@@ -141,7 +142,10 @@ internal class PdfDocumentSerializer
             int contentId = writer.GetNewId();
 
             // A. Write Content Stream IMMEDIATELY (Flush memory)
-            writer.WriteCompressedObject(contentId, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), pageOutput.ContentStream);
+            if (pageOutput.Body != null)
+                writer.WriteBinaryObject(contentId, CompressedContentDictionary(), pageOutput.CompressedContent());
+            else
+                writer.WriteCompressedObject(contentId, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), pageOutput.ContentStream);
 
             // B. Write Page Object IMMEDIATELY
             // NOTICE: We removed "/Resources" from here! It will go on the Parent.
@@ -353,6 +357,7 @@ internal class PdfDocumentSerializer
             {
                 Conformance = _document.Settings.Conformance,
                 TocEntries = new Dictionary<string, int>(),
+                DiscardFinishedPages = true,
             };
 
             foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
@@ -419,8 +424,17 @@ internal class PdfDocumentSerializer
             int contentId = writer.GetNewId();
 
             // A. Write Content Stream IMMEDIATELY (Flush memory)
-            await writer.WriteCompressedObjectAsync(contentId, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
-                pageOutput.ContentStream, cancellationToken).ConfigureAwait(false);
+            if (pageOutput.Body != null)
+            {
+                byte[] compressed = pageOutput.CompressedContent();
+                await writer.WriteBinaryObjectAsync(contentId, CompressedContentDictionary(), compressed, compressed.Length,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                await writer.WriteCompressedObjectAsync(contentId, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                    pageOutput.ContentStream, cancellationToken).ConfigureAwait(false);
+            }
 
             // B. Write Page Object IMMEDIATELY
             Dictionary<string, string> pageDict = new(StringComparer.OrdinalIgnoreCase)
@@ -731,4 +745,8 @@ internal class PdfDocumentSerializer
     /// makes the identical decision.
     /// </summary>
     private bool RequiresTwoPassLayout() => TocLayout.RequiresTwoPass(_document);
+
+    /// <summary>The dictionary of a page content stream that is already FlateDecode-compressed.</summary>
+    private static Dictionary<string, string> CompressedContentDictionary() =>
+        new(StringComparer.OrdinalIgnoreCase) { [PdfKeys.Stream.Filter] = "/FlateDecode" };
 }

@@ -108,6 +108,7 @@ namespace BonniePDF.Typography.Engine
             if (outlineLimits == null)
                 throw new ArgumentNullException("outlineLimits");
             this.outlineLimits = outlineLimits;
+            AdvanceWidthOf = AdvanceWidth;
             bytes = (byte[])fontBytes.Clone();
             var directory = new SfntDirectory(bytes, faceIndex);
             tables = directory.Tables;
@@ -160,6 +161,8 @@ namespace BonniePDF.Typography.Engine
             if (id < 0 || id >= GlyphCount)
                 throw new InvalidDataException("Invalid glyph ID.");
         }
+        // AdvanceWidth as a delegate, created once rather than on every shape call.
+        internal readonly Func<int, int> AdvanceWidthOf;
         public int AdvanceWidth(int id)
         {
             ValidateGlyph(id);
