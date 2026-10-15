@@ -6,7 +6,7 @@ using BonniePDF.Typography.TrueType;
 namespace BonniePDF;
 internal static class EmbeddedTextShaping
 {
-    internal static IReadOnlyList<GlyphInfo> Shape(TtfFont font, string text, IReadOnlyDictionary<string,int>? features)
+    internal static IReadOnlyList<GlyphInfo> Shape(TtfFont font, FontFace face, string text, IReadOnlyDictionary<string,int>? features)
     {
         ShapeOptions? options = features is null || features.Count == 0 ? null : new ShapeOptions(features:features.Select(f=>new ShapeFeature(f.Key,f.Value)));
         if (text.Length > 0 && (TextFlow.RightToLeft || TextFlow.NeedsBidi(text)))
@@ -15,7 +15,7 @@ internal static class EmbeddedTextShaping
             if (line is not null && line.Paragraph.Substring(line.Start, line.End - line.Start) != text) line = null;
             string paragraph = line?.Paragraph ?? text;
             int lineStart = line?.Start ?? 0, lineEnd = line?.End ?? text.Length;
-            var resolved = TextItemizer.Resolve(paragraph, (_, _, _, _) => font.EngineFace,
+            var resolved = TextItemizer.Resolve(paragraph, (_, _, _, _) => face,
                 TextFlow.RightToLeft ? "rtl" : "ltr");
             return resolved.ShapeLine(lineStart, lineEnd, options).SelectMany(item => item.Glyphs)
                 .Select(g => new GlyphInfo(g.Id, g.Cluster - lineStart, g.AdvanceX, g.AdvanceY, g.OffsetX, g.OffsetY,
@@ -23,14 +23,14 @@ internal static class EmbeddedTextShaping
         }
         if (font.HasColour)
         {
-            try { return Shaper.Shape(font.EngineFace, text, options).Glyphs; }
+            try { return Shaper.Shape(face, text, options).Glyphs; }
             catch (System.NotSupportedException) { /* Preserve direct mapping for unsupported scripts. */ }
         }
         bool ascii = text.Length > 0;
         for (int i = 0; ascii && i < text.Length; i++) ascii = text[i] >= 32 && text[i] <= 126;
         if (ascii)
         {
-            try { return Shaper.Shape(font.EngineFace, text, options).Glyphs; }
+            try { return Shaper.Shape(face, text, options).Glyphs; }
             catch (System.NotSupportedException) { /* Preserve the direct-mapping fallback below. */ }
         }
         var glyphs=new List<GlyphInfo>(); int start=0, cluster=0; var span=new StringBuilder();
@@ -40,7 +40,7 @@ internal static class EmbeddedTextShaping
             if(span.Length==0) return;
             string value=span.ToString();
             try {
-                foreach(var g in Shaper.Shape(font.EngineFace,value,options).Glyphs)
+                foreach(var g in Shaper.Shape(face,value,options).Glyphs)
                     glyphs.Add(new GlyphInfo(g.Id,g.Cluster+start,g.AdvanceX,g.AdvanceY,g.OffsetX,g.OffsetY,g.ComponentCount,g.IsMark,g.IsLigature,g.SourceLength,g.UnsafeToBreak,g.ComponentIndex));
             } catch(System.NotSupportedException) {
                 int offset=start;

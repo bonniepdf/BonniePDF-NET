@@ -19,31 +19,43 @@ internal sealed class ShapedTextCache
     private int _glyphCount;
     private sealed record Entry((string Text, string Features) Key, IReadOnlyList<GlyphInfo> Glyphs);
 
+    // Thread-safe: concurrent documents share a font. The lock covers only the cache; a miss
+    // shapes outside it, and two threads missing the same key at once keep the first result.
     internal IReadOnlyList<GlyphInfo> Get(TtfFont font, string text, IReadOnlyDictionary<string, int>? features)
     {
-        if (text.Length > MaxTextLength || TextFlow.CurrentLine?.Paragraph.Length > MaxTextLength) return EmbeddedTextShaping.Shape(font, text, features);
+        if (text.Length > MaxTextLength || TextFlow.CurrentLine?.Paragraph.Length > MaxTextLength) return Shape(font, text, features);
         string featureKey = features is null || features.Count == 0 ? string.Empty :
             string.Join(";", features.OrderBy(f => f.Key, StringComparer.Ordinal).Select(f =>
                 f.Key.Length.ToString(CultureInfo.InvariantCulture) + ":" + f.Key + "=" + f.Value.ToString(CultureInfo.InvariantCulture)));
         var key = (text, featureKey + "|" + TextFlow.CacheKey);
-        if (_entries.TryGetValue(key, out var existing))
+        lock (_entries)
         {
-            _recent.Remove(existing);
-            _recent.AddLast(existing);
-            return existing.Value.Glyphs;
+            if (_entries.TryGetValue(key, out var existing))
+            {
+                _recent.Remove(existing);
+                _recent.AddLast(existing);
+                return existing.Value.Glyphs;
+            }
         }
-        var shaped = EmbeddedTextShaping.Shape(font, text, features);
+        var shaped = Shape(font, text, features);
         if (shaped.Count > MaxGlyphs) return shaped;
-        var glyphs = Array.AsReadOnly(shaped.ToArray());
-        while (_entries.Count >= MaxEntries || _glyphCount + glyphs.Count > MaxGlyphs)
+        var glyphs = shaped is System.Collections.ObjectModel.ReadOnlyCollection<GlyphInfo> readOnly ? readOnly : Array.AsReadOnly(shaped.ToArray());
+        lock (_entries)
         {
-            var oldest = _recent.First!;
-            _glyphCount -= oldest.Value.Glyphs.Count;
-            _entries.Remove(oldest.Value.Key);
-            _recent.RemoveFirst();
+            if (_entries.TryGetValue(key, out var raced)) return raced.Value.Glyphs;
+            while (_entries.Count >= MaxEntries || _glyphCount + glyphs.Count > MaxGlyphs)
+            {
+                var oldest = _recent.First!;
+                _glyphCount -= oldest.Value.Glyphs.Count;
+                _entries.Remove(oldest.Value.Key);
+                _recent.RemoveFirst();
+            }
+            _entries.Add(key, _recent.AddLast(new Entry(key, glyphs)));
+            _glyphCount += glyphs.Count;
         }
-        _entries.Add(key, _recent.AddLast(new Entry(key, glyphs)));
-        _glyphCount += glyphs.Count;
         return glyphs;
     }
+
+    private static IReadOnlyList<GlyphInfo> Shape(TtfFont font, string text, IReadOnlyDictionary<string, int>? features) =>
+        font.WithShapingFace(face => EmbeddedTextShaping.Shape(font, face, text, features));
 }

@@ -15,6 +15,7 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Concurrent documents that use the same font no longer queue behind one shaping lock: each concurrent shaping call borrows its own copy of the font's shaping data (retained up to the processor count). Four 20,000-line documents generated at once take about 2.8 s instead of 4.2 s. Output is unchanged.
 - Faster shaping of embedded fonts: each OpenType lookup now skips glyphs it cannot act on, while charging exactly the same work against the shaping limits. Shaping a short Latin line takes about a third less time. Output and limit behaviour are unchanged.
 - `Save(Stream)` and `SaveAsync(Stream)` accept a stream that cannot seek, such as an HTTP response body or a pipe, so a service can stream a PDF without buffering it first. The writers buffer their output and flush the destination once at the end instead of before every object. Output is unchanged, including offsets when the destination already holds data.
 - Faster text with feature overrides (`FontFeatures`) and right-to-left or mixed-direction text: shaping no longer rebuilds the font's layout program for every line. A 5,000-line document using `tnum` takes about a third less time and allocates about 84% less. Output is unchanged.

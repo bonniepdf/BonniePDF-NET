@@ -57,7 +57,28 @@ internal class TtfFont
     internal IReadOnlyList<Typography.Engine.GlyphInfo> Shape(string text, IReadOnlyDictionary<string, int>? features = null)
     {
         using var performanceScope = PerformanceEvents.Measure(PerformanceStage.Shaping);
-        lock (_shapeGate) return _shapedText.Get(this, text, features);
+        return _shapedText.Get(this, text, features);
+    }
+
+    // Engine faces carry per-call shaping state and caches, so one face serves one shaping
+    // call at a time. Concurrent documents using this font each borrow a face instead of
+    // queueing behind one lock. Faces are retained up to the processor count; each is a
+    // copy of the font. Shaping is a pure function of the font bytes and options, so which
+    // face shapes a run never changes its glyphs.
+    private readonly System.Collections.Concurrent.ConcurrentBag<Typography.Engine.FontFace> _shapingFaces = new();
+    private static readonly int MaxShapingFaces = Math.Clamp(Environment.ProcessorCount, 1, 16);
+
+    internal T WithShapingFace<T>(Func<Typography.Engine.FontFace, T> shape)
+    {
+        if (!_shapingFaces.TryTake(out Typography.Engine.FontFace? face)) face = CreateEngineFace();
+        try
+        {
+            return shape(face);
+        }
+        finally
+        {
+            if (_shapingFaces.Count < MaxShapingFaces) _shapingFaces.Add(face);
+        }
     }
 
     // =====================================================
