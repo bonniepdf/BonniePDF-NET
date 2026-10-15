@@ -17,7 +17,7 @@ internal sealed class ShapedTextCache
     private readonly Dictionary<(string Text, string Features), LinkedListNode<Entry>> _entries = new();
     private readonly LinkedList<Entry> _recent = new();
     private int _glyphCount;
-    private sealed record Entry((string Text, string Features) Key, IReadOnlyList<GlyphInfo> Glyphs);
+    private readonly record struct Entry((string Text, string Features) Key, IReadOnlyList<GlyphInfo> Glyphs);
 
     // Thread-safe: concurrent documents share a font. The lock covers only the cache; a miss
     // shapes outside it, and two threads missing the same key at once keep the first result.
@@ -43,14 +43,20 @@ internal sealed class ShapedTextCache
         lock (_entries)
         {
             if (_entries.TryGetValue(key, out var raced)) return raced.Value.Glyphs;
+            // A full cache evicts its oldest entry on every miss; reuse that entry's node.
+            LinkedListNode<Entry>? node = null;
             while (_entries.Count >= MaxEntries || _glyphCount + glyphs.Count > MaxGlyphs)
             {
-                var oldest = _recent.First!;
-                _glyphCount -= oldest.Value.Glyphs.Count;
-                _entries.Remove(oldest.Value.Key);
+                node = _recent.First!;
+                _glyphCount -= node.Value.Glyphs.Count;
+                _entries.Remove(node.Value.Key);
                 _recent.RemoveFirst();
             }
-            _entries.Add(key, _recent.AddLast(new Entry(key, glyphs)));
+            var entry = new Entry(key, glyphs);
+            if (node is null) node = new LinkedListNode<Entry>(entry);
+            else node.Value = entry;
+            _recent.AddLast(node);
+            _entries.Add(key, node);
             _glyphCount += glyphs.Count;
         }
         return glyphs;

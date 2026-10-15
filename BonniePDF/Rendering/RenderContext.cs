@@ -379,13 +379,35 @@ public class RenderContext
         }
         else
         {
-            var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, 0, 0, RegisterFont, ResolveImageResource,
-                ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage,
-                RegisterShading, Resources.NoteImagePlacement);
+            var pdfCanvas = CreatePdfCanvas(0, 0);
         pdfCanvas.EmojiRenderingResolver = () => EmojiRendering;
             if (Tagging != null) pdfCanvas.SetTaggingContext(Tagging);
             Canvas = pdfCanvas;
         }
+    }
+
+    private CanvasCallbacks? _canvasCallbacks;
+
+    /// <summary>A PDF canvas on the current page, sharing one set of callback delegates across canvases.</summary>
+    private PdfCanvas CreatePdfCanvas(float x, float y)
+    {
+        CanvasCallbacks c = _canvasCallbacks ??= new CanvasCallbacks(this);
+        return new PdfCanvas(CurrentStream, PageSize.Height, x, y, c.RegisterFont, c.ResolveImage, c.ResolveEmbeddedFont,
+            c.TrackGlyphUsage, c.RegisterAlpha, c.ResolveTextRuns, c.ReportUntaggedImage, c.RegisterShading, c.NoteImagePlacement);
+    }
+
+    /// <summary>The context's canvas callbacks, created once instead of per canvas.</summary>
+    private sealed class CanvasCallbacks(RenderContext ctx)
+    {
+        internal readonly Func<string, string> RegisterFont = ctx.RegisterFont;
+        internal readonly Func<ImageInfo, string> ResolveImage = ctx.ResolveImageResource;
+        internal readonly Func<string, TtfFont?> ResolveEmbeddedFont = ctx.ResolveEmbeddedFont;
+        internal readonly Action<string, string> TrackGlyphUsage = ctx.TrackGlyphUsage;
+        internal readonly Func<float, string> RegisterAlpha = ctx.RegisterAlphaGraphicsState;
+        internal readonly Func<string, string, IList<ResolvedTextRun>> ResolveTextRuns = ctx.ResolveTextRuns;
+        internal readonly Action ReportUntaggedImage = ctx.ReportUntaggedImage;
+        internal readonly Func<ShadingRequest, ShadingResources?> RegisterShading = ctx.RegisterShading;
+        internal readonly Action<ImageInfo, float, float> NoteImagePlacement = ctx.Resources.NoteImagePlacement;
     }
 
     /// <summary>
@@ -415,9 +437,7 @@ public class RenderContext
                 IdAllocator = _svgIdAllocator
             };
 
-        var pdfCanvas = new PdfCanvas(CurrentStream, PageSize.Height, x, y, RegisterFont, ResolveImageResource,
-            ResolveEmbeddedFont, TrackGlyphUsage, RegisterAlphaGraphicsState, ResolveTextRuns, ReportUntaggedImage,
-            RegisterShading, Resources.NoteImagePlacement);
+        var pdfCanvas = CreatePdfCanvas(x, y);
         pdfCanvas.EmojiRenderingResolver = () => EmojiRendering;
         if (Tagging != null)
         {

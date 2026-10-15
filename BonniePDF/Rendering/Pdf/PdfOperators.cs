@@ -273,7 +273,10 @@ internal static class PdfOperators
     /// <see href="https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf#page=406"/>
     /// </summary>
     internal static void SetTextPosition(StringBuilder s, float x, float y)
-        => s.AppendLf($"1 0 0 1 {PdfSyntax.FormatDecimal(x)} {PdfSyntax.FormatDecimal(y)} Tm");
+    {
+        PdfSyntax.AppendDecimal(s.Append("1 0 0 1 "), x).Append(' ');
+        PdfSyntax.AppendDecimal(s, y).Append(" Tm\n");
+    }
 
     /// <summary>
     /// <c>Tj</c> - Show a text string.

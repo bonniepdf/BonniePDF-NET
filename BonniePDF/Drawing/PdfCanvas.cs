@@ -832,7 +832,7 @@ internal class PdfCanvas : ICanvas
 
     private void AppendTextAdjustment(double value)
     {
-        _stream.Append("> ").Append(PdfSyntax.FormatDecimal((float)value)).Append(" <");
+        PdfSyntax.AppendDecimal(_stream.Append("> "), (float)value).Append(" <");
     }
 
     private static double AfterAdvance(Typography.Engine.GlyphInfo glyph, string text, TtfFont font, float fontSize, float wordSpacing)

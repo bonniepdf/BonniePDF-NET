@@ -119,6 +119,16 @@ internal static class PdfSyntax
     /// Formats a float using InvariantCulture to ensure dot separators.
     /// This is critical for PDF syntax which requires decimal points, not commas.
     /// </summary>
+    /// <summary>Appends <see cref="FormatDecimal(float)"/>'s text without allocating a string.</summary>
+    internal static StringBuilder AppendDecimal(StringBuilder s, float value)
+    {
+        Span<char> buffer = stackalloc char[64];
+        if (!value.TryFormat(buffer, out int written, "0.###", CultureInfo.InvariantCulture))
+            return s.Append(FormatDecimal(value));
+        ReadOnlySpan<char> text = buffer[..written];
+        return text is "-0" ? s.Append('0') : s.Append(text);
+    }
+
     internal static string FormatDecimal(float value)
     {
         // A negative zero - a zero matrix entry negated, or a tiny negative value
