@@ -15,6 +15,7 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Faster pagination of large single tables: column widths are computed once per render instead of on every page, which scanned every row each time. A 200,000-row table now renders in about 7 s instead of 39 s. Output is unchanged.
 - A top-level element that does not fit even on an empty page is still skipped after two fresh pages, and now reports a `Render` warning (source `pagination`) in `Document.Diagnostics` instead of disappearing silently.
 - Tagged (PDF/UA) documents: a top-level element that continues onto another page now reopens its marked content before its graphics state on every page, as on its first page, instead of interleaving the two.
 

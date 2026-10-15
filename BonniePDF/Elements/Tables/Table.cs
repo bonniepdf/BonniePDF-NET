@@ -236,7 +236,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     private RenderStatus RenderStatefulRows(RenderContext ctx, float width, TaggingContext? tagging)
     {
         float contentWidth = GetContentWidth(width);
-        float[] widths = CalculateColumnWidths(contentWidth);
+        float[] widths = PaginatedColumnWidths(contentWidth);
         // Layout (presentation) tables emit no TR/TH/TD and therefore no row-groups.
         TaggingContext? groupTagging = IsLayoutGrid ? null : tagging;
         // PDF/UA 7.2: rows must sit inside a THead/TBody/TFoot row-group. Groups
@@ -336,6 +336,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         _headersPending = true;
         _bottomsAbove = null;
         _edgePlan.Clear();
+        _paginatedWidths = null;
     }
 
     // --- Border collapse ---
@@ -797,6 +798,24 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         }
     }
 
+    private float[]? _paginatedWidths;
+    private float _paginatedWidthsFor;
+
+    /// <summary>
+    /// Column widths for the page fragments of one render. Finding the column count
+    /// scans every row, so recomputing it on each page made one table O(rows x pages).
+    /// The tree is frozen while it renders; <see cref="ResetState"/> drops the cache.
+    /// </summary>
+    private float[] PaginatedColumnWidths(float totalWidth)
+    {
+        if (_paginatedWidths is null || _paginatedWidthsFor != totalWidth)
+        {
+            _paginatedWidths = CalculateColumnWidths(totalWidth);
+            _paginatedWidthsFor = totalWidth;
+        }
+        return _paginatedWidths;
+    }
+
     private float[] CalculateColumnWidths(float totalWidth)
     {
         float[] weights = EffectiveColumnWeights();
@@ -834,11 +853,14 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     {
         int columns = _columnWeights.Length;
 
-        foreach (TableRow row in _headers.Concat(_rows).Concat(_footers))
+        foreach (List<TableRow> rows in (List<TableRow>[])[_headers, _rows, _footers])
         {
-            int spanned = 0;
-            foreach (TableCell cell in row.Cells) spanned += Math.Max(1, cell.ColumnSpan);
-            if (spanned > columns) columns = spanned;
+            foreach (TableRow row in rows)
+            {
+                int spanned = 0;
+                foreach (TableCell cell in row.Cells) spanned += Math.Max(1, cell.ColumnSpan);
+                if (spanned > columns) columns = spanned;
+            }
         }
 
         return columns;
