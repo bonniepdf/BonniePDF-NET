@@ -15,6 +15,7 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Faster text with feature overrides (`FontFeatures`) and right-to-left or mixed-direction text: shaping no longer rebuilds the font's layout program for every line. A 5,000-line document using `tnum` takes about a third less time and allocates about 84% less. Output is unchanged.
 - `Document.Fonts.Add` reuses the parse of a byte array it has seen before, and the PDF writer shares it, so a font is no longer parsed twice per document. A service that keeps its font bytes in memory parses each font once: a small two-face document takes about 20% less time and allocates about 75% less. Family resolution is memoised per document.
 - Safer concurrent generation: font subset prefixes no longer use a shared, unsynchronised `Random`; a font's shaping data is built once when several documents first use it together; colour-glyph and CFF embedding reads take the font's lock; `FontFamilyResolver.RegisterFamily` may run while other documents render.
 - Faster pagination of large single tables: column widths are computed once per render instead of on every page, which scanned every row each time. A 200,000-row table now renders in about 7 s instead of 39 s. Output is unchanged.
