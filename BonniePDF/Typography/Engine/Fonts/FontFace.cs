@@ -18,19 +18,42 @@ namespace BonniePDF.Typography.Engine
         internal readonly BitmapStrikes Bitmaps;
         private readonly ColourLayers colourLayers;
         private readonly Dictionary<ShapeOptions, ShapingProgram> programs = new Dictionary<ShapeOptions, ShapingProgram>();
+        private readonly Dictionary<string, ShapingProgram> programsByValue = new Dictionary<string, ShapingProgram>(StringComparer.Ordinal);
         private ShapingProgram defaultProgram;
         internal ShapingProgram Program(ShapeOptions options)
         {
             if (options == null)
                 return defaultProgram ?? (defaultProgram = new ShapingProgram(Substitution, Positioning));
             ShapingProgram program;
+            if (options.Limits == null)
+            {
+                // Callers build a fresh options instance per call (feature overrides, bidi
+                // items), so equal options share a program by value rather than identity.
+                string key = ProgramKey(options);
+                if (programsByValue.TryGetValue(key, out program)) return program;
+                program = BuildProgram(options, Limits);
+                if (programsByValue.Count < 16) programsByValue.Add(key, program);
+                return program;
+            }
             if (programs.TryGetValue(options, out program)) return program;
-            var limits = options.Limits ?? Limits;
-            program = new ShapingProgram(new GlyphSubstitution(Font.GetTableData("GSUB"), Font.GlyphCount, Font.GetTableData("GDEF"), limits, options),
-                new GlyphPositioning(Font.GetTableData("GPOS"), Font.GetTableData("GDEF"), limits, options));
+            program = BuildProgram(options, options.Limits);
             // Cache caller-owned immutable option instances, with a strict face bound.
             if (programs.Count < 16) programs.Add(options, program);
             return program;
+        }
+        private ShapingProgram BuildProgram(ShapeOptions options, ShapingLimits limits)
+        {
+            return new ShapingProgram(new GlyphSubstitution(Font.GetTableData("GSUB"), Font.GlyphCount, Font.GetTableData("GDEF"), limits, options),
+                new GlyphPositioning(Font.GetTableData("GPOS"), Font.GetTableData("GDEF"), limits, options));
+        }
+        // Script and language are four-character tags, so plain concatenation is unambiguous.
+        private static string ProgramKey(ShapeOptions options)
+        {
+            var key = new StringBuilder(16 + options.Features.Count * 24);
+            key.Append(options.Script).Append(options.Language).Append((int)options.Direction);
+            foreach (var feature in options.Features)
+                key.Append(';').Append(feature.Tag).Append(feature.Value).Append(',').Append(feature.Start).Append(',').Append(feature.End);
+            return key.ToString();
         }
         internal FontMetrics Metrics { get { return Font.Metrics; } }
         internal FontNames Names { get { return Font.Names; } }

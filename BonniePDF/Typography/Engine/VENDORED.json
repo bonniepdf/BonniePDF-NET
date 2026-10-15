@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "text-engine-dotnet",
   "source": {
-    "commit": "c2d9a81a3723a69b84dcad1cf4cd7a0dfa2954db",
+    "commit": "5cff387d0b0f19ca68a17634230b167778f76f39",
     "dirty": false
   },
   "files": {
@@ -20,7 +20,7 @@
     "Fonts/Colour/ColourLayerData.cs": "6d6eec3659069be84cb2670a2fe349aa23233b7fd4f616a155f2f0491a059859",
     "Fonts/Colour/ColourLayers.cs": "6beb47b9c835e1e2bc7d5007cc78629ab8c8f7d3ebc1df7ec74f85a448fef7aa",
     "Fonts/Colour/PaletteColour.cs": "d3dc55fc512337a0c5169e87d05ef214833e5d4401d56a8582164834bba3764f",
-    "Fonts/FontFace.cs": "74c2578a2d45fa04e5b5c300e2cb69eb73daa54c8686f393e677f62d11bd4f84",
+    "Fonts/FontFace.cs": "f427e59c93df04b52db34b470f57c9af93301bc0861f916ce74e1b5fec410483",
     "Fonts/Outlines/CffFont.cs": "92e562715034df9df3aff6e0891ebe2b41a22c30bd78bbe73b2bd6ac2ce5b4f6",
     "Fonts/Outlines/DecodedOutline.cs": "a0c09f742e3b9efe78ea01b7288752966c850b518ca612a3828becbf05d437f9",
     "Fonts/Outlines/FontPoint.cs": "17bb482034907c52371a571d150c5b887cdd3ecbd3edfa2f4f1357b567db9a42",
