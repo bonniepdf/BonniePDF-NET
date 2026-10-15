@@ -8,15 +8,18 @@ namespace BonniePDF;
 /// </summary>
 public abstract class ElementBase : IElement, IMargin, ICaptureMetadata
 {
-    private ContentDirection? _contentDirection;
+    // Margin, capture name, direction and break permission, shared with every element that has
+    // the same values (see Interned). Most elements keep the defaults.
+    private ElementOptions _options = ElementOptions.Default;
+
     /// <summary>Inline direction override. Null inherits the enclosing direction.</summary>
     public ContentDirection? ContentDirection
     {
-        get => _contentDirection;
+        get => _options.ContentDirection;
         set
         {
             if (value.HasValue && !System.Enum.IsDefined(value.Value)) throw new System.ArgumentOutOfRangeException(nameof(value));
-            _contentDirection = value;
+            _options = _options.With(value, static (o, v) => o with { ContentDirection = v });
         }
     }
     internal ContentDirection InheritedContentDirection { get; set; }
@@ -101,12 +104,20 @@ public abstract class ElementBase : IElement, IMargin, ICaptureMetadata
     /// Optional author-supplied name/key surfaced in the layout snapshot. Null by
     /// default; a future capture API can populate it.
     /// </summary>
-    public string? CaptureName { get; set; }
+    public string? CaptureName
+    {
+        get => _options.CaptureName;
+        set => _options = _options.With(value, static (o, v) => o with { CaptureName = v });
+    }
 
     /// <summary>
     /// Margin around this element
     /// </summary>
-    public Thickness Margin { get; set; } = new(0);
+    public Thickness Margin
+    {
+        get => _options.Margin;
+        set => _options = _options.With(value, static (o, v) => o with { Margin = v });
+    }
 
     /// <summary>
     /// Whether this element can be split across page boundaries.
@@ -114,7 +125,11 @@ public abstract class ElementBase : IElement, IMargin, ICaptureMetadata
     /// rather than split. If it doesn't fit on a fresh page either, it renders anyway.
     /// Default is true.
     /// </summary>
-    public bool BreakAllowed { get; set; } = true;
+    public bool BreakAllowed
+    {
+        get => _options.BreakAllowed;
+        set => _options = _options.With(value, static (o, v) => o with { BreakAllowed = v });
+    }
 
     /// <summary>
     /// Gets the content width after accounting for margins

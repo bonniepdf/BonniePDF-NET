@@ -12,16 +12,12 @@ namespace BonniePDF;
 /// </summary>
 public abstract class TextElementBase : ElementBase
 {
-    private TextStyle? _featureStyle;
     /// <summary>OpenType feature overrides for embedded text, such as kern=0 or liga=0.</summary>
     public System.Collections.Generic.IReadOnlyDictionary<string,int>? FontFeatures
     {
-        get => _featureStyle?.FontFeatures;
-        set
-        {
-            if (value is null) _featureStyle = null;
-            else (_featureStyle ??= new TextStyle()).FontFeatures = value;
-        }
+        get => _text.FontFeatures;
+        // TextStyle validates the features and takes a private copy.
+        set => _text = _text.With(value is null ? null : new TextStyle { FontFeatures = value }.FontFeatures, static (o, v) => o with { FontFeatures = v });
     }
 
     /// <summary>
@@ -41,19 +37,23 @@ public abstract class TextElementBase : ElementBase
     /// </summary>
     public const string CurrentPageToken = "{{CurrentPage}}";
 
-    private string? _fontFamily;
-    private FontWeight _weight = FontWeight.Normal;
-    private bool _isItalic;
-    private string _fontName = StandardFonts.Helvetica;
+    // Text style and options, shared with every text element that has the same values (see
+    // Interned); the members below read and write it.
+    private protected TextOptions _text = TextOptions.Default;
+
+    private string? _fontFamily { get => _text.FontFamily; set => _text = _text.With(value, static (o, v) => o with { FontFamily = v }); }
+    private FontWeight _weight { get => _text.Weight; set => _text = _text.With(value, static (o, v) => o with { Weight = v }); }
+    private bool _isItalic { get => _text.Italic; set => _text = _text.With(value, static (o, v) => o with { Italic = v }); }
+    private string _fontName { get => _text.FontName; set => _text = _text.With(value, static (o, v) => o with { FontName = v }); }
 
     // Explicit-set tracking for DefaultTextStyle cascade
-    private bool _fontExplicit;
-    private float _fontSize = 12f;
-    private bool _fontSizeExplicit;
-    private Color _textColor = Color.Black;
-    private bool _textColorExplicit;
-    private float _lineHeight = 1.2f;
-    private bool _lineHeightExplicit;
+    private bool _fontExplicit { get => _text.FontExplicit; set => _text = _text.With(value, static (o, v) => o with { FontExplicit = v }); }
+    private float _fontSize { get => _text.FontSize; set => _text = _text.With(value, static (o, v) => o with { FontSize = v }); }
+    private bool _fontSizeExplicit { get => _text.FontSizeExplicit; set => _text = _text.With(value, static (o, v) => o with { FontSizeExplicit = v }); }
+    private Color _textColor { get => _text.TextColor; set => _text = _text.With(value, static (o, v) => o with { TextColor = v }); }
+    private bool _textColorExplicit { get => _text.TextColorExplicit; set => _text = _text.With(value, static (o, v) => o with { TextColorExplicit = v }); }
+    private float _lineHeight { get => _text.LineHeight; set => _text = _text.With(value, static (o, v) => o with { LineHeight = v }); }
+    private bool _lineHeightExplicit { get => _text.LineHeightExplicit; set => _text = _text.With(value, static (o, v) => o with { LineHeightExplicit = v }); }
 
     protected TextElementBase()
     {
@@ -178,30 +178,54 @@ public abstract class TextElementBase : ElementBase
     /// <summary>
     /// Text decoration (underline, strikethrough, overline, or a combination)
     /// </summary>
-    public TextDecoration Decoration { get; set; } = TextDecoration.None;
+    public TextDecoration Decoration
+    {
+        get => _text.Decoration;
+        set => _text = _text.With(value, static (o, v) => o with { Decoration = v });
+    }
 
     /// <summary>
     /// Colour of the decoration lines. Null = use <see cref="Color"/>, the default.
     /// </summary>
-    public Color? DecorationColor { get; set; }
+    public Color? DecorationColor
+    {
+        get => _text.DecorationColor;
+        set => _text = _text.With(value, static (o, v) => o with { DecorationColor = v });
+    }
 
     /// <summary>
     /// Thickness of the decoration lines in points. Null = the default derived from
     /// font size (<c>max(0.5, fontSize / 18)</c>).
     /// </summary>
-    public float? DecorationThickness { get; set; }
+    public float? DecorationThickness
+    {
+        get => _text.DecorationThickness;
+        set => _text = _text.With(value, static (o, v) => o with { DecorationThickness = v });
+    }
 
     /// <summary>Line style for decorations (solid/wavy/dashed/dotted). Default solid.</summary>
-    public DecorationStyle DecorationStyle { get; set; } = DecorationStyle.Solid;
+    public DecorationStyle DecorationStyle
+    {
+        get => _text.DecorationStyle;
+        set => _text = _text.With(value, static (o, v) => o with { DecorationStyle = v });
+    }
 
     /// <summary>
     /// Letter spacing (tracking) in points, added after every glyph.
     /// Default 0. Reflected in measurement and both PDF and SVG output.
     /// </summary>
-    public float LetterSpacing { get; set; }
+    public float LetterSpacing
+    {
+        get => _text.LetterSpacing;
+        set => _text = _text.With(value, static (o, v) => o with { LetterSpacing = v });
+    }
 
     /// <summary>Word spacing in points, added after every space. Default 0.</summary>
-    public float WordSpacing { get; set; }
+    public float WordSpacing
+    {
+        get => _text.WordSpacing;
+        set => _text = _text.With(value, static (o, v) => o with { WordSpacing = v });
+    }
 
     /// <summary>
     /// Resolves FontName from FontFamily + FontWeight + Italic via FontFamilyResolver.

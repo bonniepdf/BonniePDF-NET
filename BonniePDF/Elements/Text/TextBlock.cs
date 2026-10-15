@@ -13,17 +13,29 @@ namespace BonniePDF;
 public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 {
     private float _cachedContentWidth = -1;
-    private IList<string>? _cachedLines;
-    private TextFlow.Line?[]? _bidiLines;
+    // The wrapped lines: null until computed; a string when there is one line and nothing else
+    // to record (most table cells), which is then the only allocation; otherwise a LineLayout.
+    private object? _layout;
+
+    private sealed class LineLayout(string[] lines, float[]? indents, float[]? spaceBefore, TextFlow.Line?[]? bidi)
+    {
+        internal readonly string[] Lines = lines;
+        internal readonly float[]? Indents = indents;
+        internal readonly float[]? SpaceBefore = spaceBefore;
+        internal readonly TextFlow.Line?[]? Bidi = bidi;
+    }
+
+    private IList<string>? _cachedLines => _layout switch { null => null, string line => new[] { line }, LineLayout l => l.Lines, _ => null };
+    private TextFlow.Line?[]? _bidiLines => (_layout as LineLayout)?.Bidi;
     // Per-line paragraph metadata parallel to _cachedLines.
-    private IList<float>? _cachedIndents;
-    private IList<float>? _cachedSpaceBefore;
+    private IList<float>? _cachedIndents => (_layout as LineLayout)?.Indents;
+    private IList<float>? _cachedSpaceBefore => (_layout as LineLayout)?.SpaceBefore;
 
     // State tracking for multipage rendering
     private int _lastLineRendered = -1;
     public required string Text { get; set; }
-    private TextAlignment _alignment = TextAlignment.Left;
-    private bool _alignmentExplicit;
+    private TextAlignment _alignment { get => _text.Alignment; set => _text = _text.With(value, static (o, v) => o with { Alignment = v }); }
+    private bool _alignmentExplicit { get => _text.AlignmentExplicit; set => _text = _text.With(value, static (o, v) => o with { AlignmentExplicit = v }); }
 
     internal bool AlignmentIsExplicit => _alignmentExplicit;
 
@@ -55,22 +67,38 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     /// wraps to more lines, the block is truncated to this many lines and
     /// <see cref="Ellipsis"/> is appended to the last visible line. Null = no clamp.
     /// </summary>
-    public int? MaxLines { get; set; }
+    public int? MaxLines
+    {
+        get => _text.MaxLines;
+        set => _text = _text.With(value, static (o, v) => o with { MaxLines = v });
+    }
 
     /// <summary>Ellipsis appended to the last line when <see cref="MaxLines"/> clamps. Default <c>…</c>.</summary>
-    public string Ellipsis { get; set; } = "…";
+    public string Ellipsis
+    {
+        get => _text.Ellipsis;
+        set => _text = _text.With(value, static (o, v) => o with { Ellipsis = v });
+    }
 
     /// <summary>
     /// Paragraph layout: horizontal indent (points) applied to the first line
     /// of each paragraph (a paragraph = text between hard <c>\n</c> breaks). Default 0.
     /// </summary>
-    public float FirstLineIndent { get; set; }
+    public float FirstLineIndent
+    {
+        get => _text.FirstLineIndent;
+        set => _text = _text.With(value, static (o, v) => o with { FirstLineIndent = v });
+    }
 
     /// <summary>
     /// Paragraph layout: extra vertical space (points) inserted before each
     /// paragraph after the first. Default 0.
     /// </summary>
-    public float ParagraphSpacing { get; set; }
+    public float ParagraphSpacing
+    {
+        get => _text.ParagraphSpacing;
+        set => _text = _text.With(value, static (o, v) => o with { ParagraphSpacing = v });
+    }
 
     /// <summary>
     /// Keep every space, including leading and repeated ones, for text whose indentation carries
@@ -82,7 +110,11 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     /// long line never overflows. Tabs are not expanded. Inherited by <see cref="Heading"/>; list
     /// items and <see cref="RichText"/> do not take it.
     /// </remarks>
-    public bool PreserveWhitespace { get; set; }
+    public bool PreserveWhitespace
+    {
+        get => _text.PreserveWhitespace;
+        set => _text = _text.With(value, static (o, v) => o with { PreserveWhitespace = v });
+    }
 
     /// <summary>
     /// PDF/UA structure role for this element. Defaults to
@@ -97,14 +129,22 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     /// If fewer lines fit on the current page, the entire block moves to the next page.
     /// Set to 1 to disable orphan control. Default is 2.
     /// </summary>
-    public int MinLinesBeforeBreak { get; set; } = 2;
+    public int MinLinesBeforeBreak
+    {
+        get => _text.MinLinesBeforeBreak;
+        set => _text = _text.With(value, static (o, v) => o with { MinLinesBeforeBreak = v });
+    }
 
     /// <summary>
     /// Minimum number of lines that must appear after a page break (widow control).
     /// If fewer lines remain for the next page, the break point is adjusted
     /// to push more lines forward. Set to 1 to disable widow control. Default is 2.
     /// </summary>
-    public int MinLinesAfterBreak { get; set; } = 2;
+    public int MinLinesAfterBreak
+    {
+        get => _text.MinLinesAfterBreak;
+        set => _text = _text.With(value, static (o, v) => o with { MinLinesAfterBreak = v });
+    }
 
     public TextBlock()
     {
@@ -229,10 +269,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     public virtual void ResetState()
     {
         _lastLineRendered = -1;
-        _cachedLines = null;
-        _bidiLines = null;
-        _cachedIndents = null;
-        _cachedSpaceBefore = null;
+        _layout = null;
         _cachedContentWidth = -1;
     }
 
@@ -474,7 +511,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     private IList<string> GetOrComputeLines(float contentWidth)
     {
         // Use tolerance for floating point comparison
-        if (_cachedLines != null && Math.Abs(_cachedContentWidth - contentWidth) < 0.001f) return _cachedLines;
+        if (_layout != null && Math.Abs(_cachedContentWidth - contentWidth) < 0.001f) return _cachedLines;
 
         bool paragraphs = FirstLineIndent != 0 || ParagraphSpacing != 0;
         List<string> lines;
@@ -497,12 +534,13 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
             spaceBefore = spaceBefore?.GetRange(0, lines.Count);
         }
 
-        _bidiLines = IsRightToLeft || TextFlow.NeedsBidi(Text) ? TextFlow.MapLines(Text, lines) : null;
-        _cachedLines = lines;
-        _cachedIndents = indents;
-        _cachedSpaceBefore = spaceBefore;
+        var bidi = IsRightToLeft || TextFlow.NeedsBidi(Text) ? TextFlow.MapLines(Text, lines) : null;
+        // One plain line equal to the text keeps the text itself, not a copy of it.
+        _layout = lines.Count == 1 && bidi is null && indents is null && spaceBefore is null
+            ? (string.Equals(lines[0], Text, StringComparison.Ordinal) ? Text : lines[0])
+            : new LineLayout(lines.ToArray(), indents?.ToArray(), spaceBefore?.ToArray(), bidi);
         _cachedContentWidth = contentWidth;
-        return _cachedLines;
+        return _cachedLines!;
     }
 
     /// <summary>

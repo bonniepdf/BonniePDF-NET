@@ -6,6 +6,10 @@ namespace BonniePDF;
 /// </summary>
 public class TableCell : BorderedElementBase, IRoleProvider
 {
+    // Text colour and padding (and, on a row, minimum height and background), shared with every
+    // cell or row that has the same values.
+    private CellOptions _cell = CellOptions.Default;
+
     /// <summary>
     /// The content element to display in this cell
     /// </summary>
@@ -14,12 +18,20 @@ public class TableCell : BorderedElementBase, IRoleProvider
     /// <summary>
     /// TextBlock color for this cell
     /// </summary>
-    public Color? Color { get; set; }
+    public Color? Color
+    {
+        get => _cell.Color;
+        set => _cell = _cell.With(value, static (o, v) => o with { Color = v });
+    }
 
     /// <summary>
     /// Custom padding for this cell (overrides table default if set)
     /// </summary>
-    public Thickness? Padding { get; set; }
+    public Thickness? Padding
+    {
+        get => _cell.Padding;
+        set => _cell = _cell.With(value, static (o, v) => o with { Padding = v });
+    }
 
     /// <summary>
     /// Number of columns this cell spans (default: 1)
