@@ -27,7 +27,9 @@ public partial class DefinitionWriterTests
     [GeneratedRegex("[A-Z]{6}\\+")]
     private static partial Regex SubsetPrefix();
 
-    [GeneratedRegex(@"/(?:Creation|Mod)Date[^\n]*")]
+    // The PDF dates and their XMP copies (as TypeScript's definition helpers mask them): two
+    // generations a moment apart can straddle a second.
+    [GeneratedRegex(@"/(?:Creation|Mod)Date[^\n]*|\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})")]
     private static partial Regex Dates();
 
     /// <summary>A 1x1 PNG.</summary>
