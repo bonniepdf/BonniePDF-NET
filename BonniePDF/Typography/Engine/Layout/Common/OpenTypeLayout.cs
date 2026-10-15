@@ -6,30 +6,48 @@ using System.Collections.Generic;
 
 namespace BonniePDF.Typography.Engine
 {
-    // Per immutable layout table, bounded independently of input text diversity.
-    // Only successful reads are retained; callers still charge every lookup step.
+    // Coverage and class reads through maps built once per table (CoverageMap, ClassMap), so
+    // retained memory is bounded by the font's tables, not by the text. A table no map can
+    // answer exactly is read directly each time. Reads charge nothing; callers charge every
+    // lookup step.
     internal sealed class LayoutReadCache
     {
-        private const int Capacity = 2048;
-        private readonly Dictionary<long, int> coverage = new Dictionary<long, int>();
-        private readonly Dictionary<long, int> classes = new Dictionary<long, int>();
+        private readonly Dictionary<int, CoverageMap> coverage = new Dictionary<int, CoverageMap>();
+        private readonly Dictionary<int, ClassMap> classes = new Dictionary<int, ClassMap>();
+
+        // The coverage map for the table at offset, or null when the table must be read directly.
+        internal CoverageMap CoverageMap(BigEndianData data, int offset)
+        {
+            CoverageMap map;
+            if (!coverage.TryGetValue(offset, out map))
+            {
+                map = Engine.CoverageMap.TryBuild(data, offset);
+                coverage.Add(offset, map);
+            }
+            return map;
+        }
+
         internal int Coverage(BigEndianData data, int offset, int glyph)
         {
-            long key = ((long)offset << 32) | (uint)glyph;
-            int value;
-            if (coverage.TryGetValue(key, out value)) return value;
-            value = OpenTypeLayout.Coverage(data, offset, glyph);
-            if (coverage.Count < Capacity) coverage.Add(key, value);
-            return value;
+            var map = CoverageMap(data, offset);
+            return map != null ? map.Index(glyph) : OpenTypeLayout.Coverage(data, offset, glyph);
         }
+
+        internal ClassMap ClassMap(BigEndianData data, int offset)
+        {
+            ClassMap map;
+            if (!classes.TryGetValue(offset, out map))
+            {
+                map = Engine.ClassMap.TryBuild(data, offset);
+                classes.Add(offset, map);
+            }
+            return map;
+        }
+
         internal int Class(BigEndianData data, int offset, int glyph)
         {
-            long key = ((long)offset << 32) | (uint)glyph;
-            int value;
-            if (classes.TryGetValue(key, out value)) return value;
-            value = OpenTypeLayout.Class(data, offset, glyph);
-            if (classes.Count < Capacity) classes.Add(key, value);
-            return value;
+            var map = ClassMap(data, offset);
+            return map != null ? map.Class(glyph) : OpenTypeLayout.Class(data, offset, glyph);
         }
     }
 

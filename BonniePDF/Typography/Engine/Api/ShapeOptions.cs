@@ -59,8 +59,10 @@ namespace BonniePDF.Typography.Engine
         internal int FeatureValue(string tag, int cluster, int defaultValue, Action tick = null)
         {
             int value = defaultValue;
-            foreach (var feature in Features)
+            // By index: a foreach over the read-only collection allocates an enumerator per call.
+            for (int i = 0; i < Features.Count; i++)
             {
+                var feature = Features[i];
                 if (tick != null) tick();
                 if (feature.Tag == tag && cluster >= feature.Start && cluster < feature.End) value = feature.Value;
             }
