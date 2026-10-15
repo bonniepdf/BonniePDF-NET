@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "text-engine-dotnet",
   "source": {
-    "commit": "ae7c654538e812fb22a9a94480e21c305e7f22d8",
+    "commit": "cb5fdd4d05d2c60e6087dfc2cf014cac02cbf9c8",
     "dirty": false
   },
   "files": {
@@ -37,7 +37,7 @@
     "Fonts/Tables/FontNames.cs": "055f82ae2235b668db065c5442129352bffe1f5af3d9f278d193497a0d30fd23",
     "Fonts/Tables/LegacyKerning.cs": "028d34a48ab519e44a4f8dffd5796c006400fba62de36f48aa5f15b2391c3608",
     "Fonts/Tables/LegacyKerningSubtable.cs": "aa9bfdc8abb46811656ea595a6f219e7899df9ec263f81cc63be2194a6699510",
-    "Layout/Common/FirstGlyphSet.cs": "b032e94a9cdaf034a679016a4fc5774057785da30cda05674bdc59e920829849",
+    "Layout/Common/FirstGlyphSet.cs": "b3bd265b379bdfc9338a6e9aa4ef9f5692766b096aff5bac8348b89e4402442c",
     "Layout/Common/GlyphFilter.cs": "85bc452659ae0864e2a0cfc152f37e7f2e876f20de3a946e83e88c4e6c785f6a",
     "Layout/Common/LookupHeaderCache.cs": "76444a8742ae12da99416837271583685476a299953b00daf304dd4574cbb731",
     "Layout/Common/LookupRule.cs": "35044355ef57dc9ecd94296c26fb63a6a7ac9c35434a8c26e1dac043b6d93bdb",
@@ -49,7 +49,7 @@
     "Layout/Gpos/GlyphAdjustment.cs": "2af3f3ae1aa10328b033745462d002e76a9930f5da71afdbf2f5b2ef65a39821",
     "Layout/Gpos/GlyphPositioning.Context.cs": "7b76ac2436cceef2a3b750844000ea24e70ccfbbfb659adcbd3d7e9ffb5e3261",
     "Layout/Gpos/GlyphPositioning.Kerning.cs": "8086730a560d95aaf7175c84501c31d6f5788c404845b3ab3a77ae575afe1f75",
-    "Layout/Gpos/GlyphPositioning.cs": "a38d226f72c83dd70b67466e38457e7f866ad3c29fe71566ca1d8d163b686d4d",
+    "Layout/Gpos/GlyphPositioning.cs": "2851018cc3276821d862f35ebe12232b2bef1580535d79ce50854c576f91dcca",
     "Layout/Gsub/GlyphSubstitution.cs": "5a69f76c5c18dc2e2f8c14f70a16724b3795b0cb6f7696dce79473d9f5c300fb",
     "Shaping/ArabicJoining.cs": "be1eace2a73db72596868f447635700ce621d7d8c371ccd3788f848e734ea94f",
     "Shaping/FallbackMarkPositioning.cs": "bdab8f4a5344d10470ba857b8c3f13891b948db5acb43969e6b844b73de7020b",

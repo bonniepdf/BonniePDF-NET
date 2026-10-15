@@ -16,6 +16,7 @@ namespace BonniePDF.Typography.Engine
         private readonly int lookupList;
         private readonly LookupHeaderCache headers;
         private readonly Dictionary<int, FirstGlyphSet> firstGlyphs = new Dictionary<int, FirstGlyphSet>();
+        private readonly Dictionary<int, uint[]> subtableMasks = new Dictionary<int, uint[]>();
         private readonly int[] lookups;
         private readonly LookupRule[] rules;
         private readonly ShapeOptions options;
@@ -163,6 +164,40 @@ namespace BonniePDF.Typography.Engine
             catch (Exception) { return null; }
         }
 
+        // For a lookup of 4 to 32 single or pair adjustment subtables, which subtables' coverage
+        // lists each glyph (bit i for subtable i), or null. These subtables read nothing and
+        // charge nothing before their coverage test, which ApplyAt relies on to skip them.
+        private uint[] SubtableMasks(int index)
+        {
+            uint[] masks;
+            if (subtableMasks.TryGetValue(index, out masks)) return masks;
+            masks = BuildSubtableMasks(index);
+            subtableMasks.Add(index, masks);
+            return masks;
+        }
+        private uint[] BuildSubtableMasks(int index)
+        {
+            try
+            {
+                var header = headers.Get(index);
+                if (header.Count < 4 || header.Count > 32) return null;
+                var masks = Array.Empty<uint>();
+                for (int i = 0; i < header.Count; i++)
+                {
+                    int sub = Offset(header.Offset, header.Offset + 6 + i * 2), type = header.Type, format = data.U16(sub);
+                    if (type == 9)
+                    {
+                        int extended = data.U16(sub + 2), delta = data.Offset32(sub + 4);
+                        if (format != 1 || extended < 1 || extended > 8 || delta == 0) return null;
+                        type = extended; sub = checked(sub + delta); format = data.U16(sub);
+                    }
+                    if ((type != 1 && type != 2) || (format != 1 && format != 2)) return null;
+                    if (!FirstGlyphSet.AddCoverageBit(data, Offset(sub, sub + 2), ref masks, i)) return null;
+                }
+                return masks;
+            }
+            catch (Exception) { return null; }
+        }
         // What ApplyAt charges for every rejected glyph of this lookup, when that cannot
         // depend on the glyph: a constant feature rule, no glyph filtering (so the walk to
         // the next glyph is one step) and no Arabic ignorables. Otherwise -1.
@@ -200,6 +235,28 @@ namespace BonniePDF.Typography.Engine
                 return 0;
             int next = Walk(glyphs, at, 1, flags, markSet);
             if (rejected) { ChargeSubtables(count); return 0; }
+            var masks = SubtableMasks(index);
+            if (masks != null)
+            {
+                // Only the subtables whose coverage lists this glyph can act on it; each of the
+                // others would cost its loop tick and return at the coverage test, so they are
+                // charged that tick without being read.
+                int id = glyphs[at].Id, done = 0;
+                uint mask = id < masks.Length ? masks[id] : 0;
+                for (int i = 0; mask != 0; i++, mask >>= 1)
+                {
+                    if ((mask & 1) == 0) continue;
+                    ChargeSubtables(i - done);
+                    Tick();
+                    int consumed = Subtable(type, Offset(lookup, lookup + 6 + i * 2), glyphs, adjustments,
+                        at, next, flags, markSet, advanceWidth, depth);
+                    if (consumed != 0)
+                        return consumed == -1 ? next + 1 - at : consumed;
+                    done = i + 1;
+                }
+                ChargeSubtables(count - done);
+                return 0;
+            }
             for (int i = 0; i < count; i++)
             {
                 Tick();
