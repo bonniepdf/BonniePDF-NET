@@ -13,51 +13,41 @@ change lands in both and is described in both changelogs. Word the entry for
 this language — C# spellings, C# type names — but describe the same
 behaviour, so the two files can be read side by side.
 
-## Unreleased
+## 2026.10.15
 
-- Faster shaping of embedded fonts. Contextual rules that cannot start at a glyph are charged without being matched, coverage and class tables are read through maps instead of binary searches, and kerning pairs are read from decoded arrays; glyphs, positions and shaping limits are unchanged. Shaping a short line in Lato takes about half the time and in Source Sans 3 about a third. A 100,000-line table takes about 17% less time (2.45 s) and 2,000 paragraphs of 60 words 1.0 s instead of 1.6 s. Output is unchanged.
-- Lower memory for documents with many elements: elements styled alike now share one immutable set of options (text style, alignment, padding, border, margin) instead of each holding its own copy, and a single-line text block keeps its text rather than a cached copy of its one line. A changed option gives that element a different shared set, so no change reaches another element; values are kept exactly as set. After layout, a 100,000-line table holds 24 MB instead of 77 MB; it takes about 15% less time, and a 1,000,000-line document peaks at 391 MB instead of 927 MB with GC pauses down from 2.9 s to 1.2 s. Output is unchanged.
-- Faster kerning in fonts whose kerning is split across many subtables (Lato, Source Sans and others): each glyph is checked only against the subtables that cover it. Shaping limits and output are unchanged.
-- Much faster wrapping of paragraphs in embedded fonts: a paragraph is shaped once, and each candidate line's width is read from that shaping wherever both of its ends are safe to break (otherwise the line is measured on its own, as before). Each finished line's glyphs are handed to drawing, so lines are not shaped again. 2,000 paragraphs of 60 words take 2.3 s instead of 10.6 s and allocate 0.54 GB instead of 2.1 GB. Line breaks and output are unchanged; a test checks the widths and glyphs against measuring each line on its own across the bundled fonts.
-- Lower memory for long documents: each page's content is stored as compact bytes once layout moves past it, and a document without page chrome (headers, footers, watermark, page colour or background) compresses each page then instead of holding it as text until writing. A 1,000,000-line document peaks at about 1.2 GB instead of 1.7 GB. Output is unchanged.
-- Less allocation while laying out text: shaping reuses its per-glyph working records between calls, measuring a string no longer allocates a closure and enumerator, text without line breaks is no longer split and copied, and each page's content buffer is sized from the previous page instead of growing from empty, numbers are formatted straight into the page, canvases share one set of callbacks, table rows without layout capture share no-op callbacks, and the shaping cache reuses evicted entries. A 100,000-line document allocates 343 MB instead of 702 MB and takes about 12% less time. Output is unchanged.
-- Concurrent documents that use the same font no longer queue behind one shaping lock: each concurrent shaping call borrows its own copy of the font's shaping data (retained up to the processor count). Four 20,000-line documents generated at once take about 2.8 s instead of 4.2 s. Output is unchanged.
-- Faster shaping of embedded fonts: each OpenType lookup now skips glyphs it cannot act on, while charging exactly the same work against the shaping limits. Shaping a short Latin line takes about a third less time. Output and limit behaviour are unchanged.
+### Performance Improvements
+
+Text layout and document generation are faster and use less memory. Output is unchanged by all of these.
+
+- **Faster text shaping for embedded fonts.** Each OpenType lookup skips glyphs it cannot act on, contextual rules that cannot start at a glyph are charged without being matched, coverage and class tables are read through maps, and kerning pairs are read from decoded arrays and checked only against the subtables that cover the glyph. Validated lookup headers are reused, and shaping no longer rebuilds a font's layout program for every line with feature overrides (`FontFeatures`) or right-to-left text. Shaping a short line in Lato takes about half the time and in Source Sans 3 about a third; a 5,000-line document using `tnum` takes about a third less time. Glyphs, positions and shaping limits are unchanged.
+- **Much faster paragraph wrapping.** A paragraph is shaped once and each candidate line's width is read from that shaping wherever both ends are safe to break; finished lines are handed to drawing without being shaped again. 2,000 paragraphs of 60 words take 2.3 s instead of 10.6 s and allocate 0.54 GB instead of 2.1 GB.
+- **Faster large tables.** Column widths are computed once per render instead of on every page, so a 200,000-row table renders in about 7 s instead of 39 s. With the shaping improvements, a 100,000-line table takes about 17% less time (2.45 s).
+- **Lower memory for large documents.** Elements styled alike share one immutable set of options, single-line text blocks keep their text rather than a cached copy, font-feature storage and paragraph metadata caches are allocated only when needed, and each page's content is stored as compact bytes once layout moves past it (compressed during layout when there is no page chrome). After layout, a 100,000-line table holds 24 MB instead of 77 MB, and a 1,000,000-line document peaks at 391 MB instead of 927 MB with GC pauses down from 2.9 s to 1.2 s.
+- **Less allocation during layout.** Shaping reuses its per-glyph records, measurement and line splitting no longer allocate per call, page buffers are sized from the previous page, PDF operands and Unicode metadata are appended directly while painting text, ordered-cluster shaping allocates less, and empty contextual-substitution match lists are no longer allocated. A 100,000-line document allocates 343 MB instead of 702 MB and takes about 12% less time; a 5,000-line document using `tnum` allocates about 84% less.
+- **Concurrent documents no longer queue on a shared font.** Each concurrent shaping call borrows its own copy of the font's shaping data, so four 20,000-line documents generated at once take about 2.8 s instead of 4.2 s.
+- **Fonts are parsed once.** `Document.Fonts.Add` reuses the parse of a byte array it has seen before and the PDF writer shares it; a small two-face document takes about 20% less time and allocates about 75% less. Identical embedded font programs are compressed once in a process-wide cache capped at 4 MiB and 16 entries; `FontCache.Clear()` releases the entries and `FontCache.MaxFiles = 0` disables retention.
+- **Faster opaque images.** Fully opaque RGBA images are resampled exactly and separated into channels with guarded SIMD, with a scalar fallback on other hardware; the separation loop is also optimised for its first invocation while tiered compilation warms up. Pixel values, transparency and resolution settings are preserved.
+
+### Added
+
 - `Save(Stream)` and `SaveAsync(Stream)` accept a stream that cannot seek, such as an HTTP response body or a pipe, so a service can stream a PDF without buffering it first. The writers buffer their output and flush the destination once at the end instead of before every object. Output is unchanged, including offsets when the destination already holds data.
-- Faster text with feature overrides (`FontFeatures`) and right-to-left or mixed-direction text: shaping no longer rebuilds the font's layout program for every line. A 5,000-line document using `tnum` takes about a third less time and allocates about 84% less. Output is unchanged.
-- `Document.Fonts.Add` reuses the parse of a byte array it has seen before, and the PDF writer shares it, so a font is no longer parsed twice per document. A service that keeps its font bytes in memory parses each font once: a small two-face document takes about 20% less time and allocates about 75% less. Family resolution is memoised per document.
-- Safer concurrent generation: font subset prefixes no longer use a shared, unsynchronised `Random`; a font's shaping data is built once when several documents first use it together; colour-glyph and CFF embedding reads take the font's lock; `FontFamilyResolver.RegisterFamily` may run while other documents render.
-- Faster pagination of large single tables: column widths are computed once per render instead of on every page, which scanned every row each time. A 200,000-row table now renders in about 7 s instead of 39 s. Output is unchanged.
-- A top-level element that does not fit even on an empty page is still skipped after two fresh pages, and now reports a `Render` warning (source `pagination`) in `Document.Diagnostics` instead of disappearing silently.
-- Tagged (PDF/UA) documents: a top-level element that continues onto another page now reopens its marked content before its graphics state on every page, as on its first page, instead of interleaving the two.
-
 - Add inherited content direction through `DocumentSettings.ContentDirection` and per-element overrides. Rows and table columns mirror visually while retaining source order; start/end alignment follows direction and left/right stays physical. Embedded Arabic and Hebrew TextBlock content uses bidi and script shaping, including wrapped paragraph context. Styled spans, font-fallback boundaries, lists and page-number tokens require further RTL integration.
-
 - Support static CFF 1 OpenType (`.otf`) fonts through existing font registration: shaping and measurement, cubic SVG outlines, and PDF embedding with source-preserving text extraction. Complete CFF programs retain original hints and subroutines; CFF subsetting, CFF2, `.otc` and WOFF are unsupported.
-
-- Default `QRCode.QuietZone` to four modules, matching the QR standard and TypeScript implementation. Set it to `0` explicitly for borderless codes.
-
 - Add opt-in colour emoji with `DocumentSettings.EmojiRendering = EmojiRendering.Colour`: COLRv0 vector layers and CBDT PNG artwork in PDF and SVG, preserving original Unicode sequences for extraction. `Outline` remains the default; the existing Emojis & Unicode example stays monochrome.
 - Decode indexed PNG transparency, including packed 1/2/4-bit palette indices, partial alpha and omitted opaque entries.
-
-- Reuse bounded validated OpenType lookup headers to reduce repeated shaping work while preserving lazy validation, lookup order and operation limits.
-
-- Avoid allocating empty contextual-substitution match lists while preserving glyph output, checked font reads and shaping operation limits.
-
-- Reduce retained text-layout memory by allocating font-feature storage only when overrides are supplied and omitting zero-valued paragraph metadata caches. Text layout, feature validation and PDF output are preserved.
-
-- Reduce transient allocations while painting text: append PDF operands and Unicode metadata directly, reuse document-owned CIDs for repeated single-character sources, and size glyph-code arrays once. Text operators, character mappings and extraction are preserved.
-
-- Reduce shaping allocations for ordered clusters and independent glyph positioning, and reuse bounded OpenType coverage/class reads. Glyph output and shaping limits are preserved.
-- Reuse compression of identical embedded font programs in a process-wide cache capped at 4 MiB and 16 entries. Subsets and text mappings remain document-owned; streams are encrypted separately. `FontCache.Clear()` releases these entries and `FontCache.MaxFiles = 0` disables retention.
-
 - Add opt-in EventSource scopes for synchronous generation profiling, covering measurement, font loading/shaping/embedding, image decoding/resizing/compression, painting and PDF writing. Profiling preserves PDF output and is inactive without a diagnostic listener.
 
-- Faster processing of opaque RGBA images through exact opaque-alpha resampling and guarded SIMD channel separation. Pixel values, transparency and resolution settings are preserved, with a scalar fallback on other hardware.
-- Optimise the RGBA separation loop on its first invocation, avoiding per-pixel-group span helper calls while tiered compilation is warming up.
+### Changed
 
+- A top-level element that does not fit even on an empty page is still skipped after two fresh pages, and now reports a `Render` warning (source `pagination`) in `Document.Diagnostics` instead of disappearing silently.
+- Default `QRCode.QuietZone` to four modules, matching the QR standard and TypeScript implementation. Set it to `0` explicitly for borderless codes.
 - Embedded Latin text now uses OpenType ligatures, GPOS kerning and accent positioning consistently in measurement, PDF and SVG. `FontFeatures` on text elements and TextStyle allows overrides such as `kern: 0` and `liga: 0`. Improved advances can change line and page breaks. Standard-14 text retains its existing behavior.
 - Font subsets retain substituted glyphs; cluster ToUnicode mappings and ActualText preserve ligatures and original accent spellings during extraction. SVG outlines substitutions to prevent viewer reshaping. Fallback prefers a whole combining cluster, and emergency wrapping and ellipsis preserve graphemes.
+
+### Fixed
+
+- Safer concurrent generation: font subset prefixes no longer use a shared, unsynchronised `Random`; a font's shaping data is built once when several documents first use it together; colour-glyph and CFF embedding reads take the font's lock; `FontFamilyResolver.RegisterFamily` may run while other documents render.
+- Tagged (PDF/UA) documents: a top-level element that continues onto another page now reopens its marked content before its graphics state on every page, as on its first page, instead of interleaving the two.
 
 ## 2026.10.0
 
