@@ -15,6 +15,10 @@ namespace BonniePDF.Typography.Engine
         private readonly int lookupList, glyphCount;
         private readonly LookupHeaderCache headers;
         private readonly Dictionary<int, FirstGlyphSet> firstGlyphs = new Dictionary<int, FirstGlyphSet>();
+        private readonly Dictionary<int, ContextFormat3[]> contexts = new Dictionary<int, ContextFormat3[]>();
+        // The plans of the lookup ApplyAt last served, so a run of glyphs does not look them up per glyph.
+        private int selected = -1;
+        private ContextFormat3[] selectedContexts;
         private readonly int[] lookups;
         private readonly LookupRule[] rules;
         private LookupRule activeRule;
@@ -46,13 +50,17 @@ namespace BonniePDF.Typography.Engine
                 activeRule = rules[i];
                 int lookup = lookups[i];
                 var first = FirstGlyphs(lookup);
-                int rejectedCharge = first == null ? -1 : RejectedCharge(lookup);
+                int inputCharge = 0;
+                int rejectedCharge = first == null ? -1 : RejectedCharge(lookup, out inputCharge);
+                var plans = Contexts(lookup);
+                // The contexts a rejected glyph reaches: none when the rule turns the lookup off.
+                var charged = inputCharge != 0 ? plans : null;
                 if (IsReverse(lookup))
                 {
                     for (int at = glyphs.Count - 1; at >= 0; at--)
                     {
                         bool rejected = Rejects(first, glyphs[at]);
-                        if (rejected && rejectedCharge >= 0) ChargeSubtables(rejectedCharge);
+                        if (rejected && rejectedCharge >= 0) ChargeSubtables(rejectedCharge + inputCharge * InputsWithin(charged, glyphs.Count) + BacktrackCharge(charged, glyphs, at));
                         else ApplyAt(lookup, glyphs, at, 0, rejected);
                     }
                 }
@@ -61,7 +69,7 @@ namespace BonniePDF.Typography.Engine
                     {
                         bool rejected = Rejects(first, glyphs[at]);
                         int consumed;
-                        if (rejected && rejectedCharge >= 0) { ChargeSubtables(rejectedCharge); consumed = 0; }
+                        if (rejected && rejectedCharge >= 0) { ChargeSubtables(rejectedCharge + inputCharge * InputsWithin(charged, glyphs.Count) + BacktrackCharge(charged, glyphs, at)); consumed = 0; }
                         else consumed = ApplyAt(lookup, glyphs, at, 0, rejected);
                         at += Math.Max(consumed, 1);
                         if (glyphs.Count > limits.MaxGlyphs)
@@ -87,12 +95,22 @@ namespace BonniePDF.Typography.Engine
         }
 
         private bool Ignored(ShapingGlyph glyph, int flags, int set) { return (arabic && glyph.Scalar != 0x200c && glyph.Scalar != 0x200d && UnicodeData.IsIgnorable(glyph.Scalar)) || filter.Ignored(glyph.Id, flags, set); }
-        private bool Enabled(ShapingGlyph glyph) { return activeRule == null || activeRule.Value(glyph.FeatureCluster, charge, glyph.Mirrored, glyph.JoiningForm) != 0; }
+        private bool Enabled(ShapingGlyph glyph) { return activeRule == null || RuleValue(glyph) != 0; }
+
+        // The active rule's value; when it cannot depend on the glyph (LookupRule.Constant), its
+        // operations are charged in one step instead of one at a time.
+        private int RuleValue(ShapingGlyph glyph)
+        {
+            int value, ticks;
+            if (activeRule.Constant(out value, out ticks)) { ChargeSubtables(ticks); return value; }
+            return activeRule.Value(glyph.FeatureCluster, charge, glyph.Mirrored, glyph.JoiningForm);
+        }
 
         private static bool Rejects(FirstGlyphSet first, ShapingGlyph glyph) { return first != null && !first.Contains(glyph.Id); }
 
-        // A lookup's first-glyph set, or null when any subtable reads before its coverage
-        // test (contextual format 3) or fails the checks that precede it.
+        // A lookup's first-glyph set, or null when any subtable fails the checks that precede its
+        // coverage test. A format 3 context contributes its first input coverage when it has a
+        // plan (ContextFormat3); without one it makes the set null.
         private FirstGlyphSet FirstGlyphs(int index)
         {
             FirstGlyphSet first;
@@ -117,7 +135,12 @@ namespace BonniePDF.Typography.Engine
                         type = data.U16(sub + 2);
                         sub = checked(sub + data.Offset32(sub + 4));
                     }
-                    if ((type == 5 || type == 6) && data.U16(sub) == 3) return null;
+                    if ((type == 5 || type == 6) && data.U16(sub) == 3)
+                    {
+                        var plan = Contexts(index) == null ? null : Contexts(index)[i];
+                        if (plan == null || !first.AddCoverage(data, plan.FirstInputOffset)) return null;
+                        continue;
+                    }
                     if (!first.AddCoverage(data, data.Relative16(sub, sub + 2))) return null;
                 }
                 return first;
@@ -125,15 +148,122 @@ namespace BonniePDF.Typography.Engine
             catch (Exception) { return null; }
         }
 
-        // What ApplyAt charges for every rejected glyph of this lookup, when that cannot
-        // depend on the glyph: a constant feature rule and no glyph filtering. Otherwise -1.
-        private int RejectedCharge(int index)
+        // What ApplyAt charges for every rejected glyph of this lookup, apart from what depends
+        // on the run, when the glyph cannot change it: a constant feature rule and no glyph
+        // filtering. Otherwise -1. Each format 3 context adds inputCharge when its input fits
+        // in the run (InputsWithin), as its first input test is reached only then, and the
+        // tests of a backtrack longer than one glyph (BacktrackCharge).
+        private int RejectedCharge(int index, out int inputCharge)
         {
+            inputCharge = 0;
             var header = headers.Get(index);
             if (arabic || (header.Flags & 0xff1e) != 0 || limits.MaxNesting < 0) return -1;
             int value = 1, ticks = 0;
             if (activeRule != null && !activeRule.Constant(out value, out ticks)) return -1;
-            return 1 + ticks + (value != 0 ? header.Count : 0);
+            if (value == 0) return 1 + ticks;
+            int charge = 1 + ticks + header.Count;
+            var plans = Contexts(index);
+            if (plans != null)
+                foreach (var plan in plans)
+                {
+                    if (plan == null) continue;
+                    if (plan.Chained) charge += 1 + (plan.Backtrack.Length < 2 ? plan.Backtrack.Length : 0);
+                }
+            if (plans != null) inputCharge = 1 + ticks;
+            return charge;
+        }
+
+        // What the backtrack tests of a context with a longer backtrack charge for a rejected
+        // glyph, without glyph filtering: each step back is one walk step, and the tests stop
+        // at the first glyph the backtrack coverage does not list. The walk to the first
+        // backtrack glyph is part of the lookup's constant charge.
+        private static int BacktrackCharge(ContextFormat3[] plans, List<ShapingGlyph> glyphs, int at)
+        {
+            if (plans == null) return 0;
+            int ticks = 0;
+            foreach (var plan in plans)
+            {
+                if (plan == null || plan.Backtrack.Length < 2 || plan.Backtrack.Length > glyphs.Count) continue;
+                var backtrack = plan.Backtrack;
+                for (int j = 0, position = at - 1; j < backtrack.Length; j++)
+                {
+                    ticks++;
+                    if (position < 0 || !backtrack[j].Covers(glyphs[position].Id)) break;
+                    if (j + 1 < backtrack.Length) { ticks++; position--; }
+                }
+            }
+            return ticks;
+        }
+
+        // The number of planned contexts whose input is no longer than the run.
+        private static int InputsWithin(ContextFormat3[] plans, int count)
+        {
+            if (plans == null) return 0;
+            int within = 0;
+            foreach (var plan in plans) if (plan != null && plan.InputCount <= count) within++;
+            return within;
+        }
+
+        // Each subtable's format 3 plan (null where it has none), or null when it has none at all.
+        private ContextFormat3[] Contexts(int index)
+        {
+            ContextFormat3[] plans;
+            if (contexts.TryGetValue(index, out plans)) return plans;
+            plans = BuildContexts(index);
+            contexts.Add(index, plans);
+            return plans;
+        }
+
+        private ContextFormat3[] BuildContexts(int index)
+        {
+            LookupHeaderCache.Header header;
+            try { header = headers.Get(index); } catch (Exception) { return null; }
+            if (header.Type != 5 && header.Type != 6 && header.Type != 7) return null;
+            ContextFormat3[] plans = null;
+            for (int i = 0; i < header.Count; i++)
+            {
+                try
+                {
+                    int sub = data.Relative16(header.Offset, header.Offset + 6 + i * 2), type = header.Type;
+                    if (type == 7)
+                    {
+                        if (data.U16(sub) != 1 || data.U16(sub + 2) == 7) continue;
+                        type = data.U16(sub + 2);
+                        sub = checked(sub + data.Offset32(sub + 4));
+                    }
+                    if (type != 5 && type != 6) continue;
+                    var plan = ContextFormat3.TryBuild(data, reads, sub, type == 6);
+                    if (plan == null) continue;
+                    if (plans == null) plans = new ContextFormat3[header.Count];
+                    plans[i] = plan;
+                }
+                catch (Exception) { }
+            }
+            return plans;
+        }
+
+        // Charges what Context charges for a glyph that the plan's first input coverage does
+        // not list: the walk back over the backtrack, each backtrack test it reaches (a test
+        // fails at the first uncovered glyph), then the first input test when the input fits.
+        private void ChargeContext(ContextFormat3 plan, List<ShapingGlyph> glyphs, int at, int flags, int markSet)
+        {
+            if (plan.Chained)
+            {
+                int position = Walk(glyphs, at, -1, flags, markSet);
+                var backtrack = plan.Backtrack;
+                if (backtrack.Length <= glyphs.Count)
+                    for (int j = 0; j < backtrack.Length; j++)
+                    {
+                        Tick();
+                        if (position < 0 || position >= glyphs.Count || !backtrack[j].Covers(glyphs[position].Id)) break;
+                        if (j + 1 < backtrack.Length) position = Walk(glyphs, position, -1, flags, markSet);
+                    }
+            }
+            if (plan.InputCount <= glyphs.Count)
+            {
+                Tick();
+                Enabled(glyphs[at]);
+            }
         }
 
         // Charges what the subtable loop would charge for a glyph no subtable covers.
@@ -155,10 +285,27 @@ namespace BonniePDF.Typography.Engine
             int lookup = header.Offset, type = header.Type, flags = header.Flags, count = header.Count, markSet = header.MarkSet;
             if (Ignored(glyphs[at], flags, markSet))
                 return 0;
-            if (rejected) { ChargeSubtables(count); return 0; }
+            if (index != selected) { selectedContexts = Contexts(index); selected = index; }
+            var plans = selectedContexts;
+            if (rejected)
+            {
+                if (plans == null) { ChargeSubtables(count); return 0; }
+                for (int i = 0; i < count; i++)
+                {
+                    Tick();
+                    if (plans[i] != null) ChargeContext(plans[i], glyphs, at, flags, markSet);
+                }
+                return 0;
+            }
             for (int i = 0; i < count; i++)
             {
                 Tick();
+                // A format 3 context that cannot start here is charged without being read.
+                if (plans != null && plans[i] != null && !plans[i].FirstInput.Covers(glyphs[at].Id))
+                {
+                    ChargeContext(plans[i], glyphs, at, flags, markSet);
+                    continue;
+                }
                 int sub = data.Relative16(lookup, lookup + 6 + i * 2);
                 int result = Subtable(type, sub, glyphs, at, depth, flags, markSet);
                 if (result != 0)
@@ -238,7 +385,7 @@ namespace BonniePDF.Typography.Engine
                     throw new InvalidDataException("Invalid alternate substitution.");
                 int set = data.Relative16(sub, sub + 6 + coverage * 2), count = data.U16(set);
                 data.Check(set + 2, count * 2);
-                int value = activeRule == null ? 1 : activeRule.Value(glyphs[at].FeatureCluster, charge, glyphs[at].Mirrored, glyphs[at].JoiningForm);
+                int value = activeRule == null ? 1 : RuleValue(glyphs[at]);
                 if (value < 1 || value > count) return 0;
                 SetGlyph(glyphs[at], data.U16(set + value * 2));
                 return 1;

@@ -11,6 +11,13 @@ namespace BonniePDF.Typography.Engine
     {
         private readonly BigEndianData data;
         private readonly LayoutReadCache reads = new LayoutReadCache();
+        // The glyph class definition's offset (0 for none) and map, read on first use; -1 until
+        // a read succeeds, so a table that cannot be read throws on every call as before.
+        private int classOffset = -1;
+        private ClassMap classMap;
+        private int attachOffset = -1;
+        private ClassMap attachMap;
+        private CoverageMap[] markSets;
 
         internal GlyphFilter(byte[] bytes)
         {
@@ -20,9 +27,17 @@ namespace BonniePDF.Typography.Engine
 
         internal int Class(int glyph)
         {
-            if (data == null || data.U16(4) == 0)
+            if (data == null)
                 return 0;
-            int kind = reads.Class(data, data.U16(4), glyph);
+            if (classOffset < 0)
+            {
+                int offset = data.U16(4);
+                classMap = offset == 0 ? null : reads.ClassMap(data, offset);
+                classOffset = offset;
+            }
+            if (classOffset == 0)
+                return 0;
+            int kind = classMap != null ? classMap.Class(glyph) : OpenTypeLayout.Class(data, classOffset, glyph);
             if (kind > 4)
                 throw new InvalidDataException("Invalid GDEF glyph class.");
             return kind;
@@ -70,12 +85,27 @@ namespace BonniePDF.Typography.Engine
                 return false;
             if (markSet >= 0)
             {
+                var map = markSets != null && markSet < markSets.Length ? markSets[markSet] : null;
+                if (map != null) return !map.Covers(glyph);
                 int sets = data.U16(12), delta = data.Offset32(sets + 4 + markSet * 4);
                 if (delta == 0)
                     throw new InvalidDataException("Missing GDEF mark set coverage.");
-                return reads.Coverage(data, checked(sets + delta), glyph) < 0;
+                int offset = checked(sets + delta);
+                map = reads.CoverageMap(data, offset);
+                if (map == null) return OpenTypeLayout.Coverage(data, offset, glyph) < 0;
+                if (markSets == null || markSet >= markSets.Length) Array.Resize(ref markSets, markSet + 1);
+                markSets[markSet] = map;
+                return !map.Covers(glyph);
             }
-            return (flags & 0xff00) != 0 && reads.Class(data, data.U16(10), glyph) != flags >> 8;
+            if ((flags & 0xff00) == 0)
+                return false;
+            if (attachOffset < 0)
+            {
+                int offset = data.U16(10);
+                attachMap = reads.ClassMap(data, offset);
+                attachOffset = offset;
+            }
+            return (attachMap != null ? attachMap.Class(glyph) : OpenTypeLayout.Class(data, attachOffset, glyph)) != flags >> 8;
         }
     }
 }

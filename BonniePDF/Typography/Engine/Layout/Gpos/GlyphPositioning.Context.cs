@@ -34,7 +34,7 @@ namespace BonniePDF.Typography.Engine
                 Tick();
                 if (position < 0 || position >= glyphs.Count)
                     return false;
-                if (requireFeature && (activeRule != null && activeRule.Value(glyphs[position].FeatureCluster, charge) == 0)) return false;
+                if (requireFeature && (activeRule != null && RuleValue(glyphs[position].FeatureCluster) == 0)) return false;
                 int id = glyphs[position].Id, expected = data.U16(record + j * 2);
                 bool same = mode == 2 ? Coverage(checked(sub + expected), id) >= 0 :
                     (mode == 1 ? Class(classDefinition, id) : id) == expected;
