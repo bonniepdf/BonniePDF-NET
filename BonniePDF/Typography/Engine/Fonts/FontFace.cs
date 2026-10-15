@@ -20,6 +20,30 @@ namespace BonniePDF.Typography.Engine
         private readonly Dictionary<ShapeOptions, ShapingProgram> programs = new Dictionary<ShapeOptions, ShapingProgram>();
         private readonly Dictionary<string, ShapingProgram> programsByValue = new Dictionary<string, ShapingProgram>(StringComparer.Ordinal);
         private ShapingProgram defaultProgram;
+        // Per-call scratch for Shaper. A face serves one caller at a time (separate instances
+        // for concurrent use), so a shape call reuses the previous call's glyph records.
+        private readonly List<ShapingGlyph> run = new List<ShapingGlyph>();
+        private readonly List<ShapingGlyph> glyphPool = new List<ShapingGlyph>();
+        private int glyphsRented;
+        // Options are immutable; shape calls without options share one default.
+        internal readonly ShapeOptions DefaultOptions = new ShapeOptions();
+
+        // Starts a shape call: an empty run, and every pooled glyph record free again.
+        internal List<ShapingGlyph> BeginRun()
+        {
+            run.Clear();
+            glyphsRented = 0;
+            return run;
+        }
+
+        internal ShapingGlyph RentGlyph(int id, int scalar, int cluster)
+        {
+            if (glyphsRented < glyphPool.Count) return glyphPool[glyphsRented++].Reset(id, scalar, cluster);
+            var glyph = new ShapingGlyph(id, scalar, cluster);
+            glyphPool.Add(glyph);
+            glyphsRented++;
+            return glyph;
+        }
         internal ShapingProgram Program(ShapeOptions options)
         {
             if (options == null)

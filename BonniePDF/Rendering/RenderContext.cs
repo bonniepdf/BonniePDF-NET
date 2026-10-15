@@ -118,6 +118,18 @@ public class RenderContext
     public IList<StringBuilder> Pages { get; } = new List<StringBuilder>();
 
     /// <summary>
+    /// Finished body pages held as bytes. The render pipeline chooses the storage; it is off
+    /// (<see cref="FinishedPageStorage.Keep"/>) unless the pipeline turns it on.
+    /// </summary>
+    internal FinishedPageStore FinishedPages { get; } = new();
+
+    /// <summary>
+    /// Whether this context is a layout dry run whose page content is never written, so
+    /// finished pages can be dropped instead of held.
+    /// </summary>
+    internal bool DiscardFinishedPages { get; init; }
+
+    /// <summary>
     /// Stores hyperlinks per page index
     /// Key: page index, Value: list of hyperlinks on that page
     /// </summary>
@@ -591,6 +603,7 @@ public class RenderContext
         for (int i = 0; i < reopenStateDepth; i++)
             Canvas.RestoreState();
 
+        SealPage(CurrentPageIndex);
         Pages.Add(new StringBuilder());
         CurrentPageIndex++;
         // The new page measures its own chrome: header/footer templates are
@@ -661,6 +674,16 @@ public class RenderContext
     public void SetCanvas(ICanvas canvas)
     {
         Canvas = canvas;
+    }
+
+    /// <summary>
+    /// Hands a page whose body layout is complete to <see cref="FinishedPages"/>. Nothing
+    /// writes to a page's body after layout leaves it; page chrome is added later, around it.
+    /// </summary>
+    internal void SealPage(int index)
+    {
+        if (IsSvgMode) return;
+        if (FinishedPages.Seal(index, Pages[index])) Pages[index] = new StringBuilder();
     }
 
     /// <summary>

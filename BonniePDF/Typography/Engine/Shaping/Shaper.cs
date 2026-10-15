@@ -13,13 +13,13 @@ namespace BonniePDF.Typography.Engine
         {
             if (face == null) throw new ArgumentNullException("face");
             if (text == null) throw new ArgumentNullException("text");
-            var settings = options ?? new ShapeOptions();
+            var settings = options ?? face.DefaultOptions;
             var limits = settings.Limits ?? face.Limits;
             if (text.Length > limits.MaxTextLength)
                 throw new ArgumentException("Text exceeds the configured UTF-16 limit.", "text");
             settings.ValidateText(text);
             bool hebrew = settings.Script == "hebr", arabic = settings.Script == "arab", nativeRtl = hebrew || arabic;
-            var run = new List<ShapingGlyph>();
+            var run = face.BeginRun();
             // Printable ASCII has no canonical decomposition or multi-scalar
             // clusters. Keep the same lookup pipeline and all bounded error paths.
             bool ascii = settings.Script == "latn" && settings.Direction == TextDirection.LeftToRight &&
@@ -31,7 +31,7 @@ namespace BonniePDF.Typography.Engine
                 {
                     int id = face.Font.GlyphIndex(text[i]);
                     if (id == 0) throw new NotSupportedException("Font has no glyph for U+" + ((int)text[i]).ToString("X4") + ".");
-                    run.Add(new ShapingGlyph(id, text[i], i));
+                    run.Add(face.RentGlyph(id, text[i], i));
                 }
             }
             else
@@ -121,7 +121,7 @@ namespace BonniePDF.Typography.Engine
                 for (int i = 0; i < run.Count; i++)
                     output[i] = Output(face, run[i], adjustments[i], lengths[run[i].Cluster], unsafeClusters.Contains(run[i].Cluster));
             }
-            return new ShapedRun(text, output);
+            return new ShapedRun(text, output, owned: true);
         }
 
         private static GlyphInfo Output(FontFace face, ShapingGlyph glyph, GlyphAdjustment adjustment, int length, bool unsafeBefore)
@@ -153,7 +153,10 @@ namespace BonniePDF.Typography.Engine
                 if (id == 0 && !EmojiClusters.Ignorable(scalar))
                     throw new NotSupportedException("Font has no glyph for U+" + scalar.ToString("X4") + ".");
                 bool ownControl = hebrew && UnicodeData.IsIgnorable(scalar) && scalar != 0x200d && scalar != 0x34f && scalar != 0xfe0e && scalar != 0xfe0f;
-                run.Add(new ShapingGlyph(id, scalar, ownControl ? tokens[i].Start : sourceOffset) { AdvanceOverride = spaceWidth, Mirrored = tokens != null && scalar != tokens[i].Scalar });
+                var glyph = face.RentGlyph(id, scalar, ownControl ? tokens[i].Start : sourceOffset);
+                glyph.AdvanceOverride = spaceWidth;
+                glyph.Mirrored = tokens != null && scalar != tokens[i].Scalar;
+                run.Add(glyph);
             }
         }
 
@@ -167,7 +170,7 @@ namespace BonniePDF.Typography.Engine
                 else if (hebrew && i > 0 && i + 1 == run.Count) run[i - 1].Cluster = Math.Min(run[i - 1].Cluster, run[i].Cluster);
                 run.RemoveAt(i);
             }
-            var adjustments = positioning.Apply(run, font.AdvanceWidth, font.Kerning);
+            var adjustments = positioning.Apply(run, font.AdvanceWidthOf, font.Kerning);
             FallbackMarkPositioning.Apply(font, run, adjustments, positioning.Limits, hebrew);
             if (arabic)
             {

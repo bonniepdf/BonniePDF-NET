@@ -177,14 +177,8 @@ internal class PdfWriter : IPdfWriter, IDisposable
         // 1. Convert content to ISO-8859-1 bytes (matches WinAnsiEncoding used by standard PDF fonts)
         byte[] rawBytes = Iso88591.GetBytes(content);
 
-        // 2. Compress using ZLibStream to ensure correct ZLIB headers (0x78 0x9C)
-        using MemoryStream memoryStream = new();
-        using (ZLibStream zlib = new(memoryStream, CompressionLevel.SmallestSize))
-        {
-            zlib.Write(rawBytes, 0, rawBytes.Length);
-        }
-
-        byte[] compressedBytes = memoryStream.ToArray();
+        // 2. Compress (zlib framing); the page store compresses sealed pages the same way
+        byte[] compressedBytes = ContentCompression.Compress(rawBytes);
 
         // 3. Inject Filter into dictionary
         dict[PdfKeys.Stream.Filter] = "/FlateDecode";

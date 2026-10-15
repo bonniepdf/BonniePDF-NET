@@ -268,6 +268,14 @@ internal static class PdfRenderPipeline
         // is installed at the top of the run rather than at construction.
         ctx.SetChromeReservation(ChromeReservationFactory.For(settings, ctx));
 
+        // Finished body pages are held as bytes. With no page chrome to add, the bytes are the
+        // compressed stream the writer would produce, so a page is compressed once, as soon as
+        // layout leaves it. A dry run's pages are never written, so they are not kept at all.
+        ctx.FinishedPages.Storage = ctx.IsSvgMode || !InternalConfiguration.EnableCompression
+            ? FinishedPageStorage.Keep
+            : ctx.DiscardFinishedPages ? FinishedPageStorage.Discarded
+            : HasPageChrome(pages, settings) ? FinishedPageStorage.Encoded : FinishedPageStorage.Compressed;
+
         // Track page dimensions for each rendered page
         Dictionary<int, RenderedPageDimensions> pageDimensions = new();
 
@@ -275,6 +283,8 @@ internal static class PdfRenderPipeline
         int currentOutputIndex = 0;
         foreach (Page page in pages)
         {
+            // The previous input page's body is complete.
+            if (currentOutputIndex > 0) ctx.SealPage(ctx.CurrentPageIndex);
             // Ensure RenderContext has a buffer for this page
             while (ctx.Pages.Count <= currentOutputIndex) ctx.Pages.Add(new StringBuilder());
             // IMPORTANT: Update dimensions BEFORE SwitchToPage so the canvas
@@ -337,6 +347,8 @@ internal static class PdfRenderPipeline
         // Page chrome (watermarks, headers/footers, slots) is not body content, so
         // stop recording the layout tree before the finishing pass below.
         if (ctx.LayoutRecorder != null) ctx.LayoutRecorder.Capturing = false;
+        // Body layout is over: a page break while chrome paints must not seal the page in hand.
+        ctx.FinishedPages.Storage = FinishedPageStorage.Keep;
 
         int totalPages = ctx.Pages.Count;
         for (int i = 0; i < totalPages; i++)
@@ -354,6 +366,15 @@ internal static class PdfRenderPipeline
             ctx.PageSize = pageSize;
             ctx.Margin = pageDimensions.TryGetValue(i, out dimensions) ? dimensions.Margin : settings.Margin;
             ctx.SwitchToPage(i);
+            // A sealed body has left an empty builder behind; chrome is painted into it, and the
+            // prefix/suffix split below puts the body between the backdrop and the overlays.
+            SealedPageBody? body = ctx.FinishedPages.Take(i);
+            if (body != null && ctx.Pages[i].Length > 0)
+            {
+                // Something wrote to the page after it was sealed; keep its text after the body.
+                ctx.Pages[i].Insert(0, Encoding.Latin1.GetString(body.Content()));
+                body = null;
+            }
 
             // Full-page background slot. Painted behind everything,
             // ignoring margins. Prepended so it ends up at the very back of
@@ -371,6 +392,13 @@ internal static class PdfRenderPipeline
             // Ignored when neither is set.
             Color? pageColor = pageDimensions.TryGetValue(i, out var colorDims) ? colorDims.PageColor : null;
             RenderPageColor(ctx, pageColor ?? settings.PageColor, i, pageSize.Width, pageSize.Height);
+
+            string prefix = "";
+            if (body != null)
+            {
+                prefix = ctx.Pages[i].ToString();
+                ctx.Pages[i].Clear();
+            }
 
             // Render Templates (Headers/Footers)
             RenderTemplate(ctx, settings, i);
@@ -391,7 +419,9 @@ internal static class PdfRenderPipeline
 
             PageRenderOutput output = new()
             {
-                ContentStream = ctx.Pages[i].ToString(),
+                Body = body,
+                Prefix = prefix,
+                Suffix = body != null ? ctx.Pages[i].ToString() : "",
                 Size = pageSize,
                 // Capture hyperlinks for this page index
                 Hyperlinks = ctx.PageHyperlinks.TryGetValue(i, out var hyperlinks)
@@ -404,6 +434,7 @@ internal static class PdfRenderPipeline
                     (pageDimensions.TryGetValue(i, out var backdropDims) && backdropDims.PageBackground != null)
                     || settings.PageBackground != null
             };
+            if (body == null) output.ContentStream = ctx.Pages[i].ToString();
 
             yield return output;
 
@@ -412,6 +443,22 @@ internal static class PdfRenderPipeline
             ctx.Pages[i] = new StringBuilder();
             ctx.PageHyperlinks.Remove(i);
         }
+    }
+
+    /// <summary>
+    /// Whether any page may receive chrome (colour, background or foreground slot, header,
+    /// footer or watermark) around its body after layout.
+    /// </summary>
+    private static bool HasPageChrome(IEnumerable<Page> pages, DocumentSettings settings)
+    {
+        if (settings.PageColor != null || settings.PageBackground != null || settings.PageForeground != null
+            || settings.HeaderTemplate != null || settings.FooterTemplate != null
+            || !string.IsNullOrEmpty(settings.Watermark?.Text))
+            return true;
+        foreach (Page page in pages)
+            if (page.PageColor != null || page.PageBackground != null || page.PageForeground != null)
+                return true;
+        return false;
     }
 
     /// <summary>

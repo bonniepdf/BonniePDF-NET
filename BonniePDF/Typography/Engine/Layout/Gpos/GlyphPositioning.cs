@@ -23,6 +23,7 @@ namespace BonniePDF.Typography.Engine
         private readonly int[] kerningLookups;
         internal bool HasKerning { get { return kerningLookups.Length != 0; } }
         private int operations;
+        private readonly List<GlyphAdjustment> adjustmentPool = new List<GlyphAdjustment>();
         private readonly Action charge;
         private readonly ShapingLimits limits;
         internal ShapingLimits Limits { get { return limits; } }
@@ -64,9 +65,13 @@ namespace BonniePDF.Typography.Engine
             if (glyphs.Count > limits.MaxGlyphs)
                 throw new InvalidDataException("GPOS glyph limit exceeded.");
             var adjustments = new GlyphAdjustment[glyphs.Count];
+            // The records are reused across calls: a program serves one shape call at a time
+            // (operations is per-call state too), and callers read the adjustments before the
+            // next call.
+            while (adjustmentPool.Count < glyphs.Count) adjustmentPool.Add(new GlyphAdjustment());
             for (int i = 0; i < glyphs.Count; i++)
             {
-                adjustments[i] = new GlyphAdjustment();
+                adjustments[i] = adjustmentPool[i].Reset();
                 if (advanceWidth != null && glyphs[i].AdvanceOverride.HasValue)
                     adjustments[i].XAdvance = glyphs[i].AdvanceOverride.Value - advanceWidth(glyphs[i].Id);
                 if (advanceWidth != null && filter.IsMark(glyphs[i]) && !(options.Script == "arab" && UnicodeData.IsIgnorable(glyphs[i].Scalar)))

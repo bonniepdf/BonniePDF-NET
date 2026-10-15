@@ -15,6 +15,8 @@ behaviour, so the two files can be read side by side.
 
 ## Unreleased
 
+- Lower memory for long documents: each page's content is stored as compact bytes once layout moves past it, and a document without page chrome (headers, footers, watermark, page colour or background) compresses each page then instead of holding it as text until writing. A 1,000,000-line document peaks at about 1.2 GB instead of 1.7 GB. Output is unchanged.
+- Less allocation while shaping embedded fonts: a font reuses its per-glyph working records between shaping calls. Shaping a short Latin line allocates about two thirds less, and a 100,000-line document allocates 448 MB instead of 702 MB and takes about 8% less time. Output is unchanged.
 - Concurrent documents that use the same font no longer queue behind one shaping lock: each concurrent shaping call borrows its own copy of the font's shaping data (retained up to the processor count). Four 20,000-line documents generated at once take about 2.8 s instead of 4.2 s. Output is unchanged.
 - Faster shaping of embedded fonts: each OpenType lookup now skips glyphs it cannot act on, while charging exactly the same work against the shaping limits. Shaping a short Latin line takes about a third less time. Output and limit behaviour are unchanged.
 - `Save(Stream)` and `SaveAsync(Stream)` accept a stream that cannot seek, such as an HTTP response body or a pipe, so a service can stream a PDF without buffering it first. The writers buffer their output and flush the destination once at the end instead of before every object. Output is unchanged, including offsets when the destination already holds data.
