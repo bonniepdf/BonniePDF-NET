@@ -22,6 +22,7 @@ namespace BonniePDF.Typography.Engine
         private readonly int[] lookups;
         private readonly LookupRule[] rules;
         private LookupRule activeRule;
+        private LookupStep[] steps;
         private readonly bool arabic;
         private int operations;
         private readonly Action charge;
@@ -49,13 +50,12 @@ namespace BonniePDF.Typography.Engine
             {
                 activeRule = rules[i];
                 int lookup = lookups[i];
-                var first = FirstGlyphs(lookup);
-                int inputCharge = 0;
-                int rejectedCharge = first == null ? -1 : RejectedCharge(lookup, out inputCharge);
-                var plans = Contexts(lookup);
-                // The contexts a rejected glyph reaches: none when the rule turns the lookup off.
-                var charged = inputCharge != 0 ? plans : null;
-                if (IsReverse(lookup))
+                var step = Step(i, lookup);
+                var first = step.First;
+                int inputCharge = step.InputCharge;
+                int rejectedCharge = step.RejectedCharge;
+                var charged = step.Charged;
+                if (step.Reverse)
                 {
                     for (int at = glyphs.Count - 1; at >= 0; at--)
                     {
@@ -79,15 +79,33 @@ namespace BonniePDF.Typography.Engine
             activeRule = null;
         }
 
-        private bool IsReverse(int index)
+        // Lookup i's step (see LookupStep), working it out on the first call. activeRule must
+        // already be rules[i].
+        private LookupStep Step(int i, int lookup)
         {
+            if (steps == null) steps = new LookupStep[lookups.Length];
+            var step = steps[i];
+            if (step != null) { ChargeSubtables(step.Ticks); return step; }
+            step = new LookupStep { First = FirstGlyphs(lookup) };
+            step.RejectedCharge = step.First == null ? -1 : RejectedCharge(lookup, out step.InputCharge);
+            step.Plans = Contexts(lookup);
+            // The contexts a rejected glyph reaches: none when the rule turns the lookup off.
+            step.Charged = step.InputCharge != 0 ? step.Plans : null;
+            step.Reverse = IsReverse(lookup, out step.Ticks);
+            steps[i] = step;
+            return step;
+        }
+
+        private bool IsReverse(int index, out int ticks)
+        {
+            ticks = 0;
             int lookup = data.Relative16(lookupList, lookupList + 2 + index * 2), type = data.U16(lookup);
             if (type == 8) return true;
             if (type != 7) return false;
             int count = data.U16(lookup + 4);
             for (int i = 0; i < count; i++)
             {
-                Tick();
+                Tick(); ticks++;
                 int sub = data.Relative16(lookup, lookup + 6 + i * 2);
                 if (data.U16(sub + 2) == 8) return true;
             }

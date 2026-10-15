@@ -29,7 +29,7 @@ namespace BonniePDF.Typography.Engine
             {
                 for (int i = 0; i < text.Length; i++)
                 {
-                    int id = face.Font.GlyphIndex(text[i]);
+                    int id = face.AsciiGlyph(text[i]);
                     if (id == 0) throw new NotSupportedException("Font has no glyph for U+" + ((int)text[i]).ToString("X4") + ".");
                     run.Add(face.RentGlyph(id, text[i], i));
                 }
