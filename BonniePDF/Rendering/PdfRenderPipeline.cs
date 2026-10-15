@@ -406,6 +406,11 @@ internal static class PdfRenderPipeline
             };
 
             yield return output;
+
+            // The page has been written: drop its content and links so a long document's
+            // memory falls as it is written rather than being held until the end.
+            ctx.Pages[i] = new StringBuilder();
+            ctx.PageHyperlinks.Remove(i);
         }
     }
 
