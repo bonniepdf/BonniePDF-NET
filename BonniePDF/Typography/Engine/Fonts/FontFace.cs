@@ -28,6 +28,20 @@ namespace BonniePDF.Typography.Engine
         // Options are immutable; shape calls without options share one default.
         internal readonly ShapeOptions DefaultOptions = new ShapeOptions();
 
+        // Glyph ids of printable ASCII (U+0020 to U+007E), plus one; 0 until first mapped.
+        private int[] asciiGlyphs;
+
+        // The font's glyph for a printable ASCII character, as Font.GlyphIndex returns it.
+        internal int AsciiGlyph(char c)
+        {
+            if (asciiGlyphs == null) asciiGlyphs = new int[95];
+            int known = asciiGlyphs[c - 32];
+            if (known != 0) return known - 1;
+            int id = Font.GlyphIndex(c);
+            asciiGlyphs[c - 32] = id + 1;
+            return id;
+        }
+
         // Starts a shape call: an empty run, and every pooled glyph record free again.
         internal List<ShapingGlyph> BeginRun()
         {

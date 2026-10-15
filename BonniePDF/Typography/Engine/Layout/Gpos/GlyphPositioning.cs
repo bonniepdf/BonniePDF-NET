@@ -22,6 +22,7 @@ namespace BonniePDF.Typography.Engine
         private readonly LookupRule[] rules;
         private readonly ShapeOptions options;
         private LookupRule activeRule;
+        private LookupStep[] lookupSteps, kerningSteps;
         private readonly int[] kerningLookups;
         internal bool HasKerning { get { return kerningLookups.Length != 0; } }
         private int operations;
@@ -105,16 +106,16 @@ namespace BonniePDF.Typography.Engine
                     previous = i;
                 }
             }
-            foreach (int index in selection)
+            var steps = StepsFor(selection);
+            for (int k = 0; k < selection.Length; k++)
             {
-                activeRule = null;
-                foreach (var rule in rules) { Tick(); if (rule.Index == index) { activeRule = rule; break; } }
-                var first = FirstGlyphs(index);
-                int inputCharge = 0;
-                int rejectedCharge = first == null ? -1 : RejectedCharge(index, out inputCharge);
-                var plans = Contexts(index);
-                // The contexts a rejected glyph reaches: none when the rule turns the lookup off.
-                var charged = inputCharge != 0 ? plans : null;
+                int index = selection[k];
+                var step = Step(steps, k, index);
+                activeRule = step.Rule;
+                var first = step.First;
+                int inputCharge = step.InputCharge;
+                int rejectedCharge = step.RejectedCharge;
+                var charged = step.Charged;
                 for (int at = 0; at < glyphs.Count;)
                 {
                     bool rejected = first != null && !first.Contains(glyphs[at].Id);
@@ -125,6 +126,34 @@ namespace BonniePDF.Typography.Engine
             activeRule = null;
             Resolve(glyphs, adjustments, advanceWidth);
             return adjustments;
+        }
+
+        // The kept steps for a selection: the shaping lookups and the kerning lookups each keep
+        // theirs; any other selection works its steps out afresh.
+        private LookupStep[] StepsFor(int[] selection)
+        {
+            if (ReferenceEquals(selection, lookups)) return lookupSteps ?? (lookupSteps = new LookupStep[lookups.Length]);
+            if (ReferenceEquals(selection, kerningLookups)) return kerningSteps ?? (kerningSteps = new LookupStep[kerningLookups.Length]);
+            return new LookupStep[selection.Length];
+        }
+
+        // Lookup index's step (see LookupStep), working it out on the first call: the feature
+        // rule search charges one operation per rule examined.
+        private LookupStep Step(LookupStep[] steps, int k, int index)
+        {
+            var step = steps[k];
+            if (step != null) { ChargeSubtables(step.Ticks); return step; }
+            step = new LookupStep();
+            activeRule = null;
+            foreach (var rule in rules) { Tick(); step.Ticks++; if (rule.Index == index) { activeRule = rule; break; } }
+            step.Rule = activeRule;
+            step.First = FirstGlyphs(index);
+            step.RejectedCharge = step.First == null ? -1 : RejectedCharge(index, out step.InputCharge);
+            step.Plans = Contexts(index);
+            // The contexts a rejected glyph reaches: none when the rule turns the lookup off.
+            step.Charged = step.InputCharge != 0 ? step.Plans : null;
+            steps[k] = step;
+            return step;
         }
 
         // A lookup's first-glyph set, or null when any subtable fails the checks that precede its
