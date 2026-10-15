@@ -75,6 +75,8 @@ public sealed class DocumentFonts
     // Insertion-ordered; replacing an identity keeps its place.
     private readonly List<string> _order = [];
     private readonly Dictionary<string, DocumentFontFace> _byIdentity = new(StringComparer.Ordinal);
+    private readonly Dictionary<(string Family, int Weight, bool Italic), DocumentFontFace?> _resolved = new();
+    private int _version;
 
     /// <summary>True for a font name made by a <see cref="DocumentFonts"/>.</summary>
     internal static bool IsDocumentFontName(string name) =>
@@ -126,7 +128,9 @@ public sealed class DocumentFonts
         TtfFont font;
         try
         {
-            font = TtfFont.LoadFromBytes(bytes);
+            // The same parse the PDF writer uses for these bytes, so measuring and writing share
+            // one font and its shaping cache, and a service that keeps its font arrays parses once.
+            font = TtfFont.LoadFromBytesCached(bytes);
         }
         catch (Exception ex)
         {
@@ -147,6 +151,8 @@ public sealed class DocumentFonts
         {
             if (!_byIdentity.ContainsKey(identity)) _order.Add(identity);
             _byIdentity[identity] = face;
+            _resolved.Clear();
+            _version++;
         }
         return face;
     }
@@ -156,6 +162,24 @@ public sealed class DocumentFonts
     /// Style is matched first, then weight in the CSS font-matching order.
     /// </summary>
     public DocumentFontFace? Resolve(string family, FontWeight weight, bool italic)
+    {
+        // Layout resolves the same few families for every line it measures and draws.
+        var memoKey = (family, (int)weight, italic);
+        int version;
+        lock (_gate)
+        {
+            if (_resolved.TryGetValue(memoKey, out DocumentFontFace? known)) return known;
+            version = _version;
+        }
+        DocumentFontFace? face = ResolveUncached(family, weight, italic);
+        lock (_gate)
+        {
+            if (version == _version) _resolved[memoKey] = face;
+        }
+        return face;
+    }
+
+    private DocumentFontFace? ResolveUncached(string family, FontWeight weight, bool italic)
     {
         string key = FamilyKey(family);
         List<DocumentFontFace> candidates = Faces.Where(f => string.Equals(FamilyKey(f.Family), key, StringComparison.Ordinal)).ToList();

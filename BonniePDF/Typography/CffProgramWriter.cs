@@ -32,7 +32,7 @@ internal static class CffProgramWriter
     }
     internal static byte[] Build(TtfFont font, string name)
     {
-        var cff = font.EngineFace.Font.Cff ?? throw new InvalidOperationException("Expected CFF outlines."); var data = cff.GetEmbeddingData();
+        var data = font.ReadEngine(face => (face.Font.Cff ?? throw new InvalidOperationException("Expected CFF outlines.")).GetEmbeddingData());
         byte[] names = Index(new[] { Encoding.ASCII.GetBytes(name) }), strings = Index(new[] { Encoding.ASCII.GetBytes("Adobe"), Encoding.ASCII.GetBytes("Identity") }), globals = Index(data.Globals), chars = Index(data.Chars);
         var charset = new byte[1 + (data.Chars.Length - 1) * 2]; for (int i = 1; i < data.Chars.Length; i++) { charset[i * 2 - 1] = (byte)(i >> 8); charset[i * 2] = (byte)i; }
         var select = new byte[data.Selection.Length + 1]; for (int i = 0; i < data.Selection.Length; i++) select[i + 1] = (byte)data.Selection[i];

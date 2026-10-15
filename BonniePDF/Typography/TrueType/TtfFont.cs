@@ -34,7 +34,20 @@ internal class TtfFont
     private readonly object _shapeGate = new();
 #endif
     private Typography.Engine.FontFace? _engineFace;
-    internal Typography.Engine.FontFace EngineFace => _engineFace ??= CreateEngineFace();
+    private object? _engineFaceInit;
+    // Built once even when several documents first use the font at the same moment:
+    // each build is a full copy of the font.
+    internal Typography.Engine.FontFace EngineFace =>
+        System.Threading.LazyInitializer.EnsureInitialized(ref _engineFace, ref _engineFaceInit, CreateEngineFace);
+
+    /// <summary>
+    /// Runs <paramref name="read"/> against the engine face under the font's shaping lock.
+    /// The face caches glyphs and lookup data as it reads, so every reader shares this lock.
+    /// </summary>
+    internal T ReadEngine<T>(Func<Typography.Engine.FontFace, T> read)
+    {
+        lock (_shapeGate) return read(EngineFace);
+    }
     private Typography.Engine.FontFace CreateEngineFace()
     {
         using var performanceScope = PerformanceEvents.Measure(PerformanceStage.FontLoading);

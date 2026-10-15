@@ -304,4 +304,47 @@ public partial class DocumentFontsTests
         Assert.True(doc.Fonts.IsEmpty);
         Assert.Equal(["Helvetica"], EmbeddedFonts(doc.GenerateBytes())); // the standard font, unembedded
     }
+
+    [Fact]
+    public void ResolvesAFaceAddedAfterAnEarlierMissForTheSameFamily()
+    {
+        using BonniePDF.Document doc = new();
+        doc.Fonts.Add(SansRegular, "Inter", FontWeight.Normal);
+        Assert.Equal("400", Name(doc.Fonts.Resolve("Inter", FontWeight.Bold, italic: true)));
+
+        doc.Fonts.Add(SansBoldItalic, "Inter", FontWeight.Bold, italic: true);
+
+        Assert.Equal("700I", Name(doc.Fonts.Resolve("Inter", FontWeight.Bold, italic: true)));
+    }
+
+    [Fact]
+    public void DocumentsGivenTheSameBytesShareOneParse()
+    {
+        using BonniePDF.Document a = new();
+        using BonniePDF.Document b = new();
+
+        // A service that keeps its font bytes in memory parses each font once, and the
+        // PDF writer reuses that parse for the bytes it embeds.
+        Assert.Same(a.Fonts.Add(SansRegular, "Inter").Font, b.Fonts.Add(SansRegular, "Inter").Font);
+        Assert.Same(a.Fonts.Add(SansRegular, "Inter").Font, BonniePDF.Typography.TrueType.TtfFont.LoadFromBytesCached(SansRegular));
+    }
+
+    [Fact]
+    public void ConcurrentDocumentsSharingFontsProduceTheSameContent()
+    {
+        static byte[] Build()
+        {
+            using BonniePDF.Document doc = new();
+            DocumentFontFace face = doc.Fonts.Add(SansRegular, "Inter");
+            for (int i = 0; i < 200; i++) doc.Add(new TextBlock { Text = $"Line {i} shaped while other documents shape", FontName = face.FontName });
+            return doc.GenerateBytes();
+        }
+
+        string expected = SubsetPrefix().Replace(TrailerId().Replace(Encoding.Latin1.GetString(Build()), ""), "");
+        string[] results = new string[8];
+        Parallel.For(0, results.Length, i =>
+            results[i] = SubsetPrefix().Replace(TrailerId().Replace(Encoding.Latin1.GetString(Build()), ""), ""));
+
+        Assert.All(results, result => Assert.Equal(expected, result));
+    }
 }

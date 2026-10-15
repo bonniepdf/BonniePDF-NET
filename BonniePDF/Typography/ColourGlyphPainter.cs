@@ -25,17 +25,21 @@ internal static class ColourGlyphPainter
         {
             var key = (glyph, ppem, textPresentation);
             if (cache.Entries.TryGetValue(key, out var hit)) return hit;
-            var face = font.EngineFace;
-            var layers = new List<Layer>();
+            // The engine face caches glyph reads, so read it under the font's shaping lock.
+            var (layers, bitmap) = font.ReadEngine(face =>
+            {
+                var read = new List<Layer>();
+                if (!textPresentation)
+                    foreach (var layer in face.Layers(glyph))
+                        read.Add(new(face.ReadGlyph(layer.Glyph), layer.Colour, layer.Foreground));
+                var strike = read.Count == 0 && !textPresentation ? face.BitmapGlyph(glyph, ppem) : null;
+                if (read.Count == 0 && strike is null && font.HasOutlines)
+                    read.Add(new(face.ReadGlyph(glyph), default, true));
+                return (read, strike);
+            });
             long bytes = 0;
-            if (!textPresentation)
-                foreach (var layer in face.Layers(glyph))
-                {
-                    var outline = face.ReadGlyph(layer.Glyph);
-                    foreach (var contour in outline.Contours) bytes += contour.Count * 24L + 32;
-                    layers.Add(new(outline, layer.Colour, layer.Foreground));
-                }
-            var bitmap = layers.Count == 0 && !textPresentation ? face.BitmapGlyph(glyph, ppem) : null;
+            foreach (var layer in layers)
+                foreach (var contour in layer.Outline.Contours) bytes += contour.Count * 24L + 32;
             ImageInfo? image = null;
             if (bitmap is not null)
             {
@@ -44,12 +48,6 @@ internal static class ColourGlyphPainter
                     throw new InvalidOperationException("Emoji bitmap dimensions disagree with its font metrics.");
                 image.KeepResolution = true;
                 bytes += image.Data.LongLength + image.AlphaData.LongLength + image.OriginalData.LongLength;
-            }
-            else if (layers.Count == 0 && font.HasOutlines)
-            {
-                var outline = face.ReadGlyph(glyph);
-                foreach (var contour in outline.Contours) bytes += contour.Count * 24L + 32;
-                layers.Add(new(outline, default, true));
             }
             var result = new Artwork(layers, bitmap, image, bytes);
             // Per immutable font, bounded by both count and decoded payload. Oversized

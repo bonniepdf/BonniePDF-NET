@@ -43,7 +43,6 @@ internal sealed class ResolvedTextRun
 /// </summary>
 internal class PdfResourceRegistry
 {
-    private static readonly Random _random = new();
 
     /// <summary>Identifier prefix for glyph-fallback fonts registered on demand.</summary>
     private const string FallbackPrefix = "virtual:fallback:";
@@ -363,7 +362,7 @@ internal class PdfResourceRegistry
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         return new string(Enumerable.Range(0, 6)
-            .Select(_ => chars[_random.Next(chars.Length)])
+            .Select(_ => chars[Random.Shared.Next(chars.Length)])
             .ToArray());
     }
 
