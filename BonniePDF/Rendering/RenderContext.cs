@@ -563,6 +563,15 @@ public class RenderContext
         // then on the new page reopen the same roles with fresh MCIDs.
         // All MCIDs (old page + new page) attach to the same structure
         // elements because the StructureTreeBuilder stack is untouched.
+        //
+        // /Artifact regions are handled the same way. They are innermost (nothing
+        // inside an artifact is tagged), so they close first and reopen last; the
+        // new page's canvas would otherwise not know it is inside one, and would
+        // tag decorative content as real content.
+        int reopenArtifacts = Canvas is PdfCanvas artifactCanvas ? artifactCanvas.ArtifactDepth : 0;
+        for (int i = 0; i < reopenArtifacts; i++)
+            Canvas.EndArtifact();
+
         string[]? reopenRoles = null;
         if (Tagging != null && Tagging.OpenMarkedContentCount > 0)
         {
@@ -611,6 +620,8 @@ public class RenderContext
                     Canvas.BeginMarkedContent(role);
             }
         }
+        for (int i = 0; i < reopenArtifacts; i++)
+            Canvas.BeginArtifact();
 
         OnPageCreated?.Invoke(CurrentPageIndex);
     }

@@ -143,7 +143,7 @@ internal static class PdfRenderPipeline
         ChildTagToken token = ChildTagging.BeginChildTag(ctx, element);
         try
         {
-            RenderElementWithOverflowCore(element, ctx, contentWidth, token);
+            RenderElementWithOverflowCore(element, ctx, contentWidth);
         }
         finally
         {
@@ -151,7 +151,7 @@ internal static class PdfRenderPipeline
         }
     }
 
-    private static void RenderElementWithOverflowCore(IElement element, RenderContext ctx, float contentWidth, ChildTagToken token = default)
+    private static void RenderElementWithOverflowCore(IElement element, RenderContext ctx, float contentWidth)
     {
         using var performanceScope = PerformanceEvents.Measure(PerformanceStage.Painting);
         if (element is IStatefulElement statefulElement)
@@ -199,6 +199,8 @@ internal static class PdfRenderPipeline
                         if (wrapAttempts > MaxWrapAttempts)
                         {
                             // Element cannot fit even on a fresh page - skip it to avoid infinite loop
+                            ctx.Resources.Diagnostics.AddWarning(DiagnosticCategory.Render,
+                                $"An element that does not fit on an empty page was skipped (page {ctx.CurrentPageIndex + 1}).", "pagination");
                             ctx.LayoutRecorder?.CloseNode(element, ctx.CurrentPageIndex, ctx.CurrentY, complete: true);
                             statefulElement.ResetState();
                             return;
@@ -210,16 +212,13 @@ internal static class PdfRenderPipeline
                         wrapAttempts = 0;
                     }
 
-                    // Each page's content stream must have balanced BDC/EMC operators.
-                    // Close the canvas-side marked-content scope before switching pages,
-                    // then reopen it on the new page. The structure-tree node stays open
-                    // throughout; BeginMarkedContent on the new page allocates a fresh MCID
-                    // and attaches it to the same structure element.
+                    // Restore the element's graphics state before the break so it nests
+                    // inside its marked-content scope. NewPage closes any open marked
+                    // content on the outgoing page and reopens it, with a fresh MCID on
+                    // the same structure element, on the new one.
                     ctx.Canvas.RestoreState();
-                    ChildTagging.PauseChildTag(ctx, token);
                     ctx.NewPage();
                     ctx.Canvas.SaveState();
-                    ChildTagging.ResumeChildTag(ctx, element, token);
                     status = statefulElement.RenderStateful(ctx, contentWidth);
                 }
             }
