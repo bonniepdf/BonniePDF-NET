@@ -18,6 +18,7 @@
     <Project Path="Examples/BonniePDF.Examples.Typography.CustomFonts/BonniePDF.Examples.Typography.CustomFonts.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Typography.DickensNovel/BonniePDF.Examples.Typography.DickensNovel.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Typography.EmojisAndUnicode/BonniePDF.Examples.Typography.EmojisAndUnicode.csproj" />
+    <Project Path="Examples/BonniePDF.Examples.Typography.InternationalTypography/BonniePDF.Examples.Typography.InternationalTypography.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Typography.RichTextStyles/BonniePDF.Examples.Typography.RichTextStyles.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Typography.Alignment/BonniePDF.Examples.Typography.Alignment.csproj" />
     <Project Path="Examples/BonniePDF.Examples.Typography.TextDecorations/BonniePDF.Examples.Typography.TextDecorations.csproj" />
