@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BonniePDF\BonniePDF.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\BonniePDF\Typography\Fonts\LiberationSans-Regular.ttf" Link="fonts\LiberationSans-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\..\BonniePDF\Typography\Fonts\LiberationSans-Bold.ttf" Link="fonts\LiberationSans-Bold.ttf" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <Version>2026.10.15</Version>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

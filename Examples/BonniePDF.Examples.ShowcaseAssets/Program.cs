@@ -6,16 +6,16 @@ using BonniePDF.Examples.Templates.LabReport;
 using BonniePDF.Examples.Templates.PublicLibraryMembershipLetter;
 using BonniePDF.Examples.Templates.ShippingLabel;
 
-namespace BonniePDF.Examples.ShowcaseAssets;
+namespace BonniePDF.Examples.ExamplesAssets;
 
 /// <summary>
-/// Regenerates the showcase assets the root README displays: a first-page SVG
-/// preview and the full PDF behind it, for each document in <see cref="Showcase"/>.
+/// Regenerates the examples assets the root README displays: a first-page SVG
+/// preview and the full PDF behind it, for each document in <see cref="Examples"/>.
 ///
-/// Run with: dotnet run --project Examples/BonniePDF.Examples.ShowcaseAssets
+/// Run with: dotnet run --project Examples/BonniePDF.Examples.ExamplesAssets
 ///
 /// These assets used to be produced by hand, which meant nothing failed when
-/// they went missing. Keep them reproducible: change a showcase example, re-run
+/// they went missing. Keep them reproducible: change a examples example, re-run
 /// this, commit both outputs.
 ///
 /// The PDFs are committed binaries and do not delta-compress, so every run adds
@@ -34,7 +34,7 @@ internal sealed class Program
     /// ("pathology-lab-report") than the type does. Adding a tile here is not
     /// enough on its own; the README grid lists them explicitly, so update it too.
     /// </summary>
-    private static readonly (string Asset, Func<Document> Generate)[] Showcase =
+    private static readonly (string Asset, Func<Document> Generate)[] Examples =
     [
         ("annual-report", AnnualReportGradientCoverExample.Generate),
         ("financial-dashboard", FinancialDashboardExample.Generate),
@@ -47,14 +47,14 @@ internal sealed class Program
     private static int Main()
     {
         string repoRoot = FindRepositoryRoot();
-        string svgDir = Path.Combine(repoRoot, "docs", "images", "showcase");
+        string svgDir = Path.Combine(repoRoot, "docs", "images", "examples");
         string pdfDir = Path.Combine(repoRoot, "docs", "pdf");
         Directory.CreateDirectory(svgDir);
         Directory.CreateDirectory(pdfDir);
 
         int failures = 0;
 
-        foreach ((string asset, Func<Document> generate) in Showcase)
+        foreach ((string asset, Func<Document> generate) in Examples)
         {
             try
             {
@@ -88,11 +88,11 @@ internal sealed class Program
 
         if (failures > 0)
         {
-            Console.Error.WriteLine($"{failures} showcase asset(s) failed to generate.");
+            Console.Error.WriteLine($"{failures} examples asset(s) failed to generate.");
             return 1;
         }
 
-        Console.WriteLine("Showcase assets written to docs/images/showcase/ and docs/pdf/.");
+        Console.WriteLine("Examples assets written to docs/images/examples/ and docs/pdf/.");
         return 0;
     }
 

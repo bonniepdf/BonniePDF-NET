@@ -2,12 +2,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\BonniePDF\BonniePDF.csproj" />
-    <ProjectReference Include="..\BonniePDF.Examples.Templates.AnnualReportCovers\BonniePDF.Examples.Templates.AnnualReportCovers.csproj" />
-    <ProjectReference Include="..\BonniePDF.Examples.Templates.BusinessInvoice\BonniePDF.Examples.Templates.BusinessInvoice.csproj" />
-    <ProjectReference Include="..\BonniePDF.Examples.Templates.FinancialDashboard\BonniePDF.Examples.Templates.FinancialDashboard.csproj" />
-    <ProjectReference Include="..\BonniePDF.Examples.Templates.LabReport\BonniePDF.Examples.Templates.LabReport.csproj" />
-    <ProjectReference Include="..\BonniePDF.Examples.Templates.PublicLibraryMembershipLetter\BonniePDF.Examples.Templates.PublicLibraryMembershipLetter.csproj" />
-    <ProjectReference Include="..\BonniePDF.Examples.Templates.ShippingLabel\BonniePDF.Examples.Templates.ShippingLabel.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.Templates.AnnualReportCovers\BonniePDF.Examples.Templates.AnnualReportCovers.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.Templates.BusinessInvoice\BonniePDF.Examples.Templates.BusinessInvoice.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.Templates.FinancialDashboard\BonniePDF.Examples.Templates.FinancialDashboard.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.Templates.LabReport\BonniePDF.Examples.Templates.LabReport.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.Templates.PublicLibraryMembershipLetter\BonniePDF.Examples.Templates.PublicLibraryMembershipLetter.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.Templates.ShippingLabel\BonniePDF.Examples.Templates.ShippingLabel.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
