@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BonniePDF\BonniePDF.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <Version>2026.10.15</Version>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The caller-supplied Factur-X invoice XML, embedded verbatim by the
+         example. Copied to the output dir so the example reads it at runtime. -->
+    <Content Include="factur-x.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

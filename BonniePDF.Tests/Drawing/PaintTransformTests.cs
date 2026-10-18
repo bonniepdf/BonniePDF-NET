@@ -56,7 +56,7 @@ public class PaintTransformTests
     [Fact]
     public void EmitsNoExtraMatrixWhenThereIsNoTransform()
     {
-        // Every existing caller, showcase and golden depends on this: the feature
+        // Every existing caller, examples and golden depends on this: the feature
         // is an addition only if an absent transform changes nothing.
         string without = FillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), Stops)).Content;
         string identity = FillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), Stops)

@@ -133,7 +133,7 @@ internal static class PathDataParser
         // exactly two quarter turns. Without the tolerance the two
         // implementations disagree about whether that is 2 segments or 3:
         // identical rendering, different sink calls, and therefore different PDF
-        // content streams for the same input. Found by the showcase parity check
+        // content streams for the same input. Found by the examples parity check
         // on heroicons' paper-clip.
         double quarterTurns = Math.Abs(delta) / (Math.PI / 2);
         int count = Math.Max(1, (int)Math.Ceiling(quarterTurns - 1e-9));
