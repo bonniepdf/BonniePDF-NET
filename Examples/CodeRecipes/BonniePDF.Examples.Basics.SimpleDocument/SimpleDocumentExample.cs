@@ -123,7 +123,7 @@ public static class SimpleDocumentExample
         // ── Page 2 ──
         doc.AddPage();
 
-        doc.Add(new Heading("Page 2")
+        doc.Add(new Heading("Page 2: Summary Table")
         {
             TocIdentifier = "page2",
             Level = 1,
@@ -135,8 +135,39 @@ public static class SimpleDocumentExample
 
         doc.Add(new TextBlock
         {
-            Text = "This demonstrates multipage support with automatic page management."
+            Text = "This demonstrates multipage support with automatic page management.",
+            Margin = new Thickness(0, 0, 0, 16)
         });
+
+        var table = new Table(160f, 160f, 175f)
+        {
+            HeaderBackgroundColor = ColorPalette.Slate[800],
+            HeaderTextColor = Color.White,
+        };
+
+        table.AddHeader(
+            new TextBlock { Text = "Component", FontName = StandardFonts.HelveticaBold, FontSize = 10 },
+            new TextBlock { Text = "Runtime", FontName = StandardFonts.HelveticaBold, FontSize = 10 },
+            new TextBlock { Text = "Status", FontName = StandardFonts.HelveticaBold, FontSize = 10 }
+        );
+
+        table.AddRow(
+            new TextBlock { Text = "Core Engine", FontSize = 10 },
+            new TextBlock { Text = ".NET / TypeScript", FontSize = 10 },
+            new TextBlock { Text = "Production Ready", FontSize = 10, Color = ColorPalette.Emerald[600] }
+        );
+        table.AddRow(
+            new TextBlock { Text = "Typography Engine", FontSize = 10 },
+            new TextBlock { Text = "Embedded Fonts", FontSize = 10 },
+            new TextBlock { Text = "Production Ready", FontSize = 10, Color = ColorPalette.Emerald[600] }
+        );
+        table.AddRow(
+            new TextBlock { Text = "Vector Graphics", FontSize = 10 },
+            new TextBlock { Text = "SVG / QR / Barcode", FontSize = 10 },
+            new TextBlock { Text = "Production Ready", FontSize = 10, Color = ColorPalette.Emerald[600] }
+        );
+
+        doc.Add(table);
 
         // ── Page 3 - custom square ──
         PdfSize customSize = new PdfSize(300, 300, "Square Card");
