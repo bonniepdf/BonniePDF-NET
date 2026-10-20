@@ -52,6 +52,7 @@ public static class FacturXInvoiceExample
             Margin = 44,
             // FacturX.Apply forces PDF/A-3b; set here too so the intent is explicit.
             Conformance = PdfAConformance.PdfA3b,
+            Accessibility = AccessibilityMode.PdfUa1,
             Language = "en",
             DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(Ink),
         });
@@ -70,7 +71,11 @@ public static class FacturXInvoiceExample
         seller.Add(Cell("USt-IdNr. DE 123 456 789", bold: true, color: Accent, margin: new Thickness(0, 6, 0, 0)));
 
         VerticalStack titleStack = new();
-        titleStack.Add(Cell("E-INVOICE", size: 24, bold: true, color: Accent, align: TextAlignment.Right));
+        titleStack.Add(new Heading("E-INVOICE")
+        {
+            Level = 1, FontName = StandardFonts.HelveticaBold, FontSize = 24,
+            Color = Accent, Alignment = TextAlignment.Right,
+        });
         titleStack.Add(Cell("EN 16931 · Factur-X / ZUGFeRD", size: 8, color: Muted, align: TextAlignment.Right,
             margin: new Thickness(0, 2, 0, 0)));
         titleStack.Add(Cell("INV-2026-1001", color: Muted, align: TextAlignment.Right));
