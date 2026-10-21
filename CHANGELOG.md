@@ -8,12 +8,27 @@ at the same version are the same library.
 This file is maintained by hand. Add an entry under the current version with
 each change to the library.
 
+Each version includes `Status: Prerelease` for private releases or
+`Status: Released` and `Date: YYYY-MM-DD` for public releases. Keep one to five
+short, plain-text bullets under `### Highlights`, followed by the full notes
+under their own headings. A prerelease date is optional; do not infer it from
+the version number.
+
 Because both implementations conform to one specification, a behavioural
 change lands in both and is described in both changelogs. Word the entry for
 this language — C# spellings, C# type names — but describe the same
 behaviour, so the two files can be read side by side.
 
 ## 2026.10.15
+
+Status: Prerelease
+
+### Highlights
+
+- Faster text layout and large-document generation
+- Lower memory use and reusable font parsing
+- Content direction and embedded Arabic and Hebrew text
+- OpenType CFF fonts and opt-in colour emoji
 
 ### Performance Improvements
 
@@ -51,6 +66,17 @@ Text layout and document generation are faster and use less memory. Output is un
 - Tagged (PDF/UA) documents: a top-level element that continues onto another page now reopens its marked content before its graphics state on every page, as on its first page, instead of interleaving the two.
 
 ## 2026.10.0
+
+Status: Prerelease
+
+### Highlights
+
+- Native rotation, flip and translation elements
+- Self-contained document examples
+- More reliable SVG previews and encrypted PDFs
+- Simplified chart options, including breaking API changes
+
+### Changes
 
 - Publishing now requires successful cross-engine gallery validation of the source commit. Configure `PARITY_WORKFLOW_REPOSITORY` and `PARITY_WORKFLOW_TOKEN` before publishing.
 
@@ -704,6 +730,14 @@ Text layout and document generation are faster and use less memory. Output is un
   spacing; both now use the same rule, so SVG and PDF output agree.
 
 ## 2026.7.2
+
+Status: Prerelease
+
+### Highlights
+
+- Changelog baseline; earlier changes are recorded in Git history
+
+### Changes
 
 - Baseline at the introduction of this changelog. Earlier history is in the
   repository's commit log.
