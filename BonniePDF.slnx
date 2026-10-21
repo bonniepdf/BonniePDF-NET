@@ -73,6 +73,7 @@
     <Project Path="Examples/IndustryTemplates/BonniePDF.Examples.Templates.SaasInvoice/BonniePDF.Examples.Templates.SaasInvoice.csproj" />
     <Project Path="Examples/IndustryTemplates/BonniePDF.Examples.Templates.ShelfLabel/BonniePDF.Examples.Templates.ShelfLabel.csproj" />
     <Project Path="Examples/IndustryTemplates/BonniePDF.Examples.Templates.ShippingLabel/BonniePDF.Examples.Templates.ShippingLabel.csproj" />
+    <Project Path="Examples/IndustryTemplates/BonniePDF.Examples.Templates.StatutoryComplianceReport/BonniePDF.Examples.Templates.StatutoryComplianceReport.csproj" />
     <Project Path="Examples/IndustryTemplates/BonniePDF.Examples.Templates.Timesheet/BonniePDF.Examples.Templates.Timesheet.csproj" />
     <Project Path="Examples/IndustryTemplates/BonniePDF.Examples.Templates.TradeDocuments/BonniePDF.Examples.Templates.TradeDocuments.csproj" />
     <Project Path="Examples/IndustryTemplates/BonniePDF.Examples.Templates.UkDegreeTranscript/BonniePDF.Examples.Templates.UkDegreeTranscript.csproj" />
