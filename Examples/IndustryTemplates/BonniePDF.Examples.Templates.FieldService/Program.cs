@@ -11,6 +11,7 @@ internal sealed class Program
         (string File, Func<BonniePDF.Document> Generate)[] examples =
         [
             ("job-sheet.pdf", JobSheetExample.Generate),
+            ("reactive-work-order.pdf", ReactiveWorkOrderExample.Generate),
             ("site-inspection-report.pdf", SiteInspectionReportExample.Generate),
             ("permit-to-work.pdf", PermitToWorkExample.Generate),
             ("inventory-schedule-of-condition.pdf", InventoryScheduleOfConditionExample.Generate),
