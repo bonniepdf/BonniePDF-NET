@@ -115,6 +115,12 @@ public class Page
     /// </summary>
     public float ContentHeight => Height - Margin * 2;
 
+    /// <summary>Adds one paragraph from lines joined by hard line breaks.</summary>
+    public void Add(params string[] lines) => Add(new TextBlock(lines));
+
+    /// <summary>Adds one paragraph from lines joined by hard line breaks.</summary>
+    public void Add(IEnumerable<string> lines) => Add(new TextBlock(lines));
+
     /// <summary>
     /// Adds an element to this page
     /// </summary>

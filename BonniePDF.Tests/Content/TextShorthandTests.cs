@@ -10,7 +10,7 @@ namespace BonniePDF.Tests.Content;
 /// </summary>
 /// <remarks>
 /// Every case builds the shorthand and the explicit form and requires the same result, compared by page
-/// SVG (layout) and by PDF bytes with the random file identifier masked (tagged structure, fonts,
+/// SVG (layout) and by PDF bytes with the random file identifier and font-subset tags masked (tagged structure, fonts,
 /// everything else). The TypeScript suite asserts the same cases against the same fixture. When a case
 /// changes here it changes there, and in the fixture first.
 /// <para>
@@ -43,7 +43,7 @@ public sealed partial class TextShorthandTests : IDisposable
     {
         using var stream = new MemoryStream();
         doc.Save(stream, leaveOpen: true);
-        return FileIdentifier().Replace(Encoding.Latin1.GetString(stream.ToArray()), "/ID [<MASKED> <MASKED>]");
+        return FontSubsetTag().Replace(FileIdentifier().Replace(Encoding.Latin1.GetString(stream.ToArray()), "/ID [<MASKED> <MASKED>]"), "SUBSET+");
     }
 
     private static string Svg(BonniePDF.Document doc) => string.Join("\n", doc.GenerateSvgPages());
@@ -52,6 +52,9 @@ public sealed partial class TextShorthandTests : IDisposable
 
     [GeneratedRegex(@"/ID \[<[0-9A-F]*> <[0-9A-F]*>\]")]
     private static partial Regex FileIdentifier();
+
+    [GeneratedRegex(@"[A-Z]{6}\+")]
+    private static partial Regex FontSubsetTag();
 
     /// <summary>Build the same document two ways and require identical output.</summary>
     private static void Same(
@@ -296,6 +299,32 @@ public sealed partial class TextShorthandTests : IDisposable
         using BonniePDF.Document doc = NewDoc(Times);
         doc.Add("Hello");
         Assert.Contains("/BaseFont /Times-Roman", Bytes(doc));
+    }
+
+    [Fact]
+    public void TableRow_MixedCellsRetainTheirStyle() =>
+        Same(d =>
+        {
+            var table = new Table(1, 1);
+            var cell = new TableCell { Content = new TextBlock("A"), Padding = new Thickness(9) };
+            table.AddRow(cell, "B");
+            Assert.Same(cell, table.Rows[0].Cells[0]);
+            d.Add(table);
+        }, d =>
+        {
+            var table = new Table(1, 1);
+            table.AddRow(new TableCell { Content = new TextBlock("A"), Padding = new Thickness(9) }, new TableCell { Content = new TextBlock("B") });
+            d.Add(table);
+        });
+
+    [Fact]
+    public void NullCell_IsRejectedBeforeAddingTheRow()
+    {
+        var table = new Table(1, 1);
+        Assert.Throws<ArgumentNullException>(() => table.AddRow("A", (string)null!));
+        Assert.Throws<ArgumentNullException>(() => table.AddRow(new object[] { "A", null! }));
+        Assert.Throws<ArgumentException>(() => table.AddRow("A", 123));
+        Assert.Empty(table.Rows);
     }
 
     [Fact]
