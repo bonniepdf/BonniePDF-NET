@@ -19,7 +19,6 @@ internal partial class FontWriter
         const string system = "<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>";
         double scale = 1000.0 / font.UnitsPerEm;
         string widths = "[ " + string.Join(" ", tracker.CidToGlyphMap.Values.Distinct().Order().Select(g => $"{g.ToString(CultureInfo.InvariantCulture)} [ {PdfSyntax.FormatDecimal((float)(font.GetGlyphWidth(g) * scale))} ]")) + " ]";
-        var cmap = new BonniePDF.Typography.TrueType.ToUnicodeCMapBuilder(); foreach (var e in tracker.GlyphSources) cmap.AddSourceMapping(e.Key, e.Value); cmap.AddMappings(tracker.GetUsedCharToGlyphMap());
         return new()
         {
             new(program,new(){[PdfKeys.Common.Subtype]="/CIDFontType0C"},Bytes:CffProgramWriter.Build(font,name)),
@@ -33,7 +32,7 @@ internal partial class FontWriter
             }),
             new(encoding,new(){[PdfKeys.Common.Type]="/CMap",[PdfKeys.Font.CMapName]="/BonnieCffIdentity",[PdfKeys.Font.CidSystemInfo]=system},CffProgramWriter.EncodingCMap(tracker.CidToGlyphMap)),
             new(cid,new(){[PdfKeys.Common.Type]="/Font",[PdfKeys.Common.Subtype]="/CIDFontType0",[PdfKeys.Font.BaseFont]="/"+name,[PdfKeys.Font.CidSystemInfo]=system,[PdfKeys.Font.Descriptor]=Ref(descriptor),[PdfKeys.Font.Widths]=widths}),
-            new(unicode,new(),cmap.Build()),
+            new(unicode,new(),BuildToUnicodeCMap(tracker)),
             new(type0Id,new(){[PdfKeys.Common.Type]="/Font",[PdfKeys.Common.Subtype]="/Type0",[PdfKeys.Font.BaseFont]="/"+name,[PdfKeys.Font.Encoding]=Ref(encoding),[PdfKeys.Font.DescendantFonts]="[ "+Ref(cid)+" ]",[PdfKeys.Font.ToUnicode]=Ref(unicode)})
         };
     }

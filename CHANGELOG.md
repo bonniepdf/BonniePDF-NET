@@ -27,14 +27,22 @@ Status: Prerelease
 
 - `DefaultTextStyle` now fills font family, weight and italic independently
 - `DefaultTextStyle` now supplies `Decoration`, and behaves the same as TypeScript when regenerated
+- A font used for two purposes is embedded once, and a document's fonts no longer vary between runs
 
 ### Fixed
 
+- **A font is embedded once, however many roles it plays.** A document font is also a glyph-fallback candidate for the document's other fonts, and was embedded a second time under its fallback key, so a document using both could hold two copies of a font (two NotoEmoji and two NotoSansMath programs in `EmojiExample`). It is now embedded once and renders the same: `EmojiExample` 106,412 to 99,053 bytes, `ColourEmojiExample` 53,255 to 50,479, `InternationalTypographyExample` 64,382 to 61,551.
+- **The font subsets in a document no longer depend on how many documents the process generated before.** A text run was matched to its font registration by enumerating a dictionary whose order followed key hashes, so the same document embedded different subsets from one generation to the next (`EmojiExample` alternated between 106,620, 134,013, 106,412 and 133,805 bytes). Each run now resolves the registration its own identifier names.
+- **`GenerateBytesAsync` and `SaveAsync` honour `EnableCompression`.** The asynchronous writers compressed objects and font files even when compression was switched off, so the synchronous and asynchronous paths produced different PDFs. They now match, and a test generates a document both ways, with and without compression, and requires identical output.
 - **Changing or removing `DefaultTextStyle` now takes back what it supplied.** A value the default had supplied (font family, weight, italic, size, colour, line height, decoration) used to stay on the element when a later generation's default no longer set it, or when `DefaultTextStyle` was set to `null`. Those values now return to the library defaults, and anything the element's author set is untouched.
 - **`DefaultTextStyle.Decoration` now cascades.** An underline, strikethrough or overline in the default style was ignored in .NET but applied in TypeScript. It now reaches every text element that has not set `Decoration`, including one set to `TextDecoration.None`, which is kept as a choice. Definition export writes `decoration` only when the author set it.
 - **A document's default font family no longer disappears when an element sets its own weight or italic.** Setting `FontWeight`, `Italic` or `FontFamily` on a text element used to mark the whole font as chosen, so `DefaultTextStyle` supplied none of it: with a default family of `Times`, `new TextBlock { FontWeight = FontWeight.Bold }` rendered in Helvetica-Bold rather than Times-Bold. Family, weight and italic are now tracked separately, and the default fills whichever of them the element has not set. An explicit `FontWeight.Normal` or `Italic = false` is a choice and is kept.
 - **A default weight or italic given without a family now applies.** A `DefaultTextStyle` with only `WithWeight` or `WithItalic` was ignored; it now reaches elements that have not set those properties. A font named directly through `FontName` is not given a default weight or italic, because a named font bypasses family resolution.
 - **Definition export no longer writes defaults as the author's choices.** `DefinitionWriter` writes `fontFamily`, `fontWeight` and `italic` only for values the element's author set, and writes an explicit normal weight or `false` italic rather than dropping it, so a round trip keeps the cascade intact.
+
+### Changed
+
+- **Less duplicated code in the synchronous and asynchronous writers.** The two PDF writers share the catalog, viewer preferences, link annotation, trailer and open-action builders, so they now differ only in how they write. The document serializer, font writer (including the CFF path), compliance, metadata and navigation writers, the definition element catalogue and the chart axis-label and connecting-line code were consolidated the same way. Behaviour, output and public API are unchanged: the PDFs of 102 example documents are byte-identical through `GenerateBytes` and `GenerateBytesAsync` before and after.
 
 ## 2026.10.15
 

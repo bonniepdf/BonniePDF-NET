@@ -55,19 +55,7 @@ internal class ToUnicodeCMapBuilder
         StringBuilder sb = new();
 
         // CMap header
-        sb.AppendLf("/CIDInit /ProcSet findresource begin");
-        sb.AppendLf("12 dict begin");
-        sb.AppendLf("begincmap");
-        sb.AppendLf("/CIDSystemInfo <<");
-        sb.AppendLf("  /Registry (Adobe)");
-        sb.AppendLf("  /Ordering (UCS)");
-        sb.AppendLf("  /Supplement 0");
-        sb.AppendLf(">> def");
-        sb.AppendLf("/CMapName /Adobe-Identity-UCS def");
-        sb.AppendLf("/CMapType 2 def");
-        sb.AppendLf("1 begincodespacerange");
-        sb.AppendLf("<0000> <FFFF>");
-        sb.AppendLf("endcodespacerange");
+        AppendHeader(sb);
 
         // Sort mappings by glyph ID for consistent output
         List<(ushort glyphId, string unicode)> sorted = _mappings
@@ -109,10 +97,8 @@ internal class ToUnicodeCMapBuilder
         var hex=new StringBuilder("<"); foreach(char c in text) hex.Append(((int)c).ToString("X4",System.Globalization.CultureInfo.InvariantCulture)); return hex.Append('>').ToString();
     }
 
-    private static string BuildEmptyCMap()
+    private static void AppendHeader(StringBuilder sb)
     {
-        StringBuilder sb = new();
-
         sb.AppendLf("/CIDInit /ProcSet findresource begin");
         sb.AppendLf("12 dict begin");
         sb.AppendLf("begincmap");
@@ -126,6 +112,13 @@ internal class ToUnicodeCMapBuilder
         sb.AppendLf("1 begincodespacerange");
         sb.AppendLf("<0000> <FFFF>");
         sb.AppendLf("endcodespacerange");
+    }
+
+    private static string BuildEmptyCMap()
+    {
+        StringBuilder sb = new();
+
+        AppendHeader(sb);
         sb.AppendLf("endcmap");
         sb.AppendLf("CMapName currentdict /CMap defineresource pop");
         sb.AppendLf("end");

@@ -159,6 +159,12 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     public async Task WriteCompressedObjectAsync(int id, IDictionary<string, string> dict, string content,
         CancellationToken cancellationToken = default)
     {
+        if (!InternalConfiguration.EnableCompression)
+        {
+            await WriteObjectAsync(id, dict, content, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
         // 1. Convert to bytes
         byte[] rawBytes = Iso88591.GetBytes(content);
 
@@ -212,32 +218,7 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     public async Task<int> WriteLinkAnnotationAsync(int id, Hyperlink hyperlink, IList<int>? pageIds = null,
         int? structParentKey = null, CancellationToken cancellationToken = default)
     {
-        Dictionary<string, string> dict = new()
-        {
-            [PdfKeys.Common.Type] = "/Annot",
-            [PdfKeys.Common.Subtype] = "/Link",
-            [PdfKeys.Annotation.Rectangle] = hyperlink.GetRectangleString(),
-            [PdfKeys.Annotation.Flags] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
-            // PDF/UA rule 7-18: /Contents mirrors the visible
-            // link text. See the sync variant for the rationale.
-            [PdfKeys.Annotation.Contents] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
-        };
-
-        // /StructParent wires this annotation into the parent tree.
-        if (structParentKey.HasValue)
-            dict[PdfKeys.Annotation.StructureParent] = structParentKey.Value.ToString();
-
-        if (hyperlink.TargetPageIndex.HasValue && pageIds != null)
-        {
-            int pageIdx = Math.Max(0, Math.Min(hyperlink.TargetPageIndex.Value, pageIds.Count - 1));
-            dict[PdfKeys.Annotation.Action] = $"<< /S /GoTo /D [{pageIds[pageIdx]} 0 R /Fit] >>";
-        }
-        else
-        {
-            dict[PdfKeys.Annotation.Action] = $"<< /S /URI /URI ({PdfSyntax.Escape(hyperlink.Uri ?? "")}) >>";
-        }
-
-        await WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
+        await WriteObjectAsync(id, PdfObjectBuilders.LinkAnnotation(hyperlink, pageIds, structParentKey), null, cancellationToken).ConfigureAwait(false);
         return id;
     }
 
@@ -284,29 +265,7 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
                 await _writer.WriteAsync("0000000000 00000 f \n").ConfigureAwait(false);
 
         await _writer.WriteAsync("trailer\n").ConfigureAwait(false);
-        // Build trailer dictionary
-        List<string> trailerParts = new()
-        {
-            $"/Size {_currentObjId + 1}",
-            $"/Root {rootId} 0 R"
-        };
-
-        if (infoId > 0) trailerParts.Add($"/Info {infoId} 0 R");
-
-        // Add encryption entries if encrypted
-        if (Encryptor != null && _encryptId > 0)
-        {
-            trailerParts.Add($"/Encrypt {_encryptId} 0 R");
-            trailerParts.Add($"/ID {Encryptor.GetIdArray()}");
-        }
-        else
-        {
-            byte[] idBytes = Guid.NewGuid().ToByteArray();
-            string hexId = Convert.ToHexString(idBytes);
-            trailerParts.Add($"/ID [<{hexId}> <{hexId}>]");
-        }
-
-        string trailerDict = $"<< {string.Join(' ', trailerParts)} >>\n";
+        string trailerDict = PdfObjectBuilders.Trailer(_currentObjId, rootId, infoId, _encryptId, Encryptor);
         await _writer.WriteAsync(trailerDict).ConfigureAwait(false);
         await _writer.WriteAsync("startxref\n").ConfigureAwait(false);
         await _writer.WriteAsync($"{xrefPos}\n").ConfigureAwait(false);
@@ -323,28 +282,8 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     public async Task<int> WriteViewerPreferencesAsync(int id, DocumentSettings settings,
         CancellationToken cancellationToken = default)
     {
-        Dictionary<string, string> dict = new();
-
-        if (settings.HideToolbar)
-            dict[PdfKeys.ViewerPreferences.HideToolbar] = "true";
-
-        if (settings.HideMenubar)
-            dict[PdfKeys.ViewerPreferences.HideMenubar] = "true";
-
-        if (settings.HideWindowUI)
-            dict[PdfKeys.ViewerPreferences.HideWindowUi] = "true";
-
-        if (settings.FitWindow)
-            dict[PdfKeys.ViewerPreferences.FitWindow] = "true";
-
-        if (settings.CenterWindow)
-            dict[PdfKeys.ViewerPreferences.CenterWindow] = "true";
-
-        if (settings.DisplayDocTitle)
-            dict[PdfKeys.ViewerPreferences.DisplayDocumentTitle] = "true";
-
-        // Only write if there are actual preferences
-        if (dict.Count == 0)
+        Dictionary<string, string>? dict = PdfObjectBuilders.ViewerPreferences(settings);
+        if (dict == null)
             return 0;
 
         await WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
@@ -363,71 +302,7 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     public async Task WriteCatalogAsync(int id, int pagesId, int firstPageId, DocumentSettings settings,
         CatalogOptions? options, CancellationToken cancellationToken = default)
     {
-        Dictionary<string, string> dict = new()
-        {
-            [PdfKeys.Common.Type] = "/Catalog",
-            [PdfKeys.Catalog.Pages] = $"{pagesId} 0 R"
-        };
-
-        // Add OpenAction
-        string openAction = GetOpenActionString(firstPageId, settings);
-        dict[PdfKeys.Catalog.OpenAction] = openAction;
-
-        // Add PageMode - auto-set to UseOutlines when outlines are present
-        if (options?.OutlinesId > 0)
-            dict[PdfKeys.Catalog.PageMode] = "/UseOutlines";
-        else if (settings.PageMode != PageMode.UseNone)
-            dict[PdfKeys.Catalog.PageMode] = $"/{GetPageModeString(settings.PageMode)}";
-
-        // Add ViewerPreferences if provided
-        if (options?.ViewerPrefsId > 0) dict[PdfKeys.Catalog.ViewerPreferences] = $"{options.ViewerPrefsId} 0 R";
-
-        // Add Outlines if provided
-        if (options?.OutlinesId > 0) dict[PdfKeys.Catalog.Outlines] = $"{options.OutlinesId} 0 R";
-
-        // Add XMP Metadata if provided
-        if (options?.XmpMetadataId > 0) dict[PdfKeys.Catalog.Metadata] = $"{options.XmpMetadataId} 0 R";
-
-        // Add OutputIntents if provided (PDF/A)
-        if (options?.OutputIntentIds is { Count: > 0 })
-        {
-            string refs = string.Join(' ', options.OutputIntentIds.ToList().ConvertAll(oid => $"{oid} 0 R"));
-            dict[PdfKeys.Catalog.OutputIntents] = $"[ {refs} ]";
-        }
-
-        // Add MarkInfo when either PDF/A or tagging is on. Both standards
-        // require /MarkInfo /Marked true; they're orthogonal flags so emitting
-        // it once when either is set covers both cases.
-        if (options?.PdfAEnabled == true || options?.Tagged == true)
-            dict[PdfKeys.Catalog.MarkInfo] = "<< /Marked true >>";
-
-        // Add StructTreeRoot when tagging is on.
-        if (options?.StructTreeRootId > 0)
-            dict[PdfKeys.Catalog.StructureTreeRoot] = $"{options.StructTreeRootId} 0 R";
-
-        // Add /Lang when the document declares a natural language. Required
-        // by PDF/UA-1; useful generally for assistive tech.
-        if (!string.IsNullOrEmpty(options?.Language))
-            dict[PdfKeys.Catalog.Language] = $"({BonniePDF.Rendering.Pdf.PdfSyntax.Escape(options.Language)})";
-
-        // Add Dests if provided
-        if (options?.DestsId > 0)
-            dict[PdfKeys.Catalog.Destinations] = $"{options.DestsId} 0 R";
-
-        // Add PageLabels if configured
-        if (options?.PageLabelsId > 0)
-            dict[PdfKeys.Catalog.PageLabels] = $"{options.PageLabelsId} 0 R";
-
-        // Add /Names /EmbeddedFiles and /AF for document attachments (PDF/A-3).
-        if (options?.NamesEmbeddedFilesId > 0)
-            dict[PdfKeys.Catalog.Names] = $"<< /EmbeddedFiles {options.NamesEmbeddedFilesId} 0 R >>";
-        if (options?.AssociatedFileIds is { Count: > 0 })
-        {
-            string afRefs = string.Join(' ', options.AssociatedFileIds.ToList().ConvertAll(fid => $"{fid} 0 R"));
-            dict[PdfKeys.Catalog.AssociatedFiles] = $"[ {afRefs} ]";
-        }
-
-        await WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
+        await WriteObjectAsync(id, PdfObjectBuilders.Catalog(pagesId, firstPageId, settings, options), null, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -466,6 +341,12 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     public async Task WriteCompressedBinaryObjectAsync(int id, IDictionary<string, string> dict, byte[] streamContent,
         int length, CancellationToken cancellationToken = default)
     {
+        if (!InternalConfiguration.EnableCompression)
+        {
+            await WriteBinaryObjectAsync(id, dict, streamContent, length, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
         using MemoryStream memoryStream = new();
         using (ZLibStream zlib = new(memoryStream, CompressionLevel.SmallestSize, leaveOpen: true))
         {
@@ -569,67 +450,6 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     public async Task WriteCatalogWithOpenActionAsync(int id, int pagesId, int firstPageId, string zoomType = "Fit",
         double zoomLevel = 1.0, CancellationToken cancellationToken = default)
     {
-        string openAction;
-
-        switch (zoomType.ToUpperInvariant())
-        {
-            case "FIT":
-                // Fit the page to the window
-                openAction = $"[ {firstPageId} 0 R /Fit ]";
-                break;
-            case "FITH":
-                // Fit horizontally, top of page
-                openAction = $"[ {firstPageId} 0 R /FitH 0 ]";
-                break;
-            case "FITW":
-                // Fit vertically, left of page
-                openAction = $"[ {firstPageId} 0 R /FitV 0 ]";
-                break;
-            case "XYZ":
-                // Custom zoom level (1.0 = 100%)
-                openAction = $"[ {firstPageId} 0 R /XYZ 0 {zoomLevel} null ]";
-                break;
-            default:
-                openAction = $"[ {firstPageId} 0 R /Fit ]";
-                break;
-        }
-
-        await WriteObjectAsync(id, new Dictionary<string, string>
-        {
-            [PdfKeys.Common.Type] = "/Catalog",
-            [PdfKeys.Catalog.Pages] = $"{pagesId} 0 R",
-            [PdfKeys.Catalog.OpenAction] = openAction
-        }, null, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Gets the OpenAction string for the specified zoom level
-    /// </summary>
-    private static string GetOpenActionString(int firstPageId, DocumentSettings settings)
-    {
-        return settings.DefaultZoom switch
-        {
-            ZoomLevel.FitPage => $"[ {firstPageId} 0 R /Fit ]",
-            ZoomLevel.FitWidth => $"[ {firstPageId} 0 R /FitH 0 ]",
-            ZoomLevel.FitHeight => $"[ {firstPageId} 0 R /FitV 0 ]",
-            ZoomLevel.Custom => $"[ {firstPageId} 0 R /XYZ 0 {settings.CustomZoomLevel} null ]",
-            _ => $"[ {firstPageId} 0 R /Fit ]"
-        };
-    }
-
-    /// <summary>
-    /// Gets the PageMode string for PDF output
-    /// </summary>
-    private static string GetPageModeString(PageMode pageMode)
-    {
-        return pageMode switch
-        {
-            PageMode.UseOutlines => "UseOutlines",
-            PageMode.UseThumbs => "UseThumbs",
-            PageMode.FullScreen => "FullScreen",
-            PageMode.UseOC => "UseOC",
-            PageMode.UseAttachments => "UseAttachments",
-            _ => "UseNone"
-        };
+        await WriteObjectAsync(id, PdfObjectBuilders.CatalogWithOpenAction(pagesId, firstPageId, zoomType, zoomLevel), null, cancellationToken).ConfigureAwait(false);
     }
 }

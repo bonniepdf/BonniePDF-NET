@@ -55,6 +55,23 @@ public static class FontManager
 
     private sealed record ParsedFontCacheEntry(byte[] Bytes, TtfFont? Font);
 
+    /// <summary>The bundled Liberation faces: file stem, registry family and weight.</summary>
+    private static readonly (string FileName, string Family, string Weight)[] BundledFonts =
+    [
+        ("LiberationSans-Regular", "liberation sans", "regular"),
+        ("LiberationSans-Bold", "liberation sans", "bold"),
+        ("LiberationSans-Italic", "liberation sans", "italic"),
+        ("LiberationSans-BoldItalic", "liberation sans", "bolditalic"),
+        ("LiberationSerif-Regular", "liberation serif", "regular"),
+        ("LiberationSerif-Bold", "liberation serif", "bold"),
+        ("LiberationSerif-Italic", "liberation serif", "italic"),
+        ("LiberationSerif-BoldItalic", "liberation serif", "bolditalic"),
+        ("LiberationMono-Regular", "liberation mono", "regular"),
+        ("LiberationMono-Bold", "liberation mono", "bold"),
+        ("LiberationMono-Italic", "liberation mono", "italic"),
+        ("LiberationMono-BoldItalic", "liberation mono", "bolditalic"),
+    ];
+
     // Standard PDF font → Liberation family+weight mapping
     private static readonly Dictionary<string, (string family, string weight)> StandardFontMap =
         new(StringComparer.OrdinalIgnoreCase)
@@ -231,25 +248,9 @@ public static class FontManager
         var asm = typeof(FontManager).Assembly;
         var resourceNames = asm.GetManifestResourceNames();
 
-        var map = new Dictionary<string, (string family, string weight)>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["LiberationSans-Regular"]      = ("liberation sans",  "regular"),
-            ["LiberationSans-Bold"]         = ("liberation sans",  "bold"),
-            ["LiberationSans-Italic"]       = ("liberation sans",  "italic"),
-            ["LiberationSans-BoldItalic"]   = ("liberation sans",  "bolditalic"),
-            ["LiberationSerif-Regular"]     = ("liberation serif", "regular"),
-            ["LiberationSerif-Bold"]        = ("liberation serif", "bold"),
-            ["LiberationSerif-Italic"]      = ("liberation serif", "italic"),
-            ["LiberationSerif-BoldItalic"]  = ("liberation serif", "bolditalic"),
-            ["LiberationMono-Regular"]      = ("liberation mono",  "regular"),
-            ["LiberationMono-Bold"]         = ("liberation mono",  "bold"),
-            ["LiberationMono-Italic"]       = ("liberation mono",  "italic"),
-            ["LiberationMono-BoldItalic"]   = ("liberation mono",  "bolditalic"),
-        };
-
         foreach (var resourceName in resourceNames)
         {
-            foreach (var (fileName, (family, weight)) in map)
+            foreach (var (fileName, family, weight) in BundledFonts)
             {
                 if (!resourceName.EndsWith($"{fileName}.ttf", StringComparison.OrdinalIgnoreCase))
                     continue;
@@ -271,23 +272,7 @@ public static class FontManager
         string fontsDir = Path.Combine(asmDir, "Fonts");
         if (!Directory.Exists(fontsDir)) return;
 
-        var map = new Dictionary<string, (string family, string weight)>
-        {
-            ["LiberationSans-Regular"]      = ("liberation sans",  "regular"),
-            ["LiberationSans-Bold"]         = ("liberation sans",  "bold"),
-            ["LiberationSans-Italic"]       = ("liberation sans",  "italic"),
-            ["LiberationSans-BoldItalic"]   = ("liberation sans",  "bolditalic"),
-            ["LiberationSerif-Regular"]     = ("liberation serif", "regular"),
-            ["LiberationSerif-Bold"]        = ("liberation serif", "bold"),
-            ["LiberationSerif-Italic"]      = ("liberation serif", "italic"),
-            ["LiberationSerif-BoldItalic"]  = ("liberation serif", "bolditalic"),
-            ["LiberationMono-Regular"]      = ("liberation mono",  "regular"),
-            ["LiberationMono-Bold"]         = ("liberation mono",  "bold"),
-            ["LiberationMono-Italic"]       = ("liberation mono",  "italic"),
-            ["LiberationMono-BoldItalic"]   = ("liberation mono",  "bolditalic"),
-        };
-
-        foreach (var (fileName, (family, weight)) in map)
+        foreach (var (fileName, family, weight) in BundledFonts)
         {
             string path = Path.Combine(fontsDir, $"{fileName}.ttf");
             if (!File.Exists(path)) continue;

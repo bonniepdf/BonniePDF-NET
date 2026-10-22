@@ -98,21 +98,6 @@ public class AreaChart : CartesianChartBase
     }
 
     /// <summary>
-    /// Draws the connecting line on top of the area fill for a series.
-    /// </summary>
-    private static void DrawConnectingLine(ICanvas canvas, IList<Point> coordinates, Color color, float lineWidth)
-    {
-        if (coordinates.Count < 2) return;
-
-        for (int i = 0; i < coordinates.Count - 1; i++)
-        {
-            var p1 = coordinates[i];
-            var p2 = coordinates[i + 1];
-            canvas.DrawLine(p1.X, p1.Y, p2.X, p2.Y, color, lineWidth);
-        }
-    }
-
-    /// <summary>
     /// Gets the default color for the series when converting from old API (DataPoints) to new API (Series).
     /// Returns the chart's AreaColor property for backward compatibility.
     /// </summary>

@@ -279,27 +279,40 @@ internal class PdfResourceRegistry
         return result;
     }
 
+    /// <summary>
+    /// Registers <paramref name="font"/> under <paramref name="key"/>. A parsed font is embedded once however many keys
+    /// name it - a document font is also a glyph-fallback candidate for the document's other fonts, so its bytes are
+    /// registered again under a fallback key - so a font that is already registered is shared: the new key takes over
+    /// its resource name and its glyph tracker instead of making a second copy.
+    /// </summary>
+    private void AddEmbeddedFont(string key, TtfFont font)
+    {
+        foreach (EmbeddedFontInfo registered in EmbeddedFonts.Values)
+        {
+            if (!ReferenceEquals(registered.Font, font)) continue;
+            EmbeddedFonts[key] = registered;
+            FontNameMap[key] = registered.ResourceName;
+            return;
+        }
+
+        _fontCounter++;
+        string resourceName = $"/F{_fontCounter}";
+
+        EmbeddedFonts[key] = new EmbeddedFontInfo
+        {
+            Font = font,
+            Tracker = new GlyphUsageTracker(font),
+            SubsetPrefix = GenerateSubsetPrefix(),
+            ResourceName = resourceName
+        };
+
+        FontNameMap[key] = resourceName;
+    }
+
     private string RegisterEmbeddedFontFromBytes(byte[] bytes, string key)
     {
         if (!EmbeddedFonts.ContainsKey(key))
-        {
-            TtfFont font = TtfFont.LoadFromBytesCached(bytes);
-            GlyphUsageTracker tracker = new(font);
-
-            _fontCounter++;
-            string resourceName = $"/F{_fontCounter}";
-            string subsetPrefix = GenerateSubsetPrefix();
-
-            EmbeddedFonts[key] = new EmbeddedFontInfo
-            {
-                Font = font,
-                Tracker = tracker,
-                SubsetPrefix = subsetPrefix,
-                ResourceName = resourceName
-            };
-
-            FontNameMap[key] = resourceName;
-        }
+            AddEmbeddedFont(key, TtfFont.LoadFromBytesCached(bytes));
 
         return FontNameMap[key];
     }
@@ -307,24 +320,7 @@ internal class PdfResourceRegistry
     private string RegisterEmbeddedFont(string filePath)
     {
         if (!EmbeddedFonts.ContainsKey(filePath))
-        {
-            TtfFont font = TtfFont.LoadFromFileCached(filePath);
-            GlyphUsageTracker tracker = new(font);
-
-            _fontCounter++;
-            string resourceName = $"/F{_fontCounter}";
-            string subsetPrefix = GenerateSubsetPrefix();
-
-            EmbeddedFonts[filePath] = new EmbeddedFontInfo
-            {
-                Font = font,
-                Tracker = tracker,
-                SubsetPrefix = subsetPrefix,
-                ResourceName = resourceName
-            };
-
-            FontNameMap[filePath] = resourceName;
-        }
+            AddEmbeddedFont(filePath, TtfFont.LoadFromFileCached(filePath));
 
         return FontNameMap[filePath];
     }
@@ -386,26 +382,25 @@ internal class PdfResourceRegistry
             .ToArray());
     }
 
-    internal TtfFont? ResolveEmbeddedFont(string fontIdentifier)
+    internal TtfFont? ResolveEmbeddedFont(string fontIdentifier) => ResolveEmbeddedFontInfo(fontIdentifier)?.Font;
+
+    /// <summary>
+    /// The registration of the embedded font that <paramref name="fontIdentifier"/> names. One parsed font
+    /// can be registered under more than one identifier (a document font is also a fallback candidate for
+    /// the document's other fonts), and each registration has its own resource name and glyph tracker, so a
+    /// run is always tracked against the registration its own identifier names, never one found by font.
+    /// </summary>
+    internal EmbeddedFontInfo? ResolveEmbeddedFontInfo(string fontIdentifier)
     {
         if (IsEmbeddedFont(fontIdentifier))
-        {
-            EmbeddedFontInfo? fontInfo = GetEmbeddedFont(fontIdentifier);
-            return fontInfo?.Font;
-        }
+            return GetEmbeddedFont(fontIdentifier);
 
         // Check virtual (bytes-based) font
         string virtualKey = $"virtual:{fontIdentifier}";
         if (EmbeddedFonts.TryGetValue(virtualKey, out EmbeddedFontInfo? virtualFontInfo))
-            return virtualFontInfo?.Font;
+            return virtualFontInfo;
 
-        if (FontAliasMap.TryGetValue(fontIdentifier, out string? ttfPath))
-        {
-            EmbeddedFontInfo? fontInfo = GetEmbeddedFont(ttfPath);
-            return fontInfo?.Font;
-        }
-
-        return null;
+        return FontAliasMap.TryGetValue(fontIdentifier, out string? ttfPath) ? GetEmbeddedFont(ttfPath) : null;
     }
 
     internal void TrackGlyphUsage(string fontIdentifier, string text)
@@ -445,15 +440,6 @@ internal class PdfResourceRegistry
     /// When the primary font covers the whole string (or is a non-embedded
     /// Type1 font) the result is a single run identical to the legacy path.
     /// </remarks>
-    // The first registration of font, in the order EmbeddedFonts enumerates (as Values would),
-    // without the snapshot Values takes or a closure per call.
-    private EmbeddedFontInfo? EmbeddedFontInfoFor(TtfFont font)
-    {
-        foreach (KeyValuePair<string, EmbeddedFontInfo> entry in EmbeddedFonts)
-            if (ReferenceEquals(entry.Value.Font, font)) return entry.Value;
-        return null;
-    }
-
     private readonly Dictionary<string, TextRunFont> _wholeTextFonts = new();
 
     /// <summary>
@@ -463,13 +449,9 @@ internal class PdfResourceRegistry
     internal TextRunFont? WholeTextFont(string primaryFontIdentifier, string text)
     {
         string resourceName = RegisterFont(primaryFontIdentifier);
-        TtfFont? primaryFont = ResolveEmbeddedFont(primaryFontIdentifier);
-        EmbeddedFontInfo? primaryInfo = null;
-        if (primaryFont != null)
-        {
-            primaryInfo = EmbeddedFontInfoFor(primaryFont);
-            if (!TextRunShaper.PrimaryCovers(text, primaryFont)) return null;
-        }
+        EmbeddedFontInfo? primaryInfo = ResolveEmbeddedFontInfo(primaryFontIdentifier);
+        TtfFont? primaryFont = primaryInfo?.Font;
+        if (primaryFont != null && !TextRunShaper.PrimaryCovers(text, primaryFont)) return null;
         GlyphUsageTracker? tracker = primaryInfo?.Tracker;
         bool canTrack = primaryInfo?.ResourceName == resourceName;
         if (_wholeTextFonts.TryGetValue(primaryFontIdentifier, out TextRunFont? kept) &&
@@ -483,7 +465,8 @@ internal class PdfResourceRegistry
     public IList<ResolvedTextRun> ResolveTextRuns(string primaryFontIdentifier, string text)
     {
         string resourceName = RegisterFont(primaryFontIdentifier);
-        TtfFont? primaryFont = ResolveEmbeddedFont(primaryFontIdentifier);
+        EmbeddedFontInfo? primaryInfo = ResolveEmbeddedFontInfo(primaryFontIdentifier);
+        TtfFont? primaryFont = primaryInfo?.Font;
 
         // Non-embedded standard Type1 fonts can't be shaped (no cmap/glyph IDs);
         // preserve the literal-string emission path unchanged.
@@ -495,7 +478,6 @@ internal class PdfResourceRegistry
             };
         }
 
-        var primaryInfo = EmbeddedFontInfoFor(primaryFont);
         if (TextRunShaper.PrimaryCovers(text, primaryFont))
             return new List<ResolvedTextRun>
             {
@@ -552,8 +534,8 @@ internal class PdfResourceRegistry
             FallbackFont fb = fallbackByIndex[run.FontIndex]!;
             string fbIdentifier = candidates[run.FontIndex].FontIdentifier;
             string fbResource = RegisterEmbeddedFontFromBytes(fb.Bytes, fbIdentifier);
-            TtfFont? fbFont = ResolveEmbeddedFont(fbIdentifier);
-            var fbInfo = EmbeddedFonts.Values.FirstOrDefault(f => ReferenceEquals(f.Font, fbFont));
+            EmbeddedFontInfo? fbInfo = ResolveEmbeddedFontInfo(fbIdentifier);
+            TtfFont? fbFont = fbInfo?.Font;
             result.Add(new ResolvedTextRun
             {
                 ResourceName = fbResource,
@@ -798,6 +780,7 @@ internal class PdfResourceRegistry
         ImageWriter imageWriter = new(writer) { Conformance = Conformance };
 
         // 1. Write Fonts
+        HashSet<EmbeddedFontInfo> writtenFonts = new(System.Collections.Generic.ReferenceEqualityComparer.Instance);
         foreach (KeyValuePair<string, string> fontEntry in FontsInRegistrationOrder())
         {
             string fontIdentifier = fontEntry.Key;
@@ -814,6 +797,13 @@ internal class PdfResourceRegistry
             {
                 if (EmbeddedFonts.TryGetValue(fontIdentifier, out EmbeddedFontInfo? fontInfo))
                 {
+                    // A font registered under several keys is written once and shared.
+                    if (!writtenFonts.Add(fontInfo))
+                    {
+                        FontIdMap[fontIdentifier] = fontInfo.Type0ObjectId;
+                        continue;
+                    }
+
                     int type0Id = writer.GetNewId();
                     fontInfo.Type0ObjectId = type0Id;
                     FontIdMap[fontIdentifier] = type0Id;
@@ -883,6 +873,7 @@ internal class PdfResourceRegistry
 
         // 4. Build Resource String
         List<string> fontRefs = new();
+        HashSet<string> listedResources = new(StringComparer.Ordinal);
         foreach (KeyValuePair<string, string> fontEntry in FontsInRegistrationOrder())
         {
             string fontIdentifier = fontEntry.Key;
@@ -894,6 +885,10 @@ internal class PdfResourceRegistry
 
             // Skip logical names that were mapped to a virtual (bytes-based) font - handled under "virtual:" key
             if (EmbeddedFonts.ContainsKey($"virtual:{fontIdentifier}"))
+                continue;
+
+            // Keys that share one registration share its resource name, which is listed once.
+            if (!listedResources.Add(resourceName))
                 continue;
 
             // For virtual: keys, resolve the object ID via the virtual key itself
@@ -990,6 +985,7 @@ internal class PdfResourceRegistry
         ImageWriter imageWriter = new(writer) { Conformance = Conformance };
 
         // 1. Write Fonts
+        HashSet<EmbeddedFontInfo> writtenFonts = new(System.Collections.Generic.ReferenceEqualityComparer.Instance);
         foreach (KeyValuePair<string, string> fontEntry in FontsInRegistrationOrder())
         {
             string fontIdentifier = fontEntry.Key;
@@ -1006,6 +1002,13 @@ internal class PdfResourceRegistry
             {
                 if (EmbeddedFonts.TryGetValue(fontIdentifier, out EmbeddedFontInfo? fontInfo))
                 {
+                    // A font registered under several keys is written once and shared.
+                    if (!writtenFonts.Add(fontInfo))
+                    {
+                        FontIdMap[fontIdentifier] = fontInfo.Type0ObjectId;
+                        continue;
+                    }
+
                     int type0Id = writer.GetNewId();
                     fontInfo.Type0ObjectId = type0Id;
                     FontIdMap[fontIdentifier] = type0Id;
@@ -1075,6 +1078,7 @@ internal class PdfResourceRegistry
 
         // 4. Build Resource String
         List<string> fontRefs = new();
+        HashSet<string> listedResources = new(StringComparer.Ordinal);
         foreach (KeyValuePair<string, string> fontEntry in FontsInRegistrationOrder())
         {
             string fontIdentifier = fontEntry.Key;
@@ -1086,6 +1090,10 @@ internal class PdfResourceRegistry
 
             // Skip logical names that were mapped to a virtual (bytes-based) font
             if (EmbeddedFonts.ContainsKey($"virtual:{fontIdentifier}"))
+                continue;
+
+            // Keys that share one registration share its resource name, which is listed once.
+            if (!listedResources.Add(resourceName))
                 continue;
 
             // For virtual: keys, resolve the object ID via the virtual key itself

@@ -139,43 +139,4 @@ public class GroupedBarChart : CartesianChartBase
     /// Gets the offset for value labels (simple spacing above/beside bars).
     /// </summary>
     protected override float GetLabelVerticalOffset(ChartSeries series) => 7;
-
-    /// <summary>
-    /// Draws category-axis labels using the first series' labels.
-    /// In vertical mode: below each group. In horizontal mode: to the left of each group.
-    /// </summary>
-    protected override void DrawXAxisLabels(ICanvas canvas, ChartData data,
-        float chartAreaWidth, float chartAreaHeight, float baselineY)
-    {
-        if (data.Series.Count == 0) return;
-
-        ChartSeries firstSeries = data.Series[0];
-        int dataPointCount = firstSeries.DataPoints.Count;
-
-        if (Orientation == ChartOrientation.Horizontal)
-        {
-            float topY = baselineY - chartAreaHeight;
-            float totalGroupSpace = chartAreaHeight / dataPointCount;
-
-            for (int i = 0; i < dataPointCount; i++)
-            {
-                float y = topY + i * totalGroupSpace + totalGroupSpace / 2;
-                string label = firstSeries.DataPoints[i].Label;
-                canvas.DrawText(LeftPadding - 8, y - AxisLabelFontSize / 2, label,
-                    AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Right);
-            }
-        }
-        else
-        {
-            float labelY = baselineY + 15;
-            float totalGroupSpace = chartAreaWidth / dataPointCount;
-
-            for (int i = 0; i < dataPointCount; i++)
-            {
-                float x = LeftPadding + i * totalGroupSpace + totalGroupSpace / 2;
-                string label = firstSeries.DataPoints[i].Label;
-                canvas.DrawText(x, labelY, label, AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Center);
-            }
-        }
-    }
 }

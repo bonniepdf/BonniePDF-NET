@@ -46,14 +46,7 @@ internal class ComplianceWriter
         }
         byte[] compressed = ms.ToArray();
 
-        Dictionary<string, string> dict = new()
-        {
-            [PdfKeys.ColorProfile.Components] = "3",
-            [PdfKeys.Stream.Filter] = "/FlateDecode",
-            [PdfKeys.Stream.DecodedLength] = iccData.Length.ToString()
-        };
-
-        _writer!.WriteBinaryObject(id, dict, compressed);
+        _writer!.WriteBinaryObject(id, IccProfileDictionary(iccData.Length), compressed);
     }
 
     /// <summary>
@@ -73,14 +66,7 @@ internal class ComplianceWriter
         }
         byte[] compressed = ms.ToArray();
 
-        Dictionary<string, string> dict = new()
-        {
-            [PdfKeys.ColorProfile.Components] = "3",
-            [PdfKeys.Stream.Filter] = "/FlateDecode",
-            [PdfKeys.Stream.DecodedLength] = iccData.Length.ToString()
-        };
-
-        await _asyncWriter!.WriteBinaryObjectAsync(id, dict, compressed, compressed.Length, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteBinaryObjectAsync(id, IccProfileDictionary(iccData.Length), compressed, compressed.Length, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -91,16 +77,7 @@ internal class ComplianceWriter
     /// <param name="iccProfileId">The object ID of the referenced ICC profile.</param>
     public void WriteOutputIntent(int id, int iccProfileId)
     {
-        Dictionary<string, string> dict = new()
-        {
-            [PdfKeys.Common.Type] = "/OutputIntent",
-            [PdfKeys.OutputIntent.Subtype] = "/GTS_PDFA1",
-            [PdfKeys.OutputIntent.ConditionIdentifier] = "(sRGB IEC61966-2.1)",
-            [PdfKeys.OutputIntent.RegistryName] = "(http://www.color.org)",
-            [PdfKeys.OutputIntent.DestinationProfile] = $"{iccProfileId} 0 R"
-        };
-
-        _writer!.WriteObject(id, dict);
+        _writer!.WriteObject(id, OutputIntentDictionary(iccProfileId));
     }
 
     /// <summary>
@@ -112,15 +89,22 @@ internal class ComplianceWriter
     /// <param name="cancellationToken">Cancellation token.</param>
     public async Task WriteOutputIntentAsync(int id, int iccProfileId, CancellationToken cancellationToken = default)
     {
-        Dictionary<string, string> dict = new()
-        {
-            [PdfKeys.Common.Type] = "/OutputIntent",
-            [PdfKeys.OutputIntent.Subtype] = "/GTS_PDFA1",
-            [PdfKeys.OutputIntent.ConditionIdentifier] = "(sRGB IEC61966-2.1)",
-            [PdfKeys.OutputIntent.RegistryName] = "(http://www.color.org)",
-            [PdfKeys.OutputIntent.DestinationProfile] = $"{iccProfileId} 0 R"
-        };
-
-        await _asyncWriter!.WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteObjectAsync(id, OutputIntentDictionary(iccProfileId), null, cancellationToken).ConfigureAwait(false);
     }
+
+    private static Dictionary<string, string> IccProfileDictionary(int decodedLength) => new()
+    {
+        [PdfKeys.ColorProfile.Components] = "3",
+        [PdfKeys.Stream.Filter] = "/FlateDecode",
+        [PdfKeys.Stream.DecodedLength] = decodedLength.ToString()
+    };
+
+    private static Dictionary<string, string> OutputIntentDictionary(int iccProfileId) => new()
+    {
+        [PdfKeys.Common.Type] = "/OutputIntent",
+        [PdfKeys.OutputIntent.Subtype] = "/GTS_PDFA1",
+        [PdfKeys.OutputIntent.ConditionIdentifier] = "(sRGB IEC61966-2.1)",
+        [PdfKeys.OutputIntent.RegistryName] = "(http://www.color.org)",
+        [PdfKeys.OutputIntent.DestinationProfile] = $"{iccProfileId} 0 R"
+    };
 }
