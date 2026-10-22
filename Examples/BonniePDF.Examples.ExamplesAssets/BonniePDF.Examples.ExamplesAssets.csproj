@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BonniePDF\BonniePDF.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.FinanceReporting.AnnualReportCovers\BonniePDF.Examples.FinanceReporting.AnnualReportCovers.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.Invoices.BusinessInvoice\BonniePDF.Examples.Invoices.BusinessInvoice.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.FinanceReporting.FinancialDashboard\BonniePDF.Examples.FinanceReporting.FinancialDashboard.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.Healthcare.LabReport\BonniePDF.Examples.Healthcare.LabReport.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.EducationPublicSector.PublicLibraryMembershipLetter\BonniePDF.Examples.EducationPublicSector.PublicLibraryMembershipLetter.csproj" />
+    <ProjectReference Include="..\IndustryTemplates\BonniePDF.Examples.SalesSupplyChain.ShippingLabel\BonniePDF.Examples.SalesSupplyChain.ShippingLabel.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <Version>2026.10.22</Version>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

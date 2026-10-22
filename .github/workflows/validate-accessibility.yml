@@ -68,13 +68,14 @@ jobs:
             tools/verapdf/Validate.class
           key: verapdf-${{ runner.os }}-${{ hashFiles('tools/verapdf/pom.xml', 'tools/verapdf/Validate.java') }}
 
-      # Build and run every example project. Each writes its PDFs to
-      # <project>/bin/.../GeneratedPdfs/. Iterating over the .csproj files means a
-      # new example project is picked up automatically — no edit needed here, and
-      # non-project folders (e.g. Examples/assets) are skipped.
+      # Build and run every example project, however deep it sits (Examples/<tier>/<project>/).
+      # Each writes its PDFs to <project>/bin/.../GeneratedPdfs/. Finding the .csproj
+      # files means a new example project is picked up automatically - no edit needed
+      # here, and non-project folders (e.g. Examples/assets) are skipped. Every project
+      # runs to completion in a few seconds, so a failure here is a real failure.
       - name: Generate all example PDFs
         run: |
-          for csproj in Examples/*/*.csproj; do
+          for csproj in $(find Examples -name '*.csproj' -not -path '*/obj/*' | sort); do
             echo "::group::${csproj}"
             dotnet run --project "$csproj" -c Release
             echo "::endgroup::"
