@@ -19,6 +19,23 @@ change lands in both and is described in both changelogs. Word the entry for
 this language — C# spellings, C# type names — but describe the same
 behaviour, so the two files can be read side by side.
 
+## 2026.10.22
+
+Status: Prerelease
+
+### Highlights
+
+- `DefaultTextStyle` now fills font family, weight and italic independently
+- `DefaultTextStyle` now supplies `Decoration`, and behaves the same as TypeScript when regenerated
+
+### Fixed
+
+- **Changing or removing `DefaultTextStyle` now takes back what it supplied.** A value the default had supplied (font family, weight, italic, size, colour, line height, decoration) used to stay on the element when a later generation's default no longer set it, or when `DefaultTextStyle` was set to `null`. Those values now return to the library defaults, and anything the element's author set is untouched.
+- **`DefaultTextStyle.Decoration` now cascades.** An underline, strikethrough or overline in the default style was ignored in .NET but applied in TypeScript. It now reaches every text element that has not set `Decoration`, including one set to `TextDecoration.None`, which is kept as a choice. Definition export writes `decoration` only when the author set it.
+- **A document's default font family no longer disappears when an element sets its own weight or italic.** Setting `FontWeight`, `Italic` or `FontFamily` on a text element used to mark the whole font as chosen, so `DefaultTextStyle` supplied none of it: with a default family of `Times`, `new TextBlock { FontWeight = FontWeight.Bold }` rendered in Helvetica-Bold rather than Times-Bold. Family, weight and italic are now tracked separately, and the default fills whichever of them the element has not set. An explicit `FontWeight.Normal` or `Italic = false` is a choice and is kept.
+- **A default weight or italic given without a family now applies.** A `DefaultTextStyle` with only `WithWeight` or `WithItalic` was ignored; it now reaches elements that have not set those properties. A font named directly through `FontName` is not given a default weight or italic, because a named font bypasses family resolution.
+- **Definition export no longer writes defaults as the author's choices.** `DefinitionWriter` writes `fontFamily`, `fontWeight` and `italic` only for values the element's author set, and writes an explicit normal weight or `false` italic rather than dropping it, so a round trip keeps the cascade intact.
+
 ## 2026.10.15
 
 Status: Prerelease

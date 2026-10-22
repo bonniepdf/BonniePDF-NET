@@ -221,6 +221,9 @@ internal sealed record TextOptions : IEquatable<TextOptions>
     internal bool Italic { get; init; }
     internal string FontName { get; init; } = StandardFonts.Helvetica;
     internal bool FontExplicit { get; init; }
+    internal bool FontFamilyExplicit { get; init; }
+    internal bool WeightExplicit { get; init; }
+    internal bool ItalicExplicit { get; init; }
     internal float FontSize { get; init; } = 12f;
     internal bool FontSizeExplicit { get; init; }
     internal Color TextColor { get; init; } = Color.Black;
@@ -228,6 +231,7 @@ internal sealed record TextOptions : IEquatable<TextOptions>
     internal float LineHeight { get; init; } = 1.2f;
     internal bool LineHeightExplicit { get; init; }
     internal TextDecoration Decoration { get; init; } = TextDecoration.None;
+    internal bool DecorationExplicit { get; init; }
     internal Color? DecorationColor { get; init; }
     internal float? DecorationThickness { get; init; }
     internal DecorationStyle DecorationStyle { get; init; } = DecorationStyle.Solid;
@@ -249,10 +253,11 @@ internal sealed record TextOptions : IEquatable<TextOptions>
         other is not null && OptionEquality.Same(FontFeatures, other.FontFeatures)
         && string.Equals(FontFamily, other.FontFamily, StringComparison.Ordinal) && Weight == other.Weight && Italic == other.Italic
         && string.Equals(FontName, other.FontName, StringComparison.Ordinal) && FontExplicit == other.FontExplicit
+        && FontFamilyExplicit == other.FontFamilyExplicit && WeightExplicit == other.WeightExplicit && ItalicExplicit == other.ItalicExplicit
         && OptionEquality.Same(FontSize, other.FontSize) && FontSizeExplicit == other.FontSizeExplicit
         && TextColor == other.TextColor && TextColorExplicit == other.TextColorExplicit
         && OptionEquality.Same(LineHeight, other.LineHeight) && LineHeightExplicit == other.LineHeightExplicit
-        && Decoration == other.Decoration && DecorationColor == other.DecorationColor
+        && Decoration == other.Decoration && DecorationExplicit == other.DecorationExplicit && DecorationColor == other.DecorationColor
         && OptionEquality.Same(DecorationThickness, other.DecorationThickness) && DecorationStyle == other.DecorationStyle
         && OptionEquality.Same(LetterSpacing, other.LetterSpacing) && OptionEquality.Same(WordSpacing, other.WordSpacing)
         && Alignment == other.Alignment && AlignmentExplicit == other.AlignmentExplicit && MaxLines == other.MaxLines

@@ -498,6 +498,7 @@ internal sealed partial class DefinitionWriter
                     "fontSize" => t.FontSizeIsExplicit,
                     "color" => t.TextColorIsExplicit,
                     "lineHeight" => t.LineHeightIsExplicit,
+                    "decoration" => t.DecorationIsExplicit,
                     _ => null,
                 };
                 if (explicitly is false) continue;
@@ -550,13 +551,16 @@ internal sealed partial class DefinitionWriter
         {
             values["fontFamily"] = element.FontFamily;
         }
-        else if (!weighted || !string.Equals(FontFamilyResolver.Resolve(StandardFonts.Helvetica, element.FontWeight, element.Italic), element.FontName, StringComparison.Ordinal))
+        else if (element.FontIsNamed
+            && (!weighted || !string.Equals(FontFamilyResolver.Resolve(StandardFonts.Helvetica, element.FontWeight, element.Italic), element.FontName, StringComparison.Ordinal)))
         {
             // A font that was named, rather than one the weight and italic resolved from the default.
             values["fontName"] = element.FontName;
         }
-        if (element.FontWeight != FontWeight.Normal) values["fontWeight"] = Wire("fontWeight", (int)element.FontWeight);
-        if (element.Italic) values["italic"] = true;
+        // Weight and italic that DefaultTextStyle supplied are not the author's, so they are not written.
+        // An explicit Normal weight or false italic is written too: it is a choice that stops the cascade.
+        if (element.FontWeightIsExplicit) values["fontWeight"] = Wire("fontWeight", (int)element.FontWeight);
+        if (element.ItalicIsExplicit) values["italic"] = element.Italic;
         return values;
     }
 
