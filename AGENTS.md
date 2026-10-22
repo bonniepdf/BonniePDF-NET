@@ -78,7 +78,7 @@ Driven with `dotnet` from this folder.
 ```bash
 dotnet build BonniePDF.slnx
 dotnet test BonniePDF.Tests/BonniePDF.Tests.csproj
-dotnet run --project Examples/BonniePDF.Examples.Basics.SimpleDocument
+dotnet run --project Examples/CodeRecipes/BonniePDF.Examples.GettingStarted.SimpleDocument
 ```
 
 - `BonniePDF.slnx` lists the core project, the test project, and the example projects. `BonniePDF.Benchmarks/` is not in the solution — build it directly.

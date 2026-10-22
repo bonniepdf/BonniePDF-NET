@@ -4,7 +4,7 @@ Each example's document-building file contains its own sample data and helpers.
 You can copy it into a .NET 8 or .NET 10 project with a reference to `BonniePDF` and implicit
 usings enabled. The `Program.cs` files are runners that save the generated PDFs.
 
-Start with `CodeRecipes/BonniePDF.Examples.Basics.SimpleDocument/SimpleDocumentExample.cs`.
+Start with `CodeRecipes/BonniePDF.Examples.GettingStarted.SimpleDocument/SimpleDocumentExample.cs`.
 Other recipes introduce individual elements; the templates combine them into
 invoices, reports, letters, and other complete documents.
 
