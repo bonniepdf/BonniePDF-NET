@@ -45,12 +45,7 @@ internal partial class FontWriter
     /// </summary>
     public void WriteType1Font(int id, string fontName)
     {
-        _writer!.WriteObject(id, new Dictionary<string, string>
-        {
-            [PdfKeys.Common.Type] = "/Font",
-            [PdfKeys.Common.Subtype] = "/Type1",
-            [PdfKeys.Font.BaseFont] = $"/{fontName}"
-        });
+        _writer!.WriteObject(id, Type1FontDictionary(fontName));
     }
 
     /// <summary>
@@ -77,19 +72,7 @@ internal partial class FontWriter
         string baseFontName = fontInfo.SubsetFontName;
 
         // 1. Write FontFile2 (embedded TTF binary data)
-        byte[] fontData;
-        TtfSubsetter? subsetter = null;
-        if (enableSubsetting || !font.HasOutlines && font.HasColour)
-        {
-            // Create subset font with only the used glyphs
-            subsetter = new TtfSubsetter(font);
-            fontData = subsetter.CreateSubset(tracker.UsedGlyphIds, tracker.GetUsedCharToGlyphMap());
-        }
-        else
-        {
-            // Embed full font
-            fontData = font.GetRawFontData();
-        }
+        (byte[] fontData, TtfSubsetter? subsetter) = PrepareFontData(font, tracker, enableSubsetting);
 
         WriteFontFile2(fontFile2Id, fontData);
 
@@ -126,21 +109,10 @@ internal partial class FontWriter
         WriteCIDFont(cidFontId, baseFontName, fontDescriptorId, widthArray, cidToGidMapRef);
 
         // 6. Write ToUnicode CMap
-        ToUnicodeCMapBuilder cmapBuilder = new();
-        foreach(var entry in tracker.GlyphSources) cmapBuilder.AddSourceMapping(entry.Key,entry.Value);
-        cmapBuilder.AddMappings(tracker.GetUsedCharToGlyphMap());
-        WriteToUnicodeCMap(toUnicodeId, cmapBuilder.Build());
+        WriteToUnicodeCMap(toUnicodeId, BuildToUnicodeCMap(tracker));
 
         // 7. Write Type0 font (the main font dictionary)
-        _writer!.WriteObject(type0Id, new Dictionary<string, string>
-        {
-            [PdfKeys.Common.Type] = "/Font",
-            [PdfKeys.Common.Subtype] = "/Type0",
-            [PdfKeys.Font.BaseFont] = $"/{baseFontName}",
-            [PdfKeys.Font.Encoding] = "/Identity-H",
-            [PdfKeys.Font.DescendantFonts] = $"[ {cidFontId} 0 R ]",
-            [PdfKeys.Font.ToUnicode] = $"{toUnicodeId} 0 R"
-        });
+        _writer!.WriteObject(type0Id, Type0FontDictionary(baseFontName, cidFontId, toUnicodeId));
 
         return type0Id;
     }
@@ -168,6 +140,44 @@ internal partial class FontWriter
     /// Writes the FontDescriptor dictionary
     /// </summary>
     private void WriteFontDescriptor(int id, TtfFont font, string baseFontName, int fontFile2Id, int cidSetId = 0)
+    {
+        _writer!.WriteObject(id, FontDescriptorDictionary(font, baseFontName, fontFile2Id, cidSetId));
+    }
+
+    private static Dictionary<string, string> Type1FontDictionary(string fontName) => new()
+    {
+        [PdfKeys.Common.Type] = "/Font",
+        [PdfKeys.Common.Subtype] = "/Type1",
+        [PdfKeys.Font.BaseFont] = $"/{fontName}"
+    };
+
+    /// <summary>
+    /// Chooses the TrueType program to embed: a subset holding only the used glyphs, or the full font.
+    /// </summary>
+    private static (byte[] FontData, TtfSubsetter? Subsetter) PrepareFontData(TtfFont font, GlyphUsageTracker tracker,
+        bool enableSubsetting)
+    {
+        if (enableSubsetting || !font.HasOutlines && font.HasColour)
+        {
+            // Create subset font with only the used glyphs
+            TtfSubsetter subsetter = new(font);
+            return (subsetter.CreateSubset(tracker.UsedGlyphIds, tracker.GetUsedCharToGlyphMap()), subsetter);
+        }
+
+        // Embed full font
+        return (font.GetRawFontData(), null);
+    }
+
+    /// <summary>Builds the ToUnicode CMap program for the glyphs the tracker saw used.</summary>
+    internal static string BuildToUnicodeCMap(GlyphUsageTracker tracker)
+    {
+        ToUnicodeCMapBuilder cmapBuilder = new();
+        foreach (var entry in tracker.GlyphSources) cmapBuilder.AddSourceMapping(entry.Key, entry.Value);
+        cmapBuilder.AddMappings(tracker.GetUsedCharToGlyphMap());
+        return cmapBuilder.Build();
+    }
+
+    private static Dictionary<string, string> FontDescriptorDictionary(TtfFont font, string baseFontName, int fontFile2Id, int cidSetId)
     {
         // Scale metrics from font units to PDF units (1000 per em)
         float scale = 1000f / font.UnitsPerEm;
@@ -197,7 +207,49 @@ internal partial class FontWriter
         if (cidSetId > 0)
             dict[PdfKeys.FontDescriptor.CidSet] = $"{cidSetId} 0 R";
 
-        _writer!.WriteObject(id, dict);
+        return dict;
+    }
+
+    private static Dictionary<string, string> CidFontDictionary(string baseFontName, int fontDescriptorId, string widthArray,
+        string cidToGidMapRef) => new()
+    {
+        [PdfKeys.Common.Type] = "/Font",
+        [PdfKeys.Common.Subtype] = "/CIDFontType2",
+        [PdfKeys.Font.BaseFont] = $"/{baseFontName}",
+        [PdfKeys.Font.CidSystemInfo] = "<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>",
+        [PdfKeys.Font.Descriptor] = $"{fontDescriptorId} 0 R",
+        [PdfKeys.Font.Widths] = widthArray,
+        [PdfKeys.Font.CidToGlyphMap] = cidToGidMapRef
+    };
+
+    private static Dictionary<string, string> Type0FontDictionary(string baseFontName, int cidFontId, int toUnicodeId) => new()
+    {
+        [PdfKeys.Common.Type] = "/Font",
+        [PdfKeys.Common.Subtype] = "/Type0",
+        [PdfKeys.Font.BaseFont] = $"/{baseFontName}",
+        [PdfKeys.Font.Encoding] = "/Identity-H",
+        [PdfKeys.Font.DescendantFonts] = $"[ {cidFontId} 0 R ]",
+        [PdfKeys.Font.ToUnicode] = $"{toUnicodeId} 0 R"
+    };
+
+    /// <summary>
+    /// Fills a CIDToGIDMap buffer: a stream of 2-byte big-endian values where index i holds the new GID
+    /// for original GID i. Only the first <paramref name="mapSize"/> bytes are used, and they must be zeroed.
+    /// </summary>
+    private static void FillCidToGidMap(byte[] buffer, int mapSize, IReadOnlyDictionary<ushort, ushort> oldToNewGid)
+    {
+        foreach (KeyValuePair<ushort, ushort> kvp in oldToNewGid)
+        {
+            ushort originalGid = kvp.Key;
+            ushort newGid = kvp.Value;
+
+            int offset = originalGid * 2;
+            if (offset + 1 < mapSize)
+            {
+                buffer[offset] = (byte)(newGid >> 8);
+                buffer[offset + 1] = (byte)(newGid & 0xFF);
+            }
+        }
     }
 
     /// <summary>
@@ -276,16 +328,7 @@ internal partial class FontWriter
     private void WriteCIDFont(int id, string baseFontName, int fontDescriptorId, string widthArray,
         string cidToGidMapRef)
     {
-        _writer!.WriteObject(id, new Dictionary<string, string>
-        {
-            [PdfKeys.Common.Type] = "/Font",
-            [PdfKeys.Common.Subtype] = "/CIDFontType2",
-            [PdfKeys.Font.BaseFont] = $"/{baseFontName}",
-            [PdfKeys.Font.CidSystemInfo] = "<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>",
-            [PdfKeys.Font.Descriptor] = $"{fontDescriptorId} 0 R",
-            [PdfKeys.Font.Widths] = widthArray,
-            [PdfKeys.Font.CidToGlyphMap] = cidToGidMapRef
-        });
+        _writer!.WriteObject(id, CidFontDictionary(baseFontName, fontDescriptorId, widthArray, cidToGidMapRef));
     }
 
     /// <summary>
@@ -299,18 +342,7 @@ internal partial class FontWriter
         int mapSize = (maxOriginalGid + 1) * 2;
         byte[] mapData = new byte[mapSize];
 
-        foreach (KeyValuePair<ushort, ushort> kvp in oldToNewGid)
-        {
-            ushort originalGid = kvp.Key;
-            ushort newGid = kvp.Value;
-
-            int offset = originalGid * 2;
-            if (offset + 1 < mapData.Length)
-            {
-                mapData[offset] = (byte)(newGid >> 8);
-                mapData[offset + 1] = (byte)(newGid & 0xFF);
-            }
-        }
+        FillCidToGidMap(mapData, mapSize, oldToNewGid);
 
         _writer!.WriteCompressedBinaryObject(id, new Dictionary<string, string>(), mapData);
     }
@@ -366,12 +398,7 @@ internal partial class FontWriter
         if (_asyncWriter == null)
             throw new InvalidOperationException("AsyncFontWriter requires an IAsyncPdfWriter");
 
-        await _asyncWriter!.WriteObjectAsync(id, new Dictionary<string, string>
-        {
-            [PdfKeys.Common.Type] = "/Font",
-            [PdfKeys.Common.Subtype] = "/Type1",
-            [PdfKeys.Font.BaseFont] = $"/{fontName}"
-        }, null, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteObjectAsync(id, Type1FontDictionary(fontName), null, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -397,19 +424,7 @@ internal partial class FontWriter
         string baseFontName = fontInfo.SubsetFontName;
 
         // 1. Write FontFile2 (embedded TTF binary data)
-        byte[] fontData;
-        TtfSubsetter? subsetter = null;
-        if (enableSubsetting || !font.HasOutlines && font.HasColour)
-        {
-            // Create subset font with only the used glyphs
-            subsetter = new TtfSubsetter(font);
-            fontData = subsetter.CreateSubset(tracker.UsedGlyphIds, tracker.GetUsedCharToGlyphMap());
-        }
-        else
-        {
-            // Embed full font
-            fontData = font.GetRawFontData();
-        }
+        (byte[] fontData, TtfSubsetter? subsetter) = PrepareFontData(font, tracker, enableSubsetting);
 
         await WriteFontFile2Async(fontFile2Id, fontData, cancellationToken).ConfigureAwait(false);
 
@@ -449,21 +464,10 @@ internal partial class FontWriter
             cancellationToken).ConfigureAwait(false);
 
         // 5. Write ToUnicode CMap
-        ToUnicodeCMapBuilder cmapBuilder = new();
-        foreach(var entry in tracker.GlyphSources) cmapBuilder.AddSourceMapping(entry.Key,entry.Value);
-        cmapBuilder.AddMappings(tracker.GetUsedCharToGlyphMap());
-        await WriteToUnicodeCMapAsync(toUnicodeId, cmapBuilder.Build(), cancellationToken).ConfigureAwait(false);
+        await WriteToUnicodeCMapAsync(toUnicodeId, BuildToUnicodeCMap(tracker), cancellationToken).ConfigureAwait(false);
 
         // 6. Write Type0 font (the main font dictionary)
-        await _asyncWriter!.WriteObjectAsync(type0Id, new Dictionary<string, string>
-        {
-            [PdfKeys.Common.Type] = "/Font",
-            [PdfKeys.Common.Subtype] = "/Type0",
-            [PdfKeys.Font.BaseFont] = $"/{baseFontName}",
-            [PdfKeys.Font.Encoding] = "/Identity-H",
-            [PdfKeys.Font.DescendantFonts] = $"[ {cidFontId} 0 R ]",
-            [PdfKeys.Font.ToUnicode] = $"{toUnicodeId} 0 R"
-        }, null, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteObjectAsync(type0Id, Type0FontDictionary(baseFontName, cidFontId, toUnicodeId), null, cancellationToken).ConfigureAwait(false);
 
         return type0Id;
     }
@@ -478,7 +482,12 @@ internal partial class FontWriter
         {
             [PdfKeys.Stream.DecodedLength] = fontData.Length.ToString()
         };
-        // The asynchronous writer historically compresses font streams regardless of the sync setting.
+        if (!InternalConfiguration.EnableCompression)
+        {
+            await _asyncWriter!.WriteBinaryObjectAsync(id, dict, fontData, fontData.Length, cancellationToken)
+                .ConfigureAwait(false);
+            return;
+        }
         byte[] compressed = FontProgramCompressionCache.Shared.Compress(fontData, FontCache.MaxFiles > 0);
         dict[PdfKeys.Stream.Filter] = "/FlateDecode";
         await _asyncWriter!.WriteBinaryObjectAsync(id, dict, compressed, compressed.Length, cancellationToken)
@@ -491,35 +500,7 @@ internal partial class FontWriter
     private async Task WriteFontDescriptorAsync(int id, TtfFont font, string baseFontName, int fontFile2Id,
         int cidSetId, CancellationToken cancellationToken)
     {
-        // Scale metrics from font units to PDF units (1000 per em)
-        float scale = 1000f / font.UnitsPerEm;
-
-        int ascent = (int)(font.Ascender * scale);
-        int descent = (int)(font.Descender * scale);
-        int capHeight = (int)(font.CapHeight * scale);
-        int stemV = font.StemV;
-
-        // Scale bounding box
-        int[] bbox = font.BBox.Select(v => (int)(v * scale)).ToArray();
-
-        Dictionary<string, string> dict = new()
-        {
-            [PdfKeys.Common.Type] = "/FontDescriptor",
-            [PdfKeys.FontDescriptor.Name] = $"/{baseFontName}",
-            [PdfKeys.FontDescriptor.Flags] = font.Flags.ToString(),
-            [PdfKeys.FontDescriptor.BoundingBox] = $"[ {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]} ]",
-            [PdfKeys.FontDescriptor.ItalicAngle] = font.ItalicAngle.ToString(CultureInfo.InvariantCulture),
-            [PdfKeys.FontDescriptor.Ascent] = ascent.ToString(),
-            [PdfKeys.FontDescriptor.Descent] = descent.ToString(),
-            [PdfKeys.FontDescriptor.CapHeight] = capHeight.ToString(),
-            [PdfKeys.FontDescriptor.VerticalStemWidth] = stemV.ToString(),
-            [font.HasCff ? PdfKeys.FontDescriptor.CffProgram : PdfKeys.FontDescriptor.TrueTypeProgram] = $"{fontFile2Id} 0 R"
-        };
-
-        if (cidSetId > 0)
-            dict[PdfKeys.FontDescriptor.CidSet] = $"{cidSetId} 0 R";
-
-        await _asyncWriter!.WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteObjectAsync(id, FontDescriptorDictionary(font, baseFontName, fontFile2Id, cidSetId), null, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -538,16 +519,7 @@ internal partial class FontWriter
     private async Task WriteCIDFontAsync(int id, string baseFontName, int fontDescriptorId, string widthArray,
         string cidToGidMapRef, CancellationToken cancellationToken)
     {
-        await _asyncWriter!.WriteObjectAsync(id, new Dictionary<string, string>
-        {
-            [PdfKeys.Common.Type] = "/Font",
-            [PdfKeys.Common.Subtype] = "/CIDFontType2",
-            [PdfKeys.Font.BaseFont] = $"/{baseFontName}",
-            [PdfKeys.Font.CidSystemInfo] = "<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>",
-            [PdfKeys.Font.Descriptor] = $"{fontDescriptorId} 0 R",
-            [PdfKeys.Font.Widths] = widthArray,
-            [PdfKeys.Font.CidToGlyphMap] = cidToGidMapRef
-        }, null, cancellationToken).ConfigureAwait(false);
+        await _asyncWriter!.WriteObjectAsync(id, CidFontDictionary(baseFontName, fontDescriptorId, widthArray, cidToGidMapRef), null, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -571,20 +543,7 @@ internal partial class FontWriter
             // unmapped original GIDs default to 0 (which is .notdef in PDF).
             Array.Clear(rentedBuffer, 0, mapSize);
 
-            foreach (KeyValuePair<ushort, ushort> kvp in oldToNewGid)
-            {
-                ushort originalGid = kvp.Key;
-                ushort newGid = kvp.Value;
-
-                int offset = originalGid * 2;
-
-                // Check against mapSize, not rentedBuffer.Length
-                if (offset + 1 < mapSize)
-                {
-                    rentedBuffer[offset] = (byte)(newGid >> 8);
-                    rentedBuffer[offset + 1] = (byte)(newGid & 0xFF);
-                }
-            }
+            FillCidToGidMap(rentedBuffer, mapSize, oldToNewGid);
 
             // Pass the rented buffer and the EXACT mapSize
             await _asyncWriter!.WriteCompressedBinaryObjectAsync(

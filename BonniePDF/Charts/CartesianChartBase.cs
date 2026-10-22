@@ -201,6 +201,21 @@ public abstract class CartesianChartBase : ChartBase
     }
 
     /// <summary>
+    /// Draws the connecting line between consecutive data points for a series.
+    /// </summary>
+    internal static void DrawConnectingLine(ICanvas canvas, IList<Point> coordinates, Color color, float lineWidth)
+    {
+        if (coordinates.Count < 2) return;
+
+        for (int i = 0; i < coordinates.Count - 1; i++)
+        {
+            var p1 = coordinates[i];
+            var p2 = coordinates[i + 1];
+            canvas.DrawLine(p1.X, p1.Y, p2.X, p2.Y, color, lineWidth);
+        }
+    }
+
+    /// <summary>
     /// Draws the chart-specific elements for a single series.
     /// Derived classes must implement this to provide their specific drawing logic for each series.
     /// </summary>

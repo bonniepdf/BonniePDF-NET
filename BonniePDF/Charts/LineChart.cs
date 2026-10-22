@@ -72,20 +72,6 @@ public class LineChart : CartesianChartBase
     }
 
     /// <summary>
-    /// Draws the connecting line between all data points for a series.
-    /// </summary>
-    private static void DrawConnectingLine(ICanvas canvas, IList<Point> coordinates, Color color, float lineWidth)
-    {
-        if (coordinates.Count < 2) return;
-        for (int i = 0; i < coordinates.Count - 1; i++)
-        {
-            var p1 = coordinates[i];
-            var p2 = coordinates[i + 1];
-            canvas.DrawLine(p1.X, p1.Y, p2.X, p2.Y, color, lineWidth);
-        }
-    }
-
-    /// <summary>
     /// Draws circular markers at each data point for a series.
     /// </summary>
     private static void DrawDataPointMarkers(ICanvas canvas, IList<Point> coordinates, Color color, float radius)

@@ -59,7 +59,7 @@ public sealed class PreparedTextPaintingTests
     }
 
     [Fact]
-    public void SharedFacesWithSeparatePdfResourcesKeepTheirTrackingCallback()
+    public void SharedFacesWithSeparatePdfResourcesEachTrackTheirOwnGlyphs()
     {
         var font = new TtfFont(FontPath);
         var resources = new PdfResourceRegistry();
@@ -68,9 +68,36 @@ public sealed class PreparedTextPaintingTests
             resources.EmbeddedFonts[name] = new EmbeddedFontInfo { Font = font, Tracker = new GlyphUsageTracker(font), ResourceName = resourceName, SubsetPrefix = "ABCDEF" };
             resources.FontNameMap[name] = resourceName;
         }
-        var runs = new[] { "virtual:first", "virtual:second" }.Select(name => resources.ResolveTextRuns(name, "ffi")[0]).ToArray();
-        Assert.Single(runs.Where(run => run.CanTrackPreparedGlyphs));
-        var separate = Assert.Single(runs.Where(run => !run.CanTrackPreparedGlyphs));
+
+        // A run is resolved to the registration its own identifier names, whichever order the
+        // registrations are enumerated in, so each one tracks prepared glyphs against its own tracker.
+        foreach (string name in new[] { "virtual:second", "virtual:first" })
+        {
+            var run = resources.ResolveTextRuns(name, "ffi")[0];
+            Assert.True(run.CanTrackPreparedGlyphs);
+            Assert.Same(resources.EmbeddedFonts[name].Tracker, run.Tracker);
+            Assert.Equal(resources.EmbeddedFonts[name].ResourceName, run.ResourceName);
+        }
+
+        var whole = resources.WholeTextFont("virtual:second", "ffi");
+        Assert.NotNull(whole);
+        Assert.True(whole.CanTrackPreparedGlyphs);
+        Assert.Same(resources.EmbeddedFonts["virtual:second"].Tracker, whole.Tracker);
+    }
+
+    [Fact]
+    public void ARunThatCannotTrackPreparedGlyphsKeepsItsTrackingCallback()
+    {
+        var font = new TtfFont(FontPath);
+        var resources = new PdfResourceRegistry();
+        resources.EmbeddedFonts["virtual:only"] = new EmbeddedFontInfo { Font = font, Tracker = new GlyphUsageTracker(font), ResourceName = "/F1", SubsetPrefix = "ABCDEF" };
+        resources.FontNameMap["virtual:only"] = "/F1";
+        var run = resources.ResolveTextRuns("virtual:only", "ffi")[0];
+        var separate = new ResolvedTextRun
+        {
+            ResourceName = run.ResourceName, EmbeddedFont = run.EmbeddedFont, Tracker = run.Tracker,
+            CanTrackPreparedGlyphs = false, FontIdentifier = run.FontIdentifier, Text = run.Text
+        };
         int calls = 0;
         var canvas = new PdfCanvas(new StringBuilder(), 800,
             glyphTracker: (name, text) => { calls++; resources.TrackGlyphUsage(name, text); },

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BonniePDF.Metadata;
 using BonniePDF.Rendering.Pdf;
+using BonniePDF.Security.Encryption;
 
 namespace BonniePDF.Rendering.Writers;
 
@@ -114,18 +115,10 @@ internal class MetadataWriter
     /// </summary>
     public void WriteXmpMetadata(int id, DocumentMetadata metadata, DocumentSettings settings, PdfAConformance conformance, bool claimPdfUa)
     {
-        var blocks = BuildConformanceBlocks(settings, conformance, claimPdfUa);
-        string xmpXml = XmpMetadataWriter.GenerateXmpXml(metadata, blocks);
-        byte[] xmpBytes = Encoding.UTF8.GetBytes(xmpXml);
-
-        Dictionary<string, string> dict = new()
-        {
-            [PdfKeys.Common.Type] = "/Metadata",
-            [PdfKeys.Common.Subtype] = "/XML"
-        };
+        (Dictionary<string, string> dict, byte[] xmpBytes) = BuildXmpObject(metadata, settings, conformance, claimPdfUa);
 
         // Metadata encryption must agree with the security handler declaration.
-        if (_writer!.Encryptor is { } encryptor && (encryptor.Settings.EncryptMetadata || encryptor.Settings.Algorithm != EncryptionAlgorithm.AES_256))
+        if (EncryptsMetadata(_writer!.Encryptor))
             _writer.WriteBinaryObject(id, dict, xmpBytes);
         else
             _writer.WriteUnencryptedBinaryObject(id, dict, xmpBytes);
@@ -140,6 +133,18 @@ internal class MetadataWriter
     /// <summary>Asynchronous sibling of <see cref="WriteXmpMetadata(int, DocumentMetadata, DocumentSettings, PdfAConformance, bool)"/>.</summary>
     public async Task WriteXmpMetadataAsync(int id, DocumentMetadata metadata, DocumentSettings settings, PdfAConformance conformance, bool claimPdfUa, CancellationToken cancellationToken = default)
     {
+        (Dictionary<string, string> dict, byte[] xmpBytes) = BuildXmpObject(metadata, settings, conformance, claimPdfUa);
+
+        if (EncryptsMetadata(_asyncWriter!.Encryptor))
+            await _asyncWriter.WriteBinaryObjectAsync(id, dict, xmpBytes, xmpBytes.Length, cancellationToken).ConfigureAwait(false);
+        else
+            await _asyncWriter.WriteUnencryptedBinaryObjectAsync(id, dict, xmpBytes, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>Builds the XMP packet and the stream dictionary that describes it.</summary>
+    private static (Dictionary<string, string> Dict, byte[] Bytes) BuildXmpObject(DocumentMetadata metadata,
+        DocumentSettings settings, PdfAConformance conformance, bool claimPdfUa)
+    {
         var blocks = BuildConformanceBlocks(settings, conformance, claimPdfUa);
         string xmpXml = XmpMetadataWriter.GenerateXmpXml(metadata, blocks);
         byte[] xmpBytes = Encoding.UTF8.GetBytes(xmpXml);
@@ -150,11 +155,12 @@ internal class MetadataWriter
             [PdfKeys.Common.Subtype] = "/XML"
         };
 
-        if (_asyncWriter!.Encryptor is { } encryptor && (encryptor.Settings.EncryptMetadata || encryptor.Settings.Algorithm != EncryptionAlgorithm.AES_256))
-            await _asyncWriter.WriteBinaryObjectAsync(id, dict, xmpBytes, xmpBytes.Length, cancellationToken).ConfigureAwait(false);
-        else
-            await _asyncWriter.WriteUnencryptedBinaryObjectAsync(id, dict, xmpBytes, cancellationToken).ConfigureAwait(false);
+        return (dict, xmpBytes);
     }
+
+    /// <summary>Whether the XMP stream is encrypted with the document: it is always, except under AES-256 with metadata encryption disabled.</summary>
+    private static bool EncryptsMetadata(PdfEncryptor? encryptor) =>
+        encryptor is { } e && (e.Settings.EncryptMetadata || e.Settings.Algorithm != EncryptionAlgorithm.AES_256);
 
     /// <summary>
     /// Build the list of conformance-namespace blocks the document

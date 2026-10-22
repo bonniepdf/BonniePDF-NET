@@ -262,7 +262,7 @@ internal sealed class PdfEncryptionKey
     /// <summary>
     /// Concatenates multiple byte arrays.
     /// </summary>
-    private static byte[] Concatenate(params byte[][] arrays)
+    internal static byte[] Concatenate(params byte[][] arrays)
     {
         int totalLength = 0;
         foreach (byte[] arr in arrays) totalLength += arr?.Length ?? 0;

@@ -62,47 +62,14 @@ internal class PdfDocumentSerializer
         // 2. Initialize Shared Context
         PdfSize orientedPageSize = _document.Settings.GetOrientedPageSize();
 
-        IDictionary<string, int>? resolvedTocEntries = null;
-
-        if (RequiresTwoPassLayout())
-        {
-            RenderContext dryRunCtx = new(orientedPageSize, _document.Settings.Margin)
-            {
-                Conformance = _document.Settings.Conformance,
-                TocEntries = new Dictionary<string, int>(),
-                DiscardFinishedPages = true,
-            };
-
-            foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
-
-            resolvedTocEntries = dryRunCtx.TocEntries;
-
-            if (_document.Settings.Bookmarks.Count == 0 && resolvedTocEntries.Count > 0)
-            {
-                foreach (var kvp in resolvedTocEntries)
-                {
-                    _document.Settings.Bookmarks.Add(new BookmarkItem { Title = kvp.Key, PageIndex = kvp.Value - 1 });
-                }
-            }
-        }
+        IDictionary<string, int>? resolvedTocEntries = ResolveTocEntries(orientedPageSize);
 
         // PDF/UA tagging context - created once, shared between the
         // render pipeline (canvas attaches MCIDs to the builder) and the
         // structure-tree writer at the end (emits the populated tree).
         TaggingContext? taggingContext = CreateTaggingContext();
 
-        RenderContext ctx = new(orientedPageSize, _document.Settings.Margin)
-        {
-            Conformance = _document.Settings.Conformance,
-            TocEntries = resolvedTocEntries ?? new Dictionary<string, int>(),
-            Tagging = taggingContext,
-        };
-        ctx.Resources.Diagnostics = _diagnostics;
-        ctx.Resources.MaxImageDpi = _document.Settings.MaxImageDpi;
-        // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
-        // independently of any PDF/A claim - substitute embedded Liberation for
-        // the standard-14 references in tagged output too.
-        ctx.Resources.EmbedStandardFonts = _document.Settings.Accessibility == AccessibilityMode.PdfUa1;
+        RenderContext ctx = CreateRenderContext(orientedPageSize, resolvedTocEntries, taggingContext);
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = [];
@@ -149,29 +116,8 @@ internal class PdfDocumentSerializer
 
             // B. Write Page Object IMMEDIATELY
             // NOTICE: We removed "/Resources" from here! It will go on the Parent.
-            Dictionary<string, string> pageDict = new(StringComparer.OrdinalIgnoreCase)
-            {
-                [PdfKeys.Common.Type] = "/Page",
-                [PdfKeys.Page.Parent] = $"{pagesId} 0 R", // Refers to the parent we write later
-                [PdfKeys.Page.MediaBox] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
-                [PdfKeys.Page.Contents] = $"{contentId} 0 R",
-                // PDF/A-2b clause 6.2.2.2 / ISO 32000-1 §7.8.3: every
-                // page whose content stream references external objects
-                // (fonts, images, XObjects) must have an explicitly
-                // associated Resources dict. Inheritance from /Pages is
-                // valid per §7.7.3.4 but veraPDF profile 2b rejects it.
-                [PdfKeys.Page.Resources] = $"{resourcesId} 0 R"
-            };
-
-            // Tagged PDF: each page gets /StructParents equal to its
-            // page index. The /ParentTree (emitted at the end by
-            // StructureTreeWriter) uses the same key, so the reverse
-            // lookup MCID→StructElem works.
-            if (taggingContext != null)
-            {
-                pageDict[PdfKeys.Page.StructureParents] = (pageIndex - 1).ToString();
-                pageDict[PdfKeys.Page.TabOrder] = "/S"; // Follow structure order for tab navigation
-            }
+            Dictionary<string, string> pageDict = BuildPageDictionary(pageOutput, pagesId, contentId, resourcesId,
+                taggingContext != null, pageIndex - 1);
 
             // Write link annotations if present
             if (pageOutput.Hyperlinks.Count > 0)
@@ -187,11 +133,7 @@ internal class PdfDocumentSerializer
                     }
                     writer.WriteLinkAnnotation(annotId, link, pageIds, structParentKey);
                     annotIds.Add(annotId);
-                    if (taggingContext != null && link.LinkedStructElement != null && structParentKey.HasValue)
-                    {
-                        link.LinkedStructElement.ObjrAnnotations.Add((annotId, pageId));
-                        annotBindings.Add((link.LinkedStructElement, annotId, pageId, structParentKey.Value));
-                    }
+                    if (taggingContext != null) BindAnnotation(link, annotId, pageId, structParentKey, annotBindings);
                 }
 
                 pageDict[PdfKeys.Page.Annotations] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
@@ -220,14 +162,7 @@ internal class PdfDocumentSerializer
 
         // 6. Write Parent Pages Object. /Resources is intentionally
         // omitted - the per-page indirect references are authoritative.
-        string kids = string.Join(' ', pageIds.Select(id => $"{id} 0 R"));
-        writer.WriteObject(pagesId, new Dictionary<string, string>
-(StringComparer.OrdinalIgnoreCase)
-        {
-            [PdfKeys.Common.Type] = "/Pages",
-            [PdfKeys.PageTree.Kids] = $"[ {kids} ]",
-            [PdfKeys.PageTree.Count] = pageIds.Count.ToString()
-        });
+        writer.WriteObject(pagesId, BuildPagesDictionary(pageIds));
 
         // 6. Write Metadata & Close
         MetadataWriter metadataWriter = new(writer);
@@ -296,10 +231,7 @@ internal class PdfDocumentSerializer
         if (_document.Settings.PageLabel is { } syncPageLabel)
         {
             int pageLabelsId = writer.GetNewId();
-            writer.WriteObject(pageLabelsId, new Dictionary<string, string>
-            {
-                [PdfKeys.NumberTree.Numbers] = $"[ 0 << {BuildPageLabelEntry(syncPageLabel)} >> ]"
-            });
+            writer.WriteObject(pageLabelsId, BuildPageLabelsDictionary(syncPageLabel));
             catalogOptions.PageLabelsId = pageLabelsId;
         }
 
@@ -349,44 +281,13 @@ internal class PdfDocumentSerializer
         // 2. Initialize Shared Context
         PdfSize orientedPageSize = _document.Settings.GetOrientedPageSize();
 
-        IDictionary<string, int>? resolvedTocEntries = null;
-
-        if (RequiresTwoPassLayout())
-        {
-            RenderContext dryRunCtx = new(orientedPageSize, _document.Settings.Margin)
-            {
-                Conformance = _document.Settings.Conformance,
-                TocEntries = new Dictionary<string, int>(),
-                DiscardFinishedPages = true,
-            };
-
-            foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
-
-            resolvedTocEntries = dryRunCtx.TocEntries;
-
-            if (_document.Settings.Bookmarks.Count == 0 && resolvedTocEntries.Count > 0)
-            {
-                foreach (var kvp in resolvedTocEntries)
-                {
-                    _document.Settings.Bookmarks.Add(new BookmarkItem { Title = kvp.Key, PageIndex = kvp.Value - 1 });
-                }
-            }
-        }
+        IDictionary<string, int>? resolvedTocEntries = ResolveTocEntries(orientedPageSize);
 
         // PDF/UA tagging context - shared between the render pipeline and
         // the async structure-tree writer below.
         TaggingContext? taggingContext = CreateTaggingContext();
 
-        RenderContext ctx = new(orientedPageSize, _document.Settings.Margin);
-        ctx.Conformance = _document.Settings.Conformance;
-        // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
-        // independently of any PDF/A claim - substitute embedded Liberation for
-        // the standard-14 references in tagged output too.
-        ctx.Resources.EmbedStandardFonts = _document.Settings.Accessibility == AccessibilityMode.PdfUa1;
-        ctx.TocEntries = resolvedTocEntries ?? new Dictionary<string, int>();
-        ctx.Tagging = taggingContext;
-        ctx.Resources.Diagnostics = _diagnostics;
-        ctx.Resources.MaxImageDpi = _document.Settings.MaxImageDpi;
+        RenderContext ctx = CreateRenderContext(orientedPageSize, resolvedTocEntries, taggingContext);
 
         // 3. Stream Processing (Low Memory)
         List<int> pageIds = new();
@@ -437,26 +338,8 @@ internal class PdfDocumentSerializer
             }
 
             // B. Write Page Object IMMEDIATELY
-            Dictionary<string, string> pageDict = new(StringComparer.OrdinalIgnoreCase)
-            {
-                [PdfKeys.Common.Type] = "/Page",
-                [PdfKeys.Page.Parent] = $"{pagesId} 0 R", // Refers to the parent we write later
-                [PdfKeys.Page.MediaBox] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
-                [PdfKeys.Page.Contents] = $"{contentId} 0 R",
-                // PDF/A-2b clause 6.2.2.2 / ISO 32000-1 §7.8.3: every
-                // page whose content stream references external objects
-                // (fonts, images, XObjects) must have an explicitly
-                // associated Resources dict. Inheritance from /Pages is
-                // valid per §7.7.3.4 but veraPDF profile 2b rejects it.
-                [PdfKeys.Page.Resources] = $"{resourcesId} 0 R"
-            };
-
-            // Tagged PDF: /StructParents keyed by 0-based page index.
-            if (taggingContext != null)
-            {
-                pageDict[PdfKeys.Page.StructureParents] = (pageIndex - 1).ToString();
-                pageDict[PdfKeys.Page.TabOrder] = "/S"; // Follow structure order for tab navigation
-            }
+            Dictionary<string, string> pageDict = BuildPageDictionary(pageOutput, pagesId, contentId, resourcesId,
+                taggingContext != null, pageIndex - 1);
 
             // Write link annotations if present
             if (pageOutput.Hyperlinks.Count > 0)
@@ -472,11 +355,7 @@ internal class PdfDocumentSerializer
                     }
                     await writer.WriteLinkAnnotationAsync(annotId, link, pageIds, structParentKey, cancellationToken).ConfigureAwait(false);
                     annotIds.Add(annotId);
-                    if (taggingContext != null && link.LinkedStructElement != null && structParentKey.HasValue)
-                    {
-                        link.LinkedStructElement.ObjrAnnotations.Add((annotId, pageId));
-                        annotBindings.Add((link.LinkedStructElement, annotId, pageId, structParentKey.Value));
-                    }
+                    if (taggingContext != null) BindAnnotation(link, annotId, pageId, structParentKey, annotBindings);
                 }
 
                 pageDict[PdfKeys.Page.Annotations] = "[ " + string.Join(' ', annotIds.Select(id => $"{id} 0 R")) + " ]";
@@ -499,14 +378,7 @@ internal class PdfDocumentSerializer
         await writer.WriteRawObjectAsync(resourcesId, globalResources, cancellationToken).ConfigureAwait(false);
 
         // 6. Write Parent Pages Object - /Resources omitted; pages own it.
-        string kids = string.Join(' ', pageIds.Select(id => $"{id} 0 R"));
-        await writer.WriteObjectAsync(pagesId, new Dictionary<string, string>
-(StringComparer.OrdinalIgnoreCase)
-        {
-            [PdfKeys.Common.Type] = "/Pages",
-            [PdfKeys.PageTree.Kids] = $"[ {kids} ]",
-            [PdfKeys.PageTree.Count] = pageIds.Count.ToString()
-        }, null, cancellationToken).ConfigureAwait(false);
+        await writer.WriteObjectAsync(pagesId, BuildPagesDictionary(pageIds), null, cancellationToken).ConfigureAwait(false);
 
         // 6. Write Metadata & Close
         MetadataWriter metadataWriter = new(writer);
@@ -575,10 +447,7 @@ internal class PdfDocumentSerializer
         if (_document.Settings.PageLabel is { } asyncPageLabel)
         {
             int pageLabelsId = writer.GetNewId();
-            await writer.WriteObjectAsync(pageLabelsId, new Dictionary<string, string>
-            {
-                [PdfKeys.NumberTree.Numbers] = $"[ 0 << {BuildPageLabelEntry(asyncPageLabel)} >> ]"
-            }, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await writer.WriteObjectAsync(pageLabelsId, BuildPageLabelsDictionary(asyncPageLabel), cancellationToken: cancellationToken).ConfigureAwait(false);
             catalogOptions.PageLabelsId = pageLabelsId;
         }
 
@@ -603,6 +472,120 @@ internal class PdfDocumentSerializer
 
         await writer.CloseAsync(catalogId, documentInfoId, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <summary>
+    /// Runs the dry-run layout pass that resolves table-of-contents page numbers, and seeds the
+    /// document bookmarks from them when none were set. Returns <c>null</c> when the document
+    /// needs no two-pass layout.
+    /// </summary>
+    private IDictionary<string, int>? ResolveTocEntries(PdfSize orientedPageSize)
+    {
+        if (!RequiresTwoPassLayout()) return null;
+
+        RenderContext dryRunCtx = new(orientedPageSize, _document.Settings.Margin)
+        {
+            Conformance = _document.Settings.Conformance,
+            TocEntries = new Dictionary<string, int>(),
+            DiscardFinishedPages = true,
+        };
+
+        foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
+
+        IDictionary<string, int> resolvedTocEntries = dryRunCtx.TocEntries;
+
+        if (_document.Settings.Bookmarks.Count == 0 && resolvedTocEntries.Count > 0)
+        {
+            foreach (var kvp in resolvedTocEntries)
+            {
+                _document.Settings.Bookmarks.Add(new BookmarkItem { Title = kvp.Key, PageIndex = kvp.Value - 1 });
+            }
+        }
+
+        return resolvedTocEntries;
+    }
+
+    /// <summary>Creates the render context shared by the page loop and the resource registry.</summary>
+    private RenderContext CreateRenderContext(PdfSize orientedPageSize, IDictionary<string, int>? resolvedTocEntries,
+        TaggingContext? taggingContext)
+    {
+        RenderContext ctx = new(orientedPageSize, _document.Settings.Margin)
+        {
+            Conformance = _document.Settings.Conformance,
+            TocEntries = resolvedTocEntries ?? new Dictionary<string, int>(),
+            Tagging = taggingContext,
+        };
+        ctx.Resources.Diagnostics = _diagnostics;
+        ctx.Resources.MaxImageDpi = _document.Settings.MaxImageDpi;
+        // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
+        // independently of any PDF/A claim - substitute embedded Liberation for
+        // the standard-14 references in tagged output too.
+        ctx.Resources.EmbedStandardFonts = _document.Settings.Accessibility == AccessibilityMode.PdfUa1;
+        return ctx;
+    }
+
+    /// <summary>
+    /// Builds one page object. Resources are written as a single indirect object that every page
+    /// references explicitly (PDF/A-2b clause 6.2.2.2 / ISO 32000-1 §7.8.3 - relying on
+    /// /Pages-inheritance is rejected by veraPDF profile 2b even though §7.7.3.4 allows it).
+    /// </summary>
+    private static Dictionary<string, string> BuildPageDictionary(PageRenderOutput pageOutput, int pagesId, int contentId,
+        int resourcesId, bool tagged, int pageIndex)
+    {
+        Dictionary<string, string> pageDict = new(StringComparer.OrdinalIgnoreCase)
+        {
+            [PdfKeys.Common.Type] = "/Page",
+            [PdfKeys.Page.Parent] = $"{pagesId} 0 R", // Refers to the parent we write later
+            [PdfKeys.Page.MediaBox] = $"[0 0 {pageOutput.Size.Width} {pageOutput.Size.Height}]",
+            [PdfKeys.Page.Contents] = $"{contentId} 0 R",
+            // PDF/A-2b clause 6.2.2.2 / ISO 32000-1 §7.8.3: every
+            // page whose content stream references external objects
+            // (fonts, images, XObjects) must have an explicitly
+            // associated Resources dict. Inheritance from /Pages is
+            // valid per §7.7.3.4 but veraPDF profile 2b rejects it.
+            [PdfKeys.Page.Resources] = $"{resourcesId} 0 R"
+        };
+
+        // Tagged PDF: each page gets /StructParents equal to its
+        // page index. The /ParentTree (emitted at the end by
+        // StructureTreeWriter) uses the same key, so the reverse
+        // lookup MCID→StructElem works.
+        if (tagged)
+        {
+            pageDict[PdfKeys.Page.StructureParents] = pageIndex.ToString();
+            pageDict[PdfKeys.Page.TabOrder] = "/S"; // Follow structure order for tab navigation
+        }
+
+        return pageDict;
+    }
+
+    /// <summary>Wires a tagged link annotation to its structure element for the /OBJR entry.</summary>
+    private static void BindAnnotation(Hyperlink link, int annotId, int pageId, int? structParentKey,
+        List<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)> annotBindings)
+    {
+        if (link.LinkedStructElement != null && structParentKey.HasValue)
+        {
+            link.LinkedStructElement.ObjrAnnotations.Add((annotId, pageId));
+            annotBindings.Add((link.LinkedStructElement, annotId, pageId, structParentKey.Value));
+        }
+    }
+
+    /// <summary>Builds the parent /Pages object. /Resources is intentionally omitted - the per-page indirect references are authoritative.</summary>
+    private static Dictionary<string, string> BuildPagesDictionary(List<int> pageIds)
+    {
+        string kids = string.Join(' ', pageIds.Select(id => $"{id} 0 R"));
+        return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            [PdfKeys.Common.Type] = "/Pages",
+            [PdfKeys.PageTree.Kids] = $"[ {kids} ]",
+            [PdfKeys.PageTree.Count] = pageIds.Count.ToString()
+        };
+    }
+
+    /// <summary>Builds the /PageLabels number tree (PDF §12.4.2) for a single page label range.</summary>
+    private static Dictionary<string, string> BuildPageLabelsDictionary(PageLabel label) => new()
+    {
+        [PdfKeys.NumberTree.Numbers] = $"[ 0 << {BuildPageLabelEntry(label)} >> ]"
+    };
 
     /// <summary>The claims one generation makes, after the honest-claim guard.</summary>
     private sealed record HonestClaims(PdfAConformance Conformance, bool PdfUa, bool NeedsOutputIntent)
