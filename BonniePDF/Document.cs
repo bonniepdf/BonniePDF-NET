@@ -659,13 +659,25 @@ public class Document : IDisposable
     /// Walks the element tree and applies DefaultTextStyle to elements that haven't
     /// had their style properties explicitly set by user code.
     /// </summary>
+    private bool _defaultStyleCascaded;
+
     private void ApplyDefaultStyleToTree()
     {
         foreach (Page page in _pages)
             foreach (IElement element in page.Elements)
                 ContentDirectionResolver.Apply(element, Settings.ContentDirection);
         TextStyle? style = Settings.DefaultTextStyle;
-        if (style == null) return;
+        if (style == null)
+        {
+            // A default that was removed since the last generation: return what it supplied to the library defaults.
+            if (!_defaultStyleCascaded) return;
+            style = new TextStyle();
+            _defaultStyleCascaded = false;
+        }
+        else
+        {
+            _defaultStyleCascaded = true;
+        }
         foreach (Page page in _pages)
             foreach (IElement el in page.Elements)
                 ApplyStyleToElement(el, style);

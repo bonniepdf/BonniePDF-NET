@@ -48,10 +48,16 @@ public abstract class TextElementBase : ElementBase
 
     // Explicit-set tracking for DefaultTextStyle cascade
     private bool _fontExplicit { get => _text.FontExplicit; set => _text = _text.With(value, static (o, v) => o with { FontExplicit = v }); }
+    // Per-property tracking: the cascade fills each of family, weight and italic independently, so an
+    // explicit weight does not stop DefaultTextStyle supplying the family (and the reverse).
+    private bool _fontFamilyExplicit { get => _text.FontFamilyExplicit; set => _text = _text.With(value, static (o, v) => o with { FontFamilyExplicit = v }); }
+    private bool _weightExplicit { get => _text.WeightExplicit; set => _text = _text.With(value, static (o, v) => o with { WeightExplicit = v }); }
+    private bool _italicExplicit { get => _text.ItalicExplicit; set => _text = _text.With(value, static (o, v) => o with { ItalicExplicit = v }); }
     private float _fontSize { get => _text.FontSize; set => _text = _text.With(value, static (o, v) => o with { FontSize = v }); }
     private bool _fontSizeExplicit { get => _text.FontSizeExplicit; set => _text = _text.With(value, static (o, v) => o with { FontSizeExplicit = v }); }
     private Color _textColor { get => _text.TextColor; set => _text = _text.With(value, static (o, v) => o with { TextColor = v }); }
     private bool _textColorExplicit { get => _text.TextColorExplicit; set => _text = _text.With(value, static (o, v) => o with { TextColorExplicit = v }); }
+    private bool _decorationExplicit { get => _text.DecorationExplicit; set => _text = _text.With(value, static (o, v) => o with { DecorationExplicit = v }); }
     private float _lineHeight { get => _text.LineHeight; set => _text = _text.With(value, static (o, v) => o with { LineHeight = v }); }
     private bool _lineHeightExplicit { get => _text.LineHeightExplicit; set => _text = _text.With(value, static (o, v) => o with { LineHeightExplicit = v }); }
 
@@ -64,10 +70,14 @@ public abstract class TextElementBase : ElementBase
     // What a definition writer needs to know: which values were set, rather than defaulted or supplied by
     // DefaultTextStyle, because a default written as if it had been chosen would stop the cascade.
     internal bool FontIsExplicit => _fontExplicit;
-    internal bool FontIsChosenByFamily => _fontFamily != null;
+    internal bool FontIsChosenByFamily => _fontFamilyExplicit && _fontFamily != null;
+    internal bool FontIsNamed => _fontFamilyExplicit && _fontFamily == null;
+    internal bool FontWeightIsExplicit => _weightExplicit;
+    internal bool ItalicIsExplicit => _italicExplicit;
     internal bool FontSizeIsExplicit => _fontSizeExplicit;
     internal bool TextColorIsExplicit => _textColorExplicit;
     internal bool LineHeightIsExplicit => _lineHeightExplicit;
+    internal bool DecorationIsExplicit => _decorationExplicit;
 
     private void ApplyDefaultStyle(TextStyle style)
     {
@@ -97,7 +107,7 @@ public abstract class TextElementBase : ElementBase
         set
         {
             _fontFamily = value;
-            if (value != null) { _fontExplicit = true; ResolveFontName(); }
+            if (value != null) { _fontExplicit = true; _fontFamilyExplicit = true; ResolveFontName(); }
         }
     }
 
@@ -113,6 +123,7 @@ public abstract class TextElementBase : ElementBase
         {
             _weight = value;
             _fontExplicit = true;
+            _weightExplicit = true;
             ResolveFontName();
         }
     }
@@ -129,6 +140,7 @@ public abstract class TextElementBase : ElementBase
         {
             _isItalic = value;
             _fontExplicit = true;
+            _italicExplicit = true;
             ResolveFontName();
         }
     }
@@ -154,6 +166,7 @@ public abstract class TextElementBase : ElementBase
             _fontName = value;
             _fontFamily = null; // Direct font name bypasses family resolution
             _fontExplicit = true;
+            _fontFamilyExplicit = true;
         }
     }
 
@@ -181,7 +194,7 @@ public abstract class TextElementBase : ElementBase
     public TextDecoration Decoration
     {
         get => _text.Decoration;
-        set => _text = _text.With(value, static (o, v) => o with { Decoration = v });
+        set { _text = _text.With(value, static (o, v) => o with { Decoration = v }); _decorationExplicit = true; }
     }
 
     /// <summary>
@@ -265,22 +278,36 @@ public abstract class TextElementBase : ElementBase
         if (style == null) return;
         FontFeatures ??= style.FontFeatures;
 
-        if (!_fontExplicit)
+        // Family, weight and italic cascade independently. Writing the backing fields leaves the explicit
+        // flags alone, so a later cascade can still replace what this one supplied.
+        // A property the style does not supply returns to its library default, so a default that was
+        // changed or removed since the last cascade does not leave its old value behind.
+        bool fontChanged = false;
+        if (!_fontFamilyExplicit && _fontFamily != style.FontFamily)
         {
-            if (style.FontFamily != null)
-            {
-                _fontFamily = style.FontFamily;
-                if (style.FontWeight != FontWeight.Normal) _weight = style.FontWeight;
-                if (style.Italic) _isItalic = true;
-                ResolveFontName();
-            }
+            _fontFamily = style.FontFamily;
+            fontChanged = true;
         }
-        if (!_fontSizeExplicit && style.FontSize.HasValue)
-            _fontSize = style.FontSize.Value;
-        if (!_textColorExplicit && style.Color.HasValue)
-            _textColor = style.Color.Value;
-        if (!_lineHeightExplicit && style.LineHeight.HasValue)
-            _lineHeight = style.LineHeight.Value;
+        // A font named directly bypasses family resolution, so weight and italic do not apply to it.
+        if (!(_fontFamilyExplicit && _fontFamily == null))
+        {
+            if (!_weightExplicit && _weight != style.FontWeight) { _weight = style.FontWeight; fontChanged = true; }
+            if (!_italicExplicit && _isItalic != style.Italic) { _isItalic = style.Italic; fontChanged = true; }
+        }
+        if (fontChanged)
+        {
+            // Without a family the name is resolved from the base font, not from an earlier cascade's result.
+            if (!_fontFamilyExplicit && _fontFamily == null) _fontName = TextOptions.Default.FontName;
+            ResolveFontName();
+        }
+        if (!_fontSizeExplicit)
+            _fontSize = style.FontSize ?? TextOptions.Default.FontSize;
+        if (!_textColorExplicit)
+            _textColor = style.Color ?? TextOptions.Default.TextColor;
+        if (!_lineHeightExplicit)
+            _lineHeight = style.LineHeight ?? TextOptions.Default.LineHeight;
+        if (!_decorationExplicit)
+            _text = _text.With(style.Decoration, static (o, v) => o with { Decoration = v });
     }
 
     /// <summary>

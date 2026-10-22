@@ -161,6 +161,160 @@ public class FontEmbeddingAndTextStyleTests
     }
 
     [Fact]
+    public void DefaultTextStyle_Family_KeptWhenOnlyWeightIsExplicit()
+    {
+        var tb = new TextBlock { Text = "Hello", FontWeight = FontWeight.Bold }; // weight only
+        Generate(doc =>
+        {
+            doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Times");
+            doc.Add(tb);
+        });
+        Assert.Equal("Times-Bold", tb.FontName);
+    }
+
+    [Fact]
+    public void DefaultTextStyle_Family_KeptWhenOnlyItalicIsExplicit()
+    {
+        var tb = new TextBlock { Text = "Hello", Italic = true };
+        Generate(doc =>
+        {
+            doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Times");
+            doc.Add(tb);
+        });
+        Assert.Equal("Times-Italic", tb.FontName);
+    }
+
+    [Fact]
+    public void DefaultTextStyle_DoesNotOverrideExplicitFamily()
+    {
+        var tb = new TextBlock { Text = "Hello", FontFamily = "Courier", FontWeight = FontWeight.Bold };
+        Generate(doc =>
+        {
+            doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Times");
+            doc.Add(tb);
+        });
+        Assert.Equal("Courier-Bold", tb.FontName);
+    }
+
+    [Fact]
+    public void DefaultTextStyle_DoesNotOverrideExplicitNormalWeight()
+    {
+        var tb = new TextBlock { Text = "Hello", FontWeight = FontWeight.Normal };
+        Generate(doc =>
+        {
+            doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Times").WithWeight(FontWeight.Bold);
+            doc.Add(tb);
+        });
+        Assert.Equal("Times-Roman", tb.FontName);
+    }
+
+    [Fact]
+    public void DefaultTextStyle_Weight_AppliedWithoutFamily()
+    {
+        var tb = new TextBlock { Text = "Hello" };
+        Generate(doc =>
+        {
+            doc.Settings.DefaultTextStyle = new TextStyle().WithWeight(FontWeight.Bold);
+            doc.Add(tb);
+        });
+        Assert.Equal("Helvetica-Bold", tb.FontName);
+    }
+
+    [Fact]
+    public void DefaultTextStyle_WeightAndItalic_NotAppliedToDirectlyNamedFont()
+    {
+        var tb = new TextBlock { Text = "Hello", FontName = "Courier" };
+        Generate(doc =>
+        {
+            doc.Settings.DefaultTextStyle = new TextStyle().WithWeight(FontWeight.Bold).WithItalic();
+            doc.Add(tb);
+        });
+        Assert.Equal("Courier", tb.FontName);
+    }
+
+    [Fact]
+    public void DefaultTextStyle_Decoration_AppliedUnlessExplicit()
+    {
+        var plain = new TextBlock { Text = "Plain" };
+        var explicitNone = new TextBlock { Text = "Explicit", Decoration = TextDecoration.None };
+        Generate(doc =>
+        {
+            doc.Settings.DefaultTextStyle = new TextStyle { Decoration = TextDecoration.Underline };
+            doc.Add(plain);
+            doc.Add(explicitNone);
+        });
+        Assert.Equal(TextDecoration.Underline, plain.Decoration);
+        Assert.Equal(TextDecoration.None, explicitNone.Decoration);
+    }
+
+    [Fact]
+    public void DefaultTextStyle_ChangedDefault_AppliedOnLaterGeneration_ButNeverOverExplicitValues()
+    {
+        var cascaded = new TextBlock { Text = "Cascaded" };
+        var explicitly = new TextBlock { Text = "Explicit", FontSize = 24, Color = Color.FromHex("#FF0000"), LineHeight = 2f };
+        using var doc = new BonniePDF.Document();
+        doc.Settings.DefaultTextStyle = new TextStyle().WithSize(11).WithColor(ColorPalette.Slate[600]).WithLineHeight(1.5f);
+        doc.Add(cascaded);
+        doc.Add(explicitly);
+        doc.GenerateBytes();
+        Assert.Equal(11f, cascaded.FontSize);
+
+        doc.Settings.DefaultTextStyle = new TextStyle().WithSize(14).WithColor(ColorPalette.Slate[900]).WithLineHeight(1.3f);
+        doc.GenerateBytes();
+        Assert.Equal(14f, cascaded.FontSize);
+        Assert.Equal(ColorPalette.Slate[900], cascaded.Color);
+        Assert.Equal(1.3f, cascaded.LineHeight);
+        Assert.Equal(24f, explicitly.FontSize);
+        Assert.Equal(Color.FromHex("#FF0000"), explicitly.Color);
+        Assert.Equal(2f, explicitly.LineHeight);
+    }
+
+    [Fact]
+    public void DefaultTextStyle_Removed_ReturnsCascadedValuesToLibraryDefaults()
+    {
+        var tb = new TextBlock { Text = "Hello" };
+        using var doc = new BonniePDF.Document();
+        doc.Settings.DefaultTextStyle = new TextStyle { Decoration = TextDecoration.Underline }
+            .WithFamily("Times").WithWeight(FontWeight.Bold).WithSize(20).WithColor(ColorPalette.Slate[600]).WithLineHeight(1.5f);
+        doc.Add(tb);
+        doc.GenerateBytes();
+        Assert.Equal("Times-Bold", tb.FontName);
+        Assert.Equal(20f, tb.FontSize);
+
+        doc.Settings.DefaultTextStyle = null;
+        doc.GenerateBytes();
+        Assert.Equal("Helvetica", tb.FontName);
+        Assert.Equal(12f, tb.FontSize);
+        Assert.Equal(Color.Black, tb.Color);
+        Assert.Equal(1.2f, tb.LineHeight);
+        Assert.Equal(TextDecoration.None, tb.Decoration);
+    }
+
+    [Fact]
+    public void DefaultTextStyle_DroppedProperty_ClearsOldValue_ExplicitValuesKept()
+    {
+        var cascaded = new TextBlock { Text = "Cascaded" };
+        var explicitly = new TextBlock { Text = "Explicit", FontSize = 30, FontWeight = FontWeight.Bold };
+        using var doc = new BonniePDF.Document();
+        doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Times").WithSize(20);
+        doc.Add(cascaded);
+        doc.Add(explicitly);
+        doc.GenerateBytes();
+        Assert.Equal("Times-Bold", explicitly.FontName);
+
+        doc.Settings.DefaultTextStyle = new TextStyle().WithSize(14); // no family any more
+        doc.GenerateBytes();
+        Assert.Equal("Helvetica", cascaded.FontName);
+        Assert.Equal(14f, cascaded.FontSize);
+        Assert.Equal("Helvetica-Bold", explicitly.FontName);
+
+        doc.Settings.DefaultTextStyle = null;
+        doc.GenerateBytes();
+        Assert.Equal(30f, explicitly.FontSize);
+        Assert.Equal("Helvetica-Bold", explicitly.FontName);
+    }
+
+    [Fact]
     public void DefaultTextStyle_Null_DoesNotThrow()
     {
         // DefaultTextStyle is null by default - Save should not throw
