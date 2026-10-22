@@ -74,6 +74,8 @@ Text layout and document generation are faster and use less memory. Output is un
 
 ### Added
 
+- Text shorthand accepts strings and lines in document, page and stack adders and strings as table cells.
+
 - `Save(Stream)` and `SaveAsync(Stream)` accept a stream that cannot seek, such as an HTTP response body or a pipe, so a service can stream a PDF without buffering it first. The writers buffer their output and flush the destination once at the end instead of before every object. Output is unchanged, including offsets when the destination already holds data.
 - Add inherited content direction through `DocumentSettings.ContentDirection` and per-element overrides. Rows and table columns mirror visually while retaining source order; start/end alignment follows direction and left/right stays physical. Embedded Arabic and Hebrew TextBlock content uses bidi and script shaping, including wrapped paragraph context. Styled spans, font-fallback boundaries, lists and page-number tokens require further RTL integration.
 - Support static CFF 1 OpenType (`.otf`) fonts through existing font registration: shaping and measurement, cubic SVG outlines, and PDF embedding with source-preserving text extraction. Complete CFF programs retain original hints and subroutines; CFF subsetting, CFF2, `.otc` and WOFF are unsupported.

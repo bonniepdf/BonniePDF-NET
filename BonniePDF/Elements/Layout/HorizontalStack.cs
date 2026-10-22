@@ -48,6 +48,18 @@ public class HorizontalStack : ElementBase, IStatefulElement
     /// <inheritdoc />
     public IEnumerable<IElement> GetChildren() => _children;
 
+    /// <summary>Adds one paragraph from lines joined by hard line breaks.</summary>
+    public void Add(params string[] lines) => Add(new TextBlock(lines));
+
+    /// <summary>Adds one paragraph from lines joined by hard line breaks.</summary>
+    public void Add(IEnumerable<string> lines) => Add(new TextBlock(lines));
+
+    /// <summary>Adds text with a width weight.</summary>
+    public void Add(string text, float? weight) => Add(new TextBlock(text), weight);
+
+    /// <summary>Adds one paragraph from lines with a width weight.</summary>
+    public void Add(IEnumerable<string> lines, float? weight) => Add(new TextBlock(lines), weight);
+
     /// <summary>
     /// Adds a child element to this stack with auto width
     /// </summary>

@@ -157,6 +157,8 @@ await document.SaveAsync(outputStream);
 byte[] bytes = await document.GenerateBytesAsync();
 ```
 
+You can pass text directly to `Document.Add`, `Page.Add` and stack `Add` methods: `document.Add("Hello")` creates a `TextBlock`, and `document.Add("Line one", "Line two")` creates one paragraph with a hard line break. Table adders accept strings as separate cells, including strings mixed with elements; use `new TextBlock("Line one", "Line two")` for a multi-line cell.
+
 ## Capabilities
 
 Native [rotation](https://www.bonniepdf.dev/docs/dotnet/rotation) supports constrained quarter turns through `RotateClockwise(contentWidth?)` and `RotateCounterclockwise(contentWidth?)`, and free angles through `Rotate(angle)`. The object model exposes the same behavior through `Rotate`. Text stays selectable, SVG previews and link bounds follow the transform, and the subtree stays on one page. Free angles keep the original flow box and need surrounding clearance.

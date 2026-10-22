@@ -162,8 +162,17 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     [SetsRequiredMembers]
     public TextBlock(string text)
     {
+        ArgumentNullException.ThrowIfNull(text);
         this.Text = text;
     }
+
+    /// <summary>Creates one text element from lines joined by hard line breaks.</summary>
+    [SetsRequiredMembers]
+    public TextBlock(params string[] lines) : this(TextContent.Join(lines)) { }
+
+    /// <summary>Creates one text element from lines joined by hard line breaks.</summary>
+    [SetsRequiredMembers]
+    public TextBlock(IEnumerable<string> lines) : this(TextContent.Join(lines)) { }
 
     /// <summary>
     /// Renders this text block with state tracking for pagination.

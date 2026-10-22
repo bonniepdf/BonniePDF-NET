@@ -126,6 +126,66 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
         return children;
     }
 
+    /// <summary>Adds an empty row.</summary>
+    public void AddRow() => AddRow(Array.Empty<IElement>());
+
+    /// <summary>Adds a row of text cells.</summary>
+    public void AddRow(params string[] cells) => AddRow((IEnumerable<string>)cells);
+
+    /// <summary>Adds a row of text cells.</summary>
+    public void AddRow(IEnumerable<string> cells)
+    {
+        ArgumentNullException.ThrowIfNull(cells);
+        AddRow(cells.Select(text => (IElement)new TextBlock(text)).ToArray());
+    }
+
+    /// <summary>Adds a row of strings and elements. Other values are rejected before adding the row.</summary>
+    public void AddRow(params object[] cells) => AddRow(NormaliseCells(cells));
+
+    /// <summary>Adds an empty row.</summary>
+    public void AddHeader() => AddHeader(Array.Empty<IElement>());
+
+    /// <summary>Adds a row of text cells.</summary>
+    public void AddHeader(params string[] cells) => AddHeader((IEnumerable<string>)cells);
+
+    /// <summary>Adds a row of text cells.</summary>
+    public void AddHeader(IEnumerable<string> cells)
+    {
+        ArgumentNullException.ThrowIfNull(cells);
+        AddHeader(cells.Select(text => (IElement)new TextBlock(text)).ToArray());
+    }
+
+    /// <summary>Adds a row of strings and elements. Other values are rejected before adding the row.</summary>
+    public void AddHeader(params object[] cells) => AddHeader(NormaliseCells(cells));
+
+    /// <summary>Adds an empty row.</summary>
+    public void AddFooter() => AddFooter(Array.Empty<IElement>());
+
+    /// <summary>Adds a row of text cells.</summary>
+    public void AddFooter(params string[] cells) => AddFooter((IEnumerable<string>)cells);
+
+    /// <summary>Adds a row of text cells.</summary>
+    public void AddFooter(IEnumerable<string> cells)
+    {
+        ArgumentNullException.ThrowIfNull(cells);
+        AddFooter(cells.Select(text => (IElement)new TextBlock(text)).ToArray());
+    }
+
+    /// <summary>Adds a row of strings and elements. Other values are rejected before adding the row.</summary>
+    public void AddFooter(params object[] cells) => AddFooter(NormaliseCells(cells));
+
+    private static IElement[] NormaliseCells(object[] cells)
+    {
+        ArgumentNullException.ThrowIfNull(cells);
+        return Array.ConvertAll(cells, cell => cell switch
+        {
+            string text => (IElement)new TextBlock(text),
+            IElement element => element,
+            null => throw new ArgumentNullException(nameof(cells)),
+            _ => throw new ArgumentException("Each cell must be a string or an IElement.", nameof(cells))
+        });
+    }
+
     /// <summary>
     /// Adds a header row to the table
     /// </summary>
