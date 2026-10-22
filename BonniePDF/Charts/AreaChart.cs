@@ -65,8 +65,8 @@ public class AreaChart : CartesianChartBase
                 ? LineWidth
                 : DefaultLineWidth;
 
-        DrawAreaFill(canvas, coordinates, baselineY, series.Color, fillOpacity);
-        DrawConnectingLine(canvas, coordinates, series.Color, lineWidth);
+        DrawAreaFill(canvas, coordinates, baselineY, ResolveSeriesColor(series), fillOpacity);
+        DrawConnectingLine(canvas, coordinates, ResolveSeriesColor(series), lineWidth);
     }
 
     /// <summary>

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
+using BonniePDF.Typography;
 using BonniePDF.Typography.Engine;
 using BonniePDF.Typography.TrueType;
 
@@ -133,6 +134,81 @@ public static class FontMetrics
     //
     // Each table is indexed by (codePoint - 32) over ASCII 32–126 (95 entries),
     // in the 1000-unit em used by PDF standard fonts.
+
+    // Codes 0x80-0xFF (WinAnsiEncoding). Derived from the metric-compatible Liberation faces, which agree with
+    // the tables above on every ASCII character; ISO 32000-1 Annex D does not tabulate these codes.
+    // Each table: codes 0x80-0x9F then 0xA0-0xFF. 0 marks an undefined code.
+    private static readonly int[] HelveticaHighWidths =
+    {
+        556, 0, 222, 556, 333, 1000, 556, 556, 333, 1000, 667, 333, 1000, 0, 611, 0,
+        0, 222, 222, 333, 333, 350, 556, 1000, 333, 1000, 500, 333, 944, 0, 500, 667,
+        278, 333, 556, 556, 556, 556, 260, 556, 333, 737, 370, 556, 584, 333, 737, 552,
+        400, 549, 333, 333, 333, 576, 537, 333, 333, 333, 365, 556, 834, 834, 834, 611,
+        667, 667, 667, 667, 667, 667, 1000, 722, 667, 667, 667, 667, 278, 278, 278, 278,
+        722, 722, 778, 778, 778, 778, 778, 584, 778, 722, 722, 722, 722, 667, 667, 611,
+        556, 556, 556, 556, 556, 556, 889, 500, 556, 556, 556, 556, 278, 278, 278, 278,
+        556, 556, 556, 556, 556, 556, 556, 549, 611, 556, 556, 556, 556, 500, 556, 500
+    };
+
+    private static readonly int[] HelveticaBoldHighWidths =
+    {
+        556, 0, 278, 556, 500, 1000, 556, 556, 333, 1000, 667, 333, 1000, 0, 611, 0,
+        0, 278, 278, 500, 500, 350, 556, 1000, 333, 1000, 556, 333, 944, 0, 500, 667,
+        278, 333, 556, 556, 556, 556, 280, 556, 333, 737, 370, 556, 584, 333, 737, 552,
+        400, 549, 333, 333, 333, 576, 556, 333, 333, 333, 365, 556, 834, 834, 834, 611,
+        722, 722, 722, 722, 722, 722, 1000, 722, 667, 667, 667, 667, 278, 278, 278, 278,
+        722, 722, 778, 778, 778, 778, 778, 584, 778, 722, 722, 722, 722, 667, 667, 611,
+        556, 556, 556, 556, 556, 556, 889, 556, 556, 556, 556, 556, 278, 278, 278, 278,
+        611, 611, 611, 611, 611, 611, 611, 549, 611, 611, 611, 611, 611, 556, 611, 556
+    };
+
+    private static readonly int[] TimesHighWidths =
+    {
+        500, 0, 333, 500, 444, 1000, 500, 500, 333, 1000, 556, 333, 889, 0, 611, 0,
+        0, 333, 333, 444, 444, 350, 500, 1000, 333, 980, 389, 333, 722, 0, 444, 722,
+        250, 333, 500, 500, 500, 500, 200, 500, 333, 760, 276, 500, 564, 333, 760, 500,
+        400, 549, 300, 300, 333, 576, 453, 333, 333, 300, 310, 500, 750, 750, 750, 444,
+        722, 722, 722, 722, 722, 722, 889, 667, 611, 611, 611, 611, 333, 333, 333, 333,
+        722, 722, 722, 722, 722, 722, 722, 564, 722, 722, 722, 722, 722, 722, 556, 500,
+        444, 444, 444, 444, 444, 444, 667, 444, 444, 444, 444, 444, 278, 278, 278, 278,
+        500, 500, 500, 500, 500, 500, 500, 549, 500, 500, 500, 500, 500, 500, 500, 500
+    };
+
+    private static readonly int[] TimesBoldHighWidths =
+    {
+        500, 0, 333, 500, 500, 1000, 500, 500, 333, 1000, 556, 333, 1000, 0, 667, 0,
+        0, 333, 333, 500, 500, 350, 500, 1000, 333, 1000, 389, 333, 722, 0, 444, 722,
+        250, 333, 500, 500, 500, 500, 220, 500, 333, 747, 300, 500, 570, 333, 747, 500,
+        400, 549, 300, 300, 333, 576, 540, 333, 333, 300, 330, 500, 750, 750, 750, 500,
+        722, 722, 722, 722, 722, 722, 1000, 722, 667, 667, 667, 667, 389, 389, 389, 389,
+        722, 722, 778, 778, 778, 778, 778, 570, 778, 722, 722, 722, 722, 722, 611, 556,
+        500, 500, 500, 500, 500, 500, 722, 444, 444, 444, 444, 444, 278, 278, 278, 278,
+        500, 556, 500, 500, 500, 500, 500, 549, 500, 556, 556, 556, 556, 500, 556, 500
+    };
+
+    private static readonly int[] TimesItalicHighWidths =
+    {
+        500, 0, 333, 500, 556, 889, 500, 500, 333, 1000, 500, 333, 944, 0, 556, 0,
+        0, 333, 333, 556, 556, 350, 500, 889, 333, 980, 389, 333, 667, 0, 389, 556,
+        250, 389, 500, 500, 500, 500, 275, 500, 333, 760, 276, 500, 675, 333, 760, 500,
+        400, 549, 300, 300, 333, 576, 523, 250, 333, 300, 310, 500, 750, 750, 750, 500,
+        611, 611, 611, 611, 611, 611, 889, 667, 611, 611, 611, 611, 333, 333, 333, 333,
+        722, 667, 722, 722, 722, 722, 722, 675, 722, 722, 722, 722, 722, 556, 611, 500,
+        500, 500, 500, 500, 500, 500, 667, 444, 444, 444, 444, 444, 278, 278, 278, 278,
+        500, 500, 500, 500, 500, 500, 500, 549, 500, 500, 500, 500, 500, 444, 500, 444
+    };
+
+    private static readonly int[] TimesBoldItalicHighWidths =
+    {
+        500, 0, 333, 500, 500, 1000, 500, 500, 333, 1000, 556, 333, 944, 0, 611, 0,
+        0, 333, 333, 500, 500, 350, 500, 1000, 333, 1000, 389, 333, 722, 0, 389, 611,
+        250, 389, 500, 500, 500, 500, 220, 500, 333, 747, 266, 500, 606, 333, 747, 500,
+        400, 549, 300, 300, 333, 576, 500, 250, 333, 300, 300, 500, 750, 750, 750, 500,
+        667, 667, 667, 667, 667, 667, 944, 667, 667, 667, 667, 667, 389, 389, 389, 389,
+        722, 722, 722, 722, 722, 722, 722, 570, 722, 722, 722, 722, 722, 611, 611, 500,
+        500, 500, 500, 500, 500, 500, 722, 444, 444, 444, 444, 444, 278, 278, 278, 278,
+        500, 556, 500, 500, 500, 500, 500, 549, 500, 556, 556, 556, 556, 444, 500, 444
+    };
 
     // Helvetica Base
     private static readonly int[] HelveticaWidths =
@@ -460,6 +536,19 @@ public static class FontMetrics
         };
     }
 
+    private static int[]? GetStandardFontHighTable(string fontName) => fontName switch
+    {
+        "Helvetica"             => HelveticaHighWidths,
+        "Helvetica-Oblique"     => HelveticaHighWidths,
+        "Helvetica-Bold"        => HelveticaBoldHighWidths,
+        "Helvetica-BoldOblique" => HelveticaBoldHighWidths,
+        "Times-Roman"           => TimesHighWidths,
+        "Times-Bold"            => TimesBoldHighWidths,
+        "Times-Italic"          => TimesItalicHighWidths,
+        "Times-BoldItalic"      => TimesBoldItalicHighWidths,
+        _                       => null,
+    };
+
     private static int[]? GetStandardFontTable(string fontName) => fontName switch
     {
         "Helvetica"             => HelveticaWidths,
@@ -478,15 +567,18 @@ public static class FontMetrics
     private static float GetStandardFontWidth(string text, string fontName, float fontSize)
     {
         // Courier variants: all use a fixed 600-unit advance (monospace)
-        if (fontName.Contains("Courier")) return text.Length * (fontSize * 0.6f);
+        if (fontName.Contains("Courier")) return text.EnumerateRunes().Count() * (fontSize * 0.6f);
 
         int[]? table = GetStandardFontTable(fontName);
+        int[]? highTable = GetStandardFontHighTable(fontName);
         float totalWidth = 0;
-        foreach (char c in text)
+        foreach (Rune rune in text.EnumerateRunes())
         {
-            int index = c - 32;
-            int w = table != null && index >= 0 && index < table.Length ? table[index] : 500;
-            totalWidth += w;
+            // The text fonts show a character through its WinAnsi byte, so measure that byte.
+            int code = highTable != null ? WinAnsi.Byte(rune.Value) : rune.Value;
+            int w = code >= 128 && highTable != null ? highTable[code - 128]
+                : table != null && code >= 32 && code - 32 < table.Length ? table[code - 32] : 0;
+            totalWidth += w == 0 ? 500 : w;
         }
         return totalWidth / 1000f * fontSize;
     }

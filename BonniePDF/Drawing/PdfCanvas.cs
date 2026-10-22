@@ -774,7 +774,7 @@ internal class PdfCanvas : ICanvas
             if (font is null)
             {
                 _stream.Append('(');
-                PdfSyntax.AppendEscaped(_stream, prepared.Text);
+                PdfSyntax.AppendEscapedWinAnsi(_stream, prepared.Text);
                 _stream.Append(") Tj\n");
                 continue;
             }

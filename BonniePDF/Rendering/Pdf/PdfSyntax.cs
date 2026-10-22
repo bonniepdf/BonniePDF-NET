@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
+using BonniePDF.Typography;
 using BonniePDF.Typography.TrueType;
 
 namespace BonniePDF.Rendering.Pdf;
@@ -79,6 +80,34 @@ internal static class PdfSyntax
 
         AppendEscaped(sb, input);
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Escapes text for a string operand shown in a standard (unembedded) font. Those fonts use
+    /// WinAnsiEncoding, so characters such as ’ “ ” – — … € map to their Windows-1252 byte; any other
+    /// character beyond Latin-1 becomes <c>?</c> instead of an encoder fallback.
+    /// </summary>
+    internal static string EscapeWinAnsi(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+        StringBuilder sb = new(input.Length + 10);
+        AppendEscapedWinAnsi(sb, input);
+        return sb.ToString();
+    }
+
+    internal static void AppendEscapedWinAnsi(StringBuilder sb, string input)
+    {
+        bool plain = true;
+        foreach (char c in input) if (c > 0xFF) { plain = false; break; }
+        if (plain) { AppendEscaped(sb, input); return; }
+        StringBuilder mapped = new(input.Length);
+        for (int i = 0; i < input.Length; i++)
+        {
+            int cp = char.ConvertToUtf32(input, i);
+            if (cp > 0xFFFF) i++;
+            mapped.Append((char)WinAnsi.Byte(cp));
+        }
+        AppendEscaped(sb, mapped.ToString());
     }
 
     internal static void AppendEscaped(StringBuilder sb, string input)

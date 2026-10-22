@@ -17,7 +17,18 @@ public class ChartSeries
     /// <summary>
     /// Color to use for this series (lines, bars, markers, etc.)
     /// </summary>
-    public Color Color { get; set; } = Color.FromHex("#4f46e5");
+    public Color Color
+    {
+        get => _color ?? DefaultColor;
+        set => _color = value;
+    }
+
+    private static readonly Color DefaultColor = Color.FromHex("#4f46e5");
+
+    private Color? _color;
+
+    /// <summary>Whether the author gave this series a colour; an unset series takes its chart's colour.</summary>
+    internal bool HasColor => _color is not null;
 
     /// <summary>
     /// Data points for this series.

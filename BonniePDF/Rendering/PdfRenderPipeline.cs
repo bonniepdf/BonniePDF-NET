@@ -508,7 +508,7 @@ internal static class PdfRenderPipeline
             : null;
         string textOperand = kernedOperand ?? (embeddedFont != null
             ? PdfSyntax.ToGlyphIdHexString(wm.Text, embeddedFont)
-            : $"({PdfSyntax.Escape(wm.Text)})");
+            : $"({PdfSyntax.EscapeWinAnsi(wm.Text)})");
 
         // Build PDF operators for the watermark
         // The operators are appended to the page stream so they render on top of all content

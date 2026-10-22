@@ -245,7 +245,7 @@ public abstract class CartesianChartBase : ChartBase
             IList<Point> coordinates = CalculateSeriesCoordinates(
                 series, data, chartAreaWidth, chartAreaHeight, baselineY);
 
-            Color labelColor = series.Color;
+            Color labelColor = ResolveSeriesColor(series);
             float offset = GetLabelVerticalOffset(series);
 
             for (int i = 0; i < series.DataPoints.Count; i++)
@@ -285,7 +285,7 @@ public abstract class CartesianChartBase : ChartBase
             ChartSeries series = data.Series[i];
             float x = legendStartX + i * legendItemWidth;
 
-            canvas.FillRect(x, legendY, colorBoxSize, colorBoxSize, series.Color);
+            canvas.FillRect(x, legendY, colorBoxSize, colorBoxSize, ResolveSeriesColor(series));
 
             canvas.DrawText(x + colorBoxSize + 5, legendY + colorBoxSize / 2 - LegendFontSize / 2,
                 series.Name, AxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
@@ -491,7 +491,13 @@ public abstract class CartesianChartBase : ChartBase
     /// Gets the default color for the first series.
     /// Derived classes can override this to provide their specific default color.
     /// </summary>
-    protected virtual Color GetDefaultSeriesColor() => ColorPalette.Blue[600];
+    protected virtual Color GetDefaultSeriesColor() => Color.FromHex("#4f46e5");
+
+    /// <summary>
+    /// The colour a series is drawn in: its own when the author set one, otherwise the chart's own colour
+    /// (<c>BarColor</c>, <c>LineColor</c>, <c>AreaColor</c>, <c>DotColor</c>, <c>LollipopColor</c>).
+    /// </summary>
+    protected Color ResolveSeriesColor(ChartSeries series) => series.HasColor ? series.Color : GetDefaultSeriesColor();
 
     /// <summary>
     /// Reports whether a legend occupies the bottom band for this chart+data, which

@@ -49,13 +49,13 @@ public class BarChart : CartesianChartBase
         {
             float totalBarSpace = chartAreaHeight / dataPointCount;
             float barThickness = Math.Min(totalBarSpace * BarWidthRatio, 50);
-            DrawBars(canvas, coordinates, barThickness, baselineY, series.Color);
+            DrawBars(canvas, coordinates, barThickness, baselineY, ResolveSeriesColor(series));
         }
         else
         {
             float totalBarSpace = chartAreaWidth / dataPointCount;
             float barWidth = Math.Min(totalBarSpace * BarWidthRatio, 50);
-            DrawBars(canvas, coordinates, barWidth, baselineY, series.Color);
+            DrawBars(canvas, coordinates, barWidth, baselineY, ResolveSeriesColor(series));
         }
     }
 

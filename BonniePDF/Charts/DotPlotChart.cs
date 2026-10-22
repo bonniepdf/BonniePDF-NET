@@ -43,7 +43,7 @@ public class DotPlotChart : CartesianChartBase
         float dotRadius = series.Style?.MarkerRadius > 0 ? series.Style.MarkerRadius : DefaultDotRadius;
 
         // Draw data point circles
-        DrawDataPoints(canvas, coordinates, series.Color, dotRadius);
+        DrawDataPoints(canvas, coordinates, ResolveSeriesColor(series), dotRadius);
     }
 
     /// <summary>
