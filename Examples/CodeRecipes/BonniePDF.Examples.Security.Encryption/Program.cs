@@ -8,22 +8,10 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating Encryption - Owner Password Only...");
-        using (var doc = EncryptionOwnerOnlyExample.Generate())
+        Console.WriteLine("Generating Encryption (AES-256: password, permissions and owner-only)...");
+        using (var doc = EncryptionExample.Generate())
         {
-            doc.Save(Path.Combine(outputDir, "encryption_owner_only.pdf"));
-        }
-
-        Console.WriteLine("Generating Encryption - Password Protected...");
-        using (var doc = EncryptionPasswordExample.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "encryption_password.pdf"));
-        }
-
-        Console.WriteLine("Generating Encryption - Permission Restrictions...");
-        using (var doc = EncryptionPermissionsExample.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "encryption_permissions.pdf"));
+            doc.Save(Path.Combine(outputDir, "encryption.pdf"));
         }
 
         Console.WriteLine("Done! Files saved to " + outputDir);

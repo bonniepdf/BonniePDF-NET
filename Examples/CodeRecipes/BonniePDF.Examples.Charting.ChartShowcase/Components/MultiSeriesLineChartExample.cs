@@ -1,6 +1,6 @@
 using BonniePDF;
 
-namespace BonniePDF.Examples.Charting.ChartExamples.Components;
+namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
 /// <summary>
 /// Standalone multi-series line chart comparing year-over-year revenue.

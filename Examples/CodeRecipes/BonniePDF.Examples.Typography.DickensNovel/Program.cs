@@ -8,14 +8,10 @@ internal sealed class Program
         string outputDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedPdfs");
         Directory.CreateDirectory(outputDir);
 
-        Console.WriteLine("Generating Dickens: A Tale of Two Cities...");
+        // The novel is a PDF/A-2a and PDF/UA-1 document. The accessibility gate collects every
+        // *_tagged.pdf, so it is written under that name and validated in CI.
+        Console.WriteLine("Generating Dickens: A Tale of Two Cities (PDF/A-2a, PDF/UA-1)...");
         using (var doc = DickensNovelExample.Generate())
-        {
-            doc.Save(Path.Combine(outputDir, "dickens_a_tale_of_two_cities.pdf"));
-        }
-
-        Console.WriteLine("Generating Dickens: A Tale of Two Cities (Tagged / PDF/UA-1)...");
-        using (var doc = DickensNovelTaggedExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "dickens_a_tale_of_two_cities_tagged.pdf"));
         }
