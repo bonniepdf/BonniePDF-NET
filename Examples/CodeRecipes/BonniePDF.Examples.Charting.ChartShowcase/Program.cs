@@ -1,6 +1,6 @@
-using BonniePDF.Examples.Charting.ChartExamples.Components;
+using BonniePDF.Examples.Charting.ChartShowcase.Components;
 
-namespace BonniePDF.Examples.Charting.ChartExamples;
+namespace BonniePDF.Examples.Charting.ChartShowcase;
 
 internal sealed class Program
 {
@@ -11,7 +11,7 @@ internal sealed class Program
         Directory.CreateDirectory(outputDir);
 
         Console.WriteLine("Generating Charting Examples...");
-        using (var doc = ChartExamplesExample.Generate())
+        using (var doc = ChartShowcaseExample.Generate())
         {
             doc.Save(Path.Combine(outputDir, "charting_example.pdf"));
         }

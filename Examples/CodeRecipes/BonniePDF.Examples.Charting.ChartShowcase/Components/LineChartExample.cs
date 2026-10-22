@@ -2,7 +2,7 @@ using System.Globalization;
 using System.IO;
 using BonniePDF;
 
-namespace BonniePDF.Examples.Charting.ChartExamples.Components;
+namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
 /// <summary>
 /// Plot monthly revenue with a line chart, labelled points, and a currency axis.

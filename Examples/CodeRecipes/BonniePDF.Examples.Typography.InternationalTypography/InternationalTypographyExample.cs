@@ -149,7 +149,7 @@ public static class InternationalTypographyExample
     private static Container Specimen(string label, string fontName, Color background, IReadOnlyDictionary<string, int>? fontFeatures = null)
     {
         var stack = new VerticalStack();
-        stack.Add(new TextBlock(label) { FontName = fontName, FontSize = 8.5f, Color = ColorPalette.Slate[500], Margin = new Thickness(0, 0, 0, 4) });
+        stack.Add(new TextBlock(label) { FontName = fontName, FontSize = 8.5f, Color = ColorPalette.Slate[600], Margin = new Thickness(0, 0, 0, 4) });
         stack.Add(new TextBlock("AVATAR To Wave") { FontName = fontName, FontSize = 40, Color = ColorPalette.Slate[800], FontFeatures = fontFeatures });
         stack.Add(new TextBlock("office affluent flagship") { FontName = fontName, FontSize = 27, Color = ColorPalette.Slate[800], FontFeatures = fontFeatures });
         return new Container

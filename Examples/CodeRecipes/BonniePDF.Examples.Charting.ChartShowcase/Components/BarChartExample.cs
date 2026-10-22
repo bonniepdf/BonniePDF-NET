@@ -1,7 +1,7 @@
 using System.IO;
 using BonniePDF;
 
-namespace BonniePDF.Examples.Charting.ChartExamples.Components;
+namespace BonniePDF.Examples.Charting.ChartShowcase.Components;
 
 /// <summary>
 /// Example demonstrating the new refactored chart architecture.

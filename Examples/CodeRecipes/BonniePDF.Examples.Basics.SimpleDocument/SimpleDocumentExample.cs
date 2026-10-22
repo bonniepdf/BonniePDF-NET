@@ -154,17 +154,17 @@ public static class SimpleDocumentExample
         table.AddRow(
             new TextBlock { Text = "Core Engine", FontSize = 10 },
             new TextBlock { Text = ".NET / TypeScript", FontSize = 10 },
-            new TextBlock { Text = "Production Ready", FontSize = 10, Color = ColorPalette.Emerald[600] }
+            new TextBlock { Text = "Production Ready", FontSize = 10, Color = ColorPalette.Emerald[700] }
         );
         table.AddRow(
             new TextBlock { Text = "Typography Engine", FontSize = 10 },
             new TextBlock { Text = "Embedded Fonts", FontSize = 10 },
-            new TextBlock { Text = "Production Ready", FontSize = 10, Color = ColorPalette.Emerald[600] }
+            new TextBlock { Text = "Production Ready", FontSize = 10, Color = ColorPalette.Emerald[700] }
         );
         table.AddRow(
             new TextBlock { Text = "Vector Graphics", FontSize = 10 },
             new TextBlock { Text = "SVG / QR / Barcode", FontSize = 10 },
-            new TextBlock { Text = "Production Ready", FontSize = 10, Color = ColorPalette.Emerald[600] }
+            new TextBlock { Text = "Production Ready", FontSize = 10, Color = ColorPalette.Emerald[700] }
         );
 
         doc.Add(table);
