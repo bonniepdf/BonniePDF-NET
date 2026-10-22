@@ -48,8 +48,8 @@ public class LollipopChart : CartesianChartBase
         float stemWidth = series.Style?.StemWidth > 0 ? series.Style.StemWidth : DefaultStemWidth;
         float headRadius = series.Style?.MarkerRadius > 0 ? series.Style.MarkerRadius : DefaultHeadRadius;
 
-        DrawLollipopStems(canvas, coordinates, baselineY, series.Color, stemWidth);
-        DrawLollipopHeads(canvas, coordinates, series.Color, headRadius);
+        DrawLollipopStems(canvas, coordinates, baselineY, ResolveSeriesColor(series), stemWidth);
+        DrawLollipopHeads(canvas, coordinates, ResolveSeriesColor(series), headRadius);
     }
 
     /// <summary>

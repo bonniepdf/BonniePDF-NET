@@ -55,7 +55,7 @@ public class GroupedBarChart : CartesianChartBase
                 float barWidth = p.X - LeftPadding;
                 (float barY, float barHeight) = BarSlot(i, seriesIndex, seriesCount, categoryCount, topAreaY, chartAreaHeight);
 
-                canvas.FillRect(LeftPadding, barY, barWidth, barHeight, series.Color);
+                canvas.FillRect(LeftPadding, barY, barWidth, barHeight, ResolveSeriesColor(series));
             }
         }
         else
@@ -66,7 +66,7 @@ public class GroupedBarChart : CartesianChartBase
                 float barHeight = baselineY - p.Y;
                 (float barX, float barWidth) = BarSlot(i, seriesIndex, seriesCount, categoryCount, LeftPadding, chartAreaWidth);
 
-                canvas.FillRect(barX, p.Y, barWidth, barHeight, series.Color);
+                canvas.FillRect(barX, p.Y, barWidth, barHeight, ResolveSeriesColor(series));
             }
         }
     }
@@ -123,13 +123,13 @@ public class GroupedBarChart : CartesianChartBase
                 {
                     (float barY, float barHeight) = BarSlot(i, seriesIndex, seriesCount, categoryCount, topAreaY, chartAreaHeight);
                     canvas.DrawText(point.X + offset, barY + barHeight / 2 - LabelFontSize / 2, text,
-                        series.Color, LabelFontSize, FontFamily, TextAlignment.Left);
+                        ResolveSeriesColor(series), LabelFontSize, FontFamily, TextAlignment.Left);
                 }
                 else
                 {
                     (float barX, float barWidth) = BarSlot(i, seriesIndex, seriesCount, categoryCount, LeftPadding, chartAreaWidth);
                     canvas.DrawText(barX + barWidth / 2, point.Y - offset - LabelFontSize, text,
-                        series.Color, LabelFontSize, FontFamily, TextAlignment.Center);
+                        ResolveSeriesColor(series), LabelFontSize, FontFamily, TextAlignment.Center);
                 }
             }
         }

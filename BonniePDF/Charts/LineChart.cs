@@ -55,11 +55,11 @@ public class LineChart : CartesianChartBase
         float markerRadius = series.Style?.MarkerRadius > 0 ? series.Style.MarkerRadius : DefaultMarkerRadius;
 
         // Draw the connecting line
-        DrawConnectingLine(canvas, coordinates, series.Color, lineWidth);
+        DrawConnectingLine(canvas, coordinates, ResolveSeriesColor(series), lineWidth);
 
         // Draw data point markers if enabled
         if (showMarkers)
-            DrawDataPointMarkers(canvas, coordinates, series.Color, markerRadius);
+            DrawDataPointMarkers(canvas, coordinates, ResolveSeriesColor(series), markerRadius);
     }
 
     /// <summary>
