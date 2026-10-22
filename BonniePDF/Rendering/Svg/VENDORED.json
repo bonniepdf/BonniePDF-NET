@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "svg-engine-dotnet",
   "source": {
-    "commit": "7a03218fb4fc0694f0a4c7b03ee9e372a95b58ea",
+    "commit": "2947c3caab9a4b80a48882940eb6a2124e4a5f59",
     "dirty": false
   },
   "files": {
@@ -23,7 +23,7 @@
     "Parsers/NamedColors.cs": "d7dcd7fc6b07bba4ab975d677a0793defe1422aac382f7178f680f446d2b9875",
     "Parsers/NumberScanner.cs": "22bd796987767ec1b32b4701925fbaddb8b77ea2775280c3c14f6c7b0e4c4b7c",
     "Parsers/PaintRef.cs": "4f1113534cb3b5e91ec8bb7e63892644398f986d4314e25e397faeba7a0086be",
-    "Parsers/PathData.cs": "5129235c9f06f258f4674906a5bacaff0051ce41c5a29720eb7c4eb7a21f34d5",
+    "Parsers/PathData.cs": "7be5b99c7af6d2e2a19edf0d335129b711a96e58a6d44d7f879b44be3e7f0855",
     "Parsers/SvgParseException.cs": "33acb09a78d4ebf81de6477ab549c2f014e2477301d58268d8f5718a7d8ba413",
     "Parsers/Transform.cs": "6193fab3df554074b236cfc42a49baf6883cd09c05f528bfca1575e8a92447d2",
     "Parsers/ViewBox.cs": "98b61022f65148468187817c29a034779694c7c64b87ea8a1de549eed8e90e03",
