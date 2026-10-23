@@ -9,7 +9,7 @@ namespace BonniePDF.Rendering.Svg.Sink;
 /// <para>
 /// Copied from BonniePDF's shipped <c>ICanvas</c>
 /// (<c>BonniePDF/Drawing/ICanvas.cs</c>), specifically the path / paint /
-/// transform / clip surface that this feature landed. It is a <em>copy</em>, not a
+/// transform / clip surface of the vector drawing canvas. It is a <em>copy</em>, not a
 /// reference: this package never depends on the <c>BonniePDF</c> assembly.
 /// Keeping the copy faithful is what makes fold-in a mechanical adapter
 /// rather than a redesign — read AGENTS.md before changing any signature.
@@ -32,7 +32,7 @@ namespace BonniePDF.Rendering.Svg.Sink;
 internal interface IVectorSink
 {
     // -- Graphics state --------------------------------------------------
-    // (These two predate this feature; <g> nesting needs them.)
+    // (These two predate the vector drawing canvas; <g> nesting needs them.)
 
     /// <summary>Pushes a graphics-state scope.</summary>
     void SaveState();
