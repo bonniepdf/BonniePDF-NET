@@ -45,6 +45,7 @@ Status: Prerelease
 
 ### Changed
 
+- Licence: the bundled Community License 1.0 lets organisations below US $1,000,000 revenue ship `BonniePDF` inside their own applications, including desktop and mobile apps, and caps liability at US $100; the Commercial License Agreement 1.0 states the same for client-side delivery. The cross-language suite now compares content streams with the parity rule: operators exactly, numbers within 0.001. Layout values stay `float`.
 - **Less duplicated code in the synchronous and asynchronous writers.** The two PDF writers share the catalog, viewer preferences, link annotation, trailer and open-action builders, so they now differ only in how they write. The document serializer, font writer (including the CFF path), compliance, metadata and navigation writers, the definition element catalogue and the chart axis-label and connecting-line code were consolidated the same way. Behaviour, output and public API are unchanged: the PDFs of 102 example documents are byte-identical through `GenerateBytes` and `GenerateBytesAsync` before and after.
 
 ## 2026.10.15
