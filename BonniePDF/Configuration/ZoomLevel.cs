@@ -21,7 +21,7 @@ public enum ZoomLevel
     FitHeight,
 
     /// <summary>
-    /// Use a custom zoom level (specified in DocumentSettings)
+    /// Use a custom zoom level
     /// </summary>
     Custom
 }

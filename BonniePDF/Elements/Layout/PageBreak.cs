@@ -11,6 +11,9 @@ public class PageBreak : ElementBase, IStatefulElement
 {
     private bool _triggered;
 
+    /// <summary>
+    /// Asks for a new page unless the cursor is already at the top of one, then reports completion.
+    /// </summary>
     public RenderStatus RenderStateful(RenderContext ctx, float width)
     {
         if (ctx.AtomicLayoutBounds is not null) throw new System.InvalidOperationException("Transformed content cannot create a page.");
@@ -25,6 +28,7 @@ public class PageBreak : ElementBase, IStatefulElement
         return RenderStatus.Complete;
     }
 
+    /// <summary>Rearms the break so it can trigger again on the next render.</summary>
     public void ResetState() => _triggered = false;
 
     protected override float MeasureContentHeight(float contentWidth) => 0;

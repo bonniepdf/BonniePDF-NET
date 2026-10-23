@@ -6,5 +6,6 @@ namespace BonniePDF;
 /// </summary>
 public interface IBackgroundColor
 {
+    /// <summary>The background colour, or <c>null</c> for none.</summary>
     Color? BackgroundColor { get; set; }
 }

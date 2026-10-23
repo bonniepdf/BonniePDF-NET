@@ -8,7 +8,7 @@ using System.Text.Json.Nodes;
 
 namespace BonniePDF;
 
-/// <summary>What to do with a construct a definition cannot express (spec 15 §11.2).</summary>
+/// <summary>What to do with a construct a definition cannot express.</summary>
 public enum DefinitionUnrepresentable
 {
     /// <summary>Throw a <see cref="DefinitionException"/> listing every one, and write nothing.</summary>
@@ -36,7 +36,7 @@ public sealed class DefinitionWriteOptions
     /// <summary>
     /// Names a resource the host can supply again when the definition is read. Return a name and the definition
     /// carries <c>ref</c> and a <c>sha256</c> instead of the bytes; return <see langword="null"/> to embed them.
-    /// The writer never invents a name (spec 15 §9).
+    /// The writer never invents a name.
     /// </summary>
     public Func<DefinitionResourceDescriptor, string?>? ResourceRef { get; init; }
 
@@ -59,7 +59,7 @@ public sealed class DefinitionWriteResult
     /// <summary>The definition, as a JSON tree.</summary>
     public JsonObject Definition { get; }
 
-    /// <summary><c>secret-omitted</c> and <c>dropped</c> notes (spec 15 §11.4).</summary>
+    /// <summary><c>secret-omitted</c> and <c>dropped</c> notes.</summary>
     public IReadOnlyList<DefinitionIssue> Notes { get; }
 
     /// <summary>

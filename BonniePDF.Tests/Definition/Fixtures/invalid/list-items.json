@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/invalid/list-items",
-    "description": "A list item must be a string or a nested list of the same type. An element is invalid-type, and a nested list of the other kind is invalid-value.",
-    "spec": "15 §8.5"
+    "description": "A list item must be a string or a nested list of the same type. An element is invalid-type, and a nested list of the other kind is invalid-value."
   },
   "_expectErrors": [
     {

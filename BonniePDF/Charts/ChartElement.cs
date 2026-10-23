@@ -21,7 +21,10 @@ public class ChartElement(ChartBase chart, ChartData data) : ElementBase, IRoleP
     /// </summary>
     public bool IsDecorative { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// The structure role in a tagged PDF: <c>Figure</c> when the element has alternative text, otherwise
+    /// <c>Artifact</c>. It is always <c>Artifact</c> when <see cref="IsDecorative"/> is set.
+    /// </summary>
     public SemanticRole SemanticRole =>
         IsDecorative || string.IsNullOrEmpty(AltText)
             ? SemanticRole.Artifact

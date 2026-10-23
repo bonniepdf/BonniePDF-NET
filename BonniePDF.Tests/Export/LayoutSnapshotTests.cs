@@ -5,7 +5,7 @@ namespace BonniePDF.Tests.Export;
 
 // Mirrors the TypeScript suite tests/export/layout-snapshot.test.ts and the
 // shared fixture spec/fixtures/layout-snapshot/vertical-stack.json. Verifies the
-// layout snapshot data layer behind the previewer structure view (spec 07).
+// layout snapshot data layer behind the previewer structure view.
 //
 // NOTE: written without a .NET toolchain in the authoring environment; run this
 // before considering the .NET mirror landed.

@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/settings-rules/pdfa-a-level-with-tagging",
-    "description": "An \"a\" level with PDF/UA-1 is valid and lands on PDF 1.7.",
-    "spec": "15 §5.2"
+    "description": "An \"a\" level with PDF/UA-1 is valid and lands on PDF 1.7."
   },
   "_expect": {
     "valid": true,

@@ -238,7 +238,7 @@ internal sealed partial class DefinitionValidator
     }
 
     /// <summary>
-    /// The cross-key rules of <c>settings</c> (spec 15 §5.2), from the description. A combination the document
+    /// The cross-key rules of <c>settings</c>, from the description. A combination the document
     /// would refuse at generation is refused here, so a definition that reads always generates.
     /// </summary>
     private void CheckSettingsRules(JsonElement root)

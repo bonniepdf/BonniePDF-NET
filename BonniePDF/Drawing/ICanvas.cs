@@ -27,6 +27,10 @@ public interface ICanvas
     /// </summary>
     int GraphicsStateDepth => 0;
 
+    /// <summary>
+    /// Pushes the current graphics state (transform, clip and alpha) so that <see cref="RestoreState"/> can
+    /// return to it.
+    /// </summary>
     void SaveState();
 
     /// <summary>

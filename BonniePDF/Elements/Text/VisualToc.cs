@@ -10,7 +10,7 @@ namespace BonniePDF;
 /// </summary>
 public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
 {
-    /// <inheritdoc />
+    /// <summary>Always <c>TOC</c>.</summary>
     public SemanticRole SemanticRole => SemanticRole.TOC;
 
     /// <summary>

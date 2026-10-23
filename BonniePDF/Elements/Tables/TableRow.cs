@@ -11,7 +11,7 @@ public class TableRow : IBackgroundColor, IRoleProvider
     // cell or row that has the same values.
     private CellOptions _cell = CellOptions.Default;
 
-    /// <inheritdoc />
+    /// <summary>Always <c>TR</c>.</summary>
     public SemanticRole SemanticRole => SemanticRole.TR;
 
     /// <summary>

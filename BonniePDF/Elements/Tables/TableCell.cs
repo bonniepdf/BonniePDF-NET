@@ -49,7 +49,7 @@ public class TableCell : BorderedElementBase, IRoleProvider
     /// </summary>
     public bool IsHeader { get; set; }
 
-    /// <inheritdoc />
+    /// <summary><c>TH</c> for a header cell, otherwise <c>TD</c>.</summary>
     public SemanticRole SemanticRole =>
         IsHeader ? SemanticRole.TH : SemanticRole.TD;
 

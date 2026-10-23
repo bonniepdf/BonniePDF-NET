@@ -35,6 +35,7 @@ namespace BonniePDF;
 /// remain compatible.</summary>
 public static class LayoutSnapshotSchema
 {
+    /// <summary>The current snapshot schema version (4).</summary>
     public const int Version = 4;
 }
 
@@ -43,9 +44,13 @@ public sealed class LayoutRect
 {
     /// <summary>0-based page index, aligned with <see cref="LayoutSnapshot.Pages"/> and SVG page order.</summary>
     public int Page { get; init; }
+    /// <summary>Left edge, in points.</summary>
     public float X { get; init; }
+    /// <summary>Top edge, in points from the top of the page.</summary>
     public float Y { get; init; }
+    /// <summary>Width, in points.</summary>
     public float Width { get; init; }
+    /// <summary>Height, in points.</summary>
     public float Height { get; init; }
 }
 
@@ -146,12 +151,14 @@ public sealed class LayoutNode
     public NodeAccessibility? A11y { get; set; }
     /// <summary>Intrinsic colour/typography facts, when the element paints any; null otherwise.</summary>
     public NodePaint? Paint { get; set; }
+    /// <summary>The nodes laid out inside this one, in render order.</summary>
     public IList<LayoutNode> Children { get; } = new List<LayoutNode>();
 }
 
 /// <summary>The captured layout of a whole document.</summary>
 public sealed class LayoutSnapshot
 {
+    /// <summary>Version of the snapshot format; see <see cref="LayoutSnapshotSchema.Version"/>.</summary>
     public int Version { get; init; } = LayoutSnapshotSchema.Version;
     /// <summary>Page sizes in points, index-aligned with the rendered pages.</summary>
     public IReadOnlyList<PageSize> Pages { get; init; } = Array.Empty<PageSize>();
@@ -165,7 +172,9 @@ public sealed class LayoutSnapshot
     /// </summary>
     public sealed class PageSize
     {
+        /// <summary>Page width, in points.</summary>
         public float Width { get; init; }
+        /// <summary>Page height, in points.</summary>
         public float Height { get; init; }
         /// <summary>Resolved page fill as "#rrggbb", when one is set; null otherwise.</summary>
         public string? Color { get; init; }

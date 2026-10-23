@@ -156,7 +156,7 @@ public abstract class TextElementBase : ElementBase
         get
         {
             // While a document with its own fonts is being generated, a family is resolved against
-            // them (spec 16 §4). Otherwise the name resolved when the family was set stands.
+            // them. Otherwise the name resolved when the family was set stands.
             if (_fontFamily != null && FontMetrics.ActiveDocumentFonts != null)
                 return FontFamilyResolver.Resolve(_fontFamily, _weight, _isItalic);
             return _fontName;
@@ -352,7 +352,7 @@ public abstract class TextElementBase : ElementBase
     }
 
     /// <summary>
-    /// Wraps a single break-free segment, keeping every space (spec 03 "Preserved whitespace").
+    /// Wraps a single break-free segment, keeping every space.
     /// </summary>
     /// <remarks>
     /// Works by Unicode code point and never splits a surrogate pair. A line is the longest prefix

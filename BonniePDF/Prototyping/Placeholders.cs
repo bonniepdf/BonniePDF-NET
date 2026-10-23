@@ -13,48 +13,94 @@ public static class Placeholders
 {
     private static PlaceholderSource _global = new(42);
 
+    /// <summary>A single lorem-ipsum word.</summary>
     public static string Word() => _global.Word();
+    /// <summary>A two-word capitalised label.</summary>
     public static string Label() => _global.Label();
+    /// <summary>One lorem-ipsum sentence.</summary>
     public static string Sentence() => _global.Sentence();
+    /// <summary>A paragraph of lorem-ipsum text.</summary>
     public static string Paragraph() => _global.Paragraph();
+    /// <summary>Several paragraphs of lorem-ipsum text, separated by blank lines (3 by default).</summary>
     public static string Paragraphs(int count = 3) => _global.Paragraphs(count);
 
+    /// <summary>A full name.</summary>
     public static string Name() => _global.Name();
+    /// <summary>A given name.</summary>
     public static string FirstName() => _global.FirstName();
+    /// <summary>A family name.</summary>
     public static string LastName() => _global.LastName();
+    /// <summary>An email address.</summary>
     public static string Email() => _global.Email();
+    /// <summary>A phone number.</summary>
     public static string PhoneNumber() => _global.PhoneNumber();
+    /// <summary>A company name.</summary>
     public static string CompanyName() => _global.CompanyName();
+    /// <summary>A department name.</summary>
     public static string Department() => _global.Department();
+    /// <summary>A job title.</summary>
     public static string Role() => _global.Role();
+    /// <summary>A place name.</summary>
     public static string Location() => _global.Location();
 
+    /// <summary>
+    /// A whole number between <paramref name="min"/> and <paramref name="max"/> inclusive (0 to 1000 by
+    /// default).
+    /// </summary>
     public static int Integer(int min = 0, int max = 1000) => _global.Integer(min, max);
+    /// <summary>
+    /// A number between <paramref name="min"/> and <paramref name="max"/>, rounded to
+    /// <paramref name="decimals"/> places (0 to 1000 with 2 places by default).
+    /// </summary>
     public static decimal Decimal(decimal min = 0, decimal max = 1000, int decimals = 2) => _global.Decimal(min, max, decimals);
+    /// <summary>A whole-number percentage such as <c>42%</c> (0 to 100 by default).</summary>
     public static string Percent(int min = 0, int max = 100) => _global.Percent(min, max);
+    /// <summary>
+    /// A currency amount such as <c>$1,234.50</c>, between <paramref name="min"/> and <paramref name="max"/> (1
+    /// to 10,000, with <c>$</c>, by default).
+    /// </summary>
     public static string Currency(decimal min = 1, decimal max = 10000, string symbol = "$") => _global.Currency(min, max, symbol);
 
+    /// <summary>A date as <c>MM/DD/YYYY</c>.</summary>
     public static string ShortDate() => _global.ShortDate();
+    /// <summary>A date written out in full.</summary>
     public static string LongDate() => _global.LongDate();
+    /// <summary>A month name.</summary>
     public static string MonthLabel() => _global.MonthLabel();
 
+    /// <summary>A light colour that suits a background fill.</summary>
     public static Color BackgroundColor() => _global.BackgroundColor();
+    /// <summary>An accent colour.</summary>
     public static Color Color() => _global.Color();
 
+    /// <summary>Invoice line items, ready for a table (5 by default).</summary>
     public static IList<InvoiceLineItem> InvoiceLines(int count = 5) => _global.InvoiceLines(count);
+    /// <summary>
+    /// Rows of table cells (name, department, location, percentage), as arrays of text (5 rows of 4 columns by
+    /// default).
+    /// </summary>
     public static IList<string[]> TableRows(int rows = 5, int columns = 4) => _global.TableRows(rows, columns);
+    /// <summary>A series of whole numbers for a chart, one per month (12 between 50 and 300 by default).</summary>
     public static IList<int> MonthlyValues(int count = 12, int min = 50, int max = 300) => _global.MonthlyValues(count, min, max);
 
+    /// <summary>A PNG placeholder image of the requested size, as bytes.</summary>
     public static byte[] Image(int width, int height) => _global.Image(width, height);
 
+    /// <summary>Returns an independent source that always produces the same sequence for the same seed.</summary>
     public static PlaceholderSource WithSeed(int seed) => new(seed);
 
+    /// <summary>Rewinds the shared source to its starting seed (42).</summary>
     public static void Reset() => _global = new PlaceholderSource(42);
 }
 
 /// <summary>
 /// One priced line of placeholder invoice content.
 /// </summary>
+/// <param name="Service">The service name.</param>
+/// <param name="Description">A short description of the work.</param>
+/// <param name="Quantity">The number of units.</param>
+/// <param name="UnitPrice">The price of one unit.</param>
+/// <param name="Total">The line total: quantity times unit price.</param>
 public record InvoiceLineItem(string Service, string Description, int Quantity, decimal UnitPrice, decimal Total);
 
 /// <summary>
@@ -150,20 +196,24 @@ public class PlaceholderSource(int seed)
         ColorPalette.Rose[600], ColorPalette.Purple[600], ColorPalette.Cyan[600], ColorPalette.Slate[600],
     ];
 
+    /// <summary>A single lorem-ipsum word.</summary>
     public string Word()
     {
         var words = LoremSentences[Next(LoremSentences.Length)].Split(' ');
         return words[Next(words.Length)].Trim('.', ',');
     }
 
+    /// <summary>A two-word capitalised label.</summary>
     public string Label()
     {
         var w = $"{Word()} {Word()}";
         return char.ToUpper(w[0]) + w[1..];
     }
 
+    /// <summary>One lorem-ipsum sentence.</summary>
     public string Sentence() => LoremSentences[Next(LoremSentences.Length)];
 
+    /// <summary>A paragraph of lorem-ipsum text.</summary>
     public string Paragraph()
     {
         int count = 3 + Next(4);
@@ -172,6 +222,7 @@ public class PlaceholderSource(int seed)
         return string.Join(" ", sentences);
     }
 
+    /// <summary>Several paragraphs of lorem-ipsum text, separated by blank lines (3 by default).</summary>
     public string Paragraphs(int count = 3)
     {
         var paras = new List<string>(count);
@@ -179,10 +230,14 @@ public class PlaceholderSource(int seed)
         return string.Join("\n\n", paras);
     }
 
+    /// <summary>A full name.</summary>
     public string Name() => $"{FirstNames[Next(FirstNames.Length)]} {LastNames[Next(LastNames.Length)]}";
+    /// <summary>A given name.</summary>
     public string FirstName() => FirstNames[Next(FirstNames.Length)];
+    /// <summary>A family name.</summary>
     public string LastName() => LastNames[Next(LastNames.Length)];
 
+    /// <summary>An email address.</summary>
     public string Email()
     {
         var first = FirstNames[Next(FirstNames.Length)].ToLowerInvariant();
@@ -191,6 +246,7 @@ public class PlaceholderSource(int seed)
         return $"{first}.{last}@{domains[Next(domains.Length)]}";
     }
 
+    /// <summary>A phone number.</summary>
     public string PhoneNumber()
     {
         int area = 200 + Next(800);
@@ -199,24 +255,42 @@ public class PlaceholderSource(int seed)
         return string.Create(CultureInfo.InvariantCulture, $"({area}) {mid}-{end}");
     }
 
+    /// <summary>A company name.</summary>
     public string CompanyName() => CompanyNames[Next(CompanyNames.Length)];
+    /// <summary>A department name.</summary>
     public string Department() => Departments[Next(Departments.Length)];
+    /// <summary>A job title.</summary>
     public string Role() => Roles[Next(Roles.Length)];
+    /// <summary>A place name.</summary>
     public string Location() => Locations[Next(Locations.Length)];
 
+    /// <summary>
+    /// A whole number between <paramref name="min"/> and <paramref name="max"/> inclusive (0 to 1000 by
+    /// default).
+    /// </summary>
     public int Integer(int min = 0, int max = 1000) => min + Next(max - min + 1);
 
+    /// <summary>
+    /// A number between <paramref name="min"/> and <paramref name="max"/>, rounded to
+    /// <paramref name="decimals"/> places (0 to 1000 with 2 places by default).
+    /// </summary>
     public decimal Decimal(decimal min = 0, decimal max = 1000, int decimals = 2)
     {
         decimal raw = min + (Next(10000) / 10000m) * (max - min);
         return Math.Round(raw, decimals);
     }
 
+    /// <summary>A whole-number percentage such as <c>42%</c> (0 to 100 by default).</summary>
     public string Percent(int min = 0, int max = 100) => string.Create(CultureInfo.InvariantCulture, $"{Integer(min, max)}%");
 
+    /// <summary>
+    /// A currency amount such as <c>$1,234.50</c>, between <paramref name="min"/> and <paramref name="max"/> (1
+    /// to 10,000, with <c>$</c>, by default).
+    /// </summary>
     public string Currency(decimal min = 1, decimal max = 10000, string symbol = "$")
         => string.Create(CultureInfo.InvariantCulture, $"{symbol}{Decimal(min, max, 2):N2}");
 
+    /// <summary>A date as <c>MM/DD/YYYY</c>.</summary>
     public string ShortDate()
     {
         int m = 1 + Next(12);
@@ -225,6 +299,7 @@ public class PlaceholderSource(int seed)
         return string.Create(CultureInfo.InvariantCulture, $"{m:D2}/{d:D2}/{y}");
     }
 
+    /// <summary>A date written out in full.</summary>
     public string LongDate()
     {
         string[] months = ["January", "February", "March", "April", "May", "June",
@@ -235,11 +310,15 @@ public class PlaceholderSource(int seed)
         return string.Create(CultureInfo.InvariantCulture, $"{d} {months[m]} {y}");
     }
 
+    /// <summary>A month name.</summary>
     public string MonthLabel() => MonthLabels[Next(MonthLabels.Length)];
 
+    /// <summary>A light colour that suits a background fill.</summary>
     public Color BackgroundColor() => BackgroundColors[Next(BackgroundColors.Length)];
+    /// <summary>An accent colour.</summary>
     public Color Color() => AccentColors[Next(AccentColors.Length)];
 
+    /// <summary>Invoice line items, ready for a table (5 by default).</summary>
     public IList<InvoiceLineItem> InvoiceLines(int count = 5)
     {
         var items = new List<InvoiceLineItem>(count);
@@ -253,6 +332,10 @@ public class PlaceholderSource(int seed)
         return items;
     }
 
+    /// <summary>
+    /// Rows of table cells (name, department, location, percentage), as arrays of text (5 rows of 4 columns by
+    /// default).
+    /// </summary>
     public IList<string[]> TableRows(int rows = 5, int columns = 4)
     {
         var result = new List<string[]>(rows);
@@ -274,6 +357,7 @@ public class PlaceholderSource(int seed)
         return result;
     }
 
+    /// <summary>A series of whole numbers for a chart, one per month (12 between 50 and 300 by default).</summary>
     public IList<int> MonthlyValues(int count = 12, int min = 50, int max = 300)
     {
         var values = new List<int>(count);
@@ -281,6 +365,7 @@ public class PlaceholderSource(int seed)
         return values;
     }
 
+    /// <summary>A PNG placeholder image of the requested size, as bytes.</summary>
     public byte[] Image(int width, int height) => BuildPlaceholderPng(width, height, Next(360));
 
     private static byte[] BuildPlaceholderPng(int width, int height, int hueOffset)

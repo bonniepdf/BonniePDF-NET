@@ -8,7 +8,7 @@ namespace BonniePDF;
 /// </summary>
 /// <remarks>
 /// This is the element form of the <see cref="ElementBase.BreakAllowed"/>
-/// property (spec "Layout &amp; Pagination" §7), and behaves identically. Prefer
+/// property, and behaves identically. Prefer
 /// the property when you own the element; prefer this wrapper when you do not —
 /// around a subtree you were handed, or in a fluent chain.
 /// <para>

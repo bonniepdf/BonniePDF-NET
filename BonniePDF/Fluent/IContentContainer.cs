@@ -8,5 +8,6 @@ namespace BonniePDF.Fluent;
 /// </summary>
 public interface IContentContainer
 {
+    /// <summary>The wrapped element, if any.</summary>
     IElement? Child { get; set; }
 }

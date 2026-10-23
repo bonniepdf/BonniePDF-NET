@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/settings-rules/bookmarks-on-pdf17",
-    "description": "Bookmarks on PDF 1.7.",
-    "spec": "15 §5.2"
+    "description": "Bookmarks on PDF 1.7."
   },
   "_expect": {
     "valid": true,

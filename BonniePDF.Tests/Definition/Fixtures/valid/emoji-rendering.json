@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/valid/emoji-rendering",
-    "description": "Colour artwork is opt-in; settings survive a definition round trip.",
-    "spec": "20"
+    "description": "Colour artwork is opt-in; settings survive a definition round trip."
   },
   "_expect": {
     "pages": 1,

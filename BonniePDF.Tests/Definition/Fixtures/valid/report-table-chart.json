@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/valid/report-table-chart",
-    "description": "A one-page report. Pins: palette tokens and hex colours; length tokens ('2cm') normalising to points on write; all four spacing forms; table sugar (columns/header/rows/footer, a string cell, a TableCell object with columnSpan); a LineChart with data, axis and series style; node ids; PDF/A-2a with PDF/UA-1.",
-    "spec": "15 §3, §8.6, §8.9, §4.1"
+    "description": "A one-page report. Pins: palette tokens and hex colours; length tokens ('2cm') normalising to points on write; all four spacing forms; table sugar (columns/header/rows/footer, a string cell, a TableCell object with columnSpan); a LineChart with data, axis and series style; node ids; PDF/A-2a with PDF/UA-1."
   },
   "_expect": {
     "pages": 1,

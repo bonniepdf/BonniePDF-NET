@@ -8,6 +8,8 @@ namespace BonniePDF;
 [StructLayout(LayoutKind.Sequential)]
 public struct Size(float w, float h)
 {
+    /// <summary>Width, in points.</summary>
     public float Width = w;
+    /// <summary>Height, in points.</summary>
     public float Height = h;
 }

@@ -23,8 +23,7 @@ public enum PaginationDecision
 }
 
 /// <summary>
-/// Shared behaviour for the single-child pagination primitives
-/// (spec "Layout &amp; Pagination" §7).
+/// Shared behaviour for the single-child pagination primitives.
 /// </summary>
 /// <remarks>
 /// Each primitive is a thin decorator: it decides <i>whether</i> and <i>where</i>
@@ -51,7 +50,7 @@ public abstract class PaginationWrapperBase : ElementBase, IContentContainer, IS
     /// </summary>
     private bool _pending;
 
-    /// <inheritdoc />
+    /// <summary>Returns the wrapped child, or nothing when there is none.</summary>
     public IEnumerable<IElement> GetChildren() => Child is null ? [] : [Child];
 
     /// <summary>
@@ -81,7 +80,10 @@ public abstract class PaginationWrapperBase : ElementBase, IContentContainer, IS
         // Nothing by default.
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Decides whether the child renders on the current page, then renders it and maps its status to the status
+    /// this wrapper reports.
+    /// </summary>
     public RenderStatus RenderStateful(RenderContext ctx, float width)
     {
         if (!_pending)
@@ -185,7 +187,7 @@ public abstract class PaginationWrapperBase : ElementBase, IContentContainer, IS
         if (Child is IStatefulElement stateful) stateful.ResetState();
     }
 
-    /// <inheritdoc />
+    /// <summary>Clears the continuation state of this wrapper and of its child.</summary>
     public void ResetState()
     {
         _pending = false;

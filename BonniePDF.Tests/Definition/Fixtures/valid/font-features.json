@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/valid/font-features",
-    "description": "OpenType features survive text-element and nested TextStyle round trips.",
-    "spec": "19"
+    "description": "OpenType features survive text-element and nested TextStyle round trips."
   },
   "_expect": {
     "pages": 1,

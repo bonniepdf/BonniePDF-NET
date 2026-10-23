@@ -37,7 +37,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Paragraph alignment. When not set explicitly, an enclosing <see cref="Container"/> whose
     /// <c>HorizontalAlignment</c> is Start/Center/End supplies an ambient default instead of the plain
-    /// Left below (spec 01 "Document Model" §3.2); see <see cref="EffectiveAlignment"/>.
+    /// Left below; see <see cref="EffectiveAlignment"/>.
     /// </summary>
     public TextAlignment Alignment
     {
@@ -147,11 +147,9 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     // --- Rendering ---
 
     /// <summary>
-    /// 
+    /// Renders as many lines as fit on the current page and reports whether the text is complete or needs
+    /// another page.
     /// </summary>
-    /// <param name="ctx"></param>
-    /// <param name="width"></param>
-    /// <returns></returns>
     public RenderStatus RenderStateful(RenderContext ctx, float width)
     {
         // Apply top margin only on first render
@@ -230,9 +228,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         return RenderStatus.Overflow;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <summary>Clears the continuation state so the text can be rendered again from the start.</summary>
     public void ResetState()
     {
         _lastLineRendered = -1;

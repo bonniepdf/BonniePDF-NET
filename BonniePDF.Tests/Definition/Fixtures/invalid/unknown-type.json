@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/invalid/unknown-type",
-    "description": "The vocabulary is closed: a type outside the catalogue fails before anything renders, and the error is located by path.",
-    "spec": "15 §4, §12.4"
+    "description": "The vocabulary is closed: a type outside the catalogue fails before anything renders, and the error is located by path."
   },
   "_expectErrors": [
     {

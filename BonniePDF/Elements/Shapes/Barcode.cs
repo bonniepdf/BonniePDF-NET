@@ -66,7 +66,10 @@ public class Barcode : ElementBase, IRoleProvider, IAltTextProvider
     /// <summary>When <c>true</c>, the barcode is tagged as a decorative <c>/Artifact</c>.</summary>
     public bool IsDecorative { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// The structure role in a tagged PDF: <c>Figure</c> when the element has alternative text, otherwise
+    /// <c>Artifact</c>. It is always <c>Artifact</c> when <see cref="IsDecorative"/> is set.
+    /// </summary>
     public SemanticRole SemanticRole =>
         IsDecorative || string.IsNullOrEmpty(AltText)
             ? SemanticRole.Artifact

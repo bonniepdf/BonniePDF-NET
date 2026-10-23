@@ -40,8 +40,11 @@ public enum DiagnosticCategory
 /// </summary>
 public sealed class Diagnostic(DiagnosticSeverity severity, DiagnosticCategory category, string message, string? source = null, Exception? cause = null)
 {
+    /// <summary>How serious the issue is.</summary>
     public DiagnosticSeverity Severity { get; } = severity;
+    /// <summary>The subsystem the issue came from.</summary>
     public DiagnosticCategory Category { get; } = category;
+    /// <summary>Human-readable description of the issue.</summary>
     public string Message { get; } = message;
     /// <summary>Optional identifier of what the diagnostic is about (e.g. a font path).</summary>
     public string? Source { get; } = source;
@@ -60,24 +63,37 @@ public sealed class DiagnosticsCollector
 {
     private readonly List<Diagnostic> _entries = new();
 
+    /// <summary>Adds a diagnostic to the collection. A <c>null</c> diagnostic is ignored.</summary>
     public void Add(Diagnostic? d)
     {
         if (d != null) _entries.Add(d);
     }
 
+    /// <summary>
+    /// Adds an error-severity diagnostic with the given category, message, optional source and underlying
+    /// exception.
+    /// </summary>
     public void AddError(DiagnosticCategory category, string message, string? source = null, Exception? cause = null)
         => Add(new Diagnostic(DiagnosticSeverity.Error, category, message, source, cause));
 
+    /// <summary>
+    /// Adds a warning-severity diagnostic with the given category, message, optional source and underlying
+    /// exception.
+    /// </summary>
     public void AddWarning(DiagnosticCategory category, string message, string? source = null, Exception? cause = null)
         => Add(new Diagnostic(DiagnosticSeverity.Warning, category, message, source, cause));
 
+    /// <summary>Adds an informational diagnostic with the given category, message and optional source.</summary>
     public void AddInfo(DiagnosticCategory category, string message, string? source = null)
         => Add(new Diagnostic(DiagnosticSeverity.Info, category, message, source));
 
+    /// <summary>Every diagnostic collected so far, in the order it was added.</summary>
     public IReadOnlyList<Diagnostic> All => _entries;
 
+    /// <summary>The number of diagnostics collected so far.</summary>
     public int Count => _entries.Count;
 
+    /// <summary><c>true</c> when at least one error-severity diagnostic has been collected.</summary>
     public bool HasErrors
     {
         get
@@ -88,6 +104,7 @@ public sealed class DiagnosticsCollector
         }
     }
 
+    /// <summary><c>true</c> when at least one warning-severity diagnostic has been collected.</summary>
     public bool HasWarnings
     {
         get
@@ -98,6 +115,7 @@ public sealed class DiagnosticsCollector
         }
     }
 
+    /// <summary>Removes every collected diagnostic.</summary>
     public void Clear() => _entries.Clear();
 
     /// <summary>

@@ -50,6 +50,7 @@ public class OrderedList : ListElementBase
         _nestedLists.Add(nestedList);
     }
 
+    /// <summary>Returns the lists nested inside this list.</summary>
     public override IReadOnlyList<ListElementBase> GetNestedLists()
     {
         return _nestedLists;

@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/valid/content-direction",
-    "description": "Direction overrides and physical/logical alignment survive a definition round trip.",
-    "spec": "22"
+    "description": "Direction overrides and physical/logical alignment survive a definition round trip."
   },
   "_expect": {
     "pages": 1,

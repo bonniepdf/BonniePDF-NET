@@ -168,7 +168,7 @@ internal class PdfResourceRegistry
         // (A) Direct TTF/OTF file path
         if (IsEmbeddedFont(fontIdentifier))
         {
-            // A face the document carries itself is in memory already (spec 16).
+            // A face the document carries itself is in memory already.
             byte[]? documentFontBytes = FontMetrics.GetDocumentFontBytes(fontIdentifier);
             return documentFontBytes is not null
                 ? RegisterEmbeddedFontFromBytes(documentFontBytes, fontIdentifier)
@@ -491,7 +491,7 @@ internal class PdfResourceRegistry
         // candidates (index 0 is the primary and has no FallbackFont entry).
         var candidates = new List<ShaperFont> { new() { FontIdentifier = primaryFontIdentifier, Font = primaryFont } };
         var fallbackByIndex = new List<FallbackFont?> { null };
-        // The document's own faces come first, then the global registrations (spec 16 §4).
+        // The document's own faces come first, then the global registrations.
         IEnumerable<FallbackFont> documentFallbacks = FontMetrics.ActiveDocumentFonts?.FallbackFonts() ?? [];
         foreach (FallbackFont fb in documentFallbacks.Concat(FontManager.GetFallbackFonts()))
         {

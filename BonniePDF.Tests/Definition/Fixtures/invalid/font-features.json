@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/invalid/font-features",
-    "description": "Reject invalid feature tags and values before constructing a document.",
-    "spec": "19"
+    "description": "Reject invalid feature tags and values before constructing a document."
   },
   "_expectErrors": [
     {

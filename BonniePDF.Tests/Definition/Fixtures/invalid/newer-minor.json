@@ -2,7 +2,6 @@
   "_fixture": {
     "id": "document-definition/invalid/newer-minor",
     "description": "A reader supporting 1.0 meets a 1.3 document using a property and an element type it does not know. It refuses by default, one newer-minor error per unrecognised item at its path (a reader cannot know which minor version introduced what it does not recognise, so no `since`); with bestEffort it would read the rest, ignore the unrecognised key and leave out the unrecognised element, and return three warnings: the two items and the version itself. The key `hyphenate` and type `Callout` are invented for this fixture and are not, and will not become, real names.",
-    "spec": "15 §12.2; 14 §7.2",
     "readerSupports": "1.0"
   },
   "_expectErrors": [

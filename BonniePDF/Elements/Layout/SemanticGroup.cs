@@ -21,6 +21,6 @@ public class SemanticGroup : VerticalStack, IRoleProvider
     /// </summary>
     public SemanticGroup(SemanticRole role) => _role = role;
 
-    /// <inheritdoc />
+    /// <summary>The role the group was created with.</summary>
     public SemanticRole SemanticRole => _role;
 }

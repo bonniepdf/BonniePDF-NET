@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/invalid/transforms",
-    "description": "Reject invalid axes, offsets and nonpositive content widths.",
-    "spec": "18"
+    "description": "Reject invalid axes, offsets and nonpositive content widths."
   },
   "_expectErrors": [
     {

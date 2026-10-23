@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/valid/defaults-equivalence",
-    "description": "Two spacers, one stating Spacer's defaults and one omitting them; a stack stating VerticalStack's default spacing. Both cores read them to the same document, and the canonical write omits every value equal to its spec default (15 §3.3).",
-    "spec": "15 §3.3, §14; 03 §1"
+    "description": "Two spacers, one stating Spacer's defaults and one omitting them; a stack stating VerticalStack's default spacing. Both cores read them to the same document, and the canonical write omits every value equal to its spec default."
   },
   "_expect": {
     "canonical": {

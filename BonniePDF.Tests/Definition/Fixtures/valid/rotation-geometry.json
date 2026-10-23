@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/valid/rotation-geometry",
-    "description": "Shared four-corner bounds for cardinal and cancelling nested turns.",
-    "spec": "17"
+    "description": "Shared four-corner bounds for cardinal and cancelling nested turns."
   },
   "_expect": {
     "pages": 1,

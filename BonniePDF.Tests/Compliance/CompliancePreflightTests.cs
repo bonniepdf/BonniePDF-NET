@@ -7,8 +7,7 @@ namespace BonniePDF.Tests.Compliance;
 /// <summary>
 /// Accessibility / compliance preflight — mirrors the TypeScript
 /// <c>compliance-preflight.test.ts</c>. Verifies a11y capture into the snapshot and
-/// the evaluator's per-element findings against the PDF/UA-1 rule set
-/// (the specification).
+/// the evaluator's per-element findings against the PDF/UA-1 rule set.
 /// </summary>
 public sealed class CompliancePreflightTests
 {

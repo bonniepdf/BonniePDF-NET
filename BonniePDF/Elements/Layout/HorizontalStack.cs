@@ -45,7 +45,7 @@ public class HorizontalStack : ElementBase, IStatefulElement
     /// </summary>
     public IList<IElement> Children => _children;
 
-    /// <inheritdoc />
+    /// <summary>Returns the children in order.</summary>
     public IEnumerable<IElement> GetChildren() => _children;
 
     /// <summary>Adds one paragraph from lines joined by hard line breaks.</summary>

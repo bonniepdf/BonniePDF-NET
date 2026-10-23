@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/settings-rules/pdfa-a-level-without-tagging",
-    "description": "An \"a\" level of PDF/A needs tagged output.",
-    "spec": "15 §5.2"
+    "description": "An \"a\" level of PDF/A needs tagged output."
   },
   "_expect": {
     "valid": false,

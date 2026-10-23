@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/valid/transforms",
-    "description": "Native mirror and translate with composed cardinal rotation.",
-    "spec": "18"
+    "description": "Native mirror and translate with composed cardinal rotation."
   },
   "_expect": {
     "contentStreamSha256": "b5323607e876e52e29201a88a218b007e2da7167796be22ca1aee6c09a5216d0",

@@ -10,9 +10,8 @@ namespace BonniePDF.Tests.Core;
 ///
 /// C# spells this two ways, both resolving through Units.ToPoints: numeric
 /// extension methods for object initializers (1.Inches()), and a second Unit
-/// argument on the fluent verbs (.Height(1, Unit.Inch)). See the shared
-/// specification, naming map §4A.6, for why this differs from TypeScript's
-/// widened input type - the capability is the same, the spelling is idiomatic.
+/// argument on the fluent verbs (.Height(1, Unit.Inch)). This differs
+/// from TypeScript's widened input type - the capability is the same, the spelling is idiomatic.
 ///
 /// Mirrors core/tests/normalize/to-length.test.ts and
 /// core/tests/layout/length-units-end-to-end.test.ts.

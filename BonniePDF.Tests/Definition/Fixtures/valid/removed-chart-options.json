@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/valid/removed-chart-options",
-    "description": "Removed chart options warn as unknown keys in ordinary reads and fail strict validation; effective defaults remain supported.",
-    "spec": "15 §8.9, §12.4"
+    "description": "Removed chart options warn as unknown keys in ordinary reads and fail strict validation; effective defaults remain supported."
   },
   "_expect": {
     "pages": 1

@@ -34,7 +34,10 @@ public class Heading : TextBlock, IStatefulElement, IRoleProvider
     /// </summary>
     public int Level { get; set; } = 1;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// The heading role for the heading's <see cref="Level"/>: <c>H1</c> to <c>H6</c>. Levels above 6 use
+    /// <c>H6</c>, and levels below 1 use <c>H1</c>.
+    /// </summary>
     public override SemanticRole SemanticRole => Level switch
     {
         <= 1 => SemanticRole.H1,

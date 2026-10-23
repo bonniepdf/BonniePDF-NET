@@ -72,7 +72,7 @@ public static class FontFamilyResolver
         // A font name a document made for one of its faces is already resolved.
         if (DocumentFonts.IsDocumentFontName(family)) return family;
 
-        // The document's own fonts come first (spec 16 §4).
+        // The document's own fonts come first.
         DocumentFontFace? documentFace = FontMetrics.ActiveDocumentFonts?.Resolve(family, weight, italic);
         if (documentFace is not null) return documentFace.FontName;
 

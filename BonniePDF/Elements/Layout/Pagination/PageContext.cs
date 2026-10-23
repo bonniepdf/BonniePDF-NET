@@ -8,7 +8,7 @@ namespace BonniePDF;
 /// <remarks>
 /// Deliberately small and stateless: a predicate that can only see these three
 /// values is a pure function of where the element landed, which is what keeps
-/// layout deterministic (spec "Layout &amp; Pagination" §10) and keeps the two
+/// layout deterministic and keeps the two
 /// implementations in step.
 /// </remarks>
 /// <param name="PageNumber">1-based number of the page the element is being rendered on.</param>

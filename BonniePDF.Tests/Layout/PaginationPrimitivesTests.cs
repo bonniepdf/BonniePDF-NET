@@ -9,7 +9,7 @@ namespace BonniePDF.Tests.Layout;
 
 /// <summary>
 /// Pagination control primitives - shared conformance fixture
-/// layout/pagination-primitives (spec "Layout &amp; Pagination" §7).
+/// layout/pagination-primitives.
 ///
 /// Every case is expressed with Container heights rather than text, so the
 /// numbers are font-independent and the TypeScript suite asserts exactly the

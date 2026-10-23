@@ -9,9 +9,13 @@ namespace BonniePDF;
 [StructLayout(LayoutKind.Sequential)]
 public struct Border
 {
+    /// <summary>Border width on the left side, in points.</summary>
     public float Left { get; set; }
+    /// <summary>Border width on the top side, in points.</summary>
     public float Top { get; set; }
+    /// <summary>Border width on the right side, in points.</summary>
     public float Right { get; set; }
+    /// <summary>Border width on the bottom side, in points.</summary>
     public float Bottom { get; set; }
 
     /// <summary>Creates uniform border width on all sides</summary>
