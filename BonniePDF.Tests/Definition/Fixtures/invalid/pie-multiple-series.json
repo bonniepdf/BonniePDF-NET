@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/invalid/pie-multiple-series",
-    "description": "A pie chart uses series[0] only. The code API silently ignores the rest; a validator must not, or a stored file says something the PDF does not show.",
-    "spec": "15 §8.9"
+    "description": "A pie chart uses series[0] only. The code API silently ignores the rest; a validator must not, or a stored file says something the PDF does not show."
   },
   "_expectErrors": [
     {

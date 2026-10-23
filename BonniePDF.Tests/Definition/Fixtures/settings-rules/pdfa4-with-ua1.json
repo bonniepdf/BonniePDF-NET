@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/settings-rules/pdfa4-with-ua1",
-    "description": "PDF/A-4 is PDF 2.0, so it cannot be combined with PDF/UA-1.",
-    "spec": "15 §5.2"
+    "description": "PDF/A-4 is PDF 2.0, so it cannot be combined with PDF/UA-1."
   },
   "_expect": {
     "valid": false,

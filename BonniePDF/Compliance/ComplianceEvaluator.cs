@@ -44,6 +44,7 @@ public sealed class ComplianceFinding
 {
     /// <summary>Stable rule identifier, e.g. "figure-missing-alt".</summary>
     public string Code { get; init; } = "";
+    /// <summary>How serious the finding is.</summary>
     public ComplianceSeverity Severity { get; init; }
     /// <summary>The standard the rule derives from: "PDF/UA-1" or "WCAG 2.2".</summary>
     public string Standard { get; init; } = "PDF/UA-1";
@@ -93,14 +94,17 @@ public sealed class ComplianceReport
     public IReadOnlyList<ComplianceFinding> Findings { get; init; } = new List<ComplianceFinding>();
     /// <summary>True when there are no <see cref="ComplianceSeverity.Error"/> findings.</summary>
     public bool Passed { get; init; }
+    /// <summary>Number of error-severity findings.</summary>
     public int ErrorCount { get; init; }
+    /// <summary>Number of warning-severity findings.</summary>
     public int WarningCount { get; init; }
+    /// <summary>Number of informational findings.</summary>
     public int InfoCount { get; init; }
 }
 
 /// <summary>
 /// Evaluates a layout snapshot against the PDF/UA-1 accessibility rules. Pure and
-/// deterministic. See <c>the specification</c> for the rule set.
+/// deterministic.
 /// </summary>
 public static class CompliancePreflight
 {
@@ -248,7 +252,7 @@ public static class CompliancePreflight
 
     /// <summary>
     /// Resolves the colour painted behind a text node, walking ancestors
-    /// nearest-first per spec/08 §4.3.1.
+    /// nearest-first
     ///
     /// The important property of this method is that it is willing to say "I don't
     /// know". A confident wrong verdict is worse than no verdict: it trains authors

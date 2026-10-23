@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 namespace BonniePDF.Drawing;
 
 /// <summary>A gradient color stop at a normalized offset (0-1).</summary>
+/// <param name="Offset">Position along the gradient, from 0 (start) to 1 (end).</param>
+/// <param name="Color">The colour at this position.</param>
 [StructLayout(LayoutKind.Auto)]
 public readonly record struct GradientStop(float Offset, Color Color);
 

@@ -27,7 +27,10 @@ public class CanvasElement : ElementBase, IRoleProvider, IAltTextProvider
     /// <summary>When true, tagged as /Artifact regardless of AltText.</summary>
     public bool IsDecorative { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// The structure role in a tagged PDF: <c>Figure</c> when the element has alternative text, otherwise
+    /// <c>Artifact</c>. It is always <c>Artifact</c> when <see cref="IsDecorative"/> is set.
+    /// </summary>
     public SemanticRole SemanticRole =>
         IsDecorative || string.IsNullOrEmpty(AltText)
             ? SemanticRole.Artifact

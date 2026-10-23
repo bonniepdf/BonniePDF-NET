@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/invalid/rotation",
-    "description": "Constrained angles must be quarter turns; content width must be positive.",
-    "spec": "17"
+    "description": "Constrained angles must be quarter turns; content width must be positive."
   },
   "_expectErrors": [
     {

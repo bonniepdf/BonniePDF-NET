@@ -77,7 +77,7 @@ internal static class StateComparer
             foreach (FieldInfo field in t.GetFields(AllInstance))
             {
                 if (skip.Contains(field.Name)) continue;
-                // A document's font faces are named after the document (spec 16 §4): their identity is family, weight, italic and bytes.
+                // A document's font faces are named after the document: their identity is family, weight, italic and bytes.
                 if (a is DocumentFontFace && field.Name is "<FontName>k__BackingField" or "<Font>k__BackingField") continue;
                 if (field.Name is "_serial" or "<Serial>k__BackingField") continue;
                 string? d = Find(field.GetValue(a), field.GetValue(b), $"{path}.{field.Name}", seen);

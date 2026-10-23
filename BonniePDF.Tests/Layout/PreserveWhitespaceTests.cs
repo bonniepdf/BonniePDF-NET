@@ -8,7 +8,7 @@ namespace BonniePDF.Tests.Layout;
 
 /// <summary>
 /// <see cref="TextBlock.PreserveWhitespace"/> - shared conformance fixture
-/// layout/preserve-whitespace (spec 03 "Preserved whitespace"). Courier at 10pt is 6pt per code
+/// layout/preserve-whitespace. Courier at 10pt is 6pt per code
 /// point, so a width of 60pt holds exactly ten code points on a line whatever the platform. The
 /// TypeScript suite asserts the same cases.
 /// </summary>

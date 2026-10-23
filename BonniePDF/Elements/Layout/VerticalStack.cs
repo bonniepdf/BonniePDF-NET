@@ -25,7 +25,7 @@ public class VerticalStack : ElementBase, IStatefulElement
     /// </summary>
     public IList<IElement> Children => _children;
 
-    /// <inheritdoc />
+    /// <summary>Returns the children in order.</summary>
     public IEnumerable<IElement> GetChildren() => _children;
 
     /// <summary>

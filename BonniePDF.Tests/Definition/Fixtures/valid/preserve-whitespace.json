@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/valid/preserve-whitespace",
-    "description": "A TextBlock with preserveWhitespace true, and one stating the default false. Both cores read both; the canonical write keeps the key only where it differs from its spec default (15 §3.3).",
-    "spec": "15 §3.3, §7; 03 TextBlock 'Preserved whitespace'"
+    "description": "A TextBlock with preserveWhitespace true, and one stating the default false. Both cores read both; the canonical write keeps the key only where it differs from its spec default."
   },
   "_expect": {
     "pages": 1,

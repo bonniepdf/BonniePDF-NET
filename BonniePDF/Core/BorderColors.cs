@@ -8,9 +8,13 @@ namespace BonniePDF;
 [StructLayout(LayoutKind.Sequential)]
 public struct BorderColors
 {
+    /// <summary>Colour of the left border, or <c>null</c> when none is set for that side.</summary>
     public Color? Left { get; set; }
+    /// <summary>Colour of the top border, or <c>null</c> when none is set for that side.</summary>
     public Color? Top { get; set; }
+    /// <summary>Colour of the right border, or <c>null</c> when none is set for that side.</summary>
     public Color? Right { get; set; }
+    /// <summary>Colour of the bottom border, or <c>null</c> when none is set for that side.</summary>
     public Color? Bottom { get; set; }
 
     /// <summary>Creates uniform border color on all sides</summary>

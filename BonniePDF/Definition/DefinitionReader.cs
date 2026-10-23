@@ -175,7 +175,7 @@ internal sealed class DefinitionReader
         }
         if (options.Rasterizer is not null) settings.SvgRasterizer = options.Rasterizer;
 
-        // Fonts belong to this document (spec 16).
+        // Fonts belong to this document.
         if (definition.TryGetProperty("resources", out JsonElement resources))
         {
             foreach (JsonProperty entry in resources.EnumerateObject())
@@ -240,7 +240,7 @@ internal sealed class DefinitionReader
 
     // ── elements ─────────────────────────────────────────────────────────────
 
-    /// <summary>Builds an element, and marks it with its `id` (spec 07 source identifiers).</summary>
+    /// <summary>Builds an element, and marks it with its `id`.</summary>
     private IElement Element(JsonElement node)
     {
         IElement element = Build(node);

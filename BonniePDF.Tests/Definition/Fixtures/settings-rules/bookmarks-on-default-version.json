@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/settings-rules/bookmarks-on-default-version",
-    "description": "Bookmarks need PDF 1.7 or later.",
-    "spec": "15 §5.2"
+    "description": "Bookmarks need PDF 1.7 or later."
   },
   "_expect": {
     "valid": false,

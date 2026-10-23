@@ -12,7 +12,7 @@ namespace BonniePDF;
 /// </summary>
 public class Hyperlink : IElement, IRoleProvider
 {
-    /// <inheritdoc />
+    /// <summary>Always <c>Link</c>.</summary>
     public SemanticRole SemanticRole => SemanticRole.Link;
 
     /// <summary>

@@ -6,7 +6,7 @@ using PdfDocument = BonniePDF.Document;
 namespace BonniePDF.Tests.Definition;
 
 /// <summary>
-/// The cross-key rules of <c>settings</c> (spec 15 §5.2): the shared fixtures
+/// The cross-key rules of <c>settings</c>: the shared fixtures
 /// document-definition/settings-rules. A combination the validator refuses must be one generation refuses,
 /// and one it accepts must generate and land on the PDF version the fixture names, so the rules in the
 /// description cannot drift from behaviour.

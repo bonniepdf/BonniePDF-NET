@@ -104,11 +104,17 @@ public readonly struct Color : IEquatable<Color>
     internal float ScA => _a;
 
     // Basic Colors
+    /// <summary>Opaque black (<c>#000000</c>).</summary>
     public static Color Black => new(0, 0, 0);
+    /// <summary>Opaque white (<c>#ffffff</c>).</summary>
     public static Color White => new(255, 255, 255);
+    /// <summary>Opaque pure red (<c>#ff0000</c>).</summary>
     public static Color Red => new(255, 0, 0);
+    /// <summary>Opaque pure blue (<c>#0000ff</c>).</summary>
     public static Color Blue => new(0, 0, 255);
+    /// <summary>Light grey (<c>#e5e5e5</c>).</summary>
     public static Color LightGray => new(229, 229, 229); // ~0.9f
+    /// <summary>Dark grey (<c>#4d4d4d</c>).</summary>
     public static Color DarkGray => new(77, 77, 77);     // ~0.3f
 
     // Tailwind v4 palette tokens (Slate50, Red500, …) now live on `ColorPalette`, addressed
@@ -182,12 +188,16 @@ public readonly struct Color : IEquatable<Color>
         return $"#{R:x2}{G:x2}{B:x2}";
     }
 
+    /// <summary>
+    /// Returns <c>true</c> when <paramref name="other"/> has the same red, green, blue and alpha values.
+    /// </summary>
     public bool Equals(Color other)
         => _r == other._r && _g == other._g && _b == other._b && _a == other._a;
 
     public override bool Equals(object? obj)
         => obj is Color other && Equals(other);
 
+    /// <summary>Returns a hash code consistent with <see cref="Equals(Color)"/>.</summary>
     public override int GetHashCode()
         => HashCode.Combine(_r, _g, _b, _a);
 

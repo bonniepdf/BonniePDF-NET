@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/unrepresentable/function-template",
-    "description": "A DOCUMENT (not a definition) whose footerTemplate is a function and which holds a CanvasElement. toDefinition is strict by default: it fails, listing both nodes with locations, and writes nothing. With onUnrepresentable 'drop' it returns a definition of the rest plus one `dropped` note each; that result is not a faithful copy and the round-trip guarantee does not apply. Each core builds the document from `recipe` in its own idiom.",
-    "spec": "15 §11"
+    "description": "A DOCUMENT (not a definition) whose footerTemplate is a function and which holds a CanvasElement. toDefinition is strict by default: it fails, listing both nodes with locations, and writes nothing. With onUnrepresentable 'drop' it returns a definition of the rest plus one `dropped` note each; that result is not a faithful copy and the round-trip guarantee does not apply. Each core builds the document from `recipe` in its own idiom."
   },
   "recipe": {
     "settings": {

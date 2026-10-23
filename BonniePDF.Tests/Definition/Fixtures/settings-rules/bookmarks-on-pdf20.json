@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/settings-rules/bookmarks-on-pdf20",
-    "description": "Bookmarks are allowed on PDF 2.0.",
-    "spec": "15 §5.2"
+    "description": "Bookmarks are allowed on PDF 2.0."
   },
   "_expect": {
     "valid": true,

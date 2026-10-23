@@ -4,7 +4,7 @@ using Xunit;
 namespace BonniePDF.Tests.Definition;
 
 /// <summary>
-/// The Document Definition validator (spec 15). The fixtures are the shared conformance fixtures
+/// The Document Definition validator. The fixtures are the shared conformance fixtures
 /// document-definition/{valid,invalid}, generated into this suite from the specification; the
 /// TypeScript suite runs the same files. Every fixture must produce exactly the errors it lists.
 ///

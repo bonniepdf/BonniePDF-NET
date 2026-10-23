@@ -14,8 +14,7 @@ namespace BonniePDF;
 // Deliberately small: the preflight's character is "pure, deterministic,
 // dependency-light", and contrast does not need more than this.
 //
-// Mirrors Contrast.ts in the TypeScript core; both conform to
-// the specification §4.3.
+// Mirrors Contrast.ts in the TypeScript core; both implement the same rules.
 //
 // NOTE: authored without a .NET toolchain in the build environment — must be
 // compiled and run against the shared fixtures before it is considered landed.
@@ -47,9 +46,14 @@ public readonly struct ContrastVerdict
     /// <summary>Why the backdrop was unresolvable. Meaningful only when indeterminate.</summary>
     public ContrastUnknownReason Reason { get; init; }
 
+    /// <summary>Creates a verdict for text whose backdrop could not be resolved, with the reason.</summary>
     public static ContrastVerdict Indeterminate(ContrastUnknownReason reason) =>
         new() { IsIndeterminate = true, Reason = reason };
 
+    /// <summary>
+    /// Creates a verdict from a measured contrast ratio and the ratio required; it passes when the ratio meets
+    /// the requirement.
+    /// </summary>
     public static ContrastVerdict Measured(double ratio, double required) =>
         new() { Passed = ratio >= required, Ratio = ratio, Required = required };
 }

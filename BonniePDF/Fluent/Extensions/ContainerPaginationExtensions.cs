@@ -3,8 +3,7 @@ using System;
 namespace BonniePDF.Fluent;
 
 /// <summary>
-/// Fluent forms of the pagination control primitives (spec
-/// "Layout &amp; Pagination" §7).
+/// Fluent forms of the pagination control primitives.
 /// </summary>
 /// <remarks>
 /// Each method wraps the rest of the chain, so the primitive governs whatever is

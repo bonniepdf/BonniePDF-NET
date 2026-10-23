@@ -7,8 +7,7 @@ namespace BonniePDF.Tests.Compliance;
 /// <summary>
 /// WCAG 2.2 AA contrast preflight — mirrors the TypeScript
 /// <c>contrast-preflight.test.ts</c>. Covers the contrast maths, paint capture into
-/// the snapshot, and the evaluator's contrast findings
-/// (the specification §4.3).
+/// the snapshot, and the evaluator's contrast findings.
 /// </summary>
 public sealed class ContrastPreflightTests
 {

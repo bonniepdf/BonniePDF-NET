@@ -5,7 +5,7 @@ using Xunit;
 
 namespace BonniePDF.Tests.Typography;
 
-// Glyph fallback applies to all text (spec 16): text drawn on a positioned canvas, as charts
+// Glyph fallback applies to all text: text drawn on a positioned canvas, as charts
 // and canvas elements draw theirs, takes the same fallback font as body text. U+2641 (the earth
 // symbol) is in Liberation Sans but not in Liberation Mono, the primary face here. The
 // TypeScript suite asserts the same.

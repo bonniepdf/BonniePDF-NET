@@ -7,7 +7,7 @@ using Xunit;
 namespace BonniePDF.Tests.Definition;
 
 /// <summary>
-/// The Document Definition reader (spec 15), driven by the shared conformance fixtures
+/// The Document Definition reader, driven by the shared conformance fixtures
 /// document-definition/valid, generated into this suite from the specification.
 ///
 /// Mirrors core/tests/definition/definition.test.ts.

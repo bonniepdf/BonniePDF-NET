@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/invalid/missing-version",
-    "description": "No version stamps. A writer that omitted them did not decide, so the reader does not assume 1.0 (15 §12.2).",
-    "spec": "15 §12.2"
+    "description": "No version stamps. A writer that omitted them did not decide, so the reader does not assume 1.0."
   },
   "_expectErrors": [
     {

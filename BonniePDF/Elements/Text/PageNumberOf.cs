@@ -60,7 +60,7 @@ public class PageNumberOf : TextBlock
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>Resolves the page number the reference points to, then renders it as text.</summary>
     public override RenderStatus RenderStateful(RenderContext ctx, float width)
     {
         ResolveText(ctx);

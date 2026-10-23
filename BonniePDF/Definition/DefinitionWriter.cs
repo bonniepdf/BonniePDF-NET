@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 namespace BonniePDF;
 
 /// <summary>
-/// Writes a <see cref="Document"/> as a Document Definition (spec 15 §11, §14, §21). The inverse of
+/// Writes a <see cref="Document"/> as a Document Definition. The inverse of
 /// <see cref="DefinitionReader"/>: driven by the same element description, it reads the same public
 /// properties the reader sets, and leaves out what a freshly constructed element already holds.
 /// </summary>
@@ -30,7 +30,7 @@ internal sealed partial class DefinitionWriter
 
     /// <summary>
     /// Every element in the catalogue: its class (matched exactly: a subclass is custom behaviour), its
-    /// catalogue name, and a fresh element for its defaults (spec 15 §3.3).
+    /// catalogue name, and a fresh element for its defaults.
     /// </summary>
     private static readonly (Type Class, string Name, Func<object> Blank)[] Catalogue =
     [

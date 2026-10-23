@@ -1,9 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/valid/page-chrome",
-    "description": "Declarative page chrome. The footer has a default plus an even-page override; the header has only a first-page element. For page n the element is the first present of firstPage (n = 1), odd/even, default (15 §5.1). Three pages of content force pages 2 and 3 to exist.",
-    "spec": "15 §5.1; 01 §4",
-    "requires": "prerequisite P1 (pageTemplate factory, 01 §4.0): built in both cores"
+    "description": "Declarative page chrome. The footer has a default plus an even-page override; the header has only a first-page element. For page n the element is the first present of firstPage (n = 1), odd/even, default. Three pages of content force pages 2 and 3 to exist."
   },
   "_expect": {
     "pages": 3,

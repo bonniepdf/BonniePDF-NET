@@ -8,9 +8,13 @@ namespace BonniePDF;
 [StructLayout(LayoutKind.Sequential)]
 public struct Thickness
 {
+    /// <summary>Thickness on the left side, in points.</summary>
     public float Left { get; set; }
+    /// <summary>Thickness on the top side, in points.</summary>
     public float Top { get; set; }
+    /// <summary>Thickness on the right side, in points.</summary>
     public float Right { get; set; }
+    /// <summary>Thickness on the bottom side, in points.</summary>
     public float Bottom { get; set; }
 
     /// <summary>Creates uniform thickness on all sides</summary>

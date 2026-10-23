@@ -58,7 +58,7 @@ public class HardeningTests
         // PDF/A-1b §6.3.4 and PDF/UA-1 §7.21.4.1 both forbid non-embedded
         // fonts. When no font can be embedded for the standard Helvetica,
         // the serializer withholds both claims rather than emitting invalid
-        // ones. The tagging itself is kept (spec 04 §8.2).
+        // ones. The tagging itself is kept.
         // Simulate a no-fonts environment: clear bundled fonts AND disable the OS
         // system-font fallback so no TTF is available for the standard Helvetica name.
         // The serializer must drop the PDF/A claim rather than emit an invalid one.

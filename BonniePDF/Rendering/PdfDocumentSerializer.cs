@@ -149,7 +149,7 @@ internal class PdfDocumentSerializer
         // 4. Post-Processing (Write Resources)
         string globalResources = ctx.Resources.WriteResources(writer, pageIds.Count);
 
-        // ── Honest claims (spec 04 §8) ──────────────────────────────
+        // ── Honest claims ──────────────────────────────
         // Decide which of the requested claims this generation can honour,
         // now that we know which fonts were embedded.
         HonestClaims claims = EvaluateHonestClaims(ctx.Resources);
@@ -594,7 +594,7 @@ internal class PdfDocumentSerializer
     }
 
     /// <summary>
-    /// The honest-claim guard (spec 04 §8). PDF/A and PDF/UA-1 both require every
+    /// The honest-claim guard. PDF/A and PDF/UA-1 both require every
     /// font to be embedded, so when a standard-14 reference could not be, both
     /// claims are withheld for this generation and each is reported as a
     /// <see cref="DiagnosticCategory.Compliance"/> warning. Tagging is kept. The
@@ -627,7 +627,7 @@ internal class PdfDocumentSerializer
                 $"The document is still tagged. {remedy}", "pdf/ua-1");
         }
 
-        // Spec 04 §7: under PDF/A the OutputIntent goes with the claim; a PDF/UA-only
+        // Under PDF/A the OutputIntent goes with the claim; a PDF/UA-only
         // document always carries one, for colour management rather than as a claim.
         bool needsOutputIntent = pdfA || (pdfUaRequested && !settings.PdfAEnabled);
         return new HonestClaims(pdfA ? settings.Conformance : PdfAConformance.None, pdfUa, needsOutputIntent);

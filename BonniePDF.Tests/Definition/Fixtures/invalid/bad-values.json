@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/invalid/bad-values",
-    "description": "Every value error is returned in one pass, each located. An unknown token, a malformed colour (which the code API would silently turn black), a malformed length, a null, and a wrong JSON type. Nothing is constructed.",
-    "spec": "15 §3.2, §3.3, §12.1"
+    "description": "Every value error is returned in one pass, each located. An unknown token, a malformed colour (which the code API would silently turn black), a malformed length, a null, and a wrong JSON type. Nothing is constructed."
   },
   "_expectErrors": [
     {

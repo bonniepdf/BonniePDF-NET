@@ -223,7 +223,7 @@ public class RenderContext
 
     /// <summary>
     /// The horizontal text alignment a <see cref="BonniePDF.Container"/> establishes for
-    /// descendant text that sets no alignment of its own (spec 01 "Document Model" §3.2). <c>null</c> means
+    /// descendant text that sets no alignment of its own. <c>null</c> means
     /// no ambient is in effect: unset text stays at its own default (Left). Scoped to the container's
     /// subtree by the container itself, which restores the value it found on the way in.
     /// </summary>

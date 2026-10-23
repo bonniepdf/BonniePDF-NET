@@ -8,7 +8,7 @@ using Xunit;
 namespace BonniePDF.Tests.Definition;
 
 /// <summary>
-/// The Document Definition writer (spec 15 §11, §14, §21). Three kinds of check:
+/// The Document Definition writer. Three kinds of check:
 /// every valid fixture reads, writes and reads back to a document with identical state and identical PDF bytes;
 /// every key of every element, with every token it accepts, survives read, write, read (generated from the element
 /// description, so a new key is covered the day it is added); and the constructs a definition cannot express are
@@ -77,7 +77,7 @@ public partial class DefinitionWriterTests
     }
 
     /// <summary>
-    /// Structural equality across the cores (spec 14 §8): the same values, key order ignored, numbers compared to three
+    /// Structural equality across the cores: the same values, key order ignored, numbers compared to three
     /// decimal places. A length in centimetres is 56.69291338582677 in a double and 56.692913 in a float.
     /// </summary>
     private static bool Equivalent(JsonNode? a, JsonNode? b)
@@ -167,7 +167,7 @@ public partial class DefinitionWriterTests
         }
     }
 
-    /// <summary>Barcode.QuietZone is an int here where the wire says number (spec 15 §20.3), so its sample is a whole number.</summary>
+    /// <summary>Barcode.QuietZone is an int here where the wire says number, so its sample is a whole number.</summary>
     private static JsonNode AsDotnetValue(string type, string key, JsonNode sample) =>
         type == "Barcode" && key == "quietZone" ? 3 : sample;
 

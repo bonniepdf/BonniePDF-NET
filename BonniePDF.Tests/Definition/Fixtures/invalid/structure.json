@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/invalid/structure",
-    "description": "Structural errors: a required key missing (TextBlock.text), a required choice over-specified (Hyperlink uri and targetPageIndex), keys that cannot coexist (fontName and fontFamily), a duplicate id, and references to nothing (a resource, an anchor, a page beyond the last, a heading identifier no Heading carries).",
-    "spec": "15 §4.1, §8.4, §8.8, §12.4"
+    "description": "Structural errors: a required key missing (TextBlock.text), a required choice over-specified (Hyperlink uri and targetPageIndex), keys that cannot coexist (fontName and fontFamily), a duplicate id, and references to nothing (a resource, an anchor, a page beyond the last, a heading identifier no Heading carries)."
   },
   "_expectErrors": [
     {

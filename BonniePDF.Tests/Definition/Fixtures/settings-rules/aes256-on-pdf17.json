@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/settings-rules/aes256-on-pdf17",
-    "description": "AES-256 on PDF 1.7.",
-    "spec": "15 §5.2"
+    "description": "AES-256 on PDF 1.7."
   },
   "_expect": {
     "valid": true,

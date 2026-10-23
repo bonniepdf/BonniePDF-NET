@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/invalid/emoji-rendering",
-    "description": "Unknown emoji rendering modes are rejected.",
-    "spec": "20"
+    "description": "Unknown emoji rendering modes are rejected."
   },
   "_expectErrors": [
     {

@@ -10,9 +10,10 @@ namespace BonniePDF;
 /// </summary>
 public class Container : BorderedElementBase, IContentContainer, IStatefulElement
 {
+    /// <summary>The element placed inside the container.</summary>
     public IElement? Child { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>Returns the child, or nothing when there is none.</summary>
     public IEnumerable<IElement> GetChildren() => Child is null ? [] : [Child];
 
     /// <summary>
@@ -24,6 +25,7 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         get => Child;
         set => Child = value;
     }
+    /// <summary>Space between the container's border and its child, in points.</summary>
     public Thickness Padding { get; set; }
 
     /// <summary>
@@ -135,7 +137,7 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
 
     /// <summary>
     /// The ambient horizontal text alignment a given <see cref="HorizontalAlignment"/> establishes for
-    /// descendant text (spec 01 "Document Model" §3.2). Start/Center/End map to Left/Center/Right; Stretch
+    /// descendant text. Start/Center/End map to Left/Center/Right; Stretch
     /// and unset (null) return null, leaving whatever ambient an enclosing container established untouched.
     /// </summary>
     private TextAlignment? AmbientTextAlignmentFor(BonniePDF.HorizontalAlignment? alignment) => alignment switch
@@ -148,7 +150,10 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         _ => null,
     };
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Renders as much of the container as fits on the current page and reports whether it is complete or needs
+    /// another page.
+    /// </summary>
     public RenderStatus RenderStateful(RenderContext ctx, float width)
     {
         if (_fragments == 0)
@@ -166,7 +171,10 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         return RenderFragment(ctx, width);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Clears the continuation state, including the child's, so the container can be rendered again from the
+    /// start.
+    /// </summary>
     public void ResetState()
     {
         _fragments = 0;

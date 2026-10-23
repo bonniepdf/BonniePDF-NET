@@ -5,7 +5,7 @@ using Xunit;
 namespace BonniePDF.Tests.Content;
 
 /// <summary>
-/// Text shorthand (spec 03 "Text shorthand", fixture <c>layout/text-shorthand</c>): text content (a string,
+/// Text shorthand: text content (a string,
 /// or several lines as one paragraph) wherever an element can be added, and strings as table cells.
 /// </summary>
 /// <remarks>

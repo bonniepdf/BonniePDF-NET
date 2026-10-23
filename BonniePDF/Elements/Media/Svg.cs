@@ -85,7 +85,10 @@ public class Svg : ElementBase, IRoleProvider, IAltTextProvider
     /// </summary>
     public bool StrictUnsupportedFeatures { get; set; } = true;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// The structure role in a tagged PDF: <c>Figure</c> when the element has alternative text, otherwise
+    /// <c>Artifact</c>. It is always <c>Artifact</c> when <see cref="IsDecorative"/> is set.
+    /// </summary>
     public SemanticRole SemanticRole =>
         IsDecorative || string.IsNullOrEmpty(AltText) ? SemanticRole.Artifact : SemanticRole.Figure;
 

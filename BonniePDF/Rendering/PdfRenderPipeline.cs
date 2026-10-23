@@ -35,8 +35,7 @@ internal static class PdfRenderPipeline
 
         PdfSize orientedPageSize = settings.GetOrientedPageSize();
         RenderContext ctx = new(orientedPageSize, settings.Margin) { EmojiRendering = settings.EmojiRendering };
-        // Header/footer consume body content height (spec: Layout & Pagination
-        // §5.1). Installed before any layout so the very first page's cursor and
+        // Header/footer consume body content height. Installed before any layout so the very first page's cursor and
         // break threshold already account for the chrome.
         ctx.SetChromeReservation(ChromeReservationFactory.For(settings, ctx));
 
@@ -263,8 +262,7 @@ internal static class PdfRenderPipeline
         // made after the document was created (e.g., doc.Settings.Orientation = Landscape)
         settings.GetOrientedPageSize();
 
-        // Header/footer consume body content height (spec: Layout & Pagination
-        // §5.1). The context is supplied by the caller here, so the reservation
+        // Header/footer consume body content height. The context is supplied by the caller here, so the reservation
         // is installed at the top of the run rather than at construction.
         ctx.SetChromeReservation(ChromeReservationFactory.For(settings, ctx));
 
@@ -643,8 +641,7 @@ internal static class PdfRenderPipeline
             float footerHeight = footerElement.MeasureHeight(contentWidth);
             // Centred in the bottom margin band while it fits there, flush to
             // the bottom page edge once it outgrows it - continuous at
-            // footerHeight == Margin, and it never runs off the page
-            // (spec: Layout & Pagination §5.1).
+            // footerHeight == Margin, and it never runs off the page.
             float bandTop = ctx.PageSize.Height - MathF.Max(ctx.Margin, footerHeight);
             ctx.CurrentX = startX;
             ctx.CurrentY = bandTop + MathF.Max(0f, (ctx.Margin - footerHeight) / 2f);

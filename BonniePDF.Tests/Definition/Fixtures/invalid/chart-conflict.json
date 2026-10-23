@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/invalid/chart-conflict",
-    "description": "A chart's own title, xAxis and yAxis and the copies inside `data` may both be given, but must agree: the reader would otherwise have to choose, and a stored file would say something the PDF does not show. Equal values (compared as JSON, key order ignored) are fine.",
-    "spec": "15 §8.9"
+    "description": "A chart's own title, xAxis and yAxis and the copies inside `data` may both be given, but must agree: the reader would otherwise have to choose, and a stored file would say something the PDF does not show. Equal values (compared as JSON, key order ignored) are fine."
   },
   "_expectErrors": [
     {

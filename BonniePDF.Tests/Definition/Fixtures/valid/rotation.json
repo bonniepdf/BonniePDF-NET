@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/valid/rotation",
-    "description": "Native rotations, quarter turns and nested free rotations.",
-    "spec": "17"
+    "description": "Native rotations, quarter turns and nested free rotations."
   },
   "_expect": {
     "pages": 1,

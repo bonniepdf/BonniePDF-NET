@@ -6,6 +6,7 @@ namespace BonniePDF;
 /// </summary>
 public static class BorderStyle
 {
+    /// <summary>No border (width 0).</summary>
     public const float None = 0f;
 
     /// <summary>

@@ -31,7 +31,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     /// <summary>The grouping role this table tags under: Table for data, Div for layout.</summary>
     private SemanticRole GroupRole => IsLayoutGrid ? SemanticRole.Div : SemanticRole.Table;
 
-    /// <inheritdoc />
+    /// <summary><c>Table</c>, or <c>Div</c> when the table is used only as a layout grid.</summary>
     public SemanticRole SemanticRole => GroupRole;
 
     private readonly float[] _columnWeights;
@@ -106,7 +106,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
     public IReadOnlyList<TableRow> GetAllRows() =>
         _headers.Concat(_rows).Concat(_footers).ToList().AsReadOnly();
 
-    /// <inheritdoc /> - every cell's content across headers, body rows, and footers.
+    /// <summary>Returns the content of every cell across the header, body and footer rows.</summary>
     public IEnumerable<IElement> GetChildren()
     {
         // Read without materialising compact body rows (see TableRowStore), into a list sized

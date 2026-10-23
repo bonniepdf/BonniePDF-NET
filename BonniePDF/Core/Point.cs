@@ -8,6 +8,8 @@ namespace BonniePDF;
 [StructLayout(LayoutKind.Sequential)]
 public struct Point(float x, float y)
 {
+    /// <summary>Horizontal coordinate, in points.</summary>
     public float X = x;
+    /// <summary>Vertical coordinate, in points.</summary>
     public float Y = y;
 }

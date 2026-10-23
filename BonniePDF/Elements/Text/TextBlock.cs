@@ -41,6 +41,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
 
     // State tracking for multipage rendering
     private int _lastLineRendered = -1;
+    /// <summary>The text to render. A hard line break starts a new paragraph.</summary>
     public required string Text { get; set; }
     private TextAlignment _alignment { get => _text.Alignment; set => _text = _text.With(value, static (o, v) => o with { Alignment = v }); }
     private bool _alignmentExplicit { get => _text.AlignmentExplicit; set => _text = _text.With(value, static (o, v) => o with { AlignmentExplicit = v }); }
@@ -50,7 +51,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     /// <summary>
     /// Paragraph alignment. When not set explicitly, an enclosing <see cref="Container"/> whose
     /// <c>HorizontalAlignment</c> is Start/Center/End supplies an ambient default instead of the plain
-    /// Left below (spec 01 "Document Model" §3.2); see <see cref="EffectiveAlignment"/>.
+    /// Left below; see <see cref="EffectiveAlignment"/>.
     /// </summary>
     public TextAlignment Alignment
     {

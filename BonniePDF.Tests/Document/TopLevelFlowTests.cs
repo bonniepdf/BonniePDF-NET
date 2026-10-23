@@ -6,7 +6,7 @@ using Xunit;
 namespace BonniePDF.Tests.Document;
 
 /// <summary>
-/// Spec fixture layout/top-level-flow (02 §6.1, 04 §3.3): an element may span any number of
+/// Shared fixture layout/top-level-flow: an element may span any number of
 /// pages while it makes progress, is skipped with a warning after two fresh pages on which it
 /// still cannot fit, and keeps its marked content balanced on every page it spans.
 /// Mirrored by the TypeScript suite's top-level-flow tests.

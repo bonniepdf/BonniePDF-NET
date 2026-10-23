@@ -33,7 +33,7 @@ public sealed class TextDescriptor
             // Only pass Alignment along when Align()/AlignCenter()/etc. was actually called: assigning it
             // unconditionally would mark the built RichText's Alignment as explicit even when the author
             // never touched it, silently defeating the ambient text-alignment fallback from an enclosing
-            // Container (spec 01 "Document Model" §3.2).
+            // Container.
             var richText = new RichText();
             if (_alignmentExplicit) richText.Alignment = _alignment;
 

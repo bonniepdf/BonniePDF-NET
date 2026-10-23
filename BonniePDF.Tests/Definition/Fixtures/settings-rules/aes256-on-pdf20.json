@@ -1,8 +1,7 @@
 {
   "_fixture": {
     "id": "document-definition/settings-rules/aes256-on-pdf20",
-    "description": "AES-256 is allowed on PDF 2.0 as well as 1.7.",
-    "spec": "15 §5.2"
+    "description": "AES-256 is allowed on PDF 2.0 as well as 1.7."
   },
   "_expect": {
     "valid": true,
