@@ -59,9 +59,9 @@ public static class EdgeReceiptExample
         doc.Add(Center("+44 117 555 0110"));
         doc.Add(Rule());
 
-        doc.Add(Kv("Order", "#" + OrderNo));
-        doc.Add(Kv("Date", stamp));
-        doc.Add(Kv("Served", "Register 3 - Alex"));
+        doc.Add(Kv("Order", "#" + OrderNo, leftWeight: 1, rightWeight: 2));
+        doc.Add(Kv("Date", stamp, leftWeight: 1, rightWeight: 2));
+        doc.Add(Kv("Served", "Register 3 - Alex", leftWeight: 1, rightWeight: 2));
         doc.Add(Rule());
 
         double total = 0;
@@ -116,7 +116,7 @@ public static class EdgeReceiptExample
 
         doc.Add(Rule());
         doc.Add(Center("Thank you! Returns within 30 days", 8, Ink));
-        doc.Add(Center("with your receipt.", 8, Mute));
+        doc.Add(Center("with your receipt.", 8, Ink));
         doc.Add(Center("Generated with BonniePDF", 7, Mute, 8));
 
         return doc;
@@ -142,15 +142,21 @@ public static class EdgeReceiptExample
         return block;
     }
 
-    private static HorizontalStack Kv(string label, string value, bool bold = false, float size = 9)
+    private static HorizontalStack Kv(
+        string label,
+        string value,
+        bool bold = false,
+        float size = 9,
+        int leftWeight = 3,
+        int rightWeight = 2)
     {
         HorizontalStack row = new()
         {
             WidthDistribution = WidthDistribution.Weighted,
             Margin = new Thickness(0, 1.5f, 0, 1.5f),
         };
-        row.Add(Cell(label, size, bold, TextAlignment.Left), 3);
-        row.Add(Cell(value, size, bold, TextAlignment.Right), 2);
+        row.Add(Cell(label, size, bold, TextAlignment.Left), leftWeight);
+        row.Add(Cell(value, size, bold, TextAlignment.Right), rightWeight);
         return row;
     }
 
