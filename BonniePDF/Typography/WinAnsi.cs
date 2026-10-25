@@ -23,4 +23,10 @@ internal static class WinAnsi
     /// <summary>The WinAnsi byte that shows <paramref name="codePoint"/> in a standard font, or 0x3F (<c>?</c>) when it has none.</summary>
     internal static byte Byte(int codePoint) =>
         codePoint <= 0xFF ? (byte)codePoint : High.TryGetValue(codePoint, out byte b) ? b : (byte)0x3F;
+
+    /// <summary>
+    /// Whether a standard text font can show <paramref name="codePoint"/>: every code point up to U+00FF, and the
+    /// characters Windows-1252 places at 0x80-0x9F. A character it cannot show falls back to another face.
+    /// </summary>
+    internal static bool Covers(int codePoint) => codePoint <= 0xFF || High.ContainsKey(codePoint);
 }

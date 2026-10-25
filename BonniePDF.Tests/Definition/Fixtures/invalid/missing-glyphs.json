@@ -1,0 +1,22 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/missing-glyphs",
+    "description": "Unknown missingGlyphs modes are rejected."
+  },
+  "_expectErrors": [
+    {
+      "path": "/settings/missingGlyphs",
+      "code": "invalid-value"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "missingGlyphs": "replace"
+  },
+  "pages": [
+    {
+      "content": []
+    }
+  ]
+}

@@ -48,6 +48,7 @@ public static class FontMetrics
     {
         public bool EmbedStandardFonts { get; } = embedStandardFonts;
         public DocumentFonts? DocumentFonts { get; set; }
+        public Action<string>? ReportUnknownFamily { get; set; }
         public Dictionary<string, string> PathAliases { get; } = new(GlobalFontPathAliases, StringComparer.OrdinalIgnoreCase);
         public Dictionary<string, TtfFont> InstanceAliases { get; } = new(GlobalFontInstanceAliases, StringComparer.OrdinalIgnoreCase);
     }
@@ -69,10 +70,11 @@ public static class FontMetrics
     /// Embedded standard-font substitutes are resolved lazily on the first
     /// measurement, before layout makes a wrapping or pagination decision.
     /// </summary>
-    internal static IDisposable BeginDocumentScope(bool embedStandardFonts, DocumentFonts? documentFonts = null)
+    internal static IDisposable BeginDocumentScope(bool embedStandardFonts, DocumentFonts? documentFonts = null,
+        Action<string>? reportUnknownFamily = null)
     {
         DocumentAliasScope? previous = CurrentDocumentScope.Value;
-        var scope = new DocumentAliasScope(embedStandardFonts);
+        var scope = new DocumentAliasScope(embedStandardFonts) { ReportUnknownFamily = reportUnknownFamily };
         if (documentFonts is { IsEmpty: false })
         {
             scope.DocumentFonts = documentFonts;
@@ -83,6 +85,13 @@ public static class FontMetrics
         CurrentDocumentScope.Value = scope;
         return new DocumentAliasScopeLease(previous);
     }
+
+
+    /// <summary>Reports, to the render pass in progress, a font family that resolved to nothing and was drawn in Helvetica.</summary>
+    internal static void ReportUnknownFamily(string family) => CurrentDocumentScope.Value?.ReportUnknownFamily?.Invoke(family);
+
+    /// <summary>Whether a document is being laid out or rendered, so a font family is resolved now rather than when it was set.</summary>
+    internal static bool IsGeneratingDocument => CurrentDocumentScope.Value != null;
 
     /// <summary>The document fonts of the render pass in progress, if that document has any.</summary>
     internal static DocumentFonts? ActiveDocumentFonts => CurrentDocumentScope.Value?.DocumentFonts;
@@ -341,7 +350,38 @@ public static class FontMetrics
         if (unparsedPath != null) return GetUnparsedTtfWidth(text, unparsedPath, fontSize);
 
         // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
+        if (StandardFontCoverage.IsStandardTextFace(fontIdentifier) && !StandardFontCoverage.CoversAll(text))
+            return GetStandardFallbackWidth(text, fontIdentifier, fontSize, features);
         return GetStandardFontWidth(text, fontIdentifier, fontSize);
+    }
+
+    /// <summary>
+    /// A standard text face's text that falls back in part, measured as it is painted: the clusters the face shows
+    /// from its width tables, the rest from the shaped advances of the fallback faces that draw them.
+    /// </summary>
+    private static float GetStandardFallbackWidth(string text, string fontName, float fontSize, IReadOnlyDictionary<string,int>? features)
+    {
+        List<ShaperFont> candidates = StandardFallbackCandidates(fontName);
+        var covered = new System.Text.StringBuilder();
+        double fallback = 0;
+        foreach (StandardTextSegment segment in StandardFontCoverage.Split(text))
+        {
+            if (segment.Covered) { covered.Append(segment.Text); continue; }
+            foreach (ShapedRun run in TextRunShaper.ShapeTextRuns(segment.Text, candidates).Runs)
+            {
+                TtfFont face = candidates[run.FontIndex].Font;
+                fallback += SumAdvances(face.Shape(run.Text, features)) * fontSize / face.UnitsPerEm;
+            }
+        }
+        return (float)(GetStandardFontWidth(covered.ToString(), fontName, fontSize) + fallback);
+    }
+
+    private static List<ShaperFont> StandardFallbackCandidates(string fontName)
+    {
+        var candidates = new List<ShaperFont>();
+        foreach (FallbackFont fallback in StandardFontCoverage.FallbackChain(fontName))
+            candidates.Add(new ShaperFont { FontIdentifier = fallback.Key, Font = fallback.Font });
+        return candidates;
     }
 
     /// <summary>
@@ -357,6 +397,9 @@ public static class FontMetrics
         if (fontIdentifier.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) ||
             fontIdentifier.EndsWith(".otf", StringComparison.OrdinalIgnoreCase))
             return LoadMeasuringTtf(fontIdentifier, out unparsedPath);
+
+        // A family registered through FontManager resolves to a name for that registration.
+        if (FontManager.GetRegisteredFont(fontIdentifier) is { } registered) return registered.Font;
 
         DocumentAliasScope? scope = CurrentDocumentScope.Value;
         if (scope != null)
@@ -500,6 +543,7 @@ public static class FontMetrics
         var scope=CurrentDocumentScope.Value;
         if(scope?.InstanceAliases.TryGetValue(identifier,out var scoped)==true)return scoped;
         if(GlobalFontInstanceAliases.TryGetValue(identifier,out var global))return global;
+        if(FontManager.GetRegisteredFont(identifier) is { } registered)return registered.Font;
         if(scope?.EmbedStandardFonts==true && FontManager.GetParsedStandardFont(identifier) is TtfFont standard)return standard;
         if(scope?.PathAliases.TryGetValue(identifier,out var scopedPath)==true)identifier=scopedPath;
         else if(GlobalFontPathAliases.TryGetValue(identifier,out var globalPath))identifier=globalPath;
@@ -510,12 +554,31 @@ public static class FontMetrics
 
     internal static int GetGlyphCount(string text,string identifier,IReadOnlyDictionary<string,int>? features=null)
     {
-        var font=MetricFace(identifier);if(font is null)return text.EnumerateRunes().Count(c=>c.Value>=32);
+        var font=MetricFace(identifier);
+        if(font is null)
+        {
+            if(StandardFontCoverage.IsStandardTextFace(identifier) && !StandardFontCoverage.CoversAll(text))
+                return GetStandardFallbackGlyphCount(text, identifier, features);
+            return text.EnumerateRunes().Count(c=>c.Value>=32);
+        }
         if (TextRunShaper.PrimaryCovers(text, font)) return font.Shape(text, features).Count;
         var candidates=new List<ShaperFont>{new(){FontIdentifier="primary",Font=font}};
         foreach(var fallback in (ActiveDocumentFonts?.FallbackFonts()??[]).Concat(FontManager.GetFallbackFonts()))if(!ReferenceEquals(fallback.Font,font))candidates.Add(new ShaperFont {FontIdentifier=fallback.Key,Font=fallback.Font});
         return TextRunShaper.ShapeTextRuns(text,candidates).Runs.Sum(run=>candidates[run.FontIndex].Font.Shape(run.Text,features).Count);
     }
+    private static int GetStandardFallbackGlyphCount(string text, string fontName, IReadOnlyDictionary<string,int>? features)
+    {
+        List<ShaperFont> candidates = StandardFallbackCandidates(fontName);
+        int count = 0;
+        foreach (StandardTextSegment segment in StandardFontCoverage.Split(text))
+        {
+            if (segment.Covered) { count += segment.Text.EnumerateRunes().Count(c => c.Value >= 32); continue; }
+            foreach (ShapedRun run in TextRunShaper.ShapeTextRuns(segment.Text, candidates).Runs)
+                count += candidates[run.FontIndex].Font.Shape(run.Text, features).Count;
+        }
+        return count;
+    }
+
     internal static bool IsSafeTextBreak(string text,string identifier,int offset,IReadOnlyDictionary<string,int>? features=null)
     {
         return GetTextBreakPredicate(text, identifier, features)(offset);

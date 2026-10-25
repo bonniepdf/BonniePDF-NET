@@ -58,14 +58,6 @@ public sealed class DocumentFonts
 
     private static int _nextSerial;
 
-    private static readonly (string Name, int Weight)[] SubfamilyWeights =
-    [
-        ("thin", 100), ("extralight", 200), ("ultralight", 200), ("light", 300),
-        ("regular", 400), ("book", 400), ("normal", 400), ("medium", 500),
-        ("semibold", 600), ("demibold", 600), ("extrabold", 800), ("ultrabold", 800),
-        ("bold", 700), ("black", 900), ("heavy", 900),
-    ];
-
     private readonly int _serial = Interlocked.Increment(ref _nextSerial);
 #if NET9_0_OR_GREATER
     private readonly System.Threading.Lock _gate = new();
@@ -183,23 +175,7 @@ public sealed class DocumentFonts
     {
         string key = FamilyKey(family);
         List<DocumentFontFace> candidates = Faces.Where(f => string.Equals(FamilyKey(f.Family), key, StringComparison.Ordinal)).ToList();
-        if (candidates.Count == 0) return null;
-
-        List<DocumentFontFace> styled = candidates.Where(f => f.Italic == italic).ToList();
-        List<DocumentFontFace> pool = styled.Count > 0 ? styled : candidates;
-
-        int wanted = (int)weight;
-        DocumentFontFace? exact = pool.Find(f => f.Weight == wanted);
-        if (exact is not null) return exact;
-
-        DocumentFontFace? heavier = pool.Where(f => f.Weight > wanted).OrderBy(f => f.Weight).FirstOrDefault();
-        DocumentFontFace? lighter = pool.Where(f => f.Weight < wanted).OrderByDescending(f => f.Weight).FirstOrDefault();
-        if (wanted is >= 400 and <= 500)
-        {
-            return pool.Where(f => f.Weight > wanted && f.Weight <= 500).OrderBy(f => f.Weight).FirstOrDefault()
-                ?? lighter ?? heavier;
-        }
-        return wanted < 400 ? lighter ?? heavier : heavier ?? lighter;
+        return FaceMatching.Match(candidates, (int)weight, italic, f => f.Weight, f => f.Italic);
     }
 
     /// <summary>The face made by <see cref="Add"/> that has this font name, or null.</summary>
@@ -214,20 +190,8 @@ public sealed class DocumentFonts
 
     private static string FamilyKey(string family) => family.Trim().ToLowerInvariant();
 
-    private static int DetectWeight(TtfFont font)
-    {
-        if (font.WeightClass is { } weightClass) return weightClass;
-        string words = font.FontSubfamily.ToLowerInvariant().Replace(" ", "", StringComparison.Ordinal)
-            .Replace("-", "", StringComparison.Ordinal).Replace("_", "", StringComparison.Ordinal);
-        foreach ((string name, int weight) in SubfamilyWeights)
-            if (words.Contains(name, StringComparison.Ordinal)) return weight;
-        return 400;
-    }
+    private static int DetectWeight(TtfFont font) =>
+        font.WeightClass is { } weightClass ? weightClass : FaceMatching.SubfamilyWeight(font.FontSubfamily);
 
-    private static bool DetectItalic(TtfFont font)
-    {
-        if (font.SelectionItalic) return true;
-        string subfamily = font.FontSubfamily.ToLowerInvariant();
-        return subfamily.Contains("italic", StringComparison.Ordinal) || subfamily.Contains("oblique", StringComparison.Ordinal);
-    }
+    private static bool DetectItalic(TtfFont font) => font.SelectionItalic || FaceMatching.SubfamilyItalic(font.FontSubfamily);
 }

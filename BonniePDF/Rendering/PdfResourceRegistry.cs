@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BonniePDF.Rendering.Writers;
@@ -65,7 +66,7 @@ internal class PdfResourceRegistry
 {
 
     /// <summary>Identifier prefix for glyph-fallback fonts registered on demand.</summary>
-    private const string FallbackPrefix = "virtual:fallback:";
+    internal const string FallbackPrefix = FontManager.RegisteredFontPrefix;
 
     private int _fontCounter;
     private int _imageCounter;
@@ -116,6 +117,9 @@ internal class PdfResourceRegistry
     /// instance so non-Document callers still get a usable collector.
     /// </summary>
     public DiagnosticsCollector Diagnostics { get; set; } = new DiagnosticsCollector();
+
+    /// <summary>What happens to a code point no font can draw; wired from the document's settings.</summary>
+    internal MissingGlyphs MissingGlyphs { get; set; } = MissingGlyphs.Drop;
 
     internal Dictionary<string, string> FontAliasMap { get; } = new();
     
@@ -169,7 +173,8 @@ internal class PdfResourceRegistry
         if (IsEmbeddedFont(fontIdentifier))
         {
             // A face the document carries itself is in memory already.
-            byte[]? documentFontBytes = FontMetrics.GetDocumentFontBytes(fontIdentifier);
+            byte[]? documentFontBytes = FontMetrics.GetDocumentFontBytes(fontIdentifier) ??
+                                        FontManager.GetRegisteredFont(fontIdentifier)?.Bytes;
             return documentFontBytes is not null
                 ? RegisterEmbeddedFontFromBytes(documentFontBytes, fontIdentifier)
                 : RegisterEmbeddedFont(fontIdentifier);
@@ -452,6 +457,8 @@ internal class PdfResourceRegistry
         EmbeddedFontInfo? primaryInfo = ResolveEmbeddedFontInfo(primaryFontIdentifier);
         TtfFont? primaryFont = primaryInfo?.Font;
         if (primaryFont != null && !TextRunShaper.PrimaryCovers(text, primaryFont)) return null;
+        if (primaryFont == null && StandardFontCoverage.IsStandardTextFace(primaryFontIdentifier) &&
+            !StandardFontCoverage.CoversAll(text)) return null;
         GlyphUsageTracker? tracker = primaryInfo?.Tracker;
         bool canTrack = primaryInfo?.ResourceName == resourceName;
         if (_wholeTextFonts.TryGetValue(primaryFontIdentifier, out TextRunFont? kept) &&
@@ -468,14 +475,16 @@ internal class PdfResourceRegistry
         EmbeddedFontInfo? primaryInfo = ResolveEmbeddedFontInfo(primaryFontIdentifier);
         TtfFont? primaryFont = primaryInfo?.Font;
 
-        // Non-embedded standard Type1 fonts can't be shaped (no cmap/glyph IDs);
-        // preserve the literal-string emission path unchanged.
+        // A non-embedded standard font is written as WinAnsi bytes. Text it shows whole keeps that literal-string
+        // path unchanged; a standard text face falls back for the rest.
         if (primaryFont == null)
         {
-            return new List<ResolvedTextRun>
-            {
-                new() { ResourceName = resourceName, EmbeddedFont = null, FontIdentifier = primaryFontIdentifier, Text = text }
-            };
+            if (!StandardFontCoverage.IsStandardTextFace(primaryFontIdentifier) || StandardFontCoverage.CoversAll(text))
+                return new List<ResolvedTextRun>
+                {
+                    new() { ResourceName = resourceName, EmbeddedFont = null, FontIdentifier = primaryFontIdentifier, Text = text }
+                };
+            return ResolveStandardTextRuns(primaryFontIdentifier, resourceName, text);
         }
 
         if (TextRunShaper.PrimaryCovers(text, primaryFont))
@@ -502,17 +511,7 @@ internal class PdfResourceRegistry
 
         ShapeResult shaped = TextRunShaper.ShapeTextRuns(text, candidates);
 
-        if (shaped.Unsupported.Count > 0)
-        {
-            string sample = string.Join(", ", shaped.Unsupported
-                .Distinct()
-                .Take(8)
-                .Select(cp => $"U+{cp:X4}"));
-            Diagnostics.AddWarning(
-                DiagnosticCategory.Font,
-                $"Dropped {shaped.Unsupported.Count} code point(s) with no glyph in the selected or fallback fonts ({sample}).",
-                primaryFontIdentifier);
-        }
+        ReportMissing(shaped.Unsupported, primaryFontIdentifier);
 
         var result = new List<ResolvedTextRun>(shaped.Runs.Count);
         foreach (ShapedRun run in shaped.Runs)
@@ -531,23 +530,76 @@ internal class PdfResourceRegistry
                 continue;
             }
 
-            FallbackFont fb = fallbackByIndex[run.FontIndex]!;
-            string fbIdentifier = candidates[run.FontIndex].FontIdentifier;
-            string fbResource = RegisterEmbeddedFontFromBytes(fb.Bytes, fbIdentifier);
-            EmbeddedFontInfo? fbInfo = ResolveEmbeddedFontInfo(fbIdentifier);
-            TtfFont? fbFont = fbInfo?.Font;
-            result.Add(new ResolvedTextRun
-            {
-                ResourceName = fbResource,
-                EmbeddedFont = fbFont,
-                Tracker = fbInfo?.Tracker,
-                CanTrackPreparedGlyphs = fbInfo?.ResourceName == fbResource,
-                FontIdentifier = fbIdentifier,
-                Text = run.Text
-            });
+            result.Add(FallbackRun(fallbackByIndex[run.FontIndex]!, candidates[run.FontIndex].FontIdentifier, run.Text));
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The runs of a standard text face's text that it does not show whole: covered clusters stay in the face, as
+    /// WinAnsi bytes, and the rest go through its fallback chain, its Liberation substitute first.
+    /// </summary>
+    private List<ResolvedTextRun> ResolveStandardTextRuns(string fontName, string resourceName, string text)
+    {
+        List<FallbackFont> chain = StandardFontCoverage.FallbackChain(fontName);
+        var candidates = new List<ShaperFont>(chain.Count);
+        foreach (FallbackFont fb in chain)
+            candidates.Add(new ShaperFont { FontIdentifier = $"{FallbackPrefix}{fb.Key}", Font = fb.Font });
+        var result = new List<ResolvedTextRun>();
+        var unsupported = new List<int>();
+        foreach (StandardTextSegment segment in StandardFontCoverage.Split(text))
+        {
+            if (segment.Covered)
+            {
+                result.Add(new ResolvedTextRun { ResourceName = resourceName, EmbeddedFont = null, FontIdentifier = fontName, Text = segment.Text });
+                continue;
+            }
+            if (candidates.Count == 0)
+            {
+                // Nothing to fall back to: every renderable code point of the piece is missing.
+                foreach (Rune rune in segment.Text.EnumerateRunes())
+                    if (TextEncoding.IsRenderableCodePoint(rune.Value)) unsupported.Add(rune.Value);
+                continue;
+            }
+            ShapeResult shaped = TextRunShaper.ShapeTextRuns(segment.Text, candidates);
+            unsupported.AddRange(shaped.Unsupported);
+            foreach (ShapedRun run in shaped.Runs)
+                result.Add(FallbackRun(chain[run.FontIndex], candidates[run.FontIndex].FontIdentifier, run.Text));
+        }
+        ReportMissing(unsupported, fontName);
+        return result;
+    }
+
+    /// <summary>A run in a fallback face, registering the face for embedding on demand.</summary>
+    private ResolvedTextRun FallbackRun(FallbackFont fb, string fbIdentifier, string text)
+    {
+        string fbResource = RegisterEmbeddedFontFromBytes(fb.Bytes, fbIdentifier);
+        EmbeddedFontInfo? fbInfo = ResolveEmbeddedFontInfo(fbIdentifier);
+        return new ResolvedTextRun
+        {
+            ResourceName = fbResource,
+            EmbeddedFont = fbInfo?.Font,
+            Tracker = fbInfo?.Tracker,
+            CanTrackPreparedGlyphs = fbInfo?.ResourceName == fbResource,
+            FontIdentifier = fbIdentifier,
+            Text = text
+        };
+    }
+
+    /// <summary>
+    /// Code points no font could draw: a <c>Font</c> warning, or a <see cref="MissingGlyphException"/> when the
+    /// document asks for one.
+    /// </summary>
+    private void ReportMissing(IList<int> unsupported, string fontName)
+    {
+        if (unsupported.Count == 0) return;
+        int[] named = unsupported.Distinct().Take(8).ToArray();
+        if (MissingGlyphs == MissingGlyphs.Throw) throw new MissingGlyphException(named, fontName);
+        Diagnostics.AddWarning(
+            DiagnosticCategory.Font,
+            $"Dropped {unsupported.Count} code point(s) with no glyph in the selected or fallback fonts ({string.Join(", ", named.Select(MissingGlyphException.FormatCodePoint))}).",
+            fontName);
     }
 
     /// <summary>
