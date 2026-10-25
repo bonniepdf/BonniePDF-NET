@@ -29,13 +29,27 @@ internal class PdfDocumentSerializer
         _diagnostics = diagnostics ?? new DiagnosticsCollector();
     }
 
+    private readonly HashSet<string> _reportedFamilies = new(StringComparer.Ordinal);
+
+    /// <summary>Reports a font family that resolved to nothing, once per family for this generation.</summary>
+    private void ReportUnknownFamily(string family)
+    {
+        lock (_reportedFamilies)
+        {
+            if (!_reportedFamilies.Add(family)) return;
+        }
+        _diagnostics.AddWarning(DiagnosticCategory.Font,
+            $"Font family '{family}' is not a document font, a registered family or a standard font; its text was drawn in Helvetica.",
+            family);
+    }
+
     /// <summary>
     /// Serializes the document synchronously to the provided writer.
     /// </summary>
     public void Serialize(IPdfWriter writer)
     {
         using var performanceScope = PerformanceEvents.Measure(PerformanceStage.PdfWriting);
-        using IDisposable fontScope = FontMetrics.BeginDocumentScope(UsesEmbeddedStandardFonts(), _document.Fonts);
+        using IDisposable fontScope = FontMetrics.BeginDocumentScope(UsesEmbeddedStandardFonts(), _document.Fonts, ReportUnknownFamily);
 
         // 0. Set up encryption if configured
         int encryptId = 0;
@@ -260,7 +274,7 @@ internal class PdfDocumentSerializer
     /// </summary>
     public async Task SerializeAsync(IAsyncPdfWriter writer, CancellationToken cancellationToken)
     {
-        using IDisposable fontScope = FontMetrics.BeginDocumentScope(UsesEmbeddedStandardFonts(), _document.Fonts);
+        using IDisposable fontScope = FontMetrics.BeginDocumentScope(UsesEmbeddedStandardFonts(), _document.Fonts, ReportUnknownFamily);
 
         // 0. Set up encryption if configured
         int encryptId = 0;
@@ -488,6 +502,7 @@ internal class PdfDocumentSerializer
             TocEntries = new Dictionary<string, int>(),
             DiscardFinishedPages = true,
         };
+        dryRunCtx.Resources.MissingGlyphs = _document.Settings.MissingGlyphs;
 
         foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
 
@@ -516,6 +531,7 @@ internal class PdfDocumentSerializer
         };
         ctx.Resources.Diagnostics = _diagnostics;
         ctx.Resources.MaxImageDpi = _document.Settings.MaxImageDpi;
+        ctx.Resources.MissingGlyphs = _document.Settings.MissingGlyphs;
         // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
         // independently of any PDF/A claim - substitute embedded Liberation for
         // the standard-14 references in tagged output too.

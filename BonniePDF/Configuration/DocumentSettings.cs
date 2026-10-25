@@ -33,6 +33,22 @@ public class DocumentSettings
         }
     }
 
+    private MissingGlyphs _missingGlyphs;
+    /// <summary>
+    /// What happens to a character no registered font can draw: <see cref="MissingGlyphs.Drop"/> (the default)
+    /// leaves it out and records a <c>Font</c> warning; <see cref="MissingGlyphs.Throw"/> stops generation with a
+    /// <see cref="MissingGlyphException"/>. A character that falls back to another font is not missing.
+    /// </summary>
+    public MissingGlyphs MissingGlyphs
+    {
+        get => _missingGlyphs;
+        set
+        {
+            if (!System.Enum.IsDefined(value)) throw new System.ArgumentOutOfRangeException(nameof(value));
+            _missingGlyphs = value;
+        }
+    }
+
     /// <summary>
     /// Creates a new instance of DocumentSettings with default values
     /// </summary>

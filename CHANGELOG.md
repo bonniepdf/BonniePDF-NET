@@ -29,8 +29,18 @@ Status: Prerelease
 - `DefaultTextStyle` now supplies `Decoration`, and behaves the same as TypeScript when regenerated
 - A font used for two purposes is embedded once, and a document's fonts no longer vary between runs
 - A chart's own colour (`BarColor`, `LineColor` and the others) now applies to series that set none
+- Text in Helvetica, Times or Courier no longer prints `?` for characters such as `Ł`, `Ж` or `Ω`: they are drawn in the matching Liberation face
+
+### Added
+
+- **`Settings.MissingGlyphs`.** `MissingGlyphs.Drop` (the default) leaves out a character no registered font can draw and records a `Font` warning, as before. `MissingGlyphs.Throw` stops generation with a `MissingGlyphException` naming the characters (`CodePoints`) and the font (`FontName`), for tests and pipelines that must not ship a document with a missing character. The definition key is `missingGlyphs` (`drop`, `throw`).
+- **A font family that resolves to nothing is reported.** Text whose `FontFamily` is not a document font, a registered family or a standard family is still drawn in Helvetica, and generation now records one `Font` warning per family naming it.
 
 ### Fixed
+
+- **Standard-font text outside WinAnsi falls back instead of printing `?`.** Text in an unembedded standard font (Helvetica, Times, Courier) can only show roughly Latin-1, so `Łódź` printed as `?ód?` with no warning, while the same text in a PDF/A or PDF/UA document, whose standard fonts are embedded Liberation, printed correctly. A character the standard font cannot show is now drawn in its Liberation substitute (Helvetica to Liberation Sans, Times to Liberation Serif, Courier to Liberation Mono, same weight and style), which covers Latin Extended, Greek and Cyrillic, and only that face's glyphs are embedded. When the substitute lacks it, the document's own fonts and then the registered fonts are tried; a character none of them has is dropped with a warning. Text the standard font shows whole produces the same bytes as before. Layout measures the fallback glyphs, and SVG export draws them. A letter and its combining accent are never split between fonts.
+- **The list bullet `◦` in a standard font** printed as `?`; it is now the Liberation glyph, the same as in TypeScript.
+- **A family registered with `FontManager.RegisterFont` now resolves.** Naming that family in `FontFamily` drew Helvetica: only document fonts and `FontFamilyResolver.RegisterFamily` families were looked up. It now draws the registered font, choosing among its registrations by the weight and style their subfamilies name (`Bold`, `Bold Italic`, `SemiBold`) as for document fonts. A registered family comes before the standard families and their aliases, so a font registered as `Arial` is drawn as itself; a document's own family still comes first. The family is resolved when the document is generated, so registering the font after creating the element works too, and the bundled `Liberation Sans`, `Liberation Serif` and `Liberation Mono` can be named directly. A registered font used both by name and as a fallback is embedded once.
 
 - **Typographic punctuation in a standard font.** Text shown in an unembedded standard font (Helvetica, Times, Courier) was written through an encoder fallback, so a curly apostrophe (U+2019) and `“ ” – — … €` printed as `?`. These now use their Windows-1252 byte, which is what the fonts' WinAnsiEncoding reads; a character with no WinAnsi code is written as `?`. Embedded fonts were never affected. The widths of those characters are now measured too: every standard-font character beyond ASCII was assumed to be 500 units wide, so a line with `£`, `é` or `—` wrapped slightly differently from what a viewer drew.
 - **A chart's own colour now reaches its series.** `BarColor`, `LineColor`, `AreaColor`, `DotColor` and `LollipopColor` were never applied: bars, lines, areas, dots and lollipops were drawn in the series colour, which is `#4f46e5` unless the series sets one, so a chart given a colour drew in indigo anyway. A series with no colour of its own now takes the chart's colour, and a colour set on the series still wins. A chart with neither set is unchanged. The base chart's default colour was Blue 600, which nothing used; it is now `#4f46e5`, as in TypeScript, so a grouped bar chart draws the same in both.
@@ -109,7 +119,7 @@ Status: Prerelease
 
 ### Changes
 
-- Publishing now requires successful cross-engine gallery validation of the source commit. Configure `PARITY_WORKFLOW_REPOSITORY` and `PARITY_WORKFLOW_TOKEN` before publishing.
+- Releases now require successful cross-engine gallery validation of the source commit before release.
 
 - Fixed stable SVG identifiers for document-owned fonts, background-paint snapshots, and artifact tagging of repeated table-header fragments. Corrected encryption of PDF text strings, XMP metadata handling and AES-256 permissions so accessible encrypted documents pass independent validation.
 
@@ -760,15 +770,3 @@ Status: Prerelease
   a wider set of control characters than the PDF painter when measuring
   spacing; both now use the same rule, so SVG and PDF output agree.
 
-## 2026.7.2
-
-Status: Prerelease
-
-### Highlights
-
-- Changelog baseline; earlier changes are recorded in Git history
-
-### Changes
-
-- Baseline at the introduction of this changelog. Earlier history is in the
-  repository's commit log.

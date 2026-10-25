@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Reflection;
 using BonniePDF.Typography.TrueType;
@@ -47,6 +48,15 @@ public static class FontManager
     // register or read fonts from multiple threads at once. A plain Dictionary is
     // not safe under concurrent writes.
     private static readonly ConcurrentDictionary<string, byte[]> _registry = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Prefix of the font name a registered font is drawn under, whether a family resolves to it or it is reached
+    /// as a glyph fallback: one font name per registration, so a face playing both roles is embedded once.
+    /// </summary>
+    internal const string RegisteredFontPrefix = "virtual:fallback:";
+
+    // Family resolutions, keyed by family, weight and style; cleared whenever a registration changes.
+    private static readonly ConcurrentDictionary<(string Family, int Weight, bool Italic), string?> _familyMemo = new();
 
     // Parsed-font cache for the fallback chain, keyed like _registry. Retaining
     // the source byte-array identity makes replacement registrations coherent:
@@ -114,6 +124,7 @@ public static class FontManager
         var fam = (family ?? font.FontFamily).ToLowerInvariant();
         var wt  = NormalizeWeight(subfamily ?? font.FontSubfamily ?? "Regular");
         _registry[$"{fam}:{wt}"] = bytes;
+        _familyMemo.Clear();
     }
 
     /// <summary>
@@ -156,6 +167,58 @@ public static class FontManager
         if (!_registry.TryGetValue(key, out byte[]? bytes)) return null;
 
         return GetParsedFont(key, bytes);
+    }
+
+    /// <summary>
+    /// The font name of the registered face that a family resolves to, or <c>null</c> when no font is registered in
+    /// that family. A registration's weight and style come from the subfamily it was registered under
+    /// (<c>Bold Italic</c> is weight 700, italic); the face is then chosen as for a document's fonts, style first and
+    /// weight in the CSS font-matching order. The family is matched ignoring case and surrounding white space.
+    /// </summary>
+    internal static string? ResolveFamily(string family, FontWeight weight, bool italic)
+    {
+        string wanted = family.Trim().ToLowerInvariant();
+        return _familyMemo.GetOrAdd((wanted, (int)weight, italic), static key =>
+        {
+            var faces = new List<(string Key, int Weight, bool Italic)>();
+            foreach (string registered in _registry.Keys.Order(StringComparer.Ordinal))
+            {
+                int separator = registered.LastIndexOf(':');
+                if (!string.Equals(registered[..separator].Trim(), key.Family, StringComparison.Ordinal)) continue;
+                string subfamily = registered[(separator + 1)..];
+                faces.Add((registered, FaceMatching.SubfamilyWeight(subfamily), FaceMatching.SubfamilyItalic(subfamily)));
+            }
+            var boxed = faces.Select(f => new Tuple<string, int, bool>(f.Key, f.Weight, f.Italic)).ToList();
+            Tuple<string, int, bool>? face = FaceMatching.Match(boxed, key.Weight, key.Italic, f => f.Item2, f => f.Item3);
+            return face is null ? null : RegisteredFontPrefix + face.Item1;
+        });
+    }
+
+    /// <summary>
+    /// The registered font a font name made by <see cref="ResolveFamily"/> (or a glyph-fallback run) names, parsed,
+    /// or <c>null</c> when the name is not one of those or the registration is gone.
+    /// </summary>
+    internal static FallbackFont? GetRegisteredFont(string fontName)
+    {
+        if (!fontName.StartsWith(RegisteredFontPrefix, StringComparison.Ordinal)) return null;
+        string key = fontName[RegisteredFontPrefix.Length..];
+        if (!_registry.TryGetValue(key, out byte[]? bytes)) return null;
+        TtfFont? font = GetParsedFont(key, bytes);
+        return font is null ? null : new FallbackFont { Key = key, Bytes = bytes, Font = font };
+    }
+
+    /// <summary>
+    /// The registered Liberation substitute for a standard text face (Helvetica to Liberation Sans, Times to
+    /// Liberation Serif, Courier to Liberation Mono, in the same weight and style), parsed, as a fallback font;
+    /// or <c>null</c> when it is not registered. Its font is the instance <see cref="GetFallbackFonts"/> returns for it.
+    /// </summary>
+    internal static FallbackFont? GetStandardSubstitute(string standardFontName)
+    {
+        if (!StandardFontMap.TryGetValue(standardFontName, out var mapping)) return null;
+        string key = $"{mapping.family}:{NormalizeWeight(mapping.weight)}";
+        if (!_registry.TryGetValue(key, out byte[]? bytes)) return null;
+        TtfFont? font = GetParsedFont(key, bytes);
+        return font is null ? null : new FallbackFont { Key = key, Bytes = bytes, Font = font };
     }
 
     /// <summary>
@@ -202,6 +265,7 @@ public static class FontManager
     {
         _registry.Clear();
         _fallbackCache.Clear();
+        _familyMemo.Clear();
     }
 
     /// <summary>Re-registers the bundled Liberation fonts after a <see cref="Clear"/> call (test isolation).</summary>
@@ -259,6 +323,7 @@ public static class FontManager
                 using var ms = new MemoryStream();
                 stream.CopyTo(ms);
                 _registry[$"{family}:{weight}"] = ms.ToArray();
+                _familyMemo.Clear();
                 break;
             }
         }
@@ -277,6 +342,7 @@ public static class FontManager
             string path = Path.Combine(fontsDir, $"{fileName}.ttf");
             if (!File.Exists(path)) continue;
             _registry[$"{family}:{weight}"] = File.ReadAllBytes(path);
+            _familyMemo.Clear();
         }
     }
 

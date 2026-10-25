@@ -155,9 +155,10 @@ public abstract class TextElementBase : ElementBase
     {
         get
         {
-            // While a document with its own fonts is being generated, a family is resolved against
-            // them. Otherwise the name resolved when the family was set stands.
-            if (_fontFamily != null && FontMetrics.ActiveDocumentFonts != null)
+            // A family is resolved when the document is generated, against the document's fonts and the fonts
+            // registered by then, so the order of registering a font and setting the family does not matter.
+            // Outside generation the name resolved when the family was set stands.
+            if (_fontFamily != null && FontMetrics.IsGeneratingDocument)
                 return FontFamilyResolver.Resolve(_fontFamily, _weight, _isItalic);
             return _fontName;
         }

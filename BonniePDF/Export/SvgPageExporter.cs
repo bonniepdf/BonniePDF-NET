@@ -126,6 +126,7 @@ internal static class SvgPageExporter
         // not the face the PDF actually carries, and not what the TypeScript
         // exporter emits for the same document.
         ctx.Resources.EmbedStandardFonts = settings.Accessibility == AccessibilityMode.PdfUa1;
+        ctx.Resources.MissingGlyphs = settings.MissingGlyphs;
 
         // Two-pass TOC resolution. A VisualToc renders before the headings it
         // references, so on a single pass its page numbers resolve to "XX" and
@@ -141,6 +142,7 @@ internal static class SvgPageExporter
                 TocEntries = new Dictionary<string, int>()
             };
             dryRunCtx.Resources.EmbedStandardFonts = ctx.Resources.EmbedStandardFonts;
+            dryRunCtx.Resources.MissingGlyphs = settings.MissingGlyphs;
             foreach (PageRenderOutput _ in PdfRenderPipeline.RenderPagesStreaming(document.Pages, settings, dryRunCtx))
             {
                 // intentionally empty - discard the rendered output of the dry run

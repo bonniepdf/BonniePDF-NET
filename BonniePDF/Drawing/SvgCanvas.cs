@@ -193,10 +193,28 @@ internal partial class SvgCanvas : ICanvas
         }
 
         RegisterFontCallback?.Invoke(fontFamily);
-        foreach (ResolvedTextRun run in TextRunResolver(fontFamily, text))
+        IList<ResolvedTextRun> resolved = TextRunResolver(fontFamily, text);
+        bool allEmbedded = true;
+        foreach (ResolvedTextRun run in resolved) allEmbedded &= run.EmbeddedFont != null;
+
+        // A standard text face's draw that needs fallback is painted as glyphs throughout, its own pieces in the
+        // face's metric-compatible Liberation substitute, so the viewer never draws a character the PDF dropped.
+        // Without the substitute, and for a draw the face shows whole, the viewer draws it.
+        FallbackFont? substitute = null;
+        if (!allEmbedded)
         {
-            if (run.EmbeddedFont == null) continue;
-            result.Add(new SvgTextRun(run.FontIdentifier, run.EmbeddedFont, run.Text, run.EmbeddedFont.Shape(run.Text, _fontFeatures)));
+            if (!StandardFontCoverage.IsStandardTextFace(fontFamily) || StandardFontCoverage.CoversAll(text)) return result;
+            substitute = FontManager.GetStandardSubstitute(fontFamily);
+            if (substitute == null) return result;
+        }
+
+        foreach (ResolvedTextRun run in resolved)
+        {
+            if (run.EmbeddedFont != null)
+                result.Add(new SvgTextRun(run.FontIdentifier, run.EmbeddedFont, run.Text, run.EmbeddedFont.Shape(run.Text, _fontFeatures)));
+            else
+                result.Add(new SvgTextRun($"{PdfResourceRegistry.FallbackPrefix}{substitute!.Key}", substitute.Font, run.Text,
+                    substitute.Font.Shape(run.Text, _fontFeatures)));
         }
 
         return result;

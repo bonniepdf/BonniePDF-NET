@@ -90,6 +90,10 @@ public static class FontFamilyResolver
         if (CustomFamilies.TryGetValue(family, out FontFamilyDefinition? definition))
             return definition.GetVariant(isBold, italic);
 
+        // A family registered through FontManager. Global registrations come before the standard families and their
+        // aliases, so a registered "Arial" is that font, not Helvetica.
+        if (FontManager.ResolveFamily(family, weight, italic) is { } registered) return registered;
+
         // Resolve alias to canonical family name
         string canonicalFamily = ResolveAlias(family);
 
@@ -97,7 +101,8 @@ public static class FontFamilyResolver
         if (StandardFonts.TryGetValue((canonicalFamily, isBold, italic), out string? fontName))
             return fontName;
 
-        // Fallback: return Helvetica variant
+        // Fallback: return Helvetica variant. The family resolved to nothing; a document being generated reports it.
+        FontMetrics.ReportUnknownFamily(family);
         return StandardFonts.GetValueOrDefault(("Helvetica", isBold, italic), BonniePDF.StandardFonts.Helvetica);
     }
 

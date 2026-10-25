@@ -32,8 +32,16 @@ public sealed class StandardFontEncodingTests
         Assert.Contains("(£5 café)", ContentOf("£5 café"), System.StringComparison.Ordinal);
 
     [Fact]
-    public void CharacterOutsideWinAnsi_IsWrittenAsQuestionMark() =>
-        Assert.Contains("(a?b?c)", ContentOf("a日b\U0001F600c"), System.StringComparison.Ordinal);
+    public void CharacterOutsideWinAnsi_IsNeverWrittenAsQuestionMark()
+    {
+        // No registered font covers these characters, so they are dropped with a warning. Characters a fallback
+        // face covers are drawn in it instead (StandardFontFallbackTests).
+        string pdf = ContentOf("a日b\U0001F600c");
+        Assert.Contains("(a)", pdf, System.StringComparison.Ordinal);
+        Assert.Contains("(b)", pdf, System.StringComparison.Ordinal);
+        Assert.Contains("(c)", pdf, System.StringComparison.Ordinal);
+        Assert.DoesNotContain("(a?", pdf, System.StringComparison.Ordinal);
+    }
 
     private static float Width(string text, string font) => FontMetrics.GetStringWidth(text, font, 1000);
 
@@ -49,10 +57,10 @@ public sealed class StandardFontEncodingTests
     }
 
     [Fact]
-    public void CharacterWrittenAsQuestionMark_IsMeasuredAsQuestionMark()
+    public void CharacterNoFontCanDraw_IsMeasuredAsNothing()
     {
-        Assert.Equal(Width("?", "Helvetica"), Width("\u65e5", "Helvetica"));
-        Assert.Equal(Width("?", "Times-Roman"), Width("\U0001F600", "Times-Roman"));
+        Assert.Equal(0f, Width("\u65e5", "Helvetica"));
+        Assert.Equal(Width("a", "Times-Roman"), Width("a\U0001F600", "Times-Roman"));
     }
 
     [Fact]
@@ -61,5 +69,5 @@ public sealed class StandardFontEncodingTests
 
     [Fact]
     public void Courier_IsMeasuredPerCharacter() =>
-        Assert.Equal(1200f, Width("a\U0001F600", "Courier"));
+        Assert.Equal(1800f, Width("a\u00e9\u20ac", "Courier"));
 }

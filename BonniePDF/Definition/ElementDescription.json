@@ -155,6 +155,13 @@
       ],
       "via": "options"
     },
+    "MissingGlyphs": {
+      "tokens": [
+        "drop",
+        "throw"
+      ],
+      "via": "options"
+    },
     "AccessibilityMode": {
       "tokens": [
         "none",
@@ -2076,6 +2083,9 @@
         },
         "emojiRendering": {
           "kind": "enum:EmojiRendering"
+        },
+        "missingGlyphs": {
+          "kind": "enum:MissingGlyphs"
         },
         "language": {
           "kind": "string"
