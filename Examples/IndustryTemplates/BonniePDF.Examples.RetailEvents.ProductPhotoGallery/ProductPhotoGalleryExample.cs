@@ -1,22 +1,22 @@
+using System.Linq;
 using BonniePDF;
 
 namespace BonniePDF.Examples.RetailEvents.ProductPhotoGallery;
 
 /// <summary>
 /// A retail product gallery / look-book. Products are laid out two-per-row as
-/// cards with name, SKU, price, and blurb in an accessible PDF/A-2a + PDF/UA-1
-/// document that paginates automatically. Each card leads with a deterministic
-/// colour-blocked tile - a per-product tint with the product's initial - drawn
-/// natively by the engine, so the catalogue is self-contained and needs no
-/// bundled photography.
+/// cards with studio photography, name, SKU, price, and blurb in an accessible
+/// PDF/A-2a + PDF/UA-1 document that paginates automatically. Each card leads
+/// with a rounded, clipped product photograph tagged as a Figure with alt text.
 /// </summary>
 [System.ComponentModel.DisplayName("Product Gallery")]
 [System.ComponentModel.Category("Retail & Events")]
 [System.ComponentModel.Description(
-    "A retail look-book: products laid out two-per-row as cards with name, SKU, price, and blurb, paginating automatically. Each card leads with a deterministic colour-blocked tile drawn natively by the engine, so the catalogue is self-contained. PDF/A-2a + PDF/UA-1.")]
+    "A retail look-book: products laid out two-per-row as cards with studio photography, name, SKU, price, and blurb, paginating automatically. Each photograph is clipped to a rounded frame and carries alt text. PDF/A-2a + PDF/UA-1.")]
 public static class ProductPhotoGalleryExample
 {
     private const float CardImageHeight = 128f;
+    private const float CardImageRadius = 6f;
 
     private static readonly Color Accent = ColorPalette.Emerald[700];
     private static readonly Color Ink = ColorPalette.Slate[800];
@@ -24,43 +24,34 @@ public static class ProductPhotoGalleryExample
     private static readonly Color Muted = ColorPalette.Slate[500];
     private static readonly Color Rule = ColorPalette.Slate[200];
 
-    // One tint per card, cycled by position, so the catalogue reads as a
-    // deliberate colour-blocked design rather than a set of missing images.
-    private static readonly ColorPalette[] TileHues =
-    [
-        ColorPalette.Emerald,
-        ColorPalette.Amber,
-        ColorPalette.Rose,
-        ColorPalette.Sky,
-        ColorPalette.Violet,
-        ColorPalette.Teal,
-        ColorPalette.Orange,
-        ColorPalette.Indigo,
-    ];
-
     private static readonly Product[] Products =
     [
-        new("Terracotta Planter", "HG-1042", "£28.00",
+        new("Terracotta Planter", "HG-1042", "£28.00", "terracotta-planter",
             "Hand-thrown stoneware planter with a matte terracotta glaze."),
-        new("Linen Throw", "HG-2277", "£54.00",
+        new("Linen Throw", "HG-2277", "£54.00", "linen-throw",
             "Stonewashed pure-linen throw in oatmeal, finished with a hand-knotted fringe."),
-        new("Brass Reading Lamp", "LT-0391", "£120.00",
+        new("Brass Reading Lamp", "LT-0391", "£120.00", "brass-reading-lamp",
             "Adjustable desk lamp in brushed brass with a weighted base and warm-dim LED."),
-        new("Ceramic Pour-Over", "KT-5108", "£36.00",
+        new("Ceramic Pour-Over", "KT-5108", "£36.00", "ceramic-pour-over",
             "Single-cup pour-over dripper in speckled clay, sized for a standard 02 filter."),
-        new("Wool Floor Cushion", "HG-3315", "£95.00",
+        new("Wool Floor Cushion", "HG-3315", "£95.00", "wool-floor-cushion",
             "Chunky hand-woven wool floor cushion with a removable, washable cover."),
-        new("Smoked-Glass Carafe", "KT-4420", "£42.00",
+        new("Smoked-Glass Carafe", "KT-4420", "£42.00", "smoked-glass-carafe",
             "Mouth-blown smoked-glass carafe and tumbler set for the bedside or table."),
-        new("Oak Wall Shelf", "FN-0876", "£68.00",
+        new("Oak Wall Shelf", "FN-0876", "£68.00", "oak-wall-shelf",
             "Solid white-oak floating shelf with concealed brackets and an oiled finish."),
-        new("Rattan Pendant Shade", "LT-1653", "£82.00",
+        new("Rattan Pendant Shade", "LT-1653", "£82.00", "rattan-pendant-shade",
             "Open-weave rattan pendant shade that casts a soft, patterned light."),
     ];
 
+    /// <summary>The asset paths (relative to <c>Examples/assets/</c>) the example needs pre-loaded.</summary>
+    public static IReadOnlyList<string> RequiredAssets { get; } = Products.Select(AssetPath).ToArray();
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+
         DocumentSettings settings = new()
         {
             Conformance = PdfAConformance.PdfA2a,
@@ -107,11 +98,11 @@ public static class ProductPhotoGalleryExample
             Margin = new Thickness(0, 0, 0, 18),
         });
 
-        doc.Add(BuildGallery());
+        doc.Add(BuildGallery(assets));
         return doc;
     }
 
-    private static VerticalStack BuildGallery()
+    private static VerticalStack BuildGallery(IReadOnlyDictionary<string, byte[]> assets)
     {
         VerticalStack gallery = new() { Spacing = 16 };
         for (int i = 0; i < Products.Length; i += 2)
@@ -121,18 +112,18 @@ public static class ProductPhotoGalleryExample
                 Spacing = 16,
                 WidthDistribution = WidthDistribution.Equal,
             };
-            row.Add(ProductCard(Products[i], i));
-            if (i + 1 < Products.Length) row.Add(ProductCard(Products[i + 1], i + 1));
+            row.Add(ProductCard(Products[i], assets));
+            if (i + 1 < Products.Length) row.Add(ProductCard(Products[i + 1], assets));
             gallery.Add(row);
         }
 
         return gallery;
     }
 
-    private static Container ProductCard(Product product, int index)
+    private static Container ProductCard(Product product, IReadOnlyDictionary<string, byte[]> assets)
     {
         VerticalStack body = new() { Spacing = 4 };
-        body.Add(ProductMedia(product, index));
+        body.Add(ProductMedia(product, assets));
 
         Heading name = new(product.Name)
         {
@@ -183,32 +174,32 @@ public static class ProductPhotoGalleryExample
         };
     }
 
-    private static Container ProductMedia(Product product, int index)
+    private static string AssetPath(Product product) => $"images/products/{product.ImageSlug}.jpg";
+
+    private static byte[] ImageBytes(Product product, IReadOnlyDictionary<string, byte[]> assets)
     {
-        ColorPalette hue = TileHues[index % TileHues.Length];
+        string path = AssetPath(product);
+        if (!assets.TryGetValue(path, out byte[]? bytes) || bytes.Length == 0)
+            throw new InvalidOperationException($"Missing required asset: {path}");
+        return bytes;
+    }
 
-        // Amber[600] is the one shade in this cycle that falls short of 3:1 on its
-        // own [100] tint (2.87:1); every other hue already clears it at [600].
-        Color monogramColor = hue == ColorPalette.Amber ? ColorPalette.Amber[700] : hue[600];
-
-        TextBlock monogram = new()
-        {
-            Text = product.Name[..1].ToUpperInvariant(),
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 40,
-            Color = monogramColor,
-            Alignment = TextAlignment.Center,
-            Margin = new Thickness(0, 40, 0, 0),
-        };
-
+    private static Container ProductMedia(Product product, IReadOnlyDictionary<string, byte[]> assets)
+    {
         return new Container
         {
             Height = CardImageHeight,
-            BackgroundColor = hue[100],
-            CornerRadius = 6,
-            Child = monogram,
+            CornerRadius = CardImageRadius,
+            ClipContent = true,
+            Child = new Image
+            {
+                ImageData = ImageBytes(product, assets),
+                Height = CardImageHeight,
+                FitMode = ImageFitMode.Cover,
+                AltText = $"{product.Name}: {product.Blurb}",
+            },
         };
     }
 
-    private sealed record Product(string Name, string Sku, string Price, string Blurb);
+    private sealed record Product(string Name, string Sku, string Price, string ImageSlug, string Blurb);
 }
