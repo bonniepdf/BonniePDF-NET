@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BonniePDF;
 
 namespace BonniePDF.Examples.TablesLists.MultiPageFlow;
@@ -12,55 +13,6 @@ namespace BonniePDF.Examples.TablesLists.MultiPageFlow;
     "A Table with repeating headers spanning multiple pages, accessible cells, a page-number footer, and prose sections. PDF/A-2a + PDF/UA-1.")]
 public static class TablesExample
 {
-    private static readonly (string Name, string Department, string Role)[] Employees =
-    [
-        ("Alice Chen", "Engineering", "Senior Developer"),
-        ("Bob Martinez", "Marketing", "Brand Manager"),
-        ("Carol Johnson", "Human Resources", "HR Specialist"),
-        ("David Kim", "Finance", "Financial Analyst"),
-        ("Eva Patel", "Engineering", "QA Lead"),
-        ("Frank Wilson", "Sales", "Account Executive"),
-        ("Grace Taylor", "Operations", "Project Manager"),
-        ("Henry Brown", "R&D", "Research Scientist"),
-        ("Isabel Garcia", "Customer Support", "Support Lead"),
-        ("James Lee", "Engineering", "DevOps Engineer"),
-        ("Karen White", "Legal", "Compliance Officer"),
-        ("Liam Moore", "IT", "Systems Administrator"),
-        ("Mia Anderson", "Engineering", "Frontend Developer"),
-        ("Noah Thomas", "Finance", "Budget Analyst"),
-        ("Olivia Jackson", "Marketing", "Content Strategist"),
-        ("Peter Harris", "Sales", "Sales Manager"),
-        ("Quinn Robinson", "Engineering", "Backend Developer"),
-        ("Rachel Clark", "Operations", "Supply Chain Lead"),
-        ("Samuel Lewis", "R&D", "Data Scientist"),
-        ("Tara Walker", "Customer Support", "CX Analyst"),
-        ("Uma Hall", "Human Resources", "Recruiter"),
-        ("Victor Allen", "Finance", "Controller"),
-        ("Wendy Young", "Engineering", "Platform Architect"),
-        ("Xavier King", "Legal", "IP Counsel"),
-        ("Yara Wright", "IT", "Security Engineer"),
-        ("Zack Scott", "Marketing", "Digital Strategist"),
-        ("Amy Green", "Sales", "Business Developer"),
-        ("Brian Adams", "Operations", "Logistics Manager"),
-        ("Chloe Baker", "R&D", "UX Researcher"),
-        ("Dylan Carter", "Engineering", "Mobile Developer"),
-        ("Eleanor Price", "Marketing", "Events Manager"),
-        ("Felix Nguyen", "Engineering", "Cloud Architect"),
-        ("Georgia Moss", "Finance", "Treasury Analyst"),
-        ("Hugo Reyes", "R&D", "AI Researcher"),
-        ("Iris Chambers", "Legal", "Contract Specialist"),
-        ("Jordan Holt", "Sales", "Sales Engineer"),
-        ("Kira Okafor", "Operations", "Process Analyst"),
-        ("Leo Novak", "IT", "Network Engineer"),
-        ("Maya Singh", "Customer Support", "Escalations Lead"),
-        ("Nate Callahan", "Engineering", "Site Reliability Engineer"),
-        ("Ophelia Dunn", "Human Resources", "L&D Manager"),
-        ("Patrick Stern", "Finance", "Risk Analyst"),
-        ("Rosa Tanaka", "Marketing", "SEO Specialist"),
-        ("Stefan Mehta", "Engineering", "Data Engineer"),
-        ("Talia Burns", "Operations", "Fleet Coordinator"),
-    ];
-
     private static readonly (string Title, string Body)[] OverviewSections =
     [
         ("Our Mission",
@@ -86,7 +38,7 @@ public static class TablesExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
     {
         Document doc = new()
         {
@@ -131,11 +83,11 @@ public static class TablesExample
         doc.Add(new TextBlock
         {
             Text =
-                "The table below lists team members by department. Column headers repeat on every page for easy reference. Each cell is automatically tagged for screen readers.",
+                "The table below lists team members by name, role, and department. Column headers repeat on every page for easy reference. Each cell is automatically tagged for screen readers.",
             Margin = new Thickness(0, 0, 0, 10),
         });
 
-        var table = new Table(100f, 160f, 140f)
+        var table = new Table(34f, 130f, 130f, 120f)
         {
             RepeatHeadersOnNewPage = true,
             HeaderBackgroundColor = ColorPalette.Blue[600],
@@ -145,7 +97,7 @@ public static class TablesExample
         table.AddHeader(
             new TableCell
             {
-                Content = new TextBlock { Text = "Department", FontName = StandardFonts.HelveticaBold, FontSize = 10 },
+                Content = new TextBlock { Text = "Photo", FontName = StandardFonts.HelveticaBold, FontSize = 10 },
                 IsHeader = true
             },
             new TableCell
@@ -157,26 +109,57 @@ public static class TablesExample
             {
                 Content = new TextBlock { Text = "Role", FontName = StandardFonts.HelveticaBold, FontSize = 10 },
                 IsHeader = true
+            },
+            new TableCell
+            {
+                Content = new TextBlock { Text = "Department", FontName = StandardFonts.HelveticaBold, FontSize = 10 },
+                IsHeader = true
             });
 
+        var employees = Placeholders.WithSeed(42).Employees(45);
+
         int rowIndex = 0;
-        foreach ((string name, string dept, string role) in Employees)
+        foreach (var emp in employees)
         {
+            byte[] photoData;
+            if (assets != null && assets.TryGetValue($"images/employees/employee-{emp.Id}.jpg", out byte[]? assetBytes))
+            {
+                photoData = assetBytes;
+            }
+            else
+            {
+                photoData = emp.Avatar;
+            }
+
+            var photo = new Image
+            {
+                ImageData = photoData,
+                Width = 24,
+                Height = 24,
+                FitMode = ImageFitMode.Cover,
+                AltText = $"Photo of {emp.Name}"
+            };
+
             Color bg = rowIndex++ % 2 == 0 ? Color.White : ColorPalette.Slate[50];
             table.AddRow(
                 new TableCell
                 {
-                    Content = new TextBlock { Text = dept, FontSize = 10, Color = ColorPalette.Slate[600] },
+                    Content = photo,
                     BackgroundColor = bg
                 },
                 new TableCell
                 {
-                    Content = new TextBlock { Text = name, FontSize = 10, Color = ColorPalette.Slate[800] },
+                    Content = new TextBlock { Text = emp.Name, FontSize = 10, Color = ColorPalette.Slate[800] },
                     BackgroundColor = bg
                 },
                 new TableCell
                 {
-                    Content = new TextBlock { Text = role, FontSize = 10, Color = ColorPalette.Slate[600] },
+                    Content = new TextBlock { Text = emp.Role, FontSize = 10, Color = ColorPalette.Slate[600] },
+                    BackgroundColor = bg
+                },
+                new TableCell
+                {
+                    Content = new TextBlock { Text = emp.Department, FontSize = 10, Color = ColorPalette.Slate[600] },
                     BackgroundColor = bg
                 });
         }

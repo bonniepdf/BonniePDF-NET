@@ -175,12 +175,12 @@ public static class ServerEndpointExample
                 + "error does not leak one per failed request.",
                 size: 9f),
         ]));
-        doc.Add(Panel("Set the length; stream when the document is large",
+        doc.Add(Panel("Set the length; bound concurrent generation",
         [
             Cell(
                 "GenerateBytesAsync returns a byte array, so the content length is known before the first byte goes "
-                + "out. For documents large enough to matter, call SaveAsync with the response body stream "
-                + "rather than buffering the whole response.",
+                + "out. This path buffers the completed PDF. Bound concurrent generation and dispose each document "
+                + "before accepting more work.",
                 size: 9f),
         ]));
 

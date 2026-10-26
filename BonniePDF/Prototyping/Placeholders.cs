@@ -86,6 +86,12 @@ public static class Placeholders
     /// <summary>A PNG placeholder image of the requested size, as bytes.</summary>
     public static byte[] Image(int width, int height) => _global.Image(width, height);
 
+    /// <summary>A PNG placeholder avatar icon of the requested square size (48 by default), as bytes.</summary>
+    public static byte[] Avatar(int size = 48) => _global.Avatar(size);
+
+    /// <summary>Several employee records for directory tables and team prototypes (10 by default).</summary>
+    public static IList<EmployeeItem> Employees(int count = 10) => _global.Employees(count);
+
     /// <summary>Returns an independent source that always produces the same sequence for the same seed.</summary>
     public static PlaceholderSource WithSeed(int seed) => new(seed);
 
@@ -102,6 +108,16 @@ public static class Placeholders
 /// <param name="UnitPrice">The price of one unit.</param>
 /// <param name="Total">The line total: quantity times unit price.</param>
 public record InvoiceLineItem(string Service, string Description, int Quantity, decimal UnitPrice, decimal Total);
+
+/// <summary>
+/// One employee record for prototyping directory and team layouts.
+/// </summary>
+/// <param name="Id">The 1-based index or employee id.</param>
+/// <param name="Name">The full name.</param>
+/// <param name="Role">The job title.</param>
+/// <param name="Department">The department name.</param>
+/// <param name="Avatar">A circular avatar placeholder PNG, as bytes.</param>
+public sealed record EmployeeItem(int Id, string Name, string Role, string Department, byte[] Avatar);
 
 /// <summary>
 /// A single seeded stream of placeholder values. Use this directly when one
@@ -137,7 +153,54 @@ public class PlaceholderSource(int seed)
     ];
 
     private static readonly string[] Departments = ["Engineering", "Marketing", "Sales", "HR", "Finance", "Design", "Operations"];
-    private static readonly string[] Roles = ["Manager", "Lead", "Senior", "Junior", "Intern", "Director", "VP"];
+    private static readonly string[] Roles =
+    [
+        "Senior Developer",
+        "Brand Manager",
+        "HR Specialist",
+        "Financial Analyst",
+        "QA Lead",
+        "Account Executive",
+        "Project Manager",
+        "Research Scientist",
+        "Support Lead",
+        "DevOps Engineer",
+        "Compliance Officer",
+        "Systems Administrator",
+        "Frontend Developer",
+        "Budget Analyst",
+        "Content Strategist",
+        "Sales Manager",
+        "Backend Developer",
+        "Supply Chain Lead",
+        "Data Scientist",
+        "CX Analyst",
+        "Recruiter",
+        "Controller",
+        "Platform Architect",
+        "IP Counsel",
+        "Security Engineer",
+        "Digital Strategist",
+        "Business Developer",
+        "Logistics Manager",
+        "UX Researcher",
+        "Mobile Developer",
+        "Events Manager",
+        "Cloud Architect",
+        "Treasury Analyst",
+        "AI Researcher",
+        "Contract Specialist",
+        "Sales Engineer",
+        "Process Analyst",
+        "Network Engineer",
+        "Escalations Lead",
+        "Site Reliability Engineer",
+        "L&D Manager",
+        "Risk Analyst",
+        "SEO Specialist",
+        "Data Engineer",
+        "Fleet Coordinator",
+    ];
     private static readonly string[] Locations = ["New York", "London", "Berlin", "Tokyo", "Sydney", "Toronto", "Paris"];
 
     private static readonly string[] CompanyNames =
@@ -332,6 +395,22 @@ public class PlaceholderSource(int seed)
         return items;
     }
 
+    /// <summary>Several employee records for directory tables and team prototypes (10 by default).</summary>
+    public IList<EmployeeItem> Employees(int count = 10)
+    {
+        var list = new List<EmployeeItem>(count);
+        for (int i = 1; i <= count; i++)
+        {
+            list.Add(new EmployeeItem(
+                Id: i,
+                Name: Name(),
+                Role: Role(),
+                Department: Department(),
+                Avatar: Avatar(48)));
+        }
+        return list;
+    }
+
     /// <summary>
     /// Rows of table cells (name, department, location, percentage), as arrays of text (5 rows of 4 columns by
     /// default).
@@ -367,6 +446,119 @@ public class PlaceholderSource(int seed)
 
     /// <summary>A PNG placeholder image of the requested size, as bytes.</summary>
     public byte[] Image(int width, int height) => BuildPlaceholderPng(width, height, Next(360));
+
+    private static readonly (byte R, byte G, byte B)[] AvatarPalettes =
+    [
+        (59, 130, 246),  // Blue
+        (16, 185, 129),  // Emerald
+        (139, 92, 246),  // Purple
+        (245, 158, 11),  // Amber
+        (239, 68, 68),   // Red
+        (20, 184, 166),  // Teal
+        (236, 72, 153),  // Pink
+        (99, 102, 241),  // Indigo
+    ];
+
+    /// <summary>
+    /// Generates a circular avatar placeholder PNG with a silhouette of a person
+    /// and a deterministic background color from a friendly palette.
+    /// </summary>
+    /// <param name="size">The width and height of the square PNG in pixels (48 by default).</param>
+    public byte[] Avatar(int size = 48)
+    {
+        int clampedSize = Math.Max(8, Math.Min(size, 512));
+        int paletteIdx = Next(AvatarPalettes.Length);
+        return BuildPlaceholderAvatarPng(clampedSize, paletteIdx);
+    }
+
+    private static byte[] BuildPlaceholderAvatarPng(int size, int paletteIdx)
+    {
+        (byte bgR, byte bgG, byte bgB) = AvatarPalettes[paletteIdx % AvatarPalettes.Length];
+        byte[] raw = new byte[size * (1 + size * 4)];
+
+        double cx = (size - 1) / 2.0;
+        double cy = (size - 1) / 2.0;
+        double outerR = size / 2.0;
+
+        double headCy = 0.38 * size;
+        double headR = 0.20 * size;
+
+        double bodyCy = 1.05 * size;
+        double bodyR = 0.55 * size;
+
+        for (int y = 0; y < size; y++)
+        {
+            int rowStart = y * (1 + size * 4);
+            raw[rowStart] = 0; // filter: none
+            double dy = y - cy;
+            double dyHead = y - headCy;
+            double dyBody = y - bodyCy;
+
+            for (int x = 0; x < size; x++)
+            {
+                double dx = x - cx;
+                double distOuter = Math.Sqrt(dx * dx + dy * dy);
+
+                double deltaOuter = outerR - distOuter;
+                double alphaOuter = 0;
+                if (deltaOuter >= 0.5)
+                    alphaOuter = 1;
+                else if (deltaOuter > -0.5)
+                    alphaOuter = deltaOuter + 0.5;
+
+                int off = rowStart + 1 + x * 4;
+
+                if (alphaOuter <= 0)
+                {
+                    raw[off] = 0;
+                    raw[off + 1] = 0;
+                    raw[off + 2] = 0;
+                    raw[off + 3] = 0;
+                    continue;
+                }
+
+                double distHead = Math.Sqrt(dx * dx + dyHead * dyHead);
+                double distBody = Math.Sqrt(dx * dx + dyBody * dyBody);
+
+                double dHead = headR - distHead;
+                double dBody = bodyR - distBody;
+                double dSil = Math.Max(dHead, dBody);
+
+                double wSil = 0;
+                if (dSil >= 0.5)
+                    wSil = 1;
+                else if (dSil > -0.5)
+                    wSil = dSil + 0.5;
+
+                byte r = (byte)Math.Clamp((int)Math.Round(bgR * (1 - wSil) + 255 * wSil), 0, 255);
+                byte g = (byte)Math.Clamp((int)Math.Round(bgG * (1 - wSil) + 255 * wSil), 0, 255);
+                byte b = (byte)Math.Clamp((int)Math.Round(bgB * (1 - wSil) + 255 * wSil), 0, 255);
+                byte a = (byte)Math.Clamp((int)Math.Round(255 * alphaOuter), 0, 255);
+
+                raw[off] = r;
+                raw[off + 1] = g;
+                raw[off + 2] = b;
+                raw[off + 3] = a;
+            }
+        }
+
+        using MemoryStream ms = new();
+        ms.Write([137, 80, 78, 71, 13, 10, 26, 10]);
+
+        byte[] ihdr = new byte[13];
+        WriteU32(ihdr, 0, (uint)size);
+        WriteU32(ihdr, 4, (uint)size);
+        ihdr[8] = 8; // bit depth
+        ihdr[9] = 6; // RGBA
+        WritePngChunk(ms, "IHDR", ihdr);
+
+        byte[] deflated = DeflateRawSimple(raw);
+        WritePngChunk(ms, "IDAT", deflated);
+
+        WritePngChunk(ms, "IEND", []);
+
+        return ms.ToArray();
+    }
 
     private static byte[] BuildPlaceholderPng(int width, int height, int hueOffset)
     {

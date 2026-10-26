@@ -3,9 +3,11 @@
   <Project Path="BonniePDF/BonniePDF.csproj" />
 
   <Folder Name="/Examples/">
+    <Project Path="Examples/Integrations/BonniePDF.Examples.DownloadHost/BonniePDF.Examples.DownloadHost.csproj" />
     <Project Path="Examples/BonniePDF.Examples.ExamplesAssets/BonniePDF.Examples.ExamplesAssets.csproj" />
   </Folder>
   <Folder Name="/Examples/CodeRecipes/">
+    <Project Path="Examples/CodeRecipes/BonniePDF.Examples.PracticalRecipes/BonniePDF.Examples.PracticalRecipes.csproj" />
     <Project Path="Examples/CodeRecipes/BonniePDF.Examples.BarcodesQrCodes.Barcodes/BonniePDF.Examples.BarcodesQrCodes.Barcodes.csproj" />
     <Project Path="Examples/CodeRecipes/BonniePDF.Examples.BarcodesQrCodes.DataMatrix/BonniePDF.Examples.BarcodesQrCodes.DataMatrix.csproj" />
     <Project Path="Examples/CodeRecipes/BonniePDF.Examples.BarcodesQrCodes.QRCodes/BonniePDF.Examples.BarcodesQrCodes.QRCodes.csproj" />
@@ -28,7 +30,6 @@
     <Project Path="Examples/CodeRecipes/BonniePDF.Examples.LongFormTypesetting.DickensNovel/BonniePDF.Examples.LongFormTypesetting.DickensNovel.csproj" />
     <Project Path="Examples/CodeRecipes/BonniePDF.Examples.PageSetup.HeadersFooters/BonniePDF.Examples.PageSetup.HeadersFooters.csproj" />
     <Project Path="Examples/CodeRecipes/BonniePDF.Examples.PageSetup.Margins/BonniePDF.Examples.PageSetup.Margins.csproj" />
-    <Project Path="Examples/CodeRecipes/BonniePDF.Examples.PageSetup.PageSettings/BonniePDF.Examples.PageSetup.PageSettings.csproj" />
     <Project Path="Examples/CodeRecipes/BonniePDF.Examples.ScriptsEmoji.ColourEmojis/BonniePDF.Examples.ScriptsEmoji.ColourEmojis.csproj" />
     <Project Path="Examples/CodeRecipes/BonniePDF.Examples.ScriptsEmoji.EmojisAndUnicode/BonniePDF.Examples.ScriptsEmoji.EmojisAndUnicode.csproj" />
     <Project Path="Examples/CodeRecipes/BonniePDF.Examples.ScriptsEmoji.InternationalTypography/BonniePDF.Examples.ScriptsEmoji.InternationalTypography.csproj" />
@@ -46,6 +47,7 @@
     <Project Path="Examples/CodeRecipes/BonniePDF.Examples.TrendCharts.LineAndArea/BonniePDF.Examples.TrendCharts.LineAndArea.csproj" />
   </Folder>
   <Folder Name="/Examples/IndustryTemplates/">
+    <Project Path="Examples/IndustryTemplates/BonniePDF.Examples.PracticalDocuments/BonniePDF.Examples.PracticalDocuments.csproj" />
     <Project Path="Examples/IndustryTemplates/BonniePDF.Examples.BillingPayments.BillingDocuments/BonniePDF.Examples.BillingPayments.BillingDocuments.csproj" />
     <Project Path="Examples/IndustryTemplates/BonniePDF.Examples.BillingPayments.UtilityBill/BonniePDF.Examples.BillingPayments.UtilityBill.csproj" />
     <Project Path="Examples/IndustryTemplates/BonniePDF.Examples.ComplianceArchival.AttachedData/BonniePDF.Examples.ComplianceArchival.AttachedData.csproj" />
