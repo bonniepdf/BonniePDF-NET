@@ -13,6 +13,25 @@ namespace BonniePDF.Tests.Prototyping;
 public class PlaceholderParityTests
 {
     [Fact]
+    public void EmployeesSeed42MatchesCanonicalSequence()
+    {
+        var emps = Placeholders.WithSeed(42).Employees(3);
+        var actual = emps.Select(e => (e.Id, e.Name, e.Role, e.Department)).ToArray();
+
+        Assert.Equal(
+            new (int, string, string, string)[]
+            {
+                (1, "Brian Martinez", "Support Lead", "Marketing"),
+                (2, "Gina Mitchell", "Project Manager", "Engineering"),
+                (3, "Pete Stewart", "IP Counsel", "Marketing"),
+            },
+            actual);
+
+        Assert.NotNull(emps[0].Avatar);
+        Assert.True(emps[0].Avatar.Length > 0);
+    }
+
+    [Fact]
     public void InvoiceLinesSeed42MatchesCanonicalSequence()
     {
         var items = Placeholders.WithSeed(42).InvoiceLines(5);
@@ -37,5 +56,17 @@ public class PlaceholderParityTests
         Assert.Equal(
             new[] { 16, 33, 38, 71, 40 },
             new[] { p.Integer(0, 99), p.Integer(0, 99), p.Integer(0, 99), p.Integer(0, 99), p.Integer(0, 99) });
+    }
+
+    [Fact]
+    public void AvatarReturnsValidPngBytes()
+    {
+        byte[] defaultAvatar = Placeholders.Avatar();
+        Assert.NotNull(defaultAvatar);
+        Assert.Equal(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }, defaultAvatar.Take(8));
+
+        byte[] customAvatar = Placeholders.Avatar(32);
+        Assert.NotNull(customAvatar);
+        Assert.True(customAvatar.Length > 0);
     }
 }

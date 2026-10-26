@@ -5,6 +5,14 @@ Versions use CalVer (`yyyy.m.minor`), decided by the versioning tool, and are
 shared with the TypeScript implementation: `BonniePDF` and `@bonniepdf/core`
 at the same version are the same library.
 
+## Unreleased
+
+### Examples
+
+- Add page-break, practical-table, download, font-fallback and diagnostics recipes with an ASP.NET Core host and bounded async batch companion.
+- Add large-order invoice, long-basket receipt and multilingual customer-letter examples.
+- Refresh conditional headers and explicit image assets; remove the paper-size gallery.
+
 ## 2026.10.22
 
 Status: Prerelease
