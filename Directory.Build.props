@@ -2,7 +2,7 @@
   <PropertyGroup>
     <!-- Version is managed by scripts/Update-Versions.ps1 and scripts/update-versions.sh -->
     <!-- Format: [yyyy].[mm].[patch] (e.g., 2026.04.0) -->
-    <Version>2026.10.22</Version>
+    <Version>2026.10.28</Version>
   </PropertyGroup>
 
   <ItemGroup>
