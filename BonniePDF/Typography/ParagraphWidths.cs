@@ -52,14 +52,15 @@ internal sealed class ParagraphWidths
 
     /// <summary>
     /// Shapes <paramref name="text"/> once, or returns null when its widths cannot come from one
-    /// shaping: text outside printable ASCII (it takes other shaping paths), a font measured by
-    /// width table, a font that does not cover the text, or a paragraph the shaper rejects.
+    /// shaping: text outside printable ASCII and <see cref="IsStableLatin"/> (it takes other shaping
+    /// paths), a font measured by width table, a font that does not cover the text, or a paragraph
+    /// the shaper rejects.
     /// </summary>
     internal static ParagraphWidths? TryCreate(string text, string fontIdentifier, float fontSize, IReadOnlyDictionary<string, int>? features)
     {
         if (text.Length < 2) return null;
         foreach (char c in text)
-            if (c < ' ' || c > '~') return null;
+            if ((c < ' ' || c > '~') && !IsStableLatin(c)) return null;
         TtfFont? font = FontMetrics.ResolveShapingFont(fontIdentifier, out _);
         if (font is null || !TextRunShaper.PrimaryCovers(text, font)) return null;
 
@@ -151,4 +152,23 @@ internal sealed class ParagraphWidths
         }
         return _window != null && end - start <= _window._text.Length ? _window : null;
     }
+
+    /// <summary>
+    /// Non-ASCII characters ordinary prose uses that shape exactly like ASCII does: Latin-1 letters
+    /// and symbols (not the soft hyphen, which is default-ignorable) and common typographic
+    /// punctuation.
+    /// </summary>
+    /// <remarks>
+    /// Each is its own cluster, already in canonical form and never default-ignorable, so a
+    /// paragraph of these and printable ASCII takes one Latin shaping path, and so does every
+    /// span of it.
+    /// </remarks>
+    internal static bool IsStableLatin(char c) =>
+        (c >= '\u00A0' && c <= '\u00FF' && c != '\u00AD')
+        || c == '\u2013' || c == '\u2014'                    // en and em dash
+        || (c >= '\u2018' && c <= '\u201A')                  // single quotes
+        || (c >= '\u201C' && c <= '\u201E')                  // double quotes
+        || c == '\u2022' || c == '\u2026' || c == '\u2030'    // bullet, ellipsis, per mille
+        || c == '\u2039' || c == '\u203A'                    // single angle quotes
+        || c == '\u20AC' || c == '\u2122';                   // euro, trade mark
 }
