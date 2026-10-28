@@ -18,6 +18,9 @@ public class ParagraphWidthsTests(ITestOutputHelper output)
         "office", "affluent", "fjord", "Wave", "AVATAR", "To.", "Yes,", "LT", "P.", "\"quoted\"", "(paren)", "don't",
         "1,234.56", "--", "e-mail", "ff", "fi", "fl", "ffi", "ffl", "The", "first", "staff", "lorem", "ipsum", "Tyre",
         "VAT", "y.", "r.", "f/", "W,", "Fly", "awkward", "kV", "T-", "rv", "Yo", "LY", "a", "I", "x", "#42", "100%",
+        // Ordinary prose outside ASCII: curly quotes, dashes, accents, symbols.
+        "\u201Cquoted\u201D", "\u2018single\u2019", "Lorry\u2019s", "caf\u00E9", "na\u00EFve", "\u2014", "T\u2014",
+        "well\u2026", "\u00A312", "\u20AC5", "Brand\u2122", "\u2022", "\u00AB\u00BB", "Y\u2019", "V\u201D",
     ];
 
     private static IEnumerable<string> FontPaths()
@@ -103,7 +106,10 @@ public class ParagraphWidthsTests(ITestOutputHelper output)
     public void DeclinesWhatOneShapingCannotAnswer()
     {
         string font = FontPaths().First();
-        Assert.Null(ParagraphWidths.TryCreate("café au lait", font, 11, null));   // outside printable ASCII
+        Assert.Null(ParagraphWidths.TryCreate("cafe\u0301 au lait", font, 11, null));      // a combining mark
+        Assert.Null(ParagraphWidths.TryCreate("soft\u00ADhyphen here", font, 11, null));   // default-ignorable
+        Assert.Null(ParagraphWidths.TryCreate("\u03A9 is omega", font, 11, null));         // outside the Latin set
+        Assert.NotNull(ParagraphWidths.TryCreate("caf\u00E9 \u201Cau\u201D lait\u2014", font, 11, null)); // prose punctuation
         Assert.Null(ParagraphWidths.TryCreate("tab\there", font, 11, null));          // control character
         Assert.Null(ParagraphWidths.TryCreate("plain text here", "Helvetica", 11, null)); // standard font: width table
         Assert.NotNull(ParagraphWidths.TryCreate("plain text here", font, 11, null));
