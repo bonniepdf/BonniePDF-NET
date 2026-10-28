@@ -9,6 +9,16 @@ namespace BonniePDF.Typography.Engine
     // Single-font default shaping with explicit OpenType selection and UTF-16 sources.
     internal static class Shaper
     {
+        // Non-ASCII characters prose uses that are their own cluster, already in canonical (NFC) form
+        // and never default-ignorable: Latin-1 letters and symbols (not the soft hyphen) and common
+        // typographic punctuation.
+        private static bool StableLatin(char c)
+        {
+            return (c >= 0xA0 && c <= 0xFF && c != 0xAD) || c == 0x2013 || c == 0x2014 || (c >= 0x2018 && c <= 0x201A) ||
+                (c >= 0x201C && c <= 0x201E) || c == 0x2022 || c == 0x2026 || c == 0x2030 || c == 0x2039 || c == 0x203A ||
+                c == 0x20AC || c == 0x2122;
+        }
+
         internal static ShapedRun Shape(FontFace face, string text, ShapeOptions options = null, bool itemized = false)
         {
             if (face == null) throw new ArgumentNullException("face");
@@ -20,16 +30,18 @@ namespace BonniePDF.Typography.Engine
             settings.ValidateText(text);
             bool hebrew = settings.Script == "hebr", arabic = settings.Script == "arab", nativeRtl = hebrew || arabic;
             var run = face.BeginRun();
-            // Printable ASCII has no canonical decomposition or multi-scalar
-            // clusters. Keep the same lookup pipeline and all bounded error paths.
-            bool ascii = settings.Script == "latn" && settings.Direction == TextDirection.LeftToRight &&
+            // Printable ASCII, and the stable Latin characters prose uses, have no canonical
+            // decomposition or multi-scalar clusters. Keep the same lookup pipeline and all
+            // bounded error paths.
+            bool simple = settings.Script == "latn" && settings.Direction == TextDirection.LeftToRight &&
                 text.Length <= limits.MaxGlyphs && text.Length * 3 <= limits.MaxOperations;
-            for (int i = 0; ascii && i < text.Length; i++) ascii = text[i] >= 32 && text[i] <= 126;
-            if (ascii)
+            for (int i = 0; simple && i < text.Length; i++)
+                simple = (text[i] >= 32 && text[i] <= 126) || (StableLatin(text[i]) && face.MapGlyph(text[i]) != 0);
+            if (simple)
             {
                 for (int i = 0; i < text.Length; i++)
                 {
-                    int id = face.AsciiGlyph(text[i]);
+                    int id = text[i] <= 126 ? face.AsciiGlyph(text[i]) : face.MapGlyph(text[i]);
                     if (id == 0) throw new NotSupportedException("Font has no glyph for U+" + ((int)text[i]).ToString("X4") + ".");
                     run.Add(face.RentGlyph(id, text[i], i));
                 }

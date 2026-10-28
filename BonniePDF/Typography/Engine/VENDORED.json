@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "text-engine-dotnet",
   "source": {
-    "commit": "0a2fa99fc4148990dcce6b90c6ba1ae91894156e",
+    "commit": "f4e34d43f12ef7f4e0c701eeaf23b579a7e046e8",
     "dirty": false
   },
   "files": {
@@ -59,7 +59,7 @@
     "Shaping/ArabicJoining.cs": "be1eace2a73db72596868f447635700ce621d7d8c371ccd3788f848e734ea94f",
     "Shaping/FallbackMarkPositioning.cs": "bdab8f4a5344d10470ba857b8c3f13891b948db5acb43969e6b844b73de7020b",
     "Shaping/ItemizedParagraph.cs": "3f311077f77549546927bd856c3eff8849931a6a241a28ba4be9a17c09343990",
-    "Shaping/Shaper.cs": "4ea7fdc1f0237e6da4e6a00ce6affc6a0113c01e4790efe894b33a09a78a0f2b",
+    "Shaping/Shaper.cs": "8445bfaf7418e63599e09d94871ce857ee363ba31f92f9f8f9baf3784f0be670",
     "Shaping/Shapers/ArabicShaper.cs": "2e8e1f124e4d970db07a162c1febcbfce7b29d0a87f0222f67847f6582ac9c12",
     "Shaping/Shapers/HebrewShaper.cs": "09542e2765920d45a0c471456d8a14359d1cbc3c5c0502ea35240337d3a9e82c",
     "Shaping/ShapingProgram.cs": "62d764e969b652eea74078530d75832b757110134395583cb3b7308fb1f39b9f",
