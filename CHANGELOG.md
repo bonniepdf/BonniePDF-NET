@@ -5,7 +5,20 @@ Versions use CalVer (`yyyy.m.minor`), decided by the versioning tool, and are
 shared with the TypeScript implementation: `BonniePDF` and `@bonniepdf/core`
 at the same version are the same library.
 
-## Unreleased
+## 2026.10.28
+
+Status: Prerelease
+
+### Highlights
+
+- Faster paragraph wrapping for everyday prose with curly quotes, dashes, and accented letters
+- Multi-fold layout speedups on long documents formatted with embedded fonts
+- New runnable recipes for page breaks, practical tables, downloads, font fallback, and batch generation
+- New industry invoice, long-basket receipt, and customer letter examples
+
+### Performance Improvements
+
+- **Faster wrapping for everyday prose:** Paragraphs containing curly quotes, dashes, accented letters or symbols such as `€` and `™` now wrap from a single shaping pass, as plain ASCII already did. Long documents in embedded fonts, which PDF/A and PDF/UA always use, generate several times faster; a full novel under PDF/A-2a and PDF/UA-1 drops from about 4.5 s to about 1.2 s. Output is byte-for-byte unchanged.
 
 ### Examples
 
