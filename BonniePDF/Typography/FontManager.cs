@@ -47,7 +47,10 @@ public static class FontManager
     // document generation (a common server workload - see ConcurrencyTests) can
     // register or read fonts from multiple threads at once. A plain Dictionary is
     // not safe under concurrent writes.
-    private static readonly ConcurrentDictionary<string, byte[]> _registry = new(StringComparer.OrdinalIgnoreCase);
+    // Values are lazy so the bundled faces are copied out of the assembly only when a
+    // document reaches them; a registration always yields the same array, which the
+    // parsed-font cache relies on.
+    private static readonly ConcurrentDictionary<string, Lazy<byte[]>> _registry = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Prefix of the font name a registered font is drawn under, whether a family resolves to it or it is reached
@@ -123,7 +126,7 @@ public static class FontManager
         var font = TtfFont.LoadFromBytes(bytes);
         var fam = (family ?? font.FontFamily).ToLowerInvariant();
         var wt  = NormalizeWeight(subfamily ?? font.FontSubfamily ?? "Regular");
-        _registry[$"{fam}:{wt}"] = bytes;
+        _registry[$"{fam}:{wt}"] = new Lazy<byte[]>(bytes);
         _familyMemo.Clear();
     }
 
@@ -164,9 +167,9 @@ public static class FontManager
         if (!StandardFontMap.TryGetValue(standardFontName, out var mapping)) return null;
 
         string key = $"{mapping.family}:{mapping.weight}";
-        if (!_registry.TryGetValue(key, out byte[]? bytes)) return null;
+        if (!_registry.TryGetValue(key, out Lazy<byte[]>? bytes)) return null;
 
-        return GetParsedFont(key, bytes);
+        return GetParsedFont(key, bytes.Value);
     }
 
     /// <summary>
@@ -202,7 +205,8 @@ public static class FontManager
     {
         if (!fontName.StartsWith(RegisteredFontPrefix, StringComparison.Ordinal)) return null;
         string key = fontName[RegisteredFontPrefix.Length..];
-        if (!_registry.TryGetValue(key, out byte[]? bytes)) return null;
+        if (!_registry.TryGetValue(key, out Lazy<byte[]>? source)) return null;
+        byte[] bytes = source.Value;
         TtfFont? font = GetParsedFont(key, bytes);
         return font is null ? null : new FallbackFont { Key = key, Bytes = bytes, Font = font };
     }
@@ -216,7 +220,8 @@ public static class FontManager
     {
         if (!StandardFontMap.TryGetValue(standardFontName, out var mapping)) return null;
         string key = $"{mapping.family}:{NormalizeWeight(mapping.weight)}";
-        if (!_registry.TryGetValue(key, out byte[]? bytes)) return null;
+        if (!_registry.TryGetValue(key, out Lazy<byte[]>? source)) return null;
+        byte[] bytes = source.Value;
         TtfFont? font = GetParsedFont(key, bytes);
         return font is null ? null : new FallbackFont { Key = key, Bytes = bytes, Font = font };
     }
@@ -227,7 +232,7 @@ public static class FontManager
     public static byte[]? GetBytesForFamily(string family, string subfamily)
     {
         var key = $"{family.ToLowerInvariant()}:{NormalizeWeight(subfamily)}";
-        return _registry.TryGetValue(key, out var bytes) ? bytes : null;
+        return _registry.TryGetValue(key, out var bytes) ? bytes.Value : null;
     }
 
     /// <summary>Returns <c>true</c> if at least one substitution font is registered.</summary>
@@ -250,7 +255,7 @@ public static class FontManager
         foreach (var entry in _registry)
         {
             string key = entry.Key;
-            byte[] bytes = entry.Value;
+            byte[] bytes = entry.Value.Value;
 
             TtfFont? font = GetParsedFont(key, bytes);
 
@@ -319,14 +324,20 @@ public static class FontManager
                 if (!resourceName.EndsWith($"{fileName}.ttf", StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                using var stream = asm.GetManifestResourceStream(resourceName)!;
-                using var ms = new MemoryStream();
-                stream.CopyTo(ms);
-                _registry[$"{family}:{weight}"] = ms.ToArray();
+                string name = resourceName;
+                _registry[$"{family}:{weight}"] = new Lazy<byte[]>(() => ReadResource(asm, name));
                 _familyMemo.Clear();
                 break;
             }
         }
+    }
+
+    private static byte[] ReadResource(Assembly asm, string resourceName)
+    {
+        using var stream = asm.GetManifestResourceStream(resourceName)!;
+        var bytes = new byte[stream.Length];
+        stream.ReadExactly(bytes);
+        return bytes;
     }
 
     private static void TryRegisterFromAssemblyDirectory()
@@ -341,7 +352,7 @@ public static class FontManager
         {
             string path = Path.Combine(fontsDir, $"{fileName}.ttf");
             if (!File.Exists(path)) continue;
-            _registry[$"{family}:{weight}"] = File.ReadAllBytes(path);
+            _registry[$"{family}:{weight}"] = new Lazy<byte[]>(File.ReadAllBytes(path));
             _familyMemo.Clear();
         }
     }
