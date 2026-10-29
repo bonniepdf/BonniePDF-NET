@@ -98,7 +98,12 @@ internal static class LicenseChecker
     /// No tier is declared and the environment is positively identified as
     /// development, test, or CI.
     /// </exception>
-    public static void ValidateLicense() => ValidateLicense(LicenseEnvironment.Classify());
+    public static void ValidateLicense()
+    {
+        // Before classifying: reading the environment walks every loaded assembly.
+        if (Volatile.Read(ref _checked) != 0) return;
+        ValidateLicense(LicenseEnvironment.Classify());
+    }
 
     /// <summary>
     /// The check, against a caller-supplied classification.
