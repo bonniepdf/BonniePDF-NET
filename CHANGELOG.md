@@ -5,6 +5,17 @@ Versions use CalVer (`yyyy.m.minor`), decided by the versioning tool, and are
 shared with the TypeScript implementation: `BonniePDF` and `@bonniepdf/core`
 at the same version are the same library.
 
+## Unreleased
+
+### Performance Improvements
+
+- **Smaller, faster start-up:** The bundled Liberation fonts are now read from the assembly the first time a document uses them, not all twelve when `FontManager` is first touched. A process whose documents use their own fonts allocates about 15 MB less at start-up, and its peak working set falls by about 13 MB. Output is byte-for-byte unchanged.
+- **Cheaper licence check per document:** After the first document, the licence check no longer inspects the environment or the loaded assemblies on every save. It now costs a single flag read, as documented.
+
+### Document Engine & API
+
+- **Source layout matches the TypeScript implementation:** `BarcodeSymbology`, `BarcodeContentException` and `QrErrorCorrection` move to their own files, the honest-claim guard becomes an internal `ConformancePlan`, and a container recognises a table frame through an internal `IBorderFrameHost` marker. Public types, namespaces and output are unchanged.
+
 ## 2026.10.28
 
 Status: Prerelease
