@@ -304,7 +304,7 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
             {
                 switch (current)
                 {
-                    case Table:
+                    case IBorderFrameHost:
                         return true;
                     case BonniePDF.Fluent.ContentSlot { Child: not null } slot:
                         current = slot.Child;
