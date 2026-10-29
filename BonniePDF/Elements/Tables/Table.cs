@@ -7,7 +7,7 @@ namespace BonniePDF;
 /// <summary>
 /// A table element with support for column weights, cell padding, borders, headers, and footers
 /// </summary>
-public class Table : BorderedElementBase, IStatefulElement, IRoleProvider
+public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBorderFrameHost
 {
     /// <summary>
     /// When <c>true</c>, the table is a <b>layout (presentation) table</b>: it
