@@ -3,10 +3,10 @@ using BonniePDF;
 
 namespace BonniePDF.Examples.FinanceReporting.FinancialDashboard;
 
-/// <summary>A landscape annual review with KPI cards, gradient bars, a layered doughnut and a product table.</summary>
+/// <summary>A print-ready landscape annual review with KPI cards, gradient bars, a doughnut and a product table.</summary>
 [System.ComponentModel.DisplayName("Financial Dashboard")]
 [System.ComponentModel.Category("Finance & Reporting")]
-[System.ComponentModel.Description("A landscape annual review with four KPIs, rounded gradient bars, a revenue-mix doughnut and a product revenue table.")]
+[System.ComponentModel.Description("A print-ready landscape annual review with four KPIs, rounded gradient bars, a revenue-mix doughnut and a product revenue table.")]
 public static class FinancialDashboardExample
 {
     private static readonly Color Navy = Color.FromHex("#0f172a");
@@ -15,7 +15,8 @@ public static class FinancialDashboardExample
     private static readonly Color Violet = Color.FromHex("#7c3aed");
     private static readonly Color Amber = Color.FromHex("#d97706");
     private static readonly Color Muted = Color.FromHex("#475569");
-    private static readonly Color Light = Color.FromHex("#cbd5e1");
+    private static readonly Color Rule = Color.FromHex("#e2e8f0");
+    private static readonly Color HeaderFill = Color.FromHex("#f8fafc");
     private static readonly Color Positive = Color.FromHex("#047857");
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
@@ -29,35 +30,36 @@ public static class FinancialDashboardExample
         double grossProfit = products.Sum(p => p.Revenue * p.Margin / 100);
         string totalLabel = "£" + F(total / 1000, "F2") + "M";
         double secondHalfGrowth = (revenue.Skip(6).Sum() / revenue.Take(6).Sum() - 1) * 100;
+        // A white page with a printable margin: no full-bleed fills for a printer to waste ink on or clip.
         Document doc = new(new DocumentSettings
         {
-            PageSize = PdfSize.A4, Orientation = PageOrientation.Landscape, Margin = 0, PageColor = Color.FromHex("#f1f5f9"),
+            PageSize = PdfSize.A4, Orientation = PageOrientation.Landscape, Margin = 24,
             Conformance = PdfAConformance.PdfA2a, Accessibility = AccessibilityMode.PdfUa1, Language = "en-GB",
             DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(Muted)
         });
-        doc.Metadata.Title = "Northstar - FY " + year + " Financial Dashboard";
-        doc.Metadata.Author = "Northstar";
-        doc.Metadata.Subject = "Annual performance review with revenue trends and product mix. Illustrative data.";
+        doc.Metadata.Title = "Sample Company Ltd - FY " + year + " Financial Dashboard";
+        doc.Metadata.Author = "Sample Company Ltd";
+        doc.Metadata.Subject = "Annual performance review with revenue trends and product mix. Sample data.";
 
         Grid header = LayoutGrid([2, 1], 0);
         header.AddRow(
-            Stack(Text("NORTHSTAR  /  FINANCE", 9, Color.FromHex("#67e8f9"), true),
-                Text("Performance at a glance", 25, Color.White, true, top: 7),
-                Text("Annual revenue review  |  An expanding business, a stronger revenue mix", 9, Light, top: 6)),
-            Stack(Text("FY " + year, 20, Color.White, true, TextAlignment.Right),
-                Text("REVENUE  +18.3% YoY", 9, Color.FromHex("#67e8f9"), true, TextAlignment.Right, 8),
-                Text("Board & investor overview", 8, Light, false, TextAlignment.Right, 6)));
-        doc.Add(new Container { BackgroundColor = Navy, Padding = new Thickness(28, 13), Child = header });
-        doc.Add(new Container { Height = 3, BackgroundColor = Blue });
+            Stack(Text("SAMPLE COMPANY LTD  /  FINANCE", 8, Blue, true),
+                Text("Performance at a glance", 24, Navy, true, top: 6),
+                Text("Annual review", 9, Muted, top: 5)),
+            Stack(Text("FY " + year, 20, Navy, true, TextAlignment.Right),
+                Text("REVENUE  +18.3% YoY", 8, Positive, true, TextAlignment.Right, 7),
+                Text("Board & investor overview", 8, Muted, false, TextAlignment.Right, 5)));
+        doc.Add(new Container { Padding = new Thickness(4, 0, 4, 8), Child = header });
+        doc.Add(new Container { Height = 2, BackgroundColor = Blue, Margin = new Thickness(4, 0, 4, 6) });
         Grid metrics = LayoutGrid([1, 1, 1, 1], 4);
         metrics.AddRow(Kpi(totalLabel, "TOTAL REVENUE", "+18.3% vs prior year", Blue),
             Kpi("£" + F(grossProfit / 1000, "F2") + "M", "GROSS PROFIT", "+£272K vs prior year", Teal),
             Kpi(F(grossProfit / total * 100, "F1") + "%", "GROSS MARGIN", "+2.1 percentage points", Violet),
-            Kpi("3,814", "ACTIVE CUSTOMERS", "+24.1% vs prior year", Blue));
+            Kpi("3,814", "ACTIVE CUSTOMERS", "+24.1% vs prior year", Amber));
 
         BarChart bars = new()
         {
-            Theme = "modern", Height = 164, StretchToFit = true, ShowValueLabels = false, FontFamily = StandardFonts.Helvetica, LabelFontSize = 8,
+            Theme = "modern", Height = 142, StretchToFit = true, ShowValueLabels = false, FontFamily = StandardFonts.Helvetica, LabelFontSize = 8,
             BarStyle = new ChartBarStyle { CornerRadius = 4, Gradient = new ChartLinearGradient { StartColor = Color.FromHex("#60a5fa"), EndColor = Blue, Scope = "bar" } },
             Data = new ChartData
             {
@@ -91,20 +93,21 @@ public static class FinancialDashboardExample
         Grid charts = LayoutGrid([1.9f, 1], 4);
         charts.AddRow(Panel("Revenue momentum", "Monthly revenue (£000)  |  H2 +" + F(secondHalfGrowth, "F1") + "% vs H1", bars),
             Panel("Revenue mix", "A diversified product portfolio", donutLayers, legend));
+        // A rule under each row only: no lines above the headings, at the edges or between columns.
         Table table = new(2.4f, 1.3f, 1, 1)
         {
-            Border = new Border(0.5f), BorderColors = new BorderColors(Color.FromHex("#e2e8f0")), CellPadding = 5,
-            HeaderBackgroundColor = Color.FromHex("#eff6ff"), HeaderTextColor = Navy
+            Border = new Border(0, 0, 0, 0.5f), BorderColors = new BorderColors(Rule), CellPadding = 4,
+            HeaderBackgroundColor = HeaderFill, HeaderTextColor = Navy
         };
         table.AddHeader(Text("PRODUCT", 7, Muted, true), Text("REVENUE", 7, Muted, true, TextAlignment.Right), Text("SHARE", 7, Muted, true, TextAlignment.Right), Text("MARGIN", 7, Muted, true, TextAlignment.Right));
         foreach (Product p in products)
             table.AddRow(Text(p.Name, 8, Navy, true), Text("£" + F(p.Revenue * 1000, "N0"), 8, Navy, true, TextAlignment.Right),
                 Text(F(Math.Round(p.Revenue / total * 100), "F0") + "%", 8, Muted, false, TextAlignment.Right), Text(p.Margin + "%", 8, Positive, true, TextAlignment.Right));
         Container bottom = Panel("Revenue by product", "", new Container { Margin = new Thickness(0, 7, 0, 0), Child = table });
-        doc.Add(new Container { Padding = new Thickness(24, 8, 24, 0), Child = Stack(metrics, charts, new Container { Padding = new Thickness(4, 4), Child = bottom }) });
+        doc.Add(Stack(metrics, charts, new Container { Padding = new Thickness(4), Child = bottom }));
         Grid footer = LayoutGrid([2, 1], 0);
-        footer.AddRow(Text("NORTHSTAR  /  FY " + year + "  /  Illustrative data in GBP", 7, Muted), Text("CONFIDENTIAL  /  01", 7, Muted, true, TextAlignment.Right));
-        doc.Add(new Container { Padding = new Thickness(28, 9), Child = footer });
+        footer.AddRow(Text("SAMPLE COMPANY LTD  /  FY " + year + "  /  Sample data in GBP", 7, Muted), Text("CONFIDENTIAL  /  01", 7, Muted, true, TextAlignment.Right));
+        doc.Add(new Container { Padding = new Thickness(4, 4, 4, 0), Child = footer });
         return doc;
     }
 
@@ -117,21 +120,19 @@ public static class FinancialDashboardExample
         return stack;
     }
     private static Grid LayoutGrid(float[] columns, float padding) => new(columns) { Border = Border.None, CellPadding = padding };
+    // Cards and panels are outlined rather than filled, so they keep their shape on a white page.
     private static Container Kpi(string value, string label, string delta, Color accent) => new()
     {
-        BackgroundColor = Color.White, CornerRadius = 7,
-        Child = Stack(new Container { BackgroundColor = accent, Height = 3 }, new Container
-        {
-            Padding = new Thickness(14, 8),
-            Child = Stack(Text(label, 7, Muted, true), Text(value, 22, Navy, true, top: 4), Text(delta, 7, Positive, true, top: 3))
-        })
+        Border = new Border(0.75f), BorderColors = new BorderColors(Rule), CornerRadius = 6, Padding = new Thickness(14, 8),
+        Child = Stack(new Container { BackgroundColor = accent, Width = 24, Height = 3, CornerRadius = 1.5f },
+            Text(label, 7, Muted, true, top: 6), Text(value, 22, Navy, true, top: 4), Text(delta, 7, Positive, true, top: 3))
     };
     private static Container Panel(string title, string subtitle, params IElement[] children)
     {
         VerticalStack content = Stack(Text(title, 12, Navy, true));
         if (subtitle.Length > 0) content.Add(Text(subtitle, 7.5f, Muted, top: 4));
         foreach (IElement child in children) content.Add(child);
-        return new Container { BackgroundColor = Color.White, CornerRadius = 7, Padding = new Thickness(12), Child = content };
+        return new Container { Border = new Border(0.75f), BorderColors = new BorderColors(Rule), CornerRadius = 6, Padding = new Thickness(12), Child = content };
     }
     private static Container LegendItem(string name, string share, Color color)
     {

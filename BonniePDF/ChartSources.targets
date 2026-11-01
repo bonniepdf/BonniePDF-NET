@@ -12,6 +12,7 @@
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartBars.cs" ExpectedHash="D4954F81AF2AEA4C133CA81E117E4FD615D24BA360BBAC8A5AD5B30F79885C93" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartLabels.cs" ExpectedHash="D7DCA53E2FDB01C2CEC361037BD149AFA21D0CB718CFAAAAF4130C6A02456A89" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartPathPlan.cs" ExpectedHash="6202E554BB91B4846E1CF04FC5F234F111828E09A5AD83FCC8440A7855582935" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartTint.cs" ExpectedHash="FEBF44284D3B1ECA343222B45B734A2297F0046D7C2970058A457713DAA26D7D" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartValueScale.cs" ExpectedHash="0651E610A0DA7CB49CDAEE2C6A179408D4631FF984C945D019F9562D74ABAA70" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartVector.cs" ExpectedHash="D25AED2B01FA7841E0FCE4539746FA4B776CEB08BC101C6BAF813B9A17538171" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/GroupedBarChart.cs" ExpectedHash="CFB00595BF1B26D11991B638C775953FA7E514CCB3D101BFF600F0E7B8DDE65F" />
@@ -22,7 +23,7 @@
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartDataPoint.cs" ExpectedHash="0FCAE587A63995B4D47491D9BD63D929A00154D9FC4126921A7DDAFF94D28CA0" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartSeries.cs" ExpectedHash="D160AB1EFC4B97ED540EFF2C2541CFC078D03ECB82D10FC7BF0C3E2E47A69FD5" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartSeriesStyle.cs" ExpectedHash="38839F84138E9A95AE86B47CE4D59F36DA7C439FEE0FE819F73ED19AF53A1478" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/PieChart.cs" ExpectedHash="023F4972474256278AC5D5BC3523F84048E2B071EC2495BFF9B2C02D835BB316" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/PieChart.cs" ExpectedHash="3F3F547BB445E8688BB584B3F33042ED11920CD4FEFC986297D179A72655D774" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartBase.Host.cs" ExpectedHash="E5ADCB011881A928C56FE4671B4A21D5F9C158B5815E112852125B7441E76F7D" />
   </ItemGroup>
   <Target Name="VerifyChartSources" BeforeTargets="CoreCompile">

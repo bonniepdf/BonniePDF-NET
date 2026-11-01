@@ -92,6 +92,14 @@ public class PieChart : ChartBase
     public bool ShowTotal { get; set; } = true;
 
     /// <summary>
+    /// Fill each slice with a gradient from a lighter tint of its colour at the centre side to its
+    /// own colour at the rim. Slice colours must be opaque. Default is false.
+    /// </summary>
+    public bool SliceGradient { get; set; }
+
+    internal override bool UsesStyledGeometry => base.UsesStyledGeometry || SliceGradient;
+
+    /// <summary>
     /// Draws the pie chart content.
     /// All positions are computed dynamically from Width and Height.
     /// </summary>
@@ -228,8 +236,24 @@ public class PieChart : ChartBase
                 ? CreateAnnularSectorPath(startAngle, endAngle, layout)
                 : CreatePieSlicePath(startAngle, endAngle, layout);
 
-            canvas.FillPath(path, color);
+            if (SliceGradient) ChartVector.Fill(canvas, GradientSlice(path, startAngle, endAngle, color, layout));
+            else canvas.FillPath(path, color);
         }
+    }
+
+    /// <summary>
+    /// A slice outline painted along its bisector, from its tint at the inner edge (the centre, or the
+    /// donut hole) to its own colour at the rim.
+    /// </summary>
+    private ChartPathPlan GradientSlice(List<Point> path, float startAngle, float endAngle, Color color, PieLayout layout)
+    {
+        double middle = (startAngle + endAngle) / 2.0 * Math.PI / 180;
+        double inner = IsDonut ? layout.DonutHoleRadius : 0;
+        List<ChartPathCommand> commands = [.. path.Select((p, n) => new ChartPathCommand(n == 0 ? "M" : "L", [p.X, p.Y])), new ChartPathCommand("Z", [])];
+        return new ChartPathPlan(commands, color, new ChartResolvedGradient(
+            layout.CenterX + inner * Math.Cos(middle), layout.CenterY + inner * Math.Sin(middle),
+            layout.CenterX + layout.Radius * Math.Cos(middle), layout.CenterY + layout.Radius * Math.Sin(middle),
+            ChartTint.Tint(color), color));
     }
 
     /// <summary>
