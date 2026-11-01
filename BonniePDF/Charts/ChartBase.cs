@@ -1,3 +1,4 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 using System;
 using BonniePDF.Drawing;
 
@@ -8,13 +9,14 @@ namespace BonniePDF;
 /// using the ICanvas interface. This ensures charts can be rendered to any backend
 /// (PDF, SVG, etc.) without modification.
 /// </summary>
-public abstract class ChartBase : ElementBase, IRoleProvider, IAltTextProvider
+public abstract partial class ChartBase
 {
-    // Title styling constants (matching SVG chart implementation)
-    private const float TitleFontSize = 20;
-    private const float TitleY = 35;
-    private const string TitleFontFamily = StandardFonts.Helvetica;
-    private static readonly Color TitleColor = Color.FromHex("#333333");
+    private string _theme = "legacy";
+    /// <summary>Appearance preset: "legacy" (default) or "modern".</summary>
+    public string Theme { get => _theme; set { if (value is not "legacy" and not "modern") throw new ArgumentException("Invalid chart theme.", nameof(value)); _theme = value; } }
+    /// <summary>The values and behaviours behind <see cref="Theme"/>.</summary>
+    internal ChartTheme Appearance => ChartTheme.For(Theme);
+    internal virtual bool UsesStyledGeometry => Appearance.StyledGeometry;
 
     /// <summary>Creates an empty chart for construct-then-mutate authoring.</summary>
     protected ChartBase()
@@ -50,15 +52,6 @@ public abstract class ChartBase : ElementBase, IRoleProvider, IAltTextProvider
     public bool IsDecorative { get; set; }
 
     /// <summary>
-    /// The structure role in a tagged PDF: <c>Figure</c> when the element has alternative text, otherwise
-    /// <c>Artifact</c>. It is always <c>Artifact</c> when <see cref="IsDecorative"/> is set.
-    /// </summary>
-    public SemanticRole SemanticRole =>
-        IsDecorative || string.IsNullOrEmpty(AltText)
-            ? SemanticRole.Artifact
-            : SemanticRole.Figure;
-
-    /// <summary>
     /// Width of the chart canvas in points
     /// </summary>
     public float Width { get; set; } = 800;
@@ -74,12 +67,6 @@ public abstract class ChartBase : ElementBase, IRoleProvider, IAltTextProvider
     /// Set to Color.White for standalone chart images.
     /// </summary>
     public Color? BackgroundColor { get; set; }
-
-    /// <summary>
-    /// When true, the chart will stretch to fill the container width.
-    /// The Width property will be set automatically by the document layout engine.
-    /// </summary>
-    public bool StretchToFit { get; set; }
 
     /// <summary>
     /// Preferred root <c>shape-rendering</c> for standalone SVG export
@@ -114,14 +101,14 @@ public abstract class ChartBase : ElementBase, IRoleProvider, IAltTextProvider
     public void Draw(ICanvas canvas) => Draw(canvas, Data);
 
     /// <summary>
-    /// Draws the chart title centered at the top.
+    /// Draws the chart title in the theme's title style.
     /// </summary>
     /// <param name="canvas">The canvas to draw to</param>
     /// <param name="title">The title text</param>
     protected virtual void DrawTitle(ICanvas canvas, string title)
     {
-        float centerX = Width / 2;
-        canvas.DrawText(centerX, TitleY, title, TitleColor, TitleFontSize, TitleFontFamily, TextAlignment.Center);
+        ChartTheme t = Appearance;
+        canvas.DrawText(t.TitleX ?? Width / 2, t.TitleY, title, t.TitleColor, t.TitleFontSize, t.TitleFontFamily, t.TitleAlignment);
     }
 
     /// <summary>
@@ -132,20 +119,4 @@ public abstract class ChartBase : ElementBase, IRoleProvider, IAltTextProvider
     /// <param name="data">The chart data to render</param>
     protected abstract void DrawContent(ICanvas canvas, ChartData data);
 
-    /// <inheritdoc />
-    protected override float GetPreferredContentWidth() => Width;
-
-    /// <inheritdoc />
-    protected override float MeasureContentHeight(float contentWidth) => Height;
-
-    /// <inheritdoc />
-    protected override void RenderContent(RenderContext ctx, float contentWidth)
-    {
-        if (StretchToFit) Width = contentWidth;
-
-        ICanvas canvas = ctx.GetCanvas(ctx.CurrentX, ctx.CurrentY);
-        Draw(canvas);
-        ctx.FlushExternalCanvas(canvas);
-        ctx.CurrentY += Height;
-    }
 }

@@ -1,0 +1,54 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/modern-charts",
+    "description": "Modern theme, rounded bars and native opaque gradients survive definition round trips."
+  },
+  "_expect": {
+    "pages": 1,
+    "roundTrip": true
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "BarChart",
+          "theme": "modern",
+          "width": 400,
+          "height": 200,
+          "altText": "Revenue by quarter",
+          "barStyle": {
+            "cornerRadius": 6,
+            "gradient": {
+              "startColor": "#93c5fd",
+              "endColor": "#2563eb",
+              "scope": "plot"
+            }
+          },
+          "data": {
+            "title": "Revenue",
+            "series": [
+              {
+                "name": "Revenue",
+                "dataPoints": [
+                  {
+                    "label": "Q1",
+                    "value": 25
+                  },
+                  {
+                    "label": "Q2",
+                    "value": 40
+                  }
+                ]
+              }
+            ],
+            "yAxis": {
+              "maxValue": 50
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

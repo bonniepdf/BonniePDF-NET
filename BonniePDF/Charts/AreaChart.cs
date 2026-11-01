@@ -1,3 +1,4 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 using System.Collections.Generic;
 using BonniePDF.Drawing;
 
@@ -48,7 +49,7 @@ public class AreaChart : CartesianChartBase
 
     /// <summary>
     /// Draws the area chart elements for a single series (area fill and connecting line).
-    /// In horizontal mode the area fill extends leftward from the line to the value-axis baseline.
+    /// The fill spans from the line to the value origin, in either orientation.
     /// </summary>
     protected override void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
         IList<Point> coordinates,
@@ -65,7 +66,7 @@ public class AreaChart : CartesianChartBase
                 ? LineWidth
                 : DefaultLineWidth;
 
-        DrawAreaFill(canvas, coordinates, baselineY, ResolveSeriesColor(series), fillOpacity);
+        DrawAreaFill(canvas, coordinates, ValueOrigin(data, chartAreaWidth, chartAreaHeight, baselineY), ResolveSeriesColor(series), fillOpacity);
         DrawConnectingLine(canvas, coordinates, ResolveSeriesColor(series), lineWidth);
     }
 
@@ -75,9 +76,9 @@ public class AreaChart : CartesianChartBase
     protected override float GetLabelVerticalOffset(ChartSeries series) => 7;
 
     /// <summary>
-    /// Draws the area fill as a single closed polygon spanning from the axis baseline to the line.
+    /// Draws the area fill as a single closed polygon spanning from the value origin to the line.
     /// </summary>
-    private void DrawAreaFill(ICanvas canvas, IList<Point> coordinates, float baselineY, Color color, float opacity)
+    private void DrawAreaFill(ICanvas canvas, IList<Point> coordinates, float origin, Color color, float opacity)
     {
         if (coordinates.Count < 2) return;
 
@@ -87,12 +88,12 @@ public class AreaChart : CartesianChartBase
 
         if (Orientation == ChartOrientation.Horizontal)
         {
-            List<Point> path = [new(LeftPadding, first.Y), .. coordinates, new(LeftPadding, last.Y)];
+            List<Point> path = [new(origin, first.Y), .. coordinates, new(origin, last.Y)];
             canvas.FillPath(path, fillColor);
         }
         else
         {
-            List<Point> path = [new(first.X, baselineY), .. coordinates, new(last.X, baselineY)];
+            List<Point> path = [new(first.X, origin), .. coordinates, new(last.X, origin)];
             canvas.FillPath(path, fillColor);
         }
     }

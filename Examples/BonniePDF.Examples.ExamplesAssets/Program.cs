@@ -44,8 +44,14 @@ internal sealed class Program
         ("public-library-membership", PublicLibraryMembershipLetterExample.Generate),
     ];
 
-    private static int Main()
+    private static int Main(string[] args)
     {
+        foreach (string name in args)
+        {
+            if (Examples.Any(example => string.Equals(example.Asset, name, StringComparison.Ordinal))) continue;
+            Console.Error.WriteLine($"Unknown README asset: {name}");
+            return 2;
+        }
         string repoRoot = FindRepositoryRoot();
         string svgDir = Path.Combine(repoRoot, "docs", "images", "examples");
         string pdfDir = Path.Combine(repoRoot, "docs", "pdf");
@@ -56,6 +62,7 @@ internal sealed class Program
 
         foreach ((string asset, Func<Document> generate) in Examples)
         {
+            if (args.Length > 0 && !args.Contains(asset, StringComparer.Ordinal)) continue;
             try
             {
                 using Document doc = generate();

@@ -1,3 +1,4 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 using System;
 using System.Collections.Generic;
 using BonniePDF.Drawing;
@@ -11,6 +12,11 @@ namespace BonniePDF;
 /// </summary>
 public class GroupedBarChart : CartesianChartBase
 {
+    protected override void DrawLegendSwatch(ICanvas canvas, float x, float y, float size, ChartSeries series)
+    { ChartBars.Draw(canvas, x, y, size, size, ResolveSeriesColor(series), BarStyle, Appearance, false, x, y, size, size); }
+    /// <summary>Value-end rounding and optional opaque linear gradient.</summary>
+    public ChartBarStyle BarStyle { get; set; } = new();
+    internal override bool UsesStyledGeometry => base.UsesStyledGeometry || (BarStyle.CornerRadius ?? 0) > 0 || BarStyle.Gradient is not null;
     /// <summary>
     /// Width of bars as percentage of available space (0.0 to 1.0, default: 0.6).
     /// </summary>
@@ -44,6 +50,7 @@ public class GroupedBarChart : CartesianChartBase
         int seriesCount = data.Series.Count;
         int categoryCount = series.DataPoints.Count;
         int seriesIndex = data.Series.IndexOf(series);
+        float origin = ValueOrigin(data, chartAreaWidth, chartAreaHeight, baselineY);
 
         if (Orientation == ChartOrientation.Horizontal)
         {
@@ -52,10 +59,10 @@ public class GroupedBarChart : CartesianChartBase
             for (int i = 0; i < coordinates.Count; i++)
             {
                 var p = coordinates[i];
-                float barWidth = p.X - LeftPadding;
+                float barWidth = p.X - origin;
                 (float barY, float barHeight) = BarSlot(i, seriesIndex, seriesCount, categoryCount, topAreaY, chartAreaHeight);
 
-                canvas.FillRect(LeftPadding, barY, barWidth, barHeight, ResolveSeriesColor(series));
+                ChartBars.Draw(canvas, origin, barY, barWidth, barHeight, ResolveSeriesColor(series), BarStyle, Appearance, true, LeftPadding, topAreaY, chartAreaWidth, chartAreaHeight);
             }
         }
         else
@@ -63,10 +70,10 @@ public class GroupedBarChart : CartesianChartBase
             for (int i = 0; i < coordinates.Count; i++)
             {
                 var p = coordinates[i];
-                float barHeight = baselineY - p.Y;
+                float barHeight = origin - p.Y;
                 (float barX, float barWidth) = BarSlot(i, seriesIndex, seriesCount, categoryCount, LeftPadding, chartAreaWidth);
 
-                canvas.FillRect(barX, p.Y, barWidth, barHeight, ResolveSeriesColor(series));
+                ChartBars.Draw(canvas, barX, p.Y, barWidth, barHeight, ResolveSeriesColor(series), BarStyle, Appearance, false, LeftPadding, baselineY - chartAreaHeight, chartAreaWidth, chartAreaHeight);
             }
         }
     }
@@ -118,17 +125,18 @@ public class GroupedBarChart : CartesianChartBase
             {
                 var point = coordinates[i];
                 string text = series.DataPoints[i].FormattedValue;
+                bool below = ChartValueScale.IsBelowOrigin(series.DataPoints[i].Value, data.YAxis.MinValue, data.YAxis.MaxValue);
 
                 if (Orientation == ChartOrientation.Horizontal)
                 {
                     (float barY, float barHeight) = BarSlot(i, seriesIndex, seriesCount, categoryCount, topAreaY, chartAreaHeight);
-                    canvas.DrawText(point.X + offset, barY + barHeight / 2 - LabelFontSize / 2, text,
-                        ResolveSeriesColor(series), LabelFontSize, FontFamily, TextAlignment.Left);
+                    DrawPlacedLabel(canvas, below ? point.X - offset : point.X + offset, barY + barHeight / 2 - LabelFontSize / 2, text,
+                        ResolveSeriesColor(series), LabelFontSize, FontFamily, below ? TextAlignment.Right : TextAlignment.Left);
                 }
                 else
                 {
                     (float barX, float barWidth) = BarSlot(i, seriesIndex, seriesCount, categoryCount, LeftPadding, chartAreaWidth);
-                    canvas.DrawText(barX + barWidth / 2, point.Y - offset - LabelFontSize, text,
+                    DrawPlacedLabel(canvas, barX + barWidth / 2, below ? point.Y + offset : point.Y - offset - LabelFontSize, text,
                         ResolveSeriesColor(series), LabelFontSize, FontFamily, TextAlignment.Center);
                 }
             }

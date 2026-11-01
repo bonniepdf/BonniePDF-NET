@@ -496,6 +496,20 @@
         "rightToLeft"
       ],
       "via": "options"
+    },
+    "ChartTheme": {
+      "via": "options",
+      "tokens": [
+        "legacy",
+        "modern"
+      ]
+    },
+    "ChartGradientScope": {
+      "via": "options",
+      "tokens": [
+        "bar",
+        "plot"
+      ]
     }
   },
   "mixins": {
@@ -642,6 +656,9 @@
       },
       "isDecorative": {
         "kind": "boolean"
+      },
+      "theme": {
+        "kind": "enum:ChartTheme"
       }
     },
     "Cartesian": {
@@ -1038,6 +1055,30 @@
         },
         "lineBreak": {
           "kind": "boolean"
+        }
+      }
+    },
+    "ChartLinearGradient": {
+      "keys": {
+        "startColor": {
+          "kind": "color"
+        },
+        "endColor": {
+          "kind": "color"
+        },
+        "scope": {
+          "kind": "enum:ChartGradientScope"
+        }
+      }
+    },
+    "ChartBarStyle": {
+      "keys": {
+        "cornerRadius": {
+          "kind": "number",
+          "min": 0
+        },
+        "gradient": {
+          "kind": "object:ChartLinearGradient"
         }
       }
     }
@@ -1760,6 +1801,9 @@
           "kind": "number",
           "min": 0,
           "max": 1
+        },
+        "barStyle": {
+          "kind": "object:ChartBarStyle"
         }
       },
       "rules": [
@@ -1782,6 +1826,9 @@
           "kind": "number",
           "min": 0,
           "max": 1
+        },
+        "barStyle": {
+          "kind": "object:ChartBarStyle"
         }
       },
       "rules": [

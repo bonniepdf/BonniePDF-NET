@@ -1,329 +1,144 @@
+using System.Globalization;
 using BonniePDF;
 
 namespace BonniePDF.Examples.FinanceReporting.FinancialDashboard;
 
-/// <summary>
-/// Generates a single-page landscape financial dashboard with KPI cards,
-/// a 12-month revenue bar chart, and a top-products table.
-/// </summary>
+/// <summary>A landscape annual review with KPI cards, gradient bars, a layered doughnut and a product table.</summary>
 [System.ComponentModel.DisplayName("Financial Dashboard")]
 [System.ComponentModel.Category("Finance & Reporting")]
-[System.ComponentModel.Description(
-    "Landscape A4 financial dashboard with KPI strip, 12-month revenue bar chart with alt text, and top-products table.")]
+[System.ComponentModel.Description("A landscape annual review with four KPIs, rounded gradient bars, a revenue-mix doughnut and a product revenue table.")]
 public static class FinancialDashboardExample
 {
-    // ── Brand colours - drawn from the BonniePDF logo palette ────────────────
-    private static readonly Color Espresso = Color.FromHex("#442714");
-    private static readonly Color Terra = Color.FromHex("#956b51");
-    private static readonly Color Brown = Color.FromHex("#805e48");
-    private static readonly Color Sand = Color.FromHex("#d2c8b7");
-    private static readonly Color Cream = Color.FromHex("#f4f1ef");
-    private static readonly Color HeaderMute = Color.FromHex("#b99a88");
-    private static readonly Color RowAlt = Color.FromHex("#e8e0d8");
-    private static readonly Color DeltaPos = Color.FromHex("#2d7a3a");
-    private static readonly Color DeltaNeg = Color.FromHex("#b94040");
+    private static readonly Color Navy = Color.FromHex("#0f172a");
+    private static readonly Color Blue = Color.FromHex("#2563eb");
+    private static readonly Color Teal = Color.FromHex("#0d9488");
+    private static readonly Color Violet = Color.FromHex("#7c3aed");
+    private static readonly Color Amber = Color.FromHex("#d97706");
+    private static readonly Color Muted = Color.FromHex("#475569");
+    private static readonly Color Light = Color.FromHex("#cbd5e1");
+    private static readonly Color Positive = Color.FromHex("#047857");
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
-        // Landscape, zero margin - layout elements carry their own padding
+        int year = DateTime.Now.Year - 1;
+        string[] months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        double[] revenue = [125, 146, 140, 175, 163, 190, 197, 182, 211, 226, 240, 233];
+        Product[] products = [new("Enterprise", 910, 71, Blue), new("Professional", 650, 64, Teal), new("Starter", 446, 58, Violet), new("Services", 222, 82, Amber)];
+        double total = revenue.Sum();
+        double grossProfit = products.Sum(p => p.Revenue * p.Margin / 100);
+        string totalLabel = "£" + F(total / 1000, "F2") + "M";
+        double secondHalfGrowth = (revenue.Skip(6).Sum() / revenue.Take(6).Sum() - 1) * 100;
         Document doc = new(new DocumentSettings
         {
-            PageSize = PdfSize.A4,
-            Orientation = PageOrientation.Landscape,
-            Margin = 0,
-            PageColor = Cream
+            PageSize = PdfSize.A4, Orientation = PageOrientation.Landscape, Margin = 0, PageColor = Color.FromHex("#f1f5f9"),
+            Conformance = PdfAConformance.PdfA2a, Accessibility = AccessibilityMode.PdfUa1, Language = "en-GB",
+            DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(Muted)
         });
+        doc.Metadata.Title = "Northstar - FY " + year + " Financial Dashboard";
+        doc.Metadata.Author = "Northstar";
+        doc.Metadata.Subject = "Annual performance review with revenue trends and product mix. Illustrative data.";
 
-        doc.Settings.Conformance = PdfAConformance.PdfA2a;
-        doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
-        doc.Settings.Language = "en-GB";
-        doc.Settings.DefaultTextStyle = new TextStyle()
-            .WithFamily("Helvetica")
-            .WithSize(9)
-            .WithColor(ColorPalette.Slate[600]);
+        Grid header = LayoutGrid([2, 1], 0);
+        header.AddRow(
+            Stack(Text("NORTHSTAR  /  FINANCE", 9, Color.FromHex("#67e8f9"), true),
+                Text("Performance at a glance", 25, Color.White, true, top: 7),
+                Text("Annual revenue review  |  An expanding business, a stronger revenue mix", 9, Light, top: 6)),
+            Stack(Text("FY " + year, 20, Color.White, true, TextAlignment.Right),
+                Text("REVENUE  +18.3% YoY", 9, Color.FromHex("#67e8f9"), true, TextAlignment.Right, 8),
+                Text("Board & investor overview", 8, Light, false, TextAlignment.Right, 6)));
+        doc.Add(new Container { BackgroundColor = Navy, Padding = new Thickness(28, 13), Child = header });
+        doc.Add(new Container { Height = 3, BackgroundColor = Blue });
+        Grid metrics = LayoutGrid([1, 1, 1, 1], 4);
+        metrics.AddRow(Kpi(totalLabel, "TOTAL REVENUE", "+18.3% vs prior year", Blue),
+            Kpi("£" + F(grossProfit / 1000, "F2") + "M", "GROSS PROFIT", "+£272K vs prior year", Teal),
+            Kpi(F(grossProfit / total * 100, "F1") + "%", "GROSS MARGIN", "+2.1 percentage points", Violet),
+            Kpi("3,814", "ACTIVE CUSTOMERS", "+24.1% vs prior year", Blue));
 
-        DateTime today = DateTime.Now;
-        int currentQuarter = (today.Month - 1) / 3 + 1;
-        int quarter = currentQuarter == 1 ? 4 : currentQuarter - 1;
-        int year = currentQuarter == 1 ? today.Year - 1 : today.Year;
-        string quarterLabel = $"Q{quarter} {year}";
-        string title = $"{quarterLabel} Financial Report";
-        string generated = $"Generated {today:d MMMM yyyy}";
-
-        doc.Metadata.Title = title;
-        doc.Metadata.Author = "Sample Company";
-        doc.Metadata.Subject =
-            $"{quarterLabel} financial dashboard - KPIs, monthly revenue chart, and product breakdown";
-
-        // ════════════════════════════════════════════════════════════════════════
-        // 1.  Header bar
-        // ════════════════════════════════════════════════════════════════════════
-
-        VerticalStack companyStack = new();
-        companyStack.Add(new TextBlock
+        BarChart bars = new()
         {
-            Text = "Sample Company",
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 14,
-            Color = Cream
-        });
-        companyStack.Add(new TextBlock
-        {
-            Text = "Confidential - Internal Use Only",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 8,
-            Color = HeaderMute,
-            Margin = new Thickness(0, 5, 0, 0)
-        });
-
-        VerticalStack reportStack = new();
-        reportStack.Add(new TextBlock
-        {
-            Text = title,
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 13,
-            Color = Cream,
-            Alignment = TextAlignment.Right
-        });
-        reportStack.Add(new TextBlock
-        {
-            Text = generated,
-            FontName = StandardFonts.Helvetica,
-            FontSize = 8,
-            Color = HeaderMute,
-            Alignment = TextAlignment.Right,
-            Margin = new Thickness(0, 5, 0, 0)
-        });
-
-        Grid headerLayout = new(1f, 1f)
-        {
-            Border = Border.None,
-            CellPadding = 0
-        };
-        headerLayout.AddRow(
-            companyStack,
-            reportStack
-        );
-
-        doc.Add(new Container
-        {
-            BackgroundColor = Espresso,
-            Padding = new Thickness(24, 20, 24, 20),
-            Child = headerLayout
-        });
-
-        // ════════════════════════════════════════════════════════════════════════
-        // 2.  KPI strip - four equal-width metric cards
-        // ════════════════════════════════════════════════════════════════════════
-
-        Container totalRevenueCell = CreateKpiCard("£2.41M", "TOTAL REVENUE", "↑ 18.3% YoY", DeltaPos, false);
-        Container grossProfitCell = CreateKpiCard("£640K", "GROSS PROFIT", "↑ 11.7% YoY", DeltaPos, true);
-        Container newCustomersCell = CreateKpiCard("3,814", "NEW CUSTOMERS", "↑ 24.1% YoY", DeltaPos, true);
-        Container satisfactionCell = CreateKpiCard("94.2%", "SATISFACTION", "↓ 0.8%", DeltaNeg, true);
-
-        Grid kpiTable = new(1f, 1f, 1f, 1f)
-        {
-            Border = Border.None,
-            CellPadding = 0
-        };
-        kpiTable.AddRow(totalRevenueCell, grossProfitCell, newCustomersCell, satisfactionCell);
-        doc.Add(kpiTable);
-
-        // KPI rule
-        doc.Add(new Container
-        {
-            BackgroundColor = Sand,
-            Height = 0.75f,
-        });
-
-        // ════════════════════════════════════════════════════════════════════════
-        // 3.  Monthly revenue bar chart
-        // ════════════════════════════════════════════════════════════════════════
-
-        doc.Add(new Container
-        {
-            Padding = new Thickness(24, 14, 24, 6),
-            Child = new TextBlock
+            Theme = "modern", Height = 164, StretchToFit = true, ShowValueLabels = false, FontFamily = StandardFonts.Helvetica, LabelFontSize = 8,
+            BarStyle = new ChartBarStyle { CornerRadius = 4, Gradient = new ChartLinearGradient { StartColor = Color.FromHex("#60a5fa"), EndColor = Blue, Scope = "bar" } },
+            Data = new ChartData
             {
-                Text = "MONTHLY REVENUE  (£000s)",
-                FontName = StandardFonts.HelveticaBold,
-                FontSize = 7,
-                Color = Brown // Terra fails at 4.15:1 on Cream (needs 4.5:1)
-            }
-        });
-
-        string[] months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        decimal[] revenue = [125, 146, 140, 175, 163, 190, 197, 182, 211, 226, 240, 233];
-
-        ChartSeries series = new() { Color = Terra };
-        for (int i = 0; i < months.Length; i++)
-        {
-            series.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = revenue[i] });
-        }
-
-        ChartData chartData = new()
-        {
-            Series = [series],
-            YAxis = new AxisOptions
-            {
-                Prefix = "£",
-                MaxValue = 250,
-                StepCount = 5
-            }
-        };
-
-        BarChart barChart = new(chartData)
-        {
-            AltText = "Bar chart of monthly revenue in thousands, ranging from 125 in January to 233 in December.",
-            Height = 200,
-            StretchToFit = true,
-            BarColor = Terra,
-            FontFamily = StandardFonts.Helvetica,
-            LabelFontSize = 8
-        };
-
-        // Charts are document elements and participate in normal width resolution.
-        doc.Add(barChart);
-
-        // ════════════════════════════════════════════════════════════════════════
-        // 4.  Top products table
-        // ════════════════════════════════════════════════════════════════════════
-
-        // Product rule
-        doc.Add(new Container
-        {
-            BackgroundColor = Sand,
-            Height = 0.75f,
-        });
-
-        doc.Add(new Container
-        {
-            Padding = new Thickness(24, 14, 24, 6),
-            Child = new TextBlock
-            {
-                Text = "TOP PRODUCTS",
-                FontName = StandardFonts.HelveticaBold,
-                FontSize = 7,
-                Color = Brown // Terra fails at 4.15:1 on Cream (needs 4.5:1)
-            }
-        });
-
-        Table productTable = new(2.2f, 1f, 1.4f, 0.8f)
-        {
-            Border = new Border(0.5f),
-            BorderColors = new BorderColors(Sand),
-            CellPadding = 8,
-            HeaderBackgroundColor = RowAlt,
-            HeaderTextColor = Espresso
-        };
-
-        productTable.AddHeader(
-            new TextBlock
-            {
-                Text = "Product", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso,
-                Alignment = TextAlignment.Left
+                Series = [new ChartSeries { Name = "Revenue", Color = Blue, DataPoints = months.Select((label, i) => new ChartDataPoint { Label = label, Value = (decimal)revenue[i] }).ToList() }],
+                YAxis = new AxisOptions { Prefix = "£", MaxValue = 300, StepCount = 6 }
             },
-            new TextBlock
-            {
-                Text = "Units", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso,
-                Alignment = TextAlignment.Right
-            },
-            new TextBlock
-            {
-                Text = "Revenue", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso,
-                Alignment = TextAlignment.Right
-            },
-            new TextBlock
-            {
-                Text = "Margin", FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso,
-                Alignment = TextAlignment.Right
-            }
-        );
-
-        var products = new[]
-        {
-            new { Name = "Enterprise Plan", Units = "142", Revenue = "£890,400", Margin = "71%" },
-            new { Name = "Pro Plan", Units = "1,204", Revenue = "£722,400", Margin = "64%" },
-            new { Name = "Starter Plan", Units = "2,468", Revenue = "£493,600", Margin = "58%" },
-            new { Name = "Add-ons", Units = "-", Revenue = "£304,000", Margin = "82%" },
+            AltText = "Monthly revenue in thousands of pounds: 125, 146, 140, 175, 163, 190, 197, 182, 211, 226, 240, 233. Annual total £2,228,000."
         };
-
-        foreach (var p in products)
+        PieChart donut = new()
         {
-            productTable.AddRow(
-                new TextBlock
-                {
-                    Text = p.Name, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Espresso,
-                    Alignment = TextAlignment.Left
-                },
-                new TextBlock
-                {
-                    Text = p.Units, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Brown,
-                    Alignment = TextAlignment.Right
-                },
-                new TextBlock
-                {
-                    Text = p.Revenue, FontName = StandardFonts.HelveticaBold, FontSize = 8, Color = Espresso,
-                    Alignment = TextAlignment.Right
-                },
-                new TextBlock
-                {
-                    Text = p.Margin, FontName = StandardFonts.Helvetica, FontSize = 8, Color = Brown,
-                    Alignment = TextAlignment.Right
-                }
-            );
-        }
-
-        doc.Add(new Container
+            Theme = "modern", Height = 132, StretchToFit = true, IsDonut = true, ShowLegend = false, ShowTotal = false,
+            Colors = ["#2563eb", "#0d9488", "#7c3aed", "#d97706"],
+            Data = new ChartData { Series = [new ChartSeries { DataPoints = products.Select(p => new ChartDataPoint { Label = p.Name, Value = (decimal)p.Revenue }).ToList() }] },
+            AltText = "Revenue mix: Enterprise £910,000; Professional £650,000; Starter £446,000; Services £222,000. Total £2,228,000."
+        };
+        // A white circular foreground and centred labels demonstrate native vector layering.
+        Layers donutLayers = new() { PrimaryLayer = donut };
+        donutLayers.AddForeground(new Container
         {
-            Padding = new Thickness(24, 0, 24, 20),
-            Child = productTable
+            Height = 132, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
+            Child = new Container
+            {
+                Width = 64, Height = 64, CornerRadius = 32, BackgroundColor = Color.White, VerticalAlignment = VerticalAlignment.Center,
+                Child = Stack(Text(totalLabel, 12, Navy, true, TextAlignment.Center), Text("TOTAL REVENUE", 5.5f, Muted, true, TextAlignment.Center, 4))
+            }
         });
-
+        Grid legend = LayoutGrid([1, 1], 1);
+        IElement[] legendItems = products.Select(p => LegendItem(p.Name, F(Math.Round(p.Revenue / total * 100), "F0") + "%", p.Color)).ToArray();
+        legend.AddRow(legendItems[0], legendItems[1]);
+        legend.AddRow(legendItems[2], legendItems[3]);
+        Grid charts = LayoutGrid([1.9f, 1], 4);
+        charts.AddRow(Panel("Revenue momentum", "Monthly revenue (£000)  |  H2 +" + F(secondHalfGrowth, "F1") + "% vs H1", bars),
+            Panel("Revenue mix", "A diversified product portfolio", donutLayers, legend));
+        Table table = new(2.4f, 1.3f, 1, 1)
+        {
+            Border = new Border(0.5f), BorderColors = new BorderColors(Color.FromHex("#e2e8f0")), CellPadding = 5,
+            HeaderBackgroundColor = Color.FromHex("#eff6ff"), HeaderTextColor = Navy
+        };
+        table.AddHeader(Text("PRODUCT", 7, Muted, true), Text("REVENUE", 7, Muted, true, TextAlignment.Right), Text("SHARE", 7, Muted, true, TextAlignment.Right), Text("MARGIN", 7, Muted, true, TextAlignment.Right));
+        foreach (Product p in products)
+            table.AddRow(Text(p.Name, 8, Navy, true), Text("£" + F(p.Revenue * 1000, "N0"), 8, Navy, true, TextAlignment.Right),
+                Text(F(Math.Round(p.Revenue / total * 100), "F0") + "%", 8, Muted, false, TextAlignment.Right), Text(p.Margin + "%", 8, Positive, true, TextAlignment.Right));
+        Container bottom = Panel("Revenue by product", "", new Container { Margin = new Thickness(0, 7, 0, 0), Child = table });
+        doc.Add(new Container { Padding = new Thickness(24, 8, 24, 0), Child = Stack(metrics, charts, new Container { Padding = new Thickness(4, 4), Child = bottom }) });
+        Grid footer = LayoutGrid([2, 1], 0);
+        footer.AddRow(Text("NORTHSTAR  /  FY " + year + "  /  Illustrative data in GBP", 7, Muted), Text("CONFIDENTIAL  /  01", 7, Muted, true, TextAlignment.Right));
+        doc.Add(new Container { Padding = new Thickness(28, 9), Child = footer });
         return doc;
     }
 
-    private static Container CreateKpiCard(string value, string label, string delta, Color deltaColor,
-        bool showLeftBorder)
+    private static TextBlock Text(string value, float size, Color color, bool bold = false, TextAlignment align = TextAlignment.Left, float top = 0) =>
+        new(value) { FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica, FontSize = size, Color = color, Alignment = align, Margin = new Thickness(0, top, 0, 0) };
+    private static VerticalStack Stack(params IElement[] children)
     {
         VerticalStack stack = new();
-        stack.Add(new TextBlock
-        {
-            Text = value,
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 18,
-            Color = Espresso
-        });
-        stack.Add(new TextBlock
-        {
-            Text = label,
-            FontName = StandardFonts.Helvetica,
-            FontSize = 7,
-            Color = Brown,
-            Margin = new Thickness(0, 4, 0, 0)
-        });
-        stack.Add(new TextBlock
-        {
-            Text = delta,
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 7,
-            Color = deltaColor,
-            Margin = new Thickness(0, 4, 0, 0)
-        });
-
-        Container cell = new()
-        {
-            Child = stack,
-            Padding = new Thickness(20, 16, 20, 16)
-        };
-
-        if (showLeftBorder)
-        {
-            cell.Border = Border.LeftOnly(0.75f);
-            cell.BorderColors = BorderColors.LeftOnly(Sand);
-        }
-
-        return cell;
+        foreach (IElement child in children) stack.Add(child);
+        return stack;
     }
+    private static Grid LayoutGrid(float[] columns, float padding) => new(columns) { Border = Border.None, CellPadding = padding };
+    private static Container Kpi(string value, string label, string delta, Color accent) => new()
+    {
+        BackgroundColor = Color.White, CornerRadius = 7,
+        Child = Stack(new Container { BackgroundColor = accent, Height = 3 }, new Container
+        {
+            Padding = new Thickness(14, 8),
+            Child = Stack(Text(label, 7, Muted, true), Text(value, 22, Navy, true, top: 4), Text(delta, 7, Positive, true, top: 3))
+        })
+    };
+    private static Container Panel(string title, string subtitle, params IElement[] children)
+    {
+        VerticalStack content = Stack(Text(title, 12, Navy, true));
+        if (subtitle.Length > 0) content.Add(Text(subtitle, 7.5f, Muted, top: 4));
+        foreach (IElement child in children) content.Add(child);
+        return new Container { BackgroundColor = Color.White, CornerRadius = 7, Padding = new Thickness(12), Child = content };
+    }
+    private static Container LegendItem(string name, string share, Color color)
+    {
+        Grid row = LayoutGrid([9, 100], 0);
+        row.AddRow(new Container { Width = 5, Height = 5, Margin = new Thickness(0, 2, 0, 0), CornerRadius = 2.5f, BackgroundColor = color }, Text(name + "  " + share, 7, Muted));
+        return new Container { Padding = new Thickness(0, 3), Child = row };
+    }
+    private static string F(double value, string format) => value.ToString(format, CultureInfo.InvariantCulture);
+    private sealed record Product(string Name, double Revenue, int Margin, Color Color);
 }
