@@ -1952,6 +1952,9 @@
         },
         "showTotal": {
           "kind": "boolean"
+        },
+        "sliceGradient": {
+          "kind": "boolean"
         }
       },
       "rules": [

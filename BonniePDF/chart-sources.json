@@ -2,7 +2,7 @@
   "version": 1,
   "source": {
     "name": "BonnieCharts",
-    "sha256": "e3e580685b4f089dc6861ec218a36b20f3726e7bd3958f33c55f332396def185",
+    "sha256": "809b85940887043a58270a7881471fe2071a9f77e3ed7bbc1adc6f5c96f6d803",
     "files": {
       "typescript/src/Charts/AreaChart.ts": "f2b0846e97bb58a2250094da4324eff6b2927eb48574647026f863427d737c82",
       "typescript/src/Charts/BarChart.ts": "886320a1b81388f477b0f0dc4998392cd98dcb35e3417d26de69e34ea5b6d148",
@@ -17,6 +17,7 @@
       "typescript/src/Charts/Graphics/ChartBars.ts": "5cb1451607d5442ca8e4377a1cf6802e69a678aaf23637b4b90f8199f1d5354e",
       "typescript/src/Charts/Graphics/ChartLabels.ts": "69807f9736249884924828111698a8609e53f4e5982e46839d01cba5c6950025",
       "typescript/src/Charts/Graphics/ChartPathPlan.ts": "3e13cc22db32c04ca5838829a75ed0c6cca494511cbf3828ec05c838e3dc4c56",
+      "typescript/src/Charts/Graphics/ChartTint.ts": "cc796f619aa8719d5f61517146f139955f18d1ab04d928ef72395f2226410b54",
       "typescript/src/Charts/Graphics/ChartValueScale.ts": "957aa3ad03bb6629079746ebb7e0e448619375c23202ce4954fe2725dacdb386",
       "typescript/src/Charts/Graphics/ChartVector.ts": "9b98ce6e20554604bdc57f1fad4b8c3ded7ec84c493fec0199de866b5b35f607",
       "typescript/src/Charts/GroupedBarChart.ts": "e2b9ceb71405cacfcbb281a761544079ad4e9978cb0cb837a9fe368eb7175541",
@@ -27,7 +28,7 @@
       "typescript/src/Charts/Models/ChartDataPoint.ts": "f95685db6ecf428a9c6fc5a25b45c5997de6a3950f5173235a41ee4f5122d870",
       "typescript/src/Charts/Models/ChartSeries.ts": "7ac6fd5f7ae4f2d6c9804f0e387bdb48e83bd0540744130c5a59b3762414eaac",
       "typescript/src/Charts/Models/ChartSeriesStyle.ts": "38c2697bb649a2e6f97296b9078a303cf5fececa78f9793bb2c7e342d780a0f2",
-      "typescript/src/Charts/PieChart.ts": "5e7b31eb053260b024adaf7f30b6a1d0997432a50cf57b788922e1e695ab5f0e",
+      "typescript/src/Charts/PieChart.ts": "9c304b3967e6a412af8a9d3244786fc1156a2494cabdb4dca82b5ec471ff94e0",
       "typescript/src/Core/applyOptions.ts": "85de2cdafb223ab0c0cf9d20a70c09c020dbfa87fdb91195958e622956df9984",
       "typescript/src/Core/Color.ts": "67d9d3261e441006152def71f5ed03a733f7eddf83c0d403212b6068933f5147",
       "typescript/src/Core/ColorPalette.ts": "8b11358d53befe1d3d38ad77d1f756f06825a70404738ad2491d22672eed0683",
@@ -60,6 +61,7 @@
       "dotnet/src/Charts/Graphics/ChartBars.cs": "b7651e03bc52b03e8fefffb9cddc70bac43a891b73dc7024bb01cfdb06da02f6",
       "dotnet/src/Charts/Graphics/ChartLabels.cs": "bbe50987990639141bfe27525aa23e37b41951a90ec1befd84f8da0379588454",
       "dotnet/src/Charts/Graphics/ChartPathPlan.cs": "879a243056cb8313f53402bc4f60059ab3d13558a9ef5c0d7a2ba1579b169a74",
+      "dotnet/src/Charts/Graphics/ChartTint.cs": "cb6f8a4c0f0f4556ff0d8da3d2d03de188b752ea904651aa3448357215019838",
       "dotnet/src/Charts/Graphics/ChartValueScale.cs": "b01008b00c91fd85ae0d3b7c3a1bd5ccead743ac2fb821724add365b2971be83",
       "dotnet/src/Charts/Graphics/ChartVector.cs": "6de049844fe8501b730fcee23e5aaa374f0253222adfbc57274368afd9e38a40",
       "dotnet/src/Charts/GroupedBarChart.cs": "216b46465fd6b9e97be950e3dc6a9eb25b8ffdc786a8e2f23b71ab4bde0adcea",
@@ -70,7 +72,7 @@
       "dotnet/src/Charts/Models/ChartDataPoint.cs": "e3e57170f2ddfd7b989b57e002c0bc0956de076fb7d2e95ca382fe8d5ef32bea",
       "dotnet/src/Charts/Models/ChartSeries.cs": "32622095bdd263409108267d21cea06d6a8395b92cb224c7d6d499f14ff99297",
       "dotnet/src/Charts/Models/ChartSeriesStyle.cs": "25041440e610992e2ea361db4a00611e41b1c9d9317dddc14e40b148c7aeec10",
-      "dotnet/src/Charts/PieChart.cs": "e87497301abf5e8ab6fea14decfd411fb2378c8a5219bd2fe4ce3078ef7e464f",
+      "dotnet/src/Charts/PieChart.cs": "2b4c36c1fe3f6a258b8fce018b1cdf8c2fd3185f47629197a4625375b05c7373",
       "dotnet/src/Drawing/IChartSink.cs": "110df5454cea1298db70bf0af61f11d442d9f216184853d5021bf37e00c83e9b",
       "dotnet/src/Sinks/RecordingSink.cs": "9ce346a14f34e9da1c69b40b95b65e92a0d33a390a25d25adbca1827f7bdf77e",
       "dotnet/src/Sinks/SvgOptions.cs": "8d0d09101b42977958b5689f3ba54c958e8c5f37f0c362efcb4e7110389dd105",
@@ -92,6 +94,7 @@
       "fixtures/appearance.json": "b4f1c07965c7844070baabe2abf1d06d5dedc7bc2eda97d3ab31670e4d3df79e",
       "fixtures/cases.json": "f1190e5d14fc376e4bfae60d218b4364cfb004b959e3f533c3c9c01d853f114c",
       "fixtures/font-metrics.json": "dd7dda10cc449d53488f6c73fda5dc5ce4faefcd74d35c83e01b767dc53820fa",
+      "fixtures/pie-gradient-cases.json": "30ef5b6d580b44abf1b55cf2e57bfb4669f15f0261101004a1aa4b89c9fcfb02",
       "fixtures/scale-cases.json": "5fa0f2f582ce233096b74c7218b015fbd5b4e8949b3790abb37159bff7259f0f",
       "scripts/sync.mjs": "12ecab1b57f05108ad2f28cee3a2a6d36482e2938bb81297339778913372289a",
       "scripts/verify.mjs": "d83cc34fb0fdedad9c64095ed83e83e0e4a6e21ad00560e90953bb3d41b4b311",
@@ -111,6 +114,7 @@
     "Charts/Graphics/ChartBars.cs": "d4954f81af2aea4c133ca81e117e4fd615d24ba360bbac8a5ad5b30f79885c93",
     "Charts/Graphics/ChartLabels.cs": "d7dca53e2fdb01c2cec361037bd149afa21d0cb718cfaaaaf4130c6a02456a89",
     "Charts/Graphics/ChartPathPlan.cs": "6202e554bb91b4846e1cf04fc5f234f111828e09a5ad83fcc8440a7855582935",
+    "Charts/Graphics/ChartTint.cs": "febf44284d3b1eca343222b45b734a2297f0046d7c2970058a457713daa26d7d",
     "Charts/Graphics/ChartValueScale.cs": "0651e610a0da7cb49cdaee2c6a179408d4631ff984c945d019f9562d74abaa70",
     "Charts/Graphics/ChartVector.cs": "d25aed2b01fa7841e0fce4539746fa4b776ceb08bc101c6baf813b9a17538171",
     "Charts/GroupedBarChart.cs": "cfb00595bf1b26d11991b638c775953fa7e514ccb3d101bff600f0e7b8dde65f",
@@ -121,7 +125,7 @@
     "Charts/Models/ChartDataPoint.cs": "0fcae587a63995b4d47491d9bd63d929a00154d9fc4126921a7ddaff94d28ca0",
     "Charts/Models/ChartSeries.cs": "d160ab1efc4b97ed540eff2c2541cfc078d03ecb82d10fc7bf0c3e2e47a69fd5",
     "Charts/Models/ChartSeriesStyle.cs": "38839f84138e9a95ae86b47ce4d59f36da7c439fee0fe819f73ed19af53a1478",
-    "Charts/PieChart.cs": "023f4972474256278ac5d5bc3523f84048e2b071ec2495bff9b2c02d835bb316",
+    "Charts/PieChart.cs": "3f3f547bb445e8688bb584b3f33042ed11920cd4fefc986297d179a72655d774",
     "Charts/ChartBase.Host.cs": "e5adcb011881a928c56fe4671b4a21d5f9c158b5815e112852125b7441e76f7d"
   }
 }
