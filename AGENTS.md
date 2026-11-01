@@ -74,6 +74,13 @@ These are correctness requirements of the format and the shared spec, not C# qui
 
 ## Commands
 
+Chart drawing files under `BonniePDF/Charts/` with a generated header are maintained
+upstream. `BonniePDF/chart-sources.json` pins their source inputs and file hashes;
+`ChartSources.targets` verifies the files before compilation without Node or a
+sibling checkout. Change the authoritative source and regenerate both language
+bindings. Layout/tagging bindings preserve chart APIs and document output, and
+the generated files add no runtime dependency.
+
 Driven with `dotnet` from this folder.
 
 ```bash

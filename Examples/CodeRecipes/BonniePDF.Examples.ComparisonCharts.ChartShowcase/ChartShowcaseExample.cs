@@ -105,18 +105,19 @@ public static class ChartShowcaseExample
         document.Add(new TextBlock
         {
             Text = "Bar Chart: Monthly Sales Report",
-            FontSize = 24,
-            Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = Color.FromHex("#0f172a"),
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 10)
         });
 
         document.Add(new TextBlock
         {
-            Text = "Vertical bars with grid lines and value labels",
-            FontSize = 14,
+            Text = "Rounded gradient bars, clear value labels and a modern chart theme",
+            FontSize = 11,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center,
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -136,13 +137,15 @@ public static class ChartShowcaseExample
         // Create bar chart
         BarChart barChart = new(chartData)
         {
+            Theme = "modern",
+            BarStyle = new ChartBarStyle { CornerRadius = 6, Gradient = new ChartLinearGradient { StartColor = Color.FromHex("#60a5fa"), EndColor = Color.FromHex("#2563eb"), Scope = "bar" } },
             AltText = "Bar chart showing monthly sales from January to December with values in pounds sterling",
             Height = 400,
             StretchToFit = true,
-            BarColor = Color.FromHex("#4f46e5"),
+            BarColor = Color.FromHex("#2563eb"),
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
-            BackgroundColor = Color.FromHex("#fafafa")
+            BackgroundColor = Color.FromHex("#ffffff")
         };
 
         // Add chart to document
@@ -154,19 +157,20 @@ public static class ChartShowcaseExample
         // Add a title
         document.Add(new TextBlock
         {
-            Text = "Grouped Bar Chart: Quarterly Revenue",
-            FontSize = 24,
-            Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center,
+            Text = "Grouped Bar Chart: Monthly Revenue",
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = Color.FromHex("#0f172a"),
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 10)
         });
 
         document.Add(new TextBlock
         {
             Text = "Comparison of three product lines across all months",
-            FontSize = 14,
+            FontSize = 11,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center,
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -186,9 +190,9 @@ public static class ChartShowcaseExample
             }
         };
 
-        ChartSeries electronicsSeries = new() { Name = "Electronics", Color = Color.FromHex("#4f46e5") };
-        ChartSeries clothingSeries = new() { Name = "Clothing", Color = Color.FromHex("#f43f5e") };
-        ChartSeries homeSeries = new() { Name = "Home & Garden", Color = Color.FromHex("#22c55e") };
+        ChartSeries electronicsSeries = new() { Name = "Electronics", Color = Color.FromHex("#2563eb") };
+        ChartSeries clothingSeries = new() { Name = "Clothing", Color = Color.FromHex("#0d9488") };
+        ChartSeries homeSeries = new() { Name = "Home & Garden", Color = Color.FromHex("#7c3aed") };
 
         for (int i = 0; i < months.Count; i++)
         {
@@ -204,13 +208,15 @@ public static class ChartShowcaseExample
         // Create grouped bar chart with 3 series
         GroupedBarChart groupedBarChart = new(groupedChartData)
         {
+            Theme = "modern",
+            BarStyle = new ChartBarStyle { CornerRadius = 3 },
             AltText =
                 "Grouped bar chart comparing monthly revenue across Electronics, Clothing, and Home & Garden product lines",
             Height = 400,
             StretchToFit = true,
             FontFamily = StandardFonts.Helvetica,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa"),
+            BackgroundColor = Color.FromHex("#ffffff"),
         };
 
         // Add chart to document
@@ -223,18 +229,19 @@ public static class ChartShowcaseExample
         document.Add(new TextBlock
         {
             Text = "Line Chart: Monthly Revenue Trends",
-            FontSize = 24,
-            Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = Color.FromHex("#0f172a"),
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 10)
         });
 
         document.Add(new TextBlock
         {
             Text = "Connected data points with markers and value labels",
-            FontSize = 14,
+            FontSize = 11,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center,
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -259,6 +266,7 @@ public static class ChartShowcaseExample
         // Create line chart
         LineChart lineChart = new(chartData)
         {
+            Theme = "modern",
             AltText = "Line chart showing monthly revenue trends from January to December",
             Height = 400,
             StretchToFit = true,
@@ -266,7 +274,7 @@ public static class ChartShowcaseExample
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            BackgroundColor = Color.FromHex("#ffffff")
         };
 
         // Add chart to document
@@ -279,18 +287,19 @@ public static class ChartShowcaseExample
         document.Add(new TextBlock
         {
             Text = "Multi-Series Line Chart: Year-over-Year Comparison",
-            FontSize = 24,
-            Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = Color.FromHex("#0f172a"),
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 10)
         });
 
         document.Add(new TextBlock
         {
             Text = $"Comparing {DateTime.Now.Year - 1} and {DateTime.Now.Year} revenue with multiple series",
-            FontSize = 14,
+            FontSize = 11,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center,
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -303,7 +312,7 @@ public static class ChartShowcaseExample
                 new ChartSeries
                 {
                     Name = $"{DateTime.Now.Year - 1}",
-                    Color = Color.FromHex("#4f46e5"),
+                    Color = Color.FromHex("#2563eb"),
                     DataPoints = new List<ChartDataPoint>
                     {
                         new ChartDataPoint { Label = "Jan", Value = 65000, LabelFormat = "N0" },
@@ -357,13 +366,14 @@ public static class ChartShowcaseExample
         // Create line chart with multiple series
         LineChart lineChart = new(chartData)
         {
+            Theme = "modern",
             AltText = "Multi-series line chart comparing year-over-year monthly revenue",
             Height = 400,
             StretchToFit = true,
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            BackgroundColor = Color.FromHex("#ffffff")
         };
 
         // Add chart to document
@@ -376,18 +386,19 @@ public static class ChartShowcaseExample
         document.Add(new TextBlock
         {
             Text = "Area Chart: Monthly Sales Performance",
-            FontSize = 24,
-            Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = Color.FromHex("#0f172a"),
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 10)
         });
 
         document.Add(new TextBlock
         {
             Text = "Filled area under the line with configurable opacity",
-            FontSize = 14,
+            FontSize = 11,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center,
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -395,7 +406,7 @@ public static class ChartShowcaseExample
         ChartData chartData = new()
         {
             Title = "Monthly Sales",
-            Series = [new ChartSeries { Color = Color.FromHex("#a855f7"), DataPoints = MonthlySales }],
+            Series = [new ChartSeries { Color = Color.FromHex("#0d9488"), DataPoints = MonthlySales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -412,16 +423,17 @@ public static class ChartShowcaseExample
         // Create area chart
         AreaChart areaChart = new(chartData)
         {
+            Theme = "modern",
             AltText = "Area chart showing monthly sales performance from January to December",
             Height = 400,
             StretchToFit = true,
-            AreaColor = Color.FromHex("#a855f7"),
+            AreaColor = Color.FromHex("#0d9488"),
             FillOpacity = 0.3f,
             LineWidth = 2.5f,
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            BackgroundColor = Color.FromHex("#ffffff")
         };
 
         // Add chart to document
@@ -434,18 +446,19 @@ public static class ChartShowcaseExample
         document.Add(new TextBlock
         {
             Text = "Lollipop Chart: Quarterly Metrics",
-            FontSize = 24,
-            Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = Color.FromHex("#0f172a"),
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 10)
         });
 
         document.Add(new TextBlock
         {
             Text = "Stems with circular heads - clear and minimal bar alternative",
-            FontSize = 14,
+            FontSize = 11,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center,
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -453,7 +466,7 @@ public static class ChartShowcaseExample
         ChartData chartData = new()
         {
             Title = "Quarterly Revenue",
-            Series = [new ChartSeries { Color = Color.FromHex("#ec4899"), DataPoints = QuarterlyRevenue }],
+            Series = [new ChartSeries { Color = Color.FromHex("#7c3aed"), DataPoints = QuarterlyRevenue }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -470,14 +483,15 @@ public static class ChartShowcaseExample
         // Create lollipop chart
         LollipopChart lollipopChart = new(chartData)
         {
+            Theme = "modern",
             AltText = "Lollipop chart showing quarterly revenue metrics",
             Height = 400,
             StretchToFit = true,
-            LollipopColor = Color.FromHex("#ec4899"),
+            LollipopColor = Color.FromHex("#7c3aed"),
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            BackgroundColor = Color.FromHex("#ffffff")
         };
 
         // Add chart to document
@@ -490,18 +504,19 @@ public static class ChartShowcaseExample
         document.Add(new TextBlock
         {
             Text = "Dot Plot Chart: Product Performance",
-            FontSize = 24,
-            Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = Color.FromHex("#0f172a"),
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 10)
         });
 
         document.Add(new TextBlock
         {
             Text = "Circular markers positioned along a value axis",
-            FontSize = 14,
+            FontSize = 11,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center,
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -509,7 +524,7 @@ public static class ChartShowcaseExample
         ChartData chartData = new()
         {
             Title = "Product Sales",
-            Series = [new ChartSeries { Color = Color.FromHex("#14b8a6"), DataPoints = ProductSales }],
+            Series = [new ChartSeries { Color = Color.FromHex("#0d9488"), DataPoints = ProductSales }],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
@@ -526,14 +541,15 @@ public static class ChartShowcaseExample
         // Create dot plot chart
         DotPlotChart dotPlotChart = new(chartData)
         {
+            Theme = "modern",
             AltText = "Dot plot chart showing product sales performance across eight products",
             Height = 400,
             StretchToFit = true,
-            DotColor = Color.FromHex("#14b8a6"),
+            DotColor = Color.FromHex("#0d9488"),
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            BackgroundColor = Color.FromHex("#ffffff")
         };
 
         // Add chart to document
@@ -545,39 +561,42 @@ public static class ChartShowcaseExample
         // Add a title
         document.Add(new TextBlock
         {
-            Text = $"Pie Chart: Monthly Sales {DateTime.Now.Year}",
-            FontSize = 24,
-            Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center,
+            Text = $"Doughnut Chart: Revenue Mix {DateTime.Now.Year}",
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 22,
+            Color = Color.FromHex("#0f172a"),
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 10)
         });
 
         document.Add(new TextBlock
         {
-            Text = "Donut chart with legend and total value in the centre",
-            FontSize = 14,
+            Text = "Four product lines, a coordinated palette and a clear revenue breakdown",
+            FontSize = 11,
             Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center,
+            Alignment = TextAlignment.Left,
             Margin = new Thickness(0, 0, 0, 20)
         });
 
         // Create chart data with all 12 months
         ChartData chartData = new()
         {
-            Title = $"Monthly Sales {DateTime.Now.Year}",
-            Series = [new ChartSeries { DataPoints = PieChartSales }]
+            Title = $"Product Revenue {DateTime.Now.Year}",
+            Series = [new ChartSeries { DataPoints = new[] { ("Enterprise", 910000m), ("Professional", 650000m), ("Starter", 446000m), ("Services", 222000m) }.Select(p => new ChartDataPoint { Label = p.Item1, Value = p.Item2, LabelFormat = "N0" }).ToList() }]
         };
 
         // Create pie chart
         PieChart pieChart = new(chartData)
         {
+            Theme = "modern",
             AltText = "Pie chart showing proportional distribution of monthly sales",
             Height = 400,
             StretchToFit = true,
             IsDonut = true,
-            TotalLabel = "Total",
+            TotalLabel = "Total revenue (GBP)",
+            TotalValueFormat = "N0",
             ShowLegend = true,
-            Colors = new[] { "#4f46e5", "#7c3aed", "#a855f7", "#d946ef", "#ec4899", "#f43f5e", "#f97316", "#eab308", "#84cc16", "#22c55e", "#14b8a6", "#06b6d4" },
+            Colors = new[] { "#2563eb", "#0d9488", "#7c3aed", "#d97706" },
             BackgroundColor = Color.White
         };
 
@@ -746,79 +765,4 @@ public static class ChartShowcaseExample
         }
     };
 
-    private static IList<ChartDataPoint> PieChartSales => new List<ChartDataPoint>()
-    {
-        new ChartDataPoint
-        {
-            Label = MonthLabels[0],
-            Value = 7234,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[1],
-            Value = 4891,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[2],
-            Value = 8456,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[3],
-            Value = 3127,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[4],
-            Value = 9542,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[5],
-            Value = 6789,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[6],
-            Value = 5234,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[7],
-            Value = 8901,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[8],
-            Value = 2456,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[9],
-            Value = 7890,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[10],
-            Value = 6123,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[11],
-            Value = 9876,
-            LabelFormat = "N0"
-        }
-    };
 }

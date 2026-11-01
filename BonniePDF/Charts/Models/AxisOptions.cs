@@ -1,3 +1,4 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 namespace BonniePDF;
 
 /// <summary>
@@ -16,12 +17,13 @@ public class AxisOptions
     public string Suffix { get; set; } = "";
 
     /// <summary>
-    /// Maximum value for the axis scale
+    /// Highest value on the value axis. Must be greater than <see cref="MinValue"/> when a chart with series is drawn.
     /// </summary>
     public decimal MaxValue { get; set; } = 10000;
 
     /// <summary>
-    /// Minimum value for the axis scale (default: 0)
+    /// Lowest value on the value axis (default: 0). Values are placed linearly between this and
+    /// <see cref="MaxValue"/>, and bars, areas and stems start at zero limited to that range.
     /// </summary>
     public decimal MinValue { get; set; } = 0;
 

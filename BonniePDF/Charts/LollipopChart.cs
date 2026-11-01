@@ -1,3 +1,4 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 using System.Collections.Generic;
 using BonniePDF.Drawing;
 
@@ -48,7 +49,7 @@ public class LollipopChart : CartesianChartBase
         float stemWidth = series.Style?.StemWidth > 0 ? series.Style.StemWidth : DefaultStemWidth;
         float headRadius = series.Style?.MarkerRadius > 0 ? series.Style.MarkerRadius : DefaultHeadRadius;
 
-        DrawLollipopStems(canvas, coordinates, baselineY, ResolveSeriesColor(series), stemWidth);
+        DrawLollipopStems(canvas, coordinates, ValueOrigin(data, chartAreaWidth, chartAreaHeight, baselineY), ResolveSeriesColor(series), stemWidth);
         DrawLollipopHeads(canvas, coordinates, ResolveSeriesColor(series), headRadius);
     }
 
@@ -62,19 +63,18 @@ public class LollipopChart : CartesianChartBase
     }
 
     /// <summary>
-    /// Draws lollipop stems from the axis baseline to each data point.
-    /// In vertical mode: vertical lines from baselineY up to p.Y.
-    /// In horizontal mode: horizontal lines from LeftPadding right to p.X.
+    /// Draws lollipop stems from the value origin to each data point: vertical lines in vertical
+    /// mode and horizontal lines in horizontal mode.
     /// </summary>
     private void DrawLollipopStems(ICanvas canvas, IList<Point> coordinates,
-        float baselineY, Color color, float stemWidth)
+        float origin, Color color, float stemWidth)
     {
         foreach (Point p in coordinates)
         {
             if (Orientation == ChartOrientation.Horizontal)
-                canvas.DrawLine(LeftPadding, p.Y, p.X, p.Y, color, stemWidth);
+                canvas.DrawLine(origin, p.Y, p.X, p.Y, color, stemWidth);
             else
-                canvas.DrawLine(p.X, baselineY, p.X, p.Y, color, stemWidth);
+                canvas.DrawLine(p.X, origin, p.X, p.Y, color, stemWidth);
         }
     }
 

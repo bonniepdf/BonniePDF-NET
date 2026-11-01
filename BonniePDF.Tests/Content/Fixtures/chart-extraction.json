@@ -1,0 +1,198 @@
+[
+  {
+    "id": "BarChart-default",
+    "type": "BarChart",
+    "variant": "default",
+    "tsSvg": "d1b306a9047823c0f36259c4d7d4e3e6edf824fdbeb4da53a526bdda7fc533c4",
+    "netSvg": "6866945c8964c6648298ea8d02dab920a9757febffc61b2331d6906fca98669f"
+  },
+  {
+    "id": "BarChart-horizontal",
+    "type": "BarChart",
+    "variant": "horizontal",
+    "tsSvg": "f4f863c971aa8288bc341d09ccc9d5671db82c786ccb94abdecf411f19abf66b",
+    "netSvg": "65a92a4da04d7da4f46a0a9e474e804ecca527335425c3feff3bff6186093e0c"
+  },
+  {
+    "id": "BarChart-minimal",
+    "type": "BarChart",
+    "variant": "minimal",
+    "tsSvg": "1e32e818b1be3b7bbf3903dfc9dbc16762af33ad680913ce4a4a8e443b2f7c80",
+    "netSvg": "7b09424b2429df16c558d3103b9f090333d7e1593b69acf2f635bb4f1ef36036"
+  },
+  {
+    "id": "BarChart-empty",
+    "type": "BarChart",
+    "variant": "empty",
+    "tsSvg": "2802ede11ac3146b73b264a94481e086ef434a330cb71098a7a232fe7650b4ca",
+    "netSvg": "2d59d70c58d1de67ae957848b4e9815679556565b627efb01da71386e90fdc37"
+  },
+  {
+    "id": "GroupedBarChart-default",
+    "type": "GroupedBarChart",
+    "variant": "default",
+    "tsSvg": "ffadc40360025057698f844f6a1c1b0e46210020c8b2e1d392be0ea8fea2f326",
+    "netSvg": "84b1f3c0e7a327babd404f772f2880b7097754a794073b1e82f00d7e7609ced6"
+  },
+  {
+    "id": "GroupedBarChart-horizontal",
+    "type": "GroupedBarChart",
+    "variant": "horizontal",
+    "tsSvg": "469a60c5e39ab2fe83cf8674f0fe87a89b9174e341a0c505f668b528d58f6cfc",
+    "netSvg": "5c2d02bbbbb81e83b1a7015d695f9a96ffcd8588b327d23687f939960243acf9"
+  },
+  {
+    "id": "GroupedBarChart-minimal",
+    "type": "GroupedBarChart",
+    "variant": "minimal",
+    "tsSvg": "673aa2b3f9fce64c54dbd674fb7eecc48eb71fd9a82d201da6e412ca8f0e8da4",
+    "netSvg": "7ebe00413fe6f64e3ec58205dfcad141acf907b8d883ddc1e23a1eb24fcf438b"
+  },
+  {
+    "id": "GroupedBarChart-empty",
+    "type": "GroupedBarChart",
+    "variant": "empty",
+    "tsSvg": "2802ede11ac3146b73b264a94481e086ef434a330cb71098a7a232fe7650b4ca",
+    "netSvg": "2d59d70c58d1de67ae957848b4e9815679556565b627efb01da71386e90fdc37"
+  },
+  {
+    "id": "LineChart-default",
+    "type": "LineChart",
+    "variant": "default",
+    "tsSvg": "658530fd87afd55094bc5a4c8ab97e7e791aac6906df61ca3510ace90aa03b3b",
+    "netSvg": "76ddd22e696f5aef93e96dcd467961a9a94395fc1be173c0fe90642e66643b05"
+  },
+  {
+    "id": "LineChart-horizontal",
+    "type": "LineChart",
+    "variant": "horizontal",
+    "tsSvg": "9ee7cec54fdc5002d23c56e2ef52b465126bb94a5b592228ab63a3153c2ecb3b",
+    "netSvg": "cf098ad292af8f866f687179fdb6a4b9e875e29ba3dc02b0ee1e349880146302"
+  },
+  {
+    "id": "LineChart-minimal",
+    "type": "LineChart",
+    "variant": "minimal",
+    "tsSvg": "dc4e703a8ba73b466197c82a3b012ff4cd27f54be41e225d726df3bb1266ba60",
+    "netSvg": "96a330451c231b66ea69be1df585e6f67303f600d20c2b6a40514ace84c261f3"
+  },
+  {
+    "id": "LineChart-empty",
+    "type": "LineChart",
+    "variant": "empty",
+    "tsSvg": "4733c882dc6206e422692428abc366e0623a727b8b7e1e76b1099fbe68eeb256",
+    "netSvg": "e765d5a8c4ca132ef1b38fe70c650e8fbbad399b0eb9d0a7c9a9dbfe17bb8199"
+  },
+  {
+    "id": "AreaChart-default",
+    "type": "AreaChart",
+    "variant": "default",
+    "tsSvg": "262bf18c7b85858bf76a4579623b27afd260c954feed8c3a66fd2d351a365c64",
+    "netSvg": "c2d0582b9df4482e424a87022436ce417d7a014b57f1d5d807d00016bf6d7973"
+  },
+  {
+    "id": "AreaChart-horizontal",
+    "type": "AreaChart",
+    "variant": "horizontal",
+    "tsSvg": "835bde68c4fba3493e97177c2905218944ca046e4451f7c0f3e3697acb960174",
+    "netSvg": "362e6cfb3d0593036f51db68e1008a76481d5b938e24070a5ffcd11d8c5ac630"
+  },
+  {
+    "id": "AreaChart-minimal",
+    "type": "AreaChart",
+    "variant": "minimal",
+    "tsSvg": "d457e3cd07e4e74711fae1e7ce9d5e8df0f9734d0d1fd6d63d1eefb8048af193",
+    "netSvg": "b884a76047f423331bb23ec84f1c921cd7765db334b3957d1dfdbac5b56e3765"
+  },
+  {
+    "id": "AreaChart-empty",
+    "type": "AreaChart",
+    "variant": "empty",
+    "tsSvg": "4733c882dc6206e422692428abc366e0623a727b8b7e1e76b1099fbe68eeb256",
+    "netSvg": "e765d5a8c4ca132ef1b38fe70c650e8fbbad399b0eb9d0a7c9a9dbfe17bb8199"
+  },
+  {
+    "id": "DotPlotChart-default",
+    "type": "DotPlotChart",
+    "variant": "default",
+    "tsSvg": "701f34e4bf05741e814864bce8c47edf509cc8b102a3a6b28d80b6f2d76d8da8",
+    "netSvg": "e00dbefa367d5babac230bc4b76fbd7cd4123d9e188a1b38b2d5e6cbedc7fce6"
+  },
+  {
+    "id": "DotPlotChart-horizontal",
+    "type": "DotPlotChart",
+    "variant": "horizontal",
+    "tsSvg": "33c20ded42c7b1cad5fc8597888d14b1313538d0e417c7c28b4671159136c9e9",
+    "netSvg": "f64184cac98ed7b79151ba6fe0b3f05f973570cd75366b4fd6035334cc77b96a"
+  },
+  {
+    "id": "DotPlotChart-minimal",
+    "type": "DotPlotChart",
+    "variant": "minimal",
+    "tsSvg": "19f4409d4bfffc184c441be35ea6c4124f998e7e592e929ee3b8e44528f3e0c8",
+    "netSvg": "642aa4e3201fdac5e34660a17c89dbcc748ff25dddf39de36e1fe3ecf8cf5853"
+  },
+  {
+    "id": "DotPlotChart-empty",
+    "type": "DotPlotChart",
+    "variant": "empty",
+    "tsSvg": "4733c882dc6206e422692428abc366e0623a727b8b7e1e76b1099fbe68eeb256",
+    "netSvg": "e765d5a8c4ca132ef1b38fe70c650e8fbbad399b0eb9d0a7c9a9dbfe17bb8199"
+  },
+  {
+    "id": "LollipopChart-default",
+    "type": "LollipopChart",
+    "variant": "default",
+    "tsSvg": "68109fda7f8b6b71139d5265fcca69a6b321163bf9c6135417c2518a25243e70",
+    "netSvg": "c564d820a266a909bac3e4fb2f85555d131714c15bd18c1164b4fbdd7aed4018"
+  },
+  {
+    "id": "LollipopChart-horizontal",
+    "type": "LollipopChart",
+    "variant": "horizontal",
+    "tsSvg": "dfe953483886e4dbcb3f75e76eee642d408d9ed479983aed0d0d6c5025eaac94",
+    "netSvg": "b72c800e169048fe4b71cb2338255d9c9a81061813848eef46f316a2c806e58a"
+  },
+  {
+    "id": "LollipopChart-minimal",
+    "type": "LollipopChart",
+    "variant": "minimal",
+    "tsSvg": "1eda348178cf77137e26cd887b8f096aa5beff9b9c1510a5e6167898fefb58a9",
+    "netSvg": "3d0c81f9a8f5341c89c65bc999474270740ec0d2c700093150d3ab8248ec2e55"
+  },
+  {
+    "id": "LollipopChart-empty",
+    "type": "LollipopChart",
+    "variant": "empty",
+    "tsSvg": "4733c882dc6206e422692428abc366e0623a727b8b7e1e76b1099fbe68eeb256",
+    "netSvg": "e765d5a8c4ca132ef1b38fe70c650e8fbbad399b0eb9d0a7c9a9dbfe17bb8199"
+  },
+  {
+    "id": "PieChart-default",
+    "type": "PieChart",
+    "variant": "default",
+    "tsSvg": "b615b2e080963a10f6f1024298af57aeaef582f1421d32e7e6f3075c9c702a93",
+    "netSvg": "f4464fc0a3ae2dc32766ce11e5c64af34c08beb1123480355bb96238d7c03777"
+  },
+  {
+    "id": "PieChart-horizontal",
+    "type": "PieChart",
+    "variant": "horizontal",
+    "tsSvg": "0e745a7e5b53d4882d7156422dc4e709bb1b332286278d40ede91741e42eb027",
+    "netSvg": "1b2d871bbadd04834c17940eb0ab8a98cebd308e07fb2e6cc7fe25fb060c6e9e"
+  },
+  {
+    "id": "PieChart-minimal",
+    "type": "PieChart",
+    "variant": "minimal",
+    "tsSvg": "8ea1399b43216bc7b73cb372358fefd4d97cab728f5a12e38c387e0496c5562b",
+    "netSvg": "244a7bfd6bab3e308039bf7d4c5974031fc6f58fe926e19f8c8d202172296d64"
+  },
+  {
+    "id": "PieChart-empty",
+    "type": "PieChart",
+    "variant": "empty",
+    "tsSvg": "4733c882dc6206e422692428abc366e0623a727b8b7e1e76b1099fbe68eeb256",
+    "netSvg": "e765d5a8c4ca132ef1b38fe70c650e8fbbad399b0eb9d0a7c9a9dbfe17bb8199"
+  }
+]

@@ -14,6 +14,14 @@ at the same version are the same library.
 
 ### Document Engine & API
 
+- Added opt-in `Theme = "modern"`, measured label spacing and `BarStyle` rounded value ends/opaque linear gradients on bar and grouped-bar charts. SVG and native PDF share resolved vector geometry; modern SVG text uses PDF baselines. Styles round-trip through document definitions. Legacy output is unchanged.
+
+- **Charts honour `AxisOptions.MinValue`:** Cartesian charts now place values linearly between `MinValue` and `MaxValue`, so marks line up with the axis tick labels; before, a non-zero `MinValue` moved the tick labels but not the data. Bars, grouped bars, area fills and lollipop stems start at zero limited to the axis range: a zero line inside the plot when the range crosses zero, the top edge when every value is negative. The modern theme draws its baseline at that zero line in vertical charts. Drawing a chart with series now throws `InvalidOperationException` when `MaxValue` is not greater than `MinValue`, where it used to produce non-finite geometry. Charts with `MinValue = 0` are unchanged.
+
+- **Chart value labels stay outside their marks:** A value below the axis origin (zero, limited to the axis range) is now labelled below its point, or to the left of it and right-aligned in horizontal charts, with the same gap as a label above. It used to be labelled on the far side of its own bar, stem or fill, where it was hidden by the mark. Applies to every cartesian chart in both themes; labels for values at or above the origin are unchanged. The modern theme still omits a moved label that would collide with another.
+
+- Chart drawing sources are shared with the standalone BonnieCharts engine and compiled into this assembly. Existing chart APIs, document layout, accessibility and output are preserved; no runtime dependency is added.
+
 - **Source layout matches the TypeScript implementation:** `BarcodeSymbology`, `BarcodeContentException` and `QrErrorCorrection` move to their own files, the honest-claim guard becomes an internal `ConformancePlan`, and a container recognises a table frame through an internal `IBorderFrameHost` marker. Public types, namespaces and output are unchanged.
 
 ## 2026.10.28

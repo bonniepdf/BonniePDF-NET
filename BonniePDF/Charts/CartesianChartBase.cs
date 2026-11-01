@@ -1,3 +1,4 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 using System;
 using System.Collections.Generic;
 using BonniePDF.Drawing;
@@ -11,6 +12,17 @@ namespace BonniePDF;
 /// </summary>
 public abstract class CartesianChartBase : ChartBase
 {
+    private readonly List<ChartLabelBox> _labelBoxes = new();
+    private ChartData? _renderData;
+    protected void DrawPlacedLabel(ICanvas canvas, float x, float y, string text, Color color, float size, string family, TextAlignment align)
+    {
+        if (Appearance.MeasuredLabels) ChartLabels.Draw(canvas, _labelBoxes, Width, Height, x, y, text, color, size, family, align);
+        else canvas.DrawText(x, y, text, color, size, family, align);
+    }
+
+    private Color ThemeAxisColor => Appearance.AxisColor;
+    private Color ThemeGridColor => Appearance.GridLineColor;
+
     protected CartesianChartBase()
     {
     }
@@ -46,9 +58,9 @@ public abstract class CartesianChartBase : ChartBase
     protected const float AxisLabelFontSize = 10;
     protected const float LegendFontSize = 11;
 
-    // Styling constants
-    protected static readonly Color AxisColor = Color.FromHex("#666666");
-    protected static readonly Color GridLineColor = Color.FromHex("#e0e0e0");
+    // Legacy styling constants; the active theme supplies the colours actually drawn.
+    protected static readonly Color AxisColor = ChartTheme.Legacy.AxisColor;
+    protected static readonly Color GridLineColor = ChartTheme.Legacy.GridLineColor;
 
     /// <summary>Category-axis presentation owned by this chart.</summary>
     public AxisOptions XAxis
@@ -104,7 +116,12 @@ public abstract class CartesianChartBase : ChartBase
     /// </summary>
     protected sealed override void DrawContent(ICanvas canvas, ChartData data)
     {
+        ChartData? previousData=_renderData;
+        try {
+        _labelBoxes.Clear();
+        _renderData = data;
         if (data.Series.Count == 0) return;
+        ChartValueScale.Check(data.YAxis.MinValue, data.YAxis.MaxValue);
 
         (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) = CalculateLayout(data);
 
@@ -134,11 +151,18 @@ public abstract class CartesianChartBase : ChartBase
             DrawXAxisLegend(canvas, data.XAxis.Legend, chartAreaWidth, chartAreaHeight, baselineY);
 
         // 8. Draw axis lines LAST (on top of everything to prevent overlap)
-        DrawAxisLines(canvas, chartAreaWidth, baselineY, topY);
+        if (Appearance.AxisFrame) DrawAxisLines(canvas, chartAreaWidth, baselineY, topY);
+        else
+        {
+            float baseline = Orientation == ChartOrientation.Horizontal ? baselineY : ValueOrigin(data, chartAreaWidth, chartAreaHeight, baselineY);
+            canvas.DrawLine(LeftPadding, baseline, LeftPadding + chartAreaWidth, baseline, ThemeAxisColor, Appearance.AxisLineWidth);
+        }
 
         // 9. Draw legend for multi-series charts
         if (ShowLegend && data.Series.Count > 1)
             DrawLegend(canvas, data, chartAreaWidth);
+
+        } finally {_renderData=previousData;_labelBoxes.Clear();}
     }
 
     /// <summary>
@@ -179,7 +203,7 @@ public abstract class CartesianChartBase : ChartBase
             for (int i = 0; i < dataPointCount; i++)
             {
                 float y = topY + i * totalSpace + totalSpace / 2;
-                decimal normalizedValue = series.DataPoints[i].Value / data.YAxis.MaxValue;
+                decimal normalizedValue = ChartValueScale.Fraction(series.DataPoints[i].Value, data.YAxis.MinValue, data.YAxis.MaxValue);
                 float x = LeftPadding + (float)(normalizedValue * (decimal)chartAreaWidth);
                 coordinates.Add(new Point(x, y));
             }
@@ -191,13 +215,25 @@ public abstract class CartesianChartBase : ChartBase
             for (int i = 0; i < dataPointCount; i++)
             {
                 float x = LeftPadding + i * totalSpace + totalSpace / 2;
-                decimal normalizedValue = series.DataPoints[i].Value / data.YAxis.MaxValue;
+                decimal normalizedValue = ChartValueScale.Fraction(series.DataPoints[i].Value, data.YAxis.MinValue, data.YAxis.MaxValue);
                 float y = baselineY - (float)(normalizedValue * (decimal)chartAreaHeight);
                 coordinates.Add(new Point(x, y));
             }
         }
 
         return coordinates;
+    }
+
+    /// <summary>
+    /// Where bars, area fills and stems start: value zero limited to the axis range. A y coordinate in
+    /// vertical mode and an x coordinate in horizontal mode.
+    /// </summary>
+    internal float ValueOrigin(ChartData data, float chartAreaWidth, float chartAreaHeight, float baselineY)
+    {
+        decimal fraction = ChartValueScale.OriginFraction(data.YAxis.MinValue, data.YAxis.MaxValue);
+        return Orientation == ChartOrientation.Horizontal
+            ? LeftPadding + (float)(fraction * (decimal)chartAreaWidth)
+            : baselineY - (float)(fraction * (decimal)chartAreaHeight);
     }
 
     /// <summary>
@@ -232,8 +268,8 @@ public abstract class CartesianChartBase : ChartBase
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY);
 
     /// <summary>
-    /// Draws value labels next to data points for all series.
-    /// In vertical mode labels appear above each point; in horizontal mode to the right.
+    /// Draws value labels beyond each point, away from the value origin: above or right of a value at
+    /// or above it, below or left of a value below it.
     /// </summary>
     protected virtual void DrawValueLabels(ICanvas canvas, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
@@ -252,12 +288,13 @@ public abstract class CartesianChartBase : ChartBase
             {
                 var point = coordinates[i];
                 string text = series.DataPoints[i].FormattedValue;
+                bool below = ChartValueScale.IsBelowOrigin(series.DataPoints[i].Value, data.YAxis.MinValue, data.YAxis.MaxValue);
 
                 if (Orientation == ChartOrientation.Horizontal)
-                    canvas.DrawText(point.X + offset, point.Y - LabelFontSize / 2, text,
-                        labelColor, LabelFontSize, FontFamily, TextAlignment.Left);
+                    DrawPlacedLabel(canvas, below ? point.X - offset : point.X + offset, point.Y - LabelFontSize / 2, text,
+                        labelColor, LabelFontSize, FontFamily, below ? TextAlignment.Right : TextAlignment.Left);
                 else
-                    canvas.DrawText(point.X, point.Y - offset - LabelFontSize, text,
+                    DrawPlacedLabel(canvas, point.X, below ? point.Y + offset : point.Y - offset - LabelFontSize, text,
                         labelColor, LabelFontSize, FontFamily, TextAlignment.Center);
             }
         }
@@ -273,8 +310,22 @@ public abstract class CartesianChartBase : ChartBase
     /// <summary>
     /// Draws the legend showing all series names and colors.
     /// </summary>
+    protected virtual void DrawLegendSwatch(ICanvas canvas, float x, float y, float size, ChartSeries series) => canvas.FillRect(x, y, size, size, ResolveSeriesColor(series));
     protected virtual void DrawLegend(ICanvas canvas, ChartData data, float chartAreaWidth)
     {
+        if (Appearance.FlowLegend)
+        {
+            float x = LeftPadding, y = Height - 42;
+            foreach (var series in data.Series)
+            {
+                float w = canvas.MeasureText(series.Name, 11, FontFamily).Width + 32;
+                if (x + w > Width - 16 && x > LeftPadding) { x = LeftPadding; y += 18; }
+                if (y + 12 > Height - 4) break;
+                DrawLegendSwatch(canvas, x, y, 12, series);
+                canvas.DrawText(x + 18, y, series.Name, ThemeAxisColor, 11, FontFamily, TextAlignment.Left); x += w;
+            }
+            return;
+        }
         float legendY = Height - 40;
         float legendStartX = LeftPadding;
         float legendItemWidth = 150;
@@ -285,10 +336,10 @@ public abstract class CartesianChartBase : ChartBase
             ChartSeries series = data.Series[i];
             float x = legendStartX + i * legendItemWidth;
 
-            canvas.FillRect(x, legendY, colorBoxSize, colorBoxSize, ResolveSeriesColor(series));
+            DrawLegendSwatch(canvas, x, legendY, colorBoxSize, series);
 
             canvas.DrawText(x + colorBoxSize + 5, legendY + colorBoxSize / 2 - LegendFontSize / 2,
-                series.Name, AxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
+                series.Name, ThemeAxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
         }
     }
 
@@ -309,7 +360,7 @@ public abstract class CartesianChartBase : ChartBase
             for (int i = 1; i <= stepCount; i++)
             {
                 float x = LeftPadding + i * stepWidth;
-                canvas.DrawLine(x, topY, x, baselineY, GridLineColor, GridLineWidth);
+                canvas.DrawLine(x, topY, x, baselineY, ThemeGridColor, GridLineWidth);
             }
         }
         else
@@ -320,7 +371,7 @@ public abstract class CartesianChartBase : ChartBase
                 float y = baselineY - i * stepHeight;
                 float x1 = LeftPadding;
                 float x2 = LeftPadding + chartAreaWidth;
-                canvas.DrawLine(x1, y, x2, y, GridLineColor, GridLineWidth);
+                canvas.DrawLine(x1, y, x2, y, ThemeGridColor, GridLineWidth);
             }
         }
     }
@@ -371,7 +422,7 @@ public abstract class CartesianChartBase : ChartBase
                 float x = LeftPadding + i * stepWidth;
                 decimal value = minValue + i * stepValue;
                 string label = $"{data.YAxis.Prefix}{ChartNumberFormat.Format(value, "N0")}{data.YAxis.Suffix}";
-                canvas.DrawText(x, baselineY + 8, label, AxisColor, AxisLabelFontSize, FontFamily,
+                canvas.DrawText(x, baselineY + 8, label, ThemeAxisColor, AxisLabelFontSize, FontFamily,
                     TextAlignment.Center);
             }
         }
@@ -384,7 +435,7 @@ public abstract class CartesianChartBase : ChartBase
                 float y = baselineY - i * stepHeight;
                 decimal value = minValue + i * stepValue;
                 string label = $"{data.YAxis.Prefix}{ChartNumberFormat.Format(value, "N0")}{data.YAxis.Suffix}";
-                canvas.DrawText(LeftPadding - 8, y - AxisLabelFontSize / 2, label, AxisColor, AxisLabelFontSize,
+                canvas.DrawText(LeftPadding - 8, y - AxisLabelFontSize / 2, label, ThemeAxisColor, AxisLabelFontSize,
                     FontFamily, TextAlignment.Right);
             }
         }
@@ -402,20 +453,20 @@ public abstract class CartesianChartBase : ChartBase
         {
             float x = LeftPadding + chartAreaWidth / 2;
             float y = Height - 15;
-            canvas.DrawText(x, y, yAxis.Legend, AxisColor, LegendFontSize, FontFamily, TextAlignment.Center);
+            canvas.DrawText(x, y, yAxis.Legend, ThemeAxisColor, LegendFontSize, FontFamily, TextAlignment.Center);
         }
         else if (yAxis.VerticalLegend)
         {
             float x = 15;
             float textWidth = canvas.MeasureText(yAxis.Legend, LegendFontSize, FontFamily).Width;
             float y = topY + chartAreaHeight / 2 + textWidth / 2 - LegendFontSize;
-            canvas.DrawTextRotated(x, y, yAxis.Legend, AxisColor, LegendFontSize, FontFamily, 90);
+            canvas.DrawTextRotated(x, y, yAxis.Legend, ThemeAxisColor, LegendFontSize, FontFamily, 90);
         }
         else
         {
             float x = 10;
             float y = topY + chartAreaHeight / 2;
-            canvas.DrawText(x, y, yAxis.Legend, AxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
+            canvas.DrawText(x, y, yAxis.Legend, ThemeAxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
         }
     }
 
@@ -432,7 +483,7 @@ public abstract class CartesianChartBase : ChartBase
             float x = 15;
             float textWidth = canvas.MeasureText(legend, LegendFontSize, FontFamily).Width;
             float y = TitleAreaHeight + chartAreaHeight / 2 + textWidth / 2 - LegendFontSize;
-            canvas.DrawTextRotated(x, y, legend, AxisColor, LegendFontSize, FontFamily, 90);
+            canvas.DrawTextRotated(x, y, legend, ThemeAxisColor, LegendFontSize, FontFamily, 90);
         }
         else
         {
@@ -443,7 +494,7 @@ public abstract class CartesianChartBase : ChartBase
             float labelsBottom = baselineY + 15 + AxisLabelFontSize;
             float marginBottom = baselineY + BottomPadding;
             float y = (labelsBottom + marginBottom) / 2 - LegendFontSize / 2;
-            canvas.DrawText(x, y, legend, AxisColor, LegendFontSize, FontFamily, TextAlignment.Center);
+            canvas.DrawText(x, y, legend, ThemeAxisColor, LegendFontSize, FontFamily, TextAlignment.Center);
         }
     }
 
@@ -469,8 +520,8 @@ public abstract class CartesianChartBase : ChartBase
             {
                 float y = topY + i * totalSpace + totalSpace / 2;
                 string label = firstSeries.DataPoints[i].Label;
-                canvas.DrawText(LeftPadding - 8, y - AxisLabelFontSize / 2, label,
-                    AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Right);
+                DrawPlacedLabel(canvas, LeftPadding - 8, y - AxisLabelFontSize / 2, label,
+                    ThemeAxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Right);
             }
         }
         else
@@ -482,7 +533,7 @@ public abstract class CartesianChartBase : ChartBase
             {
                 float x = LeftPadding + i * totalSpace + totalSpace / 2;
                 string label = firstSeries.DataPoints[i].Label;
-                canvas.DrawText(x, labelY, label, AxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Center);
+                DrawPlacedLabel(canvas, x, labelY, label, ThemeAxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Center);
             }
         }
     }
@@ -497,7 +548,12 @@ public abstract class CartesianChartBase : ChartBase
     /// The colour a series is drawn in: its own when the author set one, otherwise the chart's own colour
     /// (<c>BarColor</c>, <c>LineColor</c>, <c>AreaColor</c>, <c>DotColor</c>, <c>LollipopColor</c>).
     /// </summary>
-    protected Color ResolveSeriesColor(ChartSeries series) => series.HasColor ? series.Color : GetDefaultSeriesColor();
+    protected Color ResolveSeriesColor(ChartSeries series)
+    {
+        if (series.HasColor) return series.Color;
+        Color color = GetDefaultSeriesColor();
+        return Appearance.SeriesColor(color, (_renderData ?? Data).Series.IndexOf(series));
+    }
 
     /// <summary>
     /// Reports whether a legend occupies the bottom band for this chart+data, which

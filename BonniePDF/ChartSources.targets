@@ -1,0 +1,34 @@
+<Project>
+  <ItemGroup>
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/AreaChart.cs" ExpectedHash="72EB4E768564853A5365526560A6F6F2158F55B10280023F3665317430757594" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/BarChart.cs" ExpectedHash="43BD4461C8CE48D11A7A030E1E87BB8D93AF04ECF3682A3705B4D5036FC2D2CA" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/CartesianChartBase.cs" ExpectedHash="D16ED5A8AE6BFA422CB7BD5A6911F65C44FA78BD64F4589BD19FA47C9AAF17C4" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartBarStyle.cs" ExpectedHash="0AB78B147BF04C1EFCA1D39576FC500761EEC3A94ECCFBFBB0B71CBD83B78CA6" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartBase.cs" ExpectedHash="02BF68B8769B929909EF17138E80E90C75D155DC6DDF8F2029CCB6FF81A23A61" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartNumberFormat.cs" ExpectedHash="589B9BF0496F1CA066D3933E447A27F19D852E0BD3C3D7FFDBA75B3C85283600" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartOrientation.cs" ExpectedHash="4D8807546055A7556D0F5E5E2CFFCDCF8A9C031FD74D7B12852217350E2FE07F" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartTheme.cs" ExpectedHash="0939AFF8995A65839834A3489FE75B290C691E4F63F22A89AC3F5270E3C321AD" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/DotPlotChart.cs" ExpectedHash="46D00B069A7F61E73D9DE4765D2DD0423715D2291CB8EDDF2A83152EAAD7CA96" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartBars.cs" ExpectedHash="D4954F81AF2AEA4C133CA81E117E4FD615D24BA360BBAC8A5AD5B30F79885C93" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartLabels.cs" ExpectedHash="D7DCA53E2FDB01C2CEC361037BD149AFA21D0CB718CFAAAAF4130C6A02456A89" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartPathPlan.cs" ExpectedHash="6202E554BB91B4846E1CF04FC5F234F111828E09A5AD83FCC8440A7855582935" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartValueScale.cs" ExpectedHash="0651E610A0DA7CB49CDAEE2C6A179408D4631FF984C945D019F9562D74ABAA70" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartVector.cs" ExpectedHash="D25AED2B01FA7841E0FCE4539746FA4B776CEB08BC101C6BAF813B9A17538171" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/GroupedBarChart.cs" ExpectedHash="CFB00595BF1B26D11991B638C775953FA7E514CCB3D101BFF600F0E7B8DDE65F" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/LineChart.cs" ExpectedHash="A612E6F1742B72B1A575A28FDC7486C6807DCBA3E5DD51545A4ED3A1E59DEDAA" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/LollipopChart.cs" ExpectedHash="BFC41A12E26C3BA2DE91B7F0C909107B60044752C4850DB5FE7EB324D2449788" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/AxisOptions.cs" ExpectedHash="A2D17ACF0A1C7537B50CB0185A93021752101E287C24D149DD6D83238926F358" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartData.cs" ExpectedHash="940911AE643435022B87235EE35E957EC7CE1E3693A97E0D85C2125EA7BBBECF" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartDataPoint.cs" ExpectedHash="0FCAE587A63995B4D47491D9BD63D929A00154D9FC4126921A7DDAFF94D28CA0" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartSeries.cs" ExpectedHash="D160AB1EFC4B97ED540EFF2C2541CFC078D03ECB82D10FC7BF0C3E2E47A69FD5" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartSeriesStyle.cs" ExpectedHash="38839F84138E9A95AE86B47CE4D59F36DA7C439FEE0FE819F73ED19AF53A1478" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/PieChart.cs" ExpectedHash="023F4972474256278AC5D5BC3523F84048E2B071EC2495BFF9B2C02D835BB316" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartBase.Host.cs" ExpectedHash="E5ADCB011881A928C56FE4671B4A21D5F9C158B5815E112852125B7441E76F7D" />
+  </ItemGroup>
+  <Target Name="VerifyChartSources" BeforeTargets="CoreCompile">
+    <GetFileHash Files="@(ChartSource)" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_HashedChartSources" />
+    </GetFileHash>
+    <Error Condition="'%(_HashedChartSources.FileHash)' != '%(_HashedChartSources.ExpectedHash)'" Text="Modified chart source: %(_HashedChartSources.Identity). Regenerate from its authoritative source." />
+  </Target>
+</Project>

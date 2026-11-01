@@ -42,7 +42,7 @@ public static class SvgExportExtensions
     public static string ToSvg(this ChartBase chart, ChartData data)
     {
         // Charts use standard fonts internally, so no per-glyph font resolver is needed here.
-        SvgCanvas canvas = new(chart.Width, chart.Height);
+        SvgCanvas canvas = new(chart.Width, chart.Height) { Options = new SvgRenderOptions { PdfBaseline = chart.Appearance.PdfTextBaseline } };
 
         // Draw the chart
         chart.Draw(canvas, data);
@@ -54,12 +54,12 @@ public static class SvgExportExtensions
         // bars/gridlines snap to the pixel grid; others keep the default
         // antialiasing for their diagonals/arcs/circles. Injected on the root tag
         // (the header is written in the SvgCanvas constructor, before options).
-        if (!string.IsNullOrEmpty(chart.SvgShapeRendering))
+        if (chart.UsesStyledGeometry || !string.IsNullOrEmpty(chart.SvgShapeRendering))
         {
             const string rootTag = "<svg ";
             int idx = svg.IndexOf(rootTag, System.StringComparison.Ordinal);
             if (idx >= 0)
-                svg = svg.Insert(idx + rootTag.Length, $"shape-rendering=\"{chart.SvgShapeRendering}\" ");
+                svg = svg.Insert(idx + rootTag.Length, $"shape-rendering=\"{(chart.UsesStyledGeometry ? "auto" : chart.SvgShapeRendering)}\" ");
         }
 
         return svg;

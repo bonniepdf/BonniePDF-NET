@@ -1,3 +1,4 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 using System;
 using System.Collections.Generic;
 using BonniePDF.Drawing;
@@ -11,6 +12,11 @@ namespace BonniePDF;
 /// </summary>
 public class BarChart : CartesianChartBase
 {
+    protected override void DrawLegendSwatch(ICanvas canvas, float x, float y, float size, ChartSeries series)
+    { ChartBars.Draw(canvas, x, y, size, size, ResolveSeriesColor(series), BarStyle, Appearance, false, x, y, size, size); }
+    /// <summary>Value-end rounding and optional opaque linear gradient.</summary>
+    public ChartBarStyle BarStyle { get; set; } = new();
+    internal override bool UsesStyledGeometry => base.UsesStyledGeometry || (BarStyle.CornerRadius ?? 0) > 0 || BarStyle.Gradient is not null;
     private const string BarColorHex = "#4f46e5";
 
     /// <summary>
@@ -44,18 +50,19 @@ public class BarChart : CartesianChartBase
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
         int dataPointCount = series.DataPoints.Count;
+        float origin = ValueOrigin(data, chartAreaWidth, chartAreaHeight, baselineY);
 
         if (Orientation == ChartOrientation.Horizontal)
         {
             float totalBarSpace = chartAreaHeight / dataPointCount;
             float barThickness = Math.Min(totalBarSpace * BarWidthRatio, 50);
-            DrawBars(canvas, coordinates, barThickness, baselineY, ResolveSeriesColor(series));
+            DrawBars(canvas, coordinates, barThickness, origin, ResolveSeriesColor(series), chartAreaWidth, chartAreaHeight, topY);
         }
         else
         {
             float totalBarSpace = chartAreaWidth / dataPointCount;
             float barWidth = Math.Min(totalBarSpace * BarWidthRatio, 50);
-            DrawBars(canvas, coordinates, barWidth, baselineY, ResolveSeriesColor(series));
+            DrawBars(canvas, coordinates, barWidth, origin, ResolveSeriesColor(series), chartAreaWidth, chartAreaHeight, topY);
         }
     }
 
@@ -66,22 +73,22 @@ public class BarChart : CartesianChartBase
 
     /// <summary>
     /// Draws bars for each data point.
-    /// In vertical mode bars grow upward; in horizontal mode bars grow rightward from LeftPadding.
+    /// Bars run from the value origin to each point, up or right for values above it.
     /// </summary>
-    private void DrawBars(ICanvas canvas, IList<Point> coordinates, float thickness, float baselineY, Color color)
+    private void DrawBars(ICanvas canvas, IList<Point> coordinates, float thickness, float origin, Color color, float plotWidth, float plotHeight, float plotY)
     {
         foreach (Point p in coordinates)
         {
             if (Orientation == ChartOrientation.Horizontal)
             {
-                float barWidth = p.X - LeftPadding;
-                canvas.FillRect(LeftPadding, p.Y - thickness / 2, barWidth, thickness, color);
+                float barWidth = p.X - origin;
+                ChartBars.Draw(canvas, origin, p.Y - thickness / 2, barWidth, thickness, color, BarStyle, Appearance, true, LeftPadding, plotY, plotWidth, plotHeight);
             }
             else
             {
-                float barHeight = baselineY - p.Y;
+                float barHeight = origin - p.Y;
                 float barX = p.X - thickness / 2;
-                canvas.FillRect(barX, p.Y, thickness, barHeight, color);
+                ChartBars.Draw(canvas, barX, p.Y, thickness, barHeight, color, BarStyle, Appearance, false, LeftPadding, plotY, plotWidth, plotHeight);
             }
         }
     }
