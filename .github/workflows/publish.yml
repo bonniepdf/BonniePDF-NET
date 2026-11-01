@@ -42,7 +42,7 @@ jobs:
         | grep -v '^${{ github.run_id }}$' \
         | xargs -r -I{} gh run delete --repo "${{ github.repository }}" {}
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Require cross-engine gallery validation
       env:
@@ -52,7 +52,7 @@ jobs:
       run: bash scripts/verify-gallery-gate.sh
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: |
           8.0.x
