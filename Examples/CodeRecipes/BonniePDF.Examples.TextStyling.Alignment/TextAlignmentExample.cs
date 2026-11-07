@@ -17,12 +17,6 @@ namespace BonniePDF.Examples.TextStyling.Alignment;
     "Left, centre, right, and justified text alignment including book-style paragraphs, accessible to screen readers. PDF/A-2a + PDF/UA-1.")]
 public static class TextAlignmentExample
 {
-    private const string SampleText =
-        "The quick brown fox jumps over the lazy dog. This sentence demonstrates how text " +
-        "alignment affects the visual appearance of a paragraph. When text is justified, the " +
-        "word spacing is adjusted so that both the left and right edges align perfectly with " +
-        "the margins, creating a clean, professional look commonly seen in books and formal documents.";
-
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
@@ -61,15 +55,14 @@ public static class TextAlignmentExample
 
         doc.Add(new TextBlock
         {
-            Text = "The four standard alignments are shown below. Each paragraph carries the same text and the " +
-                   "same tagging — alignment is a purely visual property.",
+            Text = "Each alignment suits a different job, so each sample below is the kind of text it is set for. Alignment is a purely visual property: every paragraph is tagged the same way.",
             Margin = new Thickness(0, 0, 0, 14),
         });
 
-        AlignedSample(doc, "Left Aligned (Default)", "s-left", Align.Left);
-        AlignedSample(doc, "Centre Aligned", "s-centre", Align.Center);
-        AlignedSample(doc, "Right Aligned", "s-right", Align.Right);
-        AlignedSample(doc, "Justified", "s-justify", Align.Justify);
+        AlignedSample(doc, "Left Aligned — letters and body text", "s-left", Align.Left, "Dear Ms Patel, thank you for your letter of 28 October. Left-aligned text keeps an even space between words and a ragged right edge, which makes it the easiest setting to read for letters, emails and most body copy.");
+        AlignedSample(doc, "Centre Aligned — invitations and titles", "s-centre", Align.Center, "You are warmly invited to the opening of the new reading room\nSaturday 14 November at eleven o'clock\nSample Town Library, Market Square");
+        AlignedSample(doc, "Right Aligned — addresses and dates", "s-right", Align.Right, "Sample Supplies Ltd\n12 Exmouth Market\nLondon EC1R 4QE\n5 November 2026");
+        AlignedSample(doc, "Justified — books and columns", "s-justify", Align.Justify, "Justified text stretches the spaces between words so that both edges of a column line up, the setting used in most printed books and newspapers. It works best in long lines: in a narrow column the stretched spaces can open into visible gaps.");
 
         // ── Book-style justified paragraphs ────────────────────────────────────
         Section(doc, "Book-Style Justified Paragraphs", "book");
@@ -117,9 +110,9 @@ public static class TextAlignmentExample
         });
     }
 
-    private static void AlignedSample(Document doc, string title, string tocId, Align alignment)
+    private static void AlignedSample(Document doc, string title, string tocId, Align alignment, string text)
     {
         Section(doc, title, tocId, alignment);
-        doc.Add(new TextBlock { Text = SampleText, Alignment = alignment, Margin = new Thickness(0, 0, 0, 14) });
+        doc.Add(new TextBlock { Text = text, Alignment = alignment, Margin = new Thickness(0, 0, 0, 14) });
     }
 }
