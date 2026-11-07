@@ -4,14 +4,15 @@ using BonniePDF;
 namespace BonniePDF.Examples.EducationPublicSector.PublicLibraryMembershipLetter;
 
 /// <summary>
-/// Fictional UK public-library membership confirmation with a local-service
-/// masthead, membership details, borrowing limits, branch opening hours, and an
-/// alternative-formats notice. It deliberately avoids real government branding.
+/// Fictional UK public-library membership confirmation with a teal library
+/// masthead, the member's library card with a scannable number, borrowing limits,
+/// branch opening hours, and an alternative-formats notice. It deliberately avoids
+/// real government branding.
 /// </summary>
 [System.ComponentModel.DisplayName("Public Library Membership")]
 [System.ComponentModel.Category("Education & Public Sector")]
 [System.ComponentModel.Description(
-    "Fictional UK public-library membership confirmation with local-service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice. PDF/A-2a + PDF/UA-1.")]
+    "Fictional UK public-library membership confirmation with a teal library masthead, the member's library card with a scannable number, borrowing limits, branch opening hours, and an alternative-formats notice. PDF/A-2a + PDF/UA-1.")]
 public static class PublicLibraryMembershipLetterExample
 {
     private const float Margin = 50;
@@ -21,6 +22,8 @@ public static class PublicLibraryMembershipLetterExample
     private static readonly Color LibrarySecondary = Color.FromHex("#526071");
     private static readonly Color LibraryMidGrey = Color.FromHex("#cbd5e1");
     private static readonly Color LibraryLight = Color.FromHex("#f1f5f9");
+    // Teal-100: the card's small print, 7.3:1 against the card's teal.
+    private static readonly Color CardTint = Color.FromHex("#ccfbf1");
 
     private static readonly InfoLine[] Membership =
     [
@@ -71,7 +74,6 @@ public static class PublicLibraryMembershipLetterExample
             "Public library membership confirmation with borrowing limits and branch hours (fictional).";
 
         doc.Add(Masthead());
-        doc.Add(ServiceHeader());
         doc.Add(AddressBlock(longDate));
         doc.Add(H1("Your public library membership"));
         doc.Add(Body(
@@ -79,11 +81,20 @@ public static class PublicLibraryMembershipLetterExample
             $"and your first card renewal date is {renewalDate}. You can use your card at " +
             "any branch, online catalogue terminal, or through the library app."));
 
-        doc.Add(StatusCallout());
+        // The member's card beside their status: the number on the card is the one the branch scans.
+        HorizontalStack cardRow = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Spacing = 24,
+            Margin = new Thickness(0, 8, 0, 22),
+        };
+        cardRow.Add(LibraryCard(renewalDate), 1.1f);
+        cardRow.Add(StatusCallout(), 1);
+        doc.Add(cardRow);
 
         VerticalStack borrowStack = new() { BreakAllowed = false };
         borrowStack.Add(H2("What you can borrow"));
-        borrowStack.Add(InfoTable(Membership, MembershipColumns, LibraryInk, "Service", "Limit", "Notes"));
+        borrowStack.Add(InfoTable(Membership, MembershipColumns, LibraryGreen, "Service", "Limit", "Notes"));
         doc.Add(borrowStack);
 
         VerticalStack hoursStack = new() { BreakAllowed = false };
@@ -122,38 +133,83 @@ public static class PublicLibraryMembershipLetterExample
         });
     }
 
-    private static Container Masthead() => new()
+    /// <summary>The library's own masthead: its name and the service writing, on the library's teal.</summary>
+    private static Container Masthead()
     {
-        BackgroundColor = LibraryInk,
-        Padding = new Thickness(14, 10, 14, 10),
-        Margin = new Thickness(0, 0, 0, 6),
-        Child = new TextBlock
+        HorizontalStack row = new() { WidthDistribution = WidthDistribution.Equal };
+        row.Add(new TextBlock
         {
             Text = "Sample Libraries",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
             Color = Color.White,
-        },
-    };
-
-    private static VerticalStack ServiceHeader()
-    {
-        VerticalStack stack = new();
-        stack.Add(new TextBlock
+        });
+        row.Add(new TextBlock
         {
             Text = "Membership Services",
             FontName = StandardFonts.HelveticaBold,
-            FontSize = 12,
-            Color = LibraryInk,
-            Margin = new Thickness(0, 0, 0, 2),
+            FontSize = 11,
+            Color = CardTint,
+            Alignment = TextAlignment.Right,
+            Margin = new Thickness(0, 5, 0, 0),
+        });
+        return new Container
+        {
+            BackgroundColor = LibraryGreen,
+            Padding = new Thickness(14, 10, 14, 10),
+            Margin = new Thickness(0, 0, 0, 20),
+            Child = row,
+        };
+    }
+
+    /// <summary>The member's library card: name, renewal date and the barcode the branch scans.</summary>
+    private static Container LibraryCard(string renewalDate)
+    {
+        VerticalStack stack = new() { Spacing = 3 };
+        stack.Add(new TextBlock
+        {
+            Text = "SAMPLE LIBRARIES  ·  LIBRARY CARD",
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 7.5f,
+            LetterSpacing = 1.2f,
+            Color = CardTint,
+        });
+        stack.Add(new TextBlock
+        {
+            Text = "Sample Member",
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 16,
+            Color = Color.White,
+            Margin = new Thickness(0, 6, 0, 0),
+        });
+        stack.Add(new TextBlock
+        {
+            Text = $"Valid until {renewalDate}",
+            FontSize = 9,
+            Color = CardTint,
+            Margin = new Thickness(0, 0, 0, 8),
         });
         stack.Add(new Container
         {
-            BackgroundColor = LibraryGreen,
-            Height = 1.5f,
-            Margin = new Thickness(0, 0, 0, 20),
+            BackgroundColor = Color.White,
+            CornerRadius = 6,
+            Padding = new Thickness(10, 8, 10, 8),
+            Child = new Barcode
+            {
+                Value = "NBL-4471-208823",
+                Symbology = BarcodeSymbology.Code128,
+                ModuleWidth = 1,
+                Height = 34,
+                AltText = "Barcode of membership number NBL-4471-208823.",
+            },
         });
-        return stack;
+        return new Container
+        {
+            BackgroundColor = LibraryGreen,
+            CornerRadius = 10,
+            Padding = new Thickness(18, 14, 18, 14),
+            Child = stack,
+        };
     }
 
     private static Grid AddressBlock(string longDate)
@@ -192,7 +248,7 @@ public static class PublicLibraryMembershipLetterExample
         });
         stack.Add(new TextBlock
         {
-            Text = "Borrow, renew, and reserve items from today",
+            Text = "Borrow, renew, and reserve items from today. Bring photo ID to collect your card.",
             FontSize = 11,
             Color = LibrarySecondary,
         });
@@ -203,7 +259,6 @@ public static class PublicLibraryMembershipLetterExample
             Border = Border.LeftOnly(5),
             BorderColors = BorderColors.LeftOnly(LibraryGreen),
             Padding = new Thickness(16, 14, 16, 14),
-            Margin = new Thickness(0, 8, 0, 22),
             Child = stack,
         };
     }

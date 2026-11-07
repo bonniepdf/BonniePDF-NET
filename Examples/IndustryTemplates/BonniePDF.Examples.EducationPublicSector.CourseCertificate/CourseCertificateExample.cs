@@ -17,7 +17,7 @@ namespace BonniePDF.Examples.EducationPublicSector.CourseCertificate;
 [System.ComponentModel.DisplayName("Course Certificate")]
 [System.ComponentModel.Category("Education & Public Sector")]
 [System.ComponentModel.Description(
-    "A landscape course completion certificate: a drawn ornamental frame layered behind the wording, a compact monogram crest built from vectors, centred serif typography, and a verification code that makes the credential checkable. Decorative artwork is kept out of the reading order. PDF/A-2a + PDF/UA-1.")]
+    "A landscape course completion certificate: a drawn ornamental frame layered behind the wording, a compact monogram crest built from vectors, a gold foil-style seal between the signatures, centred serif typography, and a verification code that makes the credential checkable. Decorative artwork is kept out of the reading order. PDF/A-2a + PDF/UA-1.")]
 public static class CourseCertificateExample
 {
     // ── Design tokens ─────────────────────────────────────────────────────────
@@ -28,6 +28,11 @@ public static class CourseCertificateExample
     private static readonly Color AccentMid = ColorPalette.Indigo[400];
     private static readonly Color AccentSoft = ColorPalette.Indigo[100];
     private static readonly Color Gold = ColorPalette.Amber[600];
+    // The seal's foil: light, mid and deep golds, with the deepest for its lettering.
+    private static readonly Color FoilLight = ColorPalette.Amber[300];
+    private static readonly Color FoilMid = ColorPalette.Amber[500];
+    private static readonly Color FoilDeep = ColorPalette.Amber[700];
+    private static readonly Color FoilInk = ColorPalette.Amber[900];
 
     // A4 landscape (595.276pt tall) less the page margin on both edges. A
     // certificate is a fixed-format document, so the frame is sized to the
@@ -106,6 +111,9 @@ public static class CourseCertificateExample
 
         canvas.StrokeRect(outer, outer, width - outer * 2, height - outer * 2, Accent, 1.6f);
         canvas.StrokeRect(inner, inner, width - inner * 2, height - inner * 2, AccentMid, 0.5f);
+        // A fine gold rule just inside the inner one.
+        const float gilt = inner + 4;
+        canvas.StrokeRect(gilt, gilt, width - gilt * 2, height - gilt * 2, Gold, 0.4f);
 
         // A small filled lozenge tucked into each corner of the inner rule.
         const float r = 4.5f;
@@ -185,6 +193,67 @@ public static class CourseCertificateExample
         IsDecorative = true,
     };
 
+    /// <summary>
+    /// The seal: a gold starburst with foil-toned rings and the award's grade, on two ribbon tails.
+    /// Shades of gold stand in for foil, so the seal prints the same on any printer.
+    /// </summary>
+    private static CanvasElement GoldSeal(string institutionName, string grade) => new((canvas, width, height) =>
+    {
+        float cx = width / 2;
+        const float cy = 40f;
+
+        // Ribbon tails first, so the seal sits on top of them.
+        foreach (int side in new[] { -1, 1 })
+        {
+            canvas.FillPath(
+            [
+                new Point(cx + side * 16, cy + 18),
+                new Point(cx + side * 26, cy + 50),
+                new Point(cx + side * 19, cy + 45),
+                new Point(cx + side * 13, cy + 52),
+                new Point(cx + side * 5, cy + 22),
+            ], Accent);
+        }
+
+        // A 32-point starburst: points alternate between the outer and inner radius.
+        List<Point> points = [];
+        for (int i = 0; i < 32; i++)
+        {
+            double angle = -Math.PI / 2 + i * Math.PI / 16;
+            float radius = i % 2 == 0 ? 36f : 32.5f;
+            points.Add(new Point(cx + (float)Math.Cos(angle) * radius, cy + (float)Math.Sin(angle) * radius));
+        }
+        canvas.FillPath(points, Gold);
+        canvas.FillCircle(cx, cy, 30, FoilDeep);
+        canvas.FillCircle(cx, cy, 28.5f, FoilLight);
+        canvas.FillCircle(cx, cy, 26.5f, FoilMid);
+
+        string monogram = string.Concat(institutionName
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Take(2)
+                .Select(word => word[0]))
+            .ToUpperInvariant();
+        float monogramWidth = canvas.MeasureText(monogram, 16, StandardFonts.TimesBold).Width;
+        canvas.DrawText(cx - monogramWidth / 2, cy - 13, monogram, FoilInk, 16, StandardFonts.TimesBold, 0);
+        string label = grade.ToUpperInvariant();
+        float labelWidth = canvas.MeasureText(label, 5.5f, StandardFonts.HelveticaBold).Width;
+        canvas.DrawText(cx - labelWidth / 2, cy + 6, label, FoilInk, 5.5f, StandardFonts.HelveticaBold, 0);
+    })
+    {
+        DrawWidth = 84,
+        DrawHeight = 94,
+        IsDecorative = true,
+    };
+
+    /// <summary>A signature column lowered so its rule lines up with the seal's centre.</summary>
+    private static VerticalStack LoweredSignature(string name, string role)
+    {
+        VerticalStack stack = new();
+        stack.Add(new Spacer(40));
+        stack.Add(SignatureColumn(name, role));
+        return stack;
+    }
+
     /// <summary>A small crest, centred above the institution name.</summary>
     private static HorizontalStack InstitutionCrest(string name)
     {
@@ -262,13 +331,19 @@ public static class CourseCertificateExample
         HorizontalStack signatures = new()
         {
             WidthDistribution = WidthDistribution.Weighted,
-            Spacing = 56,
-            Margin = new Thickness(0, 74, 0, 26),
+            Spacing = 28,
+            Margin = new Thickness(0, 34, 0, 10),
         };
-        signatures.Add(new Spacer(1), 1f);
-        signatures.Add(SignatureColumn(registrar.Name, registrar.Role), 1.3f);
-        signatures.Add(SignatureColumn(programmeLead.Name, programmeLead.Role), 1.3f);
-        signatures.Add(new Spacer(1), 1f);
+        // The seal sits between the two signatures, where a certificate is sealed.
+        signatures.Add(new Spacer(1), 0.8f);
+        signatures.Add(LoweredSignature(registrar.Name, registrar.Role), 1.3f);
+        signatures.Add(new Container
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Child = GoldSeal(data.Institution.Name, data.Course.Grade),
+        }, 0.6f);
+        signatures.Add(LoweredSignature(programmeLead.Name, programmeLead.Role), 1.3f);
+        signatures.Add(new Spacer(1), 0.8f);
 
         QRCode qr = new()
         {
