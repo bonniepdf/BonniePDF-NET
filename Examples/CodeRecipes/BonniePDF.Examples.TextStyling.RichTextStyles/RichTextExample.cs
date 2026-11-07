@@ -29,7 +29,7 @@ public static class RichTextExample
             Settings = new DocumentSettings
             {
                 PageSize = PdfSize.A4,
-                Margin = 60,
+                Margin = 40,
                 Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language = "en-GB",
@@ -85,15 +85,15 @@ public static class RichTextExample
 
         doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 10) }
             .Span("Text can be ")
-            .Span("red", new TextStyle().WithColor(Color.Red))
+            .Span("rose", new TextStyle().WithColor(ColorPalette.Rose[700]))
             .Span(", ")
-            .Span("blue", new TextStyle().WithColor(ColorPalette.Blue[600]))
+            .Span("indigo", new TextStyle().WithColor(ColorPalette.Indigo[700]))
             .Span(", ")
-            .Span("green", new TextStyle().WithColor(ColorPalette.Green[600]))
+            .Span("emerald", new TextStyle().WithColor(ColorPalette.Emerald[700]))
             .Span(", or ")
-            .Span("any colour", new TextStyle().WithColor(ColorPalette.Purple[600]))
+            .Span("any palette shade", new TextStyle().WithColor(ColorPalette.Amber[700]))
             .Span(" you choose. Colour combines freely with weight: ")
-            .Span("bold indigo", new TextStyle().Bold().WithColor(ColorPalette.Indigo[600]))
+            .Span("bold indigo", new TextStyle().Bold().WithColor(ColorPalette.Indigo[700]))
             .Span(" is a common choice for strong inline emphasis.")
         );
 
@@ -119,13 +119,13 @@ public static class RichTextExample
 
         doc.Add(new RichText { Margin = new Thickness(0, 0, 0, 10) }
             .Span("Background colours create a ")
-            .Span("highlighter pen effect", new TextStyle().WithBackground(Color.FromHex("#fef08a")))
+            .Span("highlighter pen effect", new TextStyle().WithBackground(ColorPalette.Amber[100]))
             .Span(" across any span. Combine with colour for ")
             .Span("bold red alert text",
-                new TextStyle().Bold().WithColor(Color.FromHex("#991b1b")).WithBackground(Color.FromHex("#fecaca")))
+                new TextStyle().Bold().WithColor(ColorPalette.Rose[800]).WithBackground(ColorPalette.Rose[100]))
             .Span(" or a ")
             .Span("green success note",
-                new TextStyle().WithColor(Color.FromHex("#166534")).WithBackground(Color.FromHex("#bbf7d0")))
+                new TextStyle().WithColor(ColorPalette.Emerald[800]).WithBackground(ColorPalette.Emerald[100]))
             .Span(" without breaking the paragraph flow.")
         );
 
@@ -205,7 +205,7 @@ public static class RichTextExample
                 Alignment = TextAlignment.Justify,
                 Margin = new Thickness(0, 0, 0, 10),
             }
-            .Span("IMPORTANT: ", new TextStyle().Bold().WithColor(Color.Red))
+            .Span("IMPORTANT: ", new TextStyle().Bold().WithColor(ColorPalette.Rose[700]))
             .Span("By using this software, you agree to the ")
             .Span("Terms of Service", new TextStyle().Bold().Underline())
             .Span(" and ")
@@ -213,8 +213,8 @@ public static class RichTextExample
             .Span(". All data is processed in accordance with ")
             .Span("GDPR", new TextStyle().Bold())
             .Span(" regulations. For questions, contact ")
-            .Span("support@example.com",
-                new TextStyle { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Blue[600] })
+            .Link("support@example.com", "mailto:support@example.com",
+                new TextStyle { FontFamily = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Indigo[700] }.Underline())
             .Span(".")
         );
 
