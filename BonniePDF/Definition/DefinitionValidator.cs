@@ -1059,7 +1059,7 @@ internal sealed partial class DefinitionValidator
             bool lineBreak = span.TryGetProperty("lineBreak", out JsonElement lb) && lb.ValueKind == JsonValueKind.True;
             if (lineBreak)
             {
-                if (Has(span, "text") || Has(span, "style")) Error(at, "conflicting-keys", "A line break has no text or style.", owner);
+                if (Has(span, "text") || Has(span, "style") || Has(span, "link")) Error(at, "conflicting-keys", "A line break has no text, style or link.", owner);
             }
             else if (!span.TryGetProperty("text", out JsonElement text) || text.ValueKind != JsonValueKind.String)
             {

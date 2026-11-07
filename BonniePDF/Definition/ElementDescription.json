@@ -1062,6 +1062,9 @@
         },
         "lineBreak": {
           "kind": "boolean"
+        },
+        "link": {
+          "kind": "string"
         }
       }
     },
@@ -1448,6 +1451,9 @@
         },
         "color": {
           "kind": "color"
+        },
+        "underline": {
+          "kind": "boolean"
         }
       },
       "exactlyOne": [

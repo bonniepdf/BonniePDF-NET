@@ -115,6 +115,36 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
     }
 
     /// <summary>
+    /// Adds a span that links to a URI, in the flow of the paragraph.
+    /// </summary>
+    /// <remarks>
+    /// The span's style is its look (a colour, an underline); the link adds only the clickable region,
+    /// one per line the span wraps onto, and tags it as a Link for screen readers.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// new RichText()
+    ///     .Span("Read our ")
+    ///     .Link("terms of service", "https://example.com/terms", s =&gt; s.WithColor(ColorPalette.Blue[700]).Underline())
+    ///     .Span(" before you order.");
+    /// </code>
+    /// </example>
+    public RichText Link(string text, string uri, TextStyle? style = null)
+    {
+        Span(text, style);
+        _spans[^1].Link = uri;
+        return this;
+    }
+
+    /// <summary>Adds a span that links to a URI, with a style configured via callback.</summary>
+    public RichText Link(string text, string uri, Action<TextStyle> configure)
+    {
+        TextStyle style = new();
+        configure(style);
+        return Link(text, uri, style);
+    }
+
+    /// <summary>
     /// Adds a text span followed by a line break.
     /// </summary>
     public RichText Line(string text, TextStyle? style = null)
@@ -346,18 +376,23 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             if (currentWidth > 0 && word.HasLeadingSpace)
             {
                 TextStyle spaceStyle = word.LeadingSpaceStyle ?? word.Style;
-                if (currentLine.Runs.Count > 0 && StylesEqual(currentLine.Runs[^1].Style, spaceStyle))
+                if (currentLine.Runs.Count > 0 && StylesEqual(currentLine.Runs[^1].Style, spaceStyle)
+                    && currentLine.Runs[^1].Link == word.LeadingSpaceLink)
                     currentLine.Runs[^1].Text += " ";
                 else
-                    currentLine.Runs.Add(new StyledRun { Text = " ", Style = spaceStyle });
+                    currentLine.Runs.Add(new StyledRun
+                    {
+                        Text = " ", Style = spaceStyle, Link = word.LeadingSpaceLink, LinkText = word.LeadingSpaceLinkText
+                    });
                 currentWidth += word.LeadingSpaceWidth;
             }
 
             // Add the word text with its own style
-            if (currentLine.Runs.Count > 0 && StylesEqual(currentLine.Runs[^1].Style, word.Style))
+            if (currentLine.Runs.Count > 0 && StylesEqual(currentLine.Runs[^1].Style, word.Style)
+                && currentLine.Runs[^1].Link == word.Link)
                 currentLine.Runs[^1].Text += word.Text;
             else
-                currentLine.Runs.Add(new StyledRun { Text = word.Text!, Style = word.Style });
+                currentLine.Runs.Add(new StyledRun { Text = word.Text!, Style = word.Style, Link = word.Link, LinkText = word.LinkText });
 
             currentWidth = candidateWidth;
         }
@@ -397,6 +432,8 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         List<StyledWord> words = new();
         bool prevSpanEndedWithSpace = false;
         TextStyle? prevResolvedStyle = null;
+        string? prevLink = null;
+        string? prevLinkText = null;
 
         foreach (TextSpan span in _spans)
         {
@@ -477,7 +514,12 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
                         Width = partWidth,
                         HasLeadingSpace = hasLeadingSpace,
                         LeadingSpaceWidth = spaceWidth,
-                        LeadingSpaceStyle = hasLeadingSpace ? spaceStyle : null
+                        LeadingSpaceStyle = hasLeadingSpace ? spaceStyle : null,
+                        Link = span.Link,
+                        LinkText = span.Link is null ? null : rawText.Trim(),
+                        // A space between spans belongs to the span before it, so a link's region never takes it in.
+                        LeadingSpaceLink = isInterSpanSpace ? prevLink : span.Link,
+                        LeadingSpaceLinkText = isInterSpanSpace ? prevLinkText : (span.Link is null ? null : rawText.Trim())
                     });
                 }
 
@@ -492,6 +534,8 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             }
 
             prevResolvedStyle = resolved;
+            prevLink = span.Link;
+            prevLinkText = span.Link is null ? null : rawText.Trim();
         }
 
         return words;
@@ -564,6 +608,8 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         foreach (StyledRun run in line.Runs)
         {
             if (string.IsNullOrEmpty(run.Text)) continue;
+            float runStartX = currentX;
+            StructureElement? linkElement = run.Link is null ? null : BeginLinkContent(ctx);
 
             TextStyle style = run.Style;
             string fontName = style.EffectiveFontName;
@@ -622,7 +668,46 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
             if (spaced) ctx.Canvas.SetTextSpacing(0, 0);
             ctx.Canvas.SetTextFeatures(null);
+
+            if (run.Link is not null)
+            {
+                RegisterLink(ctx, run, runStartX, y, currentX - runStartX, line.Height, linkElement);
+                EndLinkContent(ctx, linkElement);
+            }
         }
+    }
+
+    /// <summary>
+    /// In a tagged document, suspends the paragraph's marked content and opens a Link structure
+    /// element with its own marked content for a link run, so the link sits inside the paragraph in
+    /// reading order (PDF/UA-1 7.18.5). Returns the Link element, or null when untagged.
+    /// </summary>
+    private static StructureElement? BeginLinkContent(RenderContext ctx)
+    {
+        TaggingContext? tagging = ctx.Tagging;
+        if (tagging is null || ctx.Canvas.IsInsideArtifact()) return null;
+        ctx.Canvas.EndMarkedContent();
+        StructureElement element = tagging.Tree.Begin(SemanticRole.Link);
+        ctx.Canvas.BeginMarkedContent("Link");
+        return element;
+    }
+
+    /// <summary>Closes the Link scope opened by <see cref="BeginLinkContent"/> and resumes the paragraph.</summary>
+    private static void EndLinkContent(RenderContext ctx, StructureElement? element)
+    {
+        if (element is null) return;
+        ctx.Canvas.EndMarkedContent();
+        ctx.Tagging!.Tree.End();
+        ctx.Canvas.BeginMarkedContent("P");
+    }
+
+    /// <summary>Registers the clickable region of one link run: the run's width by the line's height.</summary>
+    private static void RegisterLink(RenderContext ctx, StyledRun run, float x, float y, float width, float height, StructureElement? element)
+    {
+        if (width <= 0 || ctx.Canvas.IsInsideArtifact()) return;
+        var link = new Hyperlink(run.Link!, run.LinkText ?? run.Text.Trim()) { LinkedStructElement = element };
+        link.SetRenderBounds(x, ctx.PageSize.Height - (y + height), width, height);
+        ctx.RegisterHyperlink(link);
     }
 
     /// <summary>
@@ -885,6 +970,12 @@ internal class StyledRun
 
     /// <summary>The resolved style for this run</summary>
     public required TextStyle Style { get; set; }
+
+    /// <summary>The URI this run links to, when it belongs to a link span.</summary>
+    public string? Link { get; set; }
+
+    /// <summary>The whole text of the link span this run belongs to, used as the link's description.</summary>
+    public string? LinkText { get; set; }
 }
 
 /// <summary>
@@ -908,6 +999,14 @@ internal class StyledWord
     /// </summary>
     public TextStyle? LeadingSpaceStyle { get; set; }
     public bool IsLineBreak { get; set; }
+    /// <summary>The URI of the link span this word belongs to.</summary>
+    public string? Link { get; set; }
+    /// <summary>The whole text of that link span.</summary>
+    public string? LinkText { get; set; }
+    /// <summary>The link the word's leading space belongs to: the previous span's when the space came from it.</summary>
+    public string? LeadingSpaceLink { get; set; }
+    /// <summary>The whole text of that link span.</summary>
+    public string? LeadingSpaceLinkText { get; set; }
 
     /// <summary>
     /// True when this line break came from a raw break character (<c>\n</c>) inside

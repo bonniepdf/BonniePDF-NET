@@ -10,7 +10,7 @@ namespace BonniePDF.Examples.LinksReferences.Hyperlinks;
 /// </summary>
 [System.ComponentModel.DisplayName("Hyperlinks")]
 [System.ComponentModel.Category("Links & References")]
-[System.ComponentModel.Description("A resources page: web links with descriptions, a button-style link, and email and phone links, all in one link colour.")]
+[System.ComponentModel.Description("A resources page: web links with descriptions, an underlined link inside a sentence, a button-style link, and email and phone links, all in one link colour.")]
 public static class HyperlinksExample
 {
     /// <summary>One colour for every link, so readers learn what is clickable.</summary>
@@ -69,6 +69,13 @@ public static class HyperlinksExample
                 Child = stack
             });
         }
+
+        // A link inside a sentence: a RichText span with a URI, styled as the link's look.
+        doc.Add(SectionHeading("Links in a sentence", 28));
+        doc.Add(new RichText { DefaultStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]) }
+            .Span("Orders are accepted on our ")
+            .Link("terms of business", "https://www.bonniepdf.dev/legal", new TextStyle().WithColor(Link).Underline())
+            .Span(", which set out delivery times, returns and how we handle your data. The link sits in the sentence and wraps with it."));
 
         // A button-style link: a Hyperlink inside a filled, rounded container.
         doc.Add(SectionHeading("Start a trial", 28));

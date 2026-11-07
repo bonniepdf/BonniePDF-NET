@@ -20,4 +20,11 @@ public class TextSpan
     /// When true, a line break is inserted after this span's text.
     /// </summary>
     public bool IsLineBreak { get; set; }
+
+    /// <summary>
+    /// A URI that makes this span a link: each line the span wraps onto becomes a clickable
+    /// region, tagged as a Link inside the paragraph, with the span's text as its description.
+    /// The link's look is the span's style (colour, underline); nothing is added.
+    /// </summary>
+    public string? Link { get; set; }
 }

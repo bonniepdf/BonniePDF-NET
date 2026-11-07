@@ -74,6 +74,12 @@ public class Hyperlink : IElement, IRoleProvider
     /// </summary>
     public Thickness Margin { get; set; } = new(0);
 
+    /// <summary>
+    /// Draws a line under the link text, in the link colour, placed as an underline decoration on
+    /// text is. Default <c>false</c>.
+    /// </summary>
+    public bool Underline { get; set; }
+
     /// <summary>Line height derived from <see cref="FontSize"/> with a standard 1.2× leading factor.</summary>
     private float LineHeight => FontSize * 1.2f;
 
@@ -161,6 +167,13 @@ public class Hyperlink : IElement, IRoleProvider
 
             ctx.Canvas.DrawText(ctx.CurrentX + Margin.Left, localY, line, Color, FontSize, FontName,
                 TextAlignment.Left);
+            if (Underline)
+            {
+                // The same position and weight as an underline decoration on text (spec 03, Hyperlink).
+                float underlineY = localY + FontSize + FontSize / 7f;
+                float x = ctx.CurrentX + Margin.Left;
+                ctx.Canvas.DrawLine(x, underlineY, x + lineWidth, underlineY, Color, MathF.Max(0.5f, FontSize / 18f));
+            }
 
             localY += LineHeight;
         }
