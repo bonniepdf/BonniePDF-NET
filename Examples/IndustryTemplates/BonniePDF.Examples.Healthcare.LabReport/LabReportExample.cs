@@ -29,6 +29,9 @@ public static class LabReportExample
     // 700, not 600: this flag's text on white needs 4.5:1 and 600 falls to 3.20:1.
     private static readonly Color Low = ColorPalette.Amber[700];
 
+    /// <summary>The dates of this and the patient's previous three renal results.</summary>
+    private static readonly string[] TrendDates = ["Jan 2025", "Jul 2025", "Jan 2026", "Jul 2026"];
+
     private static readonly Panel[] Panels =
     [
         new("Full Blood Count (FBC)",
@@ -85,6 +88,17 @@ public static class LabReportExample
             doc.Add(H2(panel.Title));
             doc.Add(PanelTable(panel));
         }
+
+        // The two flagged renal results against the previous three, kept with their heading.
+        VerticalStack trend = new() { Spacing = 12, Margin = new Thickness(0, 0, 0, 14) };
+        trend.Add(TrendChart("Creatinine (µmol/L)", [78, 84, 89, 96], 120, High,
+            "Line chart of creatinine over the last four results, rising from 78 to 96 µmol/L, above the upper limit of 90."));
+        trend.Add(TrendChart("eGFR (mL/min/1.73m²)", [84, 76, 70, 62], 100, ClinicalBlue,
+            "Line chart of eGFR over the last four results, falling from 84 to 62 mL/min/1.73m²."));
+        VerticalStack kidney = new() { BreakAllowed = false };
+        kidney.Add(H2("Kidney function, last four results"));
+        kidney.Add(trend);
+        doc.Add(kidney);
 
         // The interpretation and the sign-off that authorises it stay on one page.
         VerticalStack sign = new() { BreakAllowed = false };
@@ -244,6 +258,35 @@ public static class LabReportExample
             Margin = new Thickness(0, 8, 0, 0),
             Child = stack,
         };
+    }
+
+    /// <summary>A small labelled trend chart of one analyte over <see cref="TrendDates"/>.</summary>
+    private static VerticalStack TrendChart(string title, decimal[] values, decimal maxValue, Color color, string altText)
+    {
+        ChartSeries series = new() { Color = color };
+        for (int i = 0; i < TrendDates.Length; i++)
+            series.DataPoints.Add(new ChartDataPoint { Label = TrendDates[i], Value = values[i], LabelFormat = "N0" });
+
+        LineChart chart = new(new ChartData
+        {
+            Series = [series],
+            YAxis = new AxisOptions { MaxValue = maxValue, StepCount = 4 },
+        })
+        {
+            Theme = "modern",
+            AltText = altText,
+            Height = 130,
+            StretchToFit = true,
+            FontFamily = StandardFonts.Helvetica,
+            LabelFontSize = 8,
+            ShowValueLabels = true,
+            BackgroundColor = Color.White,
+        };
+
+        VerticalStack stack = new() { Spacing = 4 };
+        stack.Add(new TextBlock(title) { FontName = StandardFonts.HelveticaBold, FontSize = 9.5f, Color = Ink });
+        stack.Add(chart);
+        return stack;
     }
 
     private static Heading H2(string text) => new(text)

@@ -166,6 +166,14 @@ public static class DeliveryNoteExample
 
         doc.Add(table);
 
+        // What to report sits beside what is still to come, so the note stays on one page.
+        Container discrepancies = Panel("Discrepancies",
+        [
+            Cell(
+                "Shortages, damage, or incorrect items must be noted on this delivery note at the point of delivery "
+                + "and reported to the supplier within three working days, quoting the delivery note number.",
+                size: 9f),
+        ]);
         if (backOrdered.Length > 0)
         {
             List<IElement> notes = [];
@@ -182,7 +190,11 @@ public static class DeliveryNoteExample
                 "Back-ordered items are not invoiced until they are despatched.",
                 size: 9f,
                 color: Muted));
-            doc.Add(Panel("Items to follow", notes, Negative));
+            doc.Add(WeightedRow([Panel("Items to follow", notes, Negative), discrepancies], marginBottom: 0f));
+        }
+        else
+        {
+            doc.Add(discrepancies);
         }
 
         doc.Add(H2("Goods received"));
@@ -203,21 +215,13 @@ public static class DeliveryNoteExample
             spacing: 22f,
             marginBottom: 6f));
 
-        doc.Add(Panel("Discrepancies",
-        [
-            Cell(
-                "Shortages, damage, or incorrect items must be noted on this delivery note at the point of delivery "
-                + "and reported to the supplier within three working days, quoting the delivery note number.",
-                size: 9f),
-        ]));
-
         return doc;
     }
 
     private static VerticalStack ReceiptSlot(string role, string hint)
     {
         VerticalStack stack = new();
-        stack.Add(Cell(role.ToUpperInvariant(), size: 6.5f, bold: true, color: Muted, marginBottom: 20f));
+        stack.Add(Cell(role.ToUpperInvariant(), size: 6.5f, bold: true, color: Muted, marginBottom: 14f));
         stack.Add(new Container
         {
             BackgroundColor = Rule,

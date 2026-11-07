@@ -26,6 +26,16 @@ public static class UkDegreeTranscriptExample
     // 700, not 500: bold 12pt text on white needs 4.5:1 and 500 falls to 2.13:1.
     private static readonly Color Gold = ColorPalette.Amber[700];
 
+    /// <summary>The UK honours classifications by weighted average; the award is the one this transcript records.</summary>
+    private const string Award = "Upper Second-Class Honours (2:1)";
+    private static readonly (string Name, string Range)[] Bands =
+    [
+        ("First-Class Honours (1st)", "70–100%"),
+        (Award, "60–69%"),
+        ("Lower Second-Class Honours (2:2)", "50–59%"),
+        ("Third-Class Honours (3rd)", "40–49%"),
+    ];
+
     private static readonly Module[] Modules =
     [
         new(4, "CS4101", "Programming Fundamentals", 20, 68),
@@ -77,6 +87,7 @@ public static class UkDegreeTranscriptExample
         doc.Add(AwardBanner());
         doc.Add(H2("Module results"));
         doc.Add(ModuleTable());
+        doc.Add(AwardCalculation());
         doc.Add(Verification());
 
         return doc;
@@ -146,7 +157,7 @@ public static class UkDegreeTranscriptExample
         // The award is the transcript's primary heading (H1). Tagging it as the
         // first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede any H2);
         // the section headings below are H2. Styling is unchanged.
-        stack.Add(H1("Upper Second-Class Honours (2:1)"));
+        stack.Add(H1(Award));
         stack.Add(new TextBlock
         {
             Text =
@@ -194,6 +205,86 @@ public static class UkDegreeTranscriptExample
         }
 
         return table;
+    }
+
+    /// <summary>Each level's average beside the honours bands, with this award highlighted, kept on one page.</summary>
+    private static PreventPageBreak AwardCalculation()
+    {
+        double weighted = Modules.Where(m => m.Level >= 5).Sum(m => m.Mark * (m.Level == 6 ? 2 : 1) * m.Credits) /
+                          (double)Modules.Where(m => m.Level >= 5).Sum(m => (m.Level == 6 ? 2 : 1) * m.Credits);
+
+        Table levels = new(1.3f, 1, 1, 1.2f)
+        {
+            CellPadding = 6,
+            Border = new Border(0.5f),
+            BorderColors = new BorderColors(Rule),
+            HeaderBackgroundColor = Navy,
+            HeaderTextColor = Color.White,
+        };
+        levels.AddHeader(Th("Level", TextAlignment.Left), Th("Credits", TextAlignment.Right),
+            Th("Average", TextAlignment.Right), Th("Weight", TextAlignment.Right));
+        foreach (int level in new[] { 4, 5, 6 })
+        {
+            Module[] modules = Modules.Where(m => m.Level == level).ToArray();
+            int credits = modules.Sum(m => m.Credits);
+            double average = modules.Sum(m => m.Mark * m.Credits) / (double)credits;
+            levels.AddRow(
+                Td($"Level {level}", TextAlignment.Left, Ink),
+                Td(credits.ToString(CultureInfo.InvariantCulture), TextAlignment.Right, Ink),
+                Td(average.ToString("0.0", CultureInfo.InvariantCulture) + "%", TextAlignment.Right, Ink),
+                Td(level == 4 ? "None" : level == 5 ? "× 1" : "× 2", TextAlignment.Right, Muted));
+        }
+
+        Table bands = new(2.6f, 1)
+        {
+            CellPadding = 6,
+            Border = new Border(0.5f),
+            BorderColors = new BorderColors(Rule),
+            HeaderBackgroundColor = Navy,
+            HeaderTextColor = Color.White,
+        };
+        bands.AddHeader(Th("Classification", TextAlignment.Left), Th("Average", TextAlignment.Right));
+        foreach (var (name, range) in Bands)
+        {
+            bool awarded = name == Award;
+            string font = awarded ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+            Color ink = awarded ? Navy : Ink;
+            TableRow row = new()
+            {
+                Cells =
+                [
+                    new TableCell { Content = new TextBlock(name) { FontName = font, FontSize = 9.5f, Color = ink } },
+                    new TableCell
+                    {
+                        Content = new TextBlock(range) { FontName = font, FontSize = 9.5f, Color = ink, Alignment = TextAlignment.Right },
+                    },
+                ],
+            };
+            if (awarded) row.BackgroundColor = ColorPalette.Blue[50];
+            bands.AddRow(row);
+        }
+
+        HorizontalStack calculation = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Spacing = 20,
+            Margin = new Thickness(0, 0, 0, 10),
+        };
+        calculation.Add(levels, 1);
+        calculation.Add(bands, 1.3f);
+
+        VerticalStack section = new();
+        section.Add(H2("How the award was calculated"));
+        section.Add(calculation);
+        section.Add(new TextBlock(
+            "Level 4 does not count towards the classification. Level 6 counts twice as much as level 5, giving a " +
+            $"weighted average of {weighted.ToString("0.0", CultureInfo.InvariantCulture)}%.")
+        {
+            FontSize = 9,
+            Color = Muted,
+            Margin = new Thickness(0, 0, 0, 22),
+        });
+        return new PreventPageBreak { Child = section };
     }
 
     private static HorizontalStack Verification()
