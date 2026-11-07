@@ -144,12 +144,21 @@ internal partial class FontWriter
         _writer!.WriteObject(id, FontDescriptorDictionary(font, baseFontName, fontFile2Id, cidSetId));
     }
 
-    private static Dictionary<string, string> Type1FontDictionary(string fontName) => new()
+    private static Dictionary<string, string> Type1FontDictionary(string fontName)
     {
-        [PdfKeys.Common.Type] = "/Font",
-        [PdfKeys.Common.Subtype] = "/Type1",
-        [PdfKeys.Font.BaseFont] = $"/{fontName}"
-    };
+        Dictionary<string, string> dict = new()
+        {
+            [PdfKeys.Common.Type] = "/Font",
+            [PdfKeys.Common.Subtype] = "/Type1",
+            [PdfKeys.Font.BaseFont] = $"/{fontName}"
+        };
+        // Text is written as WinAnsi bytes. Without this entry a viewer reads them with the
+        // font's built-in StandardEncoding, which drops ’ “ ” – € and shows é as Ø.
+        // Symbol and ZapfDingbats keep their own built-in encodings (spec 03, standard fonts).
+        if (fontName is not ("Symbol" or "ZapfDingbats"))
+            dict[PdfKeys.Font.Encoding] = "/WinAnsiEncoding";
+        return dict;
+    }
 
     /// <summary>
     /// Chooses the TrueType program to embed: a subset holding only the used glyphs, or the full font.

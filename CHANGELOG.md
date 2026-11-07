@@ -14,6 +14,8 @@ at the same version are the same library.
 
 ### Document Engine & API
 
+- **Accented and typographic characters show in standard fonts:** the font dictionary of a non-embedded Helvetica, Times or Courier face now declares `/Encoding /WinAnsiEncoding`. The text was already written as WinAnsi bytes, but without the entry viewers decoded it with the font's built-in StandardEncoding, so ’ “ ” – — … € ™ disappeared and é showed as Ø. Documents that claim PDF/A or PDF/UA, whose standard faces are embedded, were not affected. Symbol and ZapfDingbats are unchanged.
+
 - **Links no longer draw a box:** link annotations now write `/Border [0 0 0]`. Without it a viewer applies the PDF default, a one-point border, and many draw it as a rectangle around every hyperlink, table-of-contents entry and cross-reference. The link text, its colour and the active region are unchanged; no other output changes.
 
 - Added opt-in `Theme = "modern"`, measured label spacing and `BarStyle` rounded value ends/opaque linear gradients on bar and grouped-bar charts. SVG and native PDF share resolved vector geometry; modern SVG text uses PDF baselines. Styles round-trip through document definitions. Legacy output is unchanged.

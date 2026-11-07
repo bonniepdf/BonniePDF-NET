@@ -43,6 +43,37 @@ public sealed class StandardFontEncodingTests
         Assert.DoesNotContain("(a?", pdf, System.StringComparison.Ordinal);
     }
 
+    private static string[] FontDictionaries(string? fontName = null)
+    {
+        InternalConfiguration.EnableCompression = false;
+        try
+        {
+            using BonniePDF.Document doc = new();
+            TextBlock block = new("café");
+            if (fontName != null) block.FontName = fontName;
+            doc.Add(block);
+            string raw = Encoding.Latin1.GetString(doc.GenerateBytes());
+            return System.Text.RegularExpressions.Regex.Matches(raw, @"<<[^<>]*/Type /Font[^<>]*>>")
+                .Select(m => m.Value).ToArray();
+        }
+        finally { InternalConfiguration.EnableCompression = true; }
+    }
+
+    [Fact]
+    public void FontDictionary_DeclaresWinAnsiEncoding()
+    {
+        // Spec 03: the bytes are WinAnsi, so the dictionary must say so, or viewers read them as StandardEncoding.
+        string helvetica = FontDictionaries().First(d => d.Contains("/BaseFont /Helvetica", System.StringComparison.Ordinal));
+        Assert.Contains("/Encoding /WinAnsiEncoding", helvetica, System.StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SymbolFont_KeepsItsBuiltInEncoding()
+    {
+        string symbol = FontDictionaries(StandardFonts.Symbol).First(d => d.Contains("/BaseFont /Symbol", System.StringComparison.Ordinal));
+        Assert.DoesNotContain("/Encoding", symbol, System.StringComparison.Ordinal);
+    }
+
     private static float Width(string text, string font) => FontMetrics.GetStringWidth(text, font, 1000);
 
     [Fact]
