@@ -1,181 +1,145 @@
 using System.Globalization;
-using System;
-using System.IO;
 using BonniePDF;
 
 namespace BonniePDF.Examples.ShareRankingCharts.ShareAndRanking;
 
 /// <summary>
-/// Example demonstrating the PieChart component.
-/// This shows how a PieChart can be rendered to PDF using the ICanvas interface.
-/// Uses the same data and colors from the sales-piechart.svg file.
+/// A donut chart of revenue share by channel - slice colours, legend and a formatted total -
+/// with a summary table alongside. A pie suits a handful of parts of one whole; for values
+/// over time, use a bar or line chart. A pie has no axes, so <see cref="ChartData"/> carries
+/// a single series.
 /// </summary>
 [System.ComponentModel.DisplayName("Pie Chart")]
 [System.ComponentModel.Category("Share & Ranking Charts")]
-[System.ComponentModel.Description(
-    "PieChart component with monthly sales data, showing a donut-style pie chart with customizable colors and legend.")]
+[System.ComponentModel.Description("A donut chart of revenue by sales channel, with each channel’s share in the legend, the formatted total and a summary table alongside.")]
 public static class PieChartExample
 {
+    /// <summary>Channel, revenue in pounds, and change on last year in percent - five shares, not twelve months.</summary>
+    private static readonly (string Channel, decimal Revenue, int Change)[] Channels =
+    [
+        ("Online shop", 412_600m, 18),
+        ("Retail stores", 298_400m, -4),
+        ("Wholesale", 176_900m, 6),
+        ("Marketplaces", 94_300m, 31),
+        ("Events", 38_700m, -12),
+    ];
+
+    /// <summary>One colour per channel, in slice order.</summary>
+    private static readonly string[] Colors = ["#4f46e5", "#0d9488", "#f59e0b", "#e11d48", "#94a3b8"];
+
+    private static readonly CultureInfo EnGb = CultureInfo.GetCultureInfo("en-GB");
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
-        // Create a new PDF document
-        Document document = new(new DocumentSettings
+        decimal total = Channels.Sum(c => c.Revenue);
+        string Share(decimal revenue) => $"{Math.Round(revenue / total * 100, MidpointRounding.AwayFromZero)}%";
+        string Money(decimal value) => "£" + value.ToString("N0", EnGb);
+
+        Document doc = new(new DocumentSettings
         {
+            PageSize = PdfSize.A4,
             Orientation = PageOrientation.Landscape,
-            FooterTemplate = pageNumber =>
+            Margin = 44,
+            Conformance = PdfAConformance.PdfA2a,
+            Accessibility = AccessibilityMode.PdfUa1,
+            Language = "en-GB",
+            DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(11).WithColor(ColorPalette.Slate[600]),
+            FooterTemplate = PageTemplate.FromElements(@default: new TextBlock("Northwind Homewares  ·  Revenue review, year to March 2026")
             {
-                HorizontalStack stack = new() { WidthDistribution = WidthDistribution.Weighted };
-                stack.Add(
-                    new TextBlock
-                    {
-                        Text = "BonniePDF - Pie Chart", FontName = StandardFonts.Helvetica, FontSize = 10,
-                        Color = ColorPalette.Slate[500]
-                    }, null);
-                stack.Add(
-                    new TextBlock
-                    {
-                        Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
-                        FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500],
-                        Alignment = TextAlignment.Right
-                    }, 1f);
-                return stack;
+                FontSize = 9,
+                Color = ColorPalette.Slate[500]
+            })
+        })
+        {
+            Metadata = new DocumentMetadata
+            {
+                Title = "Revenue by Channel",
+                Author = "BonniePDF",
+                Subject = "Pie / donut chart example - revenue share by sales channel with legend and total"
             }
-        });
-
-        document.Settings.Version = PdfVersion.Pdf17;
-        document.Settings.Conformance = PdfAConformance.PdfA2a;
-        document.Settings.Accessibility = AccessibilityMode.PdfUa1;
-        document.Settings.Language = "en-GB";
-        document.Settings.DefaultTextStyle = new TextStyle().WithFamily(StandardFonts.Helvetica).WithSize(12).WithColor(ColorPalette.Slate[600]);
-
-        // Set document metadata
-        document.Metadata.Title = "Pie Chart";
-        document.Metadata.Author = "BonniePDF";
-        document.Metadata.Subject = "Demonstrating the PieChart component";
-
-        // Add a title
-        document.Add(new TextBlock
-        {
-            Text = $"Pie Chart: Monthly Sales {DateTime.Now.Year}",
-            FontSize = 24,
-            Color = ColorPalette.Slate[800],
-            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 8) });
-
-        document.Add(new TextBlock
-        {
-            Text = "Donut chart with legend and total value in the centre",
-            FontSize = 14,
-            Color = ColorPalette.Slate[600],
-            Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 20) });
-
-        // Create chart data with all 12 months (matching the SVG data)
-        ChartData chartData = new()
-        {
-            Title = $"Monthly Sales {DateTime.Now.Year}",
-            Series = [new ChartSeries { DataPoints = PieChartSales }]
         };
 
-        // Create the pie chart with custom colors matching the SVG
-        PieChart pieChart = new(chartData)
+        doc.Add(new Heading("Revenue by channel")
         {
-            AltText = "Donut-style pie chart showing proportional distribution of monthly sales",
-            Height = 380,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 24,
+            Color = ColorPalette.Slate[900],
+            Margin = new Thickness(0, 0, 0, 4)
+        });
+        doc.Add(new TextBlock("Year to March 2026. The online shop now brings in over two fifths of revenue.")
+        {
+            FontSize = 12,
+            Margin = new Thickness(0, 0, 0, 14)
+        });
+
+        ChartData data = new()
+        {
+            Series =
+            [
+                new ChartSeries
+                {
+                    Name = "Revenue",
+                    // The share goes in the label, so the legend reads "Online shop (40%) - 412,600".
+                    DataPoints = Channels
+                        .Select(c => new ChartDataPoint { Label = $"{c.Channel} ({Share(c.Revenue)})", Value = c.Revenue, LabelFormat = "N0" })
+                        .ToList()
+                }
+            ]
+        };
+
+        PieChart chart = new(data)
+        {
+            AltText = "Donut chart of revenue by channel, year to March 2026: "
+                + string.Join(", ", Channels.Select(c => $"{c.Channel} {Share(c.Revenue)}"))
+                + $". Total {Money(total)}.",
+            Height = 360,
             StretchToFit = true,
             IsDonut = true,
-            TotalLabel = "Total",
+            TotalLabel = "Total (£)",
+            TotalValueFormat = "N0",
             ShowLegend = true,
-            Colors = new[] { "#4f46e5", "#7c3aed", "#a855f7", "#d946ef", "#ec4899", "#f43f5e", "#f97316", "#eab308", "#84cc16", "#22c55e", "#14b8a6", "#06b6d4" },
+            Colors = Colors,
             BackgroundColor = Color.White
         };
 
-        // Add the chart to the document
-        document.Add(pieChart);
+        // The same figures as a table, with the year-on-year change the chart cannot show.
+        Table table = new(3f, 2f, 1.4f, 1.4f)
+        {
+            HeaderBackgroundColor = ColorPalette.Slate[800],
+            HeaderTextColor = Color.White,
+            CellPadding = 6
+        };
+        table.AddHeader(Cell("Channel", bold: true), Cell("Revenue", bold: true, right: true), Cell("Share", bold: true, right: true), Cell("vs LY", bold: true, right: true));
+        foreach (var (channel, revenue, change) in Channels)
+        {
+            table.AddRow(
+                Cell(channel),
+                Cell(Money(revenue), right: true),
+                Cell(Share(revenue), right: true),
+                Cell($"{(change > 0 ? "+" : "")}{change}%", right: true, color: change < 0 ? ColorPalette.Red[700] : ColorPalette.Emerald[700]));
+        }
+        table.AddRow(Cell("Total", bold: true), Cell(Money(total), bold: true, right: true), Cell("100%", bold: true, right: true), Cell(""));
 
-        // Save the document
+        VerticalStack summary = new() { Spacing = 10 };
+        summary.Add(new Heading("Summary") { Level = 2, FontName = StandardFonts.HelveticaBold, FontSize = 14, Color = ColorPalette.Slate[900] });
+        summary.Add(table);
+        summary.Add(new TextBlock("Marketplaces grew fastest from a small base. Events fell as two trade fairs moved to the following year.") { FontSize = 10 });
 
+        HorizontalStack row = new() { Spacing = 28, WidthDistribution = WidthDistribution.Weighted };
+        row.Add(chart, 3);
+        row.Add(summary, 2);
+        doc.Add(row);
 
-        return document;
+        return doc;
     }
 
-    // Local helpers and sample data for this document.
-
-    // Local helpers and sample data for this document.
-    private static List<string> MonthLabels => new List<string> { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-
-    private static IList<ChartDataPoint> PieChartSales => new List<ChartDataPoint>()
+    /// <summary>A 10pt table cell, optionally bold, right-aligned or coloured.</summary>
+    private static TextBlock Cell(string text, bool bold = false, bool right = false, Color? color = null) => new(text)
     {
-        new ChartDataPoint
-        {
-            Label = MonthLabels[0],
-            Value = 7234,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[1],
-            Value = 4891,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[2],
-            Value = 8456,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[3],
-            Value = 3127,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[4],
-            Value = 9542,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[5],
-            Value = 6789,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[6],
-            Value = 5234,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[7],
-            Value = 8901,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[8],
-            Value = 2456,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[9],
-            Value = 7890,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[10],
-            Value = 6123,
-            LabelFormat = "N0"
-        },
-        new ChartDataPoint
-        {
-            Label = MonthLabels[11],
-            Value = 9876,
-            LabelFormat = "N0"
-        }
+        FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+        FontSize = 10,
+        Alignment = right ? TextAlignment.Right : TextAlignment.Left,
+        Color = color ?? ColorPalette.Slate[700]
     };
 }
