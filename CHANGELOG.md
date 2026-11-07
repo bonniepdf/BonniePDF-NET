@@ -14,6 +14,8 @@ at the same version are the same library.
 
 ### Document Engine & API
 
+- **Table grid lines no longer disappear beside shaded cells:** each cell used to paint its fill, content and edges before the next cell began, so the next cell's fill, or the next row's, covered half of an edge already drawn. Thin lines beside a shaded header, a banded row or a shaded cell all but vanished. A row now paints all its fills first, then the bottom edges of the row above, then the cells' content, then its own edges, and holds its bottom edges until the next row's fills are down or the table leaves the page. Tables without fills look the same; the order of drawing operations changes in every table with borders.
+
 - **Table footers inside a container:** a table placed inside a container, stack or other element dropped its footer rows, because the footer was drawn only when the document's current page was its last. Footers now follow the table's last body row wherever the table is placed.
 
 - **Mixed font sizes share one baseline:** in rich text, a span smaller than the text beside it used to be drawn from the top of the line, so it sat high, and a subscript (the 2 in H₂O) appeared raised. Every span on a line now sits on the baseline of the line's largest font, a subscript drops below it and a superscript rises above it. Lines in a single font size are unchanged.

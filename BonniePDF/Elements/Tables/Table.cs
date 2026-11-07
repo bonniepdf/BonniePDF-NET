@@ -344,6 +344,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         }
         finally
         {
+            // Each call draws one page's fragment: the last row's bottom edges belong to this page.
+            FlushBottomEdges(ctx);
             ctx.CurrentX = originalX;
             if (ownTable) tagging!.Tree.End();
         }
@@ -471,6 +473,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         _carryPending = false;
         _bottomsAbove = null;
         _edgePlan.Clear();
+        _pendingBottoms.Clear();
         _paginatedWidths = null;
     }
 
@@ -483,6 +486,10 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
     // wins, then the darker, and a tie goes to the earlier cell.
 
     private readonly Dictionary<TableCell, (bool DrawLeft, bool DrawTop)> _edgePlan = new();
+
+    // The bottom edges of the row last drawn, held until the next row's fills are down (see PaintCellFill).
+    private readonly List<(float X, float Y, float Width, float LineWidth, Color Color)> _pendingBottoms = new();
+    private int _pendingBottomsPage = -1;
 
     // The bottom edge of each column in the row above, on the page being drawn; null when there is none.
     private (float Width, Color? Color)[]? _bottomsAbove;
@@ -685,11 +692,31 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         try
         {
             float startX = ctx.CurrentX;
+            // Each cell's left edge and width. `col` tracks the column the cell starts in, which runs ahead
+            // of the cell index once any cell in the row spans more than one column.
+            var cellX = new float[row.Cells.Length];
+            var cellWidth = new float[row.Cells.Length];
             float currentX = startX + (IsRightToLeft ? widths.Sum() : 0);
-
-            // `col` tracks the column the cell starts in, which runs ahead of the
-            // cell index `i` once any cell in the row spans more than one column.
             for (int i = 0, col = 0; i < row.Cells.Length; i++)
+            {
+                int span = Math.Max(1, row.Cells[i].ColumnSpan);
+                float colWidth = 0;
+                for (int j = 0; j < span && col + j < widths.Length; j++)
+                    colWidth += widths[col + j];
+                if (IsRightToLeft) currentX -= colWidth;
+                cellX[i] = currentX;
+                cellWidth[i] = colWidth;
+                if (!IsRightToLeft) currentX += colWidth;
+                col += span;
+            }
+
+            // Paint order: the row's fills, then the edges held back from the row above, then the cells'
+            // content, then the row's own edges. No fill is painted over an edge.
+            for (int i = 0; i < row.Cells.Length; i++)
+                PaintCellFill(ctx, row.Cells[i], row, cellX[i], cellWidth[i], rowHeight);
+            FlushBottomEdges(ctx);
+
+            for (int i = 0; i < row.Cells.Length; i++)
             {
                 TableCell cell = row.Cells[i];
 
@@ -698,12 +725,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
                 // resolves to TH instead of TD.
                 if (row.IsHeader && !cell.IsHeader) cell.IsHeader = true;
 
-                int span = Math.Max(1, cell.ColumnSpan);
-                float colWidth = 0;
-                for (int j = 0; j < span && col + j < widths.Length; j++)
-                    colWidth += widths[col + j];
-
-                if (IsRightToLeft) currentX -= colWidth;
+                float colWidth = cellWidth[i];
+                currentX = cellX[i];
                 capture.OpenCell(cell, currentX, colWidth);
 
                 ChildTagToken childTag = default;
@@ -743,10 +766,9 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
                     }
                     capture.CloseCell(cell);
                 }
-
-                if (!IsRightToLeft) currentX += colWidth;
-                col += span;
             }
+
+            for (int i = 0; i < row.Cells.Length; i++) DrawCellEdges(ctx, row.Cells[i], cellX[i], cellWidth[i], rowHeight);
 
             ctx.CurrentX = startX;
             RecordRowBottoms(ctx, row, widths);
@@ -795,6 +817,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         }
         finally
         {
+            FlushBottomEdges(ctx);
             if (ownTable) tagging!.Tree.End();
         }
     }
@@ -833,6 +856,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
                     // Pagination check
                     if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop)
                     {
+                        FlushBottomEdges(ctx);
                         ctx.NewPage();
 
                         // Repeat headers on new page if enabled
@@ -871,27 +895,26 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         float rowHeight = MeasureRowHeight(row, widths);
 
         // Pagination check
-        if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop) ctx.NewPage();
+        if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop)
+        {
+            FlushBottomEdges(ctx);
+            ctx.NewPage();
+        }
 
         RenderRowDirect(ctx, row, widths);
     }
 
     private void RenderCell(RenderContext ctx, TableCell cell, TableRow row, float x, float width, float rowHeight)
     {
-        // Determine effective styling (cell > row > table defaults)
-        Color? bgColor = cell.BackgroundColor
-                         ?? row.BackgroundColor
-                         ?? (row.IsHeader ? HeaderBackgroundColor : null)
-                         ?? (row.IsFooter ? FooterBackgroundColor : null)
-                         ?? RowBackgroundColor;
-
-        // The cascade above is the only place a cell's effective fill is known —
+        // The fill cascade is the only place a cell's effective fill is known —
         // the cell element itself carries no BackgroundColor when the colour came
         // from the row or the table. Hand it to the recorder so the contrast rules
         // measure the cell's text against its real backdrop, not the page.
+        Color? bgColor = CellFill(cell, row);
         if (bgColor.HasValue)
             ctx.LayoutRecorder?.AnnotatePaint(cell, LayoutRecorder.PaintForBackground(bgColor.Value));
 
+        // Determine effective styling (cell > row > table defaults)
         Color? color = cell.Color
                            ?? row.Color
                            ?? (row.IsHeader ? HeaderTextColor : null)
@@ -918,9 +941,6 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
             content = tb;
         }
 
-        // Draw background (fills entire cell including padding area)
-        if (bgColor.HasValue) DrawBackground(ctx, x, ctx.CurrentY, width, rowHeight, bgColor.Value);
-
         // Render content with padding - IMPORTANT: Save Y before and restore after
         // to prevent cells from advancing Y (they should all be on the same row)
         float originalX = ctx.CurrentX;
@@ -944,23 +964,69 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         ctx.CurrentX = originalX;
         ctx.CurrentY = yBeforeCell; // Restore Y so next cell starts at same position
 
-        // Draw border
-        (Border effectiveBorder, BorderColors effectiveBorderColors) = EdgesOf(cell);
-        if (effectiveBorder.HasAnyBorder)
+    }
+
+    /// <summary>
+    /// Paints a cell's fill. Every fill in a row is painted before any of the row's edges, and a row's
+    /// bottom edges wait for the next row's fills, so no fill covers an edge (spec: Paint order).
+    /// </summary>
+    private void PaintCellFill(RenderContext ctx, TableCell cell, TableRow row, float x, float width, float rowHeight)
+    {
+        Color? bgColor = CellFill(cell, row);
+        if (bgColor.HasValue) DrawBackground(ctx, x, ctx.CurrentY, width, rowHeight, bgColor.Value);
+    }
+
+    /// <summary>A cell's effective fill: cell, then row, then the table's header, footer or row default.</summary>
+    private Color? CellFill(TableCell cell, TableRow row) =>
+        cell.BackgroundColor
+        ?? row.BackgroundColor
+        ?? (row.IsHeader ? HeaderBackgroundColor : null)
+        ?? (row.IsFooter ? FooterBackgroundColor : null)
+        ?? RowBackgroundColor;
+
+    /// <summary>
+    /// Draws a cell's left, top and right edges, and holds its bottom edge for <see cref="FlushBottomEdges"/>.
+    /// A rounded cell draws its whole outline at once.
+    /// </summary>
+    private void DrawCellEdges(RenderContext ctx, TableCell cell, float x, float width, float rowHeight)
+    {
+        (Border edges, BorderColors colors) = EdgesOf(cell);
+        if (!edges.HasAnyBorder) return;
+        // A shared edge is drawn once, by the cell that wins it (PlanRowEdges).
+        bool planned = _edgePlan.TryGetValue(cell, out (bool DrawLeft, bool DrawTop) plan);
+        bool rounded = CornerRadius > 0;
+        float left = planned && !plan.DrawLeft ? 0 : edges.Left;
+        float top = planned && !plan.DrawTop ? 0 : edges.Top;
+        if (!rounded && edges.Bottom > 0 && colors.Bottom.HasValue)
         {
-
-            // A shared edge is drawn once, by the cell that wins it (PlanRowEdges).
-            if (_edgePlan.TryGetValue(cell, out (bool DrawLeft, bool DrawTop) plan))
-            {
-                effectiveBorder = new Border(
-                    plan.DrawLeft ? effectiveBorder.Left : 0,
-                    plan.DrawTop ? effectiveBorder.Top : 0,
-                    effectiveBorder.Right,
-                    effectiveBorder.Bottom);
-            }
-
-            DrawBorder(ctx, x, ctx.CurrentY, width, rowHeight, effectiveBorder, effectiveBorderColors);
+            _pendingBottomsPage = ctx.CurrentPageIndex;
+            _pendingBottoms.Add((x, ctx.CurrentY + rowHeight, width, edges.Bottom, colors.Bottom.Value));
         }
+        DrawBorder(ctx, x, ctx.CurrentY, width, rowHeight, new Border(left, top, edges.Right, rounded ? edges.Bottom : 0), colors);
+    }
+
+    /// <summary>
+    /// Draws the bottom edges held back from the row above, once the row below has painted its fills, or
+    /// when the table leaves the page. Edges held on another page are already drawn there.
+    /// </summary>
+    private void FlushBottomEdges(RenderContext ctx)
+    {
+        if (_pendingBottoms.Count == 0) return;
+        bool samePage = _pendingBottomsPage == ctx.CurrentPageIndex;
+        if (samePage)
+        {
+            ctx.Canvas.BeginArtifact();
+            try
+            {
+                foreach (var edge in _pendingBottoms)
+                    DrawLine(ctx, edge.X, edge.Y, edge.X + edge.Width, edge.Y, edge.LineWidth, edge.Color);
+            }
+            finally
+            {
+                ctx.Canvas.EndArtifact();
+            }
+        }
+        _pendingBottoms.Clear();
     }
 
     /// <summary>
