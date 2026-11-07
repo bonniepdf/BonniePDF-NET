@@ -3,7 +3,7 @@ using BonniePDF;
 
 namespace BonniePDF.Examples.PracticalDocuments;
 
-/// <summary>A 72-line invoice: a styled header row that repeats on every page, per-line discounts, mixed VAT rates, and the totals kept together on the last page.</summary>
+/// <summary>A 72-line invoice: a styled header row that repeats on every page, a carried-forward subtotal at each page break, per-line discounts, mixed VAT rates, and the totals kept together on the last page.</summary>
 public static class LargeOrderInvoiceExample
 {
     public sealed record InvoiceLine(string Description, int Quantity, long UnitPence, long DiscountPence, int TaxPercent);
@@ -100,7 +100,8 @@ public static class LargeOrderInvoiceExample
             Party("REFERENCES", string.IsNullOrEmpty(purchaseOrder) ? "No purchase order" : $"Purchase order {purchaseOrder}", "Account WFM-0193\nCurrency GBP"));
         doc.Add(parties);
 
-        // ── Line items: the header row repeats at the top of every page ──
+        // ── Line items: the header row repeats at the top of every page, and each page
+        // break carries the net subtotal forward to the next ──
         Table table = new(4.4f, 0.6f, 1f, 1.1f, 0.6f, 1.1f)
         {
             RepeatHeadersOnNewPage = true,
@@ -108,7 +109,10 @@ public static class LargeOrderInvoiceExample
             Border = new Border(0.5f),
             BorderColors = new BorderColors(ColorPalette.Slate[200]),
             HeaderBackgroundColor = ColorPalette.Slate[800],
-            HeaderTextColor = Color.White
+            HeaderTextColor = Color.White,
+            FooterBackgroundColor = ColorPalette.Slate[100],
+            FooterTextColor = ColorPalette.Slate[900],
+            RunningTotalColumn = 5
         };
         table.AddHeader(
             Text("Description", 8.5f, Color.White, bold: true),
@@ -120,13 +124,17 @@ public static class LargeOrderInvoiceExample
         foreach (var line in lines)
         {
             Color ink = ColorPalette.Slate[800];
-            table.AddRow(
+            long net = line.Quantity * line.UnitPence - line.DiscountPence;
+            IElement[] cells =
+            [
                 Text(line.Description, 9, ink),
                 Text(line.Quantity.ToString(CultureInfo.InvariantCulture), 9, ink, align: TextAlignment.Right),
                 Text(Money(line.UnitPence), 9, ink, align: TextAlignment.Right),
                 Text(line.DiscountPence != 0 ? Money(line.DiscountPence) : "\u2013", 9, ink, align: TextAlignment.Right),
                 Text($"{line.TaxPercent}%", 9, ink, align: TextAlignment.Right),
-                Text(Money(line.Quantity * line.UnitPence - line.DiscountPence), 9, ink, align: TextAlignment.Right));
+                Text(Money(net), 9, ink, align: TextAlignment.Right),
+            ];
+            table.AddRow(new TableRow { Cells = cells.Select(content => new TableCell { Content = content }).ToArray(), RunningValue = net / 100m });
         }
         if (lines.Count == 0) table.AddRow("No billable items", "", "", "", "", "0.00");
         doc.Add(table);

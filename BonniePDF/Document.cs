@@ -704,9 +704,13 @@ public class Document : IDisposable
             foreach (ListElementBase child in list.GetNestedLists())
                 ApplyStyleToElement(child, style);
         else if (el is Table t)
+        {
+            // A table builds its running-total rows during layout, so it keeps the style for them.
+            t.CascadedTextStyle = style;
             // Every cell's non-null content, in row order, as GetAllRows would give it.
             foreach (IElement content in t.GetChildren())
                 ApplyStyleToElement(content, style);
+        }
     }
 
 

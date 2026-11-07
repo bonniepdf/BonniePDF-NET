@@ -42,6 +42,14 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
     // State tracking for multipage rendering
     private int _lastRowRendered = -1;
     private bool _headersPending = true;
+    /// <summary>The running values of the body rows drawn so far, for the carried-forward total.</summary>
+    private readonly List<decimal> _runningValues = [];
+    /// <summary>A page ended with a carried-forward row, so the next page opens with a brought-forward one.</summary>
+    private bool _carryPending;
+
+    /// <summary>The document's default text style, handed over by the style cascade for the rows the table makes itself.</summary>
+    /// <remarks>The running-total rows are built during layout, after the cascade has visited the tree.</remarks>
+    internal TextStyle? CascadedTextStyle { get; set; }
 
     public Table(params float[] columnWeights)
     {
@@ -66,6 +74,28 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
     /// Whether to show footers on each page (only last page if false)
     /// </summary>
     public bool ShowFootersOnAllPages { get; set; }
+
+    /// <summary>
+    /// Turns on a running total: the column (0-based, at least 1) that shows it. When the body breaks
+    /// across pages, each page that continues ends with a "carried forward" row holding the total of
+    /// the rows' <see cref="TableRow.RunningValue"/> so far, and the next page opens, after any repeated
+    /// header, with a "brought forward" row holding the same total. The label spans the columns before
+    /// this one. Both rows are drawn in the footer colours and left out of the accessibility structure,
+    /// since they repeat what the rows already say. Null (the default) turns the feature off.
+    /// </summary>
+    public int? RunningTotalColumn { get; set; }
+
+    /// <summary>Label of the row that ends a page that continues. Default <c>"Carried forward"</c>.</summary>
+    public string CarriedForwardLabel { get; set; } = "Carried forward";
+
+    /// <summary>Label of the row that opens a continuation page. Default <c>"Brought forward"</c>.</summary>
+    public string BroughtForwardLabel { get; set; } = "Brought forward";
+
+    /// <summary>Number format of the running total: <c>G</c>, <c>F&lt;n&gt;</c>, <c>N&lt;n&gt;</c> or <c>P&lt;n&gt;</c>, as for charts. Default <c>"N2"</c>.</summary>
+    public string RunningTotalFormat { get; set; } = "N2";
+
+    /// <summary>Text written before the running total, such as a currency symbol. Default empty.</summary>
+    public string RunningTotalPrefix { get; set; } = "";
 
     /// <summary>
     /// Default background color for header rows
@@ -376,22 +406,39 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
 
         // Render data rows
         bool tbodyOpen = false;
+        bool running = RunningTotalColumn.HasValue;
         for (int i = startRow; i < _rows.Count; i++)
         {
             TableRow row = _rows.ForLayout(i, reuse: ctx.LayoutRecorder is null);
             float rowHeight = MeasureRowHeight(row, widths);
+            // A running total opens a continuation page with a brought-forward row, and needs room after
+            // every row but the last for the carried-forward row that may end the page.
+            TableRow? broughtForward = running && _carryPending ? RunningRow(BroughtForwardLabel) : null;
+            float broughtForwardHeight = broughtForward is null ? 0 : MeasureRowHeight(broughtForward, widths);
+            float carryHeight = running && i < _rows.Count - 1 ? MeasureRowHeight(RunningRow(CarriedForwardLabel), widths) : 0;
 
             // Pagination check
-            if (ctx.CurrentY + rowHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop)
+            if (ctx.CurrentY + broughtForwardHeight + rowHeight + carryHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop)
             {
                 if (tbodyOpen && groupTagging != null) groupTagging!.Tree.End();
+                if (running && i > startRow)
+                {
+                    RenderRowDirect(ctx, RunningRow(CarriedForwardLabel), widths, asArtifact: true);
+                    _carryPending = true;
+                }
                 _lastRowRendered = i - 1;
                 _headersPending = RepeatHeadersOnNewPage && _headers.Count > 0;
                 return i == startRow ? RenderStatus.WrapRequired : RenderStatus.Overflow;
             }
 
+            if (broughtForward is not null)
+            {
+                RenderRowDirect(ctx, broughtForward, widths, asArtifact: true);
+                _carryPending = false;
+            }
             if (!tbodyOpen && groupTagging != null) { groupTagging.Tree.Begin(SemanticRole.TBody); tbodyOpen = true; }
             RenderRowDirect(ctx, row, widths);
+            if (running) _runningValues.Add(row.RunningValue ?? 0m);
             _lastRowRendered = i;
         }
         if (tbodyOpen && groupTagging != null) groupTagging!.Tree.End();
@@ -420,6 +467,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
     {
         _lastRowRendered = -1;
         _headersPending = true;
+        _runningValues.Clear();
+        _carryPending = false;
         _bottomsAbove = null;
         _edgePlan.Clear();
         _paginatedWidths = null;
@@ -568,12 +617,59 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
     /// declare it. Renders unchanged (and adds nothing to the content
     /// stream) when tagging is off.
     /// </summary>
-    private void RenderRowDirect(RenderContext ctx, TableRow row, float[] widths)
+    private void RenderRowDirect(RenderContext ctx, TableRow row, float[] widths, bool asArtifact = false)
+    {
+        // A carried- or brought-forward row repeats what the rows already say: draw it as an artifact.
+        bool artifact = asArtifact && ctx.Tagging != null && !ctx.Canvas.IsInsideArtifact();
+        if (artifact) ctx.Canvas.BeginArtifact();
+        try
+        {
+            RenderRowContent(ctx, row, widths, artifact);
+        }
+        finally
+        {
+            if (artifact) ctx.Canvas.EndArtifact();
+        }
+    }
+
+    /// <summary>
+    /// The carried-forward or brought-forward row: the label across the columns before
+    /// <see cref="RunningTotalColumn"/>, the running total formatted in that column, and empty cells after it.
+    /// </summary>
+    private TableRow RunningRow(string label)
+    {
+        int column = RunningTotalColumn!.Value;
+        int columns = ColumnCount();
+        if (column < 1 || column >= columns)
+            throw new ArgumentOutOfRangeException(nameof(RunningTotalColumn), "RunningTotalColumn must be a column index from 1 to the last column.");
+        decimal sum = 0m;
+        foreach (decimal value in _runningValues) sum += value;
+        string total = RunningTotalPrefix + ChartNumberFormat.Format(sum, RunningTotalFormat);
+        TextBlock labelText = new(label) { FontWeight = FontWeight.Bold };
+        TextBlock valueText = new(total) { FontWeight = FontWeight.Bold, Alignment = TextAlignment.Right };
+        if (CascadedTextStyle != null)
+        {
+            labelText.ApplyDefaultStyleIfNotSet(CascadedTextStyle);
+            valueText.ApplyDefaultStyleIfNotSet(CascadedTextStyle);
+        }
+        var cells = new List<TableCell>
+        {
+            new() { Content = labelText, ColumnSpan = column },
+            new() { Content = valueText },
+        };
+        for (int k = column + 1; k < columns; k++) cells.Add(new TableCell { Content = new TextBlock("") });
+        var row = new TableRow { Cells = [.. cells] };
+        if (FooterBackgroundColor.HasValue) row.BackgroundColor = FooterBackgroundColor;
+        if (FooterTextColor.HasValue) row.Color = FooterTextColor;
+        return row;
+    }
+
+    private void RenderRowContent(RenderContext ctx, TableRow row, float[] widths, bool suppressTagging)
     {
         float rowHeight = MeasureRowHeight(row, widths);
         PlanRowEdges(ctx, row);
 
-        var tagging = ctx.Tagging;
+        var tagging = suppressTagging ? null : ctx.Tagging;
         // Data tables tag TR/TH/TD; presentation (layout) tables tag each cell's
         // content in reading order instead (no table structure). Exactly one applies.
         bool dataTagging = tagging != null && !IsLayoutGrid;
