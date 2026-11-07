@@ -605,6 +605,12 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
         float currentX = startX;
 
+        // Spans on a line share one baseline: the canvas puts a run's baseline one font size below the y it is
+        // drawn at, so each run is lowered by the difference between the line's largest font size and its own.
+        float baselineFontSize = 0;
+        foreach (StyledRun run in line.Runs)
+            if (!string.IsNullOrEmpty(run.Text)) baselineFontSize = Math.Max(baselineFontSize, run.Style.EffectiveFontSize);
+
         foreach (StyledRun run in line.Runs)
         {
             if (string.IsNullOrEmpty(run.Text)) continue;
@@ -629,7 +635,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             // affecting the run's advance width, so currentX and measurement are
             // untouched. Positive shift = up, so subtract from the top-down y.
             float shift = BaselineShiftResolver.Resolve(style.BaselineAlignment, style.BaselineShift, fontSize);
-            float runY = y - shift;
+            float runY = y + (baselineFontSize - fontSize) - shift;
 
             // Letter/word spacing as canvas state for this run.
             float ls = style.LetterSpacing ?? 0;
