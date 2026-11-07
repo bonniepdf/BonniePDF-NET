@@ -57,13 +57,13 @@ public static class MarginsAndPadding
         };
         comparison.Add(ComparisonColumn(
             "Padding on the outer box",
-            "The blue band is 16pt of padding: space the container reserves inside its own border.",
+            "The tinted band is 16pt of padding: space the container reserves inside its own border.",
             // Outer box owns the space via padding; the inner content sits on a
             // contrasting fill so the padding band is actually visible.
             PaddingDemo()));
         comparison.Add(ComparisonColumn(
             "Margin on the inner box",
-            "The blue band is 16pt of margin: space the inner element holds outside itself.",
+            "The tinted band is 16pt of margin: space the inner element holds outside itself.",
             // Outer box has no padding; the inner element pushes itself away from the
             // border with its own margin, producing the same gutter a different way.
             MarginDemo()));
@@ -96,13 +96,13 @@ public static class MarginsAndPadding
             Margin = new Thickness(20), // 20pt margin on all sides
             Width = 100, // Fixed size so the label's stated dimensions are honest.
             Height = 60,
-            BackgroundColor = ColorPalette.Amber[400],
+            BackgroundColor = ColorPalette.Indigo[200],
             Child = new TextBlock
             {
                 Text = "Image 100x60",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 10,
-                Color = ColorPalette.Amber[900],
+                Color = ColorPalette.Indigo[900],
                 Alignment = TextAlignment.Center
             },
             Padding = new Thickness(6)
@@ -158,39 +158,39 @@ public static class MarginsAndPadding
 
         stack.Add(new Container
         {
-            BackgroundColor = ColorPalette.Green[100],
+            BackgroundColor = ColorPalette.Indigo[50],
             Padding = new Thickness(8),
             Child = new TextBlock
             {
                 Text = "Item 1 in stack",
                 FontSize = 10,
-                Color = ColorPalette.Green[800]
+                Color = ColorPalette.Indigo[900]
             }
         });
 
         stack.Add(new Container
         {
-            BackgroundColor = ColorPalette.Purple[100],
+            BackgroundColor = ColorPalette.Indigo[100],
             Padding = new Thickness(8),
             Margin = new Thickness(0, 5, 0, 0), // 5pt top margin
             Child = new TextBlock
             {
                 Text = "Item 2 in stack (with top margin)",
                 FontSize = 10,
-                Color = ColorPalette.Purple[800]
+                Color = ColorPalette.Indigo[900]
             }
         });
 
         stack.Add(new Container
         {
-            BackgroundColor = ColorPalette.Red[100],
+            BackgroundColor = ColorPalette.Indigo[200],
             Padding = new Thickness(8),
             Margin = new Thickness(0, 5, 0, 0), // 5pt top margin
             Child = new TextBlock
             {
                 Text = "Item 3 in stack (with top margin)",
                 FontSize = 10,
-                Color = ColorPalette.Red[800]
+                Color = ColorPalette.Indigo[900]
             }
         });
 
@@ -255,26 +255,26 @@ public static class MarginsAndPadding
         }
     };
 
-    /// <summary>Space created by the OUTER box's padding (the blue band is padding).</summary>
+    /// <summary>Space created by the OUTER box's padding (the tinted band is padding).</summary>
     private static Container PaddingDemo() => new()
     {
-        BackgroundColor = ColorPalette.Blue[200],
+        BackgroundColor = ColorPalette.Indigo[100],
         Border = new Border(1),
-        BorderColors = new BorderColors(ColorPalette.Blue[500]),
+        BorderColors = new BorderColors(ColorPalette.Indigo[400]),
         Padding = new Thickness(16), // The gutter you see IS this padding.
         Child = ContentChip()
     };
 
-    /// <summary>Space created by the INNER element's margin (the blue band is margin).</summary>
+    /// <summary>Space created by the INNER element's margin (the tinted band is margin).</summary>
     private static Container MarginDemo()
     {
         Container inner = ContentChip();
         inner.Margin = new Thickness(16); // The gutter you see IS this margin.
         return new Container
         {
-            BackgroundColor = ColorPalette.Blue[200],
+            BackgroundColor = ColorPalette.Indigo[100],
             Border = new Border(1),
-            BorderColors = new BorderColors(ColorPalette.Blue[500]),
+            BorderColors = new BorderColors(ColorPalette.Indigo[400]),
             Padding = new Thickness(0), // No padding: the inner element spaces itself.
             Child = inner
         };
