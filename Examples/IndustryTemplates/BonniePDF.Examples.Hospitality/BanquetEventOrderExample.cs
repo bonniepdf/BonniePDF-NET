@@ -1,4 +1,5 @@
 using BonniePDF;
+using BonniePDF.Drawing;
 
 namespace BonniePDF.Examples.Hospitality;
 
