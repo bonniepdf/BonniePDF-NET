@@ -470,5 +470,72 @@
         ]
       ]
     }
-  ]
+  ],
+  "fallbackRuns": {
+    "description": "Right-to-left lines whose digits and Latin fall back from a Hebrew-only face. Each line is resolved once (UBA over the whole line) and painted in visual order; adjacent pieces in the same font are merged. 'visual' lists, left to right, each font's text as painted.",
+    "primary": "NotoSansHebrew-Regular.ttf",
+    "fallback": "NotoSans-Regular.ttf",
+    "fontSize": 20,
+    "cases": [
+      {
+        "text": "מחיר 12, שלום",
+        "visual": [
+          [
+            "primary",
+            "םולש "
+          ],
+          [
+            "fallback",
+            ",12"
+          ],
+          [
+            "primary",
+            " ריחמ"
+          ]
+        ]
+      },
+      {
+        "text": "25 באוקטובר 2026",
+        "visual": [
+          [
+            "fallback",
+            "2026"
+          ],
+          [
+            "primary",
+            " רבוטקואב "
+          ],
+          [
+            "fallback",
+            "25"
+          ]
+        ]
+      },
+      {
+        "text": "סה״כ 1,234.50 ILS לתשלום",
+        "visual": [
+          [
+            "primary",
+            "םולשתל "
+          ],
+          [
+            "fallback",
+            "ILS"
+          ],
+          [
+            "primary",
+            " "
+          ],
+          [
+            "fallback",
+            "1,234.50"
+          ],
+          [
+            "primary",
+            " כ״הס"
+          ]
+        ]
+      }
+    ]
+  }
 }

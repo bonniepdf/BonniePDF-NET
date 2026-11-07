@@ -2,7 +2,7 @@ using BonniePDF;
 
 namespace BonniePDF.Examples.PracticalDocuments;
 
-/// <summary>One order-confirmation letter in French, Greek and Arabic: the same letterhead and layout, mirrored for right-to-left Arabic, with each letter set in a font that covers all of its text.</summary>
+/// <summary>One order-confirmation letter in French, Greek, Arabic and Hebrew: the same letterhead and layout, mirrored for right-to-left Arabic and Hebrew. Each letter is set in a font for its script; digits the Hebrew face lacks come from the document's Latin font.</summary>
 public static class MultilingualCustomerLetterExample
 {
     private sealed record Letter(string Font, bool Rtl, string Title, string Address, string Date, string Body,
@@ -37,6 +37,16 @@ public static class MultilingualCustomerLetterExample
             Items: [("مصباح قراءة نحاسي", "1", "450.00 ر.س"), ("غطاء من الكتان", "1", "205.00 ر.س")],
             Total: ("المجموع", "655.00 ر.س"),
             SignOff: "مع أطيب التحيات،\nخدمة العملاء"),
+        // The Hebrew face has no digits: they fall back to the Latin font added for the French letter.
+        new("NotoSerifHebrew-Regular.ttf", true,
+            Title: "אישור הזמנה",
+            Address: "גב׳ מרים לוי\nרחוב הרצל 12\nתל אביב 6578210",
+            Date: "25 באוקטובר 2026",
+            Body: "תודה על הזמנתכם. ההזמנה אושרה ותגיע לכתובתכם בתוך חמישה ימי עסקים. פרטי ההזמנה מופיעים להלן; נא לשמור מכתב זה.",
+            Columns: ["מוצר", "כמות", "מחיר"],
+            Items: [("מנורת קריאה מפליז", "1", "480.00 ₪"), ("שמיכת פשתן", "1", "215.00 ₪")],
+            Total: ("סה״כ", "695.00 ₪"),
+            SignOff: "בברכה,\nשירות הלקוחות"),
     ];
 
     public static Document Generate()
@@ -88,7 +98,7 @@ public static class MultilingualCustomerLetterExample
                 Child = letterhead
             });
 
-            // Everything below follows the letter's direction: start is the right edge in Arabic, and
+            // Everything below follows the letter's direction: start is the right edge in Arabic and Hebrew, and
             // the order table's columns mirror.
             Table table = new(4f, 1f, 1.6f)
             {

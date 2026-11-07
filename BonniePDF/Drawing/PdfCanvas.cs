@@ -20,7 +20,8 @@ internal class PdfCanvas : ICanvas
     private readonly Func<string, string> _fontResolver;
     private readonly Func<ImageInfo, string> _imageResolver;
     private readonly Action<string, string> _glyphTracker;
-    private readonly record struct PreparedTextRun(TextRunFont Run, string Text, Typography.Engine.GlyphRun? Glyphs);
+    // LineText is set on every piece of a line painted in visual order: the line's logical text, its one ActualText.
+    private readonly record struct PreparedTextRun(TextRunFont Run, string Text, Typography.Engine.GlyphRun? Glyphs, string? LineText = null);
 
     /// <summary>
     /// The font that draws a whole string, or null when the string needs more than one; asked
@@ -680,6 +681,15 @@ internal class PdfCanvas : ICanvas
                 Text = text
             }
         };
+        // A bidirectional line in several fonts is shaped as one line and painted piece by piece in visual order.
+        if (runs.Count > 1 && VisualTextRuns.Order(runs.Select(run => run.Text).ToArray(), runs.Select(run => run.EmbeddedFont).ToArray(), _fontFeatures) is { } pieces)
+        {
+            string lineText = string.Concat(runs.Select(run => run.Text));
+            var ordered = new PreparedTextRun[pieces.Count];
+            for (int i = 0; i < pieces.Count; i++)
+                ordered[i] = new(TextRunFont.Of(runs[pieces[i].Run]), pieces[i].Text, pieces[i].Glyphs, lineText);
+            return ordered;
+        }
         // Prepared glyphs live only for this operation, including runs too long
         // for the font cache. Alignment and emission use the exact same result.
         var prepared = new PreparedTextRun[runs.Count];
@@ -742,6 +752,14 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     private void EmitShowText(PreparedTextRun[] runs, float fontSize, float? wordSpacing=null)
     {
+        // Pieces painted in visual order share one ActualText, the logical line, so text extraction reads it in order.
+        string? lineText = runs.Length > 0 ? runs[0].LineText : null;
+        if (lineText is not null)
+        {
+            _stream.Append("/Span << /ActualText ");
+            PdfSyntax.AppendMetadataString(_stream, lineText);
+            _stream.Append(" >> BDC\n");
+        }
         foreach(var prepared in runs)
         {
             var run = prepared.Run;
@@ -782,9 +800,12 @@ internal class PdfCanvas : ICanvas
             bool colourFont = font.HasColour && EmojiRenderingResolver?.Invoke() == EmojiRendering.Colour;
             if (font.HasColour && !font.HasOutlines && !colourFont) throw new NotSupportedException("The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.");
             if (colourFont) _stream.AppendLf("3 Tr");
-            _stream.Append("/Span << /ActualText ");
-            PdfSyntax.AppendMetadataString(_stream, prepared.Text);
-            _stream.Append(" >> BDC\n");
+            if (lineText is null)
+            {
+                _stream.Append("/Span << /ActualText ");
+                PdfSyntax.AppendMetadataString(_stream, prepared.Text);
+                _stream.Append(" >> BDC\n");
+            }
             bool horizontal = true;
             for (int i = 0; i < glyphs.Count; i++)
                 if (glyphs.OffsetY(i) != 0) { horizontal = false; break; }
@@ -807,7 +828,7 @@ internal class PdfCanvas : ICanvas
                     if (after != 0) AppendTextAdjustment(after);
                 }
                 _stream.Append(adjusted ? ">] TJ\n" : "> Tj\n");
-                _stream.AppendLf("EMC");
+                if (lineText is null) _stream.AppendLf("EMC");
                 if (colourFont) _stream.AppendLf("0 Tr");
                 continue;
             }
@@ -827,9 +848,10 @@ internal class PdfCanvas : ICanvas
                 _stream.Append(adjusted ? "] TJ\n" : " Tj\n");
                 if (rise != 0) _stream.AppendLf("0 Ts");
             }
-            _stream.AppendLf("EMC");
+            if (lineText is null) _stream.AppendLf("EMC");
             if (colourFont) _stream.AppendLf("0 Tr");
         }
+        if (lineText is not null) _stream.AppendLf("EMC");
     }
 
     private void PaintColourRuns(PreparedTextRun[] runs, float size, float x, float baseline, Color colour, float? wordSpacing = null)
