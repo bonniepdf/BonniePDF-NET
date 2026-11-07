@@ -14,6 +14,8 @@ at the same version are the same library.
 
 ### Document Engine & API
 
+- **Links inside a sentence, and underlined links:** `RichText` gains `link(text, uri, style?)` (`Link` in .NET), backed by a new `TextSpan.link`. The span wraps with the paragraph like any other text; each line it lands on becomes a clickable region described by the whole span text and, in tagged documents, a Link inside the paragraph. The span's style is the link's look. `Hyperlink` gains `underline` (default `false`), drawn at the position and weight of an underline decoration. Both round-trip through document definitions.
+
 - **Donut totals in the centre:** `PieChart` gains `totalPosition` (`TotalPosition` in .NET), `legend` by default. With `center`, a donut draws its total as a large figure with `totalLabel` beneath it in the hole, which widens to fit, instead of as a legend row. A full pie keeps the total in the legend. The option round-trips through document definitions; charts that do not set it are unchanged.
 
 - **Wrapping text no longer fails when its font lacks a character:** a paragraph long enough to wrap, set in an embedded font that lacks a character fallback draws (a full stop or digit in a Hebrew-only face, for example), used to throw `Font has no glyph` from the line breaker. It now lays out and draws the character from the fallback font, as shorter text already did.

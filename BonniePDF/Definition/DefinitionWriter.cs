@@ -684,6 +684,7 @@ internal sealed partial class DefinitionWriter
                 JsonObject style = Shape(span.Style, D.Shapes["TextStyle"], new TextStyle(), []);
                 if (style.Count > 0) node["style"] = style;
             }
+            if (span.Link is not null) node["link"] = span.Link;
             spans.Add(node);
         }
         return spans;

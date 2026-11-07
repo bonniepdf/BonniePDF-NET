@@ -476,7 +476,11 @@ internal sealed class DefinitionReader
                     style = new TextStyle();
                     Populate(style, styleJson, D.Shapes["TextStyle"], []);
                 }
-                rich.Span(span.GetProperty("text").GetString()!, style!);
+                string text = span.GetProperty("text").GetString()!;
+                if (span.TryGetProperty("link", out JsonElement link) && link.ValueKind == JsonValueKind.String)
+                    rich.Link(text, link.GetString()!, style);
+                else
+                    rich.Span(text, style!);
             }
         }
         return rich;

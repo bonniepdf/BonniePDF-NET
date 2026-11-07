@@ -1,0 +1,87 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/inline-links",
+    "description": "A RichText span with `link` (03 §RichText, 11 §1) and a Hyperlink with `underline`. Both round-trip; the span keeps its style, which is the link's look."
+  },
+  "_expect": {
+    "pages": 1,
+    "roundTrip": true,
+    "pdfSha256": null,
+    "canonical": {
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "RichText",
+              "spans": [
+                {
+                  "text": "Please read our "
+                },
+                {
+                  "text": "terms of service",
+                  "style": {
+                    "color": "#1447e6",
+                    "decoration": "underline"
+                  },
+                  "link": "https://example.com/terms"
+                },
+                {
+                  "text": " before you order."
+                }
+              ],
+              "defaultStyle": {
+                "fontSize": 12
+              }
+            },
+            {
+              "type": "Hyperlink",
+              "text": "Contact support",
+              "uri": "mailto:support@example.com",
+              "color": "#1447e6",
+              "underline": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "RichText",
+          "defaultStyle": {
+            "fontSize": 12
+          },
+          "spans": [
+            {
+              "text": "Please read our "
+            },
+            {
+              "text": "terms of service",
+              "link": "https://example.com/terms",
+              "style": {
+                "color": "blue-700",
+                "decoration": "underline"
+              }
+            },
+            {
+              "text": " before you order."
+            }
+          ]
+        },
+        {
+          "type": "Hyperlink",
+          "text": "Contact support",
+          "uri": "mailto:support@example.com",
+          "underline": true,
+          "color": "blue-700"
+        }
+      ]
+    }
+  ]
+}
