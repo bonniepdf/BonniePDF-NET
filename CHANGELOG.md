@@ -14,6 +14,8 @@ at the same version are the same library.
 
 ### Document Engine & API
 
+- **Wrapping text no longer fails when its font lacks a character:** a paragraph long enough to wrap, set in an embedded font that lacks a character fallback draws (a full stop or digit in a Hebrew-only face, for example), used to throw `Font has no glyph` from the line breaker. It now lays out and draws the character from the fallback font, as shorter text already did.
+
 - **List markers appear once per item:** a list item that wraps onto more lines now shows its bullet or number beside the first line only. Untagged documents used to repeat the marker on every wrapped line, so one long item read as several; tagged (PDF/UA) documents already drew it once. Items that fit on one line are unchanged.
 
 - **Accented and typographic characters show in standard fonts:** the font dictionary of a non-embedded Helvetica, Times or Courier face now declares `/Encoding /WinAnsiEncoding`. The text was already written as WinAnsi bytes, but without the entry viewers decoded it with the font's built-in StandardEncoding, so ’ “ ” – — … € ™ disappeared and é showed as Ø. Documents that claim PDF/A or PDF/UA, whose standard faces are embedded, were not affected. Symbol and ZapfDingbats are unchanged.
