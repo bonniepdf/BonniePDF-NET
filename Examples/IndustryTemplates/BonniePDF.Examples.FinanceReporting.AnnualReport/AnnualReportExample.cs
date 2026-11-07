@@ -45,6 +45,25 @@ public static class AnnualReportExample
 
     private const string Company = "Sample Company";
     private const int Year = 2025;
+
+    /// <summary>The year's headline figures against the year before: line, this year, last year, change.</summary>
+    private static readonly (string Line, string Current, string Previous, string Change)[] Financials =
+    [
+        ("Revenue", "2,412", "2,044", "+18%"),
+        ("Gross profit", "1,566", "1,287", "+22%"),
+        ("Operating income", "516", "412", "+25%"),
+        ("Net income", "401", "322", "+25%"),
+        ("Earnings per share", "£1.86", "£1.49", "+25%"),
+    ];
+
+    /// <summary>Revenue by business segment: name, £ millions, share of the total.</summary>
+    private static readonly (string Segment, string Revenue, string Share)[] Segments =
+    [
+        ("Platform", "1,250", "52%"),
+        ("Services", "669", "28%"),
+        ("Hardware", "288", "12%"),
+        ("Licensing", "205", "8%"),
+    ];
     private const string ReportTitle = "Annual Report 2025";
 
     // Captured once, when the document is generated - surfaced in the footer.
@@ -130,12 +149,9 @@ public static class AnnualReportExample
         doc.Add(performanceHeading);
         doc.Add(KpiRow());
 
-        // ══════════════════════════════════════════════════════════════════
-        //  Page 3 - operational review (flows naturally, repeating the bands)
-        // ══════════════════════════════════════════════════════════════════
-        doc.AddPage();
+        // ── Operational review: flows on from the highlights, repeating the bands on any further page ──
         Heading operationalHeading = SectionHeading("Operational Review");
-        operationalHeading.Margin = new Thickness(0, 10, 0, 12);
+        operationalHeading.Margin = new Thickness(0, 20, 0, 12);
         doc.Add(operationalHeading);
         doc.Add(Body(
             "Revenue grew 18% year over year, led by double-digit gains across every " +
@@ -153,6 +169,20 @@ public static class AnnualReportExample
             "platform, and continue returning value to shareholders. The fundamentals are " +
             "strong, the strategy is clear, and the team has never been more capable. We " +
             "are grateful for your continued partnership."));
+
+        // ══════════════════════════════════════════════════════════════════
+        //  Page 3 - the numbers: the year against the last, and revenue by segment
+        // ══════════════════════════════════════════════════════════════════
+        doc.AddPage();
+        Heading financialHeading = SectionHeading("Financial Summary");
+        financialHeading.Margin = new Thickness(0, 10, 0, 12);
+        doc.Add(financialHeading);
+        doc.Add(Body($"Audited results for the year ended 31 December {Year}, in £ millions, against the year before."));
+        doc.Add(FinancialSummary());
+        Heading segmentHeading = SectionHeading("Revenue by Segment");
+        segmentHeading.Margin = new Thickness(0, 24, 0, 12);
+        doc.Add(segmentHeading);
+        doc.Add(SegmentTable());
 
         return doc;
     }
@@ -357,5 +387,62 @@ public static class AnnualReportExample
             Padding = new Thickness(18, 16, 18, 16),
             Child = stack,
         };
+    }
+
+    // ── Financial summary tables ────────────────────────────────────────────
+
+    /// <summary>A table cell in the report's body type.</summary>
+    private static TextBlock Cell(string text, Color color, bool bold = false, TextAlignment alignment = TextAlignment.Left) => new(text)
+    {
+        FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+        FontSize = 10,
+        Color = color,
+        Alignment = alignment,
+    };
+
+    /// <summary>A table in the report's style: a brand-blue header row and hairline borders.</summary>
+    private static Table ReportTable(params float[] columns) => new(columns)
+    {
+        CellPadding = 7,
+        Border = new Border(0.5f),
+        BorderColors = new BorderColors(ColorPalette.Slate[200]),
+        HeaderBackgroundColor = Primary,
+        HeaderTextColor = Color.White,
+    };
+
+    /// <summary>This year against last, with the change in the brand's positive green.</summary>
+    private static Table FinancialSummary()
+    {
+        Table table = ReportTable(2.2f, 1, 1, 0.9f);
+        string current = (Year % 100).ToString("00", System.Globalization.CultureInfo.InvariantCulture);
+        string previous = ((Year - 1) % 100).ToString("00", System.Globalization.CultureInfo.InvariantCulture);
+        table.AddHeader(
+            Cell("£ millions", Color.White, true),
+            Cell($"FY{current}", Color.White, true, TextAlignment.Right),
+            Cell($"FY{previous}", Color.White, true, TextAlignment.Right),
+            Cell("Change", Color.White, true, TextAlignment.Right));
+        foreach (var (line, now, before, change) in Financials)
+            table.AddRow(
+                Cell(line, Ink),
+                Cell(now, Ink, true, TextAlignment.Right),
+                Cell(before, ColorPalette.Slate[500], false, TextAlignment.Right),
+                Cell(change, ColorPalette.Emerald[700], true, TextAlignment.Right));
+        return table;
+    }
+
+    /// <summary>Each segment's revenue and its share of the total, which add up to the headline revenue.</summary>
+    private static Table SegmentTable()
+    {
+        Table table = ReportTable(2.2f, 1, 1);
+        table.AddHeader(
+            Cell("Segment", Color.White, true),
+            Cell("£ millions", Color.White, true, TextAlignment.Right),
+            Cell("Share", Color.White, true, TextAlignment.Right));
+        foreach (var (segment, revenue, share) in Segments)
+            table.AddRow(
+                Cell(segment, Ink),
+                Cell(revenue, Ink, true, TextAlignment.Right),
+                Cell(share, ColorPalette.Slate[500], false, TextAlignment.Right));
+        return table;
     }
 }
