@@ -110,7 +110,7 @@ public static class HorizontalStacksExample
         doc.Add(new TextBlock
         {
             Text =
-                "When a stack has a fixed height and its children differ in height, stack.Alignment positions each child along the cross (vertical) axis. The same three boxes - 24pt, 42pt and 60pt tall - are shown top-aligned, centred, and bottom-aligned, side by side.",
+                "When a stack has a fixed height and its children differ in height, the stack’s alignment positions each child along the cross (vertical) axis. The same three boxes - 24pt, 42pt and 60pt tall - are shown top-aligned, centred, and bottom-aligned, side by side.",
             Margin = new Thickness(0, 0, 0, 8),
         });
 
