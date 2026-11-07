@@ -3,6 +3,9 @@ using BonniePDF;
 namespace BonniePDF.Examples.PracticalRecipes;
 
 /// <summary>Build from explicit bytes; the host writes a file or returns a PDF response.</summary>
+[System.ComponentModel.DisplayName("Download a PDF from a Browser")]
+[System.ComponentModel.Category("Getting Started")]
+[System.ComponentModel.Description("A product card on an A5 page, built from explicit font and photo bytes, with a runnable browser download companion.")]
 public static class BrowserDownloadExample
 {
     public static Document Generate()

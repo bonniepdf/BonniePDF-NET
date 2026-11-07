@@ -4,6 +4,9 @@ using BonniePDF;
 namespace BonniePDF.Examples.PracticalRecipes;
 
 /// <summary>Column spans, wrapping, aligned numbers, repeated headers, and empty data.</summary>
+[System.ComponentModel.DisplayName("Tables with Real-World Content")]
+[System.ComponentModel.Category("Tables & Lists")]
+[System.ComponentModel.Description("Column spans, wrapping descriptions, aligned numbers, repeated headers, and empty results.")]
 public static class PracticalTablesExample
 {
     public static Document Generate()

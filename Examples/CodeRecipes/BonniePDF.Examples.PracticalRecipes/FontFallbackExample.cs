@@ -3,6 +3,9 @@ using BonniePDF;
 namespace BonniePDF.Examples.PracticalRecipes;
 
 /// <summary>An international customer list in Helvetica, with Polish, Greek, Cyrillic, Hebrew, Arabic and maths falling back to fonts that cover them.</summary>
+[System.ComponentModel.DisplayName("Font Fallback & Missing Characters")]
+[System.ComponentModel.Category("Fonts")]
+[System.ComponentModel.Description("An international customer list in Helvetica: Polish, Greek, Cyrillic and Hebrew names fall back to Liberation Sans, Arabic and maths symbols to registered fonts, under strict missing-character checks.")]
 public static class FontFallbackExample
 {
     /// <summary>The fallback fonts this document registers, in the order they are tried.</summary>

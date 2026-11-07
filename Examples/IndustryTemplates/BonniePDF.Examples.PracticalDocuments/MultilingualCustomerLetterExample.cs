@@ -3,6 +3,9 @@ using BonniePDF;
 namespace BonniePDF.Examples.PracticalDocuments;
 
 /// <summary>One order-confirmation letter in French, Greek, Arabic and Hebrew: the same letterhead and layout, mirrored for right-to-left Arabic and Hebrew. Each letter is set in a font for its script; digits the Hebrew face lacks come from the document's Latin font.</summary>
+[System.ComponentModel.DisplayName("Multilingual Customer Letter")]
+[System.ComponentModel.Category("Sales & Supply Chain")]
+[System.ComponentModel.Description("One order confirmation in French, Greek, Arabic and Hebrew under the same letterhead, with the Arabic and Hebrew letters and their order tables mirrored right to left.")]
 public static class MultilingualCustomerLetterExample
 {
     private sealed record Letter(string Font, bool Rtl, string Title, string Address, string Date, string Body,

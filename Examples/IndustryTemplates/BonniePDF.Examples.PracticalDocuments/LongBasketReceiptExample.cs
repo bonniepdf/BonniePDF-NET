@@ -4,6 +4,9 @@ using BonniePDF;
 namespace BonniePDF.Examples.PracticalDocuments;
 
 /// <summary>An 80 mm receipt with long names, discounts, returns, and explicit font coverage.</summary>
+[System.ComponentModel.DisplayName("Point-of-Sale Receipt: Long Basket")]
+[System.ComponentModel.Category("Retail & Events")]
+[System.ComponentModel.Description("An 80 mm receipt with a long basket, accented names, per-line discounts, a return, and scannable receipt codes.")]
 public static class LongBasketReceiptExample
 {
     public sealed record ReceiptLine(string Name, int Quantity, long UnitPence, long DiscountPence);
