@@ -20,6 +20,25 @@ public sealed class CompliancePreflightTests
     }
 
     [Fact]
+    public void ChecksCanvasTextOverSolidAndMixedBackdrops()
+    {
+        using var doc = new BonniePDF.Document();
+        doc.Add(new CanvasElement((canvas, _, _) =>
+        {
+            Color green = Color.FromHex("#bbf7d0");
+            canvas.FillRect(0, 0, 140, 28, green);
+            canvas.DrawText(8, 4, "Low contrast", Color.White, 10, StandardFonts.Helvetica, TextAlignment.Left);
+            canvas.FillRect(0, 30, 16, 28, green);
+            canvas.DrawText(8, 34, "Mixed backdrop", Color.White, 10, StandardFonts.Helvetica, TextAlignment.Left);
+        }) { DrawWidth = 140, DrawHeight = 60, AltText = "Two sample labels" });
+        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        var findings = CompliancePreflight.Evaluate(snapshot).Findings
+            .Where(f => f.Code.StartsWith("contrast-", System.StringComparison.Ordinal))
+            .Select(f => f.Code);
+        Assert.Equal(new[] { "contrast-insufficient", "contrast-unknown" }, findings);
+    }
+
+    [Fact]
     public void AccessibilityOf_DerivesHeadingLevelAndTagged()
     {
         var h = new Heading("Title") { Level = 2 };

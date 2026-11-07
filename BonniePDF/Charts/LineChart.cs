@@ -1,4 +1,5 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
+using System;
 using System.Collections.Generic;
 using BonniePDF.Drawing;
 
@@ -27,6 +28,31 @@ public class LineChart : CartesianChartBase
     /// Default line width for all series (can be overridden per series via Style).
     /// </summary>
     public float DefaultLineWidth { get; set; } = 2f;
+
+    /// <summary>Uses the chart box for a compact plot without axes, labels or legend.</summary>
+    public bool Sparkline { get; set; }
+
+    private protected override bool DrawCompact(ICanvas canvas, ChartData data)
+    {
+        if (!Sparkline) return false;
+        bool horizontal = Orientation == ChartOrientation.Horizontal;
+        foreach (ChartSeries series in data.Series)
+        {
+            float lineWidth = series.Style?.LineWidth > 0 ? series.Style.LineWidth : DefaultLineWidth;
+            float inset = MathF.Min(lineWidth / 2, MathF.Min(Width / 2, Height / 2));
+            List<Point> points = new(series.DataPoints.Count);
+            for (int i = 0; i < series.DataPoints.Count; i++)
+            {
+                float category = series.DataPoints.Count > 1 ? (float)i / (series.DataPoints.Count - 1) : 0.5f;
+                float fraction = Math.Clamp((float)ChartValueScale.Fraction(series.DataPoints[i].Value, data.YAxis.MinValue, data.YAxis.MaxValue), 0, 1);
+                points.Add(new Point(
+                    inset + (horizontal ? fraction : category) * (Width - 2 * inset),
+                    inset + (horizontal ? category : 1 - fraction) * (Height - 2 * inset)));
+            }
+            DrawConnectingLine(canvas, points, ResolveSeriesColor(series), lineWidth);
+        }
+        return true;
+    }
 
     /// <summary>
     /// Whether to show data point markers by default (can be overridden per series via Style).

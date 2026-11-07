@@ -122,6 +122,9 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
     /// </summary>
     public Color? RowBackgroundColor { get; set; }
 
+    /// <summary>Fill for every second data row. Explicit row and cell fills take precedence.</summary>
+    public Color? AlternateRowBackgroundColor { get; set; }
+
     /// <summary>
     /// Default text color for data rows
     /// </summary>
@@ -439,7 +442,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
                 _carryPending = false;
             }
             if (!tbodyOpen && groupTagging != null) { groupTagging.Tree.Begin(SemanticRole.TBody); tbodyOpen = true; }
-            RenderRowDirect(ctx, row, widths);
+            RenderRowDirect(ctx, row, widths, dataIndex: i);
             if (running) _runningValues.Add(row.RunningValue ?? 0m);
             _lastRowRendered = i;
         }
@@ -624,14 +627,14 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
     /// declare it. Renders unchanged (and adds nothing to the content
     /// stream) when tagging is off.
     /// </summary>
-    private void RenderRowDirect(RenderContext ctx, TableRow row, float[] widths, bool asArtifact = false)
+    private void RenderRowDirect(RenderContext ctx, TableRow row, float[] widths, bool asArtifact = false, int dataIndex = 0)
     {
         // A carried- or brought-forward row repeats what the rows already say: draw it as an artifact.
         bool artifact = asArtifact && ctx.Tagging != null && !ctx.Canvas.IsInsideArtifact();
         if (artifact) ctx.Canvas.BeginArtifact();
         try
         {
-            RenderRowContent(ctx, row, widths, artifact);
+            RenderRowContent(ctx, row, widths, artifact, dataIndex);
         }
         finally
         {
@@ -671,7 +674,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         return row;
     }
 
-    private void RenderRowContent(RenderContext ctx, TableRow row, float[] widths, bool suppressTagging)
+    private void RenderRowContent(RenderContext ctx, TableRow row, float[] widths, bool suppressTagging, int dataIndex)
     {
         float rowHeight = MeasureRowHeight(row, widths);
         PlanRowEdges(ctx, row);
@@ -713,7 +716,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
             // Paint order: the row's fills, then the edges held back from the row above, then the cells'
             // content, then the row's own edges. No fill is painted over an edge.
             for (int i = 0; i < row.Cells.Length; i++)
-                PaintCellFill(ctx, row.Cells[i], row, cellX[i], cellWidth[i], rowHeight);
+                PaintCellFill(ctx, row.Cells[i], row, cellX[i], cellWidth[i], rowHeight, dataIndex);
             FlushBottomEdges(ctx);
 
             for (int i = 0; i < row.Cells.Length; i++)
@@ -751,7 +754,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
 
                 try
                 {
-                    RenderCell(ctx, cell, row, currentX, colWidth, rowHeight);
+                    RenderCell(ctx, cell, row, currentX, colWidth, rowHeight, dataIndex);
                 }
                 finally
                 {
@@ -783,6 +786,18 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
             }
             capture.CloseRow();
         }
+    }
+
+    internal override float MinimumStartHeight(float width)
+    {
+        if (!BreakAllowed || _rows.Count == 0) return MeasureHeight(width);
+        float[] widths = CalculateColumnWidths(GetContentWidth(width));
+        float height = Margin.Top;
+        foreach (TableRow header in _headers) height += MeasureRowHeight(header, widths);
+        height += MeasureRowHeight(_rows.ForLayout(0, reuse: true), widths);
+        if (RunningTotalColumn.HasValue && _rows.Count > 1)
+            height += MeasureRowHeight(RunningRow(CarriedForwardLabel), widths);
+        return height;
     }
 
     protected override float MeasureContentHeight(float contentWidth)
@@ -866,7 +881,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
                         }
                     }
 
-                    RenderRow(ctx, row, widths);
+                    RenderRow(ctx, row, widths, i);
                 }
             }
             finally
@@ -890,7 +905,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         }
     }
 
-    private void RenderRow(RenderContext ctx, TableRow row, float[] widths)
+    private void RenderRow(RenderContext ctx, TableRow row, float[] widths, int dataIndex = 0)
     {
         float rowHeight = MeasureRowHeight(row, widths);
 
@@ -901,16 +916,16 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
             ctx.NewPage();
         }
 
-        RenderRowDirect(ctx, row, widths);
+        RenderRowDirect(ctx, row, widths, dataIndex: dataIndex);
     }
 
-    private void RenderCell(RenderContext ctx, TableCell cell, TableRow row, float x, float width, float rowHeight)
+    private void RenderCell(RenderContext ctx, TableCell cell, TableRow row, float x, float width, float rowHeight, int dataIndex)
     {
         // The fill cascade is the only place a cell's effective fill is known —
         // the cell element itself carries no BackgroundColor when the colour came
         // from the row or the table. Hand it to the recorder so the contrast rules
         // measure the cell's text against its real backdrop, not the page.
-        Color? bgColor = CellFill(cell, row);
+        Color? bgColor = CellFill(cell, row, dataIndex);
         if (bgColor.HasValue)
             ctx.LayoutRecorder?.AnnotatePaint(cell, LayoutRecorder.PaintForBackground(bgColor.Value));
 
@@ -949,8 +964,18 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         ctx.CurrentY += padding.Top;
 
         float contentWidth = width - padding.Left - padding.Right;
-        ctx.CellStretchTarget = StretchableContainer(content);
-        ctx.CellStretchHeight = rowHeight - padding.Top - padding.Bottom;
+        float innerHeight = rowHeight - padding.Top - padding.Bottom;
+        VerticalAlignment alignment = cell.VerticalAlignment;
+        if (alignment is VerticalAlignment.Center or VerticalAlignment.End)
+        {
+            float slack = MathF.Max(0, innerHeight - content.MeasureHeight(contentWidth));
+            ctx.CurrentY += alignment == VerticalAlignment.Center ? slack / 2 : slack;
+        }
+        else
+        {
+            ctx.CellStretchTarget = StretchableContainer(content);
+            ctx.CellStretchHeight = innerHeight;
+        }
         try
         {
             content.Render(ctx, contentWidth);
@@ -970,18 +995,19 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
     /// Paints a cell's fill. Every fill in a row is painted before any of the row's edges, and a row's
     /// bottom edges wait for the next row's fills, so no fill covers an edge (spec: Paint order).
     /// </summary>
-    private void PaintCellFill(RenderContext ctx, TableCell cell, TableRow row, float x, float width, float rowHeight)
+    private void PaintCellFill(RenderContext ctx, TableCell cell, TableRow row, float x, float width, float rowHeight, int dataIndex)
     {
-        Color? bgColor = CellFill(cell, row);
+        Color? bgColor = CellFill(cell, row, dataIndex);
         if (bgColor.HasValue) DrawBackground(ctx, x, ctx.CurrentY, width, rowHeight, bgColor.Value);
     }
 
     /// <summary>A cell's effective fill: cell, then row, then the table's header, footer or row default.</summary>
-    private Color? CellFill(TableCell cell, TableRow row) =>
+    private Color? CellFill(TableCell cell, TableRow row, int dataIndex) =>
         cell.BackgroundColor
         ?? row.BackgroundColor
         ?? (row.IsHeader ? HeaderBackgroundColor : null)
         ?? (row.IsFooter ? FooterBackgroundColor : null)
+        ?? (dataIndex % 2 == 1 ? AlternateRowBackgroundColor : null)
         ?? RowBackgroundColor;
 
     /// <summary>

@@ -199,7 +199,13 @@ public class RenderContext
     /// <summary>
     /// Gets or sets the uniform page margin in points applied to all four sides.
     /// </summary>
-    public float Margin { get; set; }
+    public float Margin
+    {
+        get => Margins.Left;
+        set => Margins = new Thickness(value);
+    }
+
+    internal Thickness Margins { get; set; }
 
     /// <summary>
     /// Per-page header/footer measurement, installed by the render pipeline via
@@ -296,15 +302,15 @@ public class RenderContext
     /// overwhelming majority of documents.
     /// </summary>
     public float ContentTop =>
-        AtomicLayoutBounds?.Top ?? (ChromeReservationSuspended ? Margin : MathF.Max(Margin, _chrome.Header));
+        AtomicLayoutBounds?.Top ?? (ChromeReservationSuspended ? Margins.Top : MathF.Max(Margins.Top, _chrome.Header));
 
     /// <summary>
     /// Gets the bottom of the body content band:
     /// <c>PageSize.Height - max(Margin, footerHeight)</c>.
     /// </summary>
     public float ContentBottom => AtomicLayoutBounds?.Bottom ?? (ChromeReservationSuspended
-        ? PageSize.Height - Margin
-        : PageSize.Height - MathF.Max(Margin, _chrome.Footer));
+        ? PageSize.Height - Margins.Bottom
+        : PageSize.Height - MathF.Max(Margins.Bottom, _chrome.Footer));
 
     /// <summary>
     /// Gets the maximum Y coordinate before the bottom of the content band is
@@ -334,8 +340,8 @@ public class RenderContext
     /// </summary>
     private void AssertUsableContentBand()
     {
-        float top = MathF.Max(Margin, _chrome.Header);
-        float bottom = PageSize.Height - MathF.Max(Margin, _chrome.Footer);
+        float top = MathF.Max(Margins.Top, _chrome.Header);
+        float bottom = PageSize.Height - MathF.Max(Margins.Bottom, _chrome.Footer);
         if (bottom > top) return;
 
         throw new InvalidOperationException(

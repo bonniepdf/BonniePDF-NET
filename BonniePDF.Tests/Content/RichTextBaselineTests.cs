@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Xunit;
+using PdfDocument = BonniePDF.Document;
 
 namespace BonniePDF.Tests.Content;
 
@@ -10,7 +11,7 @@ public sealed class RichTextBaselineTests
 {
     private static Dictionary<string, float> Baselines()
     {
-        using Document doc = new();
+        using PdfDocument doc = new();
         doc.Add(new RichText()
             .Span("Water", new TextStyle { FontSize = 14 })
             .Span("small", new TextStyle { FontSize = 8 })

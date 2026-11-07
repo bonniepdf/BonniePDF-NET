@@ -150,9 +150,14 @@ internal sealed class DefinitionReader
         // document is constructed with; the real defaults are put back before the other pages are added.
         PdfSize documentSize = settings.PageSize;
         PageOrientation documentOrientation = settings.Orientation;
+        bool preserveDimensions = settings.PreservePageDimensions;
         float documentMargin = settings.Margin;
         if (first.TryGetProperty("size", out JsonElement firstSize)) settings.PageSize = ToPageSize(firstSize);
-        if (first.TryGetProperty("orientation", out JsonElement firstOrientation)) settings.Orientation = EnumFromToken<PageOrientation>(firstOrientation.GetString()!);
+        if (first.TryGetProperty("orientation", out JsonElement firstOrientation))
+        {
+            settings.Orientation = EnumFromToken<PageOrientation>(firstOrientation.GetString()!);
+            settings.PreservePageDimensions = false;
+        }
         if (first.TryGetProperty("margin", out JsonElement firstMargin)) settings.Margin = ToPoints(firstMargin);
 
         var metadata = new DocumentMetadata();
@@ -161,6 +166,7 @@ internal sealed class DefinitionReader
         var doc = new Document(settings, metadata);
         settings.PageSize = documentSize;
         settings.Orientation = documentOrientation;
+        settings.PreservePageDimensions = preserveDimensions;
         settings.Margin = documentMargin;
 
         // The page the document made for itself is given a margin of its own only if the definition states one.
@@ -198,12 +204,16 @@ internal sealed class DefinitionReader
             else
             {
                 PdfSize size = entry.TryGetProperty("size", out JsonElement s) ? ToPageSize(s) : documentSize;
-                PageOrientation orientation = entry.TryGetProperty("orientation", out JsonElement o) ? EnumFromToken<PageOrientation>(o.GetString()!) : documentOrientation;
+                if (entry.TryGetProperty("orientation", out JsonElement o))
+                    size = size.GetOrientedSize(EnumFromToken<PageOrientation>(o.GetString()!));
+                else if (!preserveDimensions)
+                    size = size.GetOrientedSize(documentOrientation);
                 // A page states a margin of its own only if the definition does; otherwise it follows the document's.
                 page = entry.TryGetProperty("margin", out JsonElement m)
-                    ? doc.AddPage(size, orientation, ToPoints(m))
-                    : doc.AddPage(size, orientation);
+                    ? doc.AddPage(size, ToPoints(m))
+                    : doc.AddPage(size);
             }
+            if (entry.TryGetProperty("margins", out JsonElement margins)) page.Margins = ToThickness(margins);
             if (entry.TryGetProperty("pageColor", out JsonElement color)) page.PageColor = ToColor(color.GetString()!);
             if (entry.TryGetProperty("background", out JsonElement background)) page.PageBackground = Element(background);
             if (entry.TryGetProperty("foreground", out JsonElement foreground)) page.PageForeground = Element(foreground);
@@ -655,6 +665,14 @@ internal sealed class DefinitionReader
 
     private object ConvertList(Type type, string inner, JsonElement value)
     {
+        if (type.GetElementType() is { } elementType)
+        {
+            Array array = Array.CreateInstance(elementType, value.GetArrayLength());
+            int index = 0;
+            foreach (JsonElement item in value.EnumerateArray()) array.SetValue(ConvertTo(elementType, inner, item), index++);
+            return array;
+        }
+
         Type itemType = type.IsGenericType ? type.GetGenericArguments()[0] : typeof(object);
         var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(itemType))!;
         foreach (JsonElement item in value.EnumerateArray()) list.Add(ConvertTo(itemType, inner, item));

@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Xunit;
+using PdfDocument = BonniePDF.Document;
 
 namespace BonniePDF.Tests.Typography;
 
@@ -28,9 +29,9 @@ public sealed class RtlFallbackRunTests
             sample.GetProperty("visual").EnumerateArray().Select(piece => piece.EnumerateArray().Select(v => v.GetString()!).ToArray()).ToArray());
     }
 
-    private static Document Build(string text)
+    private static PdfDocument Build(string text)
     {
-        Document doc = new();
+        PdfDocument doc = new();
         string face = doc.Fonts.Add(File.ReadAllBytes(FixturePath(Runs.GetProperty("primary").GetString()!))).FontName;
         doc.Fonts.Add(File.ReadAllBytes(FixturePath(Runs.GetProperty("fallback").GetString()!)));
         doc.Add(new TextBlock(text)
@@ -47,7 +48,7 @@ public sealed class RtlFallbackRunTests
     public void Line_IsPaintedInVisualOrder(int index)
     {
         var (text, visual) = Case(index);
-        using Document doc = Build(text);
+        using PdfDocument doc = Build(text);
         var pieces = new List<string[]>();
         foreach (Match m in Regex.Matches(doc.GenerateSvgPages()[0], "<text x=\"([^\"]+)\"[^>]*font-family:'([^']+)'[^>]*>([^<]*)</text>"))
         {
@@ -67,12 +68,12 @@ public sealed class RtlFallbackRunTests
         InternalConfiguration.EnableCompression = false;
         try
         {
-            using Document doc = Build(text);
+            using PdfDocument doc = Build(text);
             string pdf = Encoding.Latin1.GetString(doc.GenerateBytes());
             string[] actual = Regex.Matches(pdf, "/ActualText <FEFF([0-9A-F]+)>")
                 .Select(m => Encoding.BigEndianUnicode.GetString(Convert.FromHexString(m.Groups[1].Value)))
                 .ToArray();
-            Assert.Equal([text], actual);
+            Assert.Equal(new[] { text }, actual);
         }
         finally { InternalConfiguration.EnableCompression = true; }
     }

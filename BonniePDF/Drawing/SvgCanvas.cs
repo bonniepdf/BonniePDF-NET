@@ -42,6 +42,7 @@ internal class SvgIdAllocator
 /// </summary>
 internal partial class SvgCanvas : ICanvas
 {
+    internal CanvasContrast? Contrast { get; set; }
     internal System.Func<EmojiRendering>? EmojiRenderingResolver { get; set; }
 
     private IReadOnlyDictionary<string,int>? _fontFeatures;
@@ -518,6 +519,7 @@ internal partial class SvgCanvas : ICanvas
     /// </summary>
     public void FillRect(float x, float y, float width, float height, Color color)
     {
+        Contrast?.Rect(x, y, width, height, color);
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         _sb.AppendLf($"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" {GetFillAttributes(color)}/>");
@@ -529,6 +531,7 @@ internal partial class SvgCanvas : ICanvas
     /// </summary>
     public void StrokeRect(float x, float y, float width, float height, Color color, float strokeWidth)
     {
+        Contrast?.UnknownPaint();
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         _sb.AppendLf(
@@ -540,6 +543,7 @@ internal partial class SvgCanvas : ICanvas
     /// </summary>
     public void FillRoundedRect(float x, float y, float width, float height, float radius, Color color)
     {
+        Contrast?.UnknownPaint();
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         _sb.AppendLf($"<rect x=\"{N(sx)}\" y=\"{N(sy)}\" width=\"{N(width)}\" height=\"{N(height)}\" rx=\"{N(radius)}\" ry=\"{N(radius)}\" {GetFillAttributes(color)}/>");
@@ -551,6 +555,7 @@ internal partial class SvgCanvas : ICanvas
     public void StrokeRoundedRect(float x, float y, float width, float height, float radius, Color color,
         float strokeWidth)
     {
+        Contrast?.UnknownPaint();
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         _sb.AppendLf(
@@ -563,6 +568,7 @@ internal partial class SvgCanvas : ICanvas
     /// </summary>
     public void DrawLine(float x1, float y1, float x2, float y2, Color color, float lineWidth)
     {
+        Contrast?.UnknownPaint();
         float sx1 = x1 + _xOffset;
         float sy1 = y1 + _yOffset;
         float sx2 = x2 + _xOffset;
@@ -577,6 +583,7 @@ internal partial class SvgCanvas : ICanvas
     /// </summary>
     public void FillCircle(float cx, float cy, float radius, Color color)
     {
+        Contrast?.UnknownPaint();
         float scx = cx + _xOffset;
         float scy = cy + _yOffset;
         _sb.AppendLf($"<circle cx=\"{N(scx)}\" cy=\"{N(scy)}\" r=\"{N(radius)}\" {GetFillAttributes(color)}/>");
@@ -588,6 +595,7 @@ internal partial class SvgCanvas : ICanvas
     /// </summary>
     public void FillEllipse(float cx, float cy, float rx, float ry, Color color)
     {
+        Contrast?.UnknownPaint();
         float scx = cx + _xOffset;
         float scy = cy + _yOffset;
         _sb.AppendLf($"<ellipse cx=\"{N(scx)}\" cy=\"{N(scy)}\" rx=\"{N(rx)}\" ry=\"{N(ry)}\" {GetFillAttributes(color)}/>");
@@ -599,6 +607,7 @@ internal partial class SvgCanvas : ICanvas
     /// </summary>
     public void FillPath(IList<Point>? points, Color color)
     {
+        Contrast?.UnknownPaint();
         if (points == null || points.Count < 3) return;
 
         StringBuilder pathData = new();
@@ -630,6 +639,7 @@ internal partial class SvgCanvas : ICanvas
     public void DrawText(float x, float y, string text, Color color, float fontSize, string fontFamily,
         TextAlignment align)
     {
+        if (Contrast is { } capture && !string.IsNullOrWhiteSpace(text)) capture.Text(x, y, MeasureText(text, fontSize, fontFamily).Width, fontSize, color, fontFamily, align);
         if (string.IsNullOrEmpty(text)) return;
 
         float sx = x + _xOffset;
@@ -736,6 +746,7 @@ internal partial class SvgCanvas : ICanvas
     /// </summary>
     public void DrawTextRotated(float x, float y, string text, Color color, float fontSize, string fontFamily, float angleDegrees)
     {
+        if (Contrast is { } capture && !string.IsNullOrWhiteSpace(text)) capture.Text(x, y, MeasureText(text, fontSize, fontFamily).Width, fontSize, color, fontFamily, TextAlignment.Left, complex: true);
         if (string.IsNullOrEmpty(text)) return;
 
         float sx = x + _xOffset;
@@ -786,6 +797,7 @@ internal partial class SvgCanvas : ICanvas
             return;
         }
 
+        if (Contrast is { } capture && !string.IsNullOrWhiteSpace(text)) capture.Text(x, y, MeasureText(text, fontSize, fontFamily).Width, fontSize, color, fontFamily, TextAlignment.Left, complex: true);
         // Measured over the same runs that get painted, so the extra space is
         // distributed against the width the glyphs actually occupy.
         float textWidth = MeasureText(text, fontSize, fontFamily).Width;
@@ -836,6 +848,7 @@ internal partial class SvgCanvas : ICanvas
     /// </summary>
     public void DrawImage(ImageInfo image, float x, float y, float width, float height)
     {
+        Contrast?.UnknownPaint();
         if (Options.EmbedImages == SvgImageEmbedding.Omit) return;
         if (image == null) return;
 
@@ -892,6 +905,7 @@ internal partial class SvgCanvas : ICanvas
     /// </summary>
     public void DrawFormXObject(string resourceName, float x, float y)
     {
+        Contrast?.UnknownPaint();
         // SVG does not support deferred Form XObjects like PDF.
         // We could render a placeholder here if needed, but for now we ignore it.
     }
@@ -927,6 +941,7 @@ internal partial class SvgCanvas : ICanvas
     /// <inheritdoc />
     public void BeginRoundedClip(float x, float y, float width, float height, float radius)
     {
+        Contrast?.UnknownState();
         float sx = x + _xOffset;
         float sy = y + _yOffset;
         string id = IdAllocator.NextClipId();
@@ -1009,6 +1024,7 @@ internal partial class SvgCanvas : ICanvas
     /// <inheritdoc />
     public void FillCurrentPath(Paint paint, FillRule fillRule = FillRule.NonZero)
     {
+        Contrast?.UnknownPaint();
         if (_currentPathData.Count == 0) return;
         string d = string.Join(" ", _currentPathData);
         string rule = fillRule == FillRule.EvenOdd ? " fill-rule=\"evenodd\"" : "";
@@ -1034,6 +1050,7 @@ internal partial class SvgCanvas : ICanvas
     /// <inheritdoc />
     public void StrokeCurrentPath(StrokeStyle style)
     {
+        Contrast?.UnknownPaint();
         if (_currentPathData.Count == 0) return;
         string d = string.Join(" ", _currentPathData);
         string strokeAttrs = GetStrokeStyleAttributes(style);
@@ -1061,6 +1078,7 @@ internal partial class SvgCanvas : ICanvas
     /// <inheritdoc />
     public void Translate(float dx, float dy)
     {
+        Contrast?.UnknownState();
         _sb.AppendLf($"<g transform=\"translate({N(dx)}, {N(dy)})\">");
         _extraGroupDepth++;
     }
@@ -1068,6 +1086,7 @@ internal partial class SvgCanvas : ICanvas
     /// <inheritdoc />
     public void Scale(float sx, float sy)
     {
+        Contrast?.UnknownState();
         _sb.AppendLf($"<g transform=\"scale({N(sx)}, {N(sy)})\">");
         _extraGroupDepth++;
     }
@@ -1075,6 +1094,7 @@ internal partial class SvgCanvas : ICanvas
     /// <inheritdoc />
     public void Rotate(float angleDegrees)
     {
+        Contrast?.UnknownState();
         _sb.AppendLf($"<g transform=\"rotate({N(angleDegrees)})\">");
         _extraGroupDepth++;
     }
@@ -1082,6 +1102,7 @@ internal partial class SvgCanvas : ICanvas
     /// <inheritdoc />
     public void Transform(float a, float b, float c, float d, float tx, float ty)
     {
+        Contrast?.UnknownState();
         _sb.AppendLf($"<g transform=\"matrix({N(a)}, {N(b)}, {N(c)}, {N(d)}, {N(tx)}, {N(ty)})\">");
         _extraGroupDepth++;
     }
@@ -1091,6 +1112,7 @@ internal partial class SvgCanvas : ICanvas
     /// <inheritdoc />
     public void ClipToCurrentPath(FillRule fillRule = FillRule.NonZero)
     {
+        Contrast?.UnknownState();
         if (_currentPathData.Count == 0) return;
         string d = string.Join(" ", _currentPathData);
         string id = IdAllocator.NextClipId();
@@ -1109,6 +1131,7 @@ internal partial class SvgCanvas : ICanvas
     /// <inheritdoc />
     public void SetTextSpacing(float letterSpacing, float wordSpacing)
     {
+        Contrast?.UnknownState();
         _letterSpacing = letterSpacing;
         _wordSpacing = wordSpacing;
     }
@@ -1124,6 +1147,7 @@ internal partial class SvgCanvas : ICanvas
 
     public void SetGlobalAlpha(float alpha)
     {
+        Contrast?.UnknownState();
         alpha = Math.Clamp(alpha, 0f, 1f);
         if (alpha < 1f)
         {

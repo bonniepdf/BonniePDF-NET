@@ -296,6 +296,17 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
         return MeasureTextWidth(Text) + FirstLineIndent;
     }
 
+    internal override float MinimumStartHeight(float width)
+    {
+        if (!BreakAllowed) return MeasureHeight(width);
+        var lines = GetOrComputeLines(GetContentWidth(width));
+        int minimum = Math.Max(1, MinLinesBeforeBreak);
+        if (lines.Count < minimum + Math.Max(1, MinLinesAfterBreak)) return MeasureHeight(width);
+        float height = Margin.Top;
+        for (int i = 0; i < minimum; i++) height += SpaceBeforeOf(i) + ComputedLineHeight;
+        return height;
+    }
+
     protected override float MeasureContentHeight(float contentWidth)
     {
         Lines lines = GetOrComputeLines(contentWidth);

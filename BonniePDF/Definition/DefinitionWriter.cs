@@ -861,10 +861,19 @@ internal sealed partial class DefinitionWriter
             string at = $"/pages/{i}";
             var node = new JsonObject();
             JsonNode size = PageSizeWire(page.Size);
-            if (!Same(size, PageSizeWire(baseline.PageSize))) node["size"] = size;
-            bool landscape = page.Width > page.Height;
-            if (landscape != (baseline.Orientation == PageOrientation.Landscape)) node["orientation"] = landscape ? "landscape" : "portrait";
+            if (baseline.PreservePageDimensions)
+            {
+                if (page.Width != baseline.PageSize.Width || page.Height != baseline.PageSize.Height)
+                    node["size"] = new JsonObject { ["width"] = page.Width, ["height"] = page.Height };
+            }
+            else
+            {
+                if (!Same(size, PageSizeWire(baseline.PageSize))) node["size"] = size;
+                bool landscape = page.Width > page.Height;
+                if (landscape != (baseline.Orientation == PageOrientation.Landscape)) node["orientation"] = landscape ? "landscape" : "portrait";
+            }
             if (page.HasExplicitMargin) node["margin"] = page.Margin;
+            if (page.Margins is Thickness margins) node["margins"] = Wire("spacing", margins);
             if (page.PageColor is { } pageColor) node["pageColor"] = Colour(pageColor);
             if (page.PageBackground is not null && WriteElement(page.PageBackground, $"{at}/background") is { } background) node["background"] = background;
             if (page.PageForeground is not null && WriteElement(page.PageForeground, $"{at}/foreground") is { } foreground) node["foreground"] = foreground;
@@ -945,6 +954,13 @@ internal sealed partial class DefinitionWriter
             string at = $"/settings/{key}";
             switch (key)
             {
+                case "pageSize":
+                    if (settings.PreservePageDimensions && settings.PageSize.Width > settings.PageSize.Height)
+                    {
+                        result[key] = new JsonObject { ["width"] = settings.PageSize.Width, ["height"] = settings.PageSize.Height };
+                        continue;
+                    }
+                    break;
                 case "pageChrome":
                     if (PageChrome() is { } chrome) result[key] = chrome;
                     continue;

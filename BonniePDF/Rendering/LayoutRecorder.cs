@@ -114,6 +114,8 @@ public sealed class NodePaint
     public string? Text { get; set; }
     /// <summary>Text alpha in [0,1); null when fully opaque.</summary>
     public float? TextAlpha { get; set; }
+    /// <summary>An opaque backdrop resolved from earlier drawing operations in the same canvas.</summary>
+    public string? TextBackdrop { get; set; }
     /// <summary>The element's own resolved background fill, "#rrggbb"; null when it has none.</summary>
     public string? Background { get; set; }
     /// <summary>Background alpha in [0,1); null when fully opaque.</summary>
@@ -274,6 +276,7 @@ internal sealed class LayoutRecorder
         NodePaint target = frame.Node.Paint ??= new NodePaint();
         if (paint.Text is not null) target.Text = paint.Text;
         if (paint.TextAlpha is not null) target.TextAlpha = paint.TextAlpha;
+        if (paint.TextBackdrop is not null) target.TextBackdrop = paint.TextBackdrop;
         if (paint.Background is not null) target.Background = paint.Background;
         if (paint.BackgroundAlpha is not null) target.BackgroundAlpha = paint.BackgroundAlpha;
         if (paint.FontSize is not null) target.FontSize = paint.FontSize;

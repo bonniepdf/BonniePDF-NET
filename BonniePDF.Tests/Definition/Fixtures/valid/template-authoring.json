@@ -1,0 +1,189 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/template-authoring",
+    "description": "Page geometry, fitting, table style, reference lines, sparklines, dash patterns and GS1 symbols survive round trips."
+  },
+  "_expect": {
+    "pages": 1,
+    "roundTrip": true,
+    "gs1": {
+      "payload": "01150600000000061024-1187\u001d17291013",
+      "code128": "91bd57f76f1b095cee4e9d6b682484feeed29e91fd36a264e40cb5135d744536",
+      "dataMatrix": "71d2db2b22031c9f782789daa8bc7cd7a51d18c02f6f8e5323e5f823624c92c0"
+    }
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "pageSize": {
+      "width": 420,
+      "height": 310
+    },
+    "preservePageDimensions": true,
+    "margins": {
+      "left": 35,
+      "top": 15,
+      "right": 25,
+      "bottom": 10
+    }
+  },
+  "pages": [
+    {
+      "margins": {
+        "left": 40,
+        "top": 10,
+        "right": 20,
+        "bottom": 15
+      },
+      "content": [
+        {
+          "type": "Heading",
+          "text": "Inspection",
+          "keepWithNext": false
+        },
+        {
+          "type": "Table",
+          "columns": [
+            1,
+            1
+          ],
+          "alternateRowBackgroundColor": "#f1f5f9",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "type": "TableCell",
+                  "content": {
+                    "type": "TextBlock",
+                    "text": "Result"
+                  }
+                },
+                {
+                  "type": "TableCell",
+                  "content": {
+                    "type": "TextBlock",
+                    "text": "Value"
+                  }
+                }
+              ]
+            },
+            {
+              "cells": [
+                {
+                  "type": "TableCell",
+                  "verticalAlignment": "bottom",
+                  "content": {
+                    "type": "Container",
+                    "fitContent": true,
+                    "padding": 3,
+                    "cornerRadius": 3,
+                    "backgroundColor": "#bbf7d0",
+                    "child": {
+                      "type": "TextBlock",
+                      "text": "Pass"
+                    }
+                  }
+                },
+                {
+                  "type": "TableCell",
+                  "content": {
+                    "type": "TextBlock",
+                    "text": "24"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Line",
+          "dashPattern": [
+            3,
+            2
+          ]
+        },
+        {
+          "type": "BarChart",
+          "width": 300,
+          "height": 100,
+          "references": [
+            {
+              "value": 25,
+              "color": "#334155",
+              "thickness": 2,
+              "dashPattern": [
+                5,
+                3
+              ]
+            },
+            {
+              "value": 20,
+              "endValue": 40,
+              "color": "#e2e8f0"
+            }
+          ],
+          "data": {
+            "yAxis": {
+              "minValue": 0,
+              "maxValue": 100
+            },
+            "series": [
+              {
+                "name": "Value",
+                "dataPoints": [
+                  {
+                    "label": "A",
+                    "value": 35
+                  },
+                  {
+                    "label": "B",
+                    "value": 50
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "LineChart",
+          "width": 60,
+          "height": 18,
+          "sparkline": true,
+          "data": {
+            "yAxis": {
+              "minValue": 0,
+              "maxValue": 100
+            },
+            "series": [
+              {
+                "name": "Value",
+                "dataPoints": [
+                  {
+                    "label": "A",
+                    "value": 35
+                  },
+                  {
+                    "label": "B",
+                    "value": 50
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "Barcode",
+          "value": "00350600000000000017",
+          "gs1": true,
+          "height": 24
+        },
+        {
+          "type": "DataMatrix",
+          "data": "0115060000000006172910131024-1187",
+          "gs1": true,
+          "size": 30
+        }
+      ]
+    }
+  ]
+}

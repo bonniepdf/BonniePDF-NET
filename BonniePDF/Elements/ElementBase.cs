@@ -131,6 +131,11 @@ public abstract class ElementBase : IElement, IMargin, ICaptureMetadata
         set => _options = _options.With(value, static (o, v) => o with { BreakAllowed = v });
     }
 
+    /// <summary>Keeps this element with the start of its next sibling in vertical flow.</summary>
+    public bool KeepWithNext { get; set; }
+
+    internal virtual float MinimumStartHeight(float width) => MeasureHeight(width);
+
     /// <summary>
     /// Gets the content width after accounting for margins
     /// </summary>

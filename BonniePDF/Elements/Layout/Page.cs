@@ -105,15 +105,21 @@ public class Page
     /// </summary>
     public float Margin { get; }
 
+    /// <summary>Optional four-sided margin for this page.</summary>
+    public Thickness? Margins { get; set; }
+
+    internal Thickness ResolveMargins(DocumentSettings settings) =>
+        Margins ?? (HasExplicitMargin ? new Thickness(Margin) : settings.Margins ?? new Thickness(settings.Margin));
+
     /// <summary>
     /// Gets the available content width (page width minus margins)
     /// </summary>
-    public float ContentWidth => Width - Margin * 2;
+    public float ContentWidth => Width - (Margins is Thickness margins ? margins.Left + margins.Right : Margin * 2);
 
     /// <summary>
     /// Gets the available content height (page height minus margins)
     /// </summary>
-    public float ContentHeight => Height - Margin * 2;
+    public float ContentHeight => Height - (Margins is Thickness margins ? margins.Top + margins.Bottom : Margin * 2);
 
     /// <summary>Adds one paragraph from lines joined by hard line breaks.</summary>
     public void Add(params string[] lines) => Add(new TextBlock(lines));

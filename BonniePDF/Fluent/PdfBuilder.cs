@@ -156,7 +156,9 @@ public sealed class PdfBuilder
         {
             PageSize = firstPage.PageSize,
             Orientation = firstPage.PageOrientation,
-            Margin = firstPage.PageMargin
+            Margin = firstPage.PageMargin,
+            Margins = firstPage.PageMargins,
+            PreservePageDimensions = firstPage.PreserveDimensions
         };
 
         // Apply settings action
@@ -205,8 +207,8 @@ public sealed class PdfBuilder
         for (int i = 1; i < _pageDescriptors.Count; i++)
         {
             var pageDesc = _pageDescriptors[i];
-            var orientedSize = pageDesc.PageSize.GetOrientedSize(pageDesc.PageOrientation);
-            doc.AddPage(orientedSize, pageDesc.PageMargin);
+            var size = pageDesc.PreserveDimensions ? pageDesc.PageSize : pageDesc.PageSize.GetOrientedSize(pageDesc.PageOrientation);
+            doc.AddPage(size, pageDesc.PageMargin).Margins = pageDesc.PageMargins;
 
             if (pageDesc.ContentSlot.Child != null)
                 doc.Add(pageDesc.ContentSlot.Child);

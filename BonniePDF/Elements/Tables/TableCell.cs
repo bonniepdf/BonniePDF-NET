@@ -15,6 +15,9 @@ public class TableCell : BorderedElementBase, IRoleProvider
     /// </summary>
     public required IElement Content { get; set; }
 
+    /// <summary>Vertical placement of the content within the row.</summary>
+    public VerticalAlignment VerticalAlignment { get; set; } = VerticalAlignment.Start;
+
     /// <summary>
     /// TextBlock color for this cell
     /// </summary>

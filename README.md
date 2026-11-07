@@ -161,6 +161,8 @@ You can pass text directly to `Document.Add`, `Page.Add` and stack `Add` methods
 
 ## Capabilities
 
+Headings keep with the start of the next block in vertical flow. Templates can use four-sided page margins, fit-to-content containers, vertically aligned table cells, and alternating row fills. Cartesian charts support reference lines and shaded ranges, and line charts can render as sparklines. GS1 modes for Code 128 and Data Matrix accept a prepared GS1 element string.
+
 Native [rotation](https://www.bonniepdf.dev/docs/dotnet/rotation) supports constrained quarter turns through `RotateClockwise(contentWidth?)` and `RotateCounterclockwise(contentWidth?)`, and free angles through `Rotate(angle)`. The object model exposes the same behavior through `Rotate`. Text stays selectable, SVG previews and link bounds follow the transform, and the subtree stays on one page. Free angles keep the original flow box and need surrounding clearance.
 
 | Area                  | Included                                                                                                                                |

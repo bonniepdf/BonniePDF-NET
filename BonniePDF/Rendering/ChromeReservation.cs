@@ -45,7 +45,7 @@ internal static class ChromeReservationFactory
 
         return pageNumber =>
         {
-            float contentWidth = ctx.PageSize.Width - ctx.Margin * 2f;
+            float contentWidth = ctx.PageSize.Width - ctx.Margins.Left - ctx.Margins.Right;
             return new ChromeReservation(
                 Measure(header?.Invoke(pageNumber), contentWidth, settings.ContentDirection),
                 Measure(footer?.Invoke(pageNumber), contentWidth, settings.ContentDirection));

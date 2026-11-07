@@ -140,10 +140,14 @@ public class DocumentSettings
     /// </summary>
     public Color? PageColor { get; set; }
 
-    /// <summary>
-    /// The page orientation for the document (default: Portrait)
-    /// </summary>
+    /// <summary>Optional four-sided page margin, taking precedence over the uniform margin.</summary>
+    public Thickness? Margins { get; set; }
+
+    /// <summary>The page orientation for the document (default: Portrait).</summary>
     public PageOrientation Orientation { get; set; } = PageOrientation.Portrait;
+
+    /// <summary>Preserves the supplied width and height when true.</summary>
+    public bool PreservePageDimensions { get; set; }
 
     /// <summary>
     /// The most pixels per inch an embedded PNG image is kept at (default: 288). An image that
@@ -385,6 +389,6 @@ public class DocumentSettings
     /// </summary>
     public PdfSize GetOrientedPageSize()
     {
-        return PageSize.GetOrientedSize(Orientation);
+        return PreservePageDimensions ? PageSize : PageSize.GetOrientedSize(Orientation);
     }
 }

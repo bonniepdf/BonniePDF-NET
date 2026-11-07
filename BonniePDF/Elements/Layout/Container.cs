@@ -53,6 +53,9 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
     /// </summary>
     public float? Width { get; set; }
 
+    /// <summary>Sizes the box to its child, within the available width.</summary>
+    public bool FitContent { get; set; }
+
     /// <summary>
     /// Optional fixed height for the container (null = auto-size based on content)
     /// </summary>
@@ -188,7 +191,7 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         float entryX = ctx.CurrentX;
         float entryY = ctx.CurrentY;
 
-        float effectiveWidth = Width ?? GetContentWidth(width);
+        float effectiveWidth = ResolveWidth(GetContentWidth(width));
         if (first) ctx.CurrentY += Margin.Top;
         float boxX = ctx.CurrentX + Margin.Left;
         float boxTop = ctx.CurrentY;
@@ -331,10 +334,17 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         return childWidth + Padding.Left + Padding.Right + ChildInset.HorizontalWidth;
     }
 
+    private float ResolveWidth(float available)
+    {
+        if (Width.HasValue) return Width.Value;
+        if (!FitContent || Child?.GetPreferredWidth() == 0) return available;
+        return MathF.Min(available, GetPreferredContentWidth());
+    }
+
     protected override float MeasureContentHeight(float contentWidth)
     {
         // Use fixed width if specified, otherwise use available width
-        float effectiveWidth = Width ?? contentWidth;
+        float effectiveWidth = ResolveWidth(contentWidth);
         float childContentWidth = effectiveWidth - Padding.Left - Padding.Right - ChildInset.HorizontalWidth;
 
         // Use fixed height if specified, otherwise measure child height
@@ -360,7 +370,7 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
 
         // Inside a table cell the outermost container fills the row, so its border and background span the
         // row, however tall the neighbouring cells are.
-        if (ReferenceEquals(ctx.CellStretchTarget, this)) natural = MathF.Max(natural, ctx.CellStretchHeight);
+        if (!FitContent && ReferenceEquals(ctx.CellStretchTarget, this)) natural = MathF.Max(natural, ctx.CellStretchHeight);
 
         if (!FillHeight) return natural;
 
@@ -370,7 +380,7 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
         // Use fixed width if specified, otherwise use available width
-        float effectiveWidth = Width ?? contentWidth;
+        float effectiveWidth = ResolveWidth(contentWidth);
         float containerHeight = ResolveHeight(ctx, effectiveWidth);
 
         // PAGINATION CHECK:

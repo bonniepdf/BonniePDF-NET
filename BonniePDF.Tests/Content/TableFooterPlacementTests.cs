@@ -1,4 +1,5 @@
 using Xunit;
+using PdfDocument = BonniePDF.Document;
 
 namespace BonniePDF.Tests.Content;
 
@@ -17,7 +18,7 @@ public sealed class TableFooterPlacementTests
 
     private static bool DrawsFooter(Func<Table, IElement> wrap)
     {
-        using Document doc = new();
+        using PdfDocument doc = new();
         doc.Add(wrap(Build()));
         return doc.GenerateSvgPages()[0].Contains(">Total<", StringComparison.Ordinal);
     }

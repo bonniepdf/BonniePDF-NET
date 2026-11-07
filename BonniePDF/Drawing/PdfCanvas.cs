@@ -14,6 +14,7 @@ namespace BonniePDF.Drawing;
 /// </summary>
 internal class PdfCanvas : ICanvas
 {
+    internal CanvasContrast? Contrast { get; set; }
     internal System.Func<EmojiRendering>? EmojiRenderingResolver { get; set; }
 
     private readonly Func<string, TtfFont?> _embeddedFontResolver;
@@ -168,6 +169,7 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     public void FillRect(float x, float y, float width, float height, Color color)
     {
+        Contrast?.Rect(x, y, width, height, color);
         // Apply X and Y offsets, convert Top-Left (y) to Bottom-Left (pdfY)
         float pdfX = x + _xOffset;
         float pdfY = Height - (y + _yOffset + height);
@@ -181,6 +183,7 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     public void StrokeRect(float x, float y, float width, float height, Color color, float strokeWidth)
     {
+        Contrast?.UnknownPaint();
         // Apply X and Y offsets, convert Top-Left (y) to Bottom-Left (pdfY)
         float pdfX = x + _xOffset;
         float pdfY = Height - (y + _yOffset + height);
@@ -194,6 +197,7 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     public void FillRoundedRect(float x, float y, float width, float height, float radius, Color color)
     {
+        Contrast?.UnknownPaint();
         float pdfX = x + _xOffset;
         float pdfY = Height - (y + _yOffset + height);
         DrawWithColorAlpha(color, () => PdfDrawing.FillRoundedRect(_stream, pdfX, pdfY, width, height, radius, color));
@@ -206,6 +210,7 @@ internal class PdfCanvas : ICanvas
     public void StrokeRoundedRect(float x, float y, float width, float height, float radius, Color color,
         float strokeWidth)
     {
+        Contrast?.UnknownPaint();
         float pdfX = x + _xOffset;
         float pdfY = Height - (y + _yOffset + height);
         DrawWithColorAlpha(color, () =>
@@ -219,6 +224,7 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     public void BeginRoundedClip(float x, float y, float width, float height, float radius)
     {
+        Contrast?.UnknownState();
         float pdfX = x + _xOffset;
         float pdfY = Height - (y + _yOffset + height);
         SaveState();
@@ -234,6 +240,7 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     public void DrawLine(float x1, float y1, float x2, float y2, Color color, float lineWidth)
     {
+        Contrast?.UnknownPaint();
         // Apply X and Y offsets, convert both points from Top-Left to Bottom-Left coordinates
         float pdfX1 = x1 + _xOffset;
         float pdfX2 = x2 + _xOffset;
@@ -254,6 +261,7 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     public void FillCircle(float cx, float cy, float radius, Color color)
     {
+        Contrast?.UnknownPaint();
         // Apply X and Y offsets, convert center from Top-Left to Bottom-Left coordinates
         float pdfCx = cx + _xOffset;
         float pdfCy = Height - (cy + _yOffset);
@@ -263,6 +271,7 @@ internal class PdfCanvas : ICanvas
 
     public void FillEllipse(float cx, float cy, float rx, float ry, Color color)
     {
+        Contrast?.UnknownPaint();
         float pdfCx = cx + _xOffset;
         float pdfCy = Height - (cy + _yOffset);
         DrawWithColorAlpha(color, () => PdfDrawing.FillEllipse(_stream, pdfCx, pdfCy, rx, ry, color));
@@ -274,6 +283,7 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     public void FillPath(IList<Point>? points, Color color)
     {
+        Contrast?.UnknownPaint();
         if (points == null || points.Count < 3) return;
 
         // Convert all points from Top-Left to Bottom-Left coordinates
@@ -296,6 +306,7 @@ internal class PdfCanvas : ICanvas
     public void DrawText(float x, float y, string text, Color color, float fontSize, string fontFamily,
         TextAlignment align)
     {
+        if (Contrast is { } capture && !string.IsNullOrWhiteSpace(text)) capture.Text(x, y, MeasureText(text, fontSize, fontFamily).Width, fontSize, color, fontFamily, align);
         // PDF text y is the baseline.
         // Apply Y offset and approximation: y (top) + size (height) roughly equals baseline.
         float pdfY = Height - (y + _yOffset + fontSize);
@@ -336,6 +347,7 @@ internal class PdfCanvas : ICanvas
     /// <inheritdoc />
     public void SetTextSpacing(float letterSpacing, float wordSpacing)
     {
+        Contrast?.UnknownState();
         _letterSpacing = letterSpacing;
         _wordSpacing = wordSpacing;
     }
@@ -366,6 +378,7 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     public void DrawTextRotated(float x, float y, string text, Color color, float fontSize, string fontFamily, float angleDegrees)
     {
+        if (Contrast is { } capture && !string.IsNullOrWhiteSpace(text)) capture.Text(x, y, MeasureText(text, fontSize, fontFamily).Width, fontSize, color, fontFamily, TextAlignment.Left, complex: true);
         // PDF text y is the baseline.
         float pdfY = Height - (y + _yOffset + fontSize);
         float pdfX = x + _xOffset;
@@ -410,6 +423,7 @@ internal class PdfCanvas : ICanvas
             return;
         }
 
+        if (Contrast is { } capture && !string.IsNullOrWhiteSpace(text)) capture.Text(x, y, MeasureText(text, fontSize, fontFamily).Width, fontSize, color, fontFamily, TextAlignment.Left, complex: true);
         // Resolve runs and measure per-run so spacing matches what is emitted.
         PreparedTextRun[] runs = ResolveRuns(text, fontFamily);
         float extraSpace = availableWidth - MeasureRuns(runs, fontSize);
@@ -440,6 +454,7 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     public void DrawImage(ImageInfo image, float x, float y, float width, float height)
     {
+        Contrast?.UnknownPaint();
         // Resolve the image resource name (e.g., /I1)
         string imageName = _imageResolver(image);
 
@@ -511,6 +526,7 @@ internal class PdfCanvas : ICanvas
     /// </summary>
     public void DrawFormXObject(string resourceName, float x, float y)
     {
+        Contrast?.UnknownPaint();
         // Calculate PDF coordinates (Bottom-Left origin)
         // PDF Y is bottom-left. x,y is top-left.
         float pdfX = x + _xOffset;
@@ -980,6 +996,7 @@ internal class PdfCanvas : ICanvas
     /// <inheritdoc />
     public void FillCurrentPath(Paint paint, FillRule fillRule = FillRule.NonZero)
     {
+        Contrast?.UnknownPaint();
         if (_currentPath.Count == 0) return;
 
         DrawAsArtifactFallback(() =>
@@ -1014,6 +1031,7 @@ internal class PdfCanvas : ICanvas
     /// <inheritdoc />
     public void StrokeCurrentPath(StrokeStyle style)
     {
+        Contrast?.UnknownPaint();
         if (_currentPath.Count == 0) return;
 
         DrawAsArtifactFallback(() =>
@@ -1044,6 +1062,7 @@ internal class PdfCanvas : ICanvas
     /// <inheritdoc />
     public void Translate(float dx, float dy)
     {
+        Contrast?.UnknownState();
         // Concatenate translation into local CTM
         // [1 0 0 1 dx dy] * [a b c d tx ty]
         _ctm[4] += _ctm[0] * dx + _ctm[2] * dy;
@@ -1053,6 +1072,7 @@ internal class PdfCanvas : ICanvas
     /// <inheritdoc />
     public void Scale(float sx, float sy)
     {
+        Contrast?.UnknownState();
         // Concatenate scaling into local CTM
         _ctm[0] *= sx;
         _ctm[1] *= sx;
@@ -1063,6 +1083,7 @@ internal class PdfCanvas : ICanvas
     /// <inheritdoc />
     public void Rotate(float angleDegrees)
     {
+        Contrast?.UnknownState();
         float radians = angleDegrees * (float)(Math.PI / 180.0);
         float cos = (float)Math.Cos(radians);
         float sin = (float)Math.Sin(radians);
@@ -1079,6 +1100,7 @@ internal class PdfCanvas : ICanvas
     /// <inheritdoc />
     public void Transform(float a, float b, float c, float d, float tx, float ty)
     {
+        Contrast?.UnknownState();
         float a0 = _ctm[0], b0 = _ctm[1], c0 = _ctm[2], d0 = _ctm[3], tx0 = _ctm[4], ty0 = _ctm[5];
         _ctm[0] = a0 * a + c0 * b;
         _ctm[1] = b0 * a + d0 * b;
@@ -1093,6 +1115,7 @@ internal class PdfCanvas : ICanvas
     /// <inheritdoc />
     public void ClipToCurrentPath(FillRule fillRule = FillRule.NonZero)
     {
+        Contrast?.UnknownState();
         if (_currentPath.Count == 0) return;
 
         EmitCurrentPath();
@@ -1108,6 +1131,7 @@ internal class PdfCanvas : ICanvas
     /// <inheritdoc />
     public void SetGlobalAlpha(float alpha)
     {
+        Contrast?.UnknownState();
         alpha = Math.Clamp(alpha, 0f, 1f);
         if (alpha < 1f)
             PdfOperators.SetGraphicsState(_stream, _alphaGraphicsStateResolver(alpha));

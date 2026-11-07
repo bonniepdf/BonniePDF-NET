@@ -286,6 +286,14 @@ public class HorizontalStack : ElementBase, IStatefulElement
         ctx.CurrentY += maxHeight;
     }
 
+    protected override float GetPreferredContentWidth()
+    {
+        if (_children.Count == 0 || WidthDistribution != WidthDistribution.Auto) return 0;
+        float width = (_children.Count - 1) * Spacing;
+        foreach (IElement child in _children) width += child.GetPreferredWidth();
+        return width;
+    }
+
     private (List<float> childWidths, float totalSpacing) CalculateChildWidths(float availableWidth)
     {
         List<float> childWidths = new();

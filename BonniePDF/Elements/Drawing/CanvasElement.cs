@@ -66,12 +66,21 @@ public class CanvasElement : ElementBase, IRoleProvider, IAltTextProvider
         canvas.AddRect(0, 0, drawWidth, DrawHeight);
         canvas.ClipToCurrentPath();
 
+        if (ctx.LayoutRecorder is { Capturing: true })
+        {
+            var capture = new CanvasContrast(ctx, drawWidth, DrawHeight);
+            if (canvas is PdfCanvas pdf) pdf.Contrast = capture;
+            if (canvas is SvgCanvas svg) svg.Contrast = capture;
+        }
+
         try
         {
             _drawHandler(canvas, drawWidth, DrawHeight);
         }
         finally
         {
+            if (canvas is PdfCanvas pdf) pdf.Contrast = null;
+            if (canvas is SvgCanvas svg) svg.Contrast = null;
             canvas.RestoreState();
         }
 
