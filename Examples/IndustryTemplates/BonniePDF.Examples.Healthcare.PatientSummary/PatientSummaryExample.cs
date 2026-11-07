@@ -9,15 +9,16 @@ namespace BonniePDF.Examples.Healthcare.PatientSummary;
 /// to the rounded outline - the band follows the rounded top corners instead of
 /// poking square corners out past the card edge, and the white body is masked at
 /// the bottom the same way.
-/// A teal patient card, an indigo vitals grid, and a rose allergies/alerts panel.
+/// Patient details, vitals, current medications and active problems in one teal,
+/// with rose kept for allergies and alerts.
 /// </summary>
 [System.ComponentModel.DisplayName("Patient Summary")]
 [System.ComponentModel.Category("Healthcare")]
 [System.ComponentModel.Description(
-    "A4 portrait healthcare patient-summary sheet built from rounded-corner cards: each card clips a full-bleed coloured header band to its rounded outline - a teal patient card, an indigo vitals grid, and a rose allergies/alerts panel.")]
+    "A4 portrait healthcare patient-summary sheet built from rounded-corner cards: each card clips a full-bleed header band to its rounded outline - patient details, vitals, current medications and active problems in one teal, with rose kept for allergies and alerts.")]
 public static class PatientSummaryExample
 {
-    // ── Healthcare palette (Slate neutrals + Teal/Indigo/Rose accents) ────────
+    // ── Healthcare palette (Slate neutrals, one Teal accent, Rose for alerts) ──
     private static readonly Color Ink = Color.FromHex("#0f172a"); // slate-900  headings / values
     private static readonly Color Body = Color.FromHex("#334155"); // slate-700  body text
     private static readonly Color Mute = Color.FromHex("#64748b"); // slate-500  labels / captions
@@ -30,11 +31,27 @@ public static class PatientSummaryExample
     // text) and as small status text on white, and #0d9488 only reaches 3.42-3.74:1
     // either way, below the 4.5:1 WCAG AA threshold. #0a7164 clears it in both roles.
     private static readonly Color Teal = Color.FromHex("#0a7164"); // patient band
-    private static readonly Color Indigo = Color.FromHex("#4f46e5"); // vitals band
     private static readonly Color Rose = Color.FromHex("#e11d48"); // allergy band / alerts
     private static readonly Color Cream = Color.FromHex("#f1f5f9"); // band caption text
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    /// <summary>Current medicines: name, dose and when it is taken.</summary>
+    private static readonly (string Name, string Dose, string When)[] Medications =
+    [
+        ("Warfarin", "5 mg", "Evening"),
+        ("Bisoprolol", "2.5 mg", "Morning"),
+        ("Atorvastatin", "40 mg", "Night"),
+        ("Lansoprazole", "15 mg", "Before breakfast"),
+    ];
+
+    /// <summary>Active problems and the year each was diagnosed.</summary>
+    private static readonly (string Condition, string Since)[] Problems =
+    [
+        ("Atrial fibrillation", "Since 2021"),
+        ("Hypertension", "Since 2018"),
+        ("Hypercholesterolaemia", "Since 2019"),
+    ];
+
     public static Document Generate()
     {
         DocumentSettings settings = new()
@@ -109,7 +126,7 @@ public static class PatientSummaryExample
             Child = patientStack,
         }));
 
-        // ── 2. Vitals card (indigo bleed band, 4-up grid) ─────────────────────
+        // ── 2. Vitals card (teal bleed band, 4-up grid) ───────────────────────
         Grid vitalsGrid = new(1, 1, 1, 1) { Border = Border.None, CellPadding = 6 };
         vitalsGrid.AddRow(
             Vital("128/82", "mmHg", "Blood pressure", "Normal", Teal),
@@ -117,7 +134,7 @@ public static class PatientSummaryExample
             Vital("37.1", "°C", "Temperature", "Normal", Teal),
             Vital("97", "% SpO2", "Oxygen", "Watch", Rose));
 
-        Container vitalsCard = MakeCard(Indigo, "VITALS  ·  18 Jun 2026, 09:14", vitalsGrid);
+        Container vitalsCard = MakeCard(Teal, "VITALS  ·  18 Jun 2026, 09:14", vitalsGrid);
         vitalsCard.Margin = new Thickness(0, 0, 0, 16);
         doc.Add(Pad(vitalsCard));
 
@@ -128,8 +145,29 @@ public static class PatientSummaryExample
         alerts.Add(Alert("Warfarin", "On anticoagulation - INR target 2.0-3.0.", 6));
 
         Container alertsCard = MakeCard(Rose, "ALLERGIES & ALERTS", alerts);
-        alertsCard.Margin = new Thickness(0, 0, 0, 28);
+        alertsCard.Margin = new Thickness(0, 0, 0, 16);
         doc.Add(Pad(alertsCard));
+
+        // ── 4. Medications and problems, side by side ─────────────────────────
+        Table medications = new(1.6f, 1, 1.4f) { Border = Border.None, CellPadding = 3 };
+        medications.AddHeader(Tb("MEDICINE", 7.5f, Mute, bold: true), Tb("DOSE", 7.5f, Mute, bold: true), Tb("WHEN", 7.5f, Mute, bold: true));
+        foreach (var (name, dose, when) in Medications)
+            medications.AddRow(Tb(name, 9.5f, Ink, bold: true), Tb(dose, 9.5f, Body), Tb(when, 9.5f, Body));
+
+        VerticalStack problems = new();
+        for (int i = 0; i < Problems.Length; i++)
+        {
+            Grid row = new(2.2f, 1) { Border = Border.None, CellPadding = 3 };
+            row.AddRow(Tb(Problems[i].Condition, 9.5f, Ink, bold: true), Tb(Problems[i].Since, 9, Mute, align: TextAlignment.Right));
+            Container c = new() { Child = row };
+            if (i > 0) c.Margin = new Thickness(0, 4, 0, 0);
+            problems.Add(c);
+        }
+
+        HorizontalStack clinical = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 16, Margin = new Thickness(0, 0, 0, 28) };
+        clinical.Add(MakeCard(Teal, "CURRENT MEDICATIONS", medications), 1.35f);
+        clinical.Add(MakeCard(Teal, "ACTIVE PROBLEMS", problems), 1);
+        doc.Add(Pad(clinical));
 
         return doc;
     }

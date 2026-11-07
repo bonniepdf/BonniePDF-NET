@@ -80,7 +80,7 @@ public static class CustomFontExample
         {
             Text = "BonniePDF embeds compact glyph subsets of TrueType fonts directly in the PDF — " +
                    "only the characters actually used are stored. Fonts with different Unicode coverage " +
-                   "can be mixed within a single document by setting FontName per block.",
+                   "can be mixed within a single document by choosing a font for each block.",
             Margin = new Thickness(0, 0, 0, 16),
         });
 
@@ -136,7 +136,7 @@ public static class CustomFontExample
 
         doc.Add(new TextBlock
         {
-            Text = "Embedded NotoSans (TrueType) — full Unicode range, subsetting keeps file size compact.",
+            Text = "Embedded Noto Sans (TrueType) — full Unicode range, subsetting keeps file size compact.",
             FontName = font,
         });
 
