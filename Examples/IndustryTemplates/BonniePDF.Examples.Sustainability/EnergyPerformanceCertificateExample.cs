@@ -142,7 +142,7 @@ public static class EnergyPerformanceCertificateExample
                 [
                     new TableCell { Content = Tb(feature, 8.5f, Ink, bold: true) },
                     new TableCell { Content = Tb(description, 8.5f, Body) },
-                    new TableCell { Content = Tb(featureRating, 8.5f, featureRating == "Poor" ? ColorPalette.Rose[700] : Green, bold: true) },
+                    new TableCell { Content = Tb(featureRating, 8.5f, string.Equals(featureRating, "Poor", StringComparison.Ordinal) ? ColorPalette.Rose[700] : Green, bold: true) },
                 ],
             });
         }

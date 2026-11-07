@@ -53,6 +53,9 @@ public static class CarbonEmissionsReportExample
         ("Move long-distance trunking to rail", 3, 900, "Planned"),
     ];
 
+    /// <summary>The three scopes, in reporting order.</summary>
+    private static readonly int[] Scopes = [1, 2, 3];
+
     /// <summary>One colour per scope, in slice order.</summary>
     private static readonly string[] ScopeColors = ["#166534", "#65a30d", "#94a3b8"];
 
@@ -84,7 +87,7 @@ public static class CarbonEmissionsReportExample
 
         int total = Sources.Sum(row => row.Now);
         int lastYear = Sources.Sum(row => row.Before);
-        int[] byScope = [.. new[] { 1, 2, 3 }.Select(scope => Sources.Where(row => row.Scope == scope).Sum(row => row.Now))];
+        int[] byScope = [.. Scopes.Select(scope => Sources.Where(row => row.Scope == scope).Sum(row => row.Now))];
 
         // ── Title ──
         doc.Add(Tb("SAMPLE LOGISTICS GROUP PLC  ·  SUSTAINABILITY", 7.5f, Green, bold: true));
@@ -142,7 +145,7 @@ public static class CarbonEmissionsReportExample
             Margin = new Thickness(0, 0, 0, 10),
         };
         sources.AddHeader(Th("Source"), Th("2026", TextAlignment.Right), Th("2025", TextAlignment.Right), Th("Change", TextAlignment.Right));
-        foreach (int scope in new[] { 1, 2, 3 })
+        foreach (int scope in Scopes)
         {
             sources.AddRow(new TableRow
             {
@@ -229,7 +232,7 @@ public static class CarbonEmissionsReportExample
                 Tb(initiative, 8.5f, Ink),
                 Tb(scope.ToString(CultureInfo.InvariantCulture), 8.5f, Body),
                 Tb($"{Thousands(saving)} t", 8.5f, Ink, align: TextAlignment.Right),
-                Tb(status, 8.5f, status == "Planned" ? Mute : Green, bold: status != "Planned"));
+                Tb(status, 8.5f, string.Equals(status, "Planned", StringComparison.Ordinal) ? Mute : Green, bold: !string.Equals(status, "Planned", StringComparison.Ordinal)));
         }
         int planned = Plan.Sum(row => row.Saving);
         plan.AddFooter(
