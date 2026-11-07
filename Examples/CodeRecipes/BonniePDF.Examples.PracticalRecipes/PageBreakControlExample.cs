@@ -3,6 +3,9 @@ using BonniePDF;
 namespace BonniePDF.Examples.PracticalRecipes;
 
 /// <summary>A supply agreement whose clause headings, signature panel and checklist break across pages the way a contract should.</summary>
+[System.ComponentModel.DisplayName("Control Page Breaks")]
+[System.ComponentModel.Category("Layout & Flow")]
+[System.ComponentModel.Description("A supply agreement: clause headings never stranded at the foot of a page, a signature panel kept in one piece, and a handover checklist that continues across pages.")]
 public static class PageBreakControlExample
 {
     private static readonly (string Title, string Text)[] Clauses =

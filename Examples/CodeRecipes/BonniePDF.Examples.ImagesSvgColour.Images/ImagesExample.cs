@@ -2,6 +2,9 @@ using BonniePDF;
 namespace BonniePDF.Examples.ImagesSvgColour.Images;
 
 /// <summary>Image fit modes, a product photo row, transparency and alt text, using explicit JPEG and PNG assets.</summary>
+[System.ComponentModel.DisplayName("Images")]
+[System.ComponentModel.Category("Images, SVG & Colour")]
+[System.ComponentModel.Description("JPEG and PNG embedding: contain, cover and fill in clipping frames, a product photo row, and alpha transparency on light and dark panels. Informative images carry alt text; the decorative divider is skipped.")]
 public static class ImagesExample
 {
     private static readonly (ImageFitMode Mode, string Label, string Caption)[] FitModes =

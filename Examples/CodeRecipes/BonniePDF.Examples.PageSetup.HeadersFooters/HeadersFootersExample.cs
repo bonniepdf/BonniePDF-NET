@@ -2,6 +2,9 @@ using BonniePDF;
 namespace BonniePDF.Examples.PageSetup.HeadersFooters;
 
 /// <summary>A three-page report with a distinct first-page header, mirrored odd and even headers, and page numbers on the outer edge.</summary>
+[System.ComponentModel.DisplayName("Headers & Footers")]
+[System.ComponentModel.Category("Page Setup")]
+[System.ComponentModel.Description("A three-page report with a distinct first-page header, mirrored odd and even headers with a brand mark and rule, and page numbers on the outer edge. Screen readers skip the headers and footers.")]
 public static class HeadersFootersExample
 {
     private const string Brand = "NORTHFIELD LOGISTICS";

@@ -4,6 +4,9 @@ using BonniePDF;
 namespace BonniePDF.Examples.PracticalDocuments;
 
 /// <summary>A 72-line invoice: a styled header row that repeats on every page, a carried-forward subtotal at each page break, per-line discounts, mixed VAT rates, and the totals kept together on the last page.</summary>
+[System.ComponentModel.DisplayName("Business Invoice: Large Order")]
+[System.ComponentModel.Category("Invoices")]
+[System.ComponentModel.Description("A 72-line, three-page invoice: a styled header row repeated on every page, the net subtotal carried forward at each page break, line discounts and mixed VAT rates, and a VAT summary and total due kept together on the last page.")]
 public static class LargeOrderInvoiceExample
 {
     public sealed record InvoiceLine(string Description, int Quantity, long UnitPence, long DiscountPence, int TaxPercent);

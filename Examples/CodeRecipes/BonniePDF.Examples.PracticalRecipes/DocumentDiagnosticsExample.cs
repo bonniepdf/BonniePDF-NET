@@ -3,6 +3,9 @@ using BonniePDF;
 namespace BonniePDF.Examples.PracticalRecipes;
 
 /// <summary>A generation-check report: the diagnostics a draft build raised, how they were fixed, and why diagnostics are not validation.</summary>
+[System.ComponentModel.DisplayName("Check the Generated Document")]
+[System.ComponentModel.Category("Compliance & Archival")]
+[System.ComponentModel.Description("A generation-check report: the real warnings a draft build raised, shown as a table with severity labels, what the corrected build changed, and why diagnostics are not external validation.")]
 public static class DocumentDiagnosticsExample
 {
     /// <summary>
