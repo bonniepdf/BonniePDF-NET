@@ -198,8 +198,8 @@ public abstract class ListElementBase : TextElementBase
 
                 if (tagging is null)
                 {
-                    // Non-tagged: original behaviour - marker drawn on every wrapped line
-                    renderMarker(markerX, localY);
+                    // The marker sits beside the first line only; wrapped lines carry no marker (spec 03 §3).
+                    if (i == 0) renderMarker(markerX, localY);
                     ctx.Canvas.DrawText(textX, localY, line, Color, FontSize, FontName, TextAlignment.Left);
                 }
                 else
