@@ -28,7 +28,7 @@ public static class DischargeSummaryExample
 {
     private const string Reference = "DS-2026-44127";
     private const string Patient = "Sample Patient";
-    private const string PatientId = "NHS 000 000 0000 (sample)";
+    private const string PatientId = "ID 000 000 0000 (sample)";
     private const string DateOfBirth = "14 Mar 1958";
     private const string Address = "Sample Address, Sample Town, ST2 6PL";
     private const string Ward = "Sample Ward 6 — Cardiology";
