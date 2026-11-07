@@ -99,14 +99,14 @@ public static class PatientSummaryExample
             Metadata = new DocumentMetadata
             {
                 Title = "Patient summary: Priya Shah",
-                Author = "Sample Healthcare NHS Trust",
+                Author = "Sample Healthcare Trust",
                 Subject = "Inpatient summary: identity, alerts, observations, medicines, results and plan",
             },
         };
 
         // ── Trust masthead ──
         VerticalStack trust = new() { Spacing = 2 };
-        trust.Add(Tb("Sample Healthcare NHS Trust", 12, Color.White, bold: true));
+        trust.Add(Tb("Sample Healthcare Trust", 12, Color.White, bold: true));
         trust.Add(Tb("Cardiology, ward 4B", 8, ColorPalette.Teal[100]));
         VerticalStack printed = new() { Spacing = 2 };
         printed.Add(new Heading("Patient summary")
@@ -128,7 +128,7 @@ public static class PatientSummaryExample
         // ── Identity banner ──
         VerticalStack name = new() { Spacing = 3 };
         name.Add(Tb("SHAH, Priya (Ms)", 16, Ink, bold: true));
-        name.Add(Tb("Born 14 March 1979 (47)  ·  Female  ·  NHS number 999 482 9310", 9, Body));
+        name.Add(Tb("Born 14 March 1979 (47)  ·  Female  ·  Patient ID 999 482 9310", 9, Body));
         HorizontalStack identity = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 16 };
         identity.Add(name, 1);
         identity.Add(new Container
