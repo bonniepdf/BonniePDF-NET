@@ -586,7 +586,18 @@ public static class FontMetrics
 
     internal static Func<int, bool> GetTextBreakPredicate(string text, string identifier, IReadOnlyDictionary<string,int>? features = null)
     {
-        var glyphs = MetricFace(identifier)?.Shape(text, features);
+        Typography.Engine.GlyphRun? glyphs;
+        try
+        {
+            glyphs = MetricFace(identifier)?.Shape(text, features);
+        }
+        catch (NotSupportedException)
+        {
+            // The face lacks a glyph that fallback will draw (a full stop in a Hebrew face, say), so
+            // it cannot shape the paragraph whole. Its break flags are then unavailable: allow every
+            // grapheme boundary rather than failing the document (spec 19, Layout).
+            glyphs = null;
+        }
         return offset =>
         {
             if (glyphs is null) return true;
