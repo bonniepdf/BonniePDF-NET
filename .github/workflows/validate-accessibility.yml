@@ -75,7 +75,8 @@ jobs:
       # runs to completion in a few seconds, so a failure here is a real failure.
       - name: Generate all example PDFs
         run: |
-          for csproj in $(find Examples -name '*.csproj' -not -path '*/obj/*' | sort); do
+          # Integrations/ holds long-running hosts (a web server) that never exit, and they generate no files.
+          for csproj in $(find Examples -name '*.csproj' -not -path '*/obj/*' -not -path '*/Integrations/*' | sort); do
             echo "::group::${csproj}"
             dotnet run --project "$csproj" -c Release
             echo "::endgroup::"
