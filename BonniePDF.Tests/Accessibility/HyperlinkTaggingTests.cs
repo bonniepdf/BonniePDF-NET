@@ -75,6 +75,23 @@ public class HyperlinkTaggingTests
     }
 
     [Fact]
+    public void LinkAnnotation_DrawsNoBorder()
+    {
+        // Spec 11 §2 - the /Border default is [0 0 1], which many viewers
+        // draw as a box around the link, so every link writes [0 0 0].
+        string pdf = Encoding.ASCII.GetString(GenerateBytes(doc =>
+        {
+            doc.Add(new Hyperlink("https://example.com", "Visit Example")
+            {
+                FontName = StandardFonts.Helvetica,
+                FontSize = 12,
+            });
+        }));
+
+        Assert.Contains("/Border [0 0 0]", pdf);
+    }
+
+    [Fact]
     public void LinkContents_EscapesParenthesesInLinkText()
     {
         // Defensive - link text that contains literal parens needs PDF
