@@ -17,14 +17,13 @@ namespace BonniePDF.Examples.Fonts.EmbeddedFontMetrics;
 [System.ComponentModel.DisplayName("Embedded-Font Metrics")]
 [System.ComponentModel.Category("Fonts")]
 [System.ComponentModel.Description(
-    "How an embedded TrueType font makes alignment edges exact, using its own hmtx advance widths rather than the approximate standard-14 width tables. PDF/A-2a + PDF/UA-1.")]
+    "Alignment measured from the embedded font's own advance widths: four framed samples whose rules mark the measure, so every edge can be seen landing on them. PDF/A-2a + PDF/UA-1.")]
 public static class EmbeddedFontMetricsExample
 {
     private const string SampleText =
-        "The quick brown fox jumps over the lazy dog. This sentence demonstrates how text " +
-        "alignment affects the visual appearance of a paragraph. When text is justified, the " +
-        "word spacing is adjusted so that both the left and right edges align perfectly with " +
-        "the margins, creating a clean, professional look commonly seen in books and formal documents.";
+        "The quick brown fox jumps over the lazy dog. Every line here is measured from the advance " +
+        "widths stored in the embedded font, the same font that draws it, so the edge this alignment " +
+        "promises lands on the rule beside it in any viewer.";
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
@@ -69,19 +68,26 @@ public static class EmbeddedFontMetricsExample
         doc.Add(new TextBlock
         {
             Text =
-                "The standard-14 fonts are measured from approximate width tables. An embedded TrueType font carries " +
-                "its own hmtx advance widths, so glyph placement is exact — which is what makes the right, centre, and " +
-                "justified edges below land precisely on the margin. Every element here is set in embedded Liberation Sans.",
-            Margin = new Thickness(0, 0, 0, 14),
+                "An embedded font carries its own advance widths, and the same font program draws the text, so the widths " +
+                "measured during layout are the widths every reader sees. Each frame below marks the measure with a rule on " +
+                "each side; the edges each alignment promises land on them.",
+            LineHeight = 1.45f,
+            Margin = new Thickness(0, 0, 0, 18),
         });
 
-        AlignedSample(doc, "Left Aligned (Default)", "s-left", Align.Left, sansBoldPath);
-        AlignedSample(doc, "Centre Aligned", "s-centre", Align.Center, sansBoldPath);
-        AlignedSample(doc, "Right Aligned", "s-right", Align.Right, sansBoldPath);
-        AlignedSample(doc, "Justified", "s-justify", Align.Justify, sansBoldPath);
+        doc.Add(Row(FramedSample("Left", "left edge on the rule", Align.Left, sansBoldPath), FramedSample("Centre", "centred between the rules", Align.Center, sansBoldPath), 18));
+        doc.Add(Row(FramedSample("Right", "right edge on the rule", Align.Right, sansBoldPath), FramedSample("Justified", "both edges on the rules", Align.Justify, sansBoldPath), 24));
 
-        // ── Book-style justified paragraphs ────────────────────────────────────
-        Section(doc, "Book-Style Justified Paragraphs", "book", sansBoldPath);
+        // ── Book-style justified paragraphs, framed the same way ──────────────
+        doc.Add(new Heading("Book-style justified paragraphs")
+        {
+            TocIdentifier = "book",
+            Level = 2,
+            FontName = sansBoldPath,
+            FontSize = 13,
+            Color = ColorPalette.Slate[900],
+            Margin = new Thickness(0, 0, 0, 8),
+        });
 
         string[] paragraphs =
         {
@@ -98,37 +104,40 @@ public static class EmbeddedFontMetricsExample
             "for something remarkable to happen: the emergence of life.",
         };
 
+        VerticalStack book = new() { Spacing = 8 };
         foreach (string p in paragraphs)
-        {
-            doc.Add(new TextBlock
-            {
-                Text = p,
-                FontName = sansPath,
-                Alignment = Align.Justify,
-                Margin = new Thickness(0, 0, 0, 8),
-            });
-        }
+            book.Add(new TextBlock(p) { FontName = sansPath, Alignment = Align.Justify, LineHeight = 1.4f });
+        doc.Add(Frame(book));
 
         return doc;
     }
 
-    private static void Section(Document doc, string title, string tocId, string fontPath, Align alignment = Align.Left)
+    /// <summary>Two framed samples side by side.</summary>
+    private static HorizontalStack Row(VerticalStack left, VerticalStack right, float marginBottom)
     {
-        doc.Add(new Heading(title)
-        {
-            TocIdentifier = tocId,
-            Level = 2,
-            FontName = fontPath,
-            FontSize = 13,
-            Color = ColorPalette.Indigo[600],
-            Margin = new Thickness(0, 0, 0, 6),
-            Alignment = alignment,
-        });
+        HorizontalStack stack = new() { Spacing = 24, WidthDistribution = WidthDistribution.Equal, Margin = new Thickness(0, 0, 0, marginBottom) };
+        stack.Add(left);
+        stack.Add(right);
+        return stack;
     }
 
-    private static void AlignedSample(Document doc, string title, string tocId, Align alignment, string fontPath)
+    /// <summary>A frame whose left and right rules mark the measure, with no padding between rule and text.</summary>
+    private static Container Frame(IElement child) => new()
     {
-        Section(doc, title, tocId, fontPath, alignment);
-        doc.Add(new TextBlock { Text = SampleText, Alignment = alignment, Margin = new Thickness(0, 0, 0, 14) });
+        Border = new Border(0.75f, 0, 0.75f, 0),
+        BorderColors = new BorderColors(ColorPalette.Teal[500]),
+        BackgroundColor = ColorPalette.Slate[50],
+        Padding = new Thickness(0, 8, 0, 8),
+        Child = child,
+    };
+
+    /// <summary>One alignment: a heading, a caption saying what to look for, and the framed sample.</summary>
+    private static VerticalStack FramedSample(string title, string caption, Align alignment, string boldPath)
+    {
+        VerticalStack stack = new() { Spacing = 4 };
+        stack.Add(new Heading(title) { Level = 2, FontName = boldPath, FontSize = 12, Color = ColorPalette.Slate[900] });
+        stack.Add(new TextBlock(caption) { FontSize = 9, Color = ColorPalette.Teal[700] });
+        stack.Add(Frame(new TextBlock(SampleText) { Alignment = alignment, FontSize = 10.5f, LineHeight = 1.4f }));
+        return stack;
     }
 }
