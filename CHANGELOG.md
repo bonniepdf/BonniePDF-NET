@@ -14,6 +14,8 @@ at the same version are the same library.
 
 ### Document Engine & API
 
+- **Table footers inside a container:** a table placed inside a container, stack or other element dropped its footer rows, because the footer was drawn only when the document's current page was its last. Footers now follow the table's last body row wherever the table is placed.
+
 - **Mixed font sizes share one baseline:** in rich text, a span smaller than the text beside it used to be drawn from the top of the line, so it sat high, and a subscript (the 2 in H₂O) appeared raised. Every span on a line now sits on the baseline of the line's largest font, a subscript drops below it and a superscript rises above it. Lines in a single font size are unchanged.
 
 - **Right-to-left text keeps its spaces beside fallback fonts:** a right-to-left line whose digits or Latin come from a fallback font (a Hebrew face without digits, for example) is now resolved and ordered as one line. It used to be resolved one font at a time, so the pieces were painted in logical order and the spaces next to a number landed on the wrong side ("12," lost its spaces). The pieces are now painted in visual order in PDF and SVG, and in PDF the line carries one ActualText in reading order. Lines in a single font are unchanged.

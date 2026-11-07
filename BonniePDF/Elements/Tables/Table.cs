@@ -868,9 +868,6 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
 
     private void RenderRow(RenderContext ctx, TableRow row, float[] widths)
     {
-        // For footers, only show on last page if ShowFootersOnAllPages is false
-        if (row.IsFooter && !ShowFootersOnAllPages && !IsLastPage(ctx)) return;
-
         float rowHeight = MeasureRowHeight(row, widths);
 
         // Pagination check
@@ -1097,10 +1094,4 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         return maxHeight;
     }
 
-    private static bool IsLastPage(RenderContext ctx)
-    {
-        // Use the RenderContext.IsLastPage property, which the render
-        // pipeline sets when processing each page
-        return ctx.IsLastPage;
-    }
 }
