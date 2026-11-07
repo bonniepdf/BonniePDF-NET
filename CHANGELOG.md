@@ -14,6 +14,8 @@ at the same version are the same library.
 
 ### Document Engine & API
 
+- **Carried-forward page subtotals:** `Table` gains `runningTotalColumn` (`RunningTotalColumn` in .NET) and `TableRow` gains `runningValue`. When a table with a running-total column breaks across pages, each page it leaves ends with a "Carried forward" row and the next opens with a "Brought forward" row, both showing the sum of `runningValue` so far, formatted with `runningTotalFormat` (default `N2`) after `runningTotalPrefix`. `carriedForwardLabel` and `broughtForwardLabel` change the wording. The rows are artifacts in tagged documents, so a screen reader does not read the repeated figure. All the options round-trip through document definitions; tables without them are unchanged.
+
 - **Links inside a sentence, and underlined links:** `RichText` gains `link(text, uri, style?)` (`Link` in .NET), backed by a new `TextSpan.link`. The span wraps with the paragraph like any other text; each line it lands on becomes a clickable region described by the whole span text and, in tagged documents, a Link inside the paragraph. The span's style is the link's look. `Hyperlink` gains `underline` (default `false`), drawn at the position and weight of an underline decoration. Both round-trip through document definitions.
 
 - **Donut totals in the centre:** `PieChart` gains `totalPosition` (`TotalPosition` in .NET), `legend` by default. With `center`, a donut draws its total as a large figure with `totalLabel` beneath it in the hole, which widens to fit, instead of as a legend row. A full pie keeps the total in the legend. The option round-trips through document definitions; charts that do not set it are unchanged.

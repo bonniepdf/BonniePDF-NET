@@ -48,6 +48,12 @@ public class TableRow : IBackgroundColor, IRoleProvider
     public bool IsFooter { get; set; }
 
     /// <summary>
+    /// The amount this body row adds to the table's running total, when the table has a
+    /// <see cref="Table.RunningTotalColumn"/>. Rows without one add nothing.
+    /// </summary>
+    public decimal? RunningValue { get; set; }
+
+    /// <summary>
     /// Minimum height for this row (optional)
     /// </summary>
     public float? MinHeight

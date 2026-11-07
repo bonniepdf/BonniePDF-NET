@@ -1,0 +1,1030 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/running-total",
+    "description": "A 60-row table with a running total in column 2: each page that continues ends with a carried-forward row and the next opens with a brought-forward row (03 Table, Running total). The row values and the five table keys round-trip."
+  },
+  "_expect": {
+    "pages": 3,
+    "roundTrip": true,
+    "pdfSha256": null,
+    "canonical": {
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "Table",
+              "columns": [
+                4,
+                1,
+                1.4
+              ],
+              "header": [
+                [
+                  "Item",
+                  "Qty",
+                  "Net"
+                ]
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    "Line 1",
+                    "1",
+                    "12.50"
+                  ],
+                  "runningValue": 12.5
+                },
+                {
+                  "cells": [
+                    "Line 2",
+                    "1",
+                    "13.50"
+                  ],
+                  "runningValue": 13.5
+                },
+                {
+                  "cells": [
+                    "Line 3",
+                    "1",
+                    "14.50"
+                  ],
+                  "runningValue": 14.5
+                },
+                {
+                  "cells": [
+                    "Line 4",
+                    "1",
+                    "15.50"
+                  ],
+                  "runningValue": 15.5
+                },
+                {
+                  "cells": [
+                    "Line 5",
+                    "1",
+                    "16.50"
+                  ],
+                  "runningValue": 16.5
+                },
+                {
+                  "cells": [
+                    "Line 6",
+                    "1",
+                    "17.50"
+                  ],
+                  "runningValue": 17.5
+                },
+                {
+                  "cells": [
+                    "Line 7",
+                    "1",
+                    "18.50"
+                  ],
+                  "runningValue": 18.5
+                },
+                {
+                  "cells": [
+                    "Line 8",
+                    "1",
+                    "19.50"
+                  ],
+                  "runningValue": 19.5
+                },
+                {
+                  "cells": [
+                    "Line 9",
+                    "1",
+                    "20.50"
+                  ],
+                  "runningValue": 20.5
+                },
+                {
+                  "cells": [
+                    "Line 10",
+                    "1",
+                    "21.50"
+                  ],
+                  "runningValue": 21.5
+                },
+                {
+                  "cells": [
+                    "Line 11",
+                    "1",
+                    "22.50"
+                  ],
+                  "runningValue": 22.5
+                },
+                {
+                  "cells": [
+                    "Line 12",
+                    "1",
+                    "23.50"
+                  ],
+                  "runningValue": 23.5
+                },
+                {
+                  "cells": [
+                    "Line 13",
+                    "1",
+                    "24.50"
+                  ],
+                  "runningValue": 24.5
+                },
+                {
+                  "cells": [
+                    "Line 14",
+                    "1",
+                    "25.50"
+                  ],
+                  "runningValue": 25.5
+                },
+                {
+                  "cells": [
+                    "Line 15",
+                    "1",
+                    "26.50"
+                  ],
+                  "runningValue": 26.5
+                },
+                {
+                  "cells": [
+                    "Line 16",
+                    "1",
+                    "27.50"
+                  ],
+                  "runningValue": 27.5
+                },
+                {
+                  "cells": [
+                    "Line 17",
+                    "1",
+                    "28.50"
+                  ],
+                  "runningValue": 28.5
+                },
+                {
+                  "cells": [
+                    "Line 18",
+                    "1",
+                    "29.50"
+                  ],
+                  "runningValue": 29.5
+                },
+                {
+                  "cells": [
+                    "Line 19",
+                    "1",
+                    "30.50"
+                  ],
+                  "runningValue": 30.5
+                },
+                {
+                  "cells": [
+                    "Line 20",
+                    "1",
+                    "31.50"
+                  ],
+                  "runningValue": 31.5
+                },
+                {
+                  "cells": [
+                    "Line 21",
+                    "1",
+                    "32.50"
+                  ],
+                  "runningValue": 32.5
+                },
+                {
+                  "cells": [
+                    "Line 22",
+                    "1",
+                    "33.50"
+                  ],
+                  "runningValue": 33.5
+                },
+                {
+                  "cells": [
+                    "Line 23",
+                    "1",
+                    "34.50"
+                  ],
+                  "runningValue": 34.5
+                },
+                {
+                  "cells": [
+                    "Line 24",
+                    "1",
+                    "35.50"
+                  ],
+                  "runningValue": 35.5
+                },
+                {
+                  "cells": [
+                    "Line 25",
+                    "1",
+                    "36.50"
+                  ],
+                  "runningValue": 36.5
+                },
+                {
+                  "cells": [
+                    "Line 26",
+                    "1",
+                    "37.50"
+                  ],
+                  "runningValue": 37.5
+                },
+                {
+                  "cells": [
+                    "Line 27",
+                    "1",
+                    "38.50"
+                  ],
+                  "runningValue": 38.5
+                },
+                {
+                  "cells": [
+                    "Line 28",
+                    "1",
+                    "39.50"
+                  ],
+                  "runningValue": 39.5
+                },
+                {
+                  "cells": [
+                    "Line 29",
+                    "1",
+                    "40.50"
+                  ],
+                  "runningValue": 40.5
+                },
+                {
+                  "cells": [
+                    "Line 30",
+                    "1",
+                    "41.50"
+                  ],
+                  "runningValue": 41.5
+                },
+                {
+                  "cells": [
+                    "Line 31",
+                    "1",
+                    "42.50"
+                  ],
+                  "runningValue": 42.5
+                },
+                {
+                  "cells": [
+                    "Line 32",
+                    "1",
+                    "43.50"
+                  ],
+                  "runningValue": 43.5
+                },
+                {
+                  "cells": [
+                    "Line 33",
+                    "1",
+                    "44.50"
+                  ],
+                  "runningValue": 44.5
+                },
+                {
+                  "cells": [
+                    "Line 34",
+                    "1",
+                    "45.50"
+                  ],
+                  "runningValue": 45.5
+                },
+                {
+                  "cells": [
+                    "Line 35",
+                    "1",
+                    "46.50"
+                  ],
+                  "runningValue": 46.5
+                },
+                {
+                  "cells": [
+                    "Line 36",
+                    "1",
+                    "47.50"
+                  ],
+                  "runningValue": 47.5
+                },
+                {
+                  "cells": [
+                    "Line 37",
+                    "1",
+                    "48.50"
+                  ],
+                  "runningValue": 48.5
+                },
+                {
+                  "cells": [
+                    "Line 38",
+                    "1",
+                    "49.50"
+                  ],
+                  "runningValue": 49.5
+                },
+                {
+                  "cells": [
+                    "Line 39",
+                    "1",
+                    "50.50"
+                  ],
+                  "runningValue": 50.5
+                },
+                {
+                  "cells": [
+                    "Line 40",
+                    "1",
+                    "51.50"
+                  ],
+                  "runningValue": 51.5
+                },
+                {
+                  "cells": [
+                    "Line 41",
+                    "1",
+                    "52.50"
+                  ],
+                  "runningValue": 52.5
+                },
+                {
+                  "cells": [
+                    "Line 42",
+                    "1",
+                    "53.50"
+                  ],
+                  "runningValue": 53.5
+                },
+                {
+                  "cells": [
+                    "Line 43",
+                    "1",
+                    "54.50"
+                  ],
+                  "runningValue": 54.5
+                },
+                {
+                  "cells": [
+                    "Line 44",
+                    "1",
+                    "55.50"
+                  ],
+                  "runningValue": 55.5
+                },
+                {
+                  "cells": [
+                    "Line 45",
+                    "1",
+                    "56.50"
+                  ],
+                  "runningValue": 56.5
+                },
+                {
+                  "cells": [
+                    "Line 46",
+                    "1",
+                    "57.50"
+                  ],
+                  "runningValue": 57.5
+                },
+                {
+                  "cells": [
+                    "Line 47",
+                    "1",
+                    "58.50"
+                  ],
+                  "runningValue": 58.5
+                },
+                {
+                  "cells": [
+                    "Line 48",
+                    "1",
+                    "59.50"
+                  ],
+                  "runningValue": 59.5
+                },
+                {
+                  "cells": [
+                    "Line 49",
+                    "1",
+                    "60.50"
+                  ],
+                  "runningValue": 60.5
+                },
+                {
+                  "cells": [
+                    "Line 50",
+                    "1",
+                    "61.50"
+                  ],
+                  "runningValue": 61.5
+                },
+                {
+                  "cells": [
+                    "Line 51",
+                    "1",
+                    "62.50"
+                  ],
+                  "runningValue": 62.5
+                },
+                {
+                  "cells": [
+                    "Line 52",
+                    "1",
+                    "63.50"
+                  ],
+                  "runningValue": 63.5
+                },
+                {
+                  "cells": [
+                    "Line 53",
+                    "1",
+                    "64.50"
+                  ],
+                  "runningValue": 64.5
+                },
+                {
+                  "cells": [
+                    "Line 54",
+                    "1",
+                    "65.50"
+                  ],
+                  "runningValue": 65.5
+                },
+                {
+                  "cells": [
+                    "Line 55",
+                    "1",
+                    "66.50"
+                  ],
+                  "runningValue": 66.5
+                },
+                {
+                  "cells": [
+                    "Line 56",
+                    "1",
+                    "67.50"
+                  ],
+                  "runningValue": 67.5
+                },
+                {
+                  "cells": [
+                    "Line 57",
+                    "1",
+                    "68.50"
+                  ],
+                  "runningValue": 68.5
+                },
+                {
+                  "cells": [
+                    "Line 58",
+                    "1",
+                    "69.50"
+                  ],
+                  "runningValue": 69.5
+                },
+                {
+                  "cells": [
+                    "Line 59",
+                    "1",
+                    "70.50"
+                  ],
+                  "runningValue": 70.5
+                },
+                {
+                  "cells": [
+                    "Line 60",
+                    "1",
+                    "71.50"
+                  ],
+                  "runningValue": 71.5
+                }
+              ],
+              "runningTotalColumn": 2,
+              "runningTotalPrefix": "£"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "Table",
+          "columns": [
+            4,
+            1,
+            1.4
+          ],
+          "header": [
+            [
+              "Item",
+              "Qty",
+              "Net"
+            ]
+          ],
+          "rows": [
+            {
+              "cells": [
+                "Line 1",
+                "1",
+                "12.50"
+              ],
+              "runningValue": 12.5
+            },
+            {
+              "cells": [
+                "Line 2",
+                "1",
+                "13.50"
+              ],
+              "runningValue": 13.5
+            },
+            {
+              "cells": [
+                "Line 3",
+                "1",
+                "14.50"
+              ],
+              "runningValue": 14.5
+            },
+            {
+              "cells": [
+                "Line 4",
+                "1",
+                "15.50"
+              ],
+              "runningValue": 15.5
+            },
+            {
+              "cells": [
+                "Line 5",
+                "1",
+                "16.50"
+              ],
+              "runningValue": 16.5
+            },
+            {
+              "cells": [
+                "Line 6",
+                "1",
+                "17.50"
+              ],
+              "runningValue": 17.5
+            },
+            {
+              "cells": [
+                "Line 7",
+                "1",
+                "18.50"
+              ],
+              "runningValue": 18.5
+            },
+            {
+              "cells": [
+                "Line 8",
+                "1",
+                "19.50"
+              ],
+              "runningValue": 19.5
+            },
+            {
+              "cells": [
+                "Line 9",
+                "1",
+                "20.50"
+              ],
+              "runningValue": 20.5
+            },
+            {
+              "cells": [
+                "Line 10",
+                "1",
+                "21.50"
+              ],
+              "runningValue": 21.5
+            },
+            {
+              "cells": [
+                "Line 11",
+                "1",
+                "22.50"
+              ],
+              "runningValue": 22.5
+            },
+            {
+              "cells": [
+                "Line 12",
+                "1",
+                "23.50"
+              ],
+              "runningValue": 23.5
+            },
+            {
+              "cells": [
+                "Line 13",
+                "1",
+                "24.50"
+              ],
+              "runningValue": 24.5
+            },
+            {
+              "cells": [
+                "Line 14",
+                "1",
+                "25.50"
+              ],
+              "runningValue": 25.5
+            },
+            {
+              "cells": [
+                "Line 15",
+                "1",
+                "26.50"
+              ],
+              "runningValue": 26.5
+            },
+            {
+              "cells": [
+                "Line 16",
+                "1",
+                "27.50"
+              ],
+              "runningValue": 27.5
+            },
+            {
+              "cells": [
+                "Line 17",
+                "1",
+                "28.50"
+              ],
+              "runningValue": 28.5
+            },
+            {
+              "cells": [
+                "Line 18",
+                "1",
+                "29.50"
+              ],
+              "runningValue": 29.5
+            },
+            {
+              "cells": [
+                "Line 19",
+                "1",
+                "30.50"
+              ],
+              "runningValue": 30.5
+            },
+            {
+              "cells": [
+                "Line 20",
+                "1",
+                "31.50"
+              ],
+              "runningValue": 31.5
+            },
+            {
+              "cells": [
+                "Line 21",
+                "1",
+                "32.50"
+              ],
+              "runningValue": 32.5
+            },
+            {
+              "cells": [
+                "Line 22",
+                "1",
+                "33.50"
+              ],
+              "runningValue": 33.5
+            },
+            {
+              "cells": [
+                "Line 23",
+                "1",
+                "34.50"
+              ],
+              "runningValue": 34.5
+            },
+            {
+              "cells": [
+                "Line 24",
+                "1",
+                "35.50"
+              ],
+              "runningValue": 35.5
+            },
+            {
+              "cells": [
+                "Line 25",
+                "1",
+                "36.50"
+              ],
+              "runningValue": 36.5
+            },
+            {
+              "cells": [
+                "Line 26",
+                "1",
+                "37.50"
+              ],
+              "runningValue": 37.5
+            },
+            {
+              "cells": [
+                "Line 27",
+                "1",
+                "38.50"
+              ],
+              "runningValue": 38.5
+            },
+            {
+              "cells": [
+                "Line 28",
+                "1",
+                "39.50"
+              ],
+              "runningValue": 39.5
+            },
+            {
+              "cells": [
+                "Line 29",
+                "1",
+                "40.50"
+              ],
+              "runningValue": 40.5
+            },
+            {
+              "cells": [
+                "Line 30",
+                "1",
+                "41.50"
+              ],
+              "runningValue": 41.5
+            },
+            {
+              "cells": [
+                "Line 31",
+                "1",
+                "42.50"
+              ],
+              "runningValue": 42.5
+            },
+            {
+              "cells": [
+                "Line 32",
+                "1",
+                "43.50"
+              ],
+              "runningValue": 43.5
+            },
+            {
+              "cells": [
+                "Line 33",
+                "1",
+                "44.50"
+              ],
+              "runningValue": 44.5
+            },
+            {
+              "cells": [
+                "Line 34",
+                "1",
+                "45.50"
+              ],
+              "runningValue": 45.5
+            },
+            {
+              "cells": [
+                "Line 35",
+                "1",
+                "46.50"
+              ],
+              "runningValue": 46.5
+            },
+            {
+              "cells": [
+                "Line 36",
+                "1",
+                "47.50"
+              ],
+              "runningValue": 47.5
+            },
+            {
+              "cells": [
+                "Line 37",
+                "1",
+                "48.50"
+              ],
+              "runningValue": 48.5
+            },
+            {
+              "cells": [
+                "Line 38",
+                "1",
+                "49.50"
+              ],
+              "runningValue": 49.5
+            },
+            {
+              "cells": [
+                "Line 39",
+                "1",
+                "50.50"
+              ],
+              "runningValue": 50.5
+            },
+            {
+              "cells": [
+                "Line 40",
+                "1",
+                "51.50"
+              ],
+              "runningValue": 51.5
+            },
+            {
+              "cells": [
+                "Line 41",
+                "1",
+                "52.50"
+              ],
+              "runningValue": 52.5
+            },
+            {
+              "cells": [
+                "Line 42",
+                "1",
+                "53.50"
+              ],
+              "runningValue": 53.5
+            },
+            {
+              "cells": [
+                "Line 43",
+                "1",
+                "54.50"
+              ],
+              "runningValue": 54.5
+            },
+            {
+              "cells": [
+                "Line 44",
+                "1",
+                "55.50"
+              ],
+              "runningValue": 55.5
+            },
+            {
+              "cells": [
+                "Line 45",
+                "1",
+                "56.50"
+              ],
+              "runningValue": 56.5
+            },
+            {
+              "cells": [
+                "Line 46",
+                "1",
+                "57.50"
+              ],
+              "runningValue": 57.5
+            },
+            {
+              "cells": [
+                "Line 47",
+                "1",
+                "58.50"
+              ],
+              "runningValue": 58.5
+            },
+            {
+              "cells": [
+                "Line 48",
+                "1",
+                "59.50"
+              ],
+              "runningValue": 59.5
+            },
+            {
+              "cells": [
+                "Line 49",
+                "1",
+                "60.50"
+              ],
+              "runningValue": 60.5
+            },
+            {
+              "cells": [
+                "Line 50",
+                "1",
+                "61.50"
+              ],
+              "runningValue": 61.5
+            },
+            {
+              "cells": [
+                "Line 51",
+                "1",
+                "62.50"
+              ],
+              "runningValue": 62.5
+            },
+            {
+              "cells": [
+                "Line 52",
+                "1",
+                "63.50"
+              ],
+              "runningValue": 63.5
+            },
+            {
+              "cells": [
+                "Line 53",
+                "1",
+                "64.50"
+              ],
+              "runningValue": 64.5
+            },
+            {
+              "cells": [
+                "Line 54",
+                "1",
+                "65.50"
+              ],
+              "runningValue": 65.5
+            },
+            {
+              "cells": [
+                "Line 55",
+                "1",
+                "66.50"
+              ],
+              "runningValue": 66.5
+            },
+            {
+              "cells": [
+                "Line 56",
+                "1",
+                "67.50"
+              ],
+              "runningValue": 67.5
+            },
+            {
+              "cells": [
+                "Line 57",
+                "1",
+                "68.50"
+              ],
+              "runningValue": 68.5
+            },
+            {
+              "cells": [
+                "Line 58",
+                "1",
+                "69.50"
+              ],
+              "runningValue": 69.5
+            },
+            {
+              "cells": [
+                "Line 59",
+                "1",
+                "70.50"
+              ],
+              "runningValue": 70.5
+            },
+            {
+              "cells": [
+                "Line 60",
+                "1",
+                "71.50"
+              ],
+              "runningValue": 71.5
+            }
+          ],
+          "runningTotalColumn": 2,
+          "runningTotalPrefix": "£",
+          "carriedForwardLabel": "Carried forward",
+          "broughtForwardLabel": "Brought forward",
+          "runningTotalFormat": "N2"
+        }
+      ]
+    }
+  ]
+}
