@@ -23,7 +23,7 @@
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartDataPoint.cs" ExpectedHash="0FCAE587A63995B4D47491D9BD63D929A00154D9FC4126921A7DDAFF94D28CA0" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartSeries.cs" ExpectedHash="D160AB1EFC4B97ED540EFF2C2541CFC078D03ECB82D10FC7BF0C3E2E47A69FD5" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartSeriesStyle.cs" ExpectedHash="38839F84138E9A95AE86B47CE4D59F36DA7C439FEE0FE819F73ED19AF53A1478" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/PieChart.cs" ExpectedHash="3F3F547BB445E8688BB584B3F33042ED11920CD4FEFC986297D179A72655D774" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/PieChart.cs" ExpectedHash="4A1ED491C1ECC5A1EF77D9A899D1ECE17CADC20068BD4BC3677DFE680B75CDE1" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartBase.Host.cs" ExpectedHash="E5ADCB011881A928C56FE4671B4A21D5F9C158B5815E112852125B7441E76F7D" />
   </ItemGroup>
   <Target Name="VerifyChartSources" BeforeTargets="CoreCompile">

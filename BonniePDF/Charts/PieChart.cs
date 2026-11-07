@@ -42,6 +42,11 @@ public class PieChart : ChartBase
 
     // Donut hole proportions
     private const float DonutHoleRatio = 0.33f; // donut hole radius as fraction of pie radius
+    private const float CentreTotalHoleRatio = 0.56f; // a donut with its total in the hole needs a wider hole
+    private const float CentreValueMaxSize = 22f;
+    private const float CentreValueMinSize = 7f;
+    private const float CentreLabelGap = 3f;
+    private static readonly Color CentreValueColor = Color.FromHex("#111827");
 
     private const string FontFamily = StandardFonts.Helvetica;
 
@@ -92,6 +97,25 @@ public class PieChart : ChartBase
     public bool ShowTotal { get; set; } = true;
 
     /// <summary>
+    /// Where the total is shown: <c>"legend"</c> (default), as a row below the legend items, or
+    /// <c>"center"</c>, as a large figure with <see cref="TotalLabel"/> beneath it in the donut hole,
+    /// which then widens to fit. A full pie has no hole, so it keeps the total in the legend.
+    /// </summary>
+    public string TotalPosition
+    {
+        get => _totalPosition;
+        set
+        {
+            if (value is not "legend" and not "center") throw new ArgumentException("Invalid total position.", nameof(value));
+            _totalPosition = value;
+        }
+    }
+    private string _totalPosition = "legend";
+
+    /// <summary>The total sits in the donut hole rather than the legend.</summary>
+    private bool TotalInCentre => IsDonut && TotalPosition == "center";
+
+    /// <summary>
     /// Fill each slice with a gradient from a lighter tint of its colour at the centre side to its
     /// own colour at the rim. Slice colours must be opaque. Default is false.
     /// </summary>
@@ -126,6 +150,29 @@ public class PieChart : ChartBase
 
         // Draw legend (including optional total row)
         if (ShowLegend) DrawLegend(canvas, dataPoints, colors, layout, total);
+
+        if (ShowTotal && TotalInCentre) DrawCentreTotal(canvas, total, layout);
+    }
+
+    /// <summary>
+    /// Draws the total in the donut hole: the figure as large as fits (up to 22pt, shrinking a
+    /// point at a time while it is wider than 80% of the hole), with <see cref="TotalLabel"/>
+    /// beneath it at 55% of that size, the pair centred on the hole.
+    /// </summary>
+    private void DrawCentreTotal(ICanvas canvas, decimal total, PieLayout layout)
+    {
+        string value = ChartNumberFormat.Format(total, TotalValueFormat);
+        float maxWidth = layout.DonutHoleRadius * 1.6f;
+        float size = MathF.Min(CentreValueMaxSize, MathF.Floor(layout.DonutHoleRadius * 0.45f));
+        while (size > CentreValueMinSize && canvas.MeasureText(value, size, StandardFonts.HelveticaBold).Width > maxWidth)
+            size -= 1;
+        float labelSize = MathF.Max(CentreValueMinSize, MathF.Round(size * 0.55f, MidpointRounding.AwayFromZero));
+        bool hasLabel = TotalLabel.Length > 0;
+        float blockHeight = size + (hasLabel ? CentreLabelGap + labelSize : 0);
+        float top = layout.CenterY - blockHeight / 2;
+        canvas.DrawText(layout.CenterX, top, value, CentreValueColor, size, StandardFonts.HelveticaBold, TextAlignment.Center);
+        if (hasLabel)
+            canvas.DrawText(layout.CenterX, top + size + CentreLabelGap, TotalLabel, LegendTextColor, labelSize, FontFamily, TextAlignment.Center);
     }
 
     /// <summary>
@@ -177,7 +224,7 @@ public class PieChart : ChartBase
         float legendStartY = pieCenterY - totalLegendHeight / 2;
 
         // Donut hole radius
-        float donutHoleRadius = pieRadius * DonutHoleRatio;
+        float donutHoleRadius = pieRadius * (TotalInCentre && ShowTotal ? CentreTotalHoleRatio : DonutHoleRatio);
 
         return new PieLayout(pieCenterX, pieCenterY, pieRadius, donutHoleRadius, legendX, legendStartY);
     }
@@ -337,7 +384,7 @@ public class PieChart : ChartBase
             canvas.DrawText(textX, textY, labelText, LegendTextColor, LegendFontSize, FontFamily, TextAlignment.Left);
         }
 
-        if (ShowTotal)
+        if (ShowTotal && !TotalInCentre)
         {
             string totalText = $"{TotalLabel}: {ChartNumberFormat.Format(total, TotalValueFormat)}";
             float textX = layout.LegendX + LegendBoxSize + LegendBoxTextGap;
