@@ -18,38 +18,67 @@ namespace BonniePDF.Examples.LayoutFlow.MultiColumnLayouts;
 [System.ComponentModel.DisplayName("Multi-Column Layouts")]
 [System.ComponentModel.Category("Layout & Flow")]
 [System.ComponentModel.Description(
-    "Newspaper-style columns built from stacks: a three-column article with images, divided columns, and balanced versus ragged column heights.")]
+    "Newspaper-style columns built from stacks: a three-story community newsletter with images, divided columns, and balanced versus ragged column heights.")]
 public static class MultiColumnLayoutsExample
 {
+    /// <summary>A community newsletter's three front-page stories: headline and paragraphs.</summary>
+    private static readonly (string Heading, string[] Paragraphs)[] Article =
+    [
+        ("Community garden opens",
+        [
+            "The community garden on Mill Lane opened its gates on Saturday after two years of planning. Forty raised beds, a greenhouse and a tool store now stand on what was an empty car park behind the station.",
+            "Every bed has been taken for the first season, and a waiting list is open at the library desk. Volunteers meet on Wednesday evenings and Sunday mornings; no experience is needed and tools are provided.",
+        ]),
+        ("Library open later",
+        [
+            "The central library will stay open until 8pm on Tuesdays and Thursdays from next month. The change follows a survey in which most respondents asked for evening access to study space.",
+            "The reading room has new tables with power at every seat, and study rooms can now be booked online up to a week ahead. Membership remains free for everyone who lives, works or studies in the town.",
+        ]),
+        ("High Street works",
+        [
+            "Work to resurface the High Street begins on 12 January and is expected to last six weeks. The road will close between 8pm and 6am, and the number 4 bus will divert along Station Road at night.",
+            "Shops stay open throughout, and pavements will remain clear during trading hours. Updates will be posted on the noticeboard outside the town hall every Friday until the work is complete.",
+        ]),
+    ];
+
+    /// <summary>The editor's note and the listings, set either side of the divider.</summary>
+    private static readonly string[] Editor =
+    [
+        "This is the last issue of the year, and the busiest. Thank you to everyone who sent in news, photographs and corrections; the newsletter is only as good as the town that writes it.",
+        "Next year we move to a monthly issue, delivered to every household on the first Saturday of the month. If you would like to help with deliveries in your street, leave your name at the library desk.",
+    ];
+
+    private static readonly string[] WhatsOn =
+    [
+        "The winter market returns to the square on the second weekend of December, with forty stalls, a choir on Saturday evening and the lighting of the tree at five o'clock on Sunday.",
+        "The repair café meets in the church hall on the first Sunday of each month. Bring a broken lamp, a torn coat or a bicycle that will not change gear, and leave with it working again.",
+    ];
+
+    /// <summary>Six paragraphs of one feature, used to compare column splits.</summary>
+    private static readonly string[] MarketHall =
+    [
+        "The market hall on Church Street was built in 1868 to give the weekly cattle market a roof. Its iron columns were cast in the town's own foundry, and the clock above the entrance was paid for by public subscription.",
+        "For a century the hall was the busiest building in the town. Farmers sold livestock on Tuesdays, and on Saturdays the floor filled with stalls selling cheese, cloth, ironmongery and seasonal produce.",
+        "The cattle market moved to the edge of town in 1972, and the hall stood half used for many years. A leaking roof and a failed heating system closed it to the public in 2015.",
+        "Restoration began in 2023 with a grant from the heritage fund and the work of a local building trust. The roof was relaid with the original slate, and the columns were stripped and repainted in their first colour.",
+        "The hall reopened in the spring with twenty permanent stalls, a café and a space for exhibitions. The clock, silent for nine years, strikes the hour again.",
+        "Guided tours run on the first Saturday of each month and take about an hour. They are free, but places are limited, so book at the library desk or at the café in the hall.",
+    ];
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate()
     {
-        // Deterministic filler from a seeded source; the TypeScript twin of this
-        // example reads the same sequence, so both documents carry the same text.
+        // Placeholder images from a seeded source; the TypeScript twin of this
+        // example reads the same sequence, so both documents carry the same images.
         PlaceholderSource source = Placeholders.WithSeed(42);
 
-        (string Heading, string[] Paragraphs, byte[] ImageData)[] articleColumns =
-        {
-            ("Front Page", [source.Paragraph(), source.Paragraph()], source.Image(153, 64)),
-            ("The Brief", [source.Paragraph(), source.Paragraph()], source.Image(153, 64)),
-            ("Dispatches", [source.Paragraph(), source.Paragraph()], source.Image(153, 64)),
-        };
+        (string Heading, string[] Paragraphs, byte[] ImageData)[] articleColumns = Article
+            .Select(story => (story.Heading, story.Paragraphs, source.Image(153, 64)))
+            .ToArray();
 
-        string[][] dividerParagraphs =
-        {
-            [source.Paragraph(), source.Paragraph()],
-            [source.Paragraph(), source.Paragraph()],
-        };
+        string[][] dividerParagraphs = [Editor, WhatsOn];
 
-        string[] balanceParagraphs =
-        [
-            source.Paragraph(),
-            source.Paragraph(),
-            source.Paragraph(),
-            source.Paragraph(),
-            source.Paragraph(),
-            source.Paragraph(),
-        ];
+        string[] balanceParagraphs = MarketHall;
 
         Document doc = new()
         {
@@ -109,7 +138,7 @@ public static class MultiColumnLayoutsExample
         doc.Add(new TextBlock
         {
             Text =
-                "Three equal columns, each a VerticalStack holding its own heading, image and justified paragraphs. " +
+                "Three equal columns, each a VerticalStack holding its own heading, image and paragraphs. " +
                 "The number of stack children is the number of columns; the stack\u2019s spacing (18pt here) is the gutter.",
             Margin = new Thickness(0, 0, 0, 10),
         });
@@ -145,7 +174,7 @@ public static class MultiColumnLayoutsExample
                 column.Add(new TextBlock
                 {
                     Text = text,
-                    Alignment = TextAlignment.Justify,
+                    Alignment = TextAlignment.Left,
                 });
             }
 
@@ -156,30 +185,26 @@ public static class MultiColumnLayoutsExample
 
         // ── Columns with a divider ──────────────────────────────────────────────
 
-        doc.Add(new PageBreak());
 
         doc.Add(SectionHeading("Columns with a Divider", "s-divider", 0));
         doc.Add(new TextBlock
         {
-            Text = "A vertical rule between two weighted text columns. The rule is a fixed-width Container added " +
-                   "without a weight, so it keeps its own 2pt while the remaining width is split evenly between the " +
-                   "text columns. The row carries an explicit height and the rule matches it, so the rule spans the " +
-                   "whole block regardless of how the paragraphs inside fall.",
+            Text = "A vertical rule between two weighted text columns: an unweighted 2pt Container keeps its width while the columns share the rest, and the row and the rule share one explicit height.",
             Margin = new Thickness(0, 0, 0, 10),
         });
 
         // The two text columns carry weight 1 each; the rule is added without a
         // weight, which under weighted distribution means "keep your own width".
-        // 223pt is the measured height of the taller column: the row and the rule
+        // 144pt is the measured height of the taller column: the row and the rule
         // share it, so the rule ends where the columns do.
         var divided = new HorizontalStack
         {
             Spacing = 20,
             WidthDistribution = WidthDistribution.Weighted,
-            Height = 223,
+            Height = 144,
         };
         divided.Add(ColumnOf(dividerParagraphs[0]), 1f);
-        divided.Add(DividerRule(223));
+        divided.Add(DividerRule(144));
         divided.Add(ColumnOf(dividerParagraphs[1]), 1f);
         doc.Add(divided);
 
@@ -240,7 +265,7 @@ public static class MultiColumnLayoutsExample
         Margin = new Thickness(0, topMargin, 0, 6),
     };
 
-    /// <summary>A column of justified paragraphs with a uniform gap between them.</summary>
+    /// <summary>A column of paragraphs with a uniform gap between them.</summary>
     private static VerticalStack ColumnOf(string[] paragraphs)
     {
         var column = new VerticalStack { Spacing = 12 };
@@ -249,7 +274,7 @@ public static class MultiColumnLayoutsExample
             column.Add(new TextBlock
             {
                 Text = text,
-                Alignment = TextAlignment.Justify,
+                Alignment = TextAlignment.Left,
             });
         }
 

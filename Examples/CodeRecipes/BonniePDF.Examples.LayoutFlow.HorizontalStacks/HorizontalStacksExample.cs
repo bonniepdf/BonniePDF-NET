@@ -37,6 +37,7 @@ public static class HorizontalStacksExample
                 Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language = "en-GB",
+                Margin = 40,
                 DefaultTextStyle = new TextStyle()
                     .WithFamily(StandardFonts.Helvetica)
                     .WithSize(11)
@@ -75,9 +76,9 @@ public static class HorizontalStacksExample
             WidthDistribution = WidthDistribution.Equal,
             Spacing = 10,
         };
-        equalStack.Add(Box("Column 1", ColorPalette.Blue[600]));
-        equalStack.Add(Box("Column 2", ColorPalette.Indigo[600]));
-        equalStack.Add(Box("Column 3", ColorPalette.Slate[600]));
+        equalStack.Add(Box("Column 1", ColorPalette.Indigo[600]));
+        equalStack.Add(Box("Column 2", ColorPalette.Indigo[700]));
+        equalStack.Add(Box("Column 3", ColorPalette.Indigo[900]));
         doc.Add(equalStack);
 
         // ── Weighted distribution ──────────────────────────────────────────────
@@ -98,9 +99,9 @@ public static class HorizontalStacksExample
         // 500, not 400: white text on Slate[400] falls to 2.63:1 against the
         // 4.5:1 WCAG AA threshold; 500 clears it (4.76:1) and still reads lighter
         // than the 600/800 boxes beside it.
-        weightedStack.Add(Box("1×", ColorPalette.Slate[500]), 1f);
-        weightedStack.Add(Box("2×", ColorPalette.Slate[600]), 2f);
-        weightedStack.Add(Box("3×", ColorPalette.Slate[800]), 3f);
+        weightedStack.Add(Box("1×", ColorPalette.Indigo[600]), 1f);
+        weightedStack.Add(Box("2×", ColorPalette.Indigo[700]), 2f);
+        weightedStack.Add(Box("3×", ColorPalette.Indigo[900]), 3f);
         doc.Add(weightedStack);
 
         // ── Cross-axis (vertical) alignment ────────────────────────────────────
@@ -109,15 +110,15 @@ public static class HorizontalStacksExample
         doc.Add(new TextBlock
         {
             Text =
-                "When a stack has a fixed height and its children differ in height, stack.Alignment positions each child along the cross (vertical) axis. The same three boxes - 40pt, 65pt and 90pt tall - are shown top-aligned, centred, and bottom-aligned.",
+                "When a stack has a fixed height and its children differ in height, stack.Alignment positions each child along the cross (vertical) axis. The same three boxes - 24pt, 42pt and 60pt tall - are shown top-aligned, centred, and bottom-aligned, side by side.",
             Margin = new Thickness(0, 0, 0, 8),
         });
 
         (string label, float boxHeight, Color bg)[] boxes =
         {
-            ("40pt", 40f, ColorPalette.Blue[600]),
-            ("65pt", 65f, ColorPalette.Indigo[600]),
-            ("90pt", 90f, ColorPalette.Slate[600]),
+            ("24pt", 24f, ColorPalette.Indigo[600]),
+            ("42pt", 42f, ColorPalette.Indigo[700]),
+            ("60pt", 60f, ColorPalette.Indigo[900]),
         };
 
         (string caption, HorizontalAlignment align)[] rows =
@@ -127,22 +128,20 @@ public static class HorizontalStacksExample
             ("Bottom (End)", HorizontalAlignment.End),
         };
 
+        // The three alignments side by side, each a captioned 60pt-tall stack of the same three boxes.
+        var alignments = new HorizontalStack
+        {
+            WidthDistribution = WidthDistribution.Equal,
+            Spacing = 16,
+            Margin = new Thickness(0, 0, 0, 4),
+        };
         foreach ((string caption, HorizontalAlignment align) in rows)
         {
-            doc.Add(new TextBlock
-            {
-                Text = caption,
-                FontName = StandardFonts.HelveticaBold,
-                FontSize = 11,
-                Color = ColorPalette.Slate[600],
-                Margin = new Thickness(0, 8, 0, 4),
-            });
-
             var row = new HorizontalStack
             {
                 WidthDistribution = WidthDistribution.Equal,
-                Spacing = 10,
-                Height = 90,
+                Spacing = 6,
+                Height = 60,
                 Alignment = align,
             };
             foreach ((string label, float boxHeight, Color bg) in boxes)
@@ -150,21 +149,29 @@ public static class HorizontalStacksExample
                 row.Add(new Container
                 {
                     Child = new TextBlock
-                        { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 11, Color = Color.White },
-                    Padding = new Thickness(12, 6, 12, 6),
+                        { Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 10, Color = Color.White },
+                    Padding = new Thickness(8, 6, 8, 6),
                     BackgroundColor = bg,
                     Height = boxHeight,
                 });
             }
 
-            doc.Add(row);
+            var column = new VerticalStack();
+            column.Add(new TextBlock
+            {
+                Text = caption,
+                FontName = StandardFonts.HelveticaBold,
+                FontSize = 11,
+                Color = ColorPalette.Slate[600],
+                Margin = new Thickness(0, 8, 0, 4),
+            });
+            column.Add(row);
+            alignments.Add(column);
         }
 
-        // ── Key-value pairs ────────────────────────────────────────────────────
+        doc.Add(alignments);
 
-        // Keep the heading with its section: no keep-with-next primitive exists
-        // yet, so force the whole block onto the next page with a break.
-        doc.Add(new PageBreak());
+        // ── Key-value pairs ────────────────────────────────────────────────────
 
         doc.Add(SectionHeading("Key-Value Pairs", "s-kv", 16));
         doc.Add(new TextBlock
@@ -216,14 +223,12 @@ public static class HorizontalStacksExample
         {
             Text =
                 "The first column contains flowing prose that demonstrates how text wraps within a constrained width. " +
-                "HorizontalStack automatically divides the available page width so each child receives its share. " +
                 "Text inside each column wraps independently, giving a true two-column reading experience.",
         });
         twoCol.Add(new TextBlock
         {
             Text =
-                "The second column runs in parallel with the first. Both columns sit within a single HorizontalStack " +
-                "element, meaning they are rendered side-by-side. This pattern is commonly used for newsletters, " +
+                "The second column runs in parallel with the first. This pattern is commonly used for newsletters, " +
                 "product sheets, and comparison tables where parallel content aids comprehension.",
         });
         doc.Add(twoCol);
