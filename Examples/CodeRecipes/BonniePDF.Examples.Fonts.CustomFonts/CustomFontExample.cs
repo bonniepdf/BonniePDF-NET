@@ -10,9 +10,27 @@ namespace BonniePDF.Examples.Fonts.CustomFonts;
 [System.ComponentModel.DisplayName("Custom Fonts")]
 [System.ComponentModel.Category("Fonts")]
 [System.ComponentModel.Description(
-    "TrueType font embedding with Unicode coverage — symbols, currency, arrows, maths, dingbats, and Greek. PDF/A-2a + PDF/UA-1.")]
+    "TrueType font embedding: a large specimen of the embedded face, then Unicode coverage in two columns — symbols, currency, arrows, maths, dingbats, and Greek. PDF/A-2a + PDF/UA-1.")]
 public static class CustomFontExample
 {
+    /// <summary>Which registered face a group of characters is set in.</summary>
+    private enum FontRole { Text, Math, Symbols }
+
+    /// <summary>The coverage groups, in two columns: title, contents id, face, and the lines that show them.</summary>
+    private static readonly (string Title, string TocId, FontRole Role, string[] Lines)[] LeftGroups =
+    [
+        ("Unicode Symbols", "s-symbols", FontRole.Text, ["• Bullet  © Copyright  ® Registered  ™ Trademark", "– En-dash  — Em-dash  ± Plus-minus  × Multiply  ÷ Divide"]),
+        ("Currency Symbols", "s-currency", FontRole.Text, ["€ Euro  £ Pound  ¥ Yen  ₹ Rupee  ₿ Bitcoin"]),
+        ("Greek Letters", "s-greek", FontRole.Text, ["α Alpha  β Beta  γ Gamma  δ Delta  π Pi  Ω Omega"]),
+    ];
+
+    private static readonly (string Title, string TocId, FontRole Role, string[] Lines)[] RightGroups =
+    [
+        ("Arrows (via NotoSansMath)", "s-arrows", FontRole.Math, ["← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪"]),
+        ("Mathematical Operators (via NotoSansMath)", "s-math", FontRole.Math, ["≠ Not equal  ≤ Less-equal  ≥ Greater-equal  ∞ Infinity", "∑ Sum  ∏ Product  √ Root  ∫ Integral"]),
+        ("Dingbats (via NotoSansSymbols2)", "s-dingbats", FontRole.Symbols, ["✓ Check  ✗ Cross  ★ Star  ♠ Spade  ♥ Heart  ♦ Diamond  ♣ Club"]),
+    ];
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
     {
@@ -66,78 +84,48 @@ public static class CustomFontExample
             Margin = new Thickness(0, 0, 0, 16),
         });
 
-        // ── 1. Unicode Symbols ────────────────────────────────────────────────
+        // ── The embedded face, large ───────────────────────────────────────────
 
-        Section(doc, "Unicode Symbols", "s-symbols");
-
-        foreach (string text in new[]
-                 {
-                     "• Bullet (U+2022)  © Copyright (U+00A9)  ® Registered (U+00AE)  ™ Trademark (U+2122)",
-                     "– En-dash (U+2013)  — Em-dash (U+2014)",
-                     "± Plus-minus  × Multiply  ÷ Divide",
-                 })
+        VerticalStack specimen = new() { Spacing = 4 };
+        specimen.Add(new TextBlock("Aa") { FontName = font, FontSize = 64, Color = ColorPalette.Indigo[900] });
+        specimen.Add(new TextBlock("Quick zephyrs blow, vexing daft Jim — £12, €15.") { FontName = font, FontSize = 20, Color = ColorPalette.Slate[900] });
+        specimen.Add(new TextBlock("Ελληνικά  ·  Кириллица  ·  Tiếng Việt  ·  Ærøskøbing") { FontName = font, FontSize = 14, Color = ColorPalette.Slate[700] });
+        specimen.Add(new TextBlock("Noto Sans Regular, embedded as a subset of only the glyphs on this page.")
         {
-            doc.Add(new TextBlock { Text = text, Margin = new Thickness(0, 0, 0, 4) });
+            FontName = font,
+            FontSize = 9,
+            Color = ColorPalette.Slate[600],
+            Margin = new Thickness(0, 6, 0, 0),
+        });
+        doc.Add(new Container
+        {
+            BackgroundColor = ColorPalette.Indigo[50],
+            CornerRadius = 8,
+            Padding = new Thickness(22, 16, 22, 16),
+            Margin = new Thickness(0, 0, 0, 14),
+            Child = specimen,
+        });
+
+        // ── Coverage, in two columns ───────────────────────────────────────────
+
+        string FaceOf(FontRole role) => role switch { FontRole.Math => mathFont, FontRole.Symbols => symbolsFont, _ => font };
+        HorizontalStack columns = new() { Spacing = 24, WidthDistribution = WidthDistribution.Equal };
+        foreach (var groups in new[] { LeftGroups, RightGroups })
+        {
+            VerticalStack column = new();
+            foreach (var (title, tocId, role, lines) in groups)
+            {
+                column.Add(SectionHeading(title, tocId, font));
+                foreach (string text in lines)
+                    column.Add(new TextBlock { Text = text, FontName = FaceOf(role), Margin = new Thickness(0, 0, 0, 4) });
+            }
+            columns.Add(column);
         }
+        doc.Add(columns);
 
-        // ── 2. Currency Symbols ───────────────────────────────────────────────
+        // ── Standard vs Embedded ───────────────────────────────────────────────
 
-        Section(doc, "Currency Symbols", "s-currency");
-
-        doc.Add(new TextBlock
-        {
-            Text = "€ Euro  £ Pound  ¥ Yen  ₹ Rupee  ₿ Bitcoin",
-            Margin = new Thickness(0, 0, 0, 4),
-        });
-
-        // ── 3. Arrows ─────────────────────────────────────────────────────────
-
-        Section(doc, "Arrows (via NotoSansMath)", "s-arrows");
-
-        doc.Add(new TextBlock
-        {
-            Text = "← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪",
-            FontName = mathFont,
-            Margin = new Thickness(0, 0, 0, 4),
-        });
-
-        // ── 4. Mathematical Operators ─────────────────────────────────────────
-
-        Section(doc, "Mathematical Operators (via NotoSansMath)", "s-math");
-
-        foreach (string text in new[]
-                 {
-                     "≠ Not equal  ≤ Less-equal  ≥ Greater-equal  ∞ Infinity",
-                     "∑ Sum  ∏ Product  √ Root  ∫ Integral",
-                 })
-        {
-            doc.Add(new TextBlock { Text = text, FontName = mathFont, Margin = new Thickness(0, 0, 0, 4) });
-        }
-
-        // ── 5. Dingbats ───────────────────────────────────────────────────────
-
-        Section(doc, "Dingbats (via NotoSansSymbols2)", "s-dingbats");
-
-        doc.Add(new TextBlock
-        {
-            Text = "✓ Check  ✗ Cross  ★ Star  ♠ Spade  ♥ Heart  ♦ Diamond  ♣ Club",
-            FontName = symbolsFont,
-            Margin = new Thickness(0, 0, 0, 4),
-        });
-
-        // ── 6. Greek Letters ──────────────────────────────────────────────────
-
-        Section(doc, "Greek Letters", "s-greek");
-
-        doc.Add(new TextBlock
-        {
-            Text = "α Alpha  β Beta  γ Gamma  δ Delta  π Pi  Ω Omega",
-            Margin = new Thickness(0, 0, 0, 4),
-        });
-
-        // ── 7. Standard vs Embedded ───────────────────────────────────────────
-
-        Section(doc, "Standard vs Embedded", "s-comparison");
+        doc.Add(SectionHeading("Standard vs Embedded", "s-comparison", font));
 
         doc.Add(new TextBlock
         {
@@ -148,22 +136,20 @@ public static class CustomFontExample
 
         doc.Add(new TextBlock
         {
-            Text = "Embedded Noto Sans (TrueType) — full Unicode range, subsetting keeps file size compact.",
+            Text = "Embedded NotoSans (TrueType) — full Unicode range, subsetting keeps file size compact.",
+            FontName = font,
         });
 
         return doc;
     }
 
-    private static void Section(Document doc, string title, string tocId)
+    private static Heading SectionHeading(string title, string tocId, string font) => new(title)
     {
-        doc.Add(new Heading(title)
-        {
-            TocIdentifier = tocId,
-            Level = 2,
-            FontName = doc.Fonts.Faces[0].FontName,
-            FontSize = 13,
-            Color = ColorPalette.Indigo[600],
-            Margin = new Thickness(0, 12, 0, 6),
-        });
-    }
+        TocIdentifier = tocId,
+        Level = 2,
+        FontName = font,
+        FontSize = 13,
+        Color = ColorPalette.Indigo[600],
+        Margin = new Thickness(0, 12, 0, 6),
+    };
 }
