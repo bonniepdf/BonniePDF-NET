@@ -87,11 +87,13 @@ public static class TablesExample
             Margin = new Thickness(0, 0, 0, 10),
         });
 
-        var table = new Table(34f, 130f, 130f, 120f)
+        var table = new Table(46f, 130f, 130f, 120f)
         {
             RepeatHeadersOnNewPage = true,
-            HeaderBackgroundColor = ColorPalette.Blue[600],
-            HeaderTextColor = Color.White,
+            HeaderBackgroundColor = ColorPalette.Slate[100],
+            HeaderTextColor = ColorPalette.Slate[800],
+            Border = new Border(0.5f),
+            BorderColors = new BorderColors(ColorPalette.Slate[200]),
         };
 
         table.AddHeader(
@@ -131,13 +133,21 @@ public static class TablesExample
                 photoData = emp.Avatar;
             }
 
-            var photo = new Image
+            // The photo is cropped round by a clipping container the size of the photo.
+            var photo = new Container
             {
-                ImageData = photoData,
-                Width = 24,
-                Height = 24,
-                FitMode = ImageFitMode.Cover,
-                AltText = $"Photo of {emp.Name}"
+                Width = 34,
+                Height = 34,
+                CornerRadius = 17,
+                ClipContent = true,
+                Child = new Image
+                {
+                    ImageData = photoData,
+                    Width = 34,
+                    Height = 34,
+                    FitMode = ImageFitMode.Cover,
+                    AltText = $"Photo of {emp.Name}"
+                },
             };
 
             Color bg = rowIndex++ % 2 == 0 ? Color.White : ColorPalette.Slate[50];
@@ -149,17 +159,17 @@ public static class TablesExample
                 },
                 new TableCell
                 {
-                    Content = new TextBlock { Text = emp.Name, FontSize = 10, Color = ColorPalette.Slate[800] },
+                    Content = new TextBlock { Text = emp.Name, FontSize = 10, Color = ColorPalette.Slate[800], Margin = new Thickness(0, 10, 0, 0) },
                     BackgroundColor = bg
                 },
                 new TableCell
                 {
-                    Content = new TextBlock { Text = emp.Role, FontSize = 10, Color = ColorPalette.Slate[600] },
+                    Content = new TextBlock { Text = emp.Role, FontSize = 10, Color = ColorPalette.Slate[600], Margin = new Thickness(0, 10, 0, 0) },
                     BackgroundColor = bg
                 },
                 new TableCell
                 {
-                    Content = new TextBlock { Text = emp.Department, FontSize = 10, Color = ColorPalette.Slate[600] },
+                    Content = DepartmentPill(emp.Department),
                     BackgroundColor = bg
                 });
         }
@@ -197,5 +207,36 @@ public static class TablesExample
         }
 
         return doc;
+    }
+
+    /// <summary>Each department's hue, so a department reads at a glance down the column.</summary>
+    private static ColorPalette HueOf(string department) => department switch
+    {
+        "Engineering" => ColorPalette.Indigo,
+        "Marketing" => ColorPalette.Rose,
+        "Sales" => ColorPalette.Amber,
+        "HR" => ColorPalette.Emerald,
+        "Finance" => ColorPalette.Sky,
+        "Design" => ColorPalette.Violet,
+        "Operations" => ColorPalette.Teal,
+        _ => ColorPalette.Slate,
+    };
+
+    /// <summary>
+    /// A department as a small tinted pill: a light fill with dark text of the same hue. The auto-width
+    /// stack sizes the pill to its text instead of letting it fill the cell.
+    /// </summary>
+    private static HorizontalStack DepartmentPill(string department)
+    {
+        var hue = HueOf(department);
+        var wrap = new HorizontalStack { WidthDistribution = WidthDistribution.Auto, Margin = new Thickness(0, 9, 0, 0) };
+        wrap.Add(new Container
+        {
+            BackgroundColor = hue[100],
+            CornerRadius = 8,
+            Padding = new Thickness(8, 3, 8, 3),
+            Child = new TextBlock { Text = department, FontSize = 9, Color = hue[800] },
+        });
+        return wrap;
     }
 }

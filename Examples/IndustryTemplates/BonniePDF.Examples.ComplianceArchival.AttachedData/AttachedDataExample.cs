@@ -16,7 +16,7 @@ namespace BonniePDF.Examples.ComplianceArchival.AttachedData;
 [System.ComponentModel.DisplayName("Report with Embedded Data")]
 [System.ComponentModel.Category("Compliance & Archival")]
 [System.ComponentModel.Description(
-    "A PDF/A-3 report that carries its source CSV inside the file, so a reader can check the numbers without re-keying them.")]
+    "A PDF/A-3 report that carries its source CSV inside the file: the figures as a table and a chart, and a note naming the attached file, so a reader can check the numbers without re-keying them.")]
 public static class AttachedDataExample
 {
     private static readonly Color Ink = ColorPalette.Slate[900];
@@ -74,6 +74,52 @@ public static class AttachedDataExample
         doc.Add(table);
 
         #endregion table
+
+        // The same figures as a chart, read from the same rows as the table and the attachment.
+        ChartSeries series = new() { Color = ColorPalette.Indigo[600] };
+        foreach (var (quarter, revenue, _) in Rows)
+            series.DataPoints.Add(new ChartDataPoint { Label = quarter, Value = revenue / 1000m, LabelFormat = "N0" });
+        doc.Add(new BarChart(new ChartData
+        {
+            Title = "Revenue by quarter (EUR thousand)",
+            Series = [series],
+            YAxis = new AxisOptions { MaxValue = 600, StepCount = 6 },
+        })
+        {
+            Theme = "modern",
+            AltText = "Bar chart of revenue by quarter in 2026, rising from 412 to 560 thousand euros.",
+            Height = 240,
+            StretchToFit = true,
+            FontFamily = StandardFonts.Helvetica,
+            LabelFontSize = 9,
+            BackgroundColor = Color.White,
+            Margin = new Thickness(0, 18, 0, 18),
+        });
+
+        // A note that names the attachment, so a reader knows the data is there to open.
+        HorizontalStack note = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 12 };
+        note.Add(new Container
+        {
+            BackgroundColor = ColorPalette.Indigo[100],
+            CornerRadius = 4,
+            Padding = new Thickness(6, 3, 6, 3),
+            Child = Tb("ATTACHED", 7.5f, ColorPalette.Indigo[800], bold: true, align: TextAlignment.Center),
+        }, 1);
+        note.Add(new TextBlock
+        {
+            Text = $"quarterly-revenue.csv: {Rows.Length} rows, 3 columns. Open it from your PDF viewer's attachments panel to reuse the exact figures.",
+            FontSize = 9,
+            Color = Ink,
+        }, 6);
+        doc.Add(new Container
+        {
+            BackgroundColor = ColorPalette.Slate[50],
+            Border = new Border(0.75f),
+            BorderColors = new BorderColors(ColorPalette.Slate[200]),
+            CornerRadius = 6,
+            Padding = new Thickness(14, 10, 14, 10),
+            Child = note,
+        });
 
         // ── Embed the source data as an attachment ────────────────
 
