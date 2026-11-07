@@ -327,7 +327,7 @@ public static class CustomerAccountStatementExample
         closingRow.Add(
             new Container
             {
-                BackgroundColor = ColorPalette.Indigo[50],
+                BackgroundColor = ColorPalette.Blue[50],
                 CornerRadius = 6,
                 Padding = new Thickness(12),
                 Child = closingBody,
@@ -448,7 +448,7 @@ public static class CustomerAccountStatementExample
 
     private static readonly Color Heading = ColorPalette.Slate[800];
 
-    private static readonly Color Accent = ColorPalette.Indigo[700];
+    private static readonly Color Accent = ColorPalette.Blue[800];
 
     private static readonly Color Rule = ColorPalette.Slate[200];
 

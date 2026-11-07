@@ -258,7 +258,7 @@ public static class BoardMinutesExample
 
     private static readonly Color Heading = ColorPalette.Slate[800];
 
-    private static readonly Color Accent = ColorPalette.Indigo[700];
+    private static readonly Color Accent = ColorPalette.Slate[700];
 
     private static readonly Color Rule = ColorPalette.Slate[200];
 

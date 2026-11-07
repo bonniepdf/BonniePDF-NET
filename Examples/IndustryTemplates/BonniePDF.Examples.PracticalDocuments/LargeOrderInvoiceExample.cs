@@ -86,7 +86,7 @@ public static class LargeOrderInvoiceExample
 
         // ── Header: brand and invoice details ──
         VerticalStack brand = new() { Spacing = 2 };
-        brand.Add(new Heading("NORTHFIELD SUPPLY") { Level = 1, FontName = StandardFonts.HelveticaBold, FontSize = 20, LetterSpacing = 0.5f, Color = ColorPalette.Indigo[700] });
+        brand.Add(new Heading("NORTHFIELD SUPPLY") { Level = 1, FontName = StandardFonts.HelveticaBold, FontSize = 20, LetterSpacing = 0.5f, Color = ColorPalette.Violet[800] });
         brand.Add(Text("Facilities and maintenance supplies", 9, ColorPalette.Slate[500]));
         VerticalStack meta = new() { Spacing = 2 };
         meta.Add(Text("INVOICE", 9, ColorPalette.Slate[900], bold: true, align: TextAlignment.Right));
@@ -159,9 +159,9 @@ public static class LargeOrderInvoiceExample
         sums.AddRow(Text("VAT", 10, ColorPalette.Slate[700], align: TextAlignment.Right), Text($"£{Money(totals.TaxPence)}", 10, ColorPalette.Slate[700], align: TextAlignment.Right));
 
         HorizontalStack dueLine = new() { WidthDistribution = WidthDistribution.Equal };
-        dueLine.Add(Text("Total due", 13, ColorPalette.Indigo[900], bold: true));
-        dueLine.Add(Text($"£{Money(totals.GrossPence)}", 13, ColorPalette.Indigo[900], bold: true, align: TextAlignment.Right));
-        Container due = new() { BackgroundColor = ColorPalette.Indigo[50], CornerRadius = 6, Padding = new Thickness(10, 8, 10, 8), Margin = new Thickness(0, 6, 0, 0), Child = dueLine };
+        dueLine.Add(Text("Total due", 13, ColorPalette.Violet[900], bold: true));
+        dueLine.Add(Text($"£{Money(totals.GrossPence)}", 13, ColorPalette.Violet[900], bold: true, align: TextAlignment.Right));
+        Container due = new() { BackgroundColor = ColorPalette.Violet[50], CornerRadius = 6, Padding = new Thickness(10, 8, 10, 8), Margin = new Thickness(0, 6, 0, 0), Child = dueLine };
 
         VerticalStack vatColumn = new() { Spacing = 6 };
         vatColumn.Add(new Heading("VAT summary") { Level = 2, FontName = StandardFonts.HelveticaBold, FontSize = 11, Color = ColorPalette.Slate[900] });

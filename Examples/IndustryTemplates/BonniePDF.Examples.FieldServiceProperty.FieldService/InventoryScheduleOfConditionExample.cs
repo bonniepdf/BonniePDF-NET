@@ -411,7 +411,7 @@ public static class InventoryScheduleOfConditionExample
 
     // Local helpers and sample data for this document.
     // ── Palette ───────────────────────────────────────────────────────────────
-    // Slate ink with an indigo accent, per the shared example design tokens.
+    // Slate ink with a cyan accent, per the shared example design tokens.
     private static readonly Color Ink = ColorPalette.Slate[700];
 
     /// <summary>600, not 400: 400 never clears 4.5:1 as body text on white.</summary>
@@ -419,7 +419,7 @@ public static class InventoryScheduleOfConditionExample
 
     private static readonly Color HeadingColor = ColorPalette.Slate[800];
 
-    private static readonly Color Accent = ColorPalette.Indigo[700];
+    private static readonly Color Accent = ColorPalette.Cyan[700];
 
     private static readonly Color Rule = ColorPalette.Slate[200];
 

@@ -14,11 +14,11 @@ namespace BonniePDF.Examples.ComplianceAudit.AuditReport;
     "Enterprise data-protection and security audit report with running confidential header/footer, KPI tiles, charts, findings register, and recommendations. PDF/A-2a + PDF/UA-1.")]
 public static class AuditReportExample
 {
-    private static readonly Color Primary = ColorPalette.Indigo[700];
+    private static readonly Color Primary = ColorPalette.Slate[700];
 
     private static readonly Color Ink = ColorPalette.Slate[700];
 
-    // 600, not 500: several usages read against the Indigo-50 KPI panel, and 500
+    // 600, not 500: several usages read against the Slate-50 KPI panel, and 500
     // falls to 4.26:1 there against the 4.5:1 WCAG AA threshold.
     private static readonly Color Muted = ColorPalette.Slate[600];
     private static readonly Color Rule = ColorPalette.Slate[200];
@@ -296,7 +296,7 @@ public static class AuditReportExample
         });
         stack.Add(new TextBlock { Text = label, FontName = StandardFonts.Helvetica, FontSize = 8.5f, Color = Muted });
         return new Container
-            { BackgroundColor = ColorPalette.Indigo[50], CornerRadius = 8, Padding = new Thickness(14, 12, 14, 12), Child = stack };
+            { BackgroundColor = ColorPalette.Slate[50], CornerRadius = 8, Padding = new Thickness(14, 12, 14, 12), Child = stack };
     }
 
     private static Container ChartCard(string title, IElement chart)
