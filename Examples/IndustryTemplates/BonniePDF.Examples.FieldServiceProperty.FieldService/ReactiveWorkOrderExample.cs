@@ -13,6 +13,11 @@ namespace BonniePDF.Examples.FieldServiceProperty.FieldService;
     "A one-page reactive work order for an emergency facilities call-out, with barcode and QR code, priority banner, site and job details, parts, costs and sign-off. PDF/A-2a + PDF/UA-1.")]
 public static class ReactiveWorkOrderExample
 {
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/field-service/leak.jpg",
+    ];
+
     // ── Palette ──────────────────────────────────────────────────────────────
     private static readonly Color Teal = Color.FromHex("#0e7c86");
     private static readonly Color Navy = Color.FromHex("#0f2f3d");
@@ -63,7 +68,9 @@ public static class ReactiveWorkOrderExample
     private static string Gbp(decimal amount) => "GBP " + amount.ToString("F2", CultureInfo.InvariantCulture);
 
     // ── Document ─────────────────────────────────────────────────────────────
-    public static Document Generate()
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         DocumentSettings settings = new(PdfSize.A4, 40)
         {
@@ -134,10 +141,43 @@ public static class ReactiveWorkOrderExample
         doc.Add(cards);
 
         // Narrative sections
-        doc.Add(SectionHeading("Reported fault"));
-        doc.Add(PanelBox(
-            "AHU-07 serving the retail mall has tripped and will not restart. Mall temperature is rising and the unit " +
-            "is making a loud grinding noise before shutdown. Building management system shows a supply fan failure alarm."));
+        VerticalStack faultCol = new();
+        faultCol.Add(SectionHeading("Reported fault"));
+        faultCol.Add(new Container
+        {
+            BackgroundColor = Panel,
+            CornerRadius = 6,
+            Padding = new Thickness(10, 10, 10, 10),
+            Child = Text(
+                "AHU-07 serving the retail mall has tripped and will not restart. Mall temperature is rising and the unit " +
+                "is making a loud grinding noise before shutdown. Building management system shows a supply fan failure alarm."),
+        });
+
+        HorizontalStack faultRow = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Spacing = 12,
+            Margin = new Thickness(0, 0, 0, 10),
+        };
+        faultRow.Add(faultCol, 3.4f);
+        faultRow.Add(
+            new Container
+            {
+                Width = 110,
+                Height = 82,
+                CornerRadius = 6,
+                ClipContent = true,
+                Child = new Image
+                {
+                    ImageData = Asset(assets, "images/field-service/leak.jpg"),
+                    Width = 110,
+                    Height = 82,
+                    FitMode = ImageFitMode.Cover,
+                    AltText = "Close-up of copper water pipe joint above ceiling tile showing reported leak.",
+                },
+            },
+            1f);
+        doc.Add(faultRow);
 
         doc.Add(SectionHeading("Work carried out"));
         doc.Add(PanelBox(
@@ -363,5 +403,46 @@ public static class ReactiveWorkOrderExample
         row.Add(Text(left, size: 7.5f, color: Muted), 4);
         row.Add(Text(right, bold: true, size: 7.5f, color: Muted, align: TextAlignment.Right), 1);
         return row;
+    }
+
+    private static byte[] Asset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        assets.TryGetValue(path, out byte[]? bytes)
+            ? bytes
+            : throw new InvalidOperationException($"Missing required asset: {path}");
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDirectory();
+        Dictionary<string, byte[]> result = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            result[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return result;
+    }
+
+    private static string FindAssetsDirectory()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            string localCandidate = Path.Combine(dir, "assets");
+            if (Directory.Exists(localCandidate))
+            {
+                return localCandidate;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
     }
 }

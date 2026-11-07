@@ -1,3 +1,4 @@
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.PracticalRecipes;
@@ -8,6 +9,11 @@ namespace BonniePDF.Examples.PracticalRecipes;
 [System.ComponentModel.Description("A supply agreement: clause headings never stranded at the foot of a page, a signature panel kept in one piece, and a handover checklist that continues across pages.")]
 public static class PageBreakControlExample
 {
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/svg/sample-company.svg",
+    ];
+
     private static readonly (string Title, string Text)[] Clauses =
     [
         ("1. Parties and term",
@@ -61,7 +67,9 @@ public static class PageBreakControlExample
         "Handover meeting minutes circulated",
     ];
 
-    public static Document Generate()
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         var doc = new Document(new DocumentSettings
         {
@@ -78,14 +86,29 @@ public static class PageBreakControlExample
         })
         { Metadata = new DocumentMetadata { Title = "Supply agreement SA-2026-118" } };
 
-        doc.Add(new TextBlock("SUPPLY AGREEMENT")
+        HorizontalStack brandRow = new()
         {
-            FontName = StandardFonts.HelveticaBold,
-            FontSize = 8,
-            LetterSpacing = 1.5f,
-            Color = ColorPalette.Teal[700],
-            Margin = new Thickness(0, 0, 0, 4)
+            WidthDistribution = WidthDistribution.Weighted,
+            Spacing = 6,
+            Margin = new Thickness(0, 0, 0, 4),
+        };
+        brandRow.Add(new Svg
+        {
+            SvgData = SvgAsset(assets, "images/svg/sample-company.svg"),
+            Width = 9,
+            Height = 9,
+            AltText = "Sample Company logo",
         });
+        brandRow.Add(
+            new TextBlock("SUPPLY AGREEMENT")
+            {
+                FontName = StandardFonts.HelveticaBold,
+                FontSize = 8,
+                LetterSpacing = 1.5f,
+                Color = ColorPalette.Teal[700],
+            },
+            1);
+        doc.Add(brandRow);
         doc.Add(new Heading("Northfield Logistics and Calder Print & Pack")
         {
             Level = 1,
@@ -198,5 +221,49 @@ public static class PageBreakControlExample
         block.Add(new TextBlock("Name  __________________________") { FontSize = 8.5f });
         block.Add(new TextBlock("Date  ___________________________") { FontSize = 8.5f });
         return block;
+    }
+
+    private static byte[] Asset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        assets.TryGetValue(path, out byte[]? bytes)
+            ? bytes
+            : throw new InvalidOperationException($"Missing required asset: {path}");
+
+    private static string SvgAsset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        Encoding.UTF8.GetString(Asset(assets, path));
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDirectory();
+        Dictionary<string, byte[]> result = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            result[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return result;
+    }
+
+    private static string FindAssetsDirectory()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            string localCandidate = Path.Combine(dir, "assets");
+            if (Directory.Exists(localCandidate))
+            {
+                return localCandidate;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
     }
 }

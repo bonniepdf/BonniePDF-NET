@@ -193,7 +193,7 @@ public static class BillOfCostsExample
         // ── Rates ─────────────────────────────────────────────────────────────
 
         // Each heading asks for room for the start of what it introduces, so it is never left alone at the foot of a page.
-        doc.Add(KeepWithNext(H2("Hourly rates claimed")));
+        doc.Add(H2("Hourly rates claimed"));
         Table rates = new(1f, 4.6f, 1.4f, 1.4f)
         {
             CellPadding = 6,
@@ -294,7 +294,7 @@ public static class BillOfCostsExample
 
         // ── Disbursements ─────────────────────────────────────────────────────
 
-        doc.Add(KeepWithNext(H2("Disbursements")));
+        doc.Add(H2("Disbursements"));
 
         Table disbursements = new(1.2f, 5.4f, 1.2f, 1.3f)
         {

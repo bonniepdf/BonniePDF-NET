@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 310">
+  <rect width="520" height="310" fill="#ffffff"/>
+  <!-- Ground Floor Title -->
+  <text x="115" y="18" font-family="Helvetica" font-size="10" font-weight="bold" fill="#1e293b" text-anchor="middle">GROUND FLOOR</text>
+  <!-- Ground Floor Outer Footprint (x=28..208, y=28..288) -->
+  <rect x="28" y="28" width="180" height="260" fill="#f8fafc" stroke="#1e293b" stroke-width="3"/>
+  <!-- Front Reception (4.05 x 3.70 m) -->
+  <rect x="28" y="28" width="114" height="88" fill="#ffffff" stroke="#475569" stroke-width="1.2"/>
+  <!-- Bay Window at top of Front Reception -->
+  <polyline points="54,28 62,21 108,21 116,28" fill="#ffffff" stroke="#1e293b" stroke-width="2.5"/>
+  <line x1="64" y1="21" x2="106" y2="21" stroke="#38bdf8" stroke-width="2"/>
+  <text x="85" y="68" font-family="Helvetica" font-size="8.5" font-weight="bold" fill="#1e293b" text-anchor="middle">Front reception</text>
+  <text x="85" y="80" font-family="Helvetica" font-size="7.5" fill="#475569" text-anchor="middle">4.05 × 3.70 m</text>
+  <!-- Entrance Hall (4.20 x 1.85 m) -->
+  <rect x="142" y="28" width="66" height="100" fill="#f8fafc" stroke="#475569" stroke-width="1.2"/>
+  <!-- Stairs in Hall -->
+  <g stroke="#94a3b8" stroke-width="0.8">
+    <line x1="186" y1="56" x2="206" y2="56"/>
+    <line x1="186" y1="62" x2="206" y2="62"/>
+    <line x1="186" y1="68" x2="206" y2="68"/>
+    <line x1="186" y1="74" x2="206" y2="74"/>
+    <line x1="186" y1="80" x2="206" y2="80"/>
+    <line x1="186" y1="86" x2="206" y2="86"/>
+    <rect x="186" y="50" width="20" height="42" fill="none"/>
+  </g>
+  <text x="166" y="74" font-family="Helvetica" font-size="8" font-weight="bold" fill="#1e293b" text-anchor="middle">Entrance</text>
+  <text x="166" y="84" font-family="Helvetica" font-size="8" font-weight="bold" fill="#1e293b" text-anchor="middle">hall</text>
+  <text x="166" y="95" font-family="Helvetica" font-size="7" fill="#475569" text-anchor="middle">4.20 × 1.85 m</text>
+  <!-- Rear Reception (4.10 x 3.55 m) -->
+  <rect x="28" y="116" width="114" height="86" fill="#ffffff" stroke="#475569" stroke-width="1.2"/>
+  <text x="85" y="155" font-family="Helvetica" font-size="8.5" font-weight="bold" fill="#1e293b" text-anchor="middle">Rear reception</text>
+  <text x="85" y="167" font-family="Helvetica" font-size="7.5" fill="#475569" text-anchor="middle">4.10 × 3.55 m</text>
+  <!-- Cloakroom / WC (1.80 x 0.95 m) -->
+  <rect x="142" y="128" width="66" height="36" fill="#ffffff" stroke="#475569" stroke-width="1.2"/>
+  <text x="175" y="145" font-family="Helvetica" font-size="7.5" font-weight="bold" fill="#1e293b" text-anchor="middle">Cloakroom</text>
+  <text x="175" y="155" font-family="Helvetica" font-size="6.8" fill="#475569" text-anchor="middle">1.80 × 0.95 m</text>
+  <!-- Store -->
+  <rect x="142" y="164" width="66" height="38" fill="#f8fafc" stroke="#475569" stroke-width="1.2"/>
+  <text x="175" y="186" font-family="Helvetica" font-size="7.5" font-weight="bold" fill="#475569" text-anchor="middle">Store</text>
+  <!-- Kitchen and Dining Room Extension (6.40 x 3.30 m) -->
+  <rect x="28" y="202" width="180" height="86" fill="#ffffff" stroke="#475569" stroke-width="1.2"/>
+  <!-- Roof Lantern dashed outline -->
+  <rect x="68" y="220" width="96" height="36" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="118" y="242" font-family="Helvetica" font-size="9" font-weight="bold" fill="#1e293b" text-anchor="middle">Kitchen and dining room</text>
+  <text x="118" y="254" font-family="Helvetica" font-size="7.5" fill="#475569" text-anchor="middle">6.40 × 3.30 m</text>
+  <!-- Bifold doors at bottom of Kitchen -->
+  <line x1="60" y1="288" x2="176" y2="288" stroke="#0e7490" stroke-width="3"/>
+
+  <!-- First Floor Title -->
+  <text x="392" y="18" font-family="Helvetica" font-size="10" font-weight="bold" fill="#1e293b" text-anchor="middle">FIRST FLOOR</text>
+  <!-- First Floor Outer Footprint (x=302..482, y=28..202) -->
+  <rect x="302" y="28" width="180" height="174" fill="#f8fafc" stroke="#1e293b" stroke-width="3"/>
+  <!-- Principal Bedroom (4.05 x 3.65 m) -->
+  <rect x="302" y="28" width="114" height="88" fill="#ffffff" stroke="#475569" stroke-width="1.2"/>
+  <text x="359" y="68" font-family="Helvetica" font-size="8.5" font-weight="bold" fill="#1e293b" text-anchor="middle">Principal bedroom</text>
+  <text x="359" y="80" font-family="Helvetica" font-size="7.5" fill="#475569" text-anchor="middle">4.05 × 3.65 m</text>
+  <!-- Landing -->
+  <rect x="416" y="28" width="66" height="58" fill="#f8fafc" stroke="#475569" stroke-width="1.2"/>
+  <text x="449" y="60" font-family="Helvetica" font-size="8" font-weight="bold" fill="#475569" text-anchor="middle">Landing</text>
+  <!-- Family Bathroom (2.60 x 2.10 m) -->
+  <rect x="416" y="86" width="66" height="52" fill="#ffffff" stroke="#475569" stroke-width="1.2"/>
+  <text x="449" y="109" font-family="Helvetica" font-size="7.5" font-weight="bold" fill="#1e293b" text-anchor="middle">Family bathroom</text>
+  <text x="449" y="120" font-family="Helvetica" font-size="7" fill="#475569" text-anchor="middle">2.60 × 2.10 m</text>
+  <!-- Bedroom Two (3.95 x 3.40 m) -->
+  <rect x="302" y="116" width="114" height="86" fill="#ffffff" stroke="#475569" stroke-width="1.2"/>
+  <text x="359" y="155" font-family="Helvetica" font-size="8.5" font-weight="bold" fill="#1e293b" text-anchor="middle">Bedroom two</text>
+  <text x="359" y="167" font-family="Helvetica" font-size="7.5" fill="#475569" text-anchor="middle">3.95 × 3.40 m</text>
+  <!-- Bedroom Three (2.85 x 2.30 m) -->
+  <rect x="416" y="138" width="66" height="64" fill="#ffffff" stroke="#475569" stroke-width="1.2"/>
+  <text x="449" y="167" font-family="Helvetica" font-size="7.5" font-weight="bold" fill="#1e293b" text-anchor="middle">Bedroom three</text>
+  <text x="449" y="178" font-family="Helvetica" font-size="7" fill="#475569" text-anchor="middle">2.85 × 2.30 m</text>
+
+  <!-- Compass / North Arrow (South-facing garden at bottom) -->
+  <g transform="translate(392, 248)">
+    <circle cx="0" cy="0" r="18" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+    <polygon points="0,-13 4,0 0,-3 -4,0" fill="#0e7490"/>
+    <polygon points="0,13 4,0 0,3 -4,0" fill="#94a3b8"/>
+    <text x="0" y="-21" font-family="Helvetica" font-size="7.5" font-weight="bold" fill="#0e7490" text-anchor="middle">N</text>
+    <text x="0" y="29" font-family="Helvetica" font-size="7" fill="#64748b" text-anchor="middle">South-facing garden</text>
+  </g>
+</svg>

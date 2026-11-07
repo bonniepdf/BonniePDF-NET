@@ -112,12 +112,34 @@ public static class PropertyParticularsExample
         new("G", 1, 20, ColorPalette.Rose[700], Color.White, ColorPalette.Rose[700]),
     ];
 
+    private static readonly (string Path, string AltText)[] Gallery =
+    [
+        ("images/property/kitchen.jpg",
+            "Extended kitchen and dining room with shaker units, oak worktops, and roof lantern."),
+        ("images/property/living-room.jpg", "Front reception room with bay window and open fireplace."),
+        ("images/property/garden.jpg", "South-facing rear garden with paved terrace and lawn."),
+    ];
+
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/property/hero.jpg",
+        "images/property/kitchen.jpg",
+        "images/property/living-room.jpg",
+        "images/property/garden.jpg",
+    ];
+
     private static EpcBand BandFor(int score)
         => EpcBands.FirstOrDefault(b => score >= b.From && score <= b.To) ?? EpcBands[^1];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    /// <summary>Builds the document using the supplied asset dictionary.</summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "MA0051:Method is too long", Justification = "The example intentionally keeps generation inline.")]
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+
         EpcBand current = BandFor(EpcCurrent);
         EpcBand potential = BandFor(EpcPotential);
 
@@ -146,7 +168,27 @@ public static class PropertyParticularsExample
             size: 18f,
             bold: true,
             color: Accent,
-            marginBottom: 14f));
+            marginBottom: 12f));
+
+        doc.Add(PhotoFrame(
+            Asset(assets, "images/property/hero.jpg"),
+            150f,
+            6f,
+            "Front elevation of 14 Meadowcroft Avenue, a 1930s semi-detached house with a block-paved drive.",
+            8f));
+
+        HorizontalStack gallery = new()
+        {
+            Spacing = 8,
+            WidthDistribution = WidthDistribution.Equal,
+            Margin = new Thickness(0, 0, 0, 12),
+        };
+        foreach ((string path, string altText) in Gallery)
+        {
+            gallery.Add(PhotoFrame(Asset(assets, path), 68f, 4f, altText));
+        }
+
+        doc.Add(gallery);
 
         doc.Add(WeightedRow(
             [
@@ -520,5 +562,54 @@ public static class PropertyParticularsExample
         row.Add(Cell(left, size: 7.5f, color: Muted), 2.5f);
         row.Add(Cell(right, size: 7.5f, color: Muted, align: TextAlignment.Right), 2);
         return row;
+    }
+
+    private static Container PhotoFrame(byte[] imageData, float height, float cornerRadius, string altText, float marginBottom = 0f) => new()
+    {
+        Height = height,
+        CornerRadius = cornerRadius,
+        ClipContent = true,
+        Margin = new Thickness(0, 0, 0, marginBottom),
+        Child = new Image
+        {
+            ImageData = imageData,
+            Height = height,
+            FitMode = ImageFitMode.Cover,
+            AltText = altText,
+        },
+    };
+
+    private static byte[] Asset(IReadOnlyDictionary<string, byte[]> assets, string path)
+        => assets.TryGetValue(path, out byte[]? bytes)
+            ? bytes
+            : throw new InvalidOperationException($"Missing required asset: {path}");
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        string assetsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                assetsDir = candidate;
+                break;
+            }
+
+            dir = Path.GetDirectoryName(dir);
+        }
+
+        Dictionary<string, byte[]> assets = new(StringComparer.Ordinal);
+        foreach (string path in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, path.Replace('/', Path.DirectorySeparatorChar));
+            if (File.Exists(fullPath))
+            {
+                assets[path] = File.ReadAllBytes(fullPath);
+            }
+        }
+
+        return assets;
     }
 }

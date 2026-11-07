@@ -30,12 +30,7 @@ public static class LollipopChartExample
                         Color = ColorPalette.Slate[500]
                     }, null);
                 stack.Add(
-                    new TextBlock
-                    {
-                        Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
-                        FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500],
-                        Alignment = TextAlignment.Right
-                    }, 1f);
+                    PageNumber.Text().Font(StandardFonts.Helvetica, 10).Color(ColorPalette.Slate[500]).AlignRight(), 1f);
                 return stack;
             }
         });

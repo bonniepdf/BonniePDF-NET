@@ -54,9 +54,21 @@ public static class LabReportExample
         ]),
     ];
 
+    /// <summary>Asset paths required by this example, relative to the shared <c>Examples/assets</c> directory.</summary>
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/svg/sample-healthcare.svg",
+    ];
+
+    /// <summary>Builds the document using the default shared assets. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+        string markSvg = System.Text.Encoding.UTF8.GetString(GetAsset(assets, "images/svg/sample-healthcare.svg"));
+
         DocumentSettings settings = new(PdfSize.A4, 50)
         {
             PageColor = Color.White,
@@ -79,7 +91,7 @@ public static class LabReportExample
         doc.Metadata.Author = "Sample Hospital Pathology Services";
         doc.Metadata.Subject = "Pathology laboratory report with reference ranges and flags (sample).";
 
-        doc.Add(Header());
+        doc.Add(Header(markSvg));
         doc.Add(BlueRule());
         doc.Add(InfoBlock());
 
@@ -111,7 +123,7 @@ public static class LabReportExample
         return doc;
     }
 
-    private static Grid Header()
+    private static Grid Header(string markSvg)
     {
         Grid header = new(2.4f, 1)
         {
@@ -142,6 +154,17 @@ public static class LabReportExample
             Margin = new Thickness(0, 1, 0, 0),
         });
 
+        HorizontalStack orgRow = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 10 };
+        orgRow.Add(new Svg
+        {
+            SvgData = markSvg,
+            Width = 24,
+            Height = 24,
+            IsDecorative = true,
+            Margin = new Thickness(0, 2, 0, 0),
+        });
+        orgRow.Add(org);
+
         Heading title = new("LABORATORY REPORT")
         {
             TocIdentifier = "lab-report",
@@ -152,7 +175,7 @@ public static class LabReportExample
             Alignment = TextAlignment.Right,
         };
 
-        header.AddRow(org, title);
+        header.AddRow(orgRow, title);
         return header;
     }
 
@@ -362,4 +385,42 @@ public static class LabReportExample
     private sealed record Panel(string Title, Analyte[] Rows);
 
     private sealed record Analyte(string Name, string Result, string Units, string Range, string Flag);
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDir();
+        Dictionary<string, byte[]> dict = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            dict[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return dict;
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes))
+            return bytes;
+        string fullPath = Path.Combine(FindAssetsDir(), key.Replace('/', Path.DirectorySeparatorChar));
+        return File.ReadAllBytes(fullPath);
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (!string.IsNullOrEmpty(dir))
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+                return candidate;
+            string direct = Path.Combine(dir, "assets");
+            if (Directory.Exists(direct))
+                return direct;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

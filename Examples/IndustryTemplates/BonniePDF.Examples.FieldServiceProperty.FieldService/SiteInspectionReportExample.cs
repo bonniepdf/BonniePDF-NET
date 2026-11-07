@@ -27,6 +27,13 @@ namespace BonniePDF.Examples.FieldServiceProperty.FieldService;
     "A snagging register that flows across pages with a repeating header, with severity tiles, an items-by-trade chart, and close-out signatures. PDF/A-2a + PDF/UA-1.")]
 public static class SiteInspectionReportExample
 {
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/inspection/s-002-cable-tray.jpg",
+        "images/inspection/s-003-penetration.jpg",
+        "images/inspection/s-008-emergency-light.jpg",
+    ];
+
     private const string Reference = "SIR-2026-0231";
     private const string Project = "Sample Project — Phase 2 fit-out";
     private const string Site = "Sample Site B — Building 4";
@@ -106,7 +113,10 @@ public static class SiteInspectionReportExample
     };
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         Dictionary<string, int> counts = CountBy(Defects, d => d.Severity);
         Dictionary<string, int> byTrade = CountBy(Defects, d => d.Trade);
@@ -195,6 +205,26 @@ public static class SiteInspectionReportExample
                         size: 9f)),
             ],
             StatusCritical));
+
+        HorizontalStack evidenceStrip = new()
+        {
+            WidthDistribution = WidthDistribution.Equal,
+            Spacing = 10,
+            Margin = new Thickness(0, 0, 0, 6),
+        };
+        evidenceStrip.Add(EvidenceCard(
+            Asset(assets, "images/inspection/s-002-cable-tray.jpg"),
+            "S-002 · Riser cable tray earth strap",
+            "Inspection photograph for S-002 showing cable tray coupling in Riser 2B with disconnected earth strap."));
+        evidenceStrip.Add(EvidenceCard(
+            Asset(assets, "images/inspection/s-003-penetration.jpg"),
+            "S-003 · Unsealed fire penetration",
+            "Inspection photograph for S-003 showing three cables passing through an unsealed compartment wall penetration."));
+        evidenceStrip.Add(EvidenceCard(
+            Asset(assets, "images/inspection/s-008-emergency-light.jpg"),
+            "S-008 · Corridor emergency bulkhead",
+            "Inspection photograph for S-008 showing corridor emergency bulkhead luminaire EM-2-14 unlit during key test."));
+        doc.Add(evidenceStrip);
 
         // ── Items by trade ────────────────────────────────────────────────────
 
@@ -598,4 +628,71 @@ public static class SiteInspectionReportExample
     private static readonly CultureInfo GbCulture = CultureInfo.GetCultureInfo("en-GB");
 
     private static string ShortDate(DateTime d) => d.ToString("dd MMM yyyy", GbCulture);
+
+    private static VerticalStack EvidenceCard(byte[] imageData, string caption, string altText)
+    {
+        VerticalStack card = new() { Spacing = 4 };
+        card.Add(new Container
+        {
+            Height = 76,
+            CornerRadius = 4,
+            ClipContent = true,
+            Child = new Image
+            {
+                ImageData = imageData,
+                Height = 76,
+                FitMode = ImageFitMode.Cover,
+                AltText = altText,
+            },
+        });
+        card.Add(new TextBlock
+        {
+            Text = caption,
+            FontName = StandardFonts.Helvetica,
+            FontSize = 8,
+            Color = Muted,
+        });
+        return card;
+    }
+
+    private static byte[] Asset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        assets.TryGetValue(path, out byte[]? bytes)
+            ? bytes
+            : throw new InvalidOperationException($"Missing required asset: {path}");
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDirectory();
+        Dictionary<string, byte[]> result = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            result[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return result;
+    }
+
+    private static string FindAssetsDirectory()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            string localCandidate = Path.Combine(dir, "assets");
+            if (Directory.Exists(localCandidate))
+            {
+                return localCandidate;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
+    }
 }

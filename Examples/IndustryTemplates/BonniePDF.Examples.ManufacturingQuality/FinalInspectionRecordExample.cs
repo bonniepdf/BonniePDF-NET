@@ -208,21 +208,27 @@ public static class FinalInspectionRecordExample
     /// <summary>A check's name and requirement, turned a quarter turn to read upwards.</summary>
     private static Rotate Vertical(string name, string requirement)
     {
+        TextBlock title = Tb(name, 7.5f, Color.White, bold: true);
+        TextBlock limit = Tb(requirement, 6.5f, ColorPalette.Stone[300]);
         VerticalStack stack = new() { Spacing = 1 };
-        stack.Add(Tb(name, 7.5f, Color.White, bold: true));
-        stack.Add(Tb(requirement, 6.5f, ColorPalette.Stone[300]));
+        stack.Add(title);
+        stack.Add(limit);
         return new Rotate
         {
             Angle = 270,
             Mode = RotationMode.Constrained,
-            // A fixed length before turning, so every name starts from the bottom of the header row.
-            ContentWidth = 84,
+            ContentWidth = MathF.Ceiling(MathF.Max(title.GetPreferredWidth(), limit.GetPreferredWidth())) + 1,
             Child = stack,
         };
     }
 
     /// <summary>A header cell, padded for the dark header row.</summary>
-    private static TableCell HeaderCell(IElement content) => new() { Content = content, Padding = new Thickness(4, 6, 4, 6) };
+    private static TableCell HeaderCell(IElement content) => new()
+    {
+        Content = content,
+        Padding = new Thickness(4, 6, 4, 6),
+        VerticalAlignment = VerticalAlignment.End,
+    };
 
     /// <summary>True when a result is a failed attribute check or a measurement outside its tolerance.</summary>
     private static bool Outside(string result, int check)
@@ -234,16 +240,12 @@ public static class FinalInspectionRecordExample
     }
 
     /// <summary>The part's verdict as a small chip.</summary>
-    private static HorizontalStack Verdict(bool failed)
+    private static Container Verdict(bool failed) => new()
     {
-        HorizontalStack fit = new() { WidthDistribution = WidthDistribution.Auto };
-        fit.Add(new Container
-        {
-            BackgroundColor = failed ? ColorPalette.Rose[100] : ColorPalette.Emerald[50],
-            CornerRadius = 3,
-            Padding = new Thickness(5, 1.5f, 5, 1.5f),
-            Child = Tb(failed ? "Reject" : "Accept", 7.5f, failed ? ColorPalette.Rose[800] : ColorPalette.Emerald[800], bold: true),
-        });
-        return fit;
-    }
+        FitContent = true,
+        BackgroundColor = failed ? ColorPalette.Rose[100] : ColorPalette.Emerald[50],
+        CornerRadius = 3,
+        Padding = new Thickness(5, 1.5f, 5, 1.5f),
+        Child = Tb(failed ? "Reject" : "Accept", 7.5f, failed ? ColorPalette.Rose[800] : ColorPalette.Emerald[800], bold: true),
+    };
 }

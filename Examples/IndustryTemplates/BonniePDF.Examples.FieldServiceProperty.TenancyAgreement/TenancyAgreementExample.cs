@@ -212,12 +212,7 @@ public static class TenancyAgreementExample
     }
 
     /// <summary>Pence as pounds: £1,234.56.</summary>
-    private static string Money(int pence)
-    {
-        string whole = (pence / 100).ToString("N0", CultureInfo.InvariantCulture);
-        string rest = (pence % 100).ToString("D2", CultureInfo.InvariantCulture);
-        return $"£{whole}.{rest}";
-    }
+    private static string Money(int pence) => NumberFormatter.Format(pence / 100m, "N2", "£");
 
     /// <summary>1 → 1st, 2 → 2nd, 3 → 3rd, 4 → 4th … for the days of a month.</summary>
     private static string OrdinalDay(int day)

@@ -26,7 +26,6 @@ public static class CourseCertificateExample
     private static readonly Color Faint = ColorPalette.Slate[400];
     private static readonly Color Accent = ColorPalette.Indigo[700];
     private static readonly Color AccentMid = ColorPalette.Indigo[400];
-    private static readonly Color AccentSoft = ColorPalette.Indigo[100];
     private static readonly Color Gold = ColorPalette.Amber[600];
     // The seal's foil: light, mid and deep golds, with the deepest for its lettering.
     private static readonly Color FoilLight = ColorPalette.Amber[300];
@@ -56,9 +55,20 @@ public static class CourseCertificateExample
         VerificationUrl: "https://example.com/verify/SI-ADE-2026-04188",
         Locale: "en-GB");
 
+    /// <summary>Asset paths required by this example, relative to the shared <c>Examples/assets</c> directory.</summary>
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/svg/university-crest.svg",
+        "images/svg/guilloche.svg",
+    ];
+
+    /// <summary>Builds the document using the default shared assets. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
         DocumentSettings settings = new(PdfSize.A4, PageOrientation.Landscape, PageMargin)
         {
             Conformance = PdfAConformance.PdfA2a,
@@ -66,25 +76,32 @@ public static class CourseCertificateExample
             Language = "en-GB",
         };
         settings.DefaultTextStyle = new TextStyle().WithFamily("Times").WithSize(11f).WithColor(Ink);
-        return BuildDocument(Sample, settings);
+        return BuildDocument(Sample, settings, assets);
     }
 
     /// <summary>Pure builder: the same data always produces the same document.</summary>
-    public static Document BuildDocument(CertificateData data, DocumentSettings settings)
+    public static Document BuildDocument(CertificateData data, DocumentSettings settings) =>
+        BuildDocument(data, settings, LoadDefaultAssets());
+
+    /// <summary>Pure builder: the same data always produces the same document.</summary>
+    public static Document BuildDocument(CertificateData data, DocumentSettings settings,
+        IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+        string crestSvg = System.Text.Encoding.UTF8.GetString(GetAsset(assets, "images/svg/university-crest.svg"));
+        string guillocheSvg = System.Text.Encoding.UTF8.GetString(GetAsset(assets, "images/svg/guilloche.svg"));
+
         Document doc = new(settings);
         doc.Metadata.Title = $"Certificate of Completion — {data.Recipient} — {data.Course.Title}";
         doc.Metadata.Author = data.Institution.Name;
         doc.Metadata.Subject = "Course completion certificate (fictional sample data).";
 
         // A leading spacer settles the wording into the frame rather than
-        // letting it start hard against the top rule. 30pt clears the crest's
-        // own lozenge points (which reach to the very top of its 52pt box)
-        // past the frame's inner rule at 16pt inset - without this the crest
-        // visually crosses the border instead of sitting inside it.
+        // letting it start hard against the top rule. 30pt clears the crest
+        // past the frame's inner rule at 16pt inset.
         VerticalStack body = new();
         body.Add(new Spacer(30));
-        body.Add(Citation(data));
+        body.Add(Citation(data, crestSvg, guillocheSvg));
         body.Add(Attestation(data));
 
         // The frame sits behind everything; the wording rides on top as the
@@ -139,57 +156,6 @@ public static class CourseCertificateExample
         // DrawWidth 0 (the default) means "fill the width available", which is
         // what makes the frame span the content area.
         DrawHeight = FrameHeight,
-        IsDecorative = true,
-    };
-
-    /// <summary>
-    /// The crest: a restrained circular monogram with four small gold lozenges.
-    /// Drawn rather than embedded so it scales cleanly and carries no bitmap
-    /// payload.
-    /// </summary>
-    private static CanvasElement SealMedallion(string institutionName) => new((canvas, width, height) =>
-    {
-        float cx = width / 2;
-        float cy = height / 2;
-        float outer = Math.Min(cx, cy) - 6;
-
-        // Four restrained lozenges give the crest a ceremonial detail without
-        // the visual noise of a full starburst.
-        foreach (double a in new[] { 0, Math.PI / 2, Math.PI, Math.PI * 3 / 2 })
-        {
-            const float pointDistance = 3.5f;
-            float px = cx + (float)Math.Cos(a) * (outer + pointDistance);
-            float py = cy + (float)Math.Sin(a) * (outer + pointDistance);
-            float tangentX = (float)Math.Cos(a + Math.PI / 2) * 2.5f;
-            float tangentY = (float)Math.Sin(a + Math.PI / 2) * 2.5f;
-            float radialX = (float)Math.Cos(a) * 3.5f;
-            float radialY = (float)Math.Sin(a) * 3.5f;
-            canvas.FillPath(
-            [
-                new Point(px + radialX, py + radialY),
-                new Point(px + tangentX, py + tangentY),
-                new Point(px - radialX, py - radialY),
-                new Point(px - tangentX, py - tangentY),
-            ], Gold);
-        }
-
-        canvas.FillCircle(cx, cy, outer, Accent);
-        canvas.FillCircle(cx, cy, outer - 1.5f, Color.White);
-        canvas.FillCircle(cx, cy, outer - 4.5f, AccentSoft);
-
-        string monogram = string.Concat(institutionName
-                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .Take(2)
-                .Select(word => word[0]))
-            .ToUpperInvariant();
-        const float fontSize = 13f;
-        float monogramWidth = canvas.MeasureText(monogram, fontSize, StandardFonts.TimesBold).Width;
-        canvas.DrawText(cx - monogramWidth / 2, cy - fontSize / 2, monogram, Accent, fontSize, StandardFonts.TimesBold,
-            0);
-    })
-    {
-        DrawWidth = 52,
-        DrawHeight = 52,
         IsDecorative = true,
     };
 
@@ -255,12 +221,22 @@ public static class CourseCertificateExample
     }
 
     /// <summary>A small crest, centred above the institution name.</summary>
-    private static HorizontalStack InstitutionCrest(string name)
+    private static HorizontalStack InstitutionCrest(string crestSvg)
     {
         HorizontalStack row = new()
             { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 0, 0, 7) };
         row.Add(new Spacer(1), 1f);
-        row.Add(new Container { Child = SealMedallion(name) }, 0.15f);
+        row.Add(new Container
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Child = new Svg
+            {
+                SvgData = crestSvg,
+                Width = 32,
+                Height = 37,
+                AltText = "Institutional crest",
+            },
+        }, 0.15f);
         row.Add(new Spacer(1), 1f);
         return row;
     }
@@ -268,11 +244,11 @@ public static class CourseCertificateExample
     // ── Section builders ──────────────────────────────────────────────────────
 
     /// <summary>The wording, centred and stacked — the part actually read aloud.</summary>
-    private static VerticalStack Citation(CertificateData data)
+    private static VerticalStack Citation(CertificateData data, string crestSvg, string guillocheSvg)
     {
         VerticalStack stack = new();
 
-        stack.Add(InstitutionCrest(data.Institution.Name));
+        stack.Add(InstitutionCrest(crestSvg));
 
         stack.Add(Text(data.Institution.Name.ToUpperInvariant(), font: StandardFonts.Helvetica, size: 9, color: Accent,
             align: TextAlignment.Center));
@@ -292,11 +268,12 @@ public static class CourseCertificateExample
             Margin = new Thickness(0, 0, 0, 4),
         });
 
+        stack.Add(new Container { Height = 1, BackgroundColor = AccentMid, Margin = new Thickness(210, 0, 210, 6) });
         stack.Add(new Container
         {
-            Height = 1,
-            BackgroundColor = AccentMid,
-            Margin = new Thickness(210, 0, 210, 16),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 8),
+            Child = new Svg { SvgData = guillocheSvg, Height = 14, IsDecorative = true },
         });
 
         stack.Add(Text("This is to certify that", font: StandardFonts.TimesItalic, size: 11, color: Muted,
@@ -427,4 +404,42 @@ public static class CourseCertificateExample
         Signatory[] Signatories,
         string VerificationUrl,
         string Locale);
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDir();
+        Dictionary<string, byte[]> dict = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            dict[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return dict;
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes))
+            return bytes;
+        string fullPath = Path.Combine(FindAssetsDir(), key.Replace('/', Path.DirectorySeparatorChar));
+        return File.ReadAllBytes(fullPath);
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (!string.IsNullOrEmpty(dir))
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+                return candidate;
+            string direct = Path.Combine(dir, "assets");
+            if (Directory.Exists(direct))
+                return direct;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

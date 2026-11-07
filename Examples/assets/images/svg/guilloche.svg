@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 842 595">
+  <g fill="none" stroke="#4338ca" stroke-width="0.6" stroke-opacity="0.08">
+    <!-- Top and bottom guilloche wave bands -->
+    <path d="M24 38 C 160 12, 296 64, 421 38 C 546 12, 682 64, 818 38"/>
+    <path d="M24 44 C 160 18, 296 70, 421 44 C 546 18, 682 70, 818 44"/>
+    <path d="M24 50 C 160 24, 296 76, 421 50 C 546 24, 682 76, 818 50"/>
+    <path d="M24 38 C 160 64, 296 12, 421 38 C 546 64, 682 12, 818 38"/>
+    <path d="M24 44 C 160 70, 296 18, 421 44 C 546 70, 682 18, 818 44"/>
+    <path d="M24 50 C 160 76, 296 24, 421 50 C 546 76, 682 24, 818 50"/>
+    <path d="M24 545 C 160 519, 296 571, 421 545 C 546 519, 682 571, 818 545"/>
+    <path d="M24 551 C 160 525, 296 577, 421 551 C 546 525, 682 577, 818 551"/>
+    <path d="M24 557 C 160 531, 296 583, 421 557 C 546 531, 682 583, 818 557"/>
+    <path d="M24 545 C 160 571, 296 519, 421 545 C 546 571, 682 519, 818 545"/>
+    <path d="M24 551 C 160 577, 296 525, 421 551 C 546 577, 682 525, 818 551"/>
+    <path d="M24 557 C 160 583, 296 531, 421 557 C 546 583, 682 531, 818 557"/>
+    <!-- Central concentric guilloche rosette rings -->
+    <circle cx="421" cy="297.5" r="220"/>
+    <circle cx="421" cy="297.5" r="212"/>
+    <circle cx="421" cy="297.5" r="204"/>
+    <circle cx="421" cy="297.5" r="196"/>
+    <circle cx="421" cy="297.5" r="188"/>
+    <ellipse cx="421" cy="297.5" rx="236" ry="164"/>
+    <ellipse cx="421" cy="297.5" rx="228" ry="156"/>
+    <ellipse cx="421" cy="297.5" rx="220" ry="148"/>
+    <ellipse cx="421" cy="297.5" rx="164" ry="236"/>
+    <ellipse cx="421" cy="297.5" rx="156" ry="228"/>
+    <ellipse cx="421" cy="297.5" rx="148" ry="220"/>
+    <!-- Diagonal interlaced ellipses -->
+    <g transform="rotate(30 421 297.5)">
+      <ellipse cx="421" cy="297.5" rx="236" ry="156"/>
+      <ellipse cx="421" cy="297.5" rx="224" ry="144"/>
+      <ellipse cx="421" cy="297.5" rx="156" ry="236"/>
+      <ellipse cx="421" cy="297.5" rx="144" ry="224"/>
+    </g>
+    <g transform="rotate(60 421 297.5)">
+      <ellipse cx="421" cy="297.5" rx="236" ry="156"/>
+      <ellipse cx="421" cy="297.5" rx="224" ry="144"/>
+      <ellipse cx="421" cy="297.5" rx="156" ry="236"/>
+      <ellipse cx="421" cy="297.5" rx="144" ry="224"/>
+    </g>
+    <!-- Corner guilloche medallions -->
+    <circle cx="88" cy="96" r="36"/>
+    <circle cx="88" cy="96" r="28"/>
+    <circle cx="88" cy="96" r="20"/>
+    <circle cx="754" cy="96" r="36"/>
+    <circle cx="754" cy="96" r="28"/>
+    <circle cx="754" cy="96" r="20"/>
+    <circle cx="88" cy="499" r="36"/>
+    <circle cx="88" cy="499" r="28"/>
+    <circle cx="88" cy="499" r="20"/>
+    <circle cx="754" cy="499" r="36"/>
+    <circle cx="754" cy="499" r="28"/>
+    <circle cx="754" cy="499" r="20"/>
+  </g>
+</svg>

@@ -202,12 +202,9 @@ public static class SafetyDataSheetExample
         for (int i = 0; i < Sections.Length; i++)
         {
             var (sectionTitle, blocks) = Sections[i];
-            VerticalStack opening = new();
-            opening.Add(SectionHeading(i + 1, sectionTitle));
-            if (i == 1) opening.Add(HazardBanner());
-            opening.Add(Render(blocks[0]));
-            doc.Add(new PreventPageBreak { Child = opening });
-            foreach (Block block in blocks.Skip(1)) doc.Add(Render(block));
+            doc.Add(SectionHeading(i + 1, sectionTitle));
+            if (i == 1) doc.Add(HazardBanner());
+            foreach (Block block in blocks) doc.Add(Render(block));
         }
         return doc;
     }
@@ -232,13 +229,14 @@ public static class SafetyDataSheetExample
     {
         HorizontalStack row = new() { WidthDistribution = WidthDistribution.Weighted };
         row.Add(Tb($"{Product}  ·  Safety data sheet, revision 3, 5 November 2026", 7, Mute), 3);
-        row.Add(Tb($"Page {TextElementBase.CurrentPageToken} of {TextElementBase.TotalPagesToken}", 7, Mute, align: TextAlignment.Right), 1);
+        row.Add(PageNumber.Text().FontSize(7).Color(Mute).AlignRight(), 1);
         return row;
     }
 
     /// <summary>A numbered section heading on a tinted band.</summary>
     private static Container SectionHeading(int number, string title) => new()
     {
+        KeepWithNext = true,
         BackgroundColor = ColorPalette.Orange[50],
         Border = new Border(3, 0, 0, 0),
         BorderColors = new BorderColors(Accent),
@@ -290,7 +288,7 @@ public static class SafetyDataSheetExample
     /// <summary>The label elements of section 2: two pictograms and the signal word.</summary>
     private static HorizontalStack HazardBanner()
     {
-        HorizontalStack banner = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 10, Margin = new Thickness(0, 0, 0, 6) };
+        HorizontalStack banner = new() { KeepWithNext = true, WidthDistribution = WidthDistribution.Auto, Spacing = 10, Margin = new Thickness(0, 0, 0, 6) };
         banner.Add(Pictogram(flame: true, "Hazard pictogram GHS02, a flame: flammable"));
         banner.Add(Pictogram(flame: false, "Hazard pictogram GHS07, an exclamation mark: irritant and narcotic effects"));
         VerticalStack signal = new() { Spacing = 2, Margin = new Thickness(6, 8, 0, 0) };

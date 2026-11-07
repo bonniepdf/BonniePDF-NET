@@ -53,14 +53,7 @@ public static class TextBlockOverflowExample
                     .WithColor(ColorPalette.Slate[700]),
 
                 // Page numbers in the footer are decorative - screen readers skip them.
-                FooterTemplate = pageNum => new TextBlock
-                {
-                    Text = $"Page {pageNum} of {TextElementBase.TotalPagesToken}",
-                    FontName = StandardFonts.Helvetica,
-                    FontSize = 9,
-                    Color = ColorPalette.Slate[400],
-                    Alignment = TextAlignment.Right,
-                },
+                FooterTemplate = pageNum => PageNumber.Text().Font(StandardFonts.Helvetica, 9).Color(ColorPalette.Slate[400]).AlignRight(),
             },
         };
 

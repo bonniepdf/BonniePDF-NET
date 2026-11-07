@@ -25,7 +25,7 @@ public static class GroupedBarChartExample
             {
                 HorizontalStack footer = new() { WidthDistribution = WidthDistribution.Weighted };
                 footer.Add(new TextBlock { Text = "BonniePDF - Grouped Bar Chart", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500] });
-                footer.Add(new TextBlock { Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}", FontName = StandardFonts.Helvetica, FontSize = 10, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right }, 1f);
+                footer.Add(PageNumber.Text().Font(StandardFonts.Helvetica, 10).Color(ColorPalette.Slate[500]).AlignRight(), 1f);
                 return footer;
             }
         });

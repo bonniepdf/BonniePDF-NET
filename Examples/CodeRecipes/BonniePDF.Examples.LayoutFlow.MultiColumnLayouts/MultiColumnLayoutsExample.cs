@@ -21,20 +21,33 @@ namespace BonniePDF.Examples.LayoutFlow.MultiColumnLayouts;
     "Newspaper-style columns built from stacks: a three-story community newsletter with images, divided columns, and balanced versus ragged column heights.")]
 public static class MultiColumnLayoutsExample
 {
-    /// <summary>A community newsletter's three front-page stories: headline and paragraphs.</summary>
-    private static readonly (string Heading, string[] Paragraphs)[] Article =
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/newsletter/community-garden.jpg",
+        "images/newsletter/library.jpg",
+        "images/newsletter/high-street.jpg",
+    ];
+
+    /// <summary>A community newsletter's three front-page stories: headline, photo asset, alt text, and paragraphs.</summary>
+    private static readonly (string Heading, string PhotoPath, string AltText, string[] Paragraphs)[] Article =
     [
         ("Community garden opens",
+        "images/newsletter/community-garden.jpg",
+        "Raised timber beds and a greenhouse in the new Mill Lane community garden.",
         [
             "The community garden on Mill Lane opened its gates on Saturday after two years of planning. Forty raised beds, a greenhouse and a tool store now stand on what was an empty car park behind the station.",
             "Every bed has been taken for the first season, and a waiting list is open at the library desk. Volunteers meet on Wednesday evenings and Sunday mornings; no experience is needed and tools are provided.",
         ]),
         ("Library open later",
+        "images/newsletter/library.jpg",
+        "Reading tables with desk lamps in the refurbished central library.",
         [
             "The central library will stay open until 8pm on Tuesdays and Thursdays from next month. The change follows a survey in which most respondents asked for evening access to study space.",
             "The reading room has new tables with power at every seat, and study rooms can now be booked online up to a week ahead. Membership remains free for everyone who lives, works or studies in the town.",
         ]),
         ("High Street works",
+        "images/newsletter/high-street.jpg",
+        "Overnight resurfacing works along the High Street.",
         [
             "Work to resurface the High Street begins on 12 January and is expected to last six weeks. The road will close between 8pm and 6am, and the number 4 bus will divert along Station Road at night.",
             "Shops stay open throughout, and pavements will remain clear during trading hours. Updates will be posted on the noticeboard outside the town hall every Friday until the work is complete.",
@@ -66,14 +79,13 @@ public static class MultiColumnLayoutsExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
-    {
-        // Placeholder images from a seeded source; the TypeScript twin of this
-        // example reads the same sequence, so both documents carry the same images.
-        PlaceholderSource source = Placeholders.WithSeed(42);
+    public static Document Generate() => Generate(LoadDefaultAssets());
 
-        (string Heading, string[] Paragraphs, byte[] ImageData)[] articleColumns = Article
-            .Select(story => (story.Heading, story.Paragraphs, source.Image(153, 64)))
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    {
+        (string Heading, string[] Paragraphs, string AltText, byte[] ImageData)[] articleColumns = Article
+            .Select(story => (story.Heading, story.Paragraphs, story.AltText, Asset(assets, story.PhotoPath)))
             .ToArray();
 
         string[][] dividerParagraphs = [Editor, WhatsOn];
@@ -148,7 +160,7 @@ public static class MultiColumnLayoutsExample
             Spacing = 18,
             WidthDistribution = WidthDistribution.Equal,
         };
-        foreach ((string heading, string[] paragraphs, byte[] imageData) in articleColumns)
+        foreach ((string heading, string[] paragraphs, string altText, byte[] imageData) in articleColumns)
         {
             var column = new VerticalStack { Spacing = 12 };
 
@@ -163,7 +175,7 @@ public static class MultiColumnLayoutsExample
             column.Add(new Image
             {
                 ImageData = imageData,
-                AltText = "Abstract placeholder illustration.",
+                AltText = altText,
                 Width = 153,
                 Height = 64,
                 FitMode = ImageFitMode.Cover,
@@ -292,4 +304,45 @@ public static class MultiColumnLayoutsExample
         Height = height,
         BackgroundColor = ColorPalette.Slate[400],
     };
+
+    private static byte[] Asset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        assets.TryGetValue(path, out byte[]? bytes)
+            ? bytes
+            : throw new InvalidOperationException($"Missing required asset: {path}");
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDirectory();
+        Dictionary<string, byte[]> result = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            result[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return result;
+    }
+
+    private static string FindAssetsDirectory()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            string localCandidate = Path.Combine(dir, "assets");
+            if (Directory.Exists(localCandidate))
+            {
+                return localCandidate;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
+    }
 }

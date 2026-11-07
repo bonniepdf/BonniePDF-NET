@@ -68,7 +68,7 @@ public static class CertificateOfAnalysisExample
             Settings = new DocumentSettings
             {
                 PageSize = PdfSize.A4,
-                Margin = 42,
+                Margins = new Thickness(48, 42, 36, 42),
                 Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language = "en-GB",
@@ -218,18 +218,14 @@ public static class CertificateOfAnalysisExample
     }
 
     /// <summary>A conforming result's status, as a small chip.</summary>
-    private static HorizontalStack Pass()
+    private static Container Pass() => new()
     {
-        HorizontalStack fit = new() { WidthDistribution = WidthDistribution.Auto };
-        fit.Add(new Container
-        {
-            BackgroundColor = ColorPalette.Emerald[50],
-            CornerRadius = 3,
-            Padding = new Thickness(5, 1.5f, 5, 1.5f),
-            Child = Tb("Pass", 7.5f, ColorPalette.Emerald[800], bold: true),
-        });
-        return fit;
-    }
+        FitContent = true,
+        BackgroundColor = ColorPalette.Emerald[50],
+        CornerRadius = 3,
+        Padding = new Thickness(5, 1.5f, 5, 1.5f),
+        Child = Tb("Pass", 7.5f, ColorPalette.Emerald[800], bold: true),
+    };
 
     /// <summary>The band down the page's left edge, with the title and batch turned to read upwards.</summary>
     private static Container EdgeBand() => new()

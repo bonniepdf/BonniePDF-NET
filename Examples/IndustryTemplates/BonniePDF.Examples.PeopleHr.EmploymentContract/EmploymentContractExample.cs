@@ -114,14 +114,7 @@ public static class EmploymentContractExample
                 FontSize = 7f,
                 Color = Faint,
             },
-            FooterTemplate = pageNumber => new TextBlock
-            {
-                Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
-                FontName = StandardFonts.Helvetica,
-                FontSize = 7f,
-                Color = Faint,
-                Alignment = TextAlignment.Center,
-            },
+            FooterTemplate = pageNumber => PageNumber.Text().Font(StandardFonts.Helvetica, 7f).Color(Faint).AlignCenter(),
         };
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9.5f).WithColor(Ink);
 

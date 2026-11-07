@@ -43,9 +43,21 @@ public static class PublicLibraryMembershipLetterExample
     private static readonly float[] MembershipColumns = [2.5f, 1f, 2.7f];
     private static readonly float[] HoursColumns = [1.3f, 1f, 2.2f];
 
+    /// <summary>Asset paths required by this example, relative to the shared <c>Examples/assets</c> directory.</summary>
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/svg/borough-crest.svg",
+    ];
+
+    /// <summary>Builds the document using the default shared assets. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+        string crestSvg = System.Text.Encoding.UTF8.GetString(GetAsset(assets, "images/svg/borough-crest.svg"));
+
         DateTime now = DateTime.Now;
         CultureInfo enGb = CultureInfo.GetCultureInfo("en-GB");
         string longDate = now.ToString("d MMMM yyyy", enGb);
@@ -73,7 +85,7 @@ public static class PublicLibraryMembershipLetterExample
         doc.Metadata.Subject =
             "Public library membership confirmation with borrowing limits and branch hours (fictional).";
 
-        doc.Add(Masthead());
+        doc.Add(Masthead(crestSvg));
         doc.Add(AddressBlock(longDate));
         doc.Add(H1("Your public library membership"));
         doc.Add(Body(
@@ -82,12 +94,7 @@ public static class PublicLibraryMembershipLetterExample
             "any branch, online catalogue terminal, or through the library app."));
 
         // The member's card beside their status: the number on the card is the one the branch scans.
-        HorizontalStack cardRow = new()
-        {
-            WidthDistribution = WidthDistribution.Weighted,
-            Spacing = 24,
-            Margin = new Thickness(0, 8, 0, 22),
-        };
+        HorizontalStack cardRow = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 24, Margin = new Thickness(0, 8, 0, 22) };
         cardRow.Add(LibraryCard(renewalDate), 1.1f);
         cardRow.Add(StatusCallout(), 1);
         doc.Add(cardRow);
@@ -134,16 +141,27 @@ public static class PublicLibraryMembershipLetterExample
     }
 
     /// <summary>The library's own masthead: its name and the service writing, on the library's teal.</summary>
-    private static Container Masthead()
+    private static Container Masthead(string crestSvg)
     {
-        HorizontalStack row = new() { WidthDistribution = WidthDistribution.Equal };
-        row.Add(new TextBlock
+        HorizontalStack brandRow = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 10 };
+        brandRow.Add(new Svg
+        {
+            SvgData = crestSvg,
+            Width = 28,
+            Height = 34,
+            AltText = "Sample Borough Council crest",
+        });
+        brandRow.Add(new TextBlock
         {
             Text = "Sample Libraries",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 18,
             Color = Color.White,
+            Margin = new Thickness(0, 6, 0, 0),
         });
+
+        HorizontalStack row = new() { WidthDistribution = WidthDistribution.Equal };
+        row.Add(brandRow);
         row.Add(new TextBlock
         {
             Text = "Membership Services",
@@ -151,7 +169,7 @@ public static class PublicLibraryMembershipLetterExample
             FontSize = 11,
             Color = CardTint,
             Alignment = TextAlignment.Right,
-            Margin = new Thickness(0, 5, 0, 0),
+            Margin = new Thickness(0, 10, 0, 0),
         });
         return new Container
         {
@@ -345,4 +363,42 @@ public static class PublicLibraryMembershipLetterExample
     };
 
     private sealed record InfoLine(string Label, string Value, string Note);
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDir();
+        Dictionary<string, byte[]> dict = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            dict[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return dict;
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes))
+            return bytes;
+        string fullPath = Path.Combine(FindAssetsDir(), key.Replace('/', Path.DirectorySeparatorChar));
+        return File.ReadAllBytes(fullPath);
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (!string.IsNullOrEmpty(dir))
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+                return candidate;
+            string direct = Path.Combine(dir, "assets");
+            if (Directory.Exists(direct))
+                return direct;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

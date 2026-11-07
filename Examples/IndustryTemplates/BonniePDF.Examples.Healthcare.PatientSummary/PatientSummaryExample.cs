@@ -1,6 +1,5 @@
 using System.Globalization;
 using BonniePDF;
-using BonniePDF.Drawing;
 
 namespace BonniePDF.Examples.Healthcare.PatientSummary;
 
@@ -79,12 +78,24 @@ public static class PatientSummaryExample
         ("Echocardiogram", "Booked for 2 July 2026"),
     ];
 
+    /// <summary>Asset paths required by this example, relative to the shared <c>Examples/assets</c> directory.</summary>
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/svg/sample-healthcare.svg",
+    ];
+
+    /// <summary>Builds the document using the default shared assets. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability", "MA0051:Method is too long",
         Justification = "The example intentionally keeps generation inline.")]
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+        string markSvg = System.Text.Encoding.UTF8.GetString(GetAsset(assets, "images/svg/sample-healthcare.svg"));
+
         Document doc = new()
         {
             Settings = new DocumentSettings
@@ -120,7 +131,7 @@ public static class PatientSummaryExample
         });
         printed.Add(Tb("Printed 18 June 2026, 09:30", 8, ColorPalette.Teal[100], align: TextAlignment.Right));
         HorizontalStack masthead = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 10 };
-        masthead.Add(TrustMark());
+        masthead.Add(new Svg { SvgData = markSvg, Width = 24, Height = 24, IsDecorative = true });
         masthead.Add(trust, 1);
         masthead.Add(printed, 1);
         doc.Add(new Container { BackgroundColor = Trust, Padding = new Thickness(32, 16, 32, 16), Child = masthead });
@@ -215,13 +226,24 @@ public static class PatientSummaryExample
             medicines.AddRow(Tb(medicine, 8.5f, Ink, bold: true), Tb(dose, 8.5f, Body), Tb(route, 8.5f, Body), Tb(when, 8.5f, Body), Tb(why, 8.5f, Mute));
 
         VerticalStack chart = new() { Spacing = 4 };
-        chart.Add(new CanvasElement(DrawInrChart)
+        chart.Add(new LineChart(new ChartData
         {
-            DrawWidth = 0,
-            DrawHeight = 112,
+            Series = [new ChartSeries
+            {
+                Color = ColorPalette.Teal[700],
+                DataPoints = Inr.Select(reading => new ChartDataPoint { Label = reading.Date, Value = (decimal)reading.Value }).ToList(),
+            }],
+            YAxis = new AxisOptions { MinValue = 1, MaxValue = 4, StepCount = 3 },
+        })
+        {
+            Height = 112,
+            StretchToFit = true,
+            Theme = "modern",
+            ShowValueLabels = false,
+            References = [new ChartReference { Value = 2, EndValue = 3, Color = ColorPalette.Teal[50] }],
             AltText = "INR results for the last eight weeks against the target range of 2.0 to 3.0: 1.8, 2.1, 2.6, 3.4, 2.9, 2.4, 2.2 and 2.5. Two results fell outside the range, on 30 April and 21 May.",
         });
-        chart.Add(Tb("Weekly INR. The band is the target range; red points fell outside it.", 7, Mute));
+        chart.Add(Tb("Weekly INR. Two readings fell outside the shaded target range.", 7, Mute));
         VerticalStack medicinesColumn = new();
         medicinesColumn.Add(Section("Current medicines"));
         medicinesColumn.Add(medicines);
@@ -356,31 +378,40 @@ public static class PatientSummaryExample
     }
 
     /// <summary>A status pill: teal for an active problem, grey for a past one.</summary>
-    private static HorizontalStack Pill(string text, bool active)
+    private static Container Pill(string text, bool active) => new()
     {
-        HorizontalStack fit = new() { WidthDistribution = WidthDistribution.Auto };
-        fit.Add(new Container
-        {
-            BackgroundColor = active ? ColorPalette.Teal[50] : ColorPalette.Slate[100],
-            CornerRadius = 6,
-            Padding = new Thickness(6, 1.5f, 6, 1.5f),
-            Child = Tb(text, 7, active ? ColorPalette.Teal[800] : ColorPalette.Slate[600], bold: true),
-        });
-        return fit;
-    }
+        FitContent = true,
+        BackgroundColor = active ? ColorPalette.Teal[50] : ColorPalette.Slate[100],
+        CornerRadius = 6,
+        Padding = new Thickness(6, 1.5f, 6, 1.5f),
+        Child = Tb(text, 7, active ? ColorPalette.Teal[800] : ColorPalette.Slate[600], bold: true),
+    };
 
     /// <summary>One observation: its latest value, a six-reading trend line, and its NEWS2 points.</summary>
     private static Container Observation(string name, string value, string unit, int points, float[] trend)
     {
         bool flagged = points > 0;
+        decimal low = (decimal)trend.Min();
+        decimal high = (decimal)trend.Max();
         VerticalStack stack = new() { Spacing = 2 };
         stack.Add(Tb(name.ToUpperInvariant(), 6.5f, Mute, bold: true));
         stack.Add(Tb(value, 16, Ink, bold: true));
         stack.Add(Tb(unit, 7, Mute));
-        stack.Add(new CanvasElement((canvas, width, height) => DrawTrend(canvas, width, height, trend))
+        stack.Add(new LineChart(new ChartData
         {
-            DrawWidth = 0,
-            DrawHeight = 16,
+            Series = [new ChartSeries
+            {
+                Color = ColorPalette.Teal[600],
+                DataPoints = trend.Select(value => new ChartDataPoint { Value = (decimal)value }).ToList(),
+            }],
+            YAxis = new AxisOptions { MinValue = low, MaxValue = high > low ? high : low + 1 },
+        })
+        {
+            Sparkline = true,
+            BackgroundColor = flagged ? ColorPalette.Amber[50] : ColorPalette.Slate[50],
+            Height = 16,
+            StretchToFit = true,
+            DefaultLineWidth = 1,
             AltText = $"{name}, last six readings: {string.Join(", ", trend.Select(v => v.ToString(CultureInfo.InvariantCulture)))}",
         });
         stack.Add(Tb($"NEWS2 {points}", 7, flagged ? ColorPalette.Amber[800] : ColorPalette.Teal[800], bold: true));
@@ -395,64 +426,41 @@ public static class PatientSummaryExample
         };
     }
 
-    /// <summary>A trend line through six readings, with the latest marked.</summary>
-    private static void DrawTrend(ICanvas canvas, float width, float height, float[] values)
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
     {
-        float low = values.Min();
-        float high = values.Max();
-        float span = high - low;
-        if (span == 0) span = 1;
-        float X(int i) => 2 + i * (width - 4) / (values.Length - 1);
-        float Y(float v) => height - 3 - (v - low) * (height - 6) / span;
-        for (int i = 1; i < values.Length; i++)
-            canvas.DrawLine(X(i - 1), Y(values[i - 1]), X(i), Y(values[i]), ColorPalette.Teal[600], 1);
-        canvas.FillCircle(X(values.Length - 1), Y(values[^1]), 2, ColorPalette.Teal[800]);
+        string assetsDir = FindAssetsDir();
+        Dictionary<string, byte[]> dict = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            dict[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return dict;
     }
 
-    /// <summary>Weekly INR against the 2.0 to 3.0 target band, with readings outside the band in red.</summary>
-    private static void DrawInrChart(ICanvas canvas, float width, float height)
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
     {
-        const float left = 18;
-        const float top = 6;
-        float plotWidth = width - left - 4;
-        float plotHeight = height - top - 16;
-        float Y(float v) => top + plotHeight - (v - 1) * plotHeight / 3;
-        float X(int i) => left + 6 + i * (plotWidth - 12) / (Inr.Length - 1);
-        Color label = ColorPalette.Slate[500];
-        canvas.FillRect(left, Y(3), plotWidth, Y(2) - Y(3), ColorPalette.Teal[50]);
-        foreach (float v in new float[] { 1, 2, 3, 4 })
-        {
-            canvas.DrawLine(left, Y(v), left + plotWidth, Y(v), ColorPalette.Slate[200], 0.5f);
-            canvas.DrawText(2, Y(v) - 3, v.ToString("0.0", CultureInfo.InvariantCulture), label, 6.5f, StandardFonts.Helvetica, TextAlignment.Left);
-        }
-        for (int i = 1; i < Inr.Length; i++)
-            canvas.DrawLine(X(i - 1), Y(Inr[i - 1].Value), X(i), Y(Inr[i].Value), ColorPalette.Slate[400], 1);
-        for (int i = 0; i < Inr.Length; i++)
-        {
-            var (date, value) = Inr[i];
-            bool outside = value < 2 || value > 3;
-            canvas.FillCircle(X(i), Y(value), 2.5f, outside ? ColorPalette.Rose[600] : ColorPalette.Teal[700]);
-            if (i % 2 == 1 || i == Inr.Length - 1)
-            {
-                float w = canvas.MeasureText(date, 6.5f, StandardFonts.Helvetica).Width;
-                canvas.DrawText(X(i) - w / 2, top + plotHeight + 5, date, label, 6.5f, StandardFonts.Helvetica, TextAlignment.Left);
-            }
-        }
+        if (assets.TryGetValue(key, out byte[]? bytes))
+            return bytes;
+        string fullPath = Path.Combine(FindAssetsDir(), key.Replace('/', Path.DirectorySeparatorChar));
+        return File.ReadAllBytes(fullPath);
     }
 
-    /// <summary>The trust's mark: a white cross of four rounded squares.</summary>
-    private static CanvasElement TrustMark() => new((canvas, _, _) =>
+    private static string FindAssetsDir()
     {
-        Color white = ColorPalette.Teal[50];
-        canvas.FillRoundedRect(10, 0, 10, 10, 2, white);
-        canvas.FillRoundedRect(0, 10, 10, 10, 2, white);
-        canvas.FillRoundedRect(20, 10, 10, 10, 2, white);
-        canvas.FillRoundedRect(10, 20, 10, 10, 2, white);
-        canvas.FillRoundedRect(10, 10, 10, 10, 0, ColorPalette.Teal[300]);
-    })
-    {
-        DrawWidth = 30,
-        DrawHeight = 30,
-        IsDecorative = true,
-    };
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (!string.IsNullOrEmpty(dir))
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+                return candidate;
+            string direct = Path.Combine(dir, "assets");
+            if (Directory.Exists(direct))
+                return direct;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

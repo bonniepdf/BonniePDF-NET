@@ -1,3 +1,4 @@
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.Healthcare.OutpatientAppointmentLetter;
@@ -16,7 +17,11 @@ namespace BonniePDF.Examples.Healthcare.OutpatientAppointmentLetter;
     "Accessible fictional outpatient appointment letter with clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data disclaimers. PDF/A-2a + PDF/UA-1.")]
 public static class OutpatientAppointmentLetterExample
 {
+    private const string MarkSvgKey = "images/svg/sample-healthcare.svg";
+    private const string MapSvgKey = "images/svg/clinic-map.svg";
     private const float Margin = 48;
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [MarkSvgKey, MapSvgKey];
 
     private static readonly Color Ink = Color.FromHex("#17324d");
     private static readonly Color BodyText = Color.FromHex("#2f4858");
@@ -46,9 +51,15 @@ public static class OutpatientAppointmentLetterExample
         "Contact us before your visit if you need an interpreter, step-free access, or information in another format.",
     ];
 
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+        string markSvg = Encoding.UTF8.GetString(GetAsset(assets, MarkSvgKey));
+        string mapSvg = Encoding.UTF8.GetString(GetAsset(assets, MapSvgKey));
+
         DocumentSettings settings = new(PdfSize.A4, Margin)
         {
             Conformance = PdfAConformance.PdfA2a,
@@ -73,7 +84,7 @@ public static class OutpatientAppointmentLetterExample
         doc.Metadata.Subject = "Accessible Outpatient Appointment using entirely fictional data.";
         doc.Metadata.Keywords = "sample, healthcare, appointment, accessibility, fictional data";
 
-        doc.Add(Masthead());
+        doc.Add(Masthead(markSvg));
         doc.Add(SampleBanner());
 
         doc.Add(new Heading("Your outpatient appointment")
@@ -92,15 +103,13 @@ public static class OutpatientAppointmentLetterExample
             "Please read the information on this page before you attend.", mb: 18));
 
         doc.Add(AppointmentCard());
-        AddActionsAndContact(doc);
+        AddActionsAndContact(doc, mapSvg);
 
         return doc;
     }
 
-    private static void AddActionsAndContact(Document doc)
+    private static void AddActionsAndContact(Document doc, string mapSvg)
     {
-        doc.Add(SectionHeading("What you need to do", "what-to-do"));
-
         UnorderedList actions = new()
         {
             FontName = StandardFonts.Helvetica,
@@ -108,14 +117,32 @@ public static class OutpatientAppointmentLetterExample
             Color = BodyText,
             BulletColor = Blue,
             ItemSpacing = 4,
-            Margin = new Thickness(0, 0, 0, 18),
         };
         foreach (string action in Actions)
         {
             actions.AddItem(action);
         }
 
-        doc.Add(actions);
+        VerticalStack actionsCol = new();
+        actionsCol.Add(SectionHeading("What you need to do", "what-to-do"));
+        actionsCol.Add(actions);
+
+        HorizontalStack actionsSection = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Spacing = 14,
+            Margin = new Thickness(0, 0, 0, 18),
+        };
+        actionsSection.Add(actionsCol, 1.7f);
+        actionsSection.Add(new Svg
+        {
+            SvgData = mapSvg,
+            Width = 170,
+            Height = 109,
+            AltText = "Site map of Sample General Hospital showing Main Entrance on Hospital Road and Rheumatology Outpatient Clinic in Wing B.",
+        }, 1);
+
+        doc.Add(actionsSection);
         doc.Add(UnwellNotice());
 
         doc.Add(SectionHeading("Contact and accessibility", "contact"));
@@ -126,7 +153,7 @@ public static class OutpatientAppointmentLetterExample
         doc.Add(Disclaimer());
     }
 
-    private static Grid Masthead()
+    private static Grid Masthead(string markSvg)
     {
         Grid masthead = new(1.5f, 1) { CellPadding = 0, Margin = new Thickness(0, 0, 0, 8) };
 
@@ -140,13 +167,17 @@ public static class OutpatientAppointmentLetterExample
         });
         brand.Add(new TextBlock { Text = "Outpatient services", FontSize = 10, Color = Muted });
 
+        HorizontalStack brandRow = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 8 };
+        brandRow.Add(new Svg { SvgData = markSvg, Width = 24, Height = 24, IsDecorative = true, Margin = new Thickness(0, 2, 0, 0) });
+        brandRow.Add(brand);
+
         VerticalStack reference = new() { Spacing = 3 };
         reference.Add(new TextBlock
             { Text = "Issued 1 August 2026", FontSize = 9.5f, Color = Muted, Alignment = TextAlignment.Right });
         reference.Add(new TextBlock
             { Text = "Reference SAMPLE-OP-1042", FontSize = 9.5f, Color = Muted, Alignment = TextAlignment.Right });
 
-        masthead.AddRow(brand, reference);
+        masthead.AddRow(brandRow, reference);
         return masthead;
     }
 
@@ -278,4 +309,32 @@ public static class OutpatientAppointmentLetterExample
     }
 
     private sealed record Detail(string Label, string Value);
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string dir = FindAssetsDir();
+        return RequiredAssets.ToDictionary(key => key, key => File.ReadAllBytes(Path.Combine(dir, key)), StringComparer.Ordinal);
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes)) return bytes;
+        string candidate = Path.Combine(FindAssetsDir(), key);
+        if (File.Exists(candidate)) return File.ReadAllBytes(candidate);
+        throw new InvalidOperationException($"Supply {key}.");
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate)) return candidate;
+            string local = Path.Combine(dir, "assets");
+            if (Directory.Exists(local)) return local;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

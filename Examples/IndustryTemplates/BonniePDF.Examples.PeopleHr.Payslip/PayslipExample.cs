@@ -66,14 +66,7 @@ public static class PayslipExample
             Conformance = PdfAConformance.None,
             Accessibility = AccessibilityMode.PdfUa1,
             Language = "en-GB",
-            FooterTemplate = pageNumber => new TextBlock
-            {
-                Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
-                FontName = StandardFonts.Helvetica,
-                FontSize = 6.5f,
-                Color = Faint,
-                Alignment = TextAlignment.Center,
-            },
+            FooterTemplate = pageNumber => PageNumber.Text().Font(StandardFonts.Helvetica, 6.5f).Color(Faint).AlignCenter(),
         };
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(8.5f).WithColor(Ink);
 

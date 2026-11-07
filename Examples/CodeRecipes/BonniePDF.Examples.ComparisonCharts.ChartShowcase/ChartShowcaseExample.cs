@@ -38,14 +38,7 @@ public static class ChartShowcaseExample
                 }, null); // Auto width
 
                 // Right: Page Numbers (weighted to fill remaining space, right-aligned within that space)
-                outerStack.Add(new TextBlock
-                {
-                    Text = $"Page {pageNumber} of {TextElementBase.TotalPagesToken}",
-                    FontName = StandardFonts.Helvetica,
-                    FontSize = 10,
-                    Color = ColorPalette.Slate[500],
-                    Alignment = TextAlignment.Right
-                }, 1f); // Takes all remaining space and right-aligns within it
+                outerStack.Add(PageNumber.Text().Font(StandardFonts.Helvetica, 10).Color(ColorPalette.Slate[500]).AlignRight(), 1f); // Takes all remaining space and right-aligns within it
 
                 return outerStack;
             }

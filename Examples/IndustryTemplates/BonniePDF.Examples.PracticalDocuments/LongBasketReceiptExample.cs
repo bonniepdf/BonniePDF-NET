@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.PracticalDocuments;
@@ -9,19 +10,26 @@ namespace BonniePDF.Examples.PracticalDocuments;
 [System.ComponentModel.Description("An 80 mm till receipt on one continuous roll: a long basket, accented names, per-line discounts, a return, and scannable receipt codes.")]
 public static class LongBasketReceiptExample
 {
+    private const string LogoSvgKey = "images/svg/sample-coffee.svg";
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [LogoSvgKey];
+
     private static readonly Color Ink = ColorPalette.Slate[900];
     private static readonly Color Mute = ColorPalette.Slate[600];
 
     // A till receipt is one continuous roll, never separate sheets: an 80 mm page tall enough for the basket.
-    private static readonly PdfSize Roll = new(226.77f, 1425, "Receipt roll 80mm");
+    private static readonly PdfSize Roll = new(226.77f, 1455, "Receipt roll 80mm");
 
     public sealed record ReceiptLine(string Name, int Quantity, long UnitPence, long DiscountPence);
 
-    public static Document Generate()
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
         var lines = Enumerable.Range(0, 35).Select(i => new ReceiptLine(i % 3 == 0 ? $"Café crème, oat milk and freshly baked almond croissant — item {i + 1}" : $"Farmhouse pantry selection {i + 1}", 1, 350 + i * 10, i % 7 == 0 ? 50 : 0)).ToList();
         lines.Add(new ReceiptLine("Returned reusable cup", -1, 500, 0));
-        return BuildReceipt(lines);
+        return BuildReceipt(lines, assets);
     }
 
     public static long CalculateTotal(IReadOnlyList<ReceiptLine> lines)
@@ -35,7 +43,7 @@ public static class LongBasketReceiptExample
         return total;
     }
 
-    public static Document BuildReceipt(IReadOnlyList<ReceiptLine> lines)
+    public static Document BuildReceipt(IReadOnlyList<ReceiptLine> lines, IReadOnlyDictionary<string, byte[]>? assets = null)
     {
         long total = CalculateTotal(lines);
         long discounts = lines.Sum(line => line.DiscountPence);
@@ -52,6 +60,16 @@ public static class LongBasketReceiptExample
         })
         { Metadata = new DocumentMetadata { Title = "Long-basket receipt #4022" } };
 
+        byte[]? logoBytes = GetOptionalAsset(assets, LogoSvgKey);
+        if (logoBytes is not null)
+        {
+            doc.Add(new Container
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 3),
+                Child = new Svg { SvgData = Encoding.UTF8.GetString(logoBytes), Width = 22, Height = 22, IsDecorative = true },
+            });
+        }
         doc.Add(new Heading("SAMPLE COFFEE")
         {
             Level = 1,
@@ -96,7 +114,7 @@ public static class LongBasketReceiptExample
         return doc;
     }
 
-    private static string Money(long pence) => (pence / 100m).ToString("F2", CultureInfo.InvariantCulture);
+    private static string Money(long pence) => NumberFormatter.Format(pence / 100m, "F2");
 
     /// <summary>A centred line of receipt text.</summary>
     private static TextBlock Center(string text, float marginTop = 0) => new(text)
@@ -120,12 +138,46 @@ public static class LongBasketReceiptExample
     }
 
     /// <summary>A dashed tear-line rule, the way a thermal printer separates sections.</summary>
-    private static TextBlock Rule() => new("- - - - - - - - - - - - - - - -")
+    private static Line Rule() => new()
     {
-        FontName = StandardFonts.Courier,
-        FontSize = 9,
+        Thickness = 0.8f,
         Color = Mute,
-        Alignment = TextAlignment.Center,
-        Margin = new Thickness(0, 5, 0, 5),
+        DashPattern = [3, 4],
+        Margin = new Thickness(0, 10, 0, 10),
     };
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string dir = FindAssetsDir();
+        return RequiredAssets.ToDictionary(key => key, key => File.ReadAllBytes(Path.Combine(dir, key)), StringComparer.Ordinal);
+    }
+
+    private static byte[]? GetOptionalAsset(IReadOnlyDictionary<string, byte[]>? assets, string key)
+    {
+        if (assets is not null && assets.TryGetValue(key, out byte[]? bytes)) return bytes;
+        string? dir = TryFindAssetsDir();
+        if (dir is not null)
+        {
+            string candidate = Path.Combine(dir, key);
+            if (File.Exists(candidate)) return File.ReadAllBytes(candidate);
+        }
+        return null;
+    }
+
+    private static string FindAssetsDir() =>
+        TryFindAssetsDir() ?? throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+
+    private static string? TryFindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate)) return candidate;
+            string local = Path.Combine(dir, "assets");
+            if (Directory.Exists(local)) return local;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+        return null;
+    }
 }

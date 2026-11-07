@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.Hospitality;
@@ -13,6 +14,10 @@ namespace BonniePDF.Examples.Hospitality;
 [System.ComponentModel.Description("A hotel guest folio that doubles as the VAT invoice: nightly room charges, restaurant and bar postings, Edinburgh’s visitor levy, the deposit and payment, VAT by rate, a signature line and a QR code for a copy.")]
 public static class GuestFolioExample
 {
+    private const string CrestSvgKey = "images/svg/ardmore-house.svg";
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [CrestSvgKey];
+
     private static readonly Color Hotel = ColorPalette.Rose[900];
     private static readonly Color Ink = ColorPalette.Stone[900];
     private static readonly Color Muted = ColorPalette.Stone[500];
@@ -36,12 +41,15 @@ public static class GuestFolioExample
         ("5 Nov", "Payment, Visa ending 4417", null, 0, 54625),
     ];
 
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability", "MA0051:Method is too long",
         Justification = "The example intentionally keeps generation inline.")]
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
         Document doc = new()
         {
             Settings = new DocumentSettings
@@ -66,13 +74,17 @@ public static class GuestFolioExample
                 Subject = "Guest folio and VAT invoice",
             },
         };
+        string crestSvg = Encoding.UTF8.GetString(GetAsset(assets, CrestSvgKey));
 
         // ── Masthead ──
         HorizontalStack masthead = new() { WidthDistribution = WidthDistribution.Equal, Margin = new Thickness(0, 0, 0, 14) };
         VerticalStack hotel = new() { Spacing = 3 };
         hotel.Add(new TextBlock("ARDMORE HOUSE") { FontName = StandardFonts.HelveticaBold, FontSize = 15, LetterSpacing = 3, Color = Hotel });
         hotel.Add(new TextBlock("18 Royal Terrace, Edinburgh EH7 5AB  ·  0131 496 0742") { FontSize = 8, Color = Muted });
-        masthead.Add(hotel);
+        HorizontalStack hotelBrand = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 10 };
+        hotelBrand.Add(new Svg { SvgData = crestSvg, Width = 28, Height = 28, IsDecorative = true });
+        hotelBrand.Add(hotel);
+        masthead.Add(hotelBrand);
         VerticalStack title = new() { Spacing = 3 };
         title.Add(new Heading("Guest folio")
         {
@@ -217,13 +229,7 @@ public static class GuestFolioExample
     // Local helpers used by this document.
 
     /// <summary>Pence as pounds: 54625 becomes £546.25.</summary>
-    private static string Money(long pence)
-    {
-        long abs = Math.Abs(pence);
-        string pounds = (abs / 100).ToString("#,0", CultureInfo.InvariantCulture);
-        string cents = (abs % 100).ToString("00", CultureInfo.InvariantCulture);
-        return $"{(pence < 0 ? "−" : "")}£{pounds}.{cents}";
-    }
+    private static string Money(long pence) => NumberFormatter.Format(pence / 100m, "N2", "£").Replace('-', '−');
 
     /// <summary>A labelled block of details on a light panel.</summary>
     private static Container Panel(string label, string[] lines)
@@ -255,4 +261,32 @@ public static class GuestFolioExample
     /// <summary>A body cell.</summary>
     private static TableCell Cell(string text, TextAlignment alignment = TextAlignment.Left, Color? color = null) =>
         new() { Content = new TextBlock(text) { Color = color ?? ColorPalette.Stone[800], Alignment = alignment } };
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string dir = FindAssetsDir();
+        return RequiredAssets.ToDictionary(key => key, key => File.ReadAllBytes(Path.Combine(dir, key)), StringComparer.Ordinal);
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes)) return bytes;
+        string candidate = Path.Combine(FindAssetsDir(), key);
+        if (File.Exists(candidate)) return File.ReadAllBytes(candidate);
+        throw new InvalidOperationException($"Supply {key}.");
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate)) return candidate;
+            string local = Path.Combine(dir, "assets");
+            if (Directory.Exists(local)) return local;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

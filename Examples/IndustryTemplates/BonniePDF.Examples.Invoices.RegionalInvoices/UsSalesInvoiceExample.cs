@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.Invoices.RegionalInvoices;
@@ -31,8 +32,61 @@ public static class UsSalesInvoiceExample
         new("Priority support", 1, 1800m, "Annual retainer (prorated)"),
     ];
 
+    private const string LogoAsset = "images/svg/sample-company.svg";
+
+    private const string FallbackLogoSvg = """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+          <rect x="2" y="2" width="44" height="44" rx="10" fill="#334155"/>
+          <path d="M31 15.5c0-2.5-2.8-4.5-7-4.5-4.4 0-7.5 2.2-7.5 5.5 0 3.1 2.4 4.7 6.8 5.7l2.2.5c2.5.6 3.8 1.5 3.8 3.1 0 1.9-1.9 3.2-4.8 3.2-3.1 0-5.2-1.4-5.6-3.5h-4.4c.4 4.5 4.2 7.5 10 7.5 5.6 0 9.2-2.9 9.2-7.1 0-3.5-2.4-5.4-7.2-6.5l-2.2-.5c-2.2-.5-3.4-1.3-3.4-2.7 0-1.6 1.5-2.7 3.9-2.7 2.4 0 4 1.1 4.3 2.5H31z" fill="#f8fafc"/>
+          <circle cx="35.5" cy="34.5" r="2.5" fill="#94a3b8"/>
+        </svg>
+        """;
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [LogoAsset];
+
+    private static string LogoMarkup(IReadOnlyDictionary<string, byte[]>? assets) =>
+        assets is not null && assets.TryGetValue(LogoAsset, out byte[]? bytes)
+            ? Encoding.UTF8.GetString(bytes)
+            : FallbackLogoSvg;
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return RequiredAssets.ToDictionary(p => p, p => File.ReadAllBytes(Path.Combine(candidate, p)), StringComparer.Ordinal);
+            }
+
+            string direct = Path.Combine(dir, "assets");
+            if (Directory.Exists(direct))
+            {
+                return RequiredAssets.ToDictionary(p => p, p => File.ReadAllBytes(Path.Combine(direct, p)), StringComparer.Ordinal);
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        Dictionary<string, byte[]> dict = new(StringComparer.Ordinal);
+        foreach (string p in RequiredAssets)
+        {
+            string full = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, p);
+            if (File.Exists(full))
+            {
+                dict[p] = File.ReadAllBytes(full);
+            }
+        }
+
+        return dict;
+    }
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    /// <summary>Builds the document using the supplied asset dictionary.</summary>
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         DateTime now = DateTime.Now;
         int year = now.Year;
@@ -51,8 +105,23 @@ public static class UsSalesInvoiceExample
         doc.Add(AccentBar(Accent));
 
         // ── Header: seller | INVOICE ────────────────────────────────────────
+        HorizontalStack brandRow = new()
+        {
+            WidthDistribution = WidthDistribution.Auto,
+            Spacing = 8,
+            Margin = new Thickness(0, 0, 0, 4),
+        };
+        brandRow.Add(new Svg
+        {
+            SvgData = LogoMarkup(assets),
+            Width = 26,
+            Height = 26,
+            IsDecorative = true,
+        });
+        brandRow.Add(Cell("Sample Company Inc.", size: 16, bold: true, color: Ink, margin: new Thickness(0, 4, 0, 0)));
+
         VerticalStack seller = new();
-        seller.Add(Cell("Sample Company Inc.", size: 16, bold: true, color: Ink, margin: new Thickness(0, 0, 0, 2)));
+        seller.Add(brandRow);
         AddLines(seller, Muted, "500 Market Street, Suite 1200", "San Francisco, CA 94105", "EIN 47-0912288");
 
         VerticalStack titleStack = new();

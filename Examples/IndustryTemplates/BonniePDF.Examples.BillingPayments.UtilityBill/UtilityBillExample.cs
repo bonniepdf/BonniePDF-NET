@@ -1,6 +1,5 @@
 using System.Globalization;
 using BonniePDF;
-using BonniePDF.Drawing;
 
 namespace BonniePDF.Examples.BillingPayments.UtilityBill;
 
@@ -296,23 +295,13 @@ public static class UtilityBillExample
         return stack;
     }
 
-    /// <summary>
-    /// A real dashed rule, drawn through the canvas path API with a dash
-    /// pattern, rather than a row of hyphens pretending to be one. Marking it
-    /// decorative keeps it out of the reading order — it is a cutting guide.
-    /// </summary>
-    private static CanvasElement CutLine() => new((canvas, width, height) =>
+    /// <summary>A dashed cutting guide above the remittance slip.</summary>
+    private static Line CutLine() => new()
     {
-        canvas.BeginPath();
-        canvas.MoveTo(0, height / 2);
-        canvas.LineTo(width, height / 2);
-        canvas.StrokeCurrentPath(new StrokeStyle
-            { Paint = Color.FromHex("#94a3b8"), Width = 0.75f, DashPattern = [3, 3] });
-    })
-    {
-        DrawHeight = 10,
-        IsDecorative = true,
-        Margin = new Thickness(0, 6, 0, 6),
+        Thickness = 0.75f,
+        Color = ColorPalette.Slate[400],
+        DashPattern = [3, 3],
+        Margin = new Thickness(0, 10.625f, 0, 10.625f),
     };
 
     /// <summary>The detachable half: what a payments team keys in, or a scanner reads.</summary>

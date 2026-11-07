@@ -23,6 +23,10 @@ namespace BonniePDF.Examples.RetailEvents.BookingConfirmation;
     "A travel booking confirmation: outbound and return flights as segment cards, a hotel stay, travellers with seats, a priced breakdown that adds up, and a QR code to manage the booking. PDF/A-2a + PDF/UA-1.")]
 public static class BookingConfirmationExample
 {
+    private const string LisbonPhotoKey = "images/travel/lisbon.jpg";
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [LisbonPhotoKey];
+
     private const string Reference = "BKG-7Q4M2X";
     private const string Destination = "Lisbon";
     private const string ManageUrl = "https://trips.example.com/manage/BKG-7Q4M2X";
@@ -99,13 +103,17 @@ public static class BookingConfirmationExample
         new("Seat selection — 4 seats", 3_800),
     ];
 
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+        byte[] lisbonPhoto = GetAsset(assets, LisbonPhotoKey);
         int total = PriceLines.Sum(l => l.Pence);
         int nights = (StayCheckOut - StayCheckIn).Days;
 
-        Document doc = new(new DocumentSettings { PageSize = PdfSize.A4, Margin = 46 });
+        Document doc = new(new DocumentSettings { PageSize = PdfSize.A4, Margin = 38 });
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
@@ -148,11 +156,26 @@ public static class BookingConfirmationExample
         {
             WidthDistribution = WidthDistribution.Weighted,
             Spacing = 14,
-            Margin = new Thickness(0, 0, 0, 14),
+            Margin = new Thickness(0, 0, 0, 10),
         };
         top.Add(heading, 3);
         top.Add(code, 1);
         doc.Add(top);
+
+        doc.Add(new Container
+        {
+            Height = 92,
+            CornerRadius = 6,
+            ClipContent = true,
+            Margin = new Thickness(0, 0, 0, 10),
+            Child = new Image
+            {
+                ImageData = lisbonPhoto,
+                Height = 92,
+                FitMode = ImageFitMode.Cover,
+                AltText = "Terracotta rooftops and pastel facades of Lisbon old town at golden hour.",
+            },
+        });
 
         doc.Add(Panel(
             "Confirmed",
@@ -259,7 +282,7 @@ public static class BookingConfirmationExample
             size: 8.5f,
             bold: true,
             color: Accent,
-            marginBottom: 8f));
+            marginBottom: 6f));
         body.Add(route);
         body.Add(Cell($"Baggage: {leg.Baggage}", size: 8.5f, color: Muted));
 
@@ -269,8 +292,8 @@ public static class BookingConfirmationExample
             Border = new Border(0.75f),
             BorderColors = new BorderColors(Rule),
             CornerRadius = 6,
-            Padding = new Thickness(12),
-            Margin = new Thickness(0, 0, 0, 10),
+            Padding = new Thickness(9),
+            Margin = new Thickness(0, 0, 0, 8),
             Child = body,
         };
     }
@@ -286,12 +309,7 @@ public static class BookingConfirmationExample
     }
 
     /// <summary>Pence as pounds: £1,234.56.</summary>
-    private static string Money(int pence)
-    {
-        string pounds = (pence / 100).ToString("N0", CultureInfo.InvariantCulture);
-        string rest = (pence % 100).ToString("D2", CultureInfo.InvariantCulture);
-        return $"£{pounds}.{rest}";
-    }
+    private static string Money(int pence) => NumberFormatter.Format(pence / 100m, "N2", "£");
 
     // Local helpers and sample data for this document.
     private static readonly Color Ink = ColorPalette.Slate[700];
@@ -339,7 +357,7 @@ public static class BookingConfirmationExample
         FontName = StandardFonts.HelveticaBold,
         FontSize = 13,
         Color = color ?? Accent,
-        Margin = new Thickness(0, 16, 0, 8),
+        Margin = new Thickness(0, 10, 0, 6),
     };
 
     /// <summary>The full-width accent rule at the top of each document.</summary>
@@ -347,7 +365,7 @@ public static class BookingConfirmationExample
     {
         BackgroundColor = color ?? Accent,
         Height = height,
-        Margin = new Thickness(0, 0, 0, 14),
+        Margin = new Thickness(0, 0, 0, 10),
     };
 
     /// <summary>One label/value pair for the reference grid.</summary>
@@ -395,8 +413,8 @@ public static class BookingConfirmationExample
             Border = new Border(0.75f),
             BorderColors = new BorderColors(Rule),
             CornerRadius = 6,
-            Padding = new Thickness(12),
-            Margin = new Thickness(0, 4, 0, 12),
+            Padding = new Thickness(9),
+            Margin = new Thickness(0, 2, 0, 8),
             Child = body,
         };
     }
@@ -414,4 +432,32 @@ public static class BookingConfirmationExample
     }
 
     private static string GbDate(DateTime date) => date.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string dir = FindAssetsDir();
+        return RequiredAssets.ToDictionary(key => key, key => File.ReadAllBytes(Path.Combine(dir, key)), StringComparer.Ordinal);
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes)) return bytes;
+        string candidate = Path.Combine(FindAssetsDir(), key);
+        if (File.Exists(candidate)) return File.ReadAllBytes(candidate);
+        throw new InvalidOperationException($"Supply {key}.");
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate)) return candidate;
+            string local = Path.Combine(dir, "assets");
+            if (Directory.Exists(local)) return local;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }
