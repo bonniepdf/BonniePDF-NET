@@ -11,7 +11,7 @@ namespace BonniePDF.Examples.ShareRankingCharts.ShareAndRanking;
 /// </summary>
 [System.ComponentModel.DisplayName("Pie Chart")]
 [System.ComponentModel.Category("Share & Ranking Charts")]
-[System.ComponentModel.Description("A donut chart of revenue by sales channel, with each channel’s share in the legend, the formatted total and a summary table alongside.")]
+[System.ComponentModel.Description("A donut chart of revenue by sales channel, with each channel’s share in the legend, the total in the centre and a summary table alongside.")]
 public static class PieChartExample
 {
     /// <summary>Channel, revenue in pounds, and change on last year in percent - five shares, not twelve months.</summary>
@@ -96,7 +96,9 @@ public static class PieChartExample
             Height = 360,
             StretchToFit = true,
             IsDonut = true,
-            TotalLabel = "Total (£)",
+            TotalLabel = "Total revenue (£)",
+            // The total goes in the donut hole, which widens to fit it, instead of under the legend.
+            TotalPosition = "center",
             TotalValueFormat = "N0",
             ShowLegend = true,
             Colors = Colors,

@@ -14,6 +14,8 @@ at the same version are the same library.
 
 ### Document Engine & API
 
+- **Donut totals in the centre:** `PieChart` gains `totalPosition` (`TotalPosition` in .NET), `legend` by default. With `center`, a donut draws its total as a large figure with `totalLabel` beneath it in the hole, which widens to fit, instead of as a legend row. A full pie keeps the total in the legend. The option round-trips through document definitions; charts that do not set it are unchanged.
+
 - **Wrapping text no longer fails when its font lacks a character:** a paragraph long enough to wrap, set in an embedded font that lacks a character fallback draws (a full stop or digit in a Hebrew-only face, for example), used to throw `Font has no glyph` from the line breaker. It now lays out and draws the character from the fallback font, as shorter text already did.
 
 - **List markers appear once per item:** a list item that wraps onto more lines now shows its bullet or number beside the first line only. Untagged documents used to repeat the marker on every wrapped line, so one long item read as several; tagged (PDF/UA) documents already drew it once. Items that fit on one line are unchanged.

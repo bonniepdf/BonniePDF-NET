@@ -504,6 +504,13 @@
         "modern"
       ]
     },
+    "PieTotalPosition": {
+      "via": "options",
+      "tokens": [
+        "legend",
+        "center"
+      ]
+    },
     "ChartGradientScope": {
       "via": "options",
       "tokens": [
@@ -1952,6 +1959,9 @@
         },
         "showTotal": {
           "kind": "boolean"
+        },
+        "totalPosition": {
+          "kind": "enum:PieTotalPosition"
         },
         "sliceGradient": {
           "kind": "boolean"
