@@ -86,12 +86,12 @@ public static class MultiSeriesLineChartExample
         ChartSeries previousYear = new()
         {
             Name = $"{year - 1}",
-            Color = Color.FromHex("#4f46e5")
+            Color = Color.FromHex("#94a3b8")
         };
         ChartSeries currentYear = new()
         {
             Name = $"{year}",
-            Color = Color.FromHex("#7c3aed")
+            Color = Color.FromHex("#4f46e5")
         };
 
         for (int i = 0; i < MonthLabels.Length; i++)
@@ -124,8 +124,10 @@ public static class MultiSeriesLineChartExample
             StretchToFit = true,
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
-            ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            // Twelve points per line: value labels would collide, so the axis carries the scale.
+            ShowValueLabels = false,
+            Theme = "modern",
+            BackgroundColor = Color.White
         };
 
         document.Add(lineChart);

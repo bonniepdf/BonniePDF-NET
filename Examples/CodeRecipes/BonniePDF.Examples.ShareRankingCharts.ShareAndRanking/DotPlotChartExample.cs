@@ -109,7 +109,8 @@ public static class DotPlotChartExample
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            Theme = "modern",
+            BackgroundColor = Color.White
         };
 
         // Add the chart to the document

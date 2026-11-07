@@ -62,12 +62,12 @@ public static class HorizontalBarChartExample
                     Color = Color.FromHex("#4f46e5"),
                     DataPoints =
                     [
-                        new ChartDataPoint { Label = "North East", Value = 142000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "North West", Value = 187000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Midlands", Value = 203000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "East Anglia", Value = 96000, LabelFormat = "N0" },
                         new ChartDataPoint { Label = "South East", Value = 261000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Midlands", Value = 203000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "North West", Value = 187000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "North East", Value = 142000, LabelFormat = "N0" },
                         new ChartDataPoint { Label = "South West", Value = 118000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "East Anglia", Value = 96000, LabelFormat = "N0" },
                     ]
                 }
             ],
@@ -93,7 +93,8 @@ public static class HorizontalBarChartExample
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            Theme = "modern",
+            BackgroundColor = Color.White
         };
 
         document.Add(barChart);

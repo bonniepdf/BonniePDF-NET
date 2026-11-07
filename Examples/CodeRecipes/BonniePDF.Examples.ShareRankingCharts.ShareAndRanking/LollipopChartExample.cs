@@ -10,7 +10,7 @@ namespace BonniePDF.Examples.ShareRankingCharts.ShareAndRanking;
 [System.ComponentModel.DisplayName("Lollipop Chart")]
 [System.ComponentModel.Category("Share & Ranking Charts")]
 [System.ComponentModel.Description(
-    "LollipopChart implementation with quarterly performance metrics, showing data points as lollipops with customizable stem width and head radius.")]
+    "LollipopChart implementation with twelve months of revenue, showing data points as lollipops with customizable stem width and head radius.")]
 public static class LollipopChartExample
 {
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
@@ -54,7 +54,7 @@ public static class LollipopChartExample
         // Add a title
         document.Add(new TextBlock
         {
-            Text = "Lollipop Chart: Quarterly Metrics",
+            Text = "Lollipop Chart: Monthly Revenue",
             FontSize = 24,
             Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 8) });
@@ -66,46 +66,55 @@ public static class LollipopChartExample
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 20) });
 
-        // Create chart data with quarterly data
+        // Create chart data with twelve months of revenue
         ChartData chartData = new()
         {
-            Title = "Quarterly Revenue",
+            Title = "Monthly Revenue",
             Series =
             [
                 new ChartSeries { Color = Color.FromHex("#ec4899"),
                     DataPoints =
                     [
-                        new ChartDataPoint { Label = "Q1", Value = 4500, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Q2", Value = 6200, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Q3", Value = 8500, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Q4", Value = 11500, LabelFormat = "N0" }
+                        new ChartDataPoint { Label = "Jan", Value = 1420, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Feb", Value = 1510, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Mar", Value = 1630, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Apr", Value = 1580, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "May", Value = 1720, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Jun", Value = 1890, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Jul", Value = 1960, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Aug", Value = 1840, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Sep", Value = 2030, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Oct", Value = 2210, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Nov", Value = 2380, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Dec", Value = 2640, LabelFormat = "N0" },
                     ]
                 }
             ],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
-                MaxValue = 15000,
-                StepCount = 5,
+                MaxValue = 3000,
+                StepCount = 6,
                 Legend = "Revenue"
             },
             XAxis = new AxisOptions
             {
-                Legend = "Quarter"
+                Legend = "Month"
             }
         };
 
         // Create the lollipop chart
         LollipopChart lollipopChart = new(chartData)
         {
-            AltText = "Lollipop chart showing quarterly revenue performance",
+            AltText = "Lollipop chart of monthly revenue in 2026, rising from 1,420 GBP in January to 2,640 GBP in December.",
             Height = 380,
             StretchToFit = true,
             LollipopColor = Color.FromHex("#ec4899"),
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            Theme = "modern",
+            BackgroundColor = Color.White
         };
 
         // Add the chart to the document

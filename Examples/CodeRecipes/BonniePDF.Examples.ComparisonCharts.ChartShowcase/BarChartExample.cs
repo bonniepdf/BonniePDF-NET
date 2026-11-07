@@ -112,7 +112,8 @@ public static class BarChartExample
             BarColor = Color.FromHex("#4f46e5"),
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
-            BackgroundColor = Color.FromHex("#fafafa")
+            Theme = "modern",
+            BackgroundColor = Color.White
         };
 
         // Get the current page's content stream and page height

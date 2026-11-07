@@ -263,6 +263,8 @@ public static class UtilityBillExample
                     DataPoints = [.. data.History.Select(h => new ChartDataPoint { Label = h.Month, Value = h.Units })]
                 }
             ],
+            // Fit the axis to the data: the top of the scale is the busiest month rounded up to 500 units.
+            YAxis = { MaxValue = (int)Math.Ceiling(data.History.Max(h => h.Units) / 500.0) * 500, StepCount = 4 },
         };
 
         int min = data.History.Min(h => h.Units);
@@ -273,7 +275,8 @@ public static class UtilityBillExample
             Data = chartData,
             AltText =
                 $"Monthly energy use over the last twelve months, from {data.History[0].Month} to {data.History[^1].Month}, ranging from {min} to {max} units. Use peaks in winter and falls through the summer.",
-            Height = 120,
+            Theme = "modern",
+            Height = 150,
             StretchToFit = true,
             BarColor = Accent,
             FontFamily = StandardFonts.Helvetica,
