@@ -119,7 +119,8 @@ public static class HorizontalGroupedBarChartExample
             FontFamily = StandardFonts.Helvetica,
             ShowValueLabels = true, // keep it uncluttered with 3 series
             ShowLegend = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            Theme = "modern",
+            BackgroundColor = Color.White
         };
 
         document.Add(groupedBarChart);

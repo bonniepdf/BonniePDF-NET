@@ -51,45 +51,46 @@ public static class GroupedBarChartExample
 
         document.Add(new TextBlock
         {
-            Text = "Comparison of three product lines across all months",
+            Text = "Three product lines compared quarter by quarter, 2026",
             FontSize = 14,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center, Margin = new Thickness(0, 0, 0, 20) });
 
-        List<string> months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        decimal[] electronicsValues = [4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800];
-        decimal[] clothingValues = [3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200];
-        decimal[] homeValues = [2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800];
+        List<string> quarters = ["Q1", "Q2", "Q3", "Q4"];
+        decimal[] electronicsValues = [14500, 21800, 22500, 31500];
+        decimal[] clothingValues = [10500, 14200, 14100, 19400];
+        decimal[] homeValues = [9300, 13000, 12900, 17400];
 
         ChartSeries electronicsSeries = new() { Name = "Electronics", Color = Color.FromHex("#4f46e5") };
         ChartSeries clothingSeries = new() { Name = "Clothing", Color = Color.FromHex("#f43f5e") };
         ChartSeries homeSeries = new() { Name = "Home & Garden", Color = Color.FromHex("#22c55e") };
 
-        for (int i = 0; i < months.Count; i++)
+        for (int i = 0; i < quarters.Count; i++)
         {
-            electronicsSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = electronicsValues[i], LabelFormat = "N0" });
-            clothingSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = clothingValues[i], LabelFormat = "N0" });
-            homeSeries.DataPoints.Add(new ChartDataPoint { Label = months[i], Value = homeValues[i], LabelFormat = "N0" });
+            electronicsSeries.DataPoints.Add(new ChartDataPoint { Label = quarters[i], Value = electronicsValues[i], LabelFormat = "N0" });
+            clothingSeries.DataPoints.Add(new ChartDataPoint { Label = quarters[i], Value = clothingValues[i], LabelFormat = "N0" });
+            homeSeries.DataPoints.Add(new ChartDataPoint { Label = quarters[i], Value = homeValues[i], LabelFormat = "N0" });
         }
 
         ChartData chartData = new()
         {
-            YAxis = { MaxValue = 15000, Prefix = "£", StepCount = 5, ShowGridLines = true }
+            YAxis = { MaxValue = 35000, Prefix = "£", StepCount = 7, ShowGridLines = true }
         };
         chartData.Series.Add(electronicsSeries);
         chartData.Series.Add(clothingSeries);
         chartData.Series.Add(homeSeries);
 
-        // Create the grouped bar chart with 3 series (3 bars per month)
+        // Create the grouped bar chart with 3 series (3 bars per quarter)
         GroupedBarChart groupedBarChart = new(chartData)
         {
             AltText =
-                "Grouped bar chart comparing quarterly revenue across Electronics, Clothing, and Home & Garden product lines",
+                "Grouped bar chart comparing Electronics, Clothing, and Home and Garden revenue in each quarter of 2026; Electronics leads every quarter, reaching 31,500 GBP in Q4.",
             Height = 380,
             StretchToFit = true,
             FontFamily = StandardFonts.Helvetica,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa"),
+            Theme = "modern",
+            BackgroundColor = Color.White,
         };
 
         // Add the chart to the document

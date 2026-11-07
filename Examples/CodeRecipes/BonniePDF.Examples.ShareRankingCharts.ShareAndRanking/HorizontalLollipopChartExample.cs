@@ -61,14 +61,14 @@ public static class HorizontalLollipopChartExample
                     Color = Color.FromHex("#7c3aed"),
                     DataPoints =
                     [
-                        new ChartDataPoint { Label = "Product A", Value = 45000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product B", Value = 62000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product C", Value = 38500, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product D", Value = 71000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product E", Value = 55000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product F", Value = 83000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product G", Value = 49000, LabelFormat = "N0" },
                         new ChartDataPoint { Label = "Product H", Value = 91000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product F", Value = 83000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product D", Value = 71000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product B", Value = 62000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product E", Value = 55000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product G", Value = 49000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product A", Value = 45000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product C", Value = 38500, LabelFormat = "N0" },
                     ]
                 }
             ],
@@ -93,7 +93,8 @@ public static class HorizontalLollipopChartExample
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            Theme = "modern",
+            BackgroundColor = Color.White
         };
 
         document.Add(lollipopChart);
