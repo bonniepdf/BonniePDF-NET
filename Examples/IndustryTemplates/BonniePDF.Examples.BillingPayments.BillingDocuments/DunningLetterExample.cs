@@ -271,7 +271,7 @@ public static class DunningLetterExample
 
     private static readonly Color Heading = ColorPalette.Slate[800];
 
-    private static readonly Color Accent = ColorPalette.Indigo[700];
+    private static readonly Color Accent = ColorPalette.Blue[800];
 
     private static readonly Color Rule = ColorPalette.Slate[200];
 
@@ -368,7 +368,7 @@ public static class DunningLetterExample
             body.Add(child);
         }
 
-        row.Add(new Container { BackgroundColor = ColorPalette.Indigo[50], CornerRadius = 6, Padding = new Thickness(12), Child = body, }, weight);
+        row.Add(new Container { BackgroundColor = ColorPalette.Blue[50], CornerRadius = 6, Padding = new Thickness(12), Child = body, }, weight);
         return row;
     }
 

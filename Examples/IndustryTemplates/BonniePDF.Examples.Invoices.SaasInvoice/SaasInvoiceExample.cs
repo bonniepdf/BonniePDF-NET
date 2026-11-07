@@ -16,12 +16,12 @@ namespace BonniePDF.Examples.Invoices.SaasInvoice;
     "An accessible subscription invoice for a Pro plan: billing period and status, per-seat and storage line items, a proration line, VAT, a prominent total and a QR payment code.")]
 public static class SaasInvoiceExample
 {
-    // ── Palette (Slate neutrals + indigo brand) ───────────────────────────────
+    // ── Palette (Slate neutrals + violet brand) ───────────────────────────────
     private static readonly Color Ink = ColorPalette.Slate[900];
     private static readonly Color BodyCol = ColorPalette.Slate[700];
     private static readonly Color Mute = ColorPalette.Slate[600];
     private static readonly Color RuleCol = ColorPalette.Slate[200];
-    private static readonly Color Brand = ColorPalette.Indigo[600];
+    private static readonly Color Brand = ColorPalette.Violet[600];
     private static readonly Color Panel = ColorPalette.Slate[50];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>

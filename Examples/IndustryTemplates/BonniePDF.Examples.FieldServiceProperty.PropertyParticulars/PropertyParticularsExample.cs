@@ -352,7 +352,7 @@ public static class PropertyParticularsExample
 
     private static readonly Color Heading = ColorPalette.Slate[800];
 
-    private static readonly Color Accent = ColorPalette.Indigo[700];
+    private static readonly Color Accent = ColorPalette.Cyan[700];
 
     private static readonly Color Rule = ColorPalette.Slate[200];
 

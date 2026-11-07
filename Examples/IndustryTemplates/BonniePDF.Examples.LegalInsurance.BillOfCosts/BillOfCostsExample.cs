@@ -383,11 +383,11 @@ public static class BillOfCostsExample
 
     private static readonly Color Heading = ColorPalette.Slate[800];
 
-    private static readonly Color Accent = ColorPalette.Indigo[700];
+    private static readonly Color Accent = ColorPalette.Rose[800];
 
     private static readonly Color Rule = ColorPalette.Slate[200];
 
-    private static readonly Color Negative = ColorPalette.Rose[700];
+    private static readonly Color Negative = ColorPalette.Rose[800];
 
     /// <summary>A styled text cell with trade-document defaults.</summary>
     private static TextBlock Cell(string text, float size = 9f, bool bold = false, Color? color = null, TextAlignment align = TextAlignment.Left, float marginTop = 0f, float marginBottom = 0f) => new()
@@ -504,7 +504,7 @@ public static class BillOfCostsExample
             body.Add(child);
         }
 
-        row.Add(new Container { BackgroundColor = ColorPalette.Indigo[50], CornerRadius = 6, Padding = new Thickness(12), Child = body, }, weight);
+        row.Add(new Container { BackgroundColor = ColorPalette.Rose[50], CornerRadius = 6, Padding = new Thickness(12), Child = body, }, weight);
         return row;
     }
 

@@ -309,7 +309,7 @@ public static class DischargeSummaryExample
 
     private static readonly Color Heading = ColorPalette.Slate[800];
 
-    private static readonly Color Accent = ColorPalette.Indigo[700];
+    private static readonly Color Accent = ColorPalette.Teal[700];
 
     private static readonly Color Rule = ColorPalette.Slate[200];
 

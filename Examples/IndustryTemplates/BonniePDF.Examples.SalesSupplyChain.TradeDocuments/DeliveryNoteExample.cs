@@ -242,7 +242,7 @@ public static class DeliveryNoteExample
 
     private static readonly Color Heading = ColorPalette.Slate[800];
 
-    private static readonly Color Accent = ColorPalette.Indigo[700];
+    private static readonly Color Accent = ColorPalette.Emerald[700];
 
     private static readonly Color Rule = ColorPalette.Slate[200];
 

@@ -233,7 +233,7 @@ public static class PurchaseOrderExample
 
     private static readonly Color Heading = ColorPalette.Slate[800];
 
-    private static readonly Color Accent = ColorPalette.Indigo[700];
+    private static readonly Color Accent = ColorPalette.Emerald[700];
 
     private static readonly Color Rule = ColorPalette.Slate[200];
 
@@ -343,7 +343,7 @@ public static class PurchaseOrderExample
             body.Add(child);
         }
 
-        row.Add(new Container { BackgroundColor = ColorPalette.Indigo[50], CornerRadius = 6, Padding = new Thickness(12), Child = body, }, weight);
+        row.Add(new Container { BackgroundColor = ColorPalette.Emerald[50], CornerRadius = 6, Padding = new Thickness(12), Child = body, }, weight);
         return row;
     }
 
