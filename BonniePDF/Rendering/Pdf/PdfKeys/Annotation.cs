@@ -11,6 +11,9 @@ internal static partial class PdfKeys
         /// <summary>Annotation flags controlling printing, visibility and other viewer behavior.</summary>
         internal const string Flags = "/F";
 
+        /// <summary>Border style array; <c>[0 0 0]</c> draws no border around the annotation.</summary>
+        internal const string Border = "/Border";
+
         /// <summary>Human-readable annotation text, including the accessible description of a link.</summary>
         internal const string Contents = "/Contents";
 

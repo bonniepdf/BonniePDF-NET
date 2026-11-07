@@ -21,6 +21,9 @@ internal static class PdfObjectBuilders
             [PdfKeys.Common.Subtype] = "/Link",
             [PdfKeys.Annotation.Rectangle] = hyperlink.GetRectangleString(),
             [PdfKeys.Annotation.Flags] = "4", // Print flag (PDF/A-1B requires annotations to be printable)
+            // No border: the default is [0 0 1], which many viewers draw as a box
+            // around the link. A link's look belongs to its text (spec 11 §2).
+            [PdfKeys.Annotation.Border] = "[0 0 0]",
             // PDF/UA rule 7-18: /Contents on the annotation must
             // carry an alt-text that mirrors the visible link text. Used
             // by screen readers when the structure tree omits or can't

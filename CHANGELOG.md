@@ -14,6 +14,8 @@ at the same version are the same library.
 
 ### Document Engine & API
 
+- **Links no longer draw a box:** link annotations now write `/Border [0 0 0]`. Without it a viewer applies the PDF default, a one-point border, and many draw it as a rectangle around every hyperlink, table-of-contents entry and cross-reference. The link text, its colour and the active region are unchanged; no other output changes.
+
 - Added opt-in `Theme = "modern"`, measured label spacing and `BarStyle` rounded value ends/opaque linear gradients on bar and grouped-bar charts. SVG and native PDF share resolved vector geometry; modern SVG text uses PDF baselines. Styles round-trip through document definitions. Legacy output is unchanged.
 
 - **Gradient pie slices:** `PieChart` gains `SliceGradient` (default `false`). Each slice fades from a lighter tint of its colour at the centre, or the donut hole, to its own colour at the rim, drawn as a native PDF shading and an SVG linear gradient. Slice colours must be opaque. The option round-trips through document definitions; pies without it are unchanged.
