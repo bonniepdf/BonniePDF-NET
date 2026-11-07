@@ -3,16 +3,48 @@ using BonniePDF;
 
 namespace BonniePDF.Examples.PracticalDocuments;
 
-/// <summary>A large order with line discounts, mixed rates, and reconciled minor-unit totals.</summary>
+/// <summary>A 72-line invoice: a styled header row that repeats on every page, per-line discounts, mixed VAT rates, and the totals kept together on the last page.</summary>
 public static class LargeOrderInvoiceExample
 {
-    private static readonly int[] TaxRates = [20, 5, 0];
     public sealed record InvoiceLine(string Description, int Quantity, long UnitPence, long DiscountPence, int TaxPercent);
     public sealed record Totals(long NetPence, long TaxPence, long GrossPence, SortedDictionary<int, (long NetPence, long TaxPence)> Rates);
 
-    public static Document Generate() => BuildInvoice(Enumerable.Range(0, 72).Select(i => new InvoiceLine(
-        $"Component {i + 1}: replacement assembly with installation, commissioning and handover notes{(i % 9 == 0 ? "; includes extended warranty and a detailed maintenance schedule for the customer site" : "")}.",
-        i % 4 + 1, 1299 + i * 25, i % 5 == 0 ? 150 : 0, TaxRates[i % 3])).ToArray());
+    /// <summary>Product, unit price in pence, VAT percent - the supplier's catalogue.</summary>
+    private static readonly (string Product, long UnitPence, int TaxPercent)[] Catalogue =
+    [
+        ("LED panel 600 × 600, 40 W, 4000 K", 2_450, 20),
+        ("Emergency exit sign, maintained, 3 h", 4_890, 20),
+        ("Loft insulation roll, 200 mm × 5.2 m", 2_175, 0),
+        ("Thermostatic radiator valve, 15 mm", 1_299, 20),
+        ("Smart heating controller, wall-mounted", 13_900, 20),
+        ("Draught-proofing strip, 10 m", 699, 0),
+        ("Fire door closer, adjustable, size 2–4", 3_650, 20),
+        ("Mobility grab rail, 600 mm, white", 2_840, 0),
+        ("Hand sanitiser refill, 5 l", 1_575, 20),
+        ("Children’s safety gate, pressure-fit", 3_299, 20),
+        ("Low-energy extractor fan, 100 mm", 5_820, 5),
+        ("Solar PIR floodlight, 20 W", 4_495, 5),
+        ("Air-source heat pump service kit", 18_750, 5),
+        ("Water-saving tap aerator, pack of 10", 1_890, 20),
+        ("Ceiling tile, mineral fibre, box of 16", 3_120, 20),
+        ("Fire extinguisher, 2 kg CO₂, annual service", 2_250, 20),
+        ("Anti-slip stair nosing, 1 m", 1_640, 20),
+        ("Carbon monoxide alarm, sealed battery", 2_199, 20),
+        ("Wall-mounted defibrillator cabinet", 26_500, 0),
+        ("Cleaning trolley, two-bucket", 9_850, 20),
+        ("Signage pack, accessible toilets", 4_120, 0),
+        ("Window restrictor, cable lock", 899, 20),
+        ("Lighting control module, DALI", 11_400, 20),
+        ("Batteries, AA lithium, pack of 24", 2_380, 20),
+    ];
+    private static readonly string[] Sites = ["Riverside block A", "Riverside block B", "Station Road depot"];
+    private static readonly CultureInfo EnGb = CultureInfo.GetCultureInfo("en-GB");
+
+    public static Document Generate() => BuildInvoice(Enumerable.Range(0, 72).Select(i =>
+    {
+        var (product, unitPence, taxPercent) = Catalogue[i % Catalogue.Length];
+        return new InvoiceLine($"{product}, {Sites[i / Catalogue.Length]}", i % 4 + 1, unitPence, i % 5 == 0 ? 150 : 0, taxPercent);
+    }).ToArray(), "PO-WFM-44817");
 
     // Integer minor units; tax rounds half up on each line before aggregation.
     public static Totals CalculateTotals(IReadOnlyList<InvoiceLine> lines)
@@ -35,29 +67,132 @@ public static class LargeOrderInvoiceExample
     public static Document BuildInvoice(IReadOnlyList<InvoiceLine> lines, string? purchaseOrder = null)
     {
         var totals = CalculateTotals(lines);
-        var doc = new Document(new DocumentSettings {
-            Language = "en-GB", Margin = 42, Conformance = PdfAConformance.PdfA2a, Accessibility = AccessibilityMode.PdfUa1,
-            DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(ColorPalette.Slate[800]),
-            FooterTemplate = PageTemplate.FromElements(@default: new TextBlock("INV-2026-072 · Page {{CurrentPage}} of {{TotalPages}}") { FontSize = 9, Alignment = TextAlignment.Right }) }) { Metadata = new DocumentMetadata { Title = "Large-order invoice INV-2026-072" } };
-        doc.Add(new Heading("NORTHFIELD SUPPLY") { Level = 1, FontSize = 25, Color = ColorPalette.Indigo[700] });
-        doc.Add(new TextBlock("Invoice INV-2026-072 · 25 October 2026 · GBP") { Margin = new Thickness(0, 0, 0, 16) });
-        doc.Add(new TextBlock("Bill to: Westborough Facilities and Maintenance Services Limited\nCustomer site: 18 Riverside Industrial Estate, York YO1 1AA") { Margin = new Thickness(0, 0, 0, 12) });
-        if (!string.IsNullOrEmpty(purchaseOrder)) doc.Add(new TextBlock($"Purchase order: {purchaseOrder}"));
-        var table = new Table(5, 0.5f, 1, 1, 0.6f, 1) { RepeatHeadersOnNewPage = true, CellPadding = 6 };
-        table.AddHeader("Description", "Qty", "Unit GBP", "Discount", "Tax %", "Net GBP");
-        foreach (var line in lines) table.AddRow(new TextBlock(line.Description),
-            Number(line.Quantity.ToString(CultureInfo.InvariantCulture)), Number(Money(line.UnitPence)), Number(Money(line.DiscountPence)), Number(line.TaxPercent.ToString(CultureInfo.InvariantCulture)), Number(Money(line.Quantity * line.UnitPence - line.DiscountPence)));
+        HorizontalStack footer = new() { WidthDistribution = WidthDistribution.Equal };
+        footer.Add(Text("Northfield Supply Ltd  ·  VAT GB 318 4402 17", 8, ColorPalette.Slate[500]));
+        footer.Add(Text("INV-2026-072  ·  page {{CurrentPage}} of {{TotalPages}}", 8, ColorPalette.Slate[500], align: TextAlignment.Right));
+        var doc = new Document(new DocumentSettings
+        {
+            Language = "en-GB",
+            Margin = 42,
+            Conformance = PdfAConformance.PdfA2a,
+            Accessibility = AccessibilityMode.PdfUa1,
+            DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(ColorPalette.Slate[700]),
+            FooterTemplate = PageTemplate.FromElements(@default: footer)
+        })
+        { Metadata = new DocumentMetadata { Title = "Large-order invoice INV-2026-072" } };
+
+        // ── Header: brand and invoice details ──
+        VerticalStack brand = new() { Spacing = 2 };
+        brand.Add(new Heading("NORTHFIELD SUPPLY") { Level = 1, FontName = StandardFonts.HelveticaBold, FontSize = 20, LetterSpacing = 0.5f, Color = ColorPalette.Indigo[700] });
+        brand.Add(Text("Facilities and maintenance supplies", 9, ColorPalette.Slate[500]));
+        VerticalStack meta = new() { Spacing = 2 };
+        meta.Add(Text("INVOICE", 9, ColorPalette.Slate[900], bold: true, align: TextAlignment.Right));
+        meta.Add(Text("INV-2026-072", 14, ColorPalette.Slate[900], bold: true, align: TextAlignment.Right));
+        meta.Add(Text("Issued 25 October 2026  ·  due 24 November 2026", 9, ColorPalette.Slate[500], align: TextAlignment.Right));
+        Grid header = new(1f, 1f) { Border = new Border(0), CellPadding = 0, Margin = new Thickness(0, 0, 0, 14) };
+        header.AddRow(brand, meta);
+        doc.Add(header);
+
+        Grid parties = new(1f, 1f, 1f) { Border = new Border(0), CellPadding = 0, Margin = new Thickness(0, 0, 0, 16) };
+        parties.AddRow(
+            Party("BILL TO", "Westborough Facilities and Maintenance Services Ltd", "Accounts payable\n4 Minster Court, York YO1 7HH"),
+            Party("DELIVER TO", "Riverside Industrial Estate", "Blocks A and B, and Station Road depot\nYork YO1 1AA"),
+            Party("REFERENCES", string.IsNullOrEmpty(purchaseOrder) ? "No purchase order" : $"Purchase order {purchaseOrder}", "Account WFM-0193\nCurrency GBP"));
+        doc.Add(parties);
+
+        // ── Line items: the header row repeats at the top of every page ──
+        Table table = new(4.4f, 0.6f, 1f, 1.1f, 0.6f, 1.1f)
+        {
+            RepeatHeadersOnNewPage = true,
+            CellPadding = 5,
+            Border = new Border(0.5f),
+            BorderColors = new BorderColors(ColorPalette.Slate[200]),
+            HeaderBackgroundColor = ColorPalette.Slate[800],
+            HeaderTextColor = Color.White
+        };
+        table.AddHeader(
+            Text("Description", 8.5f, Color.White, bold: true),
+            Text("Qty", 8.5f, Color.White, bold: true, align: TextAlignment.Right),
+            Text("Unit £", 8.5f, Color.White, bold: true, align: TextAlignment.Right),
+            Text("Discount £", 8.5f, Color.White, bold: true, align: TextAlignment.Right),
+            Text("VAT", 8.5f, Color.White, bold: true, align: TextAlignment.Right),
+            Text("Net £", 8.5f, Color.White, bold: true, align: TextAlignment.Right));
+        foreach (var line in lines)
+        {
+            Color ink = ColorPalette.Slate[800];
+            table.AddRow(
+                Text(line.Description, 9, ink),
+                Text(line.Quantity.ToString(CultureInfo.InvariantCulture), 9, ink, align: TextAlignment.Right),
+                Text(Money(line.UnitPence), 9, ink, align: TextAlignment.Right),
+                Text(line.DiscountPence != 0 ? Money(line.DiscountPence) : "\u2013", 9, ink, align: TextAlignment.Right),
+                Text($"{line.TaxPercent}%", 9, ink, align: TextAlignment.Right),
+                Text(Money(line.Quantity * line.UnitPence - line.DiscountPence), 9, ink, align: TextAlignment.Right));
+        }
         if (lines.Count == 0) table.AddRow("No billable items", "", "", "", "", "0.00");
         doc.Add(table);
-        var summary = new VerticalStack { Spacing = 7, Margin = new Thickness(0, 16, 0, 0) };
-        summary.Add(new Heading("Invoice totals") { Level = 2, FontSize = 17 });
-        foreach (var (rate, group) in totals.Rates) summary.Add(new TextBlock($"Tax {rate}%: net {Money(group.NetPence)} · tax {Money(group.TaxPence)} GBP"));
-        summary.Add(new TextBlock($"Net {Money(totals.NetPence)} · Tax {Money(totals.TaxPence)} · Total due {Money(totals.GrossPence)} GBP") { FontWeight = FontWeight.Bold });
-        summary.Add(new TextBlock("Payment terms: 30 days. Reference INV-2026-072 with your payment."));
-        doc.Add(new PreventPageBreak { Child = summary });
+
+        // ── Totals: kept together, so they always appear whole on the last page ──
+        Table vat = new(1f, 1.4f, 1.4f) { CellPadding = 5, Border = new Border(0), HeaderBackgroundColor = ColorPalette.Slate[100], HeaderTextColor = ColorPalette.Slate[900] };
+        vat.AddHeader(
+            Text("VAT rate", 8.5f, ColorPalette.Slate[900], bold: true),
+            Text("Net £", 8.5f, ColorPalette.Slate[900], bold: true, align: TextAlignment.Right),
+            Text("VAT £", 8.5f, ColorPalette.Slate[900], bold: true, align: TextAlignment.Right));
+        foreach (var (rate, group) in totals.Rates.Reverse())
+            vat.AddRow(
+                Text($"{rate}%", 9, ColorPalette.Slate[700]),
+                Text(Money(group.NetPence), 9, ColorPalette.Slate[700], align: TextAlignment.Right),
+                Text(Money(group.TaxPence), 9, ColorPalette.Slate[700], align: TextAlignment.Right));
+
+        Grid sums = new(1f, 1f) { Border = new Border(0), CellPadding = 4 };
+        sums.AddRow(Text("Net", 10, ColorPalette.Slate[700], align: TextAlignment.Right), Text($"£{Money(totals.NetPence)}", 10, ColorPalette.Slate[700], align: TextAlignment.Right));
+        sums.AddRow(Text("VAT", 10, ColorPalette.Slate[700], align: TextAlignment.Right), Text($"£{Money(totals.TaxPence)}", 10, ColorPalette.Slate[700], align: TextAlignment.Right));
+
+        HorizontalStack dueLine = new() { WidthDistribution = WidthDistribution.Equal };
+        dueLine.Add(Text("Total due", 13, ColorPalette.Indigo[900], bold: true));
+        dueLine.Add(Text($"£{Money(totals.GrossPence)}", 13, ColorPalette.Indigo[900], bold: true, align: TextAlignment.Right));
+        Container due = new() { BackgroundColor = ColorPalette.Indigo[50], CornerRadius = 6, Padding = new Thickness(10, 8, 10, 8), Margin = new Thickness(0, 6, 0, 0), Child = dueLine };
+
+        VerticalStack vatColumn = new() { Spacing = 6 };
+        vatColumn.Add(new Heading("VAT summary") { Level = 2, FontName = StandardFonts.HelveticaBold, FontSize = 11, Color = ColorPalette.Slate[900] });
+        vatColumn.Add(vat);
+        VerticalStack totalsColumn = new() { Spacing = 6 };
+        totalsColumn.Add(new Heading("Invoice totals") { Level = 2, FontName = StandardFonts.HelveticaBold, FontSize = 11, Color = ColorPalette.Slate[900] });
+        totalsColumn.Add(sums);
+        totalsColumn.Add(due);
+
+        HorizontalStack totalsRow = new() { Spacing = 24, WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 16, 0, 0) };
+        totalsRow.Add(vatColumn, 3);
+        totalsRow.Add(totalsColumn, 2);
+
+        VerticalStack closing = new();
+        closing.Add(totalsRow);
+        closing.Add(Text("Payment terms: 30 days by bank transfer to Northfield Supply Ltd, sort code 20-45-77, account 61839204. Quote INV-2026-072 with your payment.", 9, ColorPalette.Slate[600], top: 14));
+        doc.Add(new PreventPageBreak { Child = closing });
         return doc;
     }
 
-    private static TextBlock Number(string value) => new(value) { Alignment = TextAlignment.Right };
-    private static string Money(long pence) => (pence / 100m).ToString("F2", CultureInfo.InvariantCulture);
+    private static string Money(long pence) => (pence / 100m).ToString("N2", EnGb);
+
+    private static TextBlock Text(string content, float size, Color color, bool bold = false, TextAlignment align = TextAlignment.Left, float top = 0)
+    {
+        TextBlock block = new(content)
+        {
+            FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+            FontSize = size,
+            Color = color,
+            Alignment = align
+        };
+        if (top > 0) block.Margin = new Thickness(0, top, 0, 0);
+        return block;
+    }
+
+    /// <summary>A labelled address block.</summary>
+    private static VerticalStack Party(string label, string name, string detail)
+    {
+        VerticalStack stack = new() { Spacing = 2 };
+        stack.Add(Text(label, 7.5f, ColorPalette.Slate[500], bold: true));
+        stack.Add(Text(name, 9.5f, ColorPalette.Slate[900], bold: true));
+        stack.Add(Text(detail, 9, ColorPalette.Slate[600]));
+        return stack;
+    }
 }
