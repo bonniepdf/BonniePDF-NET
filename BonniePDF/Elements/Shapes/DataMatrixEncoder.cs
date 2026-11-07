@@ -72,10 +72,10 @@ internal static class DataMatrixEncoder
     /// <exception cref="DataMatrixContentException">
     /// Thrown if the message is too long for the largest (144x144) symbol.
     /// </exception>
-    public static EncodedDataMatrix Encode(string message, bool rectangular = false)
+    public static EncodedDataMatrix Encode(string message, bool rectangular = false, bool gs1 = false)
     {
         string bytes = ToLatin1Bytes(message);
-        List<int> data = ChooseBestEncoding(bytes);
+        List<int> data = gs1 ? EncodeGs1(message) : ChooseBestEncoding(bytes);
         SymbolSize size = CalculateSymbolSize(data.Count, rectangular);
 
         // Lay the data into a fixed-size buffer; padding and RS fill the remainder.
@@ -103,6 +103,24 @@ internal static class DataMatrixEncoder
     private static int Randomise255State(int value, int position)
     {
         return (value + ((149 * position) % 255) + 1) & 255;
+    }
+
+    private static List<int> EncodeGs1(string text)
+    {
+        List<int> data = [];
+        foreach (string field in text.Split('\u001d'))
+        {
+            if (field.Length == 0)
+                throw new DataMatrixContentException("GS1 DataMatrix fields must not be empty.");
+            foreach (char ch in field)
+            {
+                if (ch is < ' ' or > '~')
+                    throw new DataMatrixContentException("GS1 DataMatrix fields must contain printable ASCII only.");
+            }
+            data.Add(232);
+            data.AddRange(EncodeAscii(field));
+        }
+        return data;
     }
 
     private static List<int> EncodeAscii(string text)

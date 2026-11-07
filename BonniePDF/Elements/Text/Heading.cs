@@ -55,6 +55,7 @@ public class Heading : TextBlock, IStatefulElement, IRoleProvider
     /// </summary>
     public Heading() : base()
     {
+        KeepWithNext = true;
     }
 
     /// <summary>
@@ -68,6 +69,7 @@ public class Heading : TextBlock, IStatefulElement, IRoleProvider
     [SetsRequiredMembers]
     public Heading(string text) : base(text)
     {
+        KeepWithNext = true;
         TocIdentifier = string.Empty;
     }
 
@@ -80,8 +82,9 @@ public class Heading : TextBlock, IStatefulElement, IRoleProvider
     /// <returns>The render status indicating whether the element is complete or overflowed.</returns>
     public override RenderStatus RenderStateful(RenderContext ctx, float width)
     {
-        RegisterToc(ctx);
-        return base.RenderStateful(ctx, width);
+        RenderStatus status = base.RenderStateful(ctx, width);
+        if (status != RenderStatus.WrapRequired) RegisterToc(ctx);
+        return status;
     }
 
     /// <summary>

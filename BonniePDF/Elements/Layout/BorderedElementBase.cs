@@ -1,4 +1,6 @@
 
+using System;
+
 namespace BonniePDF;
 
 /// <summary>
@@ -89,7 +91,7 @@ public abstract class BorderedElementBase : ElementBase, IBackgroundColor
             // Rounded borders: use a single rounded rect stroke (uniform border only)
             if (CornerRadius > 0)
             {
-                float strokeWidth = border.Top > 0 ? border.Top : border.Left > 0 ? border.Left : border.Bottom > 0 ? border.Bottom : border.Right;
+                float strokeWidth = MathF.Max(MathF.Max(border.Top, border.Left), MathF.Max(border.Bottom, border.Right));
                 Color strokeColor = borderColors.Top ?? borderColors.Left ?? borderColors.Bottom ?? borderColors.Right ?? Color.Black;
                 ctx.Canvas.StrokeRoundedRect(x, y, width, height, CornerRadius, strokeColor, strokeWidth);
                 return;

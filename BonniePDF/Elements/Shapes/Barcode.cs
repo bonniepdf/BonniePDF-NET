@@ -19,6 +19,9 @@ public class Barcode : ElementBase, IRoleProvider, IAltTextProvider
     /// <summary>The barcode symbology. Defaults to <see cref="BarcodeSymbology.Code128"/>.</summary>
     public BarcodeSymbology Symbology { get; set; } = BarcodeSymbology.Code128;
 
+    /// <summary>Encodes Code 128 with the GS1 start and field separators.</summary>
+    public bool Gs1 { get; set; }
+
     /// <summary>
     /// Alternate text description for accessibility. When the document opts into
     /// <c>AccessibilityMode.PdfUa1</c>, this populates the <c>/Alt</c> entry on the
@@ -70,7 +73,7 @@ public class Barcode : ElementBase, IRoleProvider, IAltTextProvider
     protected override float GetPreferredContentWidth()
     {
         if (string.IsNullOrEmpty(Value)) return 0f;
-        EncodedBarcode encoded = BarcodeEncoder.Encode(Symbology, Value);
+        EncodedBarcode encoded = BarcodeEncoder.Encode(Symbology, Value, Gs1);
         int totalModules = encoded.Modules.Length + EffectiveQuietZone * 2;
         return totalModules * ModuleWidth;
     }
@@ -88,7 +91,7 @@ public class Barcode : ElementBase, IRoleProvider, IAltTextProvider
             return;
         }
 
-        EncodedBarcode encoded = BarcodeEncoder.Encode(Symbology, Value);
+        EncodedBarcode encoded = BarcodeEncoder.Encode(Symbology, Value, Gs1);
         bool[] modules = encoded.Modules;
 
         float x = ctx.CurrentX;

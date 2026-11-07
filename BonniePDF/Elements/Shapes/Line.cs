@@ -1,4 +1,7 @@
 
+using System;
+using BonniePDF.Drawing;
+
 namespace BonniePDF;
 
 /// <summary>
@@ -33,6 +36,9 @@ public class Line : ElementBase
     /// </summary>
     public float? Length { get; set; }
 
+    /// <summary>Alternating dash and gap lengths in points.</summary>
+    public float[]? DashPattern { get; set; }
+
     protected override float MeasureContentHeight(float contentWidth)
     {
         if (Orientation == LineOrientation.Horizontal)
@@ -50,46 +56,30 @@ public class Line : ElementBase
 
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
+        bool horizontal = Orientation == LineOrientation.Horizontal;
+        float length = Length ?? (horizontal ? contentWidth : 100);
         float x = ctx.CurrentX;
         float y = ctx.CurrentY;
-
-        if (Orientation == LineOrientation.Horizontal)
+        if (DashPattern is not { Length: > 0 } pattern)
         {
-            // Draw horizontal line
-            float width = Length ?? contentWidth;
-            
-            // Adjust Y to center the line in the thickness area? 
-            // Or just draw from top edge? Usually top edge is fine, but maybe center it vertically in the allocated space?
-            // Since we allocated 'Thickness' height, drawing a line of 'Thickness' width at y + Thickness/2 
-            // using a stroke would work, or filling a rectangle.
-            
-            // Using FillRect is safer for thickness > 1
-            ctx.Canvas.FillRect(x, y, width, Thickness, Color);
-            
-            // Advance Y is handled by MeasureHeight/Render caller usually adding height?
-            // No, ElementBase Render adds margins, but inside RenderContent we are just rendering.
-            // But wait, ElementBase.Render doesn't advance CurrentY by content height!
-            // Let's check ElementBase again.
-            
-            // ElementBase.Render:
-            // 57 |         RenderContent(ctx, contentWidth);
-            // ...
-            // It does NOT advance Y by content height automatically.
-            // The inheriting class MUST advance Y if it consumes vertical space.
-            
-            ctx.CurrentY += Thickness;
+            ctx.Canvas.FillRect(x, y, horizontal ? length : Thickness, horizontal ? Thickness : length, Color);
         }
         else
         {
-            // Draw vertical line
-            float height = Length ?? 100; // Default height if not specified
-            
-            // Draw vertical line
-            ctx.Canvas.FillRect(x, y, Thickness, height, Color);
-            
-            // Advance Y
-            ctx.CurrentY += height;
+            foreach (float dash in pattern)
+            {
+                if (!float.IsFinite(dash) || dash <= 0)
+                    throw new ArgumentOutOfRangeException(nameof(DashPattern), "Dash lengths must be finite and positive.");
+            }
+
+            float half = Thickness / 2;
+            ctx.Canvas.BeginPath();
+            ctx.Canvas.MoveTo(x + (horizontal ? 0 : half), y + (horizontal ? half : 0));
+            ctx.Canvas.LineTo(x + (horizontal ? length : half), y + (horizontal ? half : length));
+            ctx.Canvas.StrokeCurrentPath(new StrokeStyle { Paint = Color, Width = Thickness, DashPattern = pattern });
         }
+
+        ctx.CurrentY += horizontal ? Thickness : length;
     }
 }
 

@@ -103,6 +103,11 @@ public abstract class CartesianChartBase : ChartBase
     /// </summary>
     public ChartOrientation Orientation { get; set; } = ChartOrientation.Vertical;
 
+    /// <summary>Reference lines and bands on the value axis.</summary>
+    public List<ChartReference> References { get; set; } = [];
+
+    private protected virtual bool DrawCompact(ICanvas canvas, ChartData data) => false;
+
     /// <summary>
     /// Draws the chart content using a Template Method pattern.
     /// This ensures consistent drawing order across all Cartesian chart types:
@@ -123,7 +128,9 @@ public abstract class CartesianChartBase : ChartBase
         if (data.Series.Count == 0) return;
         ChartValueScale.Check(data.YAxis.MinValue, data.YAxis.MaxValue);
 
+        if (DrawCompact(canvas, data)) return;
         (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) = CalculateLayout(data);
+        DrawReferences(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, bands: true);
 
         // 1. Draw grid lines first (behind everything)
         if (data.YAxis.ShowGridLines)
@@ -138,6 +145,8 @@ public abstract class CartesianChartBase : ChartBase
 
         // 4. Draw chart-specific data elements
         DrawAllSeries(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
+
+        DrawReferences(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, bands: false);
 
         // 5. Draw value labels on top of data
         if (ShowValueLabels)
@@ -163,6 +172,61 @@ public abstract class CartesianChartBase : ChartBase
             DrawLegend(canvas, data, chartAreaWidth);
 
         } finally {_renderData=previousData;_labelBoxes.Clear();}
+    }
+
+    private void DrawReferences(ICanvas canvas, ChartData data, float width, float height, float baseline, bool bands)
+    {
+        bool horizontal = Orientation == ChartOrientation.Horizontal;
+        decimal min = data.YAxis.MinValue;
+        decimal max = data.YAxis.MaxValue;
+        foreach (ChartReference reference in References)
+        {
+            if (reference.EndValue.HasValue != bands) continue;
+            float a = (float)ChartValueScale.Fraction(reference.Value, min, max);
+            if (reference.EndValue is decimal end)
+            {
+                float b = (float)ChartValueScale.Fraction(end, min, max);
+                float low = MathF.Max(0, MathF.Min(a, b));
+                float high = MathF.Min(1, MathF.Max(a, b));
+                if (!(high > low)) continue;
+                if (horizontal) canvas.FillRect(LeftPadding + low * width, baseline - height, (high - low) * width, height, reference.Color);
+                else canvas.FillRect(LeftPadding, baseline - high * height, width, (high - low) * height, reference.Color);
+            }
+            else if (a >= 0 && a <= 1 && float.IsFinite(reference.Thickness) && reference.Thickness > 0)
+            {
+                float x = horizontal ? LeftPadding + a * width : LeftPadding;
+                float y = baseline - (horizontal ? height : a * height);
+                DrawReferenceLine(canvas, x, y, horizontal ? height : width, horizontal, reference);
+            }
+        }
+    }
+
+    private static void DrawReferenceLine(ICanvas canvas, float x, float y, float length, bool vertical, ChartReference reference)
+    {
+        void Draw(float from, float to)
+        {
+            if (vertical) canvas.DrawLine(x, y + from, x, y + to, reference.Color, reference.Thickness);
+            else canvas.DrawLine(x + from, y, x + to, y, reference.Color, reference.Thickness);
+        }
+
+        if (reference.DashPattern is not { Length: > 0 } pattern)
+        {
+            Draw(0, length);
+            return;
+        }
+
+        foreach (float dash in pattern)
+        {
+            if (!float.IsFinite(dash) || dash <= 0 || length / dash > 100_000)
+                throw new ArgumentOutOfRangeException(nameof(reference), "Reference dash lengths must be finite and positive and allow at most 100,000 segments.");
+        }
+        float from = 0;
+        for (int i = 0; from < length; i++)
+        {
+            float to = MathF.Min(length, from + pattern[i % pattern.Length]);
+            if (i % 2 == 0) Draw(from, to);
+            from = to;
+        }
     }
 
     /// <summary>

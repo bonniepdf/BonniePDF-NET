@@ -694,23 +694,15 @@ public class Document : IDisposable
         if (el is TextElementBase text)
             text.ApplyDefaultStyleIfNotSet(style);
 
-        if (el is VerticalStack vs)
-            foreach (IElement child in vs.Children) ApplyStyleToElement(child, style);
-        else if (el is HorizontalStack hs)
-            foreach (IElement child in hs.Children) ApplyStyleToElement(child, style);
-        else if (el is Container c && c.Child != null)
-            ApplyStyleToElement(c.Child, style);
-        else if (el is ListElementBase list)
-            foreach (ListElementBase child in list.GetNestedLists())
-                ApplyStyleToElement(child, style);
-        else if (el is Table t)
+        if (el is Table t)
         {
             // A table builds its running-total rows during layout, so it keeps the style for them.
             t.CascadedTextStyle = style;
-            // Every cell's non-null content, in row order, as GetAllRows would give it.
-            foreach (IElement content in t.GetChildren())
-                ApplyStyleToElement(content, style);
         }
+
+        IEnumerable<IElement> children = el is ListElementBase list ? list.GetNestedLists() : el.GetChildren();
+        foreach (IElement child in children)
+            ApplyStyleToElement(child, style);
     }
 
 

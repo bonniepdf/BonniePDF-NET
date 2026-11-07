@@ -35,14 +35,17 @@ internal sealed class EncodedBarcode
 /// </summary>
 internal static class BarcodeEncoder
 {
-    public static EncodedBarcode Encode(BarcodeSymbology symbology, string value)
+    public static EncodedBarcode Encode(BarcodeSymbology symbology, string value, bool gs1 = false)
     {
         if (value == null)
             throw new BarcodeContentException(symbology, "Barcode value must not be null.");
 
+        if (gs1 && symbology != BarcodeSymbology.Code128)
+            throw new BarcodeContentException(symbology, "GS1 mode is supported for Code 128 only.");
+
         return symbology switch
         {
-            BarcodeSymbology.Code128 => EncodeCode128(value),
+            BarcodeSymbology.Code128 => EncodeCode128(value, gs1),
             BarcodeSymbology.Ean13 => EncodeEan13(value),
             BarcodeSymbology.UpcA => EncodeUpcA(value),
             BarcodeSymbology.Itf14 => EncodeItf14(value),
@@ -82,19 +85,23 @@ internal static class BarcodeEncoder
     private const int Code128StartC = 105;
     private const int Code128Stop = 106;
 
-    private static EncodedBarcode EncodeCode128(string value)
+    private static EncodedBarcode EncodeCode128(string value, bool gs1)
     {
         if (value.Length == 0)
             throw new BarcodeContentException(BarcodeSymbology.Code128, "Code 128 requires at least one character.");
 
         foreach (char ch in value)
         {
-            if (ch < 32 || ch > 126)
+            if (!(gs1 && ch == 29) && (ch < 32 || ch > 126))
                 throw new BarcodeContentException(BarcodeSymbology.Code128,
                     $"Code 128 (subset B) supports ASCII 32-126 only. Got character U+{(int)ch:X4}.");
         }
 
-        List<int> codes = BuildCode128Values(value);
+        string[] fields = gs1 ? value.Split('\u001d') : [value];
+        if (gs1 && (Array.Exists(fields, string.IsNullOrEmpty) || value.Length - fields.Length + 1 > 48))
+            throw new BarcodeContentException(BarcodeSymbology.Code128, "Invalid GS1 separators or more than 48 data characters.");
+
+        List<int> codes = gs1 ? BuildGs1Code128Values(fields) : BuildCode128Values(value);
 
         // Modulo-103 weighted checksum: start value + sum(i * value_i).
         long sum = codes[0];
@@ -107,7 +114,7 @@ internal static class BarcodeEncoder
         foreach (int code in codes)
             AppendCode128Symbol(modules, code);
 
-        return new EncodedBarcode(modules.ToArray(), value);
+        return new EncodedBarcode(modules.ToArray(), gs1 ? string.Join(" ", fields) : value);
     }
 
     private static List<int> BuildCode128Values(string value)
@@ -135,6 +142,31 @@ internal static class BarcodeEncoder
                 codes.Add(ch - 32);
         }
 
+        return codes;
+    }
+
+    private static List<int> BuildGs1Code128Values(string[] fields)
+    {
+        List<int> codes = [];
+        int set = 0;
+        foreach (string field in fields)
+        {
+            List<int> data = BuildCode128Values(field);
+            int start = data[0];
+            if (set == 0)
+            {
+                codes.Add(start);
+                codes.Add(102); // Leading FNC1
+            }
+            else
+            {
+                codes.Add(102); // FNC1 field separator
+                if (start != set) codes.Add(start == Code128StartC ? 99 : 100);
+            }
+
+            set = start;
+            for (int i = 1; i < data.Count; i++) codes.Add(data[i]);
+        }
         return codes;
     }
 

@@ -305,7 +305,9 @@ public static class CompliancePreflight
         if (paint.TextAlpha is { } textAlpha && textAlpha < 1f)
             return ContrastVerdict.Indeterminate(ContrastUnknownReason.Translucent);
 
-        (string? backdropHex, ContrastUnknownReason? unknown) = ResolveBackdrop(ancestors, pages, PageOf(node));
+        (string? backdropHex, ContrastUnknownReason? unknown) = paint.TextBackdrop is { } canvasBackdrop
+            ? (canvasBackdrop, null)
+            : ResolveBackdrop(ancestors, pages, PageOf(node));
         if (unknown is { } reason) return ContrastVerdict.Indeterminate(reason);
 
         // A malformed colour degrades to "unknown" rather than to a wrong verdict.

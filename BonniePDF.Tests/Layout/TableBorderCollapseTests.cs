@@ -72,6 +72,21 @@ public partial class TableBorderCollapseTests
         strokes.Where(s => Math.Abs(s.X1 - at) < 0.01f && Math.Abs(s.X2 - at) < 0.01f).ToList();
 
     [Fact]
+    public void PaintsOnlyColouredSquareEdgesInTheSpecifiedOrder()
+    {
+        var table = new Table(1);
+        var cell = new TableCell
+        {
+            Content = new TextBlock("Edge test"),
+            Border = new Border(2),
+            BorderColors = new BorderColors(Color.Red, Color.Blue, null, Color.Black)
+        };
+        table.AddRow(cell);
+
+        Assert.Equal(new[] { "1 0 0", "0 0 1", "0 0 0" }, Strokes(RenderTable(table)).Select(stroke => stroke.Colour));
+    }
+
+    [Fact]
     public void TheTablesOwnBorder_AppliesToEveryCell()
     {
         string stream = Render(root => root.Table(t =>

@@ -74,15 +74,18 @@ public class DataMatrix : ElementBase, IRoleProvider, IAltTextProvider
     /// <summary>Whether to draw the background. If <c>false</c>, the symbol is transparent.</summary>
     public bool DrawBackground { get; set; } = true;
 
+    /// <summary>Encodes the GS1 start and field separators.</summary>
+    public bool Gs1 { get; set; }
+
     private string? _memoKey;
     private EncodedDataMatrix? _memo;
 
     private EncodedDataMatrix EncodeMatrix()
     {
-        string key = (Rectangular ? "r:" : "s:") + Data;
+        string key = (Rectangular ? "r:" : "s:") + (Gs1 ? "gs1:" : "plain:") + Data;
         if (!string.Equals(_memoKey, key, StringComparison.Ordinal) || _memo is null)
         {
-            _memo = DataMatrixEncoder.Encode(Data, Rectangular);
+            _memo = DataMatrixEncoder.Encode(Data, Rectangular, Gs1);
             _memoKey = key;
         }
         return _memo;

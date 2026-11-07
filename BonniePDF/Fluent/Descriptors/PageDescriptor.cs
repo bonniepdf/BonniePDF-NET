@@ -10,6 +10,8 @@ public sealed class PageDescriptor
 {
     internal PdfSize PageSize { get; private set; } = PdfSize.A4;
     internal float PageMargin { get; private set; } = 50f;
+    internal Thickness? PageMargins { get; private set; }
+    internal bool PreserveDimensions { get; private set; }
     internal PageOrientation PageOrientation { get; private set; } = PageOrientation.Portrait;
     internal ContentSlot HeaderSlot { get; } = new();
     internal ContentSlot ContentSlot { get; } = new();
@@ -21,12 +23,26 @@ public sealed class PageDescriptor
     /// <summary>
     /// Sets the page size.
     /// </summary>
-    public void Size(PdfSize size) => PageSize = size;
+    public void Size(PdfSize size) => Size(size, preserveDimensions: false);
+
+    /// <summary>Sets the page size and optionally preserves the supplied width and height.</summary>
+    public void Size(PdfSize size, bool preserveDimensions)
+    {
+        PageSize = size;
+        PreserveDimensions = preserveDimensions;
+    }
 
     /// <summary>
     /// Sets the page margin in points.
     /// </summary>
-    public void Margin(float margin) => PageMargin = margin;
+    public void Margin(float margin)
+    {
+        PageMargin = margin;
+        PageMargins = null;
+    }
+
+    /// <summary>Sets a separate margin for each side.</summary>
+    public void Margin(Thickness margins) => PageMargins = margins;
 
     /// <summary>
     /// Sets the page orientation.

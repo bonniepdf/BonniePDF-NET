@@ -7,7 +7,7 @@ namespace BonniePDF;
 internal class RenderedPageDimensions
 {
     public PdfSize Size { get; set; }
-    public float Margin { get; set; }
+    public Thickness Margins { get; set; }
 
     /// <summary>
     /// Per-page background colour (from <see cref="Page.PageColor"/>), carried

@@ -280,6 +280,17 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
         return widest;
     }
 
+    internal override float MinimumStartHeight(float width)
+    {
+        if (!BreakAllowed) return MeasureHeight(width);
+        var lines = GetOrComputeLines(GetContentWidth(width));
+        int minimum = Math.Max(1, MinLinesBeforeBreak);
+        if (lines.Count < minimum + Math.Max(1, MinLinesAfterBreak)) return MeasureHeight(width);
+        float height = Margin.Top;
+        for (int i = 0; i < minimum; i++) height += lines[i].Height;
+        return height;
+    }
+
     protected override float MeasureContentHeight(float contentWidth)
     {
         List<RichTextLine> lines = GetOrComputeLines(contentWidth);

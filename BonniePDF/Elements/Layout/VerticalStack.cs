@@ -35,7 +35,8 @@ public class VerticalStack : ElementBase, IStatefulElement
     public RenderStatus RenderStateful(RenderContext ctx, float width)
     {
         // Apply top margin only on first render (not on continuation pages)
-        if (_lastChildRendered < 0) ctx.CurrentY += Margin.Top;
+        float topMargin = _lastChildRendered < 0 ? Margin.Top : 0;
+        ctx.CurrentY += topMargin;
 
         float contentWidth = width - Margin.Left - Margin.Right;
 
@@ -57,6 +58,12 @@ public class VerticalStack : ElementBase, IStatefulElement
         for (int i = startChild; i < _children.Count; i++)
         {
             IElement child = _children[i];
+            float keepHeight = BonniePDF.KeepWithNext.Height(_children, i, contentWidth, Spacing);
+            if (keepHeight > 0 && keepHeight <= ctx.ContentHeight - topMargin && ctx.CurrentY + keepHeight > ctx.MaxY)
+            {
+                ctx.CurrentX = originalX;
+                return i == startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+            }
 
             // Tag children that declare a semantic role. Uses the same
             // try/finally pattern as PdfRenderPipeline so tagging is

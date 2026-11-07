@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using Xunit;
+using PdfDocument = BonniePDF.Document;
 
 namespace BonniePDF.Tests.Content;
 
@@ -38,7 +39,7 @@ public sealed class RunningTotalTests
 
     private static string[] PageTexts(bool running)
     {
-        using Document doc = new();
+        using PdfDocument doc = new();
         doc.Add(Build(running));
         return doc.GenerateSvgPages()
             .Select(svg => string.Join(' ', Regex.Matches(svg, ">([^<]*)<").Select(m => m.Groups[1].Value)))
@@ -67,7 +68,7 @@ public sealed class RunningTotalTests
         InternalConfiguration.EnableCompression = false;
         try
         {
-            using Document doc = new();
+            using PdfDocument doc = new();
             doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
             doc.Settings.Language = "en-GB";
             doc.Metadata.Title = "Running total";
@@ -90,7 +91,7 @@ public sealed class RunningTotalTests
     [Fact]
     public void RunningRows_TakeTheDocumentDefaultTextStyle()
     {
-        using Document doc = new();
+        using PdfDocument doc = new();
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9);
         doc.Add(Build(true));
         string label = Regex.Match(doc.GenerateSvgPages()[0], "<text[^>]*>Carried forward<").Value;
@@ -103,7 +104,7 @@ public sealed class RunningTotalTests
     {
         Table table = Build(true);
         table.RunningTotalColumn = 0;
-        using Document doc = new();
+        using PdfDocument doc = new();
         doc.Add(table);
         Exception error = Assert.ThrowsAny<Exception>(() => doc.GenerateBytes());
         Assert.Contains("RunningTotalColumn", error.ToString());

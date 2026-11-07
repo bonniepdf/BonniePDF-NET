@@ -61,10 +61,10 @@ internal static class PdfRenderPipeline
             float pageWidth = page.Width;
             // Pages created from document settings inherit the margin lazily, so a
             // DocumentSettings assigned after construction still reaches page 1.
-            float pageMargin = page.HasExplicitMargin ? page.Margin : settings.Margin;
+            Thickness margins = page.ResolveMargins(settings);
 
             ctx.PageSize = page.Size;
-            ctx.Margin = pageMargin;
+            ctx.Margins = margins;
 
             ctx.SwitchToPage(currentOutputIndex);
 
@@ -72,13 +72,13 @@ internal static class PdfRenderPipeline
             ctx.ResetCursorToContentTop();
 
             // Calculate content width based on actual dimensions
-            float contentWidth = pageWidth - pageMargin * 2;
+            float contentWidth = pageWidth - (margins.Left + margins.Right);
 
             // Store page dimensions for the start page
             result.PageDimensions[currentOutputIndex] = new PageDimensions
             {
                 Size = page.Size,
-                Margin = pageMargin
+                Margin = margins.Left
             };
 
             // Render all elements with overflow support
@@ -89,7 +89,7 @@ internal static class PdfRenderPipeline
                 result.PageDimensions[i] = new PageDimensions
                 {
                     Size = page.Size,
-                    Margin = pageMargin
+                    Margin = margins.Left
                 };
 
             // Advance output index for next input page
@@ -108,7 +108,13 @@ internal static class PdfRenderPipeline
     private static void RenderElementsWithOverflow(IEnumerable<IElement> elements, RenderContext ctx,
         float contentWidth)
     {
-        foreach (IElement element in elements) RenderElementWithOverflow(element, ctx, contentWidth);
+        IList<IElement> siblings = elements as IList<IElement> ?? [.. elements];
+        for (int i = 0; i < siblings.Count; i++)
+        {
+            float keepHeight = KeepWithNext.Height(siblings, i, contentWidth);
+            if (keepHeight > 0 && keepHeight <= ctx.ContentHeight && ctx.CurrentY + keepHeight > ctx.MaxY) ctx.NewPage();
+            RenderElementWithOverflow(siblings[i], ctx, contentWidth);
+        }
     }
 
     /// <summary>
@@ -290,22 +296,22 @@ internal static class PdfRenderPipeline
             float pageWidth = page.Width;
             // Pages created from document settings inherit the margin lazily, so a
             // DocumentSettings assigned after construction still reaches page 1.
-            float pageMargin = page.HasExplicitMargin ? page.Margin : settings.Margin;
+            Thickness margins = page.ResolveMargins(settings);
 
             ctx.PageSize = page.Size;
-            ctx.Margin = pageMargin;
+            ctx.Margins = margins;
 
             ctx.SwitchToPage(currentOutputIndex);
             ctx.ResetCursorToContentTop();
 
             // Calculate content width based on actual dimensions
-            float contentWidth = pageWidth - pageMargin * 2;
+            float contentWidth = pageWidth - (margins.Left + margins.Right);
 
             // Store page dimensions for this index
             pageDimensions[currentOutputIndex] = new RenderedPageDimensions
             {
                 Size = page.Size,
-                Margin = pageMargin,
+                Margins = margins,
                 PageColor = page.PageColor,
                 PageBackground = page.PageBackground,
                 PageForeground = page.PageForeground
@@ -314,7 +320,7 @@ internal static class PdfRenderPipeline
             // Layout capture: wrap each input page's body content in a Page node so
             // the snapshot tree reads Document → Page → content. Overflow onto further
             // physical pages splits the Page node's rect via ctx.NewPage().
-            ctx.LayoutRecorder?.OpenNode(page, "Page", null, currentOutputIndex, pageMargin, ctx.CurrentY, contentWidth);
+            ctx.LayoutRecorder?.OpenNode(page, "Page", null, currentOutputIndex, margins.Left, ctx.CurrentY, contentWidth);
 
             // Render Elements with overflow support
             RenderElementsWithOverflow(page.Elements, ctx, contentWidth);
@@ -326,7 +332,7 @@ internal static class PdfRenderPipeline
                 pageDimensions[i] = new RenderedPageDimensions
                 {
                     Size = page.Size,
-                    Margin = pageMargin,
+                    Margins = margins,
                     PageColor = page.PageColor,
                     PageBackground = page.PageBackground,
                     PageForeground = page.PageForeground
@@ -362,7 +368,7 @@ internal static class PdfRenderPipeline
             // Prepare context for template rendering
             // Set dimensions BEFORE SwitchToPage so the canvas uses correct PageHeight
             ctx.PageSize = pageSize;
-            ctx.Margin = pageDimensions.TryGetValue(i, out dimensions) ? dimensions.Margin : settings.Margin;
+            ctx.Margins = pageDimensions.TryGetValue(i, out dimensions) ? dimensions.Margins : settings.Margins ?? new Thickness(settings.Margin);
             ctx.SwitchToPage(i);
             // A sealed body has left an empty builder behind; chrome is painted into it, and the
             // prefix/suffix split below puts the body between the backdrop and the overlays.
@@ -606,7 +612,7 @@ internal static class PdfRenderPipeline
 
         try
         {
-            float contentWidth = ctx.PageSize.Width - ctx.Margin * 2;
+            float contentWidth = ctx.PageSize.Width - ctx.Margins.Left - ctx.Margins.Right;
             float startX = ctx.Margin;
 
             // Render Header - centred within the top-margin band so it sits in
@@ -620,7 +626,7 @@ internal static class PdfRenderPipeline
                 {
                     float headerHeight = headerElement.MeasureHeight(contentWidth);
                     ctx.CurrentX = startX;
-                    ctx.CurrentY = MathF.Max(0f, (ctx.Margin - headerHeight) / 2f);
+                    ctx.CurrentY = MathF.Max(0f, (ctx.Margins.Top - headerHeight) / 2f);
                     if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
                     headerElement.Render(ctx, contentWidth);
                     if (ctx.Tagging != null) ctx.Canvas.EndArtifact();
@@ -642,9 +648,9 @@ internal static class PdfRenderPipeline
             // Centred in the bottom margin band while it fits there, flush to
             // the bottom page edge once it outgrows it - continuous at
             // footerHeight == Margin, and it never runs off the page.
-            float bandTop = ctx.PageSize.Height - MathF.Max(ctx.Margin, footerHeight);
+            float bandTop = ctx.PageSize.Height - MathF.Max(ctx.Margins.Bottom, footerHeight);
             ctx.CurrentX = startX;
-            ctx.CurrentY = bandTop + MathF.Max(0f, (ctx.Margin - footerHeight) / 2f);
+            ctx.CurrentY = bandTop + MathF.Max(0f, (ctx.Margins.Bottom - footerHeight) / 2f);
             if (ctx.Tagging != null) ctx.Canvas.BeginArtifact();
             footerElement.Render(ctx, contentWidth);
             if (ctx.Tagging != null) ctx.Canvas.EndArtifact();
