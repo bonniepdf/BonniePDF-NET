@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.RetailEvents.EdgeReceipt;
@@ -14,7 +15,10 @@ namespace BonniePDF.Examples.RetailEvents.EdgeReceipt;
     "Point-of-sale receipt on a custom 80mm thermal-printer page, in Courier with a native vector QR digital-receipt link and a Code 128 order barcode. PDF/A-2a + PDF/UA-1.")]
 public static class EdgeReceiptExample
 {
+    private const string LogoSvgKey = "images/svg/sample-coffee.svg";
     private const string OrderNo = "4021";
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [LogoSvgKey];
 
     private static readonly Color Ink = ColorPalette.Slate[800];
     private static readonly Color Mute = ColorPalette.Slate[500];
@@ -27,9 +31,13 @@ public static class EdgeReceiptExample
         new(1, "Oat Milk (retail)", 1.95),
     ];
 
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+        string logoSvg = Encoding.UTF8.GetString(GetAsset(assets, LogoSvgKey));
         DateTime now = new(2026, 6, 16, 10, 30, 0);
         string stamp = now.ToString("dd MMM yyyy HH:mm", CultureInfo.GetCultureInfo("en-GB"));
 
@@ -46,6 +54,12 @@ public static class EdgeReceiptExample
         doc.Metadata.Author = "Sample Coffee";
         doc.Metadata.Subject = "Point-of-sale receipt generated locally with BonniePDF.";
 
+        doc.Add(new Container
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 4),
+            Child = new Svg { SvgData = logoSvg, Width = 24, Height = 24, IsDecorative = true },
+        });
         doc.Add(new Heading("SAMPLE COFFEE")
         {
             Level = 1,
@@ -169,15 +183,41 @@ public static class EdgeReceiptExample
         Alignment = align,
     };
 
-    private static TextBlock Rule() => new()
+    private static Line Rule() => new()
     {
-        Text = "- - - - - - - - - - - - - - - -",
-        FontName = StandardFonts.Courier,
-        FontSize = 9,
+        Thickness = 0.8f,
         Color = Mute,
-        Alignment = TextAlignment.Center,
-        Margin = new Thickness(0, 5, 0, 5),
+        DashPattern = [3, 4],
+        Margin = new Thickness(0, 10, 0, 10),
     };
 
     private sealed record ReceiptItem(int Quantity, string Name, double Price);
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string dir = FindAssetsDir();
+        return RequiredAssets.ToDictionary(key => key, key => File.ReadAllBytes(Path.Combine(dir, key)), StringComparer.Ordinal);
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes)) return bytes;
+        string candidate = Path.Combine(FindAssetsDir(), key);
+        if (File.Exists(candidate)) return File.ReadAllBytes(candidate);
+        throw new InvalidOperationException($"Supply {key}.");
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate)) return candidate;
+            string local = Path.Combine(dir, "assets");
+            if (Directory.Exists(local)) return local;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

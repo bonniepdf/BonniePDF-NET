@@ -19,6 +19,12 @@ namespace BonniePDF.Examples.LongFormTypesetting.DickensNovel;
 [System.ComponentModel.Description("Formats the complete Project Gutenberg novel as a book-quality PDF.")]
 public static partial class DickensNovelExample
 {
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "novels/pg98.txt",
+        "images/novels/frontispiece.png",
+    ];
+
     private static readonly string LocalFilePath = Path.Combine(AppContext.BaseDirectory, "pg98.txt");
 
     /// <summary>Matches chapter number lines: "CHAPTER I." … "CHAPTER XXIV."</summary>
@@ -30,11 +36,16 @@ public static partial class DickensNovelExample
     /// Requires the Project Gutenberg plain-text file to be present at <see cref="LocalFilePath"/>.
     /// </summary>
     /// <returns>The document, ready to export as PDF or SVG.</returns>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets)
     {
         string raw = assets is not null && assets.TryGetValue("novels/pg98.txt", out byte[]? bytes)
             ? Encoding.UTF8.GetString(bytes)
             : LoadText();
+        byte[] frontispiece = assets is not null && assets.TryGetValue("images/novels/frontispiece.png", out byte[]? plateBytes)
+            ? plateBytes
+            : LoadAssetFile("images/novels/frontispiece.png");
         List<NovelSection> sections = ParseNovel(raw);
 
         // A4 with 72 pt margins (~1 inch) gives 451 pt content width - ideal for body text.
@@ -101,7 +112,7 @@ public static partial class DickensNovelExample
         doc.Metadata.Subject = "Project Gutenberg eBook #98 - A public domain classic.";
 
         // ── Title Page ───────────────────────────────────────────────────────
-        AddTitlePage(doc);
+        AddTitlePage(doc, frontispiece);
         doc.AddPage();
 
         // ── Table of Contents ────────────────────────────────────────────────
@@ -186,7 +197,7 @@ public static partial class DickensNovelExample
     /// Renders the decorative title page with the book title, subtitle, author, and edition note.
     /// Relies on large top margins to visually centre the block without explicit page positioning.
     /// </summary>
-    private static void AddTitlePage(Document doc)
+    private static void AddTitlePage(Document doc, byte[] frontispiece)
     {
         // Large top margin to vertically centre the block on the page.
         doc.Add(new Heading("A TALE OF TWO CITIES")
@@ -196,7 +207,7 @@ public static partial class DickensNovelExample
             FontSize = 28,
             Color = ColorPalette.Slate[900],
             Alignment = TextAlignment.Center,
-            Margin = new Thickness(0, 100, 0, 12)
+            Margin = new Thickness(0, 28, 0, 10)
         });
 
         doc.Add(new TextBlock
@@ -206,7 +217,21 @@ public static partial class DickensNovelExample
             FontSize = 15,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 40)
+            Margin = new Thickness(0, 0, 0, 20)
+        });
+
+        doc.Add(new Container
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20),
+            Child = new Image
+            {
+                ImageData = frontispiece,
+                Width = 190,
+                Height = 253,
+                FitMode = ImageFitMode.Contain,
+                AltText = "Engraved frontispiece showing a narrow cobbled street in eighteenth-century Paris with a spilled wine cask outside a wine shop.",
+            },
         });
 
         // The ornamental rule and attribution lines below were Slate[300]/[400] -
@@ -220,7 +245,7 @@ public static partial class DickensNovelExample
             FontSize = 13,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 40)
+            Margin = new Thickness(0, 0, 0, 20)
         });
 
         doc.Add(new TextBlock
@@ -230,7 +255,7 @@ public static partial class DickensNovelExample
             FontSize = 20,
             Color = ColorPalette.Slate[800],
             Alignment = TextAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 60)
+            Margin = new Thickness(0, 0, 0, 28)
         });
 
         doc.Add(new TextBlock
@@ -349,7 +374,57 @@ public static partial class DickensNovelExample
     {
         if (File.Exists(LocalFilePath))
             return File.ReadAllText(LocalFilePath, Encoding.UTF8);
-        throw new FileNotFoundException("Supply novels/pg98.txt in the asset dictionary or copy pg98.txt beside the application.", LocalFilePath);
+        return Encoding.UTF8.GetString(LoadAssetFile("novels/pg98.txt"));
+    }
+
+    private static byte[] LoadAssetFile(string relativePath)
+    {
+        string assetsDir = FindAssetsDirectory();
+        string fullPath = Path.Combine(assetsDir, relativePath.Replace('/', Path.DirectorySeparatorChar));
+        return File.ReadAllBytes(fullPath);
+    }
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDirectory();
+        Dictionary<string, byte[]> result = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            if (File.Exists(fullPath))
+            {
+                result[key] = File.ReadAllBytes(fullPath);
+            }
+            else if (string.Equals(key, "novels/pg98.txt", StringComparison.Ordinal) && File.Exists(LocalFilePath))
+            {
+                result[key] = File.ReadAllBytes(LocalFilePath);
+            }
+        }
+
+        return result;
+    }
+
+    private static string FindAssetsDirectory()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            string localCandidate = Path.Combine(dir, "assets");
+            if (Directory.Exists(localCandidate))
+            {
+                return localCandidate;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
     }
 
     // ── Novel parser ─────────────────────────────────────────────────────────

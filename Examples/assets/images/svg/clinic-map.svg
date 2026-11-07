@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <!-- Background land & green space -->
+  <rect width="600" height="400" fill="#f1f5f9"/>
+  <rect x="20" y="20" width="160" height="115" rx="8" fill="#dcfce7"/>
+  <rect x="440" y="250" width="140" height="130" rx="8" fill="#dcfce7"/>
+  <!-- Hospital Grounds Campus Block -->
+  <rect x="220" y="30" width="350" height="185" rx="10" fill="#e0f2fe" stroke="#bae6fd" stroke-width="2"/>
+  <!-- Roads (white with slate kerbs) -->
+  <path d="M0 230H600M200 0V400M420 215V400" stroke="#cbd5e1" stroke-width="32" stroke-linecap="square"/>
+  <path d="M0 230H600M200 0V400M420 215V400" stroke="#ffffff" stroke-width="26" stroke-linecap="square"/>
+  <!-- Dashed road centre markings -->
+  <line x1="10" y1="230" x2="590" y2="230" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="10 8"/>
+  <line x1="200" y1="10" x2="200" y2="390" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="10 8"/>
+  <!-- Access drive into Hospital & Car Park -->
+  <path d="M320 230V155M320 230V295H260" fill="none" stroke="#cbd5e1" stroke-width="16"/>
+  <path d="M320 230V155M320 230V295H260" fill="none" stroke="#ffffff" stroke-width="12"/>
+  <!-- Main Hospital Building (L-shape) -->
+  <path d="M250 55h210v95H355v-35H250V55z" fill="#ffffff" stroke="#176b87" stroke-width="2.5"/>
+  <!-- Red/Teal Medical Cross on Main Building -->
+  <rect x="422" y="72" width="8" height="24" rx="2" fill="#176b87"/>
+  <rect x="414" y="80" width="24" height="8" rx="2" fill="#176b87"/>
+  <text x="330" y="88" font-family="Helvetica" font-size="13" font-weight="bold" fill="#17324d" text-anchor="middle">Sample Hospital</text>
+  <text x="330" y="103" font-family="Helvetica" font-size="10" fill="#2f4858" text-anchor="middle">Main Building</text>
+  <!-- Outpatient Clinic Entrance Wing (Highlighted) -->
+  <rect x="265" y="122" width="120" height="48" rx="6" fill="#176b87"/>
+  <circle cx="325" cy="170" r="6" fill="#d69e00" stroke="#ffffff" stroke-width="2"/>
+  <text x="325" y="143" font-family="Helvetica" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">Clinic Entrance</text>
+  <text x="325" y="157" font-family="Helvetica" font-size="9" fill="#eaf4f8" text-anchor="middle">Gate B · Ground Floor</text>
+  <!-- Visitor Car Park (Bottom Left of Crossroads) -->
+  <rect x="225" y="262" width="135" height="105" rx="8" fill="#ffffff" stroke="#176b87" stroke-width="2"/>
+  <rect x="237" y="274" width="28" height="28" rx="5" fill="#176b87"/>
+  <text x="251" y="294" font-family="Helvetica" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">P</text>
+  <text x="275" y="286" font-family="Helvetica" font-size="11" font-weight="bold" fill="#17324d">Car Park A</text>
+  <text x="275" y="300" font-family="Helvetica" font-size="9.5" fill="#5d6f7c">Visitor &amp; Blue Badge</text>
+  <text x="237" y="328" font-family="Helvetica" font-size="9.5" fill="#2f4858">Pedestrian crossing</text>
+  <text x="237" y="341" font-family="Helvetica" font-size="9.5" fill="#2f4858">direct to Gate B (120 m)</text>
+  <!-- Bus Stop Marker along main road -->
+  <rect x="445" y="182" width="118" height="32" rx="6" fill="#11566d"/>
+  <circle cx="462" cy="198" r="8" fill="#ffffff"/>
+  <text x="462" y="202" font-family="Helvetica" font-size="10" font-weight="bold" fill="#11566d" text-anchor="middle">B</text>
+  <text x="514" y="196" font-family="Helvetica" font-size="10" font-weight="bold" fill="#ffffff" text-anchor="middle">Bus Stop</text>
+  <text x="514" y="208" font-family="Helvetica" font-size="8.5" fill="#eaf4f8" text-anchor="middle">Routes 12, 24, 40</text>
+  <!-- Walking dashed path from Car Park & Bus Stop to Clinic Entrance -->
+  <path d="M325 262V176M445 198H325" fill="none" stroke="#d69e00" stroke-width="2.5" stroke-dasharray="5 4"/>
+  <!-- Compass Rose in top-left park -->
+  <circle cx="52" cy="52" r="20" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <polygon points="52,36 57,52 52,48 47,52" fill="#176b87"/>
+  <polygon points="52,68 57,52 52,56 47,52" fill="#94a3b8"/>
+  <text x="52" y="31" font-family="Helvetica" font-size="9" font-weight="bold" fill="#17324d" text-anchor="middle">N</text>
+</svg>

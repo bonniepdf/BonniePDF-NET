@@ -245,7 +245,7 @@ public static class CommercialInvoiceExample
     }
 
     /// <summary>A whole number with thousands separators: 1,490.</summary>
-    private static string Thousands(int n) => n.ToString("N0", CultureInfo.InvariantCulture);
+    private static string Thousands(int n) => NumberFormatter.Format(n, "N0");
 
     /// <summary>Cents as a decimal amount: 1,234.56.</summary>
     private static string Amount(int cents) =>

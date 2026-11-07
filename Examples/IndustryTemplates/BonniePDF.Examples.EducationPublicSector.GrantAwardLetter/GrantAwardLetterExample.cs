@@ -49,9 +49,21 @@ public static class GrantAwardLetterExample
         new("First instalment", "Friday 26 September 2026"),
     ];
 
+    /// <summary>Asset paths required by this example, relative to the shared <c>Examples/assets</c> directory.</summary>
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/newsletter/community-garden.jpg",
+    ];
+
+    /// <summary>Builds the document using the default shared assets. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+        byte[] gardenImage = GetAsset(assets, "images/newsletter/community-garden.jpg");
+
         DocumentSettings settings = new(PdfSize.A4, Margin)
         {
             PageColor = Color.White,
@@ -89,7 +101,7 @@ public static class GrantAwardLetterExample
             "successful. This letter explains what we have awarded, how your grant is paid, when it " +
             "starts, and what to do next."));
 
-        doc.Add(DecisionCallout());
+        doc.Add(DecisionCallout(gardenImage));
 
         doc.Add(H2("How your grant is made up", "breakdown"));
         doc.Add(BreakdownTable());
@@ -182,7 +194,7 @@ public static class GrantAwardLetterExample
         return top;
     }
 
-    private static Container DecisionCallout()
+    private static Container DecisionCallout(byte[] gardenImage)
     {
         Grid details = new(1, 1) { CellPadding = 5 };
         details.AddRow(DetailStack(DecisionDetails[0]), DetailStack(DecisionDetails[1]));
@@ -200,6 +212,24 @@ public static class GrantAwardLetterExample
         });
         stack.Add(details);
 
+        HorizontalStack calloutRow = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 14 };
+        calloutRow.Add(stack, 1);
+        calloutRow.Add(new Container
+        {
+            Width = 84,
+            Height = 56,
+            CornerRadius = 4,
+            ClipContent = true,
+            Child = new Image
+            {
+                ImageData = gardenImage,
+                Width = 84,
+                Height = 56,
+                FitMode = ImageFitMode.Cover,
+                AltText = "Community garden raised vegetable beds funded by the grant.",
+            },
+        });
+
         return new Container
         {
             BackgroundColor = Pale,
@@ -207,7 +237,7 @@ public static class GrantAwardLetterExample
             BorderColors = BorderColors.LeftOnly(Award),
             Padding = new Thickness(16, 14, 16, 14),
             Margin = new Thickness(0, 8, 0, 22),
-            Child = stack,
+            Child = calloutRow,
         };
     }
 
@@ -380,4 +410,42 @@ public static class GrantAwardLetterExample
     private sealed record Money(string Label, string Amount, string Note);
 
     private sealed record Detail(string Label, string Value);
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDir();
+        Dictionary<string, byte[]> dict = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            dict[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return dict;
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes))
+            return bytes;
+        string fullPath = Path.Combine(FindAssetsDir(), key.Replace('/', Path.DirectorySeparatorChar));
+        return File.ReadAllBytes(fullPath);
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (!string.IsNullOrEmpty(dir))
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+                return candidate;
+            string direct = Path.Combine(dir, "assets");
+            if (Directory.Exists(direct))
+                return direct;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

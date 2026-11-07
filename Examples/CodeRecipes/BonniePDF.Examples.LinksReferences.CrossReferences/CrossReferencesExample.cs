@@ -14,6 +14,11 @@ namespace BonniePDF.Examples.LinksReferences.CrossReferences;
 [System.ComponentModel.Description("A short staff handbook with a linked contents page, live page numbers, \"see page N\" references and back-links.")]
 public static class CrossReferencesExample
 {
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/handbook/office.jpg",
+    ];
+
     /// <summary>One colour for every link, so readers learn what is clickable.</summary>
     private static readonly Color Link = ColorPalette.Blue[700];
 
@@ -59,7 +64,10 @@ public static class CrossReferencesExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         Document doc = new(new DocumentSettings
         {
@@ -105,7 +113,21 @@ public static class CrossReferencesExample
         });
         doc.Add(new TextBlock("Edition 4, spring 2026. Select a chapter to jump to it; every page number below is filled in when the handbook is laid out.")
         {
-            Margin = new Thickness(0, 0, 0, 28)
+            Margin = new Thickness(0, 0, 0, 16)
+        });
+        doc.Add(new Container
+        {
+            Height = 150,
+            CornerRadius = 6,
+            ClipContent = true,
+            Margin = new Thickness(0, 0, 0, 20),
+            Child = new Image
+            {
+                ImageData = Asset(assets, "images/handbook/office.jpg"),
+                Height = 150,
+                FitMode = ImageFitMode.Cover,
+                AltText = "Open-plan studio office with exposed brick walls and oak desks.",
+            },
         });
         doc.Add(new Heading("Contents")
         {
@@ -171,4 +193,45 @@ public static class CrossReferencesExample
 
     /// <summary>Small grey text for the "see also" line.</summary>
     private static TextBlock Muted(string text) => new(text) { FontSize = 10, Color = ColorPalette.Slate[500] };
+
+    private static byte[] Asset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        assets.TryGetValue(path, out byte[]? bytes)
+            ? bytes
+            : throw new InvalidOperationException($"Missing required asset: {path}");
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDirectory();
+        Dictionary<string, byte[]> result = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            result[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return result;
+    }
+
+    private static string FindAssetsDirectory()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            string localCandidate = Path.Combine(dir, "assets");
+            if (Directory.Exists(localCandidate))
+            {
+                return localCandidate;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
+    }
 }

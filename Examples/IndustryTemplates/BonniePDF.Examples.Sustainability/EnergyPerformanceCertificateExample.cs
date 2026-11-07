@@ -229,18 +229,14 @@ public static class EnergyPerformanceCertificateExample
     private static Color RatingColor(int score) => Bands.First(band => score >= band.Low).Color;
 
     /// <summary>A rating as a small chip in its band's colour.</summary>
-    private static HorizontalStack RatingChip(int score)
+    private static Container RatingChip(int score) => new()
     {
-        HorizontalStack fit = new() { WidthDistribution = WidthDistribution.Auto };
-        fit.Add(new Container
-        {
-            BackgroundColor = RatingColor(score),
-            CornerRadius = 3,
-            Padding = new Thickness(5, 1.5f, 5, 1.5f),
-            Child = Tb($"{Letter(score)} {score}", 8, Ink, bold: true),
-        });
-        return fit;
-    }
+        FitContent = true,
+        BackgroundColor = RatingColor(score),
+        CornerRadius = 3,
+        Padding = new Thickness(5, 1.5f, 5, 1.5f),
+        Child = Tb($"{Letter(score)} {score}", 8, Ink, bold: true),
+    };
 
     /// <summary>The estimated yearly energy use, emissions and costs.</summary>
     private static Grid Figures()

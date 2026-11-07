@@ -1,3 +1,4 @@
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.PracticalDocuments;
@@ -52,7 +53,67 @@ public static class MultilingualCustomerLetterExample
             SignOff: "בברכה,\nשירות הלקוחות"),
     ];
 
-    public static Document Generate()
+    private const string LogoAsset = "images/svg/atlas-homewares.svg";
+
+    private const string FallbackLogoSvg = """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="20" fill="#f0fdfa" stroke="#0f766e" stroke-width="3"/>
+          <path d="M24 4a26 26 0 0 0 0 40M24 4a26 26 0 0 1 0 40" fill="none" stroke="#0f766e" stroke-width="2.5"/>
+          <path d="M6 17c5.5 3 11.5 4.5 18 4.5S36.5 20 42 17" fill="none" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M6 31c5.5-3 11.5-4.5 18-4.5S36.5 28 42 31" fill="none" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="4" y1="24" x2="44" y2="24" stroke="#0f766e" stroke-width="2.2"/>
+        </svg>
+        """;
+
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "fonts/NotoSans-Regular.ttf",
+        "fonts/NotoNaskhArabic-Regular.ttf",
+        "fonts/NotoSerifHebrew-Regular.ttf",
+        LogoAsset,
+    ];
+
+    private static string LogoMarkup(IReadOnlyDictionary<string, byte[]>? assets) =>
+        assets is not null && assets.TryGetValue(LogoAsset, out byte[]? bytes)
+            ? Encoding.UTF8.GetString(bytes)
+            : FallbackLogoSvg;
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return RequiredAssets.ToDictionary(p => p, p => File.ReadAllBytes(Path.Combine(candidate, p)), StringComparer.Ordinal);
+            }
+
+            string direct = Path.Combine(dir, "assets");
+            if (Directory.Exists(direct))
+            {
+                return RequiredAssets.ToDictionary(p => p, p => File.ReadAllBytes(Path.Combine(direct, p)), StringComparer.Ordinal);
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        Dictionary<string, byte[]> dict = new(StringComparer.Ordinal);
+        foreach (string p in RequiredAssets)
+        {
+            string full = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, p);
+            if (File.Exists(full))
+            {
+                dict[p] = File.ReadAllBytes(full);
+            }
+        }
+
+        return dict;
+    }
+
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         var doc = new Document(new DocumentSettings
         {
@@ -75,7 +136,10 @@ public static class MultilingualCustomerLetterExample
             if (index != 0) doc.Add(new PageBreak());
             if (!faces.TryGetValue(letter.Font, out DocumentFontFace? cached))
             {
-                cached = doc.Fonts.Add(File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "fonts", letter.Font)));
+                byte[] fontBytes = assets.TryGetValue($"fonts/{letter.Font}", out byte[]? b)
+                    ? b
+                    : File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "fonts", letter.Font));
+                cached = doc.Fonts.Add(fontBytes);
                 faces[letter.Font] = cached;
             }
             DocumentFontFace face = cached;
@@ -89,8 +153,11 @@ public static class MultilingualCustomerLetterExample
             };
 
             // The letterhead is the same on every page, in the brand's own (Latin) lettering.
+            HorizontalStack brand = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 8 };
+            brand.Add(new Svg { SvgData = LogoMarkup(assets), Width = 22, Height = 22, IsDecorative = true });
+            brand.Add(new TextBlock("ATLAS HOMEWARES") { FontName = StandardFonts.HelveticaBold, FontSize = 16, LetterSpacing = 2, Color = ColorPalette.Teal[700] });
             HorizontalStack letterhead = new() { WidthDistribution = WidthDistribution.Equal };
-            letterhead.Add(new TextBlock("ATLAS HOMEWARES") { FontName = StandardFonts.HelveticaBold, FontSize = 16, LetterSpacing = 2, Color = ColorPalette.Teal[700] });
+            letterhead.Add(brand);
             letterhead.Add(new TextBlock("London  ·  Paris  ·  Athens  ·  Riyadh") { FontSize = 9, Color = ColorPalette.Slate[500], Alignment = TextAlignment.Right });
             doc.Add(new Container
             {

@@ -258,13 +258,7 @@ public static class BankStatementExample
     ];
 
     /// <summary>Pence as pounds: £1,234.56, with a leading minus when negative.</summary>
-    private static string Money(int pence)
-    {
-        int abs = Math.Abs(pence);
-        string pounds = (abs / 100).ToString("N0", CultureInfo.InvariantCulture);
-        string rest = (abs % 100).ToString("D2", CultureInfo.InvariantCulture);
-        return $"{(pence < 0 ? "-" : string.Empty)}£{pounds}.{rest}";
-    }
+    private static string Money(int pence) => NumberFormatter.Format(pence / 100m, "N2", "£");
 
     // Local helpers and sample data for this document.
     private static readonly Color Ink = ColorPalette.Slate[700];

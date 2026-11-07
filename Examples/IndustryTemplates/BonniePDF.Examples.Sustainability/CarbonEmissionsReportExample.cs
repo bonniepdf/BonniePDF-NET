@@ -197,6 +197,7 @@ public static class CarbonEmissionsReportExample
         BarChart history = new(new ChartData { Series = [series], YAxis = new AxisOptions { MaxValue = 30, StepCount = 6 } })
         {
             Theme = "modern",
+            References = [new ChartReference { Value = Target / 1000m, Color = ColorPalette.Green[900], Thickness = 1.5f, DashPattern = [5, 3] }],
             AltText = $"Bar chart of total emissions in thousands of tonnes: {string.Join(", ", History.Select(h => $"{h.Year} {(h.Value / 1000.0).ToString("F1", CultureInfo.InvariantCulture)}"))}. The 2030 target is {(Target / 1000.0).ToString("F2", CultureInfo.InvariantCulture)} thousand tonnes.",
             Height = 230,
             StretchToFit = true,
@@ -357,7 +358,7 @@ public static class CarbonEmissionsReportExample
     private static long Round(double value) => (long)Math.Floor(value + 0.5);
 
     /// <summary>Tonnes with a thousands separator: 18420 becomes 18,420.</summary>
-    private static string Thousands(long value) => value.ToString("#,0", CultureInfo.InvariantCulture);
+    private static string Thousands(long value) => NumberFormatter.Format(value, "N0");
 
     /// <summary>A change as a signed percentage to one decimal place: −0.096 becomes −9.6%.</summary>
     private static string Percent(double change)

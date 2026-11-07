@@ -89,11 +89,12 @@ public static class PalletLabelExample
         matrix.Add(Tb("PRODUCT, BATCH, EXPIRY", 6, Mute, bold: true));
         matrix.Add(new DataMatrix
         {
-            Data = "(01)15060000000002(10)24-1187(17)291013",
+            Data = "0115060000000006172910131024-1187",
+            Gs1 = true,
             Size = 46,
             QuietZone = 1,
             ForegroundColor = Ink,
-            AltText = "DataMatrix code: product 15060000000002, batch 24-1187, expiry 13 October 2029",
+            AltText = "DataMatrix code: product 15060000000006, batch 24-1187, expiry 13 October 2029",
         });
         codes.Add(matrix);
         VerticalStack sscc = new() { Spacing = 2, Margin = new Thickness(0, 12, 0, 0) };
@@ -102,12 +103,13 @@ public static class PalletLabelExample
         {
             Value = "00350600000000000017",
             Symbology = BarcodeSymbology.Code128,
+            Gs1 = true,
             Height = 72,
             ModuleWidth = 0.95f,
             ForegroundColor = Ink,
             BackgroundColor = Color.White,
             TextLabelFontSize = 7,
-            AltText = "Code 128 barcode of the serial shipping container code 00350600000000000017",
+            AltText = "GS1-128 barcode of the serial shipping container code 350600000000000017",
         });
 
         VerticalStack body = new();

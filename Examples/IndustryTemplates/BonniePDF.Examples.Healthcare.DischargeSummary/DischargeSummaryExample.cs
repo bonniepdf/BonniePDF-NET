@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.Healthcare.DischargeSummary;
@@ -26,7 +27,10 @@ namespace BonniePDF.Examples.Healthcare.DischargeSummary;
     "A hospital discharge summary: diagnoses, the admission narrative, key investigations, a medication list marking every change from the pre-admission regimen, and numbered actions for the GP. PDF/A-2a + PDF/UA-1.")]
 public static class DischargeSummaryExample
 {
+    private const string MarkSvgKey = "images/svg/sample-healthcare.svg";
     private const string Reference = "DS-2026-44127";
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [MarkSvgKey];
     private const string Patient = "Sample Patient";
     private const string PatientId = "ID 000 000 0000 (sample)";
     private const string DateOfBirth = "14 Mar 1958";
@@ -101,9 +105,13 @@ public static class DischargeSummaryExample
         "Ensure the patient is added to the cardiac rehabilitation pathway if they have not been contacted within two weeks.",
     ];
 
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+        string markSvg = Encoding.UTF8.GetString(GetAsset(assets, MarkSvgKey));
         Document doc = new(new DocumentSettings { PageSize = PdfSize.A4, Margin = 46 });
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
@@ -124,14 +132,25 @@ public static class DischargeSummaryExample
             "discharge summary, hospital, medication reconciliation, primary care, handover, pdf/ua, pdf/a";
 
         doc.Add(AccentBar());
-        doc.Add(Cell(
+        VerticalStack headerText = new();
+        headerText.Add(Cell(
             "DISCHARGE SUMMARY · FOR THE ATTENTION OF THE GENERAL PRACTITIONER",
             size: 8.5f,
             bold: true,
             color: Accent,
             marginBottom: 4f));
-        doc.Add(H1("Inpatient discharge summary"));
-        doc.Add(Cell($"{Ward} · {Consultant}", color: Muted, marginBottom: 14f));
+        headerText.Add(H1("Inpatient discharge summary"));
+        headerText.Add(Cell($"{Ward} · {Consultant}", color: Muted));
+
+        HorizontalStack headerRow = new()
+        {
+            WidthDistribution = WidthDistribution.Auto,
+            Spacing = 10,
+            Margin = new Thickness(0, 0, 0, 14),
+        };
+        headerRow.Add(new Svg { SvgData = markSvg, Width = 24, Height = 24, IsDecorative = true, Margin = new Thickness(0, 2, 0, 0) });
+        headerRow.Add(headerText);
+        doc.Add(headerRow);
 
         doc.Add(WeightedRow(
             [
@@ -424,4 +443,32 @@ public static class DischargeSummaryExample
     }
 
     private static string GbDate(DateTime date) => date.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string dir = FindAssetsDir();
+        return RequiredAssets.ToDictionary(key => key, key => File.ReadAllBytes(Path.Combine(dir, key)), StringComparer.Ordinal);
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes)) return bytes;
+        string candidate = Path.Combine(FindAssetsDir(), key);
+        if (File.Exists(candidate)) return File.ReadAllBytes(candidate);
+        throw new InvalidOperationException($"Supply {key}.");
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate)) return candidate;
+            string local = Path.Combine(dir, "assets");
+            if (Directory.Exists(local)) return local;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

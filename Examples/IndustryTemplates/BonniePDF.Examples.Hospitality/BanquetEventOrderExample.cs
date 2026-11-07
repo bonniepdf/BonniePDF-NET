@@ -1,3 +1,4 @@
+using System.Text;
 using BonniePDF;
 using BonniePDF.Drawing;
 
@@ -12,6 +13,10 @@ namespace BonniePDF.Examples.Hospitality;
 [System.ComponentModel.Description("A banquet event order for a wedding reception: the day’s timeline, a drawn room plan, dietary counts by table, staffing with call times, and sign-off lines for the client, the event manager and the head chef.")]
 public static class BanquetEventOrderExample
 {
+    private const string CrestSvgKey = "images/svg/ardmore-house.svg";
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [CrestSvgKey];
+
     private static readonly Color Hotel = ColorPalette.Rose[900];
     private static readonly Color Ink = ColorPalette.Stone[900];
     private static readonly Color Muted = ColorPalette.Stone[500];
@@ -51,12 +56,15 @@ public static class BanquetEventOrderExample
         ("Bar staff", 3, "15:00"),
     ];
 
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability", "MA0051:Method is too long",
         Justification = "The example intentionally keeps generation inline.")]
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
         Document doc = new()
         {
             Settings = new DocumentSettings
@@ -80,6 +88,7 @@ public static class BanquetEventOrderExample
                 Subject = "Wedding reception, 14 November 2026",
             },
         };
+        string crestSvg = Encoding.UTF8.GetString(GetAsset(assets, CrestSvgKey));
 
         // ── Masthead ──
         HorizontalStack masthead = new() { WidthDistribution = WidthDistribution.Equal };
@@ -87,7 +96,10 @@ public static class BanquetEventOrderExample
         title.Add(new TextBlock("ARDMORE HOUSE  ·  EVENTS") { FontName = StandardFonts.HelveticaBold, FontSize = 8, LetterSpacing = 2, Color = Hotel });
         title.Add(new Heading("Banquet event order") { Level = 1, FontName = StandardFonts.HelveticaBold, FontSize = 20, Color = Ink, Margin = new Thickness(0) });
         title.Add(new TextBlock("Okafor and Lindqvist wedding reception") { FontSize = 10.5f, Color = ColorPalette.Stone[700] });
-        masthead.Add(title);
+        HorizontalStack titleBrand = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 10 };
+        titleBrand.Add(new Svg { SvgData = crestSvg, Width = 28, Height = 28, IsDecorative = true });
+        titleBrand.Add(title);
+        masthead.Add(titleBrand);
         masthead.Add(new TextBlock("BEO 2611-14  ·  Issue 3\nIssued 5 November 2026\nFinal numbers due 9 November")
         {
             Alignment = TextAlignment.Right,
@@ -307,4 +319,32 @@ public static class BanquetEventOrderExample
                 Alignment = alignment,
             },
         };
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string dir = FindAssetsDir();
+        return RequiredAssets.ToDictionary(key => key, key => File.ReadAllBytes(Path.Combine(dir, key)), StringComparer.Ordinal);
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes)) return bytes;
+        string candidate = Path.Combine(FindAssetsDir(), key);
+        if (File.Exists(candidate)) return File.ReadAllBytes(candidate);
+        throw new InvalidOperationException($"Supply {key}.");
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate)) return candidate;
+            string local = Path.Combine(dir, "assets");
+            if (Directory.Exists(local)) return local;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

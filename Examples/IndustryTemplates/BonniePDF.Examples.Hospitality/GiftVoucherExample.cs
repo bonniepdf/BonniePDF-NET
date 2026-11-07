@@ -1,3 +1,4 @@
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.Hospitality;
@@ -12,10 +13,16 @@ namespace BonniePDF.Examples.Hospitality;
 public static class GiftVoucherExample
 {
     private const string SerifKey = "fonts/SourceSerif4-Regular.ttf";
+    private const string VoucherPhotoKey = "images/hospitality/voucher.jpg";
+    private const string SprigSvgKey = "images/svg/the-larder.svg";
     private const string Serial = "LRD-100-4821-7730";
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [SerifKey, VoucherPhotoKey, SprigSvgKey];
 
     /// <summary>A DL page, 210 × 99 mm, in points.</summary>
     private static readonly PdfSize Dl = new(595.3f, 280.6f, "DL");
+
+    public static Document Generate() => Generate(LoadDefaultAssets());
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -29,7 +36,7 @@ public static class GiftVoucherExample
             Settings = new DocumentSettings
             {
                 PageSize = Dl,
-                Orientation = PageOrientation.Landscape,
+                PreservePageDimensions = true,
                 Margin = 0,
                 Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
@@ -43,9 +50,9 @@ public static class GiftVoucherExample
                 Subject = $"Gift voucher {Serial}, £100",
             },
         };
-        if (!assets.TryGetValue(SerifKey, out byte[]? bytes))
-            throw new InvalidOperationException($"Supply {SerifKey}.");
-        string serif = doc.Fonts.Add(bytes).FontName;
+        string serif = doc.Fonts.Add(GetAsset(assets, SerifKey)).FontName;
+        byte[] voucherPhoto = GetAsset(assets, VoucherPhotoKey);
+        string sprigSvg = Encoding.UTF8.GetString(GetAsset(assets, SprigSvgKey));
 
         // ── The voucher: dark, with the value large ──
         HorizontalStack serialRow = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 12 };
@@ -68,30 +75,53 @@ public static class GiftVoucherExample
         });
         serialRow.Add(new TextBlock($"Valid until 5 November 2027\nSerial {Serial}") { FontSize = 7.5f, Color = ColorPalette.Stone[400] });
 
-        VerticalStack face = new() { Spacing = 4 };
-        face.Add(new TextBlock("THE LARDER  ·  GIFT VOUCHER")
+        HorizontalStack brandRow = new()
+        {
+            WidthDistribution = WidthDistribution.Auto,
+            Spacing = 6,
+            Margin = new Thickness(0, 0, 0, 2),
+        };
+        brandRow.Add(new Svg { SvgData = sprigSvg, Width = 22, Height = 22, IsDecorative = true });
+        brandRow.Add(new TextBlock("THE LARDER  ·  GIFT VOUCHER")
         {
             FontName = StandardFonts.HelveticaBold,
             FontSize = 8,
             LetterSpacing = 2.5f,
             Color = ColorPalette.Amber[300],
-            Margin = new Thickness(0, 0, 0, 10),
+            Margin = new Thickness(0, 6, 0, 0),
         });
-        face.Add(new Heading("A gift for dinner") { Level = 1, FontName = serif, FontSize = 28, Color = Color.White, Margin = new Thickness(0) });
-        face.Add(new TextBlock("£100") { FontName = serif, FontSize = 46, Color = ColorPalette.Amber[200] });
+
+        VerticalStack face = new() { Spacing = 2 };
+        face.Add(brandRow);
+        face.Add(new Container
+        {
+            Height = 56,
+            CornerRadius = 4,
+            ClipContent = true,
+            Margin = new Thickness(0, 0, 0, 2),
+            Child = new Image
+            {
+                ImageData = voucherPhoto,
+                Height = 56,
+                FitMode = ImageFitMode.Cover,
+                AltText = "Candlelit dining room tables laid with white linen and glassware.",
+            },
+        });
+        face.Add(new Heading("A gift for dinner") { Level = 1, FontName = serif, FontSize = 22, Color = Color.White, Margin = new Thickness(0) });
+        face.Add(new TextBlock("£100") { FontName = serif, FontSize = 36, Color = ColorPalette.Amber[200] });
         face.Add(new TextBlock("to spend on food and drink, at lunch or dinner, any day we are open")
         {
-            FontSize = 9,
+            FontSize = 8.5f,
             Color = ColorPalette.Stone[300],
-            Margin = new Thickness(0, 0, 0, 12),
+            Margin = new Thickness(0, 0, 0, 2),
         });
-        face.Add(new TextBlock("For Priya Shah, with love from Tom") { FontName = serif, FontSize = 13, Color = Color.White, Margin = new Thickness(0, 0, 0, 14) });
+        face.Add(new TextBlock("For Priya Shah, with love from Tom") { FontName = serif, FontSize = 12, Color = Color.White, Margin = new Thickness(0, 0, 0, 4) });
         face.Add(serialRow);
         Container voucher = new()
         {
             BackgroundColor = ColorPalette.Stone[900],
             Height = Dl.Height,
-            Padding = new Thickness(30, 26, 30, 26),
+            Padding = new Thickness(28, 14, 28, 14),
             Child = face,
         };
 
@@ -153,4 +183,32 @@ public static class GiftVoucherExample
         DrawHeight = Dl.Height,
         IsDecorative = true,
     };
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string dir = FindAssetsDir();
+        return RequiredAssets.ToDictionary(key => key, key => File.ReadAllBytes(Path.Combine(dir, key)), StringComparer.Ordinal);
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes)) return bytes;
+        string candidate = Path.Combine(FindAssetsDir(), key);
+        if (File.Exists(candidate)) return File.ReadAllBytes(candidate);
+        throw new InvalidOperationException($"Supply {key}.");
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate)) return candidate;
+            string local = Path.Combine(dir, "assets");
+            if (Directory.Exists(local)) return local;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

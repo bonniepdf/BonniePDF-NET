@@ -34,7 +34,7 @@ public static class EventTicketExample
         Document doc = new(new DocumentSettings
         {
             PageSize = new PdfSize(640, 300, "Event Ticket"),
-            Orientation = PageOrientation.Landscape,
+            PreservePageDimensions = true,
             Margin = 0,
             Conformance = PdfAConformance.PdfA2a,
             Accessibility = AccessibilityMode.PdfUa1,

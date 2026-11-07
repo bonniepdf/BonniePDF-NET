@@ -49,6 +49,7 @@ public static class PracticalTablesExample
             FooterBackgroundColor = ColorPalette.Slate[100],
             FooterTextColor = ColorPalette.Slate[900],
             RunningTotalColumn = 3,
+            AlternateRowBackgroundColor = ColorPalette.Slate[50],
         };
         string[] labels = ["Item", "Description", "Qty", "Amount"];
         table.AddHeader(labels.Select((label, i) => (IElement)new TextBlock(label)
@@ -63,21 +64,25 @@ public static class PracticalTablesExample
             {
                 Cells = [new TableCell { Content = new TextBlock("No items match this selection.") { Italic = true, Color = ColorPalette.Slate[500] }, ColumnSpan = 4 }],
             });
-        for (int i = 0; i < items.Length; i++)
+        foreach (Item item in items)
         {
-            Item item = items[i];
-            IElement[] cells =
-            [
-                new TextBlock(item.Id),
-                new TextBlock(item.Description),
-                new TextBlock(item.Quantity.ToString(CultureInfo.InvariantCulture)) { Alignment = TextAlignment.Right },
-                new TextBlock(Money(item.Amount)) { Alignment = TextAlignment.Right },
-            ];
             table.AddRow(new TableRow
             {
-                Cells = cells.Select(content => new TableCell { Content = content }).ToArray(),
-                // Every other row is banded, so a long row is easy to follow across the page.
-                BackgroundColor = i % 2 == 1 ? ColorPalette.Slate[50] : null,
+                Cells =
+                [
+                    TableCell.From(new TextBlock(item.Id)),
+                    TableCell.From(new TextBlock(item.Description)),
+                    new TableCell
+                    {
+                        Content = new TextBlock(item.Quantity.ToString(CultureInfo.InvariantCulture)) { Alignment = TextAlignment.Right },
+                        VerticalAlignment = VerticalAlignment.Center,
+                    },
+                    new TableCell
+                    {
+                        Content = new TextBlock(Money(item.Amount)) { Alignment = TextAlignment.Right },
+                        VerticalAlignment = VerticalAlignment.Center,
+                    },
+                ],
                 RunningValue = item.Amount / 100m,
             });
         }
@@ -95,5 +100,5 @@ public static class PracticalTablesExample
         return table;
     }
 
-    private static string Money(int pence) => (pence / 100m).ToString("F2", CultureInfo.InvariantCulture);
+    private static string Money(int pence) => NumberFormatter.Format(pence / 100m, "F2");
 }

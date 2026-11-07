@@ -1,3 +1,4 @@
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.Hospitality;
@@ -12,6 +13,10 @@ namespace BonniePDF.Examples.Hospitality;
 public static class RestaurantMenuExample
 {
     private const string SerifKey = "fonts/SourceSerif4-Regular.ttf";
+    private const string HeaderPhotoKey = "images/hospitality/menu-header.jpg";
+    private const string SprigSvgKey = "images/svg/the-larder.svg";
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [SerifKey, HeaderPhotoKey, SprigSvgKey];
 
     private static readonly Color Ink = ColorPalette.Stone[900];
     private static readonly Color Body = ColorPalette.Stone[600];
@@ -25,7 +30,7 @@ public static class RestaurantMenuExample
     [
         ("V", "Vegetarian", ColorPalette.Emerald[100], ColorPalette.Emerald[800]),
         ("VG", "Vegan", ColorPalette.Lime[100], ColorPalette.Lime[800]),
-        ("GF", "Gluten free", ColorPalette.Amber[100], ColorPalette.Amber[900]),
+        ("GF", "Gluten\u00a0free", ColorPalette.Amber[100], ColorPalette.Amber[900]),
     ];
 
     /// <summary>The menu, by course: dish, description, price in pounds, and its dietary marks.</summary>
@@ -52,6 +57,8 @@ public static class RestaurantMenuExample
         ]),
     ];
 
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
@@ -61,7 +68,7 @@ public static class RestaurantMenuExample
             Settings = new DocumentSettings
             {
                 PageSize = Menu,
-                Margin = 34,
+                Margin = 26,
                 Conformance = PdfAConformance.PdfA2a,
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language = "en-GB",
@@ -74,17 +81,22 @@ public static class RestaurantMenuExample
                 Subject = "Dinner menu with dietary marks",
             },
         };
-        if (!assets.TryGetValue(SerifKey, out byte[]? bytes))
-            throw new InvalidOperationException($"Supply {SerifKey}.");
-        string serif = doc.Fonts.Add(bytes).FontName;
+        string serif = doc.Fonts.Add(GetAsset(assets, SerifKey)).FontName;
+        byte[] headerPhoto = GetAsset(assets, HeaderPhotoKey);
+        string sprigSvg = Encoding.UTF8.GetString(GetAsset(assets, SprigSvgKey));
 
         // ── Masthead ──
-        VerticalStack masthead = new() { Spacing = 4 };
+        VerticalStack masthead = new() { Spacing = 2 };
+        masthead.Add(new Container
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Child = new Svg { SvgData = sprigSvg, Width = 24, Height = 24, IsDecorative = true },
+        });
         masthead.Add(new Heading("The Larder")
         {
             Level = 1,
             FontName = serif,
-            FontSize = 30,
+            FontSize = 26,
             Color = Color.White,
             Alignment = TextAlignment.Center,
         });
@@ -99,9 +111,24 @@ public static class RestaurantMenuExample
         doc.Add(new Container
         {
             BackgroundColor = ColorPalette.Stone[900],
-            Padding = new Thickness(20, 18, 20, 18),
-            Margin = new Thickness(0, 0, 0, 18),
+            Padding = new Thickness(16, 10, 16, 10),
+            Margin = new Thickness(0, 0, 0, 8),
             Child = masthead,
+        });
+
+        doc.Add(new Container
+        {
+            Height = 82,
+            CornerRadius = 4,
+            ClipContent = true,
+            Margin = new Thickness(0, 0, 0, 6),
+            Child = new Image
+            {
+                ImageData = headerPhoto,
+                Height = 82,
+                FitMode = ImageFitMode.Cover,
+                AltText = "Seasonal small plates and sourdough on a rustic wooden bistro table.",
+            },
         });
 
         // ── Courses ──
@@ -111,17 +138,17 @@ public static class RestaurantMenuExample
             {
                 Level = 2,
                 FontName = serif,
-                FontSize = 17,
+                FontSize = 15,
                 Color = Accent,
                 Alignment = TextAlignment.Center,
-                Margin = new Thickness(0, 6, 0, 8),
+                Margin = new Thickness(0, 4, 0, 5),
             });
             foreach (var (dish, description, price, marks) in dishes)
                 doc.Add(MenuItem(serif, dish, description, price, marks));
         }
 
         // ── Dietary key ──
-        HorizontalStack key = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 12, Margin = new Thickness(0, 10, 0, 0) };
+        HorizontalStack key = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 12, Margin = new Thickness(0, 6, 0, 0) };
         foreach (var (mark, meaning, fill, ink) in Marks)
         {
             HorizontalStack entry = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 4 };
@@ -140,7 +167,7 @@ public static class RestaurantMenuExample
         {
             FontSize = 7.5f,
             Color = ColorPalette.Stone[500],
-            Margin = new Thickness(0, 6, 0, 0),
+            Margin = new Thickness(0, 4, 0, 0),
         });
         return doc;
     }
@@ -162,7 +189,7 @@ public static class RestaurantMenuExample
             var (_, _, fill, ink) = Array.Find(Marks, m => m.Mark == mark);
             detail.Add(Badge(mark, fill, ink));
         }
-        VerticalStack item = new() { Spacing = 2, Margin = new Thickness(0, 0, 0, 10) };
+        VerticalStack item = new() { Spacing = 1, Margin = new Thickness(0, 0, 0, 6) };
         item.Add(line);
         item.Add(detail);
         return item;
@@ -187,4 +214,32 @@ public static class RestaurantMenuExample
         Padding = new Thickness(3, 1, 3, 1),
         Child = new TextBlock(mark) { FontName = StandardFonts.HelveticaBold, FontSize = 6.5f, Color = ink },
     };
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string dir = FindAssetsDir();
+        return RequiredAssets.ToDictionary(key => key, key => File.ReadAllBytes(Path.Combine(dir, key)), StringComparer.Ordinal);
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes)) return bytes;
+        string candidate = Path.Combine(FindAssetsDir(), key);
+        if (File.Exists(candidate)) return File.ReadAllBytes(candidate);
+        throw new InvalidOperationException($"Supply {key}.");
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate)) return candidate;
+            string local = Path.Combine(dir, "assets");
+            if (Directory.Exists(local)) return local;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

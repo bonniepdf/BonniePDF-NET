@@ -1,3 +1,4 @@
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.Hospitality;
@@ -12,6 +13,9 @@ namespace BonniePDF.Examples.Hospitality;
 public static class AllergenMatrixExample
 {
     private const string SerifKey = "fonts/SourceSerif4-Regular.ttf";
+    private const string SprigSvgKey = "images/svg/the-larder.svg";
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [SerifKey, SprigSvgKey];
 
     /// <summary>The 14 allergens UK food law requires a business to declare, in the order the Food Standards Agency lists them.</summary>
     private static readonly string[] Allergens =
@@ -49,6 +53,8 @@ public static class AllergenMatrixExample
     private static readonly (string Word, Color? Fill, Color Ink) Trace = ("Trace", ColorPalette.Amber[100], ColorPalette.Amber[900]);
     private static readonly (string Word, Color? Fill, Color Ink) Absent = ("No", null, ColorPalette.Stone[500]);
 
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
@@ -72,13 +78,16 @@ public static class AllergenMatrixExample
                 Subject = "Allergens in every dish on the dinner menu",
             },
         };
-        if (!assets.TryGetValue(SerifKey, out byte[]? bytes))
-            throw new InvalidOperationException($"Supply {SerifKey}.");
-        string serif = doc.Fonts.Add(bytes).FontName;
+        string serif = doc.Fonts.Add(GetAsset(assets, SerifKey)).FontName;
+        string sprigSvg = Encoding.UTF8.GetString(GetAsset(assets, SprigSvgKey));
 
         // ── Title and review line ──
+        HorizontalStack titleRow = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 8 };
+        titleRow.Add(new Svg { SvgData = sprigSvg, Width = 24, Height = 24, IsDecorative = true, Margin = new Thickness(0, 2, 0, 0) });
+        titleRow.Add(new Heading("Allergen guide") { Level = 1, FontName = serif, FontSize = 24, Color = ColorPalette.Stone[900] });
+
         HorizontalStack top = new() { WidthDistribution = WidthDistribution.Equal, Margin = new Thickness(0, 0, 0, 12) };
-        top.Add(new Heading("Allergen guide") { Level = 1, FontName = serif, FontSize = 24, Color = ColorPalette.Stone[900] });
+        top.Add(titleRow);
         top.Add(new TextBlock("The Larder  ·  Dinner menu\nReviewed 5 November 2026 by the head chef")
         {
             Alignment = TextAlignment.Right,
@@ -179,4 +188,32 @@ public static class AllergenMatrixExample
         Padding = new Thickness(6, 2, 6, 2),
         Child = new TextBlock(answer.Word) { FontName = StandardFonts.HelveticaBold, FontSize = 7.5f, Color = answer.Ink },
     };
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string dir = FindAssetsDir();
+        return RequiredAssets.ToDictionary(key => key, key => File.ReadAllBytes(Path.Combine(dir, key)), StringComparer.Ordinal);
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes)) return bytes;
+        string candidate = Path.Combine(FindAssetsDir(), key);
+        if (File.Exists(candidate)) return File.ReadAllBytes(candidate);
+        throw new InvalidOperationException($"Supply {key}.");
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate)) return candidate;
+            string local = Path.Combine(dir, "assets");
+            if (Directory.Exists(local)) return local;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }

@@ -1,3 +1,4 @@
+using System.Text;
 using BonniePDF;
 namespace BonniePDF.Examples.PageSetup.HeadersFooters;
 
@@ -7,6 +8,12 @@ namespace BonniePDF.Examples.PageSetup.HeadersFooters;
 [System.ComponentModel.Description("A three-page report with a distinct first-page header, mirrored odd and even headers with a brand mark and rule, and page numbers on the outer edge. Screen readers skip the headers and footers.")]
 public static class HeadersFootersExample
 {
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/logistics/depot.jpg",
+        "images/svg/northfield.svg",
+    ];
+
     private const string Brand = "NORTHFIELD LOGISTICS";
     private const string Title = "Operations review  ·  Q3 2026";
 
@@ -64,12 +71,21 @@ public static class HeadersFootersExample
         ("York", "600", "97.8%", "92.2%"),
     ];
 
-    public static Document Generate()
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         Color teal = ColorPalette.Teal[700];
-        HorizontalStack firstPage = new() { WidthDistribution = WidthDistribution.Equal };
-        firstPage.Add(Small(Brand, TextAlignment.Left, bold: true, size: 11, color: teal));
-        firstPage.Add(Small("Board pack  ·  14 October 2026", TextAlignment.Right));
+        HorizontalStack firstPage = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 6 };
+        firstPage.Add(new Svg
+        {
+            SvgData = SvgAsset(assets, "images/svg/northfield.svg"),
+            Width = 14,
+            Height = 14,
+            IsDecorative = true,
+        });
+        firstPage.Add(Small(Brand, TextAlignment.Left, bold: true, size: 11, color: teal), 1);
+        firstPage.Add(Small("Board pack  ·  14 October 2026", TextAlignment.Right), 1);
 
         var doc = new Document(new DocumentSettings
         {
@@ -102,7 +118,21 @@ public static class HeadersFootersExample
         {
             FontSize = 12,
             Color = ColorPalette.Slate[600],
-            Margin = new Thickness(0, 0, 0, 18)
+            Margin = new Thickness(0, 0, 0, 10)
+        });
+        doc.Add(new Container
+        {
+            Height = 95,
+            CornerRadius = 6,
+            ClipContent = true,
+            Margin = new Thickness(0, 0, 0, 12),
+            Child = new Image
+            {
+                ImageData = Asset(assets, "images/logistics/depot.jpg"),
+                Height = 95,
+                FitMode = ImageFitMode.Cover,
+                AltText = "Northfield distribution depot loading bays at dawn.",
+            },
         });
 
         Table kpis = new(3f, 1.2f, 1.2f) { CellPadding = 7, HeaderBackgroundColor = teal, HeaderTextColor = Color.White };
@@ -113,9 +143,9 @@ public static class HeadersFootersExample
 
         foreach (var (heading, paragraphs) in Sections)
         {
-            doc.Add(SectionHeading(heading, 14));
+            doc.Add(SectionHeading(heading, 10, 4));
             foreach (string paragraph in paragraphs)
-                doc.Add(new TextBlock(paragraph) { LineHeight = 1.5f, Margin = new Thickness(0, 0, 0, 8) });
+                doc.Add(new TextBlock(paragraph) { LineHeight = 1.4f, Margin = new Thickness(0, 0, 0, 6) });
         }
 
         // The appendix starts a page of its own, so the third page shows the odd-page header.
@@ -131,13 +161,13 @@ public static class HeadersFootersExample
         return doc;
     }
 
-    private static Heading SectionHeading(string text, float top) => new(text)
+    private static Heading SectionHeading(string text, float top, float bottom = 6f) => new(text)
     {
         Level = 2,
         FontName = StandardFonts.HelveticaBold,
         FontSize = 15,
         Color = ColorPalette.Slate[900],
-        Margin = new Thickness(0, top, 0, 6)
+        Margin = new Thickness(0, top, 0, bottom)
     };
 
     /// <summary>8.5pt header and footer text, grey unless a colour is given.</summary>
@@ -172,4 +202,48 @@ public static class HeadersFootersExample
         FontSize = 10,
         Alignment = alignment
     };
+
+    private static byte[] Asset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        assets.TryGetValue(path, out byte[]? bytes)
+            ? bytes
+            : throw new InvalidOperationException($"Missing required asset: {path}");
+
+    private static string SvgAsset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        Encoding.UTF8.GetString(Asset(assets, path));
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDirectory();
+        Dictionary<string, byte[]> result = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            result[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return result;
+    }
+
+    private static string FindAssetsDirectory()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            string localCandidate = Path.Combine(dir, "assets");
+            if (Directory.Exists(localCandidate))
+            {
+                return localCandidate;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
+    }
 }

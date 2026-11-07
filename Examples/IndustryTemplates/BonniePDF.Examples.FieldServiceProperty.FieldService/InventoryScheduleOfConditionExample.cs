@@ -25,6 +25,15 @@ namespace BonniePDF.Examples.FieldServiceProperty.FieldService;
     "A tenancy check-in schedule: a room-by-room register grading condition and cleanliness separately, meter readings, keys issued, and both parties' declarations. PDF/A-2a + PDF/UA-1.")]
 public static class InventoryScheduleOfConditionExample
 {
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/inventory/living-room.jpg",
+        "images/inventory/kitchen.jpg",
+        "images/inventory/bedroom-1.jpg",
+        "images/inventory/bedroom-2.jpg",
+        "images/inventory/bathroom.jpg",
+    ];
+
     private const string Reference = "INV-2026-1174";
     private const string Property = "14 Sample Road, Sample Town, ST4 7QN";
     private const string PropertyType = "Two-bedroom first-floor flat, unfurnished with white goods";
@@ -44,7 +53,7 @@ public static class InventoryScheduleOfConditionExample
         string Notes,
         string Evidence);
 
-    private sealed record Room(string Name, Item[] Items);
+    private sealed record Room(string Name, Item[] Items, string? Photo = null);
 
     private static readonly Room[] Rooms =
     [
@@ -67,7 +76,7 @@ public static class InventoryScheduleOfConditionExample
                 "P-007"),
             new("Radiator and thermostatic valve", "Good", "Domestic", "Light dust to the rear fins", "P-008"),
             new("Curtain pole and fittings", "Worn", "Domestic", "Finial loose at the left-hand end", "P-009"),
-        ]),
+        ], "images/inventory/living-room.jpg"),
         new("Kitchen",
         [
             new("Units, doors and handles", "Good", "Professional", "All doors aligned and closing", "P-010"),
@@ -77,7 +86,7 @@ public static class InventoryScheduleOfConditionExample
             new("Fridge freezer", "Good", "Professional", "Running, seals intact, shelves complete", "P-013"),
             new("Sink, taps and waste", "Good", "Professional", "No drips; waste runs freely", "P-014"),
             new("Flooring — vinyl", "Good", "Professional", "Sealed at the perimeter", "P-015"),
-        ]),
+        ], "images/inventory/kitchen.jpg"),
         new("Bathroom",
         [
             new("Bath, shower and screen", "Good", "Professional", "Screen seal intact; shower tested", "P-016"),
@@ -85,7 +94,7 @@ public static class InventoryScheduleOfConditionExample
             new("WC and cistern", "Good", "Professional", "Flushes and refills correctly", "P-018"),
             new("Tiling and grout", "Fair", "Professional", "Minor grout discolouration behind the bath taps", "P-019"),
             new("Extractor fan", "Good", "Domestic", "Operates on the light switch; grille lightly dusty", "P-020"),
-        ]),
+        ], "images/inventory/bathroom.jpg"),
         new("Bedroom 1",
         [
             new("Walls and ceiling", "Good", "Professional",
@@ -93,7 +102,7 @@ public static class InventoryScheduleOfConditionExample
             new("Carpet", "Good", "Professional", "No marks noted", "P-022"),
             new("Built-in wardrobe", "Fair", "Professional", "Right-hand door catches slightly on closing", "P-023"),
             new("Window and blind", "Good", "Professional", "Blind raises and lowers evenly", "P-024"),
-        ]),
+        ], "images/inventory/bedroom-1.jpg"),
         new("Bedroom 2",
         [
             new("Walls and ceiling", "Good", "Professional", "No marks noted", "P-025"),
@@ -101,7 +110,7 @@ public static class InventoryScheduleOfConditionExample
                 "Burn mark approx. 25mm diameter near the radiator — recorded at check-in, not the tenant’s liability",
                 "P-026, P-027"),
             new("Radiator and valve", "Good", "Professional", "No leaks noted", "P-028"),
-        ]),
+        ], "images/inventory/bedroom-2.jpg"),
     ];
 
     private sealed record Meter(string Utility, string Serial, string Reading, string Located);
@@ -134,7 +143,10 @@ public static class InventoryScheduleOfConditionExample
     };
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         Item[] allItems = [.. Rooms.SelectMany(room => room.Items)];
         Dictionary<string, int> byCondition = new(StringComparer.Ordinal);
@@ -239,6 +251,10 @@ public static class InventoryScheduleOfConditionExample
                 }
 
                 roomStack.Add(H3(room.Name));
+                if (room.Photo is not null)
+                {
+                    roomStack.Add(RoomPhoto(Asset(assets, room.Photo), $"Check-in photograph of {room.Name}"));
+                }
 
                 Table table = new(3.1f, 1.1f, 1.3f, 4.2f, 0.95f)
                 {
@@ -629,4 +645,62 @@ public static class InventoryScheduleOfConditionExample
     private static readonly CultureInfo GbCulture = CultureInfo.GetCultureInfo("en-GB");
 
     private static string ShortDate(DateTime d) => d.ToString("dd MMM yyyy", GbCulture);
+
+    private static Container RoomPhoto(byte[] imageData, string altText) => new()
+    {
+        Width = 88,
+        Height = 66,
+        CornerRadius = 4,
+        ClipContent = true,
+        Margin = new Thickness(0, 0, 0, 6),
+        Child = new Image
+        {
+            ImageData = imageData,
+            Width = 88,
+            Height = 66,
+            FitMode = ImageFitMode.Cover,
+            AltText = altText,
+        },
+    };
+
+    private static byte[] Asset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        assets.TryGetValue(path, out byte[]? bytes)
+            ? bytes
+            : throw new InvalidOperationException($"Missing required asset: {path}");
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDirectory();
+        Dictionary<string, byte[]> result = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            result[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return result;
+    }
+
+    private static string FindAssetsDirectory()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            string localCandidate = Path.Combine(dir, "assets");
+            if (Directory.Exists(localCandidate))
+            {
+                return localCandidate;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
+    }
 }

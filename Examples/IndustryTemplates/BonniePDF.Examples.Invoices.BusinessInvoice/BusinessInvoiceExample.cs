@@ -1,3 +1,4 @@
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.Invoices.BusinessInvoice;
@@ -29,8 +30,61 @@ public static class BusinessInvoiceExample
     // #707070, not #888888: 3.54:1 on white, below the 4.5:1 WCAG AA threshold.
     private static readonly Color TextLight = Color.FromHex("#707070");
 
+    private const string LogoAsset = "images/svg/sample-company.svg";
+
+    private const string FallbackLogoSvg = """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+          <rect x="2" y="2" width="44" height="44" rx="10" fill="#334155"/>
+          <path d="M31 15.5c0-2.5-2.8-4.5-7-4.5-4.4 0-7.5 2.2-7.5 5.5 0 3.1 2.4 4.7 6.8 5.7l2.2.5c2.5.6 3.8 1.5 3.8 3.1 0 1.9-1.9 3.2-4.8 3.2-3.1 0-5.2-1.4-5.6-3.5h-4.4c.4 4.5 4.2 7.5 10 7.5 5.6 0 9.2-2.9 9.2-7.1 0-3.5-2.4-5.4-7.2-6.5l-2.2-.5c-2.2-.5-3.4-1.3-3.4-2.7 0-1.6 1.5-2.7 3.9-2.7 2.4 0 4 1.1 4.3 2.5H31z" fill="#f8fafc"/>
+          <circle cx="35.5" cy="34.5" r="2.5" fill="#94a3b8"/>
+        </svg>
+        """;
+
+    public static IReadOnlyList<string> RequiredAssets { get; } = [LogoAsset];
+
+    private static string LogoMarkup(IReadOnlyDictionary<string, byte[]>? assets) =>
+        assets is not null && assets.TryGetValue(LogoAsset, out byte[]? bytes)
+            ? Encoding.UTF8.GetString(bytes)
+            : FallbackLogoSvg;
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return RequiredAssets.ToDictionary(p => p, p => File.ReadAllBytes(Path.Combine(candidate, p)), StringComparer.Ordinal);
+            }
+
+            string direct = Path.Combine(dir, "assets");
+            if (Directory.Exists(direct))
+            {
+                return RequiredAssets.ToDictionary(p => p, p => File.ReadAllBytes(Path.Combine(direct, p)), StringComparer.Ordinal);
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        Dictionary<string, byte[]> dict = new(StringComparer.Ordinal);
+        foreach (string p in RequiredAssets)
+        {
+            string full = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, p);
+            if (File.Exists(full))
+            {
+                dict[p] = File.ReadAllBytes(full);
+            }
+        }
+
+        return dict;
+    }
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    /// <summary>Builds the document using the supplied asset dictionary.</summary>
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         Document doc = new(new DocumentSettings
         {
@@ -70,15 +124,30 @@ public static class BusinessInvoiceExample
         };
 
         // Left: Company branding
-        VerticalStack companyStack = new();
-        companyStack.Add(new TextBlock
+        HorizontalStack brandRow = new()
+        {
+            WidthDistribution = WidthDistribution.Auto,
+            Spacing = 8,
+            Margin = new Thickness(0, 0, 0, 4),
+        };
+        brandRow.Add(new Svg
+        {
+            SvgData = LogoMarkup(assets),
+            Width = 28,
+            Height = 28,
+            IsDecorative = true,
+        });
+        brandRow.Add(new TextBlock
         {
             Text = "SAMPLE COMPANY INC.",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 20,
             Color = TextDark,
-            Margin = new Thickness(0, 0, 0, 4)
+            Margin = new Thickness(0, 3, 0, 0)
         });
+
+        VerticalStack companyStack = new();
+        companyStack.Add(brandRow);
         // The address lines share one style, so they flow as a single paragraph.
         companyStack.Add(new TextBlock
             { Text = "42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@example.com" });

@@ -24,6 +24,11 @@ namespace BonniePDF.Examples.FieldServiceProperty.FieldService;
     "A field-service job sheet: labour and parts with computed totals, a register of outstanding defects by severity, and a ruled customer sign-off block. PDF/A-2a + PDF/UA-1.")]
 public static class JobSheetExample
 {
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/field-service/ahu.jpg",
+    ];
+
     private const string JobNumber = "JOB-2026-04817";
     private const string OrderReference = "PO 55-2026-0912";
     private const string Priority = "P2 — Same working day";
@@ -88,7 +93,10 @@ public static class JobSheetExample
     };
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         decimal labourTotal = Labour.Sum(l => l.Hours * l.Rate);
         decimal partsTotal = Parts.Where(p => p.Fitted).Sum(p => p.Quantity * p.UnitPrice);
@@ -163,11 +171,38 @@ public static class JobSheetExample
 
         // ── Reported fault and work done ──────────────────────────────────────
 
-        doc.Add(H2("Fault reported"));
-        doc.Add(Body(
+        VerticalStack faultText = new();
+        faultText.Add(H2("Fault reported"));
+        faultText.Add(Body(
             "Occupier reported intermittent noise and reduced airflow from the level 2 supply grilles. "
             + "Building management system showed the unit running but with supply air temperature drifting "
             + "above setpoint during the morning occupancy period."));
+
+        HorizontalStack faultSummary = new()
+        {
+            WidthDistribution = WidthDistribution.Weighted,
+            Spacing = 14,
+        };
+        faultSummary.Add(faultText, 3.4f);
+        faultSummary.Add(
+            new Container
+            {
+                Width = 110,
+                Height = 82,
+                CornerRadius = 6,
+                ClipContent = true,
+                Margin = new Thickness(0, 14, 0, 0),
+                Child = new Image
+                {
+                    ImageData = GetAsset(assets, "images/field-service/ahu.jpg"),
+                    Width = 110,
+                    Height = 82,
+                    FitMode = ImageFitMode.Cover,
+                    AltText = "Rooftop air handling unit with access panel open showing belt-driven fan.",
+                },
+            },
+            1f);
+        doc.Add(faultSummary);
 
         doc.Add(H2("Work carried out"));
         doc.Add(Body(
@@ -639,4 +674,45 @@ public static class JobSheetExample
 
     /// <summary>Decimal hours, as engineers record them: 1.5, 0.75.</summary>
     private static string Hours(decimal value) => $"{value.ToString("F2", CultureInfo.InvariantCulture)} h";
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        assets.TryGetValue(path, out byte[]? bytes)
+            ? bytes
+            : throw new InvalidOperationException($"Missing required asset: {path}");
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDirectory();
+        Dictionary<string, byte[]> result = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            result[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return result;
+    }
+
+    private static string FindAssetsDirectory()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            string localCandidate = Path.Combine(dir, "assets");
+            if (Directory.Exists(localCandidate))
+            {
+                return localCandidate;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
+    }
 }

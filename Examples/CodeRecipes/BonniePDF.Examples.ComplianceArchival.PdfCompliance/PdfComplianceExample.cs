@@ -1,3 +1,4 @@
+using System.Text;
 using BonniePDF;
 
 namespace BonniePDF.Examples.ComplianceArchival.PdfCompliance;
@@ -11,6 +12,11 @@ namespace BonniePDF.Examples.ComplianceArchival.PdfCompliance;
 [System.ComponentModel.Description("A council tax letter that has to reach every resident and be kept for years: tagged for screen readers (PDF/UA-1), archived as PDF/A-2a, with the settings that make it so explained on the page.")]
 public static class PdfComplianceExample
 {
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/svg/borough-crest.svg",
+    ];
+
     /// <summary>The council's colour: a deep teal, used for the masthead and the table header.</summary>
     private static readonly Color Council = ColorPalette.Teal[800];
 
@@ -24,10 +30,13 @@ public static class PdfComplianceExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
+    /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability", "MA0051:Method is too long",
         Justification = "The example intentionally keeps generation inline.")]
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         // ── Footer: the sender on the left, a discreet standards badge on the right ──
         HorizontalStack footer = new() { WidthDistribution = WidthDistribution.Equal };
@@ -65,12 +74,21 @@ public static class PdfComplianceExample
         };
 
         // ── Masthead and address ──
+        HorizontalStack mastheadRow = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 10 };
+        mastheadRow.Add(new Svg
+        {
+            SvgData = SvgAsset(assets, "images/svg/borough-crest.svg"),
+            Width = 24,
+            Height = 24,
+            AltText = "Sample Borough Council crest",
+        });
+        mastheadRow.Add(new TextBlock("Sample Borough Council") { FontName = StandardFonts.HelveticaBold, FontSize = 17, Color = Color.White }, 1);
         doc.Add(new Container
         {
             BackgroundColor = Council,
             Padding = new Thickness(16, 12, 16, 12),
             Margin = new Thickness(0, 0, 0, 20),
-            Child = new TextBlock("Sample Borough Council") { FontName = StandardFonts.HelveticaBold, FontSize = 17, Color = Color.White },
+            Child = mastheadRow,
         });
         HorizontalStack top = new() { WidthDistribution = WidthDistribution.Equal, Margin = new Thickness(0, 0, 0, 20) };
         top.Add(new TextBlock("Sample Resident\n12 Mill Lane\nSample Town\nST4 2QR"));
@@ -152,5 +170,49 @@ public static class PdfComplianceExample
         });
 
         return doc;
+    }
+
+    private static byte[] Asset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        assets.TryGetValue(path, out byte[]? bytes)
+            ? bytes
+            : throw new InvalidOperationException($"Missing required asset: {path}");
+
+    private static string SvgAsset(IReadOnlyDictionary<string, byte[]> assets, string path) =>
+        Encoding.UTF8.GetString(Asset(assets, path));
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDirectory();
+        Dictionary<string, byte[]> result = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            result[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return result;
+    }
+
+    private static string FindAssetsDirectory()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (dir is not null)
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            string localCandidate = Path.Combine(dir, "assets");
+            if (Directory.Exists(localCandidate))
+            {
+                return localCandidate;
+            }
+
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
     }
 }

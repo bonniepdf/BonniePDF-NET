@@ -57,9 +57,21 @@ public static class UkDegreeTranscriptExample
         new(6, "CS6305", "Ethics & Society in Computing", 20, 67),
     ];
 
+    /// <summary>Asset paths required by this example, relative to the shared <c>Examples/assets</c> directory.</summary>
+    public static IReadOnlyList<string> RequiredAssets { get; } =
+    [
+        "images/svg/university-crest.svg",
+    ];
+
+    /// <summary>Builds the document using the default shared assets. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
+    public static Document Generate() => Generate(LoadDefaultAssets());
+
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
+        ArgumentNullException.ThrowIfNull(assets);
+        string crestSvg = System.Text.Encoding.UTF8.GetString(GetAsset(assets, "images/svg/university-crest.svg"));
+
         DocumentSettings settings = new(PdfSize.A4, 50)
         {
             Conformance = PdfAConformance.PdfA2a,
@@ -81,7 +93,7 @@ public static class UkDegreeTranscriptExample
         doc.Metadata.Author = "Sample University";
         doc.Metadata.Subject = "Official degree transcript with UK honours classification (sample).";
 
-        doc.Add(Header());
+        doc.Add(Header(crestSvg));
         doc.Add(BlueRule());
         doc.Add(StudentDetails());
         doc.Add(AwardBanner());
@@ -93,7 +105,7 @@ public static class UkDegreeTranscriptExample
         return doc;
     }
 
-    private static Grid Header()
+    private static Grid Header(string crestSvg)
     {
         Grid header = new(2.4f, 1) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 0, 0, 6) };
 
@@ -105,8 +117,18 @@ public static class UkDegreeTranscriptExample
             Text = "Founded 1887 - Registrar's Office", FontSize = 9, Color = Muted, Margin = new Thickness(0, 2, 0, 0)
         });
 
+        HorizontalStack uniRow = new() { WidthDistribution = WidthDistribution.Auto, Spacing = 10 };
+        uniRow.Add(new Svg
+        {
+            SvgData = crestSvg,
+            Width = 30,
+            Height = 35,
+            AltText = "University of Sampleford heraldic crest",
+        });
+        uniRow.Add(uni);
+
         header.AddRow(
-            uni,
+            uniRow,
             new Container
             {
                 Child = new TextBlock
@@ -368,4 +390,42 @@ public static class UkDegreeTranscriptExample
     };
 
     private sealed record Module(int Level, string Code, string Title, int Credits, int Mark);
+
+    private static Dictionary<string, byte[]> LoadDefaultAssets()
+    {
+        string assetsDir = FindAssetsDir();
+        Dictionary<string, byte[]> dict = new(StringComparer.Ordinal);
+        foreach (string key in RequiredAssets)
+        {
+            string fullPath = Path.Combine(assetsDir, key.Replace('/', Path.DirectorySeparatorChar));
+            dict[key] = File.ReadAllBytes(fullPath);
+        }
+
+        return dict;
+    }
+
+    private static byte[] GetAsset(IReadOnlyDictionary<string, byte[]> assets, string key)
+    {
+        if (assets.TryGetValue(key, out byte[]? bytes))
+            return bytes;
+        string fullPath = Path.Combine(FindAssetsDir(), key.Replace('/', Path.DirectorySeparatorChar));
+        return File.ReadAllBytes(fullPath);
+    }
+
+    private static string FindAssetsDir()
+    {
+        string? dir = AppDomain.CurrentDomain.BaseDirectory;
+        while (!string.IsNullOrEmpty(dir))
+        {
+            string candidate = Path.Combine(dir, "Examples", "assets");
+            if (Directory.Exists(candidate))
+                return candidate;
+            string direct = Path.Combine(dir, "assets");
+            if (Directory.Exists(direct))
+                return direct;
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate Examples/assets directory.");
+    }
 }
