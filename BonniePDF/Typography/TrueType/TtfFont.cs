@@ -79,15 +79,28 @@ internal class TtfFont
     /// <remarks>Takes the call's arguments as state, so a static lambda can avoid a closure per call.</remarks>
     internal T WithShapingFace<TState, T>(TState state, Func<Typography.Engine.FontFace, TState, T> shape)
     {
-        if (!_shapingFaces.TryTake(out Typography.Engine.FontFace? face)) face = CreateEngineFace();
+        Typography.Engine.FontFace face = RentShapingFace();
         try
         {
             return shape(face, state);
         }
         finally
         {
-            if (_shapingFaces.Count < MaxShapingFaces) _shapingFaces.Add(face);
+            ReturnShapingFace(face);
         }
+    }
+
+    /// <summary>
+    /// Borrows a shaping face for a call that shapes with several fonts at once; hand it back with
+    /// <see cref="ReturnShapingFace"/>. Prefer <see cref="WithShapingFace{T}(Func{Typography.Engine.FontFace, T})"/>.
+    /// </summary>
+    internal Typography.Engine.FontFace RentShapingFace() =>
+        _shapingFaces.TryTake(out Typography.Engine.FontFace? face) ? face : CreateEngineFace();
+
+    /// <summary>Returns a face borrowed with <see cref="RentShapingFace"/>.</summary>
+    internal void ReturnShapingFace(Typography.Engine.FontFace face)
+    {
+        if (_shapingFaces.Count < MaxShapingFaces) _shapingFaces.Add(face);
     }
 
     // =====================================================

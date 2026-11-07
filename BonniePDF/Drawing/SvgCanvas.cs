@@ -217,6 +217,9 @@ internal partial class SvgCanvas : ICanvas
                     substitute.Font.Shape(run.Text, _fontFeatures)));
         }
 
+        // A bidirectional line in several fonts is shaped as one line and painted piece by piece in visual order.
+        if (result.Count > 1 && VisualTextRuns.Order(result.Select(run => run.Text).ToArray(), result.Select(run => (TtfFont?)run.Font).ToArray(), _fontFeatures) is { } pieces)
+            return pieces.Select(piece => result[piece.Run] with { Text = piece.Text, Glyphs = piece.Glyphs! }).ToList();
         return result;
     }
 
