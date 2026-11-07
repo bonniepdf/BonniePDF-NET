@@ -1,266 +1,458 @@
+using System.Globalization;
 using BonniePDF;
+using BonniePDF.Drawing;
 
 namespace BonniePDF.Examples.Healthcare.PatientSummary;
 
 /// <summary>
-/// An A4 portrait healthcare "patient summary" sheet built from rounded-corner
-/// cards. Each card sets <see cref="Container.ClipContent"/> with a
-/// positive <c>CornerRadius</c> so its full-bleed coloured header band is clipped
-/// to the rounded outline - the band follows the rounded top corners instead of
-/// poking square corners out past the card edge, and the white body is masked at
-/// the bottom the same way.
-/// Patient details, vitals, current medications and active problems in one teal,
-/// with rose kept for allergies and alerts.
+/// A hospital patient summary on one A4 page: an identity banner with a wristband barcode, allergy
+/// alerts, observations with six-reading trend lines and an early-warning score, medicines, a drawn INR
+/// chart against its target range, problems, the care team and next steps.
+/// Teal carries the trust and the clinical record; rose is kept for allergies and readings outside their
+/// range, so red always means a warning. Entirely fictional.
 /// </summary>
 [System.ComponentModel.DisplayName("Patient Summary")]
 [System.ComponentModel.Category("Healthcare")]
 [System.ComponentModel.Description(
-    "A4 portrait healthcare patient-summary sheet built from rounded-corner cards: each card clips a full-bleed header band to its rounded outline - patient details, vitals, current medications and active problems in one teal, with rose kept for allergies and alerts.")]
+    "A hospital patient summary on one A4 page: an identity banner with a wristband barcode, allergy alerts, observations with trend lines and an early-warning score, medicines, a drawn INR chart against its target range, problems, the care team and next steps.")]
 public static class PatientSummaryExample
 {
-    // ── Healthcare palette (Slate neutrals, one Teal accent, Rose for alerts) ──
-    private static readonly Color Ink = Color.FromHex("#0f172a"); // slate-900  headings / values
-    private static readonly Color Body = Color.FromHex("#334155"); // slate-700  body text
-    private static readonly Color Mute = Color.FromHex("#64748b"); // slate-500  labels / captions
-    private static readonly Color Hairline = Color.FromHex("#e2e8f0"); // slate-200  card border / rules
-    private static readonly Color Card = Color.FromHex("#ffffff"); // card surface
+    private static readonly Color Ink = ColorPalette.Slate[900];
+    private static readonly Color Body = ColorPalette.Slate[700];
+    private static readonly Color Mute = ColorPalette.Slate[500];
+    private static readonly Color Trust = ColorPalette.Teal[800];
+    private static readonly Color Alert = ColorPalette.Rose[700];
 
-    private static readonly Color Tint = Color.FromHex("#f8fafc"); // slate-50   page tint
+    /// <summary>Observations at 09:14: name, latest value, unit, NEWS2 points, and the last six readings, oldest first.</summary>
+    private static readonly (string Name, string Value, string Unit, int Points, float[] Trend)[] Observations =
+    [
+        ("Respiration", "18", "per min", 0, [22, 20, 20, 18, 18, 18]),
+        ("Oxygen", "95", "% on air", 1, [93, 94, 94, 95, 96, 95]),
+        ("BP", "128/82", "mmHg", 0, [142, 136, 132, 130, 126, 128]),
+        ("Pulse", "92", "bpm", 1, [104, 98, 96, 94, 90, 92]),
+        ("Temperature", "37.1", "°C", 0, [37.8f, 37.6f, 37.4f, 37.2f, 37.0f, 37.1f]),
+    ];
 
-    // #0a7164, not #0d9488: this teal doubles as the band fill (behind white/Cream
-    // text) and as small status text on white, and #0d9488 only reaches 3.42-3.74:1
-    // either way, below the 4.5:1 WCAG AA threshold. #0a7164 clears it in both roles.
-    private static readonly Color Teal = Color.FromHex("#0a7164"); // patient band
-    private static readonly Color Rose = Color.FromHex("#e11d48"); // allergy band / alerts
-    private static readonly Color Cream = Color.FromHex("#f1f5f9"); // band caption text
+    /// <summary>Current medicines: name, dose, route, when, and what it is for.</summary>
+    private static readonly (string Name, string Dose, string Route, string When, string Why)[] Medicines =
+    [
+        ("Warfarin", "5 mg", "Oral", "Evening", "Anticoagulation"),
+        ("Bisoprolol", "2.5 mg", "Oral", "Morning", "Heart rate control"),
+        ("Ramipril", "5 mg", "Oral", "Morning", "Blood pressure"),
+        ("Atorvastatin", "40 mg", "Oral", "Night", "Cholesterol"),
+        ("Lansoprazole", "15 mg", "Oral", "Breakfast", "Stomach protection"),
+    ];
+
+    /// <summary>INR results: the date of each weekly check and its value. Target range 2.0 to 3.0.</summary>
+    private static readonly (string Date, float Value)[] Inr =
+    [
+        ("30 Apr", 1.8f), ("7 May", 2.1f), ("14 May", 2.6f), ("21 May", 3.4f),
+        ("28 May", 2.9f), ("4 Jun", 2.4f), ("11 Jun", 2.2f), ("18 Jun", 2.5f),
+    ];
+
+    /// <summary>Problems: the condition, the year it was diagnosed, and whether it is still active.</summary>
+    private static readonly (string Condition, string Since, bool Active)[] Problems =
+    [
+        ("Atrial fibrillation", "2021", true),
+        ("Hypertension", "2018", true),
+        ("Hypercholesterolaemia", "2019", true),
+        ("Appendicectomy", "1998", false),
+    ];
+
+    /// <summary>Blood tests taken on 17 June: test, result, units, reference range, and whether the result is outside it.</summary>
+    private static readonly (string Test, string Result, string Units, string Range, bool Outside)[] Bloods =
+    [
+        ("Haemoglobin", "128", "g/L", "115 to 165", false),
+        ("Sodium", "139", "mmol/L", "133 to 146", false),
+        ("Potassium", "5.4", "mmol/L", "3.5 to 5.3", true),
+        ("Creatinine", "84", "µmol/L", "45 to 84", false),
+        ("eGFR", "68", "mL/min/1.73m²", "above 60", false),
+        ("C-reactive protein", "12", "mg/L", "below 5", true),
+    ];
+
+    /// <summary>The care team and what happens next.</summary>
+    private static readonly (string Role, string Detail)[] NextSteps =
+    [
+        ("Consultant", "Dr R. Okafor, cardiology"),
+        ("Anticoagulation nurse", "S. Price, extension 4471"),
+        ("Next INR check", "25 June 2026, anticoagulation clinic"),
+        ("Echocardiogram", "Booked for 2 July 2026"),
+    ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    /// <summary>Current medicines: name, dose and when it is taken.</summary>
-    private static readonly (string Name, string Dose, string When)[] Medications =
-    [
-        ("Warfarin", "5 mg", "Evening"),
-        ("Bisoprolol", "2.5 mg", "Morning"),
-        ("Atorvastatin", "40 mg", "Night"),
-        ("Lansoprazole", "15 mg", "Before breakfast"),
-    ];
-
-    /// <summary>Active problems and the year each was diagnosed.</summary>
-    private static readonly (string Condition, string Since)[] Problems =
-    [
-        ("Atrial fibrillation", "Since 2021"),
-        ("Hypertension", "Since 2018"),
-        ("Hypercholesterolaemia", "Since 2019"),
-    ];
-
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Maintainability", "MA0051:Method is too long",
+        Justification = "The example intentionally keeps generation inline.")]
     public static Document Generate()
     {
-        DocumentSettings settings = new()
+        Document doc = new()
         {
-            PageSize = PdfSize.A4,
-            Margin = 0,
-            Language = "en-GB",
+            Settings = new DocumentSettings
+            {
+                PageSize = PdfSize.A4,
+                Margin = 0,
+                Conformance = PdfAConformance.PdfA2a,
+                Accessibility = AccessibilityMode.PdfUa1,
+                Language = "en-GB",
+                DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(8.5f).WithColor(Body),
+            },
+            Metadata = new DocumentMetadata
+            {
+                Title = "Patient summary: Priya Shah",
+                Author = "Sample Healthcare NHS Trust",
+                Subject = "Inpatient summary: identity, alerts, observations, medicines, results and plan",
+            },
         };
 
-        Document doc = new(settings);
-        doc.Metadata.Title = "Patient Summary";
-        doc.Metadata.Author = "Sample Healthcare";
-        doc.Metadata.Subject = "Patient summary sheet - demographics, vitals, and alerts";
-
-        // ── Page header band ──────────────────────────────────────────────────
-        VerticalStack brand = new();
-        brand.Add(Tb("SAMPLE HEALTHCARE", 13, Color.White, bold: true));
-        brand.Add(Tb("Patient Summary", 8, Cream, top: 4));
-
-        VerticalStack issued = new();
-        issued.Add(Tb("Confidential", 8, Cream, align: TextAlignment.Right));
-        issued.Add(Tb("Generated 18 June 2026", 8, Cream, align: TextAlignment.Right, top: 4));
-
-        doc.Add(new Container
+        // ── Trust masthead ──
+        VerticalStack trust = new() { Spacing = 2 };
+        trust.Add(Tb("Sample Healthcare NHS Trust", 12, Color.White, bold: true));
+        trust.Add(Tb("Cardiology, ward 4B", 8, ColorPalette.Teal[100]));
+        VerticalStack printed = new() { Spacing = 2 };
+        printed.Add(new Heading("Patient summary")
         {
-            BackgroundColor = Ink,
-            Padding = new Thickness(28, 18, 28, 18),
-            Child = TwoUp(brand, issued),
+            Level = 1,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 16,
+            Color = Color.White,
+            Alignment = TextAlignment.Right,
+            Margin = new Thickness(0),
         });
+        printed.Add(Tb("Printed 18 June 2026, 09:30", 8, ColorPalette.Teal[100], align: TextAlignment.Right));
+        HorizontalStack masthead = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 10 };
+        masthead.Add(TrustMark());
+        masthead.Add(trust, 1);
+        masthead.Add(printed, 1);
+        doc.Add(new Container { BackgroundColor = Trust, Padding = new Thickness(32, 16, 32, 16), Child = masthead });
 
-        // ── 1. Patient card (teal bleed band) ─────────────────────────────────
-        VerticalStack idLine = new();
-        idLine.Add(Tb("Sample Patient", 15, Color.White, bold: true));
-        idLine.Add(Tb("MRN 00482931  ·  DOB 14 Mar 1979  ·  Female", 9, Cream, top: 5));
-
-        Container patientBand = new()
+        // ── Identity banner ──
+        VerticalStack name = new() { Spacing = 3 };
+        name.Add(Tb("SHAH, Priya (Ms)", 16, Ink, bold: true));
+        name.Add(Tb("Born 14 March 1979 (47)  ·  Female  ·  NHS number 999 482 9310", 9, Body));
+        HorizontalStack identity = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 16 };
+        identity.Add(name, 1);
+        identity.Add(new Container
         {
-            BackgroundColor = Teal,
-            Padding = new Thickness(16, 12, 16, 12),
-            Child = idLine,
-        };
-
-        VerticalStack detailsLeft = new();
-        detailsLeft.Add(DetailRow("Blood type", "O positive"));
-        detailsLeft.Add(DetailRow("Primary GP", "Dr. A. Sample"));
-        detailsLeft.Add(DetailRow("Phone", "+44 7700 900482"));
-
-        VerticalStack detailsRight = new();
-        detailsRight.Add(DetailRow("Patient ID", "SAMPLE-9434765919"));
-        detailsRight.Add(DetailRow("Ward", "Cardiology - 4B"));
-        detailsRight.Add(DetailRow("Admitted", "16 Jun 2026"));
-
-        Container detailsBody = new()
+            HorizontalAlignment = HorizontalAlignment.End,
+            Child = new Barcode
+            {
+                Value = "H0482931",
+                Symbology = BarcodeSymbology.Code128,
+                Height = 24,
+                ModuleWidth = 0.9f,
+                ForegroundColor = Ink,
+                BackgroundColor = Color.White,
+                TextLabelFontSize = 6.5f,
+                AltText = "Hospital number barcode: H0482931",
+            },
+        });
+        Grid facts = new(1, 1, 1, 1) { Border = Border.None, CellPadding = 0, Margin = new Thickness(0, 10, 0, 0) };
+        facts.AddRow(
+            Fact("Hospital number", "H0482931"),
+            Fact("Address", "12 Sample Road, Sample Town ST4 2QR"),
+            Fact("GP", "Dr A. Sample, Sample Road Surgery"),
+            Fact("Next of kin", "Arjun Shah (husband), 07700 900483"));
+        VerticalStack banner = new();
+        banner.Add(identity);
+        banner.Add(facts);
+        doc.Add(BodyInset(new Container
         {
-            BackgroundColor = Card,
-            Padding = new Thickness(16, 14, 16, 16),
-            Child = TwoUp(detailsLeft, detailsRight),
-        };
-
-        VerticalStack patientStack = new();
-        patientStack.Add(patientBand);
-        patientStack.Add(detailsBody);
-
-        doc.Add(Pad(new Container
-        {
-            BackgroundColor = Card,
-            CornerRadius = 14,
-            ClipContent = true, // ← Mask the bleed band + body to the rounded outline
-            Border = new Border(0.75f),
-            BorderColors = new BorderColors(Hairline),
-            Margin = new Thickness(0, 20, 0, 16),
-            Child = patientStack,
+            Border = new Border(4, 0, 0, 0),
+            BorderColors = new BorderColors(Trust),
+            Padding = new Thickness(12, 0, 0, 0),
+            Margin = new Thickness(0, 16, 0, 12),
+            Child = banner,
         }));
 
-        // ── 2. Vitals card (teal bleed band, 4-up grid) ───────────────────────
-        Grid vitalsGrid = new(1, 1, 1, 1) { Border = Border.None, CellPadding = 6 };
-        vitalsGrid.AddRow(
-            Vital("128/82", "mmHg", "Blood pressure", "Normal", Teal),
-            Vital("72", "bpm", "Heart rate", "Normal", Teal),
-            Vital("37.1", "°C", "Temperature", "Normal", Teal),
-            Vital("97", "% SpO2", "Oxygen", "Watch", Rose));
-
-        Container vitalsCard = MakeCard(Teal, "VITALS  ·  18 Jun 2026, 09:14", vitalsGrid);
-        vitalsCard.Margin = new Thickness(0, 0, 0, 16);
-        doc.Add(Pad(vitalsCard));
-
-        // ── 3. Allergies & alerts card (rose bleed band) ──────────────────────
-        VerticalStack alerts = new();
-        alerts.Add(Alert("Penicillin", "Anaphylaxis - documented 2014. Avoid all beta-lactams.", 0));
-        alerts.Add(Alert("Latex", "Contact urticaria. Use nitrile gloves.", 6));
-        alerts.Add(Alert("Warfarin", "On anticoagulation - INR target 2.0-3.0.", 6));
-
-        Container alertsCard = MakeCard(Rose, "ALLERGIES & ALERTS", alerts);
-        alertsCard.Margin = new Thickness(0, 0, 0, 16);
-        doc.Add(Pad(alertsCard));
-
-        // ── 4. Medications and problems, side by side ─────────────────────────
-        Table medications = new(1.6f, 1, 1.4f) { Border = Border.None, CellPadding = 3 };
-        medications.AddHeader(Tb("MEDICINE", 7.5f, Mute, bold: true), Tb("DOSE", 7.5f, Mute, bold: true), Tb("WHEN", 7.5f, Mute, bold: true));
-        foreach (var (name, dose, when) in Medications)
-            medications.AddRow(Tb(name, 9.5f, Ink, bold: true), Tb(dose, 9.5f, Body), Tb(when, 9.5f, Body));
-
-        VerticalStack problems = new();
-        for (int i = 0; i < Problems.Length; i++)
+        // ── Alerts ──
+        VerticalStack alertLines = new() { Spacing = 2 };
+        alertLines.Add(Tb("Penicillin: anaphylaxis (2014). Avoid all beta-lactam antibiotics.", 8.5f, ColorPalette.Rose[900], bold: true));
+        alertLines.Add(Tb("Latex: contact urticaria, use nitrile gloves.  ·  Anticoagulated: warfarin, INR target 2.0 to 3.0.", 8.5f, ColorPalette.Rose[900]));
+        HorizontalStack alerts = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 10 };
+        alerts.Add(new Container
         {
-            Grid row = new(2.2f, 1) { Border = Border.None, CellPadding = 3 };
-            row.AddRow(Tb(Problems[i].Condition, 9.5f, Ink, bold: true), Tb(Problems[i].Since, 9, Mute, align: TextAlignment.Right));
-            Container c = new() { Child = row };
-            if (i > 0) c.Margin = new Thickness(0, 4, 0, 0);
-            problems.Add(c);
+            BackgroundColor = Alert,
+            CornerRadius = 3,
+            Padding = new Thickness(6, 3, 6, 3),
+            Child = Tb("ALERTS", 7.5f, Color.White, bold: true),
+        });
+        alerts.Add(alertLines, 1);
+        doc.Add(BodyInset(new Container
+        {
+            BackgroundColor = ColorPalette.Rose[50],
+            Border = new Border(0.75f),
+            BorderColors = new BorderColors(ColorPalette.Rose[200]),
+            CornerRadius = 6,
+            Padding = new Thickness(10, 8, 10, 8),
+            Margin = new Thickness(0, 0, 0, 14),
+            Child = alerts,
+        }));
+
+        // ── Observations, with the early warning score ──
+        doc.Add(BodyInset(Section("Observations  ·  18 June 2026, 09:14")));
+        HorizontalStack observations = new() { WidthDistribution = WidthDistribution.Equal, Spacing = 8, Margin = new Thickness(0, 0, 0, 14) };
+        foreach (var (label, value, unit, points, trend) in Observations) observations.Add(Observation(label, value, unit, points, trend));
+        int score = Observations.Sum(row => row.Points);
+        VerticalStack scoreText = new() { Spacing = 2 };
+        scoreText.Add(Tb("NEWS2 SCORE", 6.5f, ColorPalette.Teal[100], bold: true));
+        scoreText.Add(Tb(score.ToString(CultureInfo.InvariantCulture), 22, Color.White, bold: true));
+        scoreText.Add(Tb("Low risk", 8, ColorPalette.Teal[50], bold: true));
+        scoreText.Add(Tb("Observe every 4 to 6 hours", 7, ColorPalette.Teal[50]));
+        observations.Add(new Container { BackgroundColor = Trust, CornerRadius = 6, Padding = new Thickness(8), Child = scoreText });
+        doc.Add(BodyInset(observations));
+
+        // ── Medicines beside the INR chart ──
+        Table medicines = new(1.2f, 0.7f, 0.6f, 1.1f, 2)
+        {
+            CellPadding = 4,
+            Border = new Border(0, 0, 0, 0.5f),
+            BorderColors = new BorderColors(ColorPalette.Slate[200]),
+            HeaderBackgroundColor = ColorPalette.Teal[50],
+            HeaderTextColor = ColorPalette.Teal[900],
+        };
+        medicines.AddHeader(Th("Medicine"), Th("Dose"), Th("Route"), Th("When"), Th("For"));
+        foreach (var (medicine, dose, route, when, why) in Medicines)
+            medicines.AddRow(Tb(medicine, 8.5f, Ink, bold: true), Tb(dose, 8.5f, Body), Tb(route, 8.5f, Body), Tb(when, 8.5f, Body), Tb(why, 8.5f, Mute));
+
+        VerticalStack chart = new() { Spacing = 4 };
+        chart.Add(new CanvasElement(DrawInrChart)
+        {
+            DrawWidth = 0,
+            DrawHeight = 112,
+            AltText = "INR results for the last eight weeks against the target range of 2.0 to 3.0: 1.8, 2.1, 2.6, 3.4, 2.9, 2.4, 2.2 and 2.5. Two results fell outside the range, on 30 April and 21 May.",
+        });
+        chart.Add(Tb("Weekly INR. The band is the target range; red points fell outside it.", 7, Mute));
+        VerticalStack medicinesColumn = new();
+        medicinesColumn.Add(Section("Current medicines"));
+        medicinesColumn.Add(medicines);
+        VerticalStack chartColumn = new();
+        chartColumn.Add(Section("INR results"));
+        chartColumn.Add(chart);
+        HorizontalStack clinical = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 18, Margin = new Thickness(0, 0, 0, 14) };
+        clinical.Add(medicinesColumn, 1.45f);
+        clinical.Add(chartColumn, 1);
+        doc.Add(BodyInset(clinical));
+
+        // ── Problems beside the care team and next steps ──
+        Table problems = new(2.2f, 0.8f, 1)
+        {
+            CellPadding = 4,
+            Border = new Border(0, 0, 0, 0.5f),
+            BorderColors = new BorderColors(ColorPalette.Slate[200]),
+        };
+        problems.AddHeader(Th("Condition"), Th("Since"), Th("Status"));
+        foreach (var (condition, since, active) in Problems)
+        {
+            problems.AddRow(new TableRow
+            {
+                Cells =
+                [
+                    new TableCell { Content = Tb(condition, 8.5f, active ? Ink : Mute, bold: active) },
+                    new TableCell { Content = Tb(since, 8.5f, Mute) },
+                    new TableCell { Content = Pill(active ? "Active" : "Past", active) },
+                ],
+            });
         }
 
-        HorizontalStack clinical = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 16, Margin = new Thickness(0, 0, 0, 28) };
-        clinical.Add(MakeCard(Teal, "CURRENT MEDICATIONS", medications), 1.35f);
-        clinical.Add(MakeCard(Teal, "ACTIVE PROBLEMS", problems), 1);
-        doc.Add(Pad(clinical));
+        Grid plan = new(1, 1.8f)
+        {
+            Border = new Border(0, 0, 0, 0.5f),
+            BorderColors = new BorderColors(ColorPalette.Slate[200]),
+            CellPadding = 4,
+        };
+        foreach (var (role, detail) in NextSteps) plan.AddRow(Tb(role, 8.5f, Mute), Tb(detail, 8.5f, Ink));
 
+        VerticalStack problemsColumn = new();
+        problemsColumn.Add(Section("Problems"));
+        problemsColumn.Add(problems);
+        VerticalStack planColumn = new();
+        planColumn.Add(Section("Care team and next steps"));
+        planColumn.Add(plan);
+        HorizontalStack lower = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 18, Margin = new Thickness(0, 0, 0, 14) };
+        lower.Add(problemsColumn, 1);
+        lower.Add(planColumn, 1.2f);
+        doc.Add(BodyInset(lower));
+
+        // ── Recent blood tests, with results outside their range flagged ──
+        Table bloods = new(1.6f, 0.8f, 1.2f, 1.2f, 0.8f)
+        {
+            CellPadding = 4,
+            Border = new Border(0, 0, 0, 0.5f),
+            BorderColors = new BorderColors(ColorPalette.Slate[200]),
+            HeaderBackgroundColor = ColorPalette.Teal[50],
+            HeaderTextColor = ColorPalette.Teal[900],
+            Margin = new Thickness(0, 0, 0, 16),
+        };
+        bloods.AddHeader(Th("Test"), Th("Result"), Th("Units"), Th("Reference range"), Th("Flag"));
+        foreach (var (test, result, units, range, outside) in Bloods)
+        {
+            TableRow row = new()
+            {
+                Cells =
+                [
+                    new TableCell { Content = Tb(test, 8.5f, Ink) },
+                    new TableCell { Content = Tb(result, 8.5f, outside ? Alert : Ink, bold: true) },
+                    new TableCell { Content = Tb(units, 8.5f, outside ? Body : Mute) },
+                    new TableCell { Content = Tb(range, 8.5f, outside ? Body : Mute) },
+                    new TableCell { Content = Tb(outside ? "High" : "Normal", 8.5f, outside ? Alert : ColorPalette.Teal[800], bold: outside) },
+                ],
+            };
+            if (outside) row.BackgroundColor = ColorPalette.Rose[50];
+            bloods.AddRow(row);
+        }
+        VerticalStack bloodsColumn = new();
+        bloodsColumn.Add(Section("Blood tests  ·  17 June 2026"));
+        bloodsColumn.Add(bloods);
+        doc.Add(BodyInset(bloodsColumn));
+
+        doc.Add(BodyInset(new Container
+        {
+            Border = new Border(0, 0.5f, 0, 0),
+            BorderColors = new BorderColors(ColorPalette.Slate[200]),
+            Padding = new Thickness(0, 6, 0, 0),
+            Child = Tb("Confidential: this summary contains personal health information. Check identity against the wristband before acting on it.  ·  Page 1 of 1", 7, Mute),
+        }));
         return doc;
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // Local helpers used by this document.
 
-    private static TextBlock Tb(string content, float size, Color color, bool bold = false,
-        TextAlignment? align = null, float top = 0)
+    /// <summary>Text in Helvetica or Helvetica Bold.</summary>
+    private static TextBlock Tb(string text, float size, Color color, bool bold = false, TextAlignment? align = null)
     {
-        TextBlock t = new()
+        TextBlock block = new(text)
         {
-            Text = content,
             FontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
             FontSize = size,
             Color = color,
         };
-        if (align.HasValue) t.Alignment = align.Value;
-        if (top > 0) t.Margin = new Thickness(0, top, 0, 0);
-        return t;
+        if (align.HasValue) block.Alignment = align.Value;
+        return block;
     }
 
-    // A rounded, clipped card whose first child is a full-bleed coloured band.
-    private static Container MakeCard(Color bandColor, string bandTitle, IElement body)
+    /// <summary>The page body, inset from the full-bleed masthead.</summary>
+    private static Container BodyInset(IElement child) => new() { Padding = new Thickness(32, 0, 32, 0), Child = child };
+
+    /// <summary>A section heading.</summary>
+    private static Heading Section(string text) => new(text)
     {
-        Container band = new()
+        Level = 2,
+        FontName = StandardFonts.HelveticaBold,
+        FontSize = 10,
+        Color = Trust,
+        Margin = new Thickness(0, 0, 0, 6),
+    };
+
+    /// <summary>A table header cell.</summary>
+    private static TextBlock Th(string text) => Tb(text, 7.5f, ColorPalette.Teal[900], bold: true);
+
+    /// <summary>A labelled fact in the identity banner.</summary>
+    private static VerticalStack Fact(string label, string value)
+    {
+        VerticalStack stack = new() { Spacing = 2, Margin = new Thickness(0, 0, 10, 0) };
+        stack.Add(Tb(label.ToUpperInvariant(), 6.5f, Mute, bold: true));
+        stack.Add(Tb(value, 8.5f, Ink));
+        return stack;
+    }
+
+    /// <summary>A status pill: teal for an active problem, grey for a past one.</summary>
+    private static HorizontalStack Pill(string text, bool active)
+    {
+        HorizontalStack fit = new() { WidthDistribution = WidthDistribution.Auto };
+        fit.Add(new Container
         {
-            BackgroundColor = bandColor,
-            Padding = new Thickness(16, 10, 16, 10),
-            Child = Tb(bandTitle, 10, Color.White, bold: true),
-        };
+            BackgroundColor = active ? ColorPalette.Teal[50] : ColorPalette.Slate[100],
+            CornerRadius = 6,
+            Padding = new Thickness(6, 1.5f, 6, 1.5f),
+            Child = Tb(text, 7, active ? ColorPalette.Teal[800] : ColorPalette.Slate[600], bold: true),
+        });
+        return fit;
+    }
 
-        Container bodyWrap = new()
+    /// <summary>One observation: its latest value, a six-reading trend line, and its NEWS2 points.</summary>
+    private static Container Observation(string name, string value, string unit, int points, float[] trend)
+    {
+        bool flagged = points > 0;
+        VerticalStack stack = new() { Spacing = 2 };
+        stack.Add(Tb(name.ToUpperInvariant(), 6.5f, Mute, bold: true));
+        stack.Add(Tb(value, 16, Ink, bold: true));
+        stack.Add(Tb(unit, 7, Mute));
+        stack.Add(new CanvasElement((canvas, width, height) => DrawTrend(canvas, width, height, trend))
         {
-            BackgroundColor = Card,
-            Padding = new Thickness(16, 14, 16, 16),
-            Child = body,
-        };
-
-        VerticalStack stack = new();
-        stack.Add(band);
-        stack.Add(bodyWrap);
-
+            DrawWidth = 0,
+            DrawHeight = 16,
+            AltText = $"{name}, last six readings: {string.Join(", ", trend.Select(v => v.ToString(CultureInfo.InvariantCulture)))}",
+        });
+        stack.Add(Tb($"NEWS2 {points}", 7, flagged ? ColorPalette.Amber[800] : ColorPalette.Teal[800], bold: true));
         return new Container
         {
-            BackgroundColor = Card,
-            CornerRadius = 14,
-            ClipContent = true, // ← clip to the rounded outline
+            BackgroundColor = flagged ? ColorPalette.Amber[50] : ColorPalette.Slate[50],
             Border = new Border(0.75f),
-            BorderColors = new BorderColors(Hairline),
+            BorderColors = new BorderColors(flagged ? ColorPalette.Amber[300] : ColorPalette.Slate[200]),
+            CornerRadius = 6,
+            Padding = new Thickness(8),
             Child = stack,
         };
     }
 
-    // A label/value pair as one borderless 2-column row.
-    private static Grid DetailRow(string label, string value)
+    /// <summary>A trend line through six readings, with the latest marked.</summary>
+    private static void DrawTrend(ICanvas canvas, float width, float height, float[] values)
     {
-        Grid row = new(1, 1.6f) { Border = Border.None, CellPadding = 3 };
-        row.AddRow(Tb(label.ToUpperInvariant(), 7.5f, Mute), Tb(value, 10, Body, bold: true));
-        return row;
+        float low = values.Min();
+        float high = values.Max();
+        float span = high - low;
+        if (span == 0) span = 1;
+        float X(int i) => 2 + i * (width - 4) / (values.Length - 1);
+        float Y(float v) => height - 3 - (v - low) * (height - 6) / span;
+        for (int i = 1; i < values.Length; i++)
+            canvas.DrawLine(X(i - 1), Y(values[i - 1]), X(i), Y(values[i]), ColorPalette.Teal[600], 1);
+        canvas.FillCircle(X(values.Length - 1), Y(values[^1]), 2, ColorPalette.Teal[800]);
     }
 
-    private static VerticalStack Vital(string value, string unit, string label, string status, Color tone)
+    /// <summary>Weekly INR against the 2.0 to 3.0 target band, with readings outside the band in red.</summary>
+    private static void DrawInrChart(ICanvas canvas, float width, float height)
     {
-        VerticalStack v = new();
-        v.Add(Tb(value, 18, Ink, bold: true));
-        v.Add(Tb(unit, 8, Mute, top: 2));
-        v.Add(Tb(label.ToUpperInvariant(), 7.5f, Body, bold: true, top: 8));
-        v.Add(Tb(status, 7.5f, tone, bold: true, top: 3));
-        return v;
+        const float left = 18;
+        const float top = 6;
+        float plotWidth = width - left - 4;
+        float plotHeight = height - top - 16;
+        float Y(float v) => top + plotHeight - (v - 1) * plotHeight / 3;
+        float X(int i) => left + 6 + i * (plotWidth - 12) / (Inr.Length - 1);
+        Color label = ColorPalette.Slate[500];
+        canvas.FillRect(left, Y(3), plotWidth, Y(2) - Y(3), ColorPalette.Teal[50]);
+        foreach (float v in new float[] { 1, 2, 3, 4 })
+        {
+            canvas.DrawLine(left, Y(v), left + plotWidth, Y(v), ColorPalette.Slate[200], 0.5f);
+            canvas.DrawText(2, Y(v) - 3, v.ToString("0.0", CultureInfo.InvariantCulture), label, 6.5f, StandardFonts.Helvetica, TextAlignment.Left);
+        }
+        for (int i = 1; i < Inr.Length; i++)
+            canvas.DrawLine(X(i - 1), Y(Inr[i - 1].Value), X(i), Y(Inr[i].Value), ColorPalette.Slate[400], 1);
+        for (int i = 0; i < Inr.Length; i++)
+        {
+            var (date, value) = Inr[i];
+            bool outside = value < 2 || value > 3;
+            canvas.FillCircle(X(i), Y(value), 2.5f, outside ? ColorPalette.Rose[600] : ColorPalette.Teal[700]);
+            if (i % 2 == 1 || i == Inr.Length - 1)
+            {
+                float w = canvas.MeasureText(date, 6.5f, StandardFonts.Helvetica).Width;
+                canvas.DrawText(X(i) - w / 2, top + plotHeight + 5, date, label, 6.5f, StandardFonts.Helvetica, TextAlignment.Left);
+            }
+        }
     }
 
-    private static Container Alert(string name, string detail, float top)
+    /// <summary>The trust's mark: a white cross of four rounded squares.</summary>
+    private static CanvasElement TrustMark() => new((canvas, _, _) =>
     {
-        Grid row = new(1, 2.4f) { Border = Border.None, CellPadding = 3 };
-        row.AddRow(Tb(name, 10, Rose, bold: true), Tb(detail, 9.5f, Body));
-        Container c = new() { Child = row };
-        if (top > 0) c.Margin = new Thickness(0, top, 0, 0);
-        return c;
-    }
-
-    // A borderless two-column grid (equal weights) wrapping the two children.
-    private static Grid TwoUp(IElement left, IElement right)
+        Color white = ColorPalette.Teal[50];
+        canvas.FillRoundedRect(10, 0, 10, 10, 2, white);
+        canvas.FillRoundedRect(0, 10, 10, 10, 2, white);
+        canvas.FillRoundedRect(20, 10, 10, 10, 2, white);
+        canvas.FillRoundedRect(10, 20, 10, 10, 2, white);
+        canvas.FillRoundedRect(10, 10, 10, 10, 0, ColorPalette.Teal[300]);
+    })
     {
-        Grid grid = new(1, 1) { Border = Border.None, CellPadding = 0 };
-        grid.AddRow(left, right);
-        return grid;
-    }
-
-    // Tint band with 28pt side padding, so each card reads against the page tint.
-    private static Container Pad(IElement child) => new()
-    {
-        BackgroundColor = Tint,
-        Padding = new Thickness(28, 0, 28, 0),
-        Child = child,
+        DrawWidth = 30,
+        DrawHeight = 30,
+        IsDecorative = true,
     };
 }
