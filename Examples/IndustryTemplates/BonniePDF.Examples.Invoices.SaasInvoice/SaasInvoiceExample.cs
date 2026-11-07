@@ -13,13 +13,13 @@ namespace BonniePDF.Examples.Invoices.SaasInvoice;
 [System.ComponentModel.DisplayName("Accessible SaaS Invoice")]
 [System.ComponentModel.Category("Invoices")]
 [System.ComponentModel.Description(
-    "Accessible (PDF/UA-1) and archival (PDF/A-2a) subscription invoice: tagged line-items table, totals, and a QR \"pay by bank\" code with alt text.")]
+    "An accessible subscription invoice for a Pro plan: billing period and status, per-seat and storage line items, a proration line, VAT, a prominent total and a QR payment code.")]
 public static class SaasInvoiceExample
 {
     // ── Palette (Slate neutrals + indigo brand) ───────────────────────────────
     private static readonly Color Ink = ColorPalette.Slate[900];
-    private static readonly Color BodyCol = ColorPalette.Slate[600];
-    private static readonly Color Mute = ColorPalette.Slate[500];
+    private static readonly Color BodyCol = ColorPalette.Slate[700];
+    private static readonly Color Mute = ColorPalette.Slate[600];
     private static readonly Color RuleCol = ColorPalette.Slate[200];
     private static readonly Color Brand = ColorPalette.Indigo[600];
     private static readonly Color Panel = ColorPalette.Slate[50];
@@ -57,7 +57,18 @@ public static class SaasInvoiceExample
 
         doc.Add(Rule(14));
 
-        doc.Add(new Heading("Invoice") { Level = 1 });
+        // ── Title with a payment-status pill ──────────────────────────────────
+        HorizontalStack titleRow = new() { WidthDistribution = WidthDistribution.Weighted, Margin = new Thickness(0, 0, 0, 4) };
+        titleRow.Add(new Heading("Invoice") { FontName = StandardFonts.HelveticaBold, FontSize = 26, Color = Ink }, 4);
+        titleRow.Add(new Container
+        {
+            BackgroundColor = ColorPalette.Amber[100],
+            CornerRadius = 10,
+            Padding = new Thickness(8, 5, 8, 5),
+            Margin = new Thickness(0, 6, 0, 0),
+            Child = Tb("PAYMENT DUE", 8, ColorPalette.Amber[900], bold: true, align: TextAlignment.Center),
+        }, 1);
+        doc.Add(titleRow);
 
         // ── Bill-to / from ────────────────────────────────────────────────────
         VerticalStack billTo = new();
@@ -79,6 +90,21 @@ public static class SaasInvoiceExample
         addr.AddRow(billTo, from);
         doc.Add(addr);
 
+        // ── Subscription summary strip ────────────────────────────────────────
+        Grid summary = new(1f, 1.4f, 1f) { Border = Border.None, CellPadding = 0 };
+        summary.AddRow(
+            Fact("PLAN", "Pro, billed monthly"),
+            Fact("BILLING PERIOD", "18 Jun \u2013 17 Jul 2026"),
+            Fact("CUSTOMER ID", "CUS-20418"));
+        doc.Add(new Container
+        {
+            BackgroundColor = Panel,
+            CornerRadius = 6,
+            Padding = new Thickness(14, 10, 14, 10),
+            Margin = new Thickness(0, 0, 0, 16),
+            Child = summary,
+        });
+
         // ── Line items (tagged table) ─────────────────────────────────────────
         Table items = new(3f, 0.8f, 1f, 1f)
         {
@@ -88,14 +114,15 @@ public static class SaasInvoiceExample
             HeaderTextColor = Ink,
         };
         items.AddHeader(
-            Cell("Description", 9, Ink, TextAlignment.Left, bold: true),
-            Cell("Qty", 9, Ink, TextAlignment.Center, bold: true),
-            Cell("Unit", 9, Ink, TextAlignment.Right, bold: true),
-            Cell("Amount", 9, Ink, TextAlignment.Right, bold: true));
+            Cell("Description", 10, Ink, TextAlignment.Left, bold: true),
+            Cell("Qty", 10, Ink, TextAlignment.Center, bold: true),
+            Cell("Unit", 10, Ink, TextAlignment.Right, bold: true),
+            Cell("Amount", 10, Ink, TextAlignment.Right, bold: true));
 
         (string Desc, int Qty, double Unit)[] lines =
         {
             ("Pro plan - 25 seats (monthly)", 25, 18.0),
+            ("Proration - 5 seats added 4 Jun (14 of 30 days)", 5, 8.4),
             ("Additional storage - 2 TB", 2, 40.0),
             ("Premium support add-on", 1, 199.0),
             ("Egress overage - June", 1, 36.5),
@@ -107,10 +134,10 @@ public static class SaasInvoiceExample
             double amount = qty * unit;
             subtotal += amount;
             items.AddRow(
-                Cell(desc, 9, BodyCol, TextAlignment.Left),
-                Cell(qty.ToString(CultureInfo.InvariantCulture), 9, BodyCol, TextAlignment.Center),
-                Cell(Money(unit), 9, BodyCol, TextAlignment.Right),
-                Cell(Money(amount), 9, Ink, TextAlignment.Right));
+                Cell(desc, 10, BodyCol, TextAlignment.Left),
+                Cell(qty.ToString(CultureInfo.InvariantCulture), 10, BodyCol, TextAlignment.Center),
+                Cell(Money(unit), 10, BodyCol, TextAlignment.Right),
+                Cell(Money(amount), 10, Ink, TextAlignment.Right));
         }
 
         doc.Add(items);
@@ -131,14 +158,21 @@ public static class SaasInvoiceExample
         doc.Add(totals);
 
         // ── Payment panel with QR ─────────────────────────────────────────────
-        doc.Add(new Heading("How to pay") { Level = 2 });
+        doc.Add(new Heading("How to pay")
+        {
+            Level = 2,
+            FontName = StandardFonts.HelveticaBold,
+            FontSize = 13,
+            Color = Ink,
+            Margin = new Thickness(0, 14, 0, 2),
+        });
 
         VerticalStack payInfo = new();
         payInfo.Add(Tb("Pay by bank transfer or scan to pay", 10, Ink, bold: true, bottom: 6));
-        payInfo.Add(Tb("Account name  Sample Company Ltd", 9, BodyCol, bottom: 2));
-        payInfo.Add(Tb("Sort code  04-00-72    Account  19483055", 9, BodyCol, bottom: 2));
-        payInfo.Add(Tb("Reference  INV-2026-0042", 9, BodyCol, bottom: 2));
-        payInfo.Add(Tb("Amount  " + Money(total), 9, Ink, bold: true));
+        payInfo.Add(Tb("Account name  Sample Company Ltd", 10, BodyCol, bottom: 2));
+        payInfo.Add(Tb("Sort code  04-00-72    Account  19483055", 10, BodyCol, bottom: 2));
+        payInfo.Add(Tb("Reference  INV-2026-0042", 10, BodyCol, bottom: 2));
+        payInfo.Add(Tb("Amount  " + Money(total), 10, Ink, bold: true));
 
         QRCode qr = new()
         {
@@ -163,7 +197,12 @@ public static class SaasInvoiceExample
             Child = payTable,
         });
 
-        doc.Add(Tb("Thank you for your business. Payment is due within 14 days.", 8.5f, Mute));
+        doc.Add(new TextBlock("Thank you for your business. Payment is due within 14 days.")
+        {
+            FontSize = 9,
+            Color = Mute,
+            Margin = new Thickness(0, 10, 0, 0),
+        });
 
         return doc;
     }
@@ -172,7 +211,7 @@ public static class SaasInvoiceExample
 
     private static void TotalRow(Table t, string label, string value, bool bold = false)
     {
-        float size = bold ? 11 : 9;
+        float size = bold ? 15 : 10;
         Color color = bold ? Ink : BodyCol;
         t.AddRow(
             Cell(label, size, color, TextAlignment.Right, bold),
@@ -192,6 +231,15 @@ public static class SaasInvoiceExample
         if (align.HasValue) t.Alignment = align.Value;
         if (bottom > 0) t.Margin = new Thickness(0, 0, 0, bottom);
         return t;
+    }
+
+    /// <summary>A small caps label over its value, for the subscription strip.</summary>
+    private static VerticalStack Fact(string label, string value)
+    {
+        VerticalStack stack = new() { Spacing = 3 };
+        stack.Add(Tb(label, 8, Mute, bold: true));
+        stack.Add(Tb(value, 10, Ink, bold: true));
+        return stack;
     }
 
     private static TextBlock Cell(string content, float size, Color color, TextAlignment align, bool bold = false)
