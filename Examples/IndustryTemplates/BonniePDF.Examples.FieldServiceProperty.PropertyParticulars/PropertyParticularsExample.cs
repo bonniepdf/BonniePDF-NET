@@ -14,10 +14,10 @@ namespace BonniePDF.Examples.FieldServiceProperty.PropertyParticulars;
 /// at the potential. That makes it a live piece of the document: change the
 /// rating in the data and the graphic follows, no asset pipeline in between.
 ///
-/// Photography is what a real brochure leads with. It is deliberately absent
-/// here: an example carrying placeholder images reads as unfinished, and the
-/// layout leaves the plate positions and their captions for real photographs to
-/// drop into.
+/// The floor plans are drawn the same way: an SVG generated from the room data,
+/// so a changed room size redraws the plan. Photography is what a real brochure
+/// leads with; it is deliberately absent here, because an example carrying
+/// placeholder images reads as unfinished.
 ///
 /// Sample property, agency, and figures throughout. Nothing here is a valuation
 /// or property advice.
@@ -80,6 +80,26 @@ public static class PropertyParticularsExample
     /// text on a light panel, where the fill itself would be unreadable.
     /// </summary>
     private sealed record EpcBand(string Letter, int From, int To, Color Fill, Color Label, Color Ink);
+
+    /// <summary>Label, x, y, width and depth in metres, front of the house at the top. Not to scale in the legal sense.</summary>
+    private static readonly (string Label, double X, double Y, double Width, double Depth)[] GroundFloor =
+    [
+        ("Front reception", 0, 0, 4.05, 3.7),
+        ("Hall", 4.05, 0, 2.35, 4.2),
+        ("Rear reception", 0, 3.7, 4.1, 3.55),
+        ("WC", 4.1, 4.2, 2.3, 1.2),
+        ("Store", 4.1, 5.4, 2.3, 1.85),
+        ("Kitchen and dining", 0, 7.25, 6.4, 3.3),
+    ];
+
+    private static readonly (string Label, double X, double Y, double Width, double Depth)[] FirstFloor =
+    [
+        ("Principal bedroom", 0, 0, 4.05, 3.65),
+        ("Landing", 4.05, 0, 2.35, 2.4),
+        ("Bathroom", 4.05, 2.4, 2.35, 2.1),
+        ("Bedroom two", 0, 3.65, 4.05, 3.6),
+        ("Bedroom three", 4.05, 4.5, 2.35, 2.75),
+    ];
 
     private static readonly EpcBand[] EpcBands =
     [
@@ -186,6 +206,18 @@ public static class PropertyParticularsExample
         }
 
         doc.Add(table);
+
+        // ── Floor plans, drawn as SVG from the room data ──────────────────────
+        doc.Add(H2("Floor plans"));
+        doc.Add(WeightedRow(
+            [
+                PlanColumn("Ground floor", GroundFloor,
+                    "Ground floor plan: front reception and hall at the front, rear reception, WC and store behind, and the kitchen and dining room across the back."),
+                PlanColumn("First floor", FirstFloor,
+                    "First floor plan: principal bedroom and landing at the front, bathroom off the landing, and bedrooms two and three at the back."),
+            ],
+            spacing: 24f, marginBottom: 4f));
+        doc.Add(Cell("Floor plans are for illustration only and are not to scale.", size: 8.5f, color: Muted, marginBottom: 4f));
 
         // ── Energy rating ─────────────────────────────────────────────────────
 
@@ -336,6 +368,49 @@ public static class PropertyParticularsExample
     };
 
     /// <summary>Table header cell - white on the accent band.</summary>
+    /// <summary>A labelled floor plan.</summary>
+    private static VerticalStack PlanColumn(string title, (string Label, double X, double Y, double Width, double Depth)[] rooms, string altText)
+    {
+        VerticalStack column = new() { Spacing = 4 };
+        column.Add(Cell(title, size: 9.5f, bold: true, color: Heading));
+        column.Add(new Svg { SvgData = FloorPlan(rooms), Width = 200, AltText = altText });
+        return column;
+    }
+
+    /// <summary>A coordinate in the plan's SVG units, rounded to a tenth so both languages write the same digits.</summary>
+    private static string N(double value) => (Math.Round(value * 10, MidpointRounding.AwayFromZero) / 10).ToString(CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// An SVG floor plan: one outlined rectangle per room, labelled with its name and size,
+    /// inside a heavier outer wall. 24 SVG units to the metre.
+    /// </summary>
+    private static string FloorPlan((string Label, double X, double Y, double Width, double Depth)[] rooms)
+    {
+        const double scale = 24;
+        const double pad = 4;
+        double width = rooms.Max(r => r.X + r.Width);
+        double depth = rooms.Max(r => r.Y + r.Depth);
+        var parts = rooms.Select(r =>
+        {
+            double cx = pad + (r.X + r.Width / 2) * scale;
+            double cy = pad + (r.Y + r.Depth / 2) * scale;
+            string size = r.Width >= 3
+                ? $"{r.Width.ToString("0.00", CultureInfo.InvariantCulture)} × {r.Depth.ToString("0.00", CultureInfo.InvariantCulture)} m"
+                : "";
+            string labelSize = r.Width >= 3 ? "7.5" : "6.5";
+            return $"<rect x=\"{N(pad + r.X * scale)}\" y=\"{N(pad + r.Y * scale)}\" width=\"{N(r.Width * scale)}\" height=\"{N(r.Depth * scale)}\" fill=\"#ffffff\" stroke=\"#64748b\" stroke-width=\"1\"/>"
+                + $"<text x=\"{N(cx)}\" y=\"{N(size.Length > 0 ? cy - 1 : cy + 2.5)}\" font-family=\"Helvetica\" font-size=\"{labelSize}\" font-weight=\"bold\" fill=\"#1e293b\" text-anchor=\"middle\">{r.Label}</text>"
+                + (size.Length > 0 ? $"<text x=\"{N(cx)}\" y=\"{N(cy + 8)}\" font-family=\"Helvetica\" font-size=\"6.5\" fill=\"#475569\" text-anchor=\"middle\">{size}</text>" : "");
+        });
+        double outerW = width * scale;
+        double outerD = depth * scale;
+        return $"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {N(outerW + 2 * pad)} {N(outerD + 2 * pad)}\">"
+            + $"<rect x=\"{N(pad)}\" y=\"{N(pad)}\" width=\"{N(outerW)}\" height=\"{N(outerD)}\" fill=\"#f8fafc\"/>"
+            + string.Concat(parts)
+            + $"<rect x=\"{N(pad)}\" y=\"{N(pad)}\" width=\"{N(outerW)}\" height=\"{N(outerD)}\" fill=\"none\" stroke=\"#1e293b\" stroke-width=\"3\"/>"
+            + "</svg>";
+    }
+
     private static TextBlock Th(string text, TextAlignment align = TextAlignment.Left) => Cell(text, size: 8.5f, bold: true, color: Color.White, align: align);
 
     /// <summary>Table body cell.</summary>
