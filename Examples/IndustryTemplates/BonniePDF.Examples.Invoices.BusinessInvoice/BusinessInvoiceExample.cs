@@ -30,6 +30,7 @@ public static class BusinessInvoiceExample
     private static readonly Color TextLight = Color.FromHex("#707070");
 
     private const string LogoAsset = "images/svg/sample-company.svg";
+    private const float AddressLineHeight = 1.3f;
 
     private const string FallbackLogoSvg = """
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
@@ -185,6 +186,7 @@ public static class BusinessInvoiceExample
         billToStack.Add(new TextBlock
         {
             Text = "Bill to",
+            LineHeight = AddressLineHeight,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9,
             Color = TextDark,
@@ -193,26 +195,34 @@ public static class BusinessInvoiceExample
         // One TextBlock with hard line breaks: the address tags as a single
         // paragraph under PDF/UA instead of four.
         billToStack.Add(new TextBlock
-            { Text = "Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701" });
+        {
+            Text = "Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701",
+            LineHeight = AddressLineHeight
+        });
 
         // Ship To column
         VerticalStack shipToStack = new();
         shipToStack.Add(new TextBlock
         {
             Text = "Ship to",
+            LineHeight = AddressLineHeight,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9,
             Color = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
         shipToStack.Add(new TextBlock
-            { Text = "Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701" });
+        {
+            Text = "Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701",
+            LineHeight = AddressLineHeight
+        });
 
         // Details column
         VerticalStack detailsStack = new();
         detailsStack.Add(new TextBlock
         {
             Text = "Details",
+            LineHeight = AddressLineHeight,
             FontName = StandardFonts.HelveticaBold,
             FontSize = 9,
             Color = TextDark,
@@ -500,12 +510,12 @@ public static class BusinessInvoiceExample
             new TextBlock
             {
                 Text = label, FontName = StandardFonts.HelveticaBold, FontSize = 9,
-                Color = TextDark
+                Color = TextDark, LineHeight = AddressLineHeight
             }.AlignLeft(),
             new TextBlock
             {
                 Text = value, FontName = StandardFonts.Helvetica, FontSize = 9,
-                Color = TextMedium
+                Color = TextMedium, LineHeight = AddressLineHeight
             }.AlignLeft()
         );
         stack.Add(row);
