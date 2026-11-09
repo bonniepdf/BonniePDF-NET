@@ -22,7 +22,6 @@ public static class BusinessInvoiceExample
     private static readonly Color AccentGreenText = Color.FromHex("#097636");
     private static readonly Color AccentGreenLight = Color.FromHex("#E8F5EC");
     private static readonly Color HeaderGray = Color.FromHex("#F5F5F5");
-    private static readonly Color BorderGray = Color.FromHex("#D9D9D9");
     private static readonly Color TextDark = Color.FromHex("#333333");
 
     private static readonly Color TextMedium = Color.FromHex("#555555");
@@ -172,13 +171,12 @@ public static class BusinessInvoiceExample
         doc.Add(headerTable);
 
         // ============================================
-        // BILL TO / SHIP TO / DETAILS - 3-column bordered section
+        // BILL TO / SHIP TO / DETAILS - 3-column section
         // ============================================
         Grid addressTable = new(1f, 1f, 1.1f)
         {
             CellPadding = 10,
-            Border = new Border(BorderStyle.Thin),
-            BorderColors = new BorderColors(BorderGray),
+            Border = Border.None,
             Margin = new Thickness(0, 0, 0, 16)
         };
 
