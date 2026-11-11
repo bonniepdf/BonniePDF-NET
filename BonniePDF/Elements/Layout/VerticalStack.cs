@@ -166,7 +166,7 @@ public class VerticalStack : ElementBase, IStatefulElement
 
                     // Save position before render
                     float yBefore = ctx.CurrentY;
-                    child.Render(ctx, contentWidth);
+                    OversizedContentPlacement.Draw(ctx, child, child.MeasureHeight(contentWidth), () => child.Render(ctx, contentWidth));
 
                     // Only advance Y if the child didn't already do it
                     if (ctx.CurrentY == yBefore)

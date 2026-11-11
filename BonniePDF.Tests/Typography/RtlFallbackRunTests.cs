@@ -8,7 +8,7 @@ namespace BonniePDF.Tests.Typography;
 
 /// <summary>Spec 22, fallback-font boundaries: a right-to-left line in two fonts is painted in visual order.</summary>
 [Collection("Serial")]
-public sealed class RtlFallbackRunTests
+public sealed partial class RtlFallbackRunTests
 {
     private static string FixturePath(string name) => Path.Combine(AppContext.BaseDirectory, "Typography", "Fixtures", name);
 
@@ -50,9 +50,9 @@ public sealed class RtlFallbackRunTests
         var (text, visual) = Case(index);
         using PdfDocument doc = Build(text);
         var pieces = new List<string[]>();
-        foreach (Match m in Regex.Matches(doc.GenerateSvgPages()[0], "<text x=\"([^\"]+)\"[^>]*font-family:'([^']+)'[^>]*>([^<]*)</text>"))
+        foreach (Match m in SvgTextRun().Matches(doc.GenerateSvgPages()[0]))
         {
-            string role = m.Groups[2].Value.Contains("hebrew") ? "primary" : "fallback";
+            string role = m.Groups[2].Value.Contains("hebrew", StringComparison.Ordinal) ? "primary" : "fallback";
             string painted = System.Net.WebUtility.HtmlDecode(m.Groups[3].Value);
             if (pieces.Count > 0 && pieces[^1][0] == role) pieces[^1][1] += painted;
             else pieces.Add([role, painted]);
@@ -70,11 +70,17 @@ public sealed class RtlFallbackRunTests
         {
             using PdfDocument doc = Build(text);
             string pdf = Encoding.Latin1.GetString(doc.GenerateBytes());
-            string[] actual = Regex.Matches(pdf, "/ActualText <FEFF([0-9A-F]+)>")
+            string[] actual = ActualText().Matches(pdf)
                 .Select(m => Encoding.BigEndianUnicode.GetString(Convert.FromHexString(m.Groups[1].Value)))
                 .ToArray();
             Assert.Equal(new[] { text }, actual);
         }
         finally { InternalConfiguration.EnableCompression = true; }
     }
+
+    [GeneratedRegex("<text x=\"([^\"]+)\"[^>]*font-family:'([^']+)'[^>]*>([^<]*)</text>")]
+    private static partial Regex SvgTextRun();
+
+    [GeneratedRegex("/ActualText <FEFF([0-9A-F]+)>")]
+    private static partial Regex ActualText();
 }

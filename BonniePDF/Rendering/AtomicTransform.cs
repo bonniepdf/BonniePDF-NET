@@ -9,16 +9,15 @@ internal static class AtomicTransform
     internal static void Render(IElement element, RenderContext ctx, float width, Action draw)
     {
         float x = ctx.CurrentX, y = ctx.CurrentY;
-        if (element.MeasureHeight(width) > ctx.ContentHeight + 0.001f) throw new InvalidOperationException("Transformed element is taller than the page content band.");
-        try { draw(); }
+        try { OversizedContentPlacement.Draw(ctx, element, element.MeasureHeight(width), draw); }
         catch { ctx.CurrentX = x; ctx.CurrentY = y; ctx.LayoutRecorder?.AbortNode(element); throw; }
     }
     internal static RenderStatus RenderStateful(IElement element, RenderContext ctx, float width, Action draw)
     {
         float height = element.MeasureHeight(width);
-        if (height > ctx.ContentHeight + 0.001f) throw new InvalidOperationException("Transformed element is taller than the page content band.");
-        if (height > ctx.MaxY - ctx.CurrentY + 0.001f) return RenderStatus.WrapRequired;
-        draw(); return RenderStatus.Complete;
+        // Taller than a whole page: drawn at the top of one, clipped and reported (spec 02 §4.3).
+        if (height > ctx.MaxY - ctx.CurrentY + 0.001f && ctx.CurrentY > ctx.ContentTop + 0.001f) return RenderStatus.WrapRequired;
+        OversizedContentPlacement.Draw(ctx, element, height, draw); return RenderStatus.Complete;
     }
     internal static void RenderChild(IElement? child, RenderContext ctx, float width, float height, float flowHeight, PaintTransform transform)
     {

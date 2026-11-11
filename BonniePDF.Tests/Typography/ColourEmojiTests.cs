@@ -103,7 +103,7 @@ public sealed class ColourEmojiTests
             doc.Add(new TextBlock(string.Join(" ", sources)) { FontName = path, FontSize = 24 });
             using var stream = new MemoryStream(); doc.Save(stream, true);
             string svg = doc.GenerateSvgPages()[0];
-            Assert.Contains("aria-label=", svg, StringComparison.Ordinal);
+            Assert.Contains("<g role=\"img\" aria-label=", svg, StringComparison.Ordinal);
             Assert.Contains(name.StartsWith("Twemoji", StringComparison.Ordinal) ? "<path" : "data:image/png;base64,", svg, StringComparison.Ordinal);
             if (Environment.GetEnvironmentVariable("EMOJI_OUTPUT") is string output)
             {

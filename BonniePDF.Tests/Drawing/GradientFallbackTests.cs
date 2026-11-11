@@ -100,11 +100,6 @@ public partial class GradientFallbackTests
         Assert.Equal(101, Count(content, "f\n"));
         Assert.Equal(101, GreyLevels(content).Count);
         Assert.DoesNotContain("/Sh", content, StringComparison.Ordinal);
-
-        // Note: how the *clip* path spells a rectangle is deliberately not asserted
-        // here. The two implementations differ on that (this one emits `re` for an
-        // axis-aligned rect, TypeScript always decomposes to m/l/l/l/h), which is a
-        // separate parity question with a far wider blast radius than this path.
     }
 
     [Fact]
@@ -168,11 +163,9 @@ public partial class GradientFallbackTests
         // multiplies, it does not add, and the gaps read as a moire lattice on any
         // ramp that is not axis-aligned. Every band therefore reaches the near end.
         string content = FillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), Stops));
-        // One moveTo for the far flood and one per band, all at the same near end.
-        // (The clip path contributes
-        // none here: this implementation spells an axis-aligned rectangle `re`, per
-        // the note in ApproximatesALinearGradientWithAStackOf100Bands.)
-        List<double> starts = Values(SegmentStartX(), content, "x");
+        // One moveTo for the clip path, then one for the far flood and one per band,
+        // all at the same near end.
+        List<double> starts = Values(SegmentStartX(), content, "x").Skip(1).ToList();
         Assert.Equal(101, starts.Count);
         Assert.Single(starts.Distinct());
     }

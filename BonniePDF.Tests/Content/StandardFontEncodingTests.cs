@@ -8,7 +8,7 @@ namespace BonniePDF.Tests.Content;
 /// not an encoder fallback.
 /// </summary>
 [Collection("Serial")]
-public sealed class StandardFontEncodingTests
+public sealed partial class StandardFontEncodingTests
 {
     private static string ContentOf(string text)
     {
@@ -53,7 +53,7 @@ public sealed class StandardFontEncodingTests
             if (fontName != null) block.FontName = fontName;
             doc.Add(block);
             string raw = Encoding.Latin1.GetString(doc.GenerateBytes());
-            return System.Text.RegularExpressions.Regex.Matches(raw, @"<<[^<>]*/Type /Font[^<>]*>>")
+            return FontDictionary().Matches(raw)
                 .Select(m => m.Value).ToArray();
         }
         finally { InternalConfiguration.EnableCompression = true; }
@@ -101,4 +101,7 @@ public sealed class StandardFontEncodingTests
     [Fact]
     public void Courier_IsMeasuredPerCharacter() =>
         Assert.Equal(1800f, Width("a\u00e9\u20ac", "Courier"));
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"<<[^<>]*/Type /Font[^<>]*>>")]
+    private static partial System.Text.RegularExpressions.Regex FontDictionary();
 }

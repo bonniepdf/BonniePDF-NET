@@ -503,6 +503,7 @@ internal class PdfDocumentSerializer
             DiscardFinishedPages = true,
         };
         dryRunCtx.Resources.MissingGlyphs = _document.Settings.MissingGlyphs;
+        dryRunCtx.Resources.OversizedContent = _document.Settings.OversizedContent;
 
         foreach (var _ in PdfRenderPipeline.RenderPagesStreaming(_document.Pages, _document.Settings, dryRunCtx)) { }
 
@@ -532,6 +533,7 @@ internal class PdfDocumentSerializer
         ctx.Resources.Diagnostics = _diagnostics;
         ctx.Resources.MaxImageDpi = _document.Settings.MaxImageDpi;
         ctx.Resources.MissingGlyphs = _document.Settings.MissingGlyphs;
+        ctx.Resources.OversizedContent = _document.Settings.OversizedContent;
         // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
         // independently of any PDF/A claim - substitute embedded Liberation for
         // the standard-14 references in tagged output too.

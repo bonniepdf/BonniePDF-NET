@@ -13,8 +13,8 @@ namespace BonniePDF.Tests.Drawing;
 /// core/tests/drawing/pdf-canvas-parity.test.ts, expected strings included.
 /// </summary>
 /// <remarks>
-/// Shapes are built from segments, not <c>AddRect</c>: how each implementation spells
-/// a rectangle (<c>re</c>, or four segments) is a separate open question.
+/// <c>AddRect</c> writes the same four segments as building the rectangle by hand, in
+/// the order given, so a reversed rectangle keeps its winding.
 /// </remarks>
 public class PdfCanvasParityTests
 {
@@ -46,6 +46,19 @@ public class PdfCanvasParityTests
         canvas.BeginPath();
         canvas.MoveTo(0, 0);
         canvas.LineTo(10, 10);
+    }
+
+    [Fact]
+    public void WritesAddRectAsTheFourSegmentsInTheOrderGiven() =>
+        Assert.Equal($"q\n1 0 0 rg\n{Rect}f\nQ\n", Draw(c => { c.BeginPath(); c.AddRect(10, 20, 30, 40); c.FillCurrentPath(new SolidPaint(new Color(255, 0, 0))); }));
+
+    [Fact]
+    public void KeepsTheWindingOfARectangleWithANegativeWidthUnderATransformToo()
+    {
+        Assert.Equal("q\n1 0 0 rg\n40 980 m\n10 980 l\n10 940 l\n40 940 l\nh\nf\nQ\n",
+            Draw(c => { c.BeginPath(); c.AddRect(40, 20, -30, 40); c.FillCurrentPath(new SolidPaint(new Color(255, 0, 0))); }));
+        Assert.Equal("q\n1 0 0 rg\n45 975 m\n15 975 l\n15 935 l\n45 935 l\nh\nf\nQ\n",
+            Draw(c => { c.Translate(5, 5); c.BeginPath(); c.AddRect(40, 20, -30, 40); c.FillCurrentPath(new SolidPaint(new Color(255, 0, 0))); }));
     }
 
     [Fact]

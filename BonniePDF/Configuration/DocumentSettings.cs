@@ -49,6 +49,24 @@ public class DocumentSettings
         }
     }
 
+    private OversizedContent _oversizedContent;
+    /// <summary>
+    /// What happens to content that cannot split across pages and is taller than a page:
+    /// <see cref="OversizedContent.Clip"/> (the default) draws it at the top of a page, cut off at the bottom of the
+    /// body, and records an error diagnostic; <see cref="OversizedContent.Throw"/> stops generation with an
+    /// <see cref="OversizedContentException"/>. Text, tables, lists and stacks split instead, so they are never
+    /// oversized.
+    /// </summary>
+    public OversizedContent OversizedContent
+    {
+        get => _oversizedContent;
+        set
+        {
+            if (!System.Enum.IsDefined(value)) throw new System.ArgumentOutOfRangeException(nameof(value));
+            _oversizedContent = value;
+        }
+    }
+
     /// <summary>
     /// Creates a new instance of DocumentSettings with default values
     /// </summary>

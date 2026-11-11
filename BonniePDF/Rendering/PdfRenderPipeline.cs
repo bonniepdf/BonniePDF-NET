@@ -237,12 +237,14 @@ internal static class PdfRenderPipeline
         }
         else
         {
-            // Non-stateful element - render normally, wrapped in SaveState/RestoreState.
-            // try/finally ensures RestoreState is always called even if Render throws.
+            // An element that cannot split is drawn whole: on this page when it fits, otherwise at the top of the
+            // next. Content taller than a whole page is drawn there too, clipped and reported (spec 02 §4.3).
+            float height = element.MeasureHeight(contentWidth);
+            if (ctx.CurrentY + height > ctx.MaxY && ctx.CurrentY > ctx.ContentTop) ctx.NewPage();
             ctx.Canvas.SaveState();
             try
             {
-                element.Render(ctx, contentWidth);
+                OversizedContentPlacement.Draw(ctx, element, height, () => element.Render(ctx, contentWidth));
             }
             finally
             {

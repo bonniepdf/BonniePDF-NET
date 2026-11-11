@@ -21,7 +21,11 @@ public class TransformTests
         Assert.Equal(RenderStatus.WrapRequired, ((IStatefulElement)element).RenderStateful(ctx,200));
         Assert.Equal(before, ctx.CurrentStream.ToString());
         child.Height = 400;
-        Assert.Throws<InvalidOperationException>(() => ((IStatefulElement)element).RenderStateful(ctx,200));
+        // Taller than any page: it waits for a fresh one, then is drawn there, clipped, and reported.
+        Assert.Equal(RenderStatus.WrapRequired, ((IStatefulElement)element).RenderStateful(ctx, 200));
+        ctx.CurrentY = ctx.ContentTop;
+        Assert.Equal(RenderStatus.Complete, ((IStatefulElement)element).RenderStateful(ctx, 200));
+        Assert.Contains(ctx.Resources.Diagnostics.All, d => d.Severity == DiagnosticSeverity.Error && d.Source == "pagination");
     }
     [Theory]
     [InlineData(false)]

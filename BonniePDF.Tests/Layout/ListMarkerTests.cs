@@ -9,7 +9,7 @@ namespace BonniePDF.Tests.Layout;
 /// (fixtures/layout/list-markers.json).
 /// </summary>
 [Collection("Serial")]
-public sealed class ListMarkerTests
+public sealed partial class ListMarkerTests
 {
     private const string Long =
         "This is a long list item that will certainly wrap onto a second line because it keeps going and going well past the right margin of the page.";
@@ -39,9 +39,24 @@ public sealed class ListMarkerTests
     [InlineData(true)]
     public void WrappedItem_DrawsItsNumberOnce(bool tagged)
     {
-        string content = PageContent(tagged);
-        Assert.Contains("(and going well past the right margin of the page.) Tj", content, System.StringComparison.Ordinal);
-        Assert.Single(Regex.Matches(content, @"\(1\.\) Tj"));
-        Assert.Single(Regex.Matches(content, @"\(2\.\) Tj"));
+        string[] expected =
+        [
+            "1.",
+            "This is a long list item that will certainly wrap onto a second line because it keeps going",
+            "and going well past the right margin of the page.",
+            "2.",
+            "Short item",
+        ];
+        Assert.Equal(expected, DrawnRuns(PageContent(tagged), tagged));
     }
+
+    /// <summary>The text of each run drawn on the page: literal strings untagged, their ActualText when tagged (embedded font).</summary>
+    private static string[] DrawnRuns(string content, bool tagged) =>
+        (tagged ? ActualTextRun() : LiteralRun()).Matches(content).Select(m => m.Groups[1].Value).ToArray();
+
+    [GeneratedRegex(@"/ActualText \((.*?)\) >>")]
+    private static partial Regex ActualTextRun();
+
+    [GeneratedRegex(@"\((.*?)\) Tj")]
+    private static partial Regex LiteralRun();
 }

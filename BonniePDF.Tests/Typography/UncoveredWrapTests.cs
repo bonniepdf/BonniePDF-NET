@@ -8,7 +8,7 @@ namespace BonniePDF.Tests.Typography;
 /// (Noto Sans Hebrew has no full stop or digits) lays out instead of failing in the line breaker.
 /// </summary>
 [Collection("Serial")]
-public sealed class UncoveredWrapTests
+public sealed partial class UncoveredWrapTests
 {
     private const string Paragraph =
         "תודה על הזמנתכם. ההזמנה אושרה ותגיע לכתובתכם בתוך 5 ימי עסקים. נא לעיין בפרטי ההזמנה שלהלן ולשמור מכתב זה.";
@@ -24,6 +24,9 @@ public sealed class UncoveredWrapTests
         string svg = doc.GenerateSvgPages()[0];
         Assert.NotEmpty(doc.GenerateBytes());
         // More than one line, so the line breaker ran.
-        Assert.True(Regex.Matches(svg, "<text\\b").Count > 1);
+        Assert.True(SvgTextElement().Count(svg) > 1);
     }
+
+    [GeneratedRegex("<text\\b")]
+    private static partial Regex SvgTextElement();
 }

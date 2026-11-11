@@ -45,7 +45,7 @@ internal static class PdfObjectBuilders
         }
         else
         {
-            dict[PdfKeys.Annotation.Action] = $"<< /S /URI /URI ({PdfSyntax.Escape(hyperlink.Uri ?? "")}) >>";
+            dict[PdfKeys.Annotation.Action] = $"<< /S /URI /URI ({PdfSyntax.Escape(PdfSyntax.EncodeUri(hyperlink.Uri ?? ""))}) >>";
         }
 
         return dict;

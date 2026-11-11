@@ -66,6 +66,34 @@ internal static class PdfSyntax
     }
 
     /// <summary>
+    /// Makes a URI safe to write as a URI action's target, which is a 7-bit ASCII string (ISO 32000-1, 12.6.4.7).
+    /// Characters outside printable ASCII, and spaces, are percent-encoded as UTF-8; everything else, including
+    /// existing percent escapes, is left as written.
+    /// </summary>
+    internal static string EncodeUri(string uri)
+    {
+        bool ascii = true;
+        foreach (char c in uri)
+        {
+            if (c <= 0x20 || c >= 0x7F)
+            {
+                ascii = false;
+                break;
+            }
+        }
+        if (ascii) return uri;
+
+        const string digits = "0123456789ABCDEF";
+        var result = new StringBuilder(uri.Length * 3);
+        foreach (byte b in Encoding.UTF8.GetBytes(uri))
+        {
+            if (b > 0x20 && b < 0x7F) result.Append((char)b);
+            else result.Append('%').Append(digits[b >> 4]).Append(digits[b & 15]);
+        }
+        return result.ToString();
+    }
+
+    /// <summary>
     /// Escapes a string for use within PDF string literals (parentheses).
     /// Handles backslashes, parentheses, and control characters.
     /// </summary>

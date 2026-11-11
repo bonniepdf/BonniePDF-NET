@@ -292,7 +292,7 @@ internal partial class SvgCanvas : ICanvas
                     cursor += glyphs.AdvanceX(g) * scale + letterSpacing;
                     if (source == " ") cursor += extraPerSpace;
                 }
-                elements.Append($"<g aria-label=\"{XmlEscape.EscapeXml(run.Text)}\"{extraAttributes}{transformAttr}>").Append(graphics.GetInnerSvg()).Append("</g>");
+                elements.Append($"<g role=\"img\" aria-label=\"{XmlEscape.EscapeXml(run.Text)}\"{extraAttributes}{transformAttr}>").Append(graphics.GetInnerSvg()).Append("</g>");
                 continue;
             }
             if (runFont.HasColour && !runFont.HasOutlines) throw new NotSupportedException("The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.");
@@ -301,7 +301,7 @@ internal partial class SvgCanvas : ICanvas
                 simple=glyphs.SourceLength(g)==(char.IsSurrogatePair(run.Text,glyphs.Cluster(g))?2:1) && glyphs.Id(g)==runFont.GetGlyphId(char.ConvertToUtf32(run.Text,glyphs.Cluster(g))) && glyphs.OffsetY(g)==0 && !glyphs.IsMark(g);
             if(runFont.HasCff || !simple)
             {
-                elements.Append($"<g fill=\"{fillHex}\" aria-label=\"{XmlEscape.EscapeXml(run.Text)}\"{extraAttributes}{transformAttr}>");
+                elements.Append($"<g fill=\"{fillHex}\" role=\"img\" aria-label=\"{XmlEscape.EscapeXml(run.Text)}\"{extraAttributes}{transformAttr}>");
                 for(int g=0;g<glyphs.Count;g++)
                 {
                     string d=runFont.GlyphOutline(glyphs.Id(g));

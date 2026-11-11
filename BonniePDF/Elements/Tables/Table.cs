@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace BonniePDF;
 
@@ -392,7 +393,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
                     }
                 }
 
-                RenderRowDirect(ctx, headerRow, widths);
+                TableRow header = headerRow;
+                OversizedContentPlacement.Draw(ctx, header, headerHeight, () => RenderRowDirect(ctx, header, widths));
             }
 
             if (theadOpen && groupTagging != null) groupTagging!.Tree.End();
@@ -412,8 +414,32 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         // Render data rows
         bool tbodyOpen = false;
         bool running = RunningTotalColumn.HasValue;
+        // The first row drawn here starts a page of the table when nothing of the table is above it on the page.
+        bool tableAtPageTop = ctx.CurrentY <= ctx.ContentTop + (startRow == 0 ? Margin.Top : 0) + 0.01f;
         for (int i = startRow; i < _rows.Count; i++)
         {
+            // A row taller than a page continues from where its previous fragment stopped (spec 02 §4.2).
+            if (_split is { } active && active.Index == i)
+            {
+                if (groupTagging != null && !tbodyOpen && active.TBody is { } tbody)
+                {
+                    groupTagging.Tree.Resume(tbody);
+                    tbodyOpen = true;
+                }
+                TableRow splitRow = active.Row;
+                RenderStatus status = RenderSplitFragment(ctx, widths, i);
+                if (status == RenderStatus.Complete)
+                {
+                    if (running) _runningValues.Add(splitRow.RunningValue ?? 0m);
+                    _lastRowRendered = i;
+                    continue;
+                }
+                if (tbodyOpen && groupTagging != null) groupTagging.Tree.End();
+                _lastRowRendered = i - 1;
+                _headersPending = RepeatHeadersOnNewPage && _headers.Count > 0;
+                return status == RenderStatus.WrapRequired && i == startRow ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+            }
+
             TableRow row = _rows.ForLayout(i, reuse: ctx.LayoutRecorder is null);
             float rowHeight = MeasureRowHeight(row, widths);
             // A running total opens a continuation page with a brought-forward row, and needs room after
@@ -421,6 +447,29 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
             TableRow? broughtForward = running && _carryPending ? RunningRow(BroughtForwardLabel) : null;
             float broughtForwardHeight = broughtForward is null ? 0 : MeasureRowHeight(broughtForward, widths);
             float carryHeight = running && i < _rows.Count - 1 ? MeasureRowHeight(RunningRow(CarriedForwardLabel), widths) : 0;
+
+            // A row taller than the space an empty page leaves for it splits instead of moving (spec 02 §4.2). It
+            // moves first when content in it that cannot split would be cut here but fits on the next page.
+            bool fitsHere = ctx.CurrentY + broughtForwardHeight + rowHeight + carryHeight <= ctx.MaxY;
+            if (!fitsHere && rowHeight > FreshPageSpace(ctx, widths, running) + 0.001f)
+            {
+                bool firstOnPage = i == startRow && tableAtPageTop;
+                if (firstOnPage || !UnsplittableCellOverruns(ctx, row, widths, broughtForwardHeight))
+                {
+                    if (broughtForward is not null)
+                    {
+                        RenderRowDirect(ctx, broughtForward, widths, asArtifact: true);
+                        _carryPending = false;
+                    }
+                    if (!tbodyOpen && groupTagging != null) { groupTagging.Tree.Begin(SemanticRole.TBody); tbodyOpen = true; }
+                    TableRow stable = _rows[i];
+                    _split = new SplitRowState(i, stable,
+                        stable.Cells.Select(cell => EffectiveCellContent(cell, stable)).ToArray(),
+                        groupTagging?.Tree.Current);
+                    i--; // draw its first fragment through the continuation branch above
+                    continue;
+                }
+            }
 
             // Pagination check
             if (ctx.CurrentY + broughtForwardHeight + rowHeight + carryHeight > ctx.MaxY && ctx.CurrentY > ctx.ContentTop)
@@ -470,6 +519,10 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
     /// </summary>
     public void ResetState()
     {
+        if (_split is { } split)
+            foreach (IElement content in split.Contents)
+                if (content is IStatefulElement stateful) stateful.ResetState();
+        _split = null;
         _lastRowRendered = -1;
         _headersPending = true;
         _runningValues.Clear();
@@ -937,24 +990,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
                            ?? RowTextColor;
 
         Thickness padding = cell.Padding ?? row.Padding ?? new Thickness(CellPadding);
-
-        // Apply text color to TextBlock content if specified
-        IElement content = cell.Content;
-        if (color.HasValue && content is TextBlock tb)
-        {
-            // Create a copy with the text color applied
-            tb = new TextBlock
-            {
-                Text = tb.Text,
-                FontName = tb.FontName,
-                FontSize = tb.FontSize,
-                Color = color.Value
-            };
-            var source = (TextBlock)cell.Content;
-            if (source.AlignmentIsExplicit) tb.Alignment = source.Alignment;
-            ContentDirectionResolver.Apply(tb, source.EffectiveContentDirection);
-            content = tb;
-        }
+        IElement content = EffectiveCellContent(cell, color);
 
         // Render content with padding - IMPORTANT: Save Y before and restore after
         // to prevent cells from advancing Y (they should all be on the same row)
@@ -991,6 +1027,287 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
 
     }
 
+    /// <summary>A cell's content as drawn: a TextBlock takes the colour the cascade gives it, on a copy.</summary>
+    private IElement EffectiveCellContent(TableCell cell, TableRow row) => EffectiveCellContent(cell, EffectiveTextColor(cell, row));
+
+    private static IElement EffectiveCellContent(TableCell cell, Color? color)
+    {
+        if (!color.HasValue || cell.Content is not TextBlock source) return cell.Content;
+        var tb = new TextBlock
+        {
+            Text = source.Text,
+            FontName = source.FontName,
+            FontSize = source.FontSize,
+            Color = color.Value
+        };
+        if (source.AlignmentIsExplicit) tb.Alignment = source.Alignment;
+        ContentDirectionResolver.Apply(tb, source.EffectiveContentDirection);
+        return tb;
+    }
+
+    /// <summary>A cell's effective text colour: cell, then row, then the table's header, footer or row default.</summary>
+    private Color? EffectiveTextColor(TableCell cell, TableRow row) =>
+        cell.Color
+        ?? row.Color
+        ?? (row.IsHeader ? HeaderTextColor : null)
+        ?? (row.IsFooter ? FooterTextColor : null)
+        ?? RowTextColor;
+
+    /// <summary>Height left on an empty page for a body row, after the repeated headers and any running-total rows.</summary>
+    private float FreshPageSpace(RenderContext ctx, float[] widths, bool running)
+    {
+        float reserved = 0;
+        if (RepeatHeadersOnNewPage) foreach (TableRow header in _headers) reserved += MeasureRowHeight(header, widths);
+        if (running)
+        {
+            reserved += MeasureRowHeight(RunningRow(BroughtForwardLabel), widths);
+            reserved += MeasureRowHeight(RunningRow(CarriedForwardLabel), widths);
+        }
+        return ctx.ContentHeight - reserved;
+    }
+
+    /// <summary>Whether a cell's content that cannot split would run past the bottom of this page.</summary>
+    private bool UnsplittableCellOverruns(RenderContext ctx, TableRow row, float[] widths, float above)
+    {
+        (float[] _, float[] cellWidths) = CellColumns(row, widths, 0);
+        for (int i = 0; i < row.Cells.Length; i++)
+        {
+            TableCell cell = row.Cells[i];
+            if (SplitsAcrossPages(cell.Content)) continue;
+            Thickness padding = cell.Padding ?? row.Padding ?? new Thickness(CellPadding);
+            float height = cell.Content.MeasureHeight(cellWidths[i] - padding.Left - padding.Right) + padding.Top;
+            if (ctx.CurrentY + above + height > ctx.MaxY) return true;
+        }
+        return false;
+    }
+
+    /// <summary>Whether content can continue on a later page, rather than being drawn whole (spec 02 §4).</summary>
+    private static bool SplitsAcrossPages(IElement content) => content switch
+    {
+        not IStatefulElement => false,
+        Container container => container.SplitsAcrossPages,
+        HorizontalStack row => row.SplitsAcrossPages,
+        Rotate or Flip or Translate => false,
+        _ => true,
+    };
+
+    /// <summary>Each cell's left edge and width. A cell spanning columns takes their combined width.</summary>
+    private (float[] X, float[] Width) CellColumns(TableRow row, float[] widths, float startX)
+    {
+        var x = new float[row.Cells.Length];
+        var width = new float[row.Cells.Length];
+        float currentX = startX + (IsRightToLeft ? widths.Sum() : 0);
+        for (int i = 0, col = 0; i < row.Cells.Length; i++)
+        {
+            int span = Math.Max(1, row.Cells[i].ColumnSpan);
+            float colWidth = 0;
+            for (int j = 0; j < span && col + j < widths.Length; j++) colWidth += widths[col + j];
+            if (IsRightToLeft) currentX -= colWidth;
+            x[i] = currentX;
+            width[i] = colWidth;
+            if (!IsRightToLeft) currentX += colWidth;
+            col += span;
+        }
+        return (x, width);
+    }
+
+    /// <summary>The state of a body row drawn in fragments across pages (spec 02 §4.2).</summary>
+    private sealed class SplitRowState(int index, TableRow row, IElement[] contents, StructureElement? tbody)
+    {
+        public int Index { get; } = index;
+        public TableRow Row { get; } = row;
+        public IElement[] Contents { get; } = contents;
+        public bool[] Done { get; } = new bool[contents.Length];
+        public StructureElement? TBody { get; } = tbody;
+        public StructureElement? TR { get; set; }
+        public (StructureElement Element, string Tag, bool Container)?[] Cells { get; } = new (StructureElement, string, bool)?[contents.Length];
+        public int Fragments { get; set; }
+    }
+
+    /// <summary>A body row taller than a page, while it is drawn in fragments.</summary>
+    private SplitRowState? _split;
+
+    /// <summary>
+    /// Draws the next page's fragment of a split row: every unfinished cell from the same top, content that can split
+    /// continuing where it stopped and content that cannot drawn once, in the first fragment. Fills cover the fragment
+    /// and are painted behind the content; the top edges are drawn on the first fragment and the bottom edges on the last.
+    /// </summary>
+    private RenderStatus RenderSplitFragment(RenderContext ctx, float[] widths, int dataIndex)
+    {
+        SplitRowState split = _split!;
+        TableRow row = split.Row;
+        bool first = split.Fragments == 0;
+        float startX = ctx.CurrentX;
+        float top = ctx.CurrentY;
+        (float[] cellX, float[] cellWidth) = CellColumns(row, widths, startX);
+        float rowWidth = widths.Sum();
+        if (first) PlanRowEdges(ctx, row);
+
+        TaggingContext? tagging = ctx.Tagging;
+        bool dataTagging = tagging != null && !IsLayoutGrid;
+        bool presTagging = tagging != null && IsLayoutGrid;
+        StringBuilder stream = ctx.CurrentStream;
+        int page = ctx.CurrentPageIndex;
+        int mark = stream.Length;
+        LayoutRecorder? rec = IsLayoutGrid ? null : ctx.LayoutRecorder;
+
+        if (dataTagging)
+        {
+            if (split.TR is { } tr) tagging!.Tree.Resume(tr);
+            else split.TR = tagging!.Tree.Begin(SemanticRole.TR);
+            ctx.Canvas.BeginContainerContent("TR");
+        }
+        rec?.OpenNode(row, LayoutRecorder.CaptureTypeOf(row), LayoutRecorder.CaptureNameOf(row), page, startX, top, rowWidth);
+
+        float bottom = top;
+        bool progress = false;
+        bool allDone = true;
+        try
+        {
+            for (int i = 0; i < row.Cells.Length; i++)
+            {
+                if (split.Done[i]) continue;
+                TableCell cell = row.Cells[i];
+                Thickness padding = cell.Padding ?? row.Padding ?? new Thickness(CellPadding);
+                float contentWidth = cellWidth[i] - padding.Left - padding.Right;
+                IElement content = split.Contents[i];
+                float cellTop = top + (first ? padding.Top : 0);
+                ctx.CurrentX = cellX[i] + padding.Left;
+                ctx.CurrentY = cellTop;
+                rec?.OpenNode(cell, LayoutRecorder.CaptureTypeOf(cell), LayoutRecorder.CaptureNameOf(cell), page, cellX[i], top, cellWidth[i]);
+
+                SplitCellTag tag = OpenSplitCellTag(ctx, split, i, cell, content, dataTagging, presTagging);
+                try
+                {
+                    if (SplitsAcrossPages(content))
+                    {
+                        var stateful = (IStatefulElement)content;
+                        RenderStatus status = stateful.RenderStateful(ctx, contentWidth);
+                        if (status != RenderStatus.WrapRequired)
+                        {
+                            progress |= status == RenderStatus.Complete || ctx.CurrentY > cellTop;
+                            bottom = MathF.Max(bottom, ctx.CurrentY + (status == RenderStatus.Complete ? padding.Bottom : 0));
+                        }
+                        if (status == RenderStatus.Complete)
+                        {
+                            split.Done[i] = true;
+                            stateful.ResetState();
+                        }
+                    }
+                    else
+                    {
+                        float height = content.MeasureHeight(contentWidth);
+                        OversizedContentPlacement.Draw(ctx, content, height, () => content.Render(ctx, contentWidth));
+                        bottom = MathF.Max(bottom, cellTop + height + padding.Bottom);
+                        progress = true;
+                        split.Done[i] = true;
+                    }
+                }
+                finally
+                {
+                    if (tag == SplitCellTag.Tag)
+                    {
+                        ctx.Canvas.EndMarkedContent();
+                        tagging!.Tree.End();
+                    }
+                    else if (tag == SplitCellTag.Artifact)
+                    {
+                        ctx.Canvas.EndArtifact();
+                    }
+                    rec?.CloseNode(cell, page, MathF.Max(bottom, ctx.CurrentY), split.Done[i]);
+                }
+                if (!split.Done[i]) allDone = false;
+            }
+        }
+        finally
+        {
+            ctx.CurrentX = startX;
+            if (dataTagging)
+            {
+                ctx.Canvas.EndMarkedContent();
+                tagging!.Tree.End();
+            }
+        }
+
+        if (!progress)
+        {
+            rec?.CloseNode(row, page, top, false);
+            ctx.CurrentY = top;
+            return RenderStatus.WrapRequired;
+        }
+
+        bool last = allDone;
+        float fragmentHeight = bottom - top;
+        if (ReferenceEquals(ctx.CurrentStream, stream) && ctx.CurrentPageIndex == page)
+        {
+            ctx.CurrentY = top;
+            int decorationStart = stream.Length;
+            for (int i = 0; i < row.Cells.Length; i++)
+                PaintCellFill(ctx, row.Cells[i], row, cellX[i], cellWidth[i], fragmentHeight, dataIndex);
+            if (first) FlushBottomEdges(ctx);
+            if (stream.Length > decorationStart)
+            {
+                string decoration = stream.ToString(decorationStart, stream.Length - decorationStart);
+                stream.Length = decorationStart;
+                stream.Insert(mark, decoration);
+            }
+            for (int i = 0; i < row.Cells.Length; i++)
+                DrawCellEdges(ctx, row.Cells[i], cellX[i], cellWidth[i], fragmentHeight, first, last);
+        }
+        rec?.CloseNode(row, page, top + fragmentHeight, last);
+
+        ctx.CurrentY = top + fragmentHeight;
+        if (!last)
+        {
+            split.Fragments++;
+            return RenderStatus.Overflow;
+        }
+        RecordRowBottoms(ctx, row, widths);
+        _split = null;
+        return RenderStatus.Complete;
+    }
+
+    private enum SplitCellTag { None, Tag, Artifact }
+
+    /// <summary>Opens, or reopens on a later page, the structure element a split row's cell is marked under.</summary>
+    private static SplitCellTag OpenSplitCellTag(RenderContext ctx, SplitRowState split, int index, TableCell cell,
+        IElement content, bool dataTagging, bool presTagging)
+    {
+        StructureTreeBuilder? tree = ctx.Tagging?.Tree;
+        if (tree is null) return SplitCellTag.None;
+        if (split.Cells[index] is { } known)
+        {
+            tree.Resume(known.Element);
+            if (known.Container) ctx.Canvas.BeginContainerContent(known.Tag);
+            else ctx.Canvas.BeginMarkedContent(known.Tag);
+            return SplitCellTag.Tag;
+        }
+        if (dataTagging)
+        {
+            if (split.Row.IsHeader && !cell.IsHeader) cell.IsHeader = true;
+            SemanticRole role = cell.SemanticRole;
+            StructureElement element = tree.Begin(role);
+            var attrs = new List<string>();
+            if (cell.ColumnSpan > 1) attrs.Add($"/ColSpan {cell.ColumnSpan}");
+            if (role == SemanticRole.TH) attrs.Add("/Scope /Column");
+            if (attrs.Count > 0) tree.SetAttributes($"<< /O /Table {string.Join(" ", attrs)} >>");
+            string tag = role.ToPdfTag();
+            ctx.Canvas.BeginMarkedContent(tag);
+            split.Cells[index] = (element, tag, false);
+            return SplitCellTag.Tag;
+        }
+        if (presTagging)
+        {
+            ChildTagToken token = ChildTagging.BeginChildTag(ctx, content);
+            if (token.IsArtifact) return SplitCellTag.Artifact;
+            if (!token.TagThis) return SplitCellTag.None;
+            SemanticRole role = ((IRoleProvider)content).SemanticRole;
+            split.Cells[index] = (tree.Current, role.ToPdfTag(), role.IsContainerRole());
+            return SplitCellTag.Tag;
+        }
+        return SplitCellTag.None;
+    }
+
     /// <summary>
     /// Paints a cell's fill. Every fill in a row is painted before any of the row's edges, and a row's
     /// bottom edges wait for the next row's fills, so no fill covers an edge (spec: Paint order).
@@ -1014,7 +1331,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
     /// Draws a cell's left, top and right edges, and holds its bottom edge for <see cref="FlushBottomEdges"/>.
     /// A rounded cell draws its whole outline at once.
     /// </summary>
-    private void DrawCellEdges(RenderContext ctx, TableCell cell, float x, float width, float rowHeight)
+    private void DrawCellEdges(RenderContext ctx, TableCell cell, float x, float width, float rowHeight,
+        bool drawTop = true, bool drawBottom = true)
     {
         (Border edges, BorderColors colors) = EdgesOf(cell);
         if (!edges.HasAnyBorder) return;
@@ -1022,13 +1340,14 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         bool planned = _edgePlan.TryGetValue(cell, out (bool DrawLeft, bool DrawTop) plan);
         bool rounded = CornerRadius > 0;
         float left = planned && !plan.DrawLeft ? 0 : edges.Left;
-        float top = planned && !plan.DrawTop ? 0 : edges.Top;
-        if (!rounded && edges.Bottom > 0 && colors.Bottom.HasValue)
+        float top = !drawTop || (planned && !plan.DrawTop) ? 0 : edges.Top;
+        float bottom = drawBottom ? edges.Bottom : 0;
+        if (!rounded && bottom > 0 && colors.Bottom.HasValue)
         {
             _pendingBottomsPage = ctx.CurrentPageIndex;
-            _pendingBottoms.Add((x, ctx.CurrentY + rowHeight, width, edges.Bottom, colors.Bottom.Value));
+            _pendingBottoms.Add((x, ctx.CurrentY + rowHeight, width, bottom, colors.Bottom.Value));
         }
-        DrawBorder(ctx, x, ctx.CurrentY, width, rowHeight, new Border(left, top, edges.Right, rounded ? edges.Bottom : 0), colors);
+        DrawBorder(ctx, x, ctx.CurrentY, width, rowHeight, new Border(left, top, edges.Right, rounded ? bottom : 0), colors);
     }
 
     /// <summary>

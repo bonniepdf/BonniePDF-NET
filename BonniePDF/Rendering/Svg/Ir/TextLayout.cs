@@ -507,7 +507,8 @@ internal static partial class TextLayout
     /// One glyph's outline, placed. Font units are y-up and user space y-down, so y is
     /// negated; a glyph rotation turns about its own origin on the baseline. Quadratic
     /// segments are raised to cubic after placing - an affine map takes a Bezier to a
-    /// Bezier of the same degree, so the order does not change the curve.
+    /// Bezier of the same degree, so the order does not change the curve. Cubic
+    /// segments, from CFF outlines, are placed as they are.
     /// </summary>
     private static List<PathSegment> GlyphSegments(Placed glyph)
     {
@@ -551,6 +552,12 @@ internal static partial class TextLayout
             else if (segment.Kind == GlyphSegmentKind.Line)
             {
                 segments.Add(PathSegment.Line(x, y));
+            }
+            else if (segment.Kind == GlyphSegmentKind.Cubic)
+            {
+                (double c1x, double c1y) = Map(segment.CX, segment.CY);
+                (double c2x, double c2y) = Map(segment.C2X, segment.C2Y);
+                segments.Add(new PathSegment(PathSegmentKind.Cubic, x, y, c1x, c1y, c2x, c2y));
             }
             else
             {

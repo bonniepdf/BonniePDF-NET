@@ -970,9 +970,17 @@ internal class PdfCanvas : ICanvas
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// Written as a move, three lines and a close in the order given, as in HTML canvas and SVG, so a
+    /// rectangle keeps the winding its width and height give it under the nonzero rule (spec 03 §5).
+    /// </remarks>
     public void AddRect(float x, float y, float width, float height)
     {
-        _currentPath.Add(('R', new[] { x, y, width, height }));
+        MoveTo(x, y);
+        LineTo(x + width, y);
+        LineTo(x + width, y + height);
+        LineTo(x, y + height);
+        ClosePath();
     }
 
     /// <inheritdoc />
@@ -1199,34 +1207,6 @@ internal class PdfCanvas : ICanvas
                     PdfOperators.CurveTo(_stream, cp1x, cp1y, cp2x, cp2y, px, py);
                     break;
                 }
-                case 'R':
-                {
-                    // Transform all four corners to handle rotation/skew
-                    var (x1, y1) = TransformPoint(args[0], args[1]);
-                    var (x2, y2) = TransformPoint(args[0] + args[2], args[1]);
-                    var (x3, y3) = TransformPoint(args[0] + args[2], args[1] + args[3]);
-                    var (x4, y4) = TransformPoint(args[0], args[1] + args[3]);
-
-                    // If the CTM is axis-aligned (no rotation/skew), use re operator
-                    if (IsAxisAligned())
-                    {
-                        float rx = Math.Min(x1, x3);
-                        float ry = Math.Min(y1, y3);
-                        float rw = Math.Abs(x3 - x1);
-                        float rh = Math.Abs(y3 - y1);
-                        PdfOperators.Rectangle(_stream, rx, ry, rw, rh);
-                    }
-                    else
-                    {
-                        // Emit as a general quadrilateral path
-                        PdfOperators.MoveTo(_stream, x1, y1);
-                        PdfOperators.LineTo(_stream, x2, y2);
-                        PdfOperators.LineTo(_stream, x3, y3);
-                        PdfOperators.LineTo(_stream, x4, y4);
-                        PdfOperators.ClosePath(_stream);
-                    }
-                    break;
-                }
                 case 'H':
                     PdfOperators.ClosePath(_stream);
                     break;
@@ -1237,10 +1217,6 @@ internal class PdfCanvas : ICanvas
     /// <summary>True while no transform is in effect.</summary>
     private bool IsIdentityCtm() =>
         _ctm[0] == 1f && _ctm[1] == 0f && _ctm[2] == 0f && _ctm[3] == 1f && _ctm[4] == 0f && _ctm[5] == 0f;
-
-    /// <summary>Returns true when the local CTM has no rotation or skew (b and c are zero).</summary>
-    private bool IsAxisAligned()
-        => Math.Abs(_ctm[1]) < 1e-6f && Math.Abs(_ctm[2]) < 1e-6f;
 
     /// <summary>Applies stroke settings (line width, cap, join, dash, miter) to the PDF state.</summary>
     /// <remarks>
@@ -1555,19 +1531,9 @@ internal class PdfCanvas : ICanvas
             if (y > maxY) maxY = y;
         }
 
-        foreach ((char type, float[] args) in _currentPath)
+        foreach ((_, float[] args) in _currentPath)
         {
-            if (type == 'R')
-            {
-                // Rect stores [x, y, width, height]; the bbox-relevant corners are
-                // the two opposite corners.
-                Add(args[0], args[1]);
-                Add(args[0] + args[2], args[1] + args[3]);
-            }
-            else
-            {
-                for (int i = 0; i + 1 < args.Length; i += 2) Add(args[i], args[i + 1]);
-            }
+            for (int i = 0; i + 1 < args.Length; i += 2) Add(args[i], args[i + 1]);
         }
 
         if (float.IsInfinity(minX)) return new[] { 0f, 0f, 0f, 0f };
@@ -2013,14 +1979,12 @@ internal class PdfCanvas : ICanvas
     /// A moveTo starts a new polyline rather than joining the previous one, and a
     /// closePath adds the segment back to the subpath's start. Each curve becomes
     /// <c>max(4, ceil(totalSegments / pathLength))</c> chords, where
-    /// <c>pathLength</c> counts path commands - a rectangle as the five
-    /// (move, three lines, close) it is made of, so the count is the same however
-    /// a canvas chooses to store one.
+    /// <c>pathLength</c> counts path commands; a rectangle is the five (move, three
+    /// lines, close) it is made of.
     /// </remarks>
     private List<List<(double X, double Y)>> LinearizeCurrentPath(int totalSegments)
     {
-        int pathLength = 0;
-        foreach ((char type, _) in _currentPath) pathLength += type == 'R' ? 5 : 1;
+        int pathLength = _currentPath.Count;
         int chords = Math.Max(4, (int)Math.Ceiling((double)totalSegments / Math.Max(1, pathLength)));
 
         var polylines = new List<List<(double X, double Y)>>();
@@ -2084,16 +2048,6 @@ internal class PdfCanvas : ICanvas
                     }
                     cx = ex;
                     cy = ey;
-                    break;
-                }
-                case 'R':
-                {
-                    double x = a[0], y = a[1], w = a[2], h = a[3];
-                    MoveTo(x, y);
-                    LineTo(x + w, y);
-                    LineTo(x + w, y + h);
-                    LineTo(x, y + h);
-                    Close();
                     break;
                 }
                 case 'H':

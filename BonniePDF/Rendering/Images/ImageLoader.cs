@@ -12,6 +12,25 @@ namespace BonniePDF;
 /// </summary>
 public static class ImageLoader
 {
+    /// <summary>Largest inflated ICC profile accepted from a PNG. Real profiles are a few kilobytes to a few megabytes.</summary>
+    private const int MaxIccProfileBytes = 16 * 1024 * 1024;
+
+    /// <summary>
+    /// Largest image the loader will decode, in pixels (width x height). An image above it is refused with an
+    /// <see cref="ImageDecodeException"/> before any pixel data is inflated, so a small file that declares enormous
+    /// dimensions cannot exhaust memory. The default of 100 million pixels is about 10,000 x 10,000; raise it for
+    /// large-format print work. Process-wide, like the font registry. It applies when an image is decoded: an image
+    /// already held by the process-wide image cache is not decoded again.
+    /// </summary>
+    public static long MaxPixels { get; set; } = 100_000_000;
+
+    private static void AssertPixelBudget(int width, int height)
+    {
+        if (width > 0 && height > 0 && (long)width * height > MaxPixels)
+            throw new ImageDecodeException(
+                $"Image is {width} x {height} pixels, above the {MaxPixels}-pixel limit (ImageLoader.MaxPixels).");
+    }
+
     /// <summary>
     /// Load an image from file path, auto-detecting format
     /// </summary>
@@ -195,6 +214,7 @@ public static class ImageLoader
 
                 if (info.Width <= 0 || info.Height <= 0)
                     throw new InvalidOperationException("Invalid JPEG file: Invalid dimensions");
+                AssertPixelBudget(info.Width, info.Height);
 
                 // Don't return yet - keep scanning for APP2/APP14 markers that
                 // may appear after SOF in some encoders (rare but legal).
@@ -425,6 +445,7 @@ public static class ImageLoader
                     info.Height = (data[pos + 4] << 24) | (data[pos + 5] << 16) | (data[pos + 6] << 8) | data[pos + 7];
                     bitDepth = data[pos + 8];
                     colorType = data[pos + 9];
+                    AssertPixelBudget(info.Width, info.Height);
                     // data[pos + 10] = compression method (always 0)
                     // data[pos + 11] = filter method (always 0)
                     // data[pos + 12] = interlace method (0=none, 1=Adam7)
@@ -569,11 +590,28 @@ public static class ImageLoader
                 }
 
                 if (filled < (int)inflatedLength)
-                    throw new InvalidOperationException("the image data is shorter than the header declares");
+                    throw new ImageDecodeException("PNG data is corrupt: its compressed stream could not be inflated.");
+
+                // The data may not inflate beyond its header's bound: one filter byte and the packed samples per
+                // row, plus two bytes per row and 64 bytes of allowance (spec 12 §3a).
+                long allowance = 2L * info.Height + 64;
+                Span<byte> scratch = stackalloc byte[256];
+                long extra = 0;
+                int more;
+                while ((more = deflateStream.Read(scratch)) > 0)
+                {
+                    extra += more;
+                    if (extra > allowance)
+                        throw new ImageDecodeException("PNG data inflates to more than its header declares.");
+                }
             }
-            catch (Exception ex)
+            catch (ImageDecodeException)
             {
-                throw new InvalidOperationException($"Failed to decompress PNG data: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex) when (ex is InvalidDataException or IOException)
+            {
+                throw new ImageDecodeException("PNG data is corrupt: its compressed stream could not be inflated.", ex);
             }
 
             DefilterRows(inflated, info.Height, scanlineLength, bytesPerPixel);
@@ -646,12 +684,19 @@ public static class ImageLoader
                     new(compressedIccProfile, 2, compressedIccProfile.Length - 2);
                 using DeflateStream deflateStream = new(compressedStream, CompressionMode.Decompress);
                 using MemoryStream resultStream = new();
-                deflateStream.CopyTo(resultStream);
+                byte[] chunk = new byte[81920];
+                int read;
+                while ((read = deflateStream.Read(chunk, 0, chunk.Length)) > 0)
+                {
+                    // A profile larger than any real one is dropped, like a corrupt one.
+                    if (resultStream.Length + read > MaxIccProfileBytes) throw new InvalidDataException("ICC profile too large");
+                    resultStream.Write(chunk, 0, read);
+                }
                 info.IccProfile = resultStream.ToArray();
             }
             catch (InvalidDataException)
             {
-                // Corrupt profile stream - fall back to the device colour space.
+                // Corrupt or oversized profile stream - fall back to the device colour space.
             }
         }
 

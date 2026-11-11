@@ -121,6 +121,9 @@ internal class PdfResourceRegistry
     /// <summary>What happens to a code point no font can draw; wired from the document's settings.</summary>
     internal MissingGlyphs MissingGlyphs { get; set; } = MissingGlyphs.Drop;
 
+    /// <summary>What layout does with content that fits on no page; from the document's settings.</summary>
+    internal OversizedContent OversizedContent { get; set; } = OversizedContent.Clip;
+
     internal Dictionary<string, string> FontAliasMap { get; } = new();
     
     /// <summary>
