@@ -58,7 +58,6 @@ parties.
 under company number 16088203 whose registered office is at 38 Collingwood
 Street, Collingwood Buildings, Newcastle, England NE1 1JF, and any successor
 that validly acquires the relevant rights. Where an Order is processed by a
-merchant of record, that
 merchant handles the sale, payment, invoicing, and applicable indirect taxes,
 and the Provider supplies the software licence described in the Order.
 
