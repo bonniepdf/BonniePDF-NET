@@ -55,9 +55,9 @@ environment for the benefit of the Customer, its customers, or other third
 parties.
 
 "Provider" means CodeFocus Limited, a company registered in England and Wales
-under company number 16088203 whose registered office is at 1 Little Lane,
-Haxby, York, YO32 3QU, England, and any successor that validly acquires the
-relevant rights. Where an Order is processed by a merchant of record, that
+under company number 16088203 whose registered office is at 38 Collingwood
+Street, Collingwood Buildings, Newcastle, England NE1 1JF, and any successor
+that validly acquires the relevant rights. Where an Order is processed by a
 merchant handles the sale, payment, invoicing, and applicable indirect taxes,
 and the Provider supplies the software licence described in the Order.
 
