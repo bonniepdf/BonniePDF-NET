@@ -220,6 +220,30 @@ public class SvgElementTests
     }
 
     [Fact]
+    public void DrawsTextInARegisteredCffOpenTypeFont()
+    {
+        // A CFF font's glyphs are cubic outlines. Before the font seam carried cubic
+        // segments, this text was silently drawn as nothing.
+        using JsonDocument corpus = JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Typography", "Fixtures", "cff.json")));
+        byte[] bytes = Convert.FromBase64String(corpus.RootElement.GetProperty("fonts").EnumerateArray()
+            .First(f => f.GetProperty("id").GetString() == "SourceSans3").GetProperty("fontBase64").GetString()!);
+        FontManager.RegisterFont(bytes, "Source Sans CFF");
+        var face = new TextFontFaceAdapter(bytes, "Source Sans CFF");
+        int contours = "office".Sum(c => face.Outline(face.GlyphIndex(c)).Count(s => s.Kind == GlyphSegmentKind.Close));
+        Assert.True(contours >= 6);
+
+        static BonniePDF.Document Drawing(string content) => Page(new Svg { SvgData = $"<svg {Ns} viewBox=\"0 0 100 20\">{content}</svg>" });
+        static int Closes(string ops) => ops.Split('\n').Count(line => line == "h");
+        using BonniePDF.Document doc = Drawing("<text x=\"0\" y=\"15\" font-family=\"Source Sans CFF\" font-size=\"12\">office</text>");
+        using BonniePDF.Document empty = Drawing("");
+        string ops = Ops(doc);
+        Assert.DoesNotContain(doc.Diagnostics, d => d.Source == "svg");
+        Assert.Contains(" c\n", ops, StringComparison.Ordinal);
+        // Every contour of every glyph is drawn: the closes beyond the empty drawing's own.
+        Assert.Equal(contours, Closes(ops) - Closes(Ops(empty)));
+    }
+
+    [Fact]
     public void NothingResolvesTextNotDrawnReportedNamingTheFamily()
     {
         using BonniePDF.Document doc = Page(Text("No Such Font"));

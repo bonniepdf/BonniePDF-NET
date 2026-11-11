@@ -7,7 +7,7 @@ namespace BonniePDF.Tests.Content;
 
 /// <summary>Spec 03, RichText shared baseline: spans on a line sit on the baseline of its largest font.</summary>
 [Collection("Serial")]
-public sealed class RichTextBaselineTests
+public sealed partial class RichTextBaselineTests
 {
     private static Dictionary<string, float> Baselines()
     {
@@ -18,10 +18,13 @@ public sealed class RichTextBaselineTests
             .Span("sub", new TextStyle { FontSize = 8, BaselineAlignment = BaselineAlignment.Subscript })
             .Span("sup", new TextStyle { FontSize = 8, BaselineAlignment = BaselineAlignment.Superscript }));
         var ys = new Dictionary<string, float>();
-        foreach (Match m in Regex.Matches(doc.GenerateSvgPages()[0], "<text[^>]*\\sy=\"([\\d.]+)\"[^>]*>([^<]*)</text>"))
+        foreach (Match m in SvgText().Matches(doc.GenerateSvgPages()[0]))
             ys[m.Groups[2].Value.Trim()] = float.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture);
         return ys;
     }
+
+    [GeneratedRegex("<text[^>]*\\sy=\"([\\d.]+)\"[^>]*>([^<]*)</text>")]
+    private static partial Regex SvgText();
 
     [Fact]
     public void SmallerSpan_SharesTheBaselineOfTheLargerText()

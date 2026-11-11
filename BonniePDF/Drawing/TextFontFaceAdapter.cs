@@ -14,8 +14,11 @@ internal sealed class TextFontFaceAdapter : IFontFace
     public double Kerning(int a,int b)=>face.GetPairKerning(a,b);
     public IReadOnlyList<GlyphSegment> Outline(int g)
     {
+        var glyph=face.Font.ReadGlyph(g);
+        // CFF outlines are cubic commands: 0 move, 1 line, 2 cubic, 3 close.
+        if(glyph.Commands.Count>0)return CffSegments(glyph.Commands);
         var segments=new List<GlyphSegment>();
-        foreach(var contour in face.Font.ReadGlyph(g).Contours)
+        foreach(var contour in glyph.Contours)
         {
             if(contour.Count<2)continue;
             var points=new List<BonniePDF.Typography.Engine.FontPoint>();
@@ -34,6 +37,22 @@ internal sealed class TextFontFaceAdapter : IFontFace
                 else {var end=At(++i);segments.Add(new GlyphSegment(GlyphSegmentKind.Quad,end.X,end.Y,p.X,p.Y));}
             }
             segments.Add(new GlyphSegment(GlyphSegmentKind.Close));
+        }
+        return segments;
+    }
+
+    private static List<GlyphSegment> CffSegments(List<double[]> commands)
+    {
+        var segments=new List<GlyphSegment>(commands.Count);
+        foreach(double[] c in commands)
+        {
+            segments.Add(c[0] switch
+            {
+                0 => new GlyphSegment(GlyphSegmentKind.Move,c[1],c[2]),
+                1 => new GlyphSegment(GlyphSegmentKind.Line,c[1],c[2]),
+                2 => new GlyphSegment(GlyphSegmentKind.Cubic,c[5],c[6],c[1],c[2],c[3],c[4]),
+                _ => new GlyphSegment(GlyphSegmentKind.Close),
+            });
         }
         return segments;
     }

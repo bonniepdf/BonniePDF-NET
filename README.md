@@ -255,3 +255,11 @@ The standard PDF fonts (Helvetica, Times, Courier) cost nothing to use and cover
 `DocumentSettings.ContentDirection` selects left-to-right (the default) or right-to-left layout. Elements inherit direction and can override it locally; `ContentFromRightToLeft()` / `ContentFromLeftToRight()` configures a local override. Row children and table columns mirror visually while source collections retain logical order. Text start/end alignment follows direction; explicit left/right alignment, margins and padding stay physical.
 
 Embedded Arabic and Hebrew plain text uses Unicode bidi and script shaping. Register a font that covers the entire paragraph, such as an Arabic/Hebrew-capable TrueType font. RTL paragraphs with styled spans, fallback-font boundaries, lists or deferred page-number tokens are outside the currently supported scope.
+
+## Content taller than a page
+
+Text, stacks, containers (rounded ones included) and table rows split across as many pages as they need. Content that cannot split, such as a fixed-height container, an image, a chart or a rotated element, moves to the next page when it does not fit. If it is taller than an empty page, it is drawn clipped at the bottom of the page body and recorded as an error in `doc.Diagnostics`, naming the page and how much is cut off. Set `doc.Settings.OversizedContent = OversizedContent.Throw` to make generation fail with an `OversizedContentException` instead.
+
+## Untrusted input
+
+Image bytes, SVG markup and link targets often come from end users. A PNG or JPEG larger than `ImageLoader.MaxPixels` (100 million pixels by default), or whose data is corrupt or inflates beyond its declared size, fails with an `ImageDecodeException`. SVG references that expand to more than 50,000 elements are refused. Link targets outside ASCII are percent-encoded. An element tree that contains itself fails with an `ElementCycleException`.

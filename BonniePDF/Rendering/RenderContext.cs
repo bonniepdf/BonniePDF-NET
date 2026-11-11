@@ -246,6 +246,9 @@ public class RenderContext
     /// <summary>The height <see cref="CellStretchTarget"/> fills: the row height less the cell's padding.</summary>
     public float CellStretchHeight { get; set; }
 
+    /// <summary>Greater than zero while oversized content is drawn inside its clip, so nested content is not reported again.</summary>
+    internal int OversizedClipDepth { get; set; }
+
     /// <summary>
     /// Installs (or clears) the per-page header/footer measurement.
     /// </summary>

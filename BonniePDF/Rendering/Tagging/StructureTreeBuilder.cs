@@ -52,6 +52,13 @@ internal sealed class StructureTreeBuilder
     }
 
     /// <summary>
+    /// Reopen an element begun earlier, so content drawn on a later page is marked as part of it. The element keeps
+    /// its place in the tree; it is only made current again. Pair with <see cref="End"/>, as for <see cref="Begin"/>.
+    /// A table row split across pages (spec 02 §4.2) resumes its row and cells on each page.
+    /// </summary>
+    public void Resume(StructureElement element) => _stack.Push(element);
+
+    /// <summary>
     /// Close the current structure element, returning to its parent.
     /// Throws <see cref="StructureTreeException"/> if called more times
     /// than <see cref="Begin"/> (the document root cannot be closed -

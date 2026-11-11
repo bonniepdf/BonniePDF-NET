@@ -105,8 +105,8 @@ public class HorizontalStack : ElementBase, IStatefulElement
                     return RenderStatus.WrapRequired;
                 }
 
-                // Fits on this page, or we're at top of page (render anyway to avoid infinite loop)
-                Render(ctx, width);
+                // Fits on this page, or at the top of one, where a row taller than the body is clipped and reported.
+                OversizedContentPlacement.Draw(ctx, this, totalHeight, () => Render(ctx, width));
                 _rendered = true;
                 return RenderStatus.Complete;
             }
@@ -114,6 +114,9 @@ public class HorizontalStack : ElementBase, IStatefulElement
 
         return RenderFragment(ctx, width);
     }
+
+    /// <summary>Whether this row splits across pages rather than moving whole (spec 02 §4.1).</summary>
+    internal bool SplitsAcrossPages => CanSplit;
 
     private bool CanSplit => !Height.HasValue && _children.Exists(c => c is IStatefulElement);
 
@@ -157,8 +160,10 @@ public class HorizontalStack : ElementBase, IStatefulElement
                     else
                     {
                         // An item that cannot split is drawn once, with the first piece.
-                        child.Render(ctx, childWidths[i]);
-                        endY = Math.Max(endY, startY + child.MeasureHeight(childWidths[i]));
+                        float childHeight = child.MeasureHeight(childWidths[i]);
+                        float childWidth = childWidths[i];
+                        OversizedContentPlacement.Draw(ctx, child, childHeight, () => child.Render(ctx, childWidth));
+                        endY = Math.Max(endY, startY + childHeight);
                         progress = true;
                         _done[i] = true;
                     }

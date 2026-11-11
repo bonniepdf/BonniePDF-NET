@@ -14,6 +14,27 @@ at the same version are the same library.
 
 ### Document Engine & API
 
+- **Corrupt image data is a catchable error:** a PNG whose pixel data is truncated or is not a valid compressed stream now fails with an `ImageDecodeException` with a message, instead of a bare `InvalidDataException` from deep in the decoder.
+
+- **Images have a size limit:** `ImageLoader.MaxPixels` (100 million by default, about 10,000 x 10,000) is checked against the dimensions a PNG or JPEG declares, before any pixel data is inflated, and a PNG's pixel data may not inflate beyond what its header declares. A small file that claims or unpacks to an enormous image is refused with an `ImageDecodeException` where it used to consume gigabytes of memory. A corrupt embedded colour profile, or one over 16 MiB, is dropped and the image uses its device colour space. Raise the limit for large-format print work.
+
+- **Table rows taller than a page split across pages:** a row too tall for any page used to be drawn past the bottom margin, or skipped when repeated headers left too little room. It now continues onto as many pages as it needs. Each cell carries on from where it stopped; content that cannot split, such as an image or a fixed-height box, is drawn once in the first fragment. Header rows repeat, a running total adds the row once, and in tagged documents the row stays one row with one cell per column.
+
+- **Rounded containers split across pages:** a container with `cornerRadius` used to be kept whole, so one taller than a page ran off it. It now splits like any other container, rounding its top corners on the first page and its bottom corners on the last.
+
+- **Content that fits on no page is clipped and reported:** content that cannot split, such as a fixed-height container, an image, a chart or a rotated element, and is taller than the page body is drawn at the top of a page, clipped at the bottom of the body so the footer and margin stay clean, and recorded as an error diagnostic (source `pagination`) naming the page and how much is cut off. Rotated and flipped elements used to throw in this case. Set `Settings.OversizedContent = OversizedContent.Throw` to make generation fail with `OversizedContentException` instead.
+
+- **Content that cannot split moves to the next page:** an image, barcode or other element placed directly in the document that did not fit in the space left on a page was drawn past the bottom margin. It now starts on the next page.
+
+- **Links with characters outside ASCII open the right address:** a link target such as `https://example.com/café` was written byte for byte, which truncated each such character and produced a different URI. Characters outside printable ASCII, and spaces, are now percent-encoded as UTF-8; an ASCII URI is written exactly as before.
+
+- **A tree that contains itself is reported as such:** adding an element to itself, directly or through a descendant, used to overflow the stack and end the process. Generation now throws `ElementCycleException`, naming the element type.
+
+- **Rectangles keep the winding they are given:** `ICanvas.AddRect` wrote an axis-aligned rectangle as PDF's `re` with its corners normalised to a positive width and height, so a rectangle drawn the other way round to cut a hole filled solid under the nonzero rule. It is now written as four segments in the order given, as HTML canvas and SVG define it, and as the TypeScript library writes it. Canvas elements and imported SVG rectangles produce slightly different PDF bytes; they look the same unless a hole was intended, which now appears.
+- **SVG text in OpenType (CFF) fonts is drawn:** text in an imported SVG that resolved to a registered `.otf` font with CFF outlines was drawn as nothing, with no diagnostic. Its glyphs are now drawn from their cubic outlines.
+- **Text drawn as shapes in SVG export is announced correctly:** colour emoji and text drawn as glyph outlines (CFF fonts, shaped runs) were written as a group with an `aria-label` but no role, which ARIA does not allow, so assistive technology could ignore the label. The group now carries `role="img"`.
+- **SVG `<use>` expansion is bounded:** references that expand to more than 50,000 elements in one drawing are reported as an unsupported feature, so a file of a few hundred bytes can no longer expand to hundreds of thousands of shapes. With strict checking, the default, the import fails; otherwise the expansion stops there.
+
 - **Table grid lines no longer disappear beside shaded cells:** each cell used to paint its fill, content and edges before the next cell began, so the next cell's fill, or the next row's, covered half of an edge already drawn. Thin lines beside a shaded header, a banded row or a shaded cell all but vanished. A row now paints all its fills first, then the bottom edges of the row above, then the cells' content, then its own edges, and holds its bottom edges until the next row's fills are down or the table leaves the page. Tables without fills look the same; the order of drawing operations changes in every table with borders.
 
 - **Table footers inside a container:** a table placed inside a container, stack or other element dropped its footer rows, because the footer was drawn only when the document's current page was its last. Footers now follow the table's last body row wherever the table is placed.

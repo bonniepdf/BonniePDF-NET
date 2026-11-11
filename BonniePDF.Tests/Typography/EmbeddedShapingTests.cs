@@ -105,7 +105,7 @@ public sealed class EmbeddedShapingTests
     public void SvgOutlinesSubstitutionsAtAccurateScale()
     {
         using var doc=Create("ffi a\u0308\u0301");string svg=doc.GenerateSvgPages()[0];
-        Assert.Contains("aria-label=\"ffi a",svg,StringComparison.Ordinal);Assert.Contains("<path d=\"M",svg,StringComparison.Ordinal);Assert.Contains("scale(0.012 -0.012)",svg,StringComparison.Ordinal);
+        Assert.Contains("role=\"img\" aria-label=\"ffi a",svg,StringComparison.Ordinal);Assert.Contains("<path d=\"M",svg,StringComparison.Ordinal);Assert.Contains("scale(0.012 -0.012)",svg,StringComparison.Ordinal);
     }
     [Fact]
     public void SvgPositionsUnsubstitutedTextWithoutViewerShaping()

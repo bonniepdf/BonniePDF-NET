@@ -162,6 +162,13 @@
       ],
       "via": "options"
     },
+    "OversizedContent": {
+      "tokens": [
+        "clip",
+        "throw"
+      ],
+      "via": "options"
+    },
     "AccessibilityMode": {
       "tokens": [
         "none",
@@ -2241,6 +2248,9 @@
         },
         "missingGlyphs": {
           "kind": "enum:MissingGlyphs"
+        },
+        "oversizedContent": {
+          "kind": "enum:OversizedContent"
         },
         "language": {
           "kind": "string"

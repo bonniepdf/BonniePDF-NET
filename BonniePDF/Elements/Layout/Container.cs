@@ -1,4 +1,5 @@
 using System;
+using BonniePDF.Drawing;
 using System.Collections.Generic;
 using BonniePDF.Fluent;
 
@@ -135,8 +136,11 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
     /// <summary>Number of fragments already drawn; greater than zero while a split render is in progress.</summary>
     private int _fragments;
 
+    /// <summary>Whether this container splits across pages rather than moving whole (spec 02 §4.1).</summary>
+    internal bool SplitsAcrossPages => CanSplit;
+
     private bool CanSplit =>
-        Child is IStatefulElement && !Height.HasValue && !FillHeight && CornerRadius <= 0;
+        Child is IStatefulElement && !Height.HasValue && !FillHeight;
 
     /// <summary>
     /// The ambient horizontal text alignment a given <see cref="HorizontalAlignment"/> establishes for
@@ -166,7 +170,7 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
             {
                 // Whole, on this page, or on a fresh one: what an atomic box has always done.
                 if (overflows && ctx.CurrentY > ctx.ContentTop) return RenderStatus.WrapRequired;
-                Render(ctx, width);
+                OversizedContentPlacement.Draw(ctx, this, MeasureHeight(width), () => Render(ctx, width));
                 return RenderStatus.Complete;
             }
         }
@@ -182,6 +186,90 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
     {
         _fragments = 0;
         if (Child is IStatefulElement stateful) stateful.ResetState();
+    }
+
+    /// <summary>
+    /// Paints one fragment of a rounded box (spec 02 §4.1): only the corners at the ends of the box are rounded, the
+    /// top two on the first fragment and the bottom two on the last. The fill is that shape; the border is one stroke
+    /// along the sides the fragment carries.
+    /// </summary>
+    private void PaintRoundedFragment(RenderContext ctx, float x, float y, float w, float h, bool first, bool last, bool fill)
+    {
+        ICanvas canvas = ctx.Canvas;
+        float r = MathF.Min(CornerRadius, MathF.Min(w / 2, first && last ? h / 2 : h));
+        float k = r * EllipseGeometry.Kappa;
+        float top = first ? r : 0;
+        float bottom = last ? r : 0;
+
+        void TopEdge()
+        {
+            canvas.CubicBezierTo(x, y + r - k, x + r - k, y, x + r, y);
+            canvas.LineTo(x + w - r, y);
+            canvas.CubicBezierTo(x + w - r + k, y, x + w, y + r - k, x + w, y + r);
+        }
+
+        void BottomEdge()
+        {
+            canvas.CubicBezierTo(x + w, y + h - r + k, x + w - r + k, y + h, x + w - r, y + h);
+            canvas.LineTo(x + r, y + h);
+            canvas.CubicBezierTo(x + r - k, y + h, x, y + h - r + k, x, y + h - r);
+        }
+
+        canvas.BeginArtifact();
+        try
+        {
+            canvas.BeginPath();
+            if (fill)
+            {
+                canvas.MoveTo(x, y + top);
+                if (first) TopEdge();
+                else canvas.LineTo(x + w, y);
+                canvas.LineTo(x + w, y + h - bottom);
+                if (last) BottomEdge();
+                else canvas.LineTo(x, y + h);
+                canvas.ClosePath();
+                canvas.FillCurrentPath(BackgroundColor!.Value);
+                return;
+            }
+
+            float strokeWidth = MathF.Max(MathF.Max(Border.Top, Border.Left), MathF.Max(Border.Bottom, Border.Right));
+            if (strokeWidth <= 0) return;
+            Color color = BorderColors.Top ?? BorderColors.Left ?? BorderColors.Bottom ?? BorderColors.Right ?? Color.Black;
+            if (first && last)
+            {
+                canvas.MoveTo(x, y + r);
+                TopEdge();
+                canvas.LineTo(x + w, y + h - r);
+                BottomEdge();
+                canvas.ClosePath();
+            }
+            else if (first)
+            {
+                canvas.MoveTo(x, y + h);
+                canvas.LineTo(x, y + r);
+                TopEdge();
+                canvas.LineTo(x + w, y + h);
+            }
+            else if (last)
+            {
+                canvas.MoveTo(x + w, y);
+                canvas.LineTo(x + w, y + h - r);
+                BottomEdge();
+                canvas.LineTo(x, y);
+            }
+            else
+            {
+                canvas.MoveTo(x, y);
+                canvas.LineTo(x, y + h);
+                canvas.MoveTo(x + w, y);
+                canvas.LineTo(x + w, y + h);
+            }
+            canvas.StrokeCurrentPath(new StrokeStyle { Paint = color, Width = strokeWidth });
+        }
+        finally
+        {
+            canvas.EndArtifact();
+        }
     }
 
     private RenderStatus RenderFragment(RenderContext ctx, float width)
@@ -254,12 +342,19 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
         if (ReferenceEquals(ctx.CurrentStream, stream) && ctx.CurrentPageIndex == pageIndex)
         {
             int decorationStart = stream.Length;
+            bool rounded = CornerRadius > 0;
             if (BackgroundColor.HasValue)
-                DrawBackground(ctx, boxX, boxTop, effectiveWidth, height, BackgroundColor.Value);
+            {
+                if (rounded) PaintRoundedFragment(ctx, boxX, boxTop, effectiveWidth, height, first, last, fill: true);
+                else DrawBackground(ctx, boxX, boxTop, effectiveWidth, height, BackgroundColor.Value);
+            }
             // The background goes behind the content; a table's frame stays on top of it.
             if (!frame && Border.HasAnyBorder)
-                DrawBorder(ctx, boxX, boxTop, effectiveWidth, height,
+            {
+                if (rounded) PaintRoundedFragment(ctx, boxX, boxTop, effectiveWidth, height, first, last, fill: false);
+                else DrawBorder(ctx, boxX, boxTop, effectiveWidth, height,
                     new Border(Border.Left, first ? Border.Top : 0, Border.Right, last ? Border.Bottom : 0), BorderColors);
+            }
 
             if (stream.Length > decorationStart)
             {
@@ -272,7 +367,10 @@ public class Container : BorderedElementBase, IContentContainer, IStatefulElemen
             // bottom edge under the last row on this page, and the top edge over the first (or repeated header)
             // row on the next.
             if (frame && Border.HasAnyBorder)
-                DrawBorder(ctx, boxX, boxTop, effectiveWidth, height, Border, BorderColors);
+            {
+                if (rounded) PaintRoundedFragment(ctx, boxX, boxTop, effectiveWidth, height, true, true, fill: false);
+                else DrawBorder(ctx, boxX, boxTop, effectiveWidth, height, Border, BorderColors);
+            }
         }
 
         ctx.CurrentY = bottom;

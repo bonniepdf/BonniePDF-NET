@@ -148,6 +148,21 @@ internal static partial class IrBuilder
     /// <summary>A use chain deeper than this is treated as runaway rather than legitimate.</summary>
     private const int MaxUseDepth = 16;
 
+    /// <summary>
+    /// The most elements <c>use</c> references may expand to in one document. Depth alone does not bound the work:
+    /// a file of a few hundred bytes can reference a shape that references ten more, six levels deep, and expand to
+    /// a million drawn nodes. Elements written in the file itself are not counted; their number is bounded by the
+    /// file's size.
+    /// </summary>
+    private const int MaxUseExpansion = 50_000;
+
+    /// <summary>How many elements <c>use</c> references have expanded to so far. Shared by every context of one build.</summary>
+    private sealed class UseBudget
+    {
+        public int Expanded;
+        public bool Reported;
+    }
+
     /// <summary>Where rasterized elements go, and what they were rasterized for.</summary>
     private sealed record RasterState(RasterRegion Region, List<UnsupportedFeature> Rasterized);
 
@@ -155,6 +170,7 @@ internal static partial class IrBuilder
     /// <param name="Style">The computed style so far.</param>
     /// <param name="Transform">The matrix from here to root user space.</param>
     /// <param name="ActiveUses">Ids currently being expanded by <c>use</c>, to catch cycles.</param>
+    /// <param name="Budget">How many elements <c>use</c> references have expanded to, shared by the whole build.</param>
     /// <param name="Fonts">Fonts for text, if any.</param>
     /// <param name="Lineage">
     /// The elements whose inherited properties reach this point, outermost first -
@@ -166,6 +182,7 @@ internal static partial class IrBuilder
         ComputedStyle Style,
         Matrix Transform,
         IReadOnlyList<string> ActiveUses,
+        UseBudget Budget,
         IFontProvider? Fonts,
         IReadOnlyList<SvgElement> Lineage,
         RasterState? Raster);
@@ -232,7 +249,7 @@ internal static partial class IrBuilder
         }
 
         ComputedStyle rootStyle = Cascade(ComputedStyle.Initial, root.Attributes);
-        var context = new Context(rootStyle, Matrix.Identity, [], options.Fonts, [root], raster);
+        var context = new Context(rootStyle, Matrix.Identity, [], new UseBudget(), options.Fonts, [root], raster);
 
         foreach (SvgElement child in root.Children) Visit(child, context, dom, children, unsupported);
 
@@ -270,6 +287,22 @@ internal static partial class IrBuilder
     private static void Visit(
         SvgElement element, Context context, SvgDom dom, List<IrNode> output, List<UnsupportedFeature> unsupported)
     {
+        if (context.ActiveUses.Count > 0)
+        {
+            UseBudget budget = context.Budget;
+            if (budget.Expanded >= MaxUseExpansion)
+            {
+                if (!budget.Reported)
+                {
+                    budget.Reported = true;
+                    unsupported.Add(new UnsupportedFeature("use",
+                        $"references expand to more than {MaxUseExpansion} elements, which is treated as runaway"));
+                }
+                return;
+            }
+            budget.Expanded++;
+        }
+
         if (context.Raster is not { } raster)
         {
             VisitElement(element, context, dom, output, unsupported);

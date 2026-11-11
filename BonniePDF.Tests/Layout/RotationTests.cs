@@ -66,7 +66,7 @@ public class RotationTests
         }
     }
     [Fact]
-    public void WrapsBeforePaintingAndRejectsOversize()
+    public void WrapsBeforePaintingAndClipsAndReportsOversize()
     {
         var ctx = Context(); ctx.CurrentY = 260;
         var r = new Rotate { Angle = 90, Mode = RotationMode.Constrained, ContentWidth = 80, Child = new Container { Height = 20 } };
@@ -74,7 +74,12 @@ public class RotationTests
         Assert.Equal(RenderStatus.WrapRequired, r.RenderStateful(ctx, 200));
         Assert.Equal(before, ctx.CurrentStream.ToString()); Assert.Equal(260, ctx.CurrentY);
         r.ContentWidth = 400;
-        Assert.Throws<InvalidOperationException>(() => r.RenderStateful(ctx, 200));
+        // Taller than any page: it still waits for a fresh one, then is drawn there, clipped, and reported.
+        Assert.Equal(RenderStatus.WrapRequired, r.RenderStateful(ctx, 200));
+        ctx.CurrentY = ctx.ContentTop;
+        Assert.Equal(RenderStatus.Complete, r.RenderStateful(ctx, 200));
+        Diagnostic error = Assert.Single(ctx.Resources.Diagnostics.All, d => d.Severity == DiagnosticSeverity.Error);
+        Assert.StartsWith("A Rotate is taller than the page body", error.Message, StringComparison.Ordinal);
     }
     [Fact]
     public void ForbiddenPageBreakRestoresContext()

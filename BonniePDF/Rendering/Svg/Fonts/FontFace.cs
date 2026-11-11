@@ -17,26 +17,33 @@ internal enum GlyphSegmentKind
     /// <summary>A quadratic Bezier segment.</summary>
     Quad,
 
+    /// <summary>A cubic Bezier segment.</summary>
+    Cubic,
+
     /// <summary>Close the current contour.</summary>
     Close,
 }
 
 /// <summary>
 /// One command of a glyph outline, in font units with y pointing up - the
-/// TrueType convention. Quadratic, because TrueType outlines are.
+/// TrueType convention. Quadratic for TrueType outlines, cubic for CFF ones.
 /// </summary>
 /// <param name="Kind">What this segment does.</param>
 /// <param name="X">End point x.</param>
 /// <param name="Y">End point y.</param>
-/// <param name="CX">Control point x, for <see cref="GlyphSegmentKind.Quad"/>.</param>
-/// <param name="CY">Control point y, for <see cref="GlyphSegmentKind.Quad"/>.</param>
+/// <param name="CX">Control point x, for <see cref="GlyphSegmentKind.Quad"/>; the first control point's, for <see cref="GlyphSegmentKind.Cubic"/>.</param>
+/// <param name="CY">Control point y, for <see cref="GlyphSegmentKind.Quad"/>; the first control point's, for <see cref="GlyphSegmentKind.Cubic"/>.</param>
+/// <param name="C2X">The second control point's x, for <see cref="GlyphSegmentKind.Cubic"/>.</param>
+/// <param name="C2Y">The second control point's y, for <see cref="GlyphSegmentKind.Cubic"/>.</param>
 [StructLayout(LayoutKind.Auto)]
 internal readonly record struct GlyphSegment(
     GlyphSegmentKind Kind,
     double X = 0,
     double Y = 0,
     double CX = 0,
-    double CY = 0);
+    double CY = 0,
+    double C2X = 0,
+    double C2Y = 0);
 
 /// <summary>
 /// The font seam: what the engine needs from a font to lay out and outline text.

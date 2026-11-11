@@ -6,7 +6,7 @@ namespace BonniePDF.Tests.Accessibility;
 
 /// <summary>Spec 03 (RichText link spans, Hyperlink underline) and 11 §1: links inside a paragraph.</summary>
 [Collection("Serial")]
-public sealed class InlineLinkTests
+public sealed partial class InlineLinkTests
 {
     private const string LinkText = "terms of service and the privacy notice before you place an order with us today";
 
@@ -35,15 +35,15 @@ public sealed class InlineLinkTests
     public void WrappedLinkSpan_GetsARegionPerLine_DescribedByTheWholeSpan()
     {
         string pdf = Pdf(false, Paragraph);
-        Assert.Equal(2, Regex.Matches(pdf, @"/Subtype /Link").Count);
-        Assert.Equal(2, Regex.Matches(pdf, Regex.Escape($"/Contents ({LinkText})")).Count);
-        Assert.Equal(2, Regex.Matches(pdf, Regex.Escape("/URI (https://example.com/terms)")).Count);
+        Assert.Equal(2, Occurrences(pdf, "/Subtype /Link"));
+        Assert.Equal(2, Occurrences(pdf, $"/Contents ({LinkText})"));
+        Assert.Equal(2, Occurrences(pdf, "/URI (https://example.com/terms)"));
     }
 
     [Fact]
     public void LinkRegion_LeavesOutTheSpacesAroundIt()
     {
-        float[][] rects = Regex.Matches(Pdf(false, Paragraph), @"/Rect \[([\d. ]+)\]")
+        float[][] rects = LinkRect().Matches(Pdf(false, Paragraph))
             .Select(m => m.Groups[1].Value.Split(' ').Select(v => float.Parse(v, System.Globalization.CultureInfo.InvariantCulture)).ToArray())
             .ToArray();
         // The first region starts after "Please read our " and its space (Helvetica 12), the second at the left margin.
@@ -55,17 +55,35 @@ public sealed class InlineLinkTests
     public void LinkRegion_IsTaggedAsALinkInsideTheParagraph()
     {
         string pdf = Pdf(true, Paragraph);
-        Assert.Equal(2, Regex.Matches(pdf, @"/S /Link").Count);
-        Assert.Equal(2, Regex.Matches(pdf, @"/OBJR").Count);
-        Assert.Equal(2, Regex.Matches(pdf, @"/StructParent \d+").Count);
-        Assert.True(Regex.Matches(pdf, @"/P << /MCID \d+ >> BDC").Count >= 3, "The paragraph resumes after each link.");
+        Assert.Equal(2, Occurrences(pdf, "/S /Link"));
+        Assert.Equal(2, Occurrences(pdf, "/OBJR"));
+        Assert.Equal(2, StructParent().Count(pdf));
+        Assert.True(ParagraphContent().Count(pdf) >= 3, "The paragraph resumes after each link.");
     }
 
     [Fact]
     public void Hyperlink_IsUnderlinedOnlyWhenAsked()
     {
-        var line = new Regex(@"\d[\d.]* [\d.]+ m [\d.]+ [\d.]+ l");
-        Assert.DoesNotMatch(line, Pdf(false, d => d.Add(new Hyperlink("mailto:support@example.com", "Contact us"))));
-        Assert.Matches(line, Pdf(false, d => d.Add(new Hyperlink("mailto:support@example.com", "Contact us") { Underline = true })));
+        Assert.DoesNotMatch(UnderlineSegment(), Pdf(false, d => d.Add(new Hyperlink("mailto:support@example.com", "Contact us"))));
+        Assert.Matches(UnderlineSegment(), Pdf(false, d => d.Add(new Hyperlink("mailto:support@example.com", "Contact us") { Underline = true })));
     }
+
+    private static int Occurrences(string text, string value)
+    {
+        int count = 0;
+        for (int i = text.IndexOf(value, StringComparison.Ordinal); i >= 0; i = text.IndexOf(value, i + value.Length, StringComparison.Ordinal)) count++;
+        return count;
+    }
+
+    [GeneratedRegex(@"/Rect \[([\d. ]+)\]")]
+    private static partial Regex LinkRect();
+
+    [GeneratedRegex(@"/StructParent \d+")]
+    private static partial Regex StructParent();
+
+    [GeneratedRegex(@"/P << /MCID \d+ >> BDC")]
+    private static partial Regex ParagraphContent();
+
+    [GeneratedRegex(@"\d[\d.]* [\d.]+ m [\d.]+ [\d.]+ l")]
+    private static partial Regex UnderlineSegment();
 }

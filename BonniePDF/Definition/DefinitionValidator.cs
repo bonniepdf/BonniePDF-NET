@@ -1084,8 +1084,8 @@ internal sealed partial class DefinitionValidator
                 CheckCells(row, at, owner, depth);
                 continue;
             }
-            if (ValidateShape(row, D.Shapes["TableRow"], at, owner, "unknown-key", 0) && row.TryGetProperty("cells", out JsonElement cells))
-                CheckCells(cells, $"{at}/cells", owner, depth);
+            // The row shape visits its cells once, preserving identity and depth accounting.
+            ValidateShape(row, D.Shapes["TableRow"], at, owner, "unknown-key", depth);
         }
     }
 
