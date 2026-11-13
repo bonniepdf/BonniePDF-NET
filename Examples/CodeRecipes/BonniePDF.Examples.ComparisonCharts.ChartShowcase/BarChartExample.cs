@@ -72,6 +72,7 @@ public static class BarChartExample
             [
                 new ChartSeries
                 {
+                    Color = Color.FromHex("#4f46e5"),
                     DataPoints =
                     [
                         new ChartDataPoint { Label = "Jan", Value = 4500, LabelFormat = "N0" },

@@ -63,9 +63,8 @@ public static class RestaurantMenuExample
     public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         ArgumentNullException.ThrowIfNull(assets);
-        Document doc = new()
-        {
-            Settings = new DocumentSettings
+        Document doc = new(
+            new DocumentSettings
             {
                 PageSize = Menu,
                 Margin = 26,
@@ -74,13 +73,12 @@ public static class RestaurantMenuExample
                 Language = "en-GB",
                 DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(Body),
             },
-            Metadata = new DocumentMetadata
+            new DocumentMetadata
             {
                 Title = "The Larder: dinner menu",
                 Author = "The Larder",
                 Subject = "Dinner menu with dietary marks",
-            },
-        };
+            });
         string serif = doc.Fonts.Add(GetAsset(assets, SerifKey)).FontName;
         byte[] headerPhoto = GetAsset(assets, HeaderPhotoKey);
         string sprigSvg = Encoding.UTF8.GetString(GetAsset(assets, SprigSvgKey));

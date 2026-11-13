@@ -291,7 +291,7 @@ public static class SafetyDataSheetExample
         HorizontalStack banner = new() { KeepWithNext = true, WidthDistribution = WidthDistribution.Auto, Spacing = 10, Margin = new Thickness(0, 0, 0, 6) };
         banner.Add(Pictogram(flame: true, "Hazard pictogram GHS02, a flame: flammable"));
         banner.Add(Pictogram(flame: false, "Hazard pictogram GHS07, an exclamation mark: irritant and narcotic effects"));
-        VerticalStack signal = new() { Spacing = 2, Margin = new Thickness(6, 8, 0, 0) };
+        VerticalStack signal = new() { Spacing = 2, Margin = new Thickness(0, 8, 0, 0) };
         signal.Add(Tb("SIGNAL WORD", 6.5f, Mute, bold: true));
         signal.Add(Tb("Danger", 16, ColorPalette.Rose[700], bold: true));
         banner.Add(signal);

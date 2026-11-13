@@ -59,9 +59,8 @@ public static class AllergenMatrixExample
     public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
     {
         ArgumentNullException.ThrowIfNull(assets);
-        Document doc = new()
-        {
-            Settings = new DocumentSettings
+        Document doc = new(
+            new DocumentSettings
             {
                 PageSize = PdfSize.A4,
                 Orientation = PageOrientation.Landscape,
@@ -71,13 +70,12 @@ public static class AllergenMatrixExample
                 Language = "en-GB",
                 DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(8.5f).WithColor(ColorPalette.Stone[700]),
             },
-            Metadata = new DocumentMetadata
+            new DocumentMetadata
             {
                 Title = "The Larder: allergen guide",
                 Author = "The Larder",
                 Subject = "Allergens in every dish on the dinner menu",
-            },
-        };
+            });
         string serif = doc.Fonts.Add(GetAsset(assets, SerifKey)).FontName;
         string sprigSvg = Encoding.UTF8.GetString(GetAsset(assets, SprigSvgKey));
 

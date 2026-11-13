@@ -28,9 +28,8 @@ public static class PalletLabelExample
         Justification = "The example intentionally keeps generation inline.")]
     public static Document Generate()
     {
-        Document doc = new()
-        {
-            Settings = new DocumentSettings
+        Document doc = new(
+            new DocumentSettings
             {
                 PageSize = A6,
                 Margin = 10,
@@ -39,13 +38,12 @@ public static class PalletLabelExample
                 Language = "en-GB",
                 DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(7.5f).WithColor(Ink),
             },
-            Metadata = new DocumentMetadata
+            new DocumentMetadata
             {
                 Title = "Pallet label: batch 24-1187, pallet 1 of 3",
                 Author = "Sample Ingredients Ltd",
                 Subject = "Logistic label for a pallet of citric acid",
-            },
-        };
+            });
 
         // ── Shipper and consignee ──
         Grid parties = new(1, 1) { Border = new Border(0, 0, 0, 0.75f), BorderColors = new BorderColors(Ink), CellPadding = 4 };
