@@ -5,7 +5,7 @@ Versions use CalVer (`yyyy.m.minor`), decided by the versioning tool, and are
 shared with the TypeScript implementation: `BonniePDF` and `@bonniepdf/core`
 at the same version are the same library.
 
-## Unreleased
+## 2026.11.12
 
 ### Performance Improvements
 

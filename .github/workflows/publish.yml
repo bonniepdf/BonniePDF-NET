@@ -17,7 +17,8 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read   # checkout
+  contents: write  # checkout + create GitHub release
+  id-token: write  # NuGet OIDC trusted publishing
   actions: write   # delete prior workflow runs
 
 jobs:
@@ -76,5 +77,36 @@ jobs:
     - name: Pack
       run: dotnet pack BonniePDF/BonniePDF.csproj --configuration Release --no-build --output nupkgs
       
+    - name: NuGet login (Trusted Publishing)
+      id: login
+      uses: NuGet/login@v1
+      with:
+        user: BonniePDF
+
     - name: Push to NuGet
-      run: dotnet nuget push nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+      run: dotnet nuget push nupkgs/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+
+    - name: Extract release notes from CHANGELOG.md
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        VERSION="${GITHUB_REF_NAME#v}"
+        awk -v v="## $VERSION" '
+          $0 == v { found = 1; next }
+          found && /^## / { exit }
+          found { print }
+        ' CHANGELOG.md > release-notes.md
+        if [ ! -s release-notes.md ]; then
+          echo "No '## $VERSION' section in CHANGELOG.md; releasing without notes."
+          echo "See CHANGELOG.md." > release-notes.md
+        fi
+        cat release-notes.md
+
+    - name: Create GitHub release
+      if: startsWith(github.ref, 'refs/tags/v')
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create "$GITHUB_REF_NAME" nupkgs/*.nupkg \
+          --repo "${{ github.repository }}" \
+          --title "$GITHUB_REF_NAME" \
+          --notes-file release-notes.md
