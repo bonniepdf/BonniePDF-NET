@@ -1,0 +1,99 @@
+name: Create GitHub prerelease
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag (optional if only one has no release)
+        type: string
+      preview:
+        description: Preview the release notes without publishing
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: create-github-prerelease
+  cancel-in-progress: false
+
+jobs:
+  prerelease:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prepare or publish the prerelease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_TAG: ${{ inputs.tag }}
+          PREVIEW: ${{ inputs.preview }}
+        run: |
+          version_pattern='^v[0-9]{4}\.[0-9]{1,2}\.[0-9]+$'
+          releases=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].tag_name')
+
+          tag=$REQUESTED_TAG
+          if [[ -z "$tag" ]]; then
+            tags=$(git tag --merged HEAD --list 'v*' --sort=-version:refname)
+            candidates=()
+            while IFS= read -r candidate; do
+              if [[ "$candidate" =~ $version_pattern ]] && ! grep -Fxq -- "$candidate" <<< "$releases"; then
+                candidates+=("$candidate")
+              fi
+            done <<< "$tags"
+
+            if (( ${#candidates[@]} == 0 )); then
+              echo "All version tags on the default branch already have releases, or there are no version tags."
+              exit 0
+            fi
+            if (( ${#candidates[@]} > 1 )); then
+              echo "::error::More than one version tag has no release. Run again and enter the intended tag."
+              printf '%s\n' "${candidates[@]}"
+              exit 1
+            fi
+            tag=${candidates[0]}
+          fi
+
+          if [[ ! "$tag" =~ $version_pattern ]] || ! git merge-base --is-ancestor "refs/tags/$tag" HEAD 2>/dev/null; then
+            echo "::error::Choose an existing CalVer tag on the default branch."
+            exit 1
+          fi
+          if grep -Fxq -- "$tag" <<< "$releases"; then
+            echo "$tag already has a GitHub release or draft."
+            exit 0
+          fi
+
+          notes=$(mktemp "$RUNNER_TEMP/bonniepdf-release-notes.XXXXXX")
+          trap 'rm -f -- "$notes"' EXIT
+          awk -v heading="## ${tag#v}" '
+            { sub(/\r$/, "") }
+            $0 == heading { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > "$notes"
+
+          if ! grep -Fxq 'Status: Prerelease' "$notes" || ! grep -q '^-' "$notes"; then
+            echo "::error::The changelog needs a prerelease entry with notes for $tag."
+            exit 1
+          fi
+
+          {
+            printf '## GitHub prerelease %s\n\n' "$tag"
+            printf 'Tagged commit: `%s`\n\n' "$(git rev-parse --short "refs/tags/$tag^{commit}")"
+            cat "$notes"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$PREVIEW" == "true" ]]; then
+            echo "Preview complete. See the job summary for the release notes."
+            exit 0
+          fi
+
+          url=$(gh release create "$tag" --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --prerelease --title "$tag" --notes-file "$notes")
+          printf '\n[Published prerelease](%s)\n' "$url" >> "$GITHUB_STEP_SUMMARY"
