@@ -60,12 +60,23 @@ jobs:
           10.0.x
         
     - name: Update Version
+      if: startsWith(github.ref, 'refs/heads/')
+      env:
+        REQUESTED_VERSION: ${{ inputs.version }}
       run: |
         chmod +x scripts/update-versions.sh
-        if [ -n "${{ github.event.inputs.version }}" ]; then
-          ./scripts/update-versions.sh --version "${{ github.event.inputs.version }}"
+        if [ -n "$REQUESTED_VERSION" ]; then
+          ./scripts/update-versions.sh --version "$REQUESTED_VERSION"
         else
           ./scripts/update-versions.sh
+        fi
+    - name: Check the tag matches the package version
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        version=$(dotnet msbuild BonniePDF/BonniePDF.csproj -getProperty:PackageVersion)
+        if [[ "$version" != "${GITHUB_REF_NAME#v}" ]]; then
+          echo "::error::Tag $GITHUB_REF_NAME does not match BonniePDF package version $version."
+          exit 1
         fi
         
     - name: Restore dependencies
@@ -106,7 +117,9 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release create "$GITHUB_REF_NAME" nupkgs/*.nupkg \
+        flags=()
+        if grep -Fxq 'Status: Prerelease' release-notes.md; then flags+=(--prerelease); fi
+        gh release create "$GITHUB_REF_NAME" nupkgs/*.nupkg --verify-tag "${flags[@]}" \
           --repo "${{ github.repository }}" \
           --title "$GITHUB_REF_NAME" \
           --notes-file release-notes.md

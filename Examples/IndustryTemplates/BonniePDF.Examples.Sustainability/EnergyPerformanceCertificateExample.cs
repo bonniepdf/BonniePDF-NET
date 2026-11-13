@@ -281,7 +281,7 @@ public static class EnergyPerformanceCertificateExample
             float top = 14 + i * (rowHeight + gap);
             float barWidth = ladder * (0.42f + i * 0.09f);
             canvas.FillRect(0, top, barWidth, rowHeight, color);
-            Color ink = i is >= 1 and <= 4 ? ColorPalette.Stone[900] : Color.White;
+            Color ink = i is >= 1 and <= 5 ? ColorPalette.Stone[900] : Color.White;
             canvas.DrawText(6, top + 9, range, ink, 7.5f, StandardFonts.Helvetica, TextAlignment.Left);
             float w = canvas.MeasureText(band, 14, StandardFonts.HelveticaBold).Width;
             canvas.DrawText(barWidth - w - 8, top + 6, band, ink, 14, StandardFonts.HelveticaBold, TextAlignment.Left);

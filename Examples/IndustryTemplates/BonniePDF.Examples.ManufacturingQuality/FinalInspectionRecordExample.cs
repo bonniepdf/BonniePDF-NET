@@ -73,9 +73,8 @@ public static class FinalInspectionRecordExample
         Justification = "The example intentionally keeps generation inline.")]
     public static Document Generate()
     {
-        Document doc = new()
-        {
-            Settings = new DocumentSettings
+        Document doc = new(
+            new DocumentSettings
             {
                 PageSize = PdfSize.A4,
                 Orientation = PageOrientation.Landscape,
@@ -91,13 +90,12 @@ public static class FinalInspectionRecordExample
                     Color = Mute,
                 }),
             },
-            Metadata = new DocumentMetadata
+            new DocumentMetadata
             {
                 Title = "Final inspection record: batch 24-118",
                 Author = "Sample Precision Ltd",
                 Subject = "Final inspection of hydraulic manifold blocks HM-220",
-            },
-        };
+            });
 
         // ── Title and the batch at a glance ──
         HorizontalStack top = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 20, Margin = new Thickness(0, 0, 0, 12) };
