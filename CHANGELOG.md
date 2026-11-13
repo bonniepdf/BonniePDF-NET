@@ -7,6 +7,16 @@ at the same version are the same library.
 
 ## 2026.11.12
 
+Status: Prerelease
+
+### Highlights
+
+- Table rows taller than a page, and rounded containers, now split across pages
+- Carried-forward page subtotals for tables that break across pages
+- Links inside a sentence, and link addresses outside ASCII open correctly
+- Modern chart theme, gradient pie slices and donut totals in the centre
+- Corrupt or oversized images fail with a catchable error before any pixel data is inflated
+
 ### Performance Improvements
 
 - **Smaller, faster start-up:** The bundled Liberation fonts are now read from the assembly the first time a document uses them, not all twelve when `FontManager` is first touched. A process whose documents use their own fonts allocates about 15 MB less at start-up, and its peak working set falls by about 13 MB. Output is byte-for-byte unchanged.
