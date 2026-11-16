@@ -25,7 +25,7 @@ public static class UkVatInvoiceExample
 
     private static readonly UkLine[] Items =
     [
-        new("Consultancy services (May 2025)", 12, 480m, 0.20m, "S"),
+        new("Consultancy services", 12, 480m, 0.20m, "S"),
         new("On-site installation", 1, 1250m, 0.20m, "S"),
         new("Children's safety equipment", 40, 18.5m, 0.05m, "R"),
         new("Printed training manuals", 200, 3.25m, 0m, "Z"),
@@ -85,11 +85,14 @@ public static class UkVatInvoiceExample
     public static Document Generate() => Generate(LoadDefaultAssets());
 
     /// <summary>Builds the document using the supplied asset dictionary.</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
-        DateTime now = DateTime.Now;
-        int year = now.Year;
-        string date = now.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        int year = day.Year;
+        string serviceMonth = day.AddMonths(-1).ToString("MMMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
+        string date = day.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
 
         Document doc = new(new DocumentSettings { PageSize = PdfSize.A4, Margin = 44 });
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
@@ -181,13 +184,14 @@ public static class UkVatInvoiceExample
         // Accumulate net per rate for the summary block.
         Dictionary<decimal, decimal> netByRate = new();
         decimal netTotal = 0m;
-        foreach (UkLine it in Items)
+        for (int index = 0; index < Items.Length; index++)
         {
+            UkLine it = Items[index];
             decimal net = it.Qty * it.UnitPrice;
             netTotal += net;
             netByRate[it.VatRate] = netByRate.GetValueOrDefault(it.VatRate) + net;
             table.AddRow(
-                Cell(it.Description),
+                Cell(index == 0 ? $"{it.Description} ({serviceMonth})" : it.Description),
                 Cell(it.Qty.ToString(CultureInfo.InvariantCulture), align: TextAlignment.Center),
                 Cell(Money(it.UnitPrice, Gbp, "en-GB"), align: TextAlignment.Right),
                 Cell(it.RateLabel, align: TextAlignment.Center, color: Muted),

@@ -64,8 +64,13 @@ public static class DeliveryNoteExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         int complete = Lines.Count(l => l.Despatched == l.Ordered);
         DeliveryLine[] backOrdered = [.. Lines.Where(l => l.Despatched < l.Ordered)];
         int units = Lines.Sum(l => l.Despatched);
@@ -88,6 +93,7 @@ public static class DeliveryNoteExample
         doc.Add(AccentBar());
         doc.Add(Cell("DELIVERY NOTE · PACKING SLIP", size: 8.5f, bold: true, color: Accent, marginBottom: 4f));
         doc.Add(H1($"Delivery {Number}"));
+        doc.Add(new TextBlock($"Generated {DateText(day)}") { FontSize = 8 });
         doc.Add(Cell(
             "This is not an invoice. No payment is due against this document.",
             color: Muted,

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using BonniePDF;
 
@@ -56,8 +57,13 @@ public static class AllergenMatrixExample
     public static Document Generate() => Generate(LoadDefaultAssets());
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         ArgumentNullException.ThrowIfNull(assets);
         Document doc = new(
             new DocumentSettings
@@ -154,6 +160,7 @@ public static class AllergenMatrixExample
             FontSize = 8,
             Color = ColorPalette.Stone[500],
         });
+        doc.Add(new TextBlock($"Generated {DateText(day)}") { FontSize = 8 });
         return doc;
     }
 

@@ -1,3 +1,4 @@
+using System.Globalization;
 using BonniePDF;
 
 namespace BonniePDF.Examples.RetailEvents.EventTicket;
@@ -28,8 +29,13 @@ public static class EventTicketExample
     private static readonly Color Stub = ColorPalette.Slate[800];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         // Landscape boarding-pass style ticket: 640 x 300 pt.
         Document doc = new(new DocumentSettings
         {
@@ -137,6 +143,7 @@ public static class EventTicketExample
         stub.Add(Tb("GA - STANDING", 12, Cream, bold: true, bottom: 8, align: TextAlignment.Center));
         stub.Add(Tb("TICKET", 7, Mute, bold: true, bottom: 2, align: TextAlignment.Center));
         stub.Add(Tb("ASF26-4471-XK", 10, Cream, bold: true, align: TextAlignment.Center));
+        stub.Add(Tb($"Generated {DateText(day)}", 7, Mute, align: TextAlignment.Center));
 
         Container stubBox = new()
         {

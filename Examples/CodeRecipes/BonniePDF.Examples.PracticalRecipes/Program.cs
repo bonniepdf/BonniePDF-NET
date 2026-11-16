@@ -1,10 +1,14 @@
 using BonniePDF;
 using BonniePDF.Examples.PracticalRecipes;
+using System.Globalization;
 
 string output = args.FirstOrDefault() ?? Path.Combine(AppContext.BaseDirectory, "GeneratedPdfs");
 Directory.CreateDirectory(output);
+DateTimeOffset now = args.Length > 1 ? DateTimeOffset.Parse(args[1], CultureInfo.InvariantCulture) : DateTimeOffset.Now;
+CultureInfo culture = CultureInfo.GetCultureInfo(args.ElementAtOrDefault(2) ?? "en-GB");
+TimeZoneInfo timeZone = args.Length > 3 ? TimeZoneInfo.FindSystemTimeZoneById(args[3]) : TimeZoneInfo.Local;
 foreach (var (id, build) in new (string, Func<Document>)[] {
-    ("page-break-control", PageBreakControlExample.Generate), ("practical-tables", PracticalTablesExample.Generate),
+    ("page-break-control", () => PageBreakControlExample.Generate(now, culture, timeZone)), ("practical-tables", PracticalTablesExample.Generate),
     ("browser-download", BrowserDownloadExample.Generate), ("font-fallback", FontFallbackExample.Generate),
     ("document-diagnostics", DocumentDiagnosticsExample.Generate) })
 {

@@ -1,3 +1,4 @@
+using System.Globalization;
 using BonniePDF;
 
 namespace BonniePDF.Examples.ComplianceAudit.StatutoryComplianceReport;
@@ -92,8 +93,13 @@ public static class StatutoryComplianceReportExample
     ];
 
     // ── Document ─────────────────────────────────────────────────────────────
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         DocumentSettings settings = new(PdfSize.A4, 44)
         {
             PageColor = Color.White,
@@ -120,6 +126,7 @@ public static class StatutoryComplianceReportExample
         AddSummaryPage(doc);
         doc.AddPage();
         AddRegisterAndActions(doc);
+        doc.Add(new TextBlock($"Generated {DateText(day)}") { FontSize = 8 });
         return doc;
     }
 
@@ -182,7 +189,7 @@ public static class StatutoryComplianceReportExample
         findings.Add(H2("Key findings", mb: 2));
         findings.Add(Callout(
             "Needs attention: five inspections are overdue, three of them high risk (fire doors, goods lift and roof " +
-            "fall-arrest anchors). All have a named owner and a date before 6 November.",
+            "fall-arrest anchors). All have a named owner and a target date no later than 6 November.",
             "#fdeceb", Red));
         findings.Add(Callout(
             "Coming up: six items fall due within 30 days, led by water hygiene work (calorifier clean and monthly " +

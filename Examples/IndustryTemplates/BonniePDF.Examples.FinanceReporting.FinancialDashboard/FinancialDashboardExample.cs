@@ -20,9 +20,12 @@ public static class FinancialDashboardExample
     private static readonly Color Positive = Color.FromHex("#047857");
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, TimeZoneInfo? timeZone = null)
     {
-        int year = DateTime.Now.Year - 1;
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        int year = day.Year - 1;
         string[] months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         double[] revenue = [125, 146, 140, 175, 163, 190, 197, 182, 211, 226, 240, 233];
         Product[] products = [new("Enterprise", 910, 71, Blue), new("Professional", 650, 64, Teal), new("Starter", 446, 58, Violet), new("Services", 222, 82, Amber)];

@@ -68,8 +68,13 @@ public static class PurchaseOrderExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         decimal net = Lines.Sum(l => l.Quantity * l.UnitPrice);
         decimal vat = net * VatRate;
 
@@ -93,6 +98,7 @@ public static class PurchaseOrderExample
         doc.Add(AccentBar());
         doc.Add(Cell("PURCHASE ORDER", size: 8.5f, bold: true, color: Accent, marginBottom: 4f));
         doc.Add(H1($"Order {Number}"));
+        doc.Add(new TextBlock($"Generated {DateText(day)}") { FontSize = 8 });
         doc.Add(Cell(Revision, color: Muted, marginBottom: 14f));
 
         doc.Add(WeightedRow(

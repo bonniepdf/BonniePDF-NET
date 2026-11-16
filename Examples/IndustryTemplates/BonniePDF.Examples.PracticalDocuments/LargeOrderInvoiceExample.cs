@@ -96,11 +96,16 @@ public static class LargeOrderInvoiceExample
 
     public static Document Generate() => Generate(LoadDefaultAssets());
 
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets) => BuildInvoice(Enumerable.Range(0, 72).Select(i =>
+    public static Document Generate(DateTimeOffset now, CultureInfo culture, TimeZoneInfo timeZone) =>
+        Generate(LoadDefaultAssets(), now, culture, timeZone);
+
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null) => BuildInvoice(Enumerable.Range(0, 72).Select(i =>
     {
         var (product, unitPence, taxPercent) = Catalogue[i % Catalogue.Length];
         return new InvoiceLine($"{product}, {Sites[i / Catalogue.Length]}", i % 4 + 1, unitPence, i % 5 == 0 ? 150 : 0, taxPercent);
-    }).ToArray(), "PO-WFM-44817", assets);
+    }).ToArray(), "PO-WFM-44817", assets, now, culture, timeZone);
 
     // Integer minor units; tax rounds half up on each line before aggregation.
     public static Totals CalculateTotals(IReadOnlyList<InvoiceLine> lines)
@@ -123,12 +128,21 @@ public static class LargeOrderInvoiceExample
     public static Document BuildInvoice(
         IReadOnlyList<InvoiceLine> lines,
         string? purchaseOrder = null,
-        IReadOnlyDictionary<string, byte[]>? assets = null)
+        IReadOnlyDictionary<string, byte[]>? assets = null,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        string Money(long pence) => (pence / 100m).ToString("N2", culture);
+        var currency = (NumberFormatInfo)culture.NumberFormat.Clone();
+        currency.CurrencySymbol = "£";
+        string Currency(long pence) => (pence / 100m).ToString("C2", currency).Replace(' ', '\u00A0');
+        string invoiceNumber = $"INV-{day.Year}-072";
         var totals = CalculateTotals(lines);
         HorizontalStack footer = new() { WidthDistribution = WidthDistribution.Equal };
         footer.Add(Text("Northfield Supply Ltd  ·  VAT GB 318 4402 17", 8, ColorPalette.Slate[500]));
-        footer.Add(Text("INV-2026-072  ·  page {{CurrentPage}} of {{TotalPages}}", 8, ColorPalette.Slate[500], align: TextAlignment.Right));
+        footer.Add(Text(invoiceNumber + "  ·  page {{CurrentPage}} of {{TotalPages}}", 8, ColorPalette.Slate[500], align: TextAlignment.Right));
         var doc = new Document(new DocumentSettings
         {
             Language = "en-GB",
@@ -138,7 +152,7 @@ public static class LargeOrderInvoiceExample
             DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9).WithColor(ColorPalette.Slate[700]),
             FooterTemplate = PageTemplate.FromElements(@default: footer)
         })
-        { Metadata = new DocumentMetadata { Title = "Large-order invoice INV-2026-072" } };
+        { Metadata = new DocumentMetadata { Title = $"Large-order invoice {invoiceNumber}" } };
 
         // ── Header: brand and invoice details ──
         VerticalStack brandText = new() { Spacing = 2 };
@@ -149,8 +163,8 @@ public static class LargeOrderInvoiceExample
         brand.Add(brandText);
         VerticalStack meta = new() { Spacing = 2 };
         meta.Add(Text("INVOICE", 9, ColorPalette.Slate[900], bold: true, align: TextAlignment.Right));
-        meta.Add(Text("INV-2026-072", 14, ColorPalette.Slate[900], bold: true, align: TextAlignment.Right));
-        meta.Add(Text("Issued 25 October 2026  ·  due 24 November 2026", 9, ColorPalette.Slate[500], align: TextAlignment.Right));
+        meta.Add(Text(invoiceNumber, 14, ColorPalette.Slate[900], bold: true, align: TextAlignment.Right));
+        meta.Add(Text($"Issued {DateText(day)}  ·  due {DateText(day.AddDays(30))}", 9, ColorPalette.Slate[500], align: TextAlignment.Right));
         Grid header = new(1f, 1f) { Border = new Border(0), CellPadding = 0, Margin = new Thickness(0, 0, 0, 14) };
         header.AddRow(brand, meta);
         doc.Add(header);
@@ -214,12 +228,12 @@ public static class LargeOrderInvoiceExample
                 Text(Money(group.TaxPence), 9, ColorPalette.Slate[700], align: TextAlignment.Right));
 
         Grid sums = new(1f, 1f) { Border = new Border(0), CellPadding = 4 };
-        sums.AddRow(Text("Net", 10, ColorPalette.Slate[700], align: TextAlignment.Right), Text($"£{Money(totals.NetPence)}", 10, ColorPalette.Slate[700], align: TextAlignment.Right));
-        sums.AddRow(Text("VAT", 10, ColorPalette.Slate[700], align: TextAlignment.Right), Text($"£{Money(totals.TaxPence)}", 10, ColorPalette.Slate[700], align: TextAlignment.Right));
+        sums.AddRow(Text("Net", 10, ColorPalette.Slate[700], align: TextAlignment.Right), Text(Currency(totals.NetPence), 10, ColorPalette.Slate[700], align: TextAlignment.Right));
+        sums.AddRow(Text("VAT", 10, ColorPalette.Slate[700], align: TextAlignment.Right), Text(Currency(totals.TaxPence), 10, ColorPalette.Slate[700], align: TextAlignment.Right));
 
         HorizontalStack dueLine = new() { WidthDistribution = WidthDistribution.Equal };
         dueLine.Add(Text("Total due", 13, ColorPalette.Violet[900], bold: true));
-        dueLine.Add(Text($"£{Money(totals.GrossPence)}", 13, ColorPalette.Violet[900], bold: true, align: TextAlignment.Right));
+        dueLine.Add(Text(Currency(totals.GrossPence), 13, ColorPalette.Violet[900], bold: true, align: TextAlignment.Right));
         Container due = new() { BackgroundColor = ColorPalette.Violet[50], CornerRadius = 6, Padding = new Thickness(10, 8, 10, 8), Margin = new Thickness(0, 6, 0, 0), Child = dueLine };
 
         VerticalStack vatColumn = new() { Spacing = 6 };
@@ -236,12 +250,11 @@ public static class LargeOrderInvoiceExample
 
         VerticalStack closing = new();
         closing.Add(totalsRow);
-        closing.Add(Text("Payment terms: 30 days by bank transfer to Northfield Supply Ltd, sort code 20-45-77, account 61839204. Quote INV-2026-072 with your payment.", 9, ColorPalette.Slate[600], top: 14));
+        closing.Add(Text($"Payment terms: 30 days by bank transfer to Northfield Supply Ltd, sort code 20-45-77, account 61839204. Quote {invoiceNumber} with your payment.", 9, ColorPalette.Slate[600], top: 14));
         doc.Add(new PreventPageBreak { Child = closing });
         return doc;
     }
 
-    private static string Money(long pence) => NumberFormatter.Format(pence / 100m, "N2");
 
     private static TextBlock Text(string content, float size, Color color, bool bold = false, TextAlignment align = TextAlignment.Left, float top = 0)
     {

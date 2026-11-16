@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using BonniePDF;
 using BonniePDF.Drawing;
@@ -62,8 +63,16 @@ public static class BanquetEventOrderExample
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability", "MA0051:Method is too long",
         Justification = "The example intentionally keeps generation inline.")]
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        DateTime eventDay = day.AddDays(9);
+        string eventDate = DateText(eventDay);
+        string reference = $"BEO {eventDay.ToString("yyMM-dd", CultureInfo.InvariantCulture)}";
         ArgumentNullException.ThrowIfNull(assets);
         Document doc = new()
         {
@@ -74,7 +83,7 @@ public static class BanquetEventOrderExample
                 Accessibility = AccessibilityMode.PdfUa1,
                 Language = "en-GB",
                 DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(8.5f).WithColor(ColorPalette.Stone[700]),
-                FooterTemplate = PageTemplate.FromElements(@default: new TextBlock("Ardmore House Hotel  ·  Events office 0131 496 0745  ·  BEO 2611-14, issue 3")
+                FooterTemplate = PageTemplate.FromElements(@default: new TextBlock($"Ardmore House Hotel  ·  Events office 0131 496 0745  ·  {reference}, issue 3")
                 {
                     FontSize = 7.5f,
                     Color = Muted,
@@ -85,7 +94,7 @@ public static class BanquetEventOrderExample
             {
                 Title = "Banquet event order 2611-14",
                 Author = "Ardmore House Hotel",
-                Subject = "Wedding reception, 14 November 2026",
+                Subject = $"Wedding reception, {eventDate}",
             },
         };
         string crestSvg = Encoding.UTF8.GetString(GetAsset(assets, CrestSvgKey));
@@ -100,7 +109,7 @@ public static class BanquetEventOrderExample
         titleBrand.Add(new Svg { SvgData = crestSvg, Width = 28, Height = 28, IsDecorative = true });
         titleBrand.Add(title);
         masthead.Add(titleBrand);
-        masthead.Add(new TextBlock("BEO 2611-14  ·  Issue 3\nIssued 5 November 2026\nFinal numbers due 9 November")
+        masthead.Add(new TextBlock($"{reference}  ·  Issue 3\nIssued {DateText(day)}\nFinal numbers due {DateText(day.AddDays(4))}")
         {
             Alignment = TextAlignment.Right,
             Color = Muted,
@@ -116,7 +125,7 @@ public static class BanquetEventOrderExample
 
         // ── The event at a glance ──
         HorizontalStack facts = new() { WidthDistribution = WidthDistribution.Equal, Spacing = 8, Margin = new Thickness(0, 0, 0, 14) };
-        facts.Add(Fact("Date", "14 November 2026"));
+        facts.Add(Fact("Date", eventDate));
         facts.Add(Fact("Room", "The Orangery"));
         facts.Add(Fact("Numbers", "86 guaranteed, 90 laid"));
         facts.Add(Fact("Client", "Sofia Lindqvist"));

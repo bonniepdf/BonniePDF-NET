@@ -75,8 +75,13 @@ public static class RemittanceAdviceExample
     };
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         decimal allocated = Items.Sum(i => i.Amount);
         // The one property this document exists to assert.
         bool reconciles = Math.Abs(allocated - PaymentMade) < 0.005m;
@@ -104,6 +109,7 @@ public static class RemittanceAdviceExample
         doc.Add(AccentBar());
         doc.Add(Cell("REMITTANCE ADVICE", size: 8.5f, bold: true, color: Accent, marginBottom: 4f));
         doc.Add(H1($"Payment of {Money(PaymentMade)}"));
+        doc.Add(new TextBlock($"Generated {DateText(day)}") { FontSize = 8 });
         doc.Add(Cell(
             $"Sent {GbDate(PaidOn)} by {Method}. This is not an invoice.",
             color: Muted,

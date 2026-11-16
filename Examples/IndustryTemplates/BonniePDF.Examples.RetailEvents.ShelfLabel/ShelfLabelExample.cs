@@ -30,8 +30,13 @@ public static class ShelfLabelExample
     private static readonly Color Promo = ColorPalette.Rose[700];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         DocumentSettings settings = new(new PdfSize(311.8f, 212.6f, "Shelf Label 110x75"), 8)
         {
             Conformance = PdfAConformance.PdfA2a,
@@ -49,7 +54,7 @@ public static class ShelfLabelExample
         card.Add(RetailerStrip());
         card.Add(MainOffer());
         card.Add(DetailRow());
-        card.Add(BarcodePanel());
+        card.Add(BarcodePanel(DateText(day.AddDays(14))));
 
         doc.Add(new Container
         {
@@ -150,7 +155,7 @@ public static class ShelfLabelExample
         };
     }
 
-    private static Container BarcodePanel()
+    private static Container BarcodePanel(string promoEnd)
     {
         VerticalStack stack = new();
         stack.Add(Tb("EAN-13 / GS1 UK article number", 6.5f, Muted, bold: true, align: TextAlignment.Center,
@@ -170,7 +175,7 @@ public static class ShelfLabelExample
             bold: true, align: TextAlignment.Center, bottom: 1);
         storage.Margin = new Thickness(0, 4, 0, 1);
         stack.Add(storage);
-        stack.Add(Tb("SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026", 5.8f, Muted,
+        stack.Add(Tb($"SEL v04  -  Price file GF-27  -  Promo ends {promoEnd}", 5.8f, Muted,
             align: TextAlignment.Center));
 
         return new Container

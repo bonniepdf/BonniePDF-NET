@@ -86,11 +86,13 @@ public static class UsSalesInvoiceExample
     public static Document Generate() => Generate(LoadDefaultAssets());
 
     /// <summary>Builds the document using the supplied asset dictionary.</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
-        DateTime now = DateTime.Now;
-        int year = now.Year;
-        DateTime due = now.AddDays(30);
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        int year = day.Year;
+        DateTime due = day.AddDays(30);
 
         Document doc = new(new DocumentSettings { PageSize = PdfSize.A4, Margin = 44 });
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
@@ -142,7 +144,7 @@ public static class UsSalesInvoiceExample
 
         // ── Bill-to + details ────────────────────────────────────────────────
         VerticalStack details = new();
-        details.Add(TotalLine("Invoice date", now.ToString("MMM d, yyyy")));
+        details.Add(TotalLine("Invoice date", day.ToString("MMM d, yyyy")));
         details.Add(TotalLine("Due date (Net 30)", due.ToString("MMM d, yyyy")));
         details.Add(TotalLine("Purchase order", "PO-88213"));
         details.Add(TotalLine("Ship to", "Seattle, WA"));

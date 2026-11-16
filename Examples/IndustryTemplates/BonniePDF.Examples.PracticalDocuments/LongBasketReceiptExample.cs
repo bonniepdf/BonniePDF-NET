@@ -24,12 +24,17 @@ public static class LongBasketReceiptExample
 
     public static Document Generate() => Generate(LoadDefaultAssets());
 
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(DateTimeOffset now, CultureInfo culture, TimeZoneInfo timeZone) =>
+        Generate(LoadDefaultAssets(), now, culture, timeZone);
+
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
         ArgumentNullException.ThrowIfNull(assets);
         var lines = Enumerable.Range(0, 35).Select(i => new ReceiptLine(i % 3 == 0 ? $"Café crème, oat milk and freshly baked almond croissant — item {i + 1}" : $"Farmhouse pantry selection {i + 1}", 1, 350 + i * 10, i % 7 == 0 ? 50 : 0)).ToList();
         lines.Add(new ReceiptLine("Returned reusable cup", -1, 500, 0));
-        return BuildReceipt(lines, assets);
+        return BuildReceipt(lines, assets, now, culture, timeZone);
     }
 
     public static long CalculateTotal(IReadOnlyList<ReceiptLine> lines)
@@ -43,8 +48,14 @@ public static class LongBasketReceiptExample
         return total;
     }
 
-    public static Document BuildReceipt(IReadOnlyList<ReceiptLine> lines, IReadOnlyDictionary<string, byte[]>? assets = null)
+    public static Document BuildReceipt(IReadOnlyList<ReceiptLine> lines, IReadOnlyDictionary<string, byte[]>? assets = null,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime local = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).DateTime;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        string Money(long pence) => (pence / 100m).ToString("F2", culture);
+        string stamp = $"{DateText(local)} {local.ToString("HH:mm", culture)}";
         long total = CalculateTotal(lines);
         long discounts = lines.Sum(line => line.DiscountPence);
         // Courier shows the Western European characters itself. A character outside them, such as the ř in
@@ -82,7 +93,7 @@ public static class LongBasketReceiptExample
         doc.Add(Center("123 Harbour Road, Bristol BS1 4RW"));
         doc.Add(Rule());
         doc.Add(Row("Receipt", "#4022", labelWeight: 1, valueWeight: 2));
-        doc.Add(Row("Date", "25 Oct 2026 16:42", labelWeight: 1, valueWeight: 2));
+        doc.Add(Row("Date", stamp, labelWeight: 1, valueWeight: 2));
         doc.Add(Row("Customer", "Zoë Dvořák", labelWeight: 1, valueWeight: 2));
         doc.Add(Rule());
 
@@ -114,7 +125,6 @@ public static class LongBasketReceiptExample
         return doc;
     }
 
-    private static string Money(long pence) => NumberFormatter.Format(pence / 100m, "F2");
 
     /// <summary>A centred line of receipt text.</summary>
     private static TextBlock Center(string text, float marginTop = 0) => new(text)

@@ -53,15 +53,18 @@ public static class PublicLibraryMembershipLetterExample
     public static Document Generate() => Generate(LoadDefaultAssets());
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        string longDate = DateText(day);
+        string renewalDate = DateText(day.AddYears(1));
         ArgumentNullException.ThrowIfNull(assets);
         string crestSvg = System.Text.Encoding.UTF8.GetString(GetAsset(assets, "images/svg/borough-crest.svg"));
 
-        DateTime now = DateTime.Now;
-        CultureInfo enGb = CultureInfo.GetCultureInfo("en-GB");
-        string longDate = now.ToString("d MMMM yyyy", enGb);
-        string renewalDate = now.AddYears(1).ToString("d MMMM yyyy", enGb);
 
         DocumentSettings settings = new(PdfSize.A4, Margin)
         {

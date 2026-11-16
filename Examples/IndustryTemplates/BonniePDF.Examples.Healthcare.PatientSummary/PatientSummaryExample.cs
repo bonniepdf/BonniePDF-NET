@@ -91,8 +91,14 @@ public static class PatientSummaryExample
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability", "MA0051:Method is too long",
         Justification = "The example intentionally keeps generation inline.")]
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime local = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).DateTime;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        string stamp = $"{DateText(local)} {local.ToString("HH:mm", culture)}";
         ArgumentNullException.ThrowIfNull(assets);
         string markSvg = System.Text.Encoding.UTF8.GetString(GetAsset(assets, "images/svg/sample-healthcare.svg"));
 
@@ -129,7 +135,7 @@ public static class PatientSummaryExample
             Alignment = TextAlignment.Right,
             Margin = new Thickness(0),
         });
-        printed.Add(Tb("Printed 18 June 2026, 09:30", 8, ColorPalette.Teal[100], align: TextAlignment.Right));
+        printed.Add(Tb($"Generated {stamp}", 8, ColorPalette.Teal[100], align: TextAlignment.Right));
         HorizontalStack masthead = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 10 };
         masthead.Add(new Svg { SvgData = markSvg, Width = 24, Height = 24, IsDecorative = true });
         masthead.Add(trust, 1);
@@ -241,7 +247,7 @@ public static class PatientSummaryExample
             Theme = "modern",
             ShowValueLabels = false,
             References = [new ChartReference { Value = 2, EndValue = 3, Color = ColorPalette.Teal[50] }],
-            AltText = "INR results for the last eight weeks against the target range of 2.0 to 3.0: 1.8, 2.1, 2.6, 3.4, 2.9, 2.4, 2.2 and 2.5. Two results fell outside the range, on 30 April and 21 May.",
+            AltText = "INR results for the eight weeks to 18 June 2026 against the target range of 2.0 to 3.0: 1.8, 2.1, 2.6, 3.4, 2.9, 2.4, 2.2 and 2.5. Two results fell outside the range, on 30 April and 21 May.",
         });
         chart.Add(Tb("Weekly INR. Two readings fell outside the shaded target range.", 7, Mute));
         VerticalStack medicinesColumn = new();

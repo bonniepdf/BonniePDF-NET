@@ -58,8 +58,23 @@ public static class UtilityBillExample
         Currency: "GBP");
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        DateTime end = day.AddDays(-5);
+        var bill = Sample with
+        {
+            Period = new BillingPeriod(DateText(end.AddDays(-91)), DateText(end), DateText(day), DateText(day.AddDays(14))),
+            Locale = culture.Name,
+            History = Sample.History.Select((reading, index) => reading with
+            {
+                Month = end.AddMonths(index - 11).ToString("MMM", CultureInfo.GetCultureInfo("en-GB")),
+            }).ToArray(),
+        };
         DocumentSettings settings = new(PdfSize.A4, PageOrientation.Portrait, 38)
         {
             Conformance = PdfAConformance.PdfA2a,
@@ -67,7 +82,7 @@ public static class UtilityBillExample
             Language = "en-GB",
         };
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9f).WithColor(Ink);
-        return BuildDocument(Sample, settings);
+        return BuildDocument(bill, settings);
     }
 
     /// <summary>Pure builder: the same data always produces the same document.</summary>
@@ -385,8 +400,12 @@ public static class UtilityBillExample
         Alignment = align,
     };
 
-    private static string Money(decimal value, UtilityBillData data) =>
-        value.ToString("C2", CultureInfo.GetCultureInfo(data.Locale));
+    private static string Money(decimal value, UtilityBillData data)
+    {
+        var format = (NumberFormatInfo)CultureInfo.GetCultureInfo(data.Locale).NumberFormat.Clone();
+        format.CurrencySymbol = data.Currency switch { "GBP" => "£", "EUR" => "€", "USD" => "$", _ => data.Currency };
+        return value.ToString("C2", format).Replace(' ', '\u00A0');
+    }
 
     // ── Domain model (the data-to-document boundary) ──────────────────────────
 

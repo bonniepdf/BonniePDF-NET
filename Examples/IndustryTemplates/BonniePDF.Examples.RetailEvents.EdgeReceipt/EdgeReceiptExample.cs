@@ -34,12 +34,19 @@ public static class EdgeReceiptExample
     public static Document Generate() => Generate(LoadDefaultAssets());
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime local = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).DateTime;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        var currency = (NumberFormatInfo)culture.NumberFormat.Clone();
+        currency.CurrencySymbol = "£";
+        string Money(double amount) => amount.ToString("C2", currency).Replace(' ', '\u00A0');
+        string stamp = $"{DateText(local)} {local.ToString("HH:mm", culture)}";
         ArgumentNullException.ThrowIfNull(assets);
         string logoSvg = Encoding.UTF8.GetString(GetAsset(assets, LogoSvgKey));
-        DateTime now = new(2026, 6, 16, 10, 30, 0);
-        string stamp = now.ToString("dd MMM yyyy HH:mm", CultureInfo.GetCultureInfo("en-GB"));
 
         DocumentSettings settings = new(new PdfSize(226.77f, 720, "Receipt 80mm"), 16)
         {
@@ -136,7 +143,6 @@ public static class EdgeReceiptExample
         return doc;
     }
 
-    private static string Money(double amount) => "£" + amount.ToString("0.00", CultureInfo.InvariantCulture);
 
     private static TextBlock Center(string text, float size = 8, Color? color = null, float marginTop = 0)
     {

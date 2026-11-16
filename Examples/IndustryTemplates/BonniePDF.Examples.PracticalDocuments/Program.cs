@@ -1,11 +1,16 @@
 using BonniePDF;
 using BonniePDF.Examples.PracticalDocuments;
+using System.Globalization;
 
 string output = args.FirstOrDefault() ?? Path.Combine(AppContext.BaseDirectory, "GeneratedPdfs");
 Directory.CreateDirectory(output);
+DateTimeOffset now = args.Length > 1 ? DateTimeOffset.Parse(args[1], CultureInfo.InvariantCulture) : DateTimeOffset.Now;
+CultureInfo culture = CultureInfo.GetCultureInfo(args.ElementAtOrDefault(2) ?? "en-GB");
+TimeZoneInfo timeZone = args.Length > 3 ? TimeZoneInfo.FindSystemTimeZoneById(args[3]) : TimeZoneInfo.Local;
 foreach (var (id, build) in new (string, Func<Document>)[] {
-    ("large-order-invoice", LargeOrderInvoiceExample.Generate), ("long-basket-receipt", LongBasketReceiptExample.Generate),
-    ("multilingual-customer-letter", MultilingualCustomerLetterExample.Generate) })
+    ("large-order-invoice", () => LargeOrderInvoiceExample.Generate(now, culture, timeZone)),
+    ("long-basket-receipt", () => LongBasketReceiptExample.Generate(now, culture, timeZone)),
+    ("multilingual-customer-letter", () => MultilingualCustomerLetterExample.Generate(now, timeZone)) })
 {
     using var document = build();
     await File.WriteAllBytesAsync(Path.Combine(output, id + ".pdf"), await document.GenerateBytesAsync());

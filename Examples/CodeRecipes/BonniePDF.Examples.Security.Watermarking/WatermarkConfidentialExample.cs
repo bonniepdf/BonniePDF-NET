@@ -12,8 +12,12 @@ namespace BonniePDF.Examples.Security.Watermarking;
 public static class WatermarkConfidentialExample
 {
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        int year = day.Year - 1;
         Document doc = new(new DocumentSettings
         {
             PageSize = PdfSize.A4,
@@ -41,7 +45,7 @@ public static class WatermarkConfidentialExample
 
         doc.Add(new TextBlock
         {
-            Text = $"Financial Performance Report Q4 {DateTime.Now.Year}",
+            Text = $"Financial Performance Report Q4 {year}",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 22,
             Color = ColorPalette.Slate[800],
@@ -54,8 +58,8 @@ public static class WatermarkConfidentialExample
         // Header row (real tabular data → AddHeader emits TH cells for assistive tech)
         table.AddHeader(
             CreateHeaderCell("Metric"),
-            CreateHeaderCell($"Q3 {DateTime.Now.Year}"),
-            CreateHeaderCell($"Q4 {DateTime.Now.Year}")
+            CreateHeaderCell($"Q3 {year}"),
+            CreateHeaderCell($"Q4 {year}")
         );
 
         // Data rows

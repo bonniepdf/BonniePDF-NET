@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using BonniePDF;
 
@@ -84,8 +85,16 @@ public static class BusinessInvoiceExample
     public static Document Generate() => Generate(LoadDefaultAssets());
 
     /// <summary>Builds the document using the supplied asset dictionary.</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-US");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        NumberFormatInfo currencyFormat = (NumberFormatInfo)culture.NumberFormat.Clone();
+        currencyFormat.CurrencySymbol = string.Equals(culture.Name, "en-GB", StringComparison.Ordinal) ? "US$" : "$";
+        string Money(decimal amount) => amount.ToString("C2", currencyFormat).Replace(' ', '\u00A0');
         Document doc = new(new DocumentSettings
         {
             PageSize = PdfSize.A4,
@@ -99,7 +108,7 @@ public static class BusinessInvoiceExample
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-US";
 
-        doc.Metadata.Title = $"Invoice INV-{DateTime.Now.Year}-001";
+        doc.Metadata.Title = $"Invoice INV-{day.Year}-001";
         doc.Metadata.Author = "Sample Company Inc.";
         doc.Metadata.Subject = "Invoice for design and development services.";
 
@@ -228,10 +237,10 @@ public static class BusinessInvoiceExample
             Color = TextDark,
             Margin = new Thickness(0, 0, 0, 4)
         });
-        AddDetailRow(detailsStack, "Invoice #", $"{DateTime.Now.Year}-001");
-        AddDetailRow(detailsStack, "Invoice date", DateTime.Now.ToString("MM/dd/yyyy"));
+        AddDetailRow(detailsStack, "Invoice #", $"{day.Year}-001");
+        AddDetailRow(detailsStack, "Invoice date", DateText(day));
         AddDetailRow(detailsStack, "Terms", "Net 14");
-        AddDetailRow(detailsStack, "Due date", DateTime.Now.AddDays(14).ToString("MM/dd/yyyy"));
+        AddDetailRow(detailsStack, "Due date", DateText(day.AddDays(14)));
 
         addressTable.AddRow(
             billToStack,
@@ -311,12 +320,12 @@ public static class BusinessInvoiceExample
                 }.AlignCenter(),
                 new TextBlock
                 {
-                    Text = $"${item.Price:N2}", FontName = StandardFonts.Helvetica, FontSize = 9,
+                    Text = Money(item.Price), FontName = StandardFonts.Helvetica, FontSize = 9,
                     Color = TextMedium
                 }.AlignRight(),
                 new TextBlock
                 {
-                    Text = $"${lineTotal:N2}", FontName = StandardFonts.Helvetica, FontSize = 9,
+                    Text = Money(lineTotal), FontName = StandardFonts.Helvetica, FontSize = 9,
                     Color = TextDark
                 }.AlignRight()
             );
@@ -378,7 +387,7 @@ public static class BusinessInvoiceExample
             }.AlignLeft(),
             new TextBlock
             {
-                Text = $"${subtotal:N2}", FontName = StandardFonts.Helvetica, FontSize = 9,
+                Text = Money(subtotal), FontName = StandardFonts.Helvetica, FontSize = 9,
                 Color = TextDark
             }.AlignRight()
         );
@@ -398,7 +407,7 @@ public static class BusinessInvoiceExample
             }.AlignLeft(),
             new TextBlock
             {
-                Text = $"${tax:N2}", FontName = StandardFonts.Helvetica, FontSize = 9,
+                Text = Money(tax), FontName = StandardFonts.Helvetica, FontSize = 9,
                 Color = TextDark
             }.AlignRight()
         );
@@ -418,7 +427,7 @@ public static class BusinessInvoiceExample
             }.AlignLeft(),
             new TextBlock
             {
-                Text = "-$1,400.00", FontName = StandardFonts.Helvetica, FontSize = 9,
+                Text = Money(-1400), FontName = StandardFonts.Helvetica, FontSize = 9,
                 Color = AccentGreenText
             }.AlignRight()
         );
@@ -447,7 +456,7 @@ public static class BusinessInvoiceExample
             }.AlignLeft(),
             new TextBlock
             {
-                Text = $"${totalDue:N2}", FontName = StandardFonts.HelveticaBold, FontSize = 14,
+                Text = Money(totalDue), FontName = StandardFonts.HelveticaBold, FontSize = 14,
                 Color = TextDark
             }.AlignRight()
         );

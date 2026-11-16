@@ -13,8 +13,12 @@ namespace BonniePDF.Examples.ComparisonCharts.ChartShowcase;
 public static class ChartShowcaseExample
 {
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        int year = day.Year - 1;
         // Create a new PDF document
         Document document = new(new DocumentSettings
         {
@@ -81,11 +85,11 @@ public static class ChartShowcaseExample
 
         // 7. Pie Chart (on seventh page)
         document.AddPage();
-        AddPieChart(document);
+        AddPieChart(document, year);
 
         // 8. Multi-Series Line Chart (on eighth page)
         document.AddPage();
-        AddMultiSeriesLineChart(document);
+        AddMultiSeriesLineChart(document, year);
 
         // Save document
 
@@ -274,7 +278,7 @@ public static class ChartShowcaseExample
         document.Add(lineChart);
     }
 
-    private static void AddMultiSeriesLineChart(Document document)
+    private static void AddMultiSeriesLineChart(Document document, int year)
     {
         // Add a title
         document.Add(new TextBlock
@@ -289,7 +293,7 @@ public static class ChartShowcaseExample
 
         document.Add(new TextBlock
         {
-            Text = $"Comparing {DateTime.Now.Year - 1} and {DateTime.Now.Year} revenue with multiple series",
+            Text = $"Comparing {year - 1} and {year} revenue with multiple series",
             FontSize = 11,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Left,
@@ -304,7 +308,7 @@ public static class ChartShowcaseExample
             {
                 new ChartSeries
                 {
-                    Name = $"{DateTime.Now.Year - 1}",
+                    Name = $"{year - 1}",
                     Color = Color.FromHex("#2563eb"),
                     DataPoints = new List<ChartDataPoint>
                     {
@@ -324,7 +328,7 @@ public static class ChartShowcaseExample
                 },
                 new ChartSeries
                 {
-                    Name = $"{DateTime.Now.Year}",
+                    Name = $"{year}",
                     Color = Color.FromHex("#7c3aed"),
                     DataPoints = new List<ChartDataPoint>
                     {
@@ -549,12 +553,12 @@ public static class ChartShowcaseExample
         document.Add(dotPlotChart);
     }
 
-    private static void AddPieChart(Document document)
+    private static void AddPieChart(Document document, int year)
     {
         // Add a title
         document.Add(new TextBlock
         {
-            Text = $"Doughnut Chart: Revenue Mix {DateTime.Now.Year}",
+            Text = $"Doughnut Chart: Revenue Mix {year}",
             FontName = StandardFonts.HelveticaBold,
             FontSize = 22,
             Color = Color.FromHex("#0f172a"),
@@ -574,7 +578,7 @@ public static class ChartShowcaseExample
         // Create chart data with all 12 months
         ChartData chartData = new()
         {
-            Title = $"Product Revenue {DateTime.Now.Year}",
+            Title = $"Product Revenue {year}",
             Series = [new ChartSeries { DataPoints = new[] { ("Enterprise", 910000m), ("Professional", 650000m), ("Starter", 446000m), ("Services", 222000m) }.Select(p => new ChartDataPoint { Label = p.Item1, Value = p.Item2, LabelFormat = "N0" }).ToList() }]
         };
 

@@ -41,9 +41,14 @@ public static class AuditReportExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
-        string longDate = DateTime.Now.ToString("d MMMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        string longDate = DateText(day);
         DocumentSettings settings = new(PdfSize.A4, 54)
         {
             Conformance = PdfAConformance.PdfA2a,

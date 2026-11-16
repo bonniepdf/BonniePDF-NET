@@ -47,8 +47,13 @@ public static class GuestFolioExample
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability", "MA0051:Method is too long",
         Justification = "The example intentionally keeps generation inline.")]
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         ArgumentNullException.ThrowIfNull(assets);
         Document doc = new()
         {
@@ -223,6 +228,7 @@ public static class GuestFolioExample
         close.Add(sign, 1);
         close.Add(copy);
         doc.Add(close);
+        doc.Add(new TextBlock($"Generated {DateText(day)}") { FontSize = 8 });
         return doc;
     }
 

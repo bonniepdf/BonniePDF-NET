@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using BonniePDF;
 
@@ -9,7 +10,7 @@ namespace BonniePDF.Examples.PracticalDocuments;
 [System.ComponentModel.Description("One order confirmation in French, Greek, Arabic and Hebrew under the same letterhead, with the Arabic and Hebrew letters and their order tables mirrored right to left.")]
 public static class MultilingualCustomerLetterExample
 {
-    private sealed record Letter(string Font, bool Rtl, string Title, string Address, string Date, string Body,
+    private sealed record Letter(string Font, bool Rtl, string Title, string Address, string Locale, string Body,
         string[] Columns, (string Item, string Quantity, string Price)[] Items, (string Label, string Amount) Total, string SignOff);
 
     private static readonly Letter[] Letters =
@@ -17,7 +18,7 @@ public static class MultilingualCustomerLetterExample
         new("NotoSans-Regular.ttf", false,
             Title: "Confirmation de votre commande",
             Address: "Madame Zoë Martin\n18 rue des Écoles\n75005 Paris",
-            Date: "25 octobre 2026",
+            Locale: "fr-FR",
             Body: "Merci pour votre commande. Elle est confirmée et sera livrée à votre adresse sous cinq jours ouvrés. Vous en trouverez le détail ci-dessous ; merci de conserver cette lettre.",
             Columns: ["Article", "Qté", "Prix"],
             Items: [("Lampe de lecture en laiton", "1", "120,00 €"), ("Plaid en lin", "1", "54,00 €")],
@@ -26,7 +27,7 @@ public static class MultilingualCustomerLetterExample
         new("NotoSans-Regular.ttf", false,
             Title: "Επιβεβαίωση παραγγελίας",
             Address: "Κυρία Ελένη Παπαδοπούλου\nΟδός Ερμού 24\n105 63 Αθήνα",
-            Date: "25 Οκτωβρίου 2026",
+            Locale: "el-GR",
             Body: "Σας ευχαριστούμε για την παραγγελία σας. Επιβεβαιώθηκε και θα παραδοθεί στη διεύθυνσή σας μέσα σε πέντε εργάσιμες ημέρες. Θα βρείτε τις λεπτομέρειες παρακάτω· παρακαλούμε κρατήστε αυτή την επιστολή.",
             Columns: ["Προϊόν", "Ποσ.", "Τιμή"],
             Items: [("Ορειχάλκινο φωτιστικό ανάγνωσης", "1", "120,00 €"), ("Λινό ριχτάρι", "1", "54,00 €")],
@@ -35,7 +36,7 @@ public static class MultilingualCustomerLetterExample
         new("NotoNaskhArabic-Regular.ttf", true,
             Title: "تأكيد الطلب",
             Address: "السيدة مريم العتيبي\nحي العليا، الرياض 12214",
-            Date: "25 أكتوبر 2026",
+            Locale: "ar-SA",
             Body: "شكراً لطلبكم. تم تأكيد الطلب وسيصل إلى عنوانكم خلال خمسة أيام عمل. يرجى مراجعة تفاصيل الطلب أدناه والاحتفاظ بهذه الرسالة.",
             Columns: ["المنتج", "الكمية", "السعر"],
             Items: [("مصباح قراءة نحاسي", "1", "450.00 ر.س"), ("غطاء من الكتان", "1", "205.00 ر.س")],
@@ -45,7 +46,7 @@ public static class MultilingualCustomerLetterExample
         new("NotoSerifHebrew-Regular.ttf", true,
             Title: "אישור הזמנה",
             Address: "גב׳ מרים לוי\nרחוב הרצל 12\nתל אביב 6578210",
-            Date: "25 באוקטובר 2026",
+            Locale: "he-IL",
             Body: "תודה על הזמנתכם. ההזמנה אושרה ותגיע לכתובתכם בתוך חמישה ימי עסקים. פרטי ההזמנה מופיעים להלן; נא לשמור מכתב זה.",
             Columns: ["מוצר", "כמות", "מחיר"],
             Items: [("מנורת קריאה מפליז", "1", "480.00 ₪"), ("שמיכת פשתן", "1", "215.00 ₪")],
@@ -113,8 +114,14 @@ public static class MultilingualCustomerLetterExample
 
     public static Document Generate() => Generate(LoadDefaultAssets());
 
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(DateTimeOffset now, TimeZoneInfo timeZone) =>
+        Generate(LoadDefaultAssets(), now, timeZone: timeZone);
+
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
         var doc = new Document(new DocumentSettings
         {
             Language = "en-GB",
@@ -185,7 +192,10 @@ public static class MultilingualCustomerLetterExample
 
             HorizontalStack heading = new() { WidthDistribution = WidthDistribution.Equal };
             heading.Add(Body(letter.Address));
-            heading.Add(Body(letter.Date, color: ColorPalette.Slate[500], align: TextAlignment.End));
+            var letterCulture = (CultureInfo)CultureInfo.GetCultureInfo(letter.Locale).Clone();
+            letterCulture.DateTimeFormat.Calendar = new GregorianCalendar();
+            string datePattern = letter.Locale == "he-IL" ? "d 'ב'MMMM yyyy" : "d MMMM yyyy";
+            heading.Add(Body(day.ToString(datePattern, letterCulture), color: ColorPalette.Slate[500], align: TextAlignment.End));
 
             VerticalStack content = new()
             {

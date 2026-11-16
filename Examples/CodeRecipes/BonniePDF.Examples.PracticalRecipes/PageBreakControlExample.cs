@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using BonniePDF;
 
@@ -69,8 +70,16 @@ public static class PageBreakControlExample
 
     public static Document Generate() => Generate(LoadDefaultAssets());
 
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(DateTimeOffset now, CultureInfo culture, TimeZoneInfo timeZone) =>
+        Generate(LoadDefaultAssets(), now, culture, timeZone);
+
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         var doc = new Document(new DocumentSettings
         {
             PageSize = PdfSize.A5,
@@ -206,6 +215,7 @@ public static class PageBreakControlExample
             });
         }
         doc.Add(new PreventPageBreak { Child = checklist });
+        doc.Add(new TextBlock($"Generated {DateText(day)}") { FontSize = 8 });
         return doc;
     }
 
