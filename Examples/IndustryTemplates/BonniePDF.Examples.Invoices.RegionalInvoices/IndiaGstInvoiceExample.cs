@@ -38,11 +38,13 @@ public static class IndiaGstInvoiceExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, TimeZoneInfo? timeZone = null)
     {
-        DateTime now = DateTime.Now;
-        int year = now.Year;
-        string date = now.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-IN"));
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        int year = day.Year;
+        string date = day.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-IN"));
 
         Document doc = new(new DocumentSettings { PageSize = PdfSize.A4, Margin = 40 });
         doc.Settings.Conformance = PdfAConformance.PdfA2a;

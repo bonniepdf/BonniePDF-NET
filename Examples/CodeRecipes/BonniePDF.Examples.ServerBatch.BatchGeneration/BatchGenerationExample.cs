@@ -68,8 +68,14 @@ public static class BatchGenerationExample
     }
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime local = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).DateTime;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        string stamp = $"{DateText(local)} {local.ToString("HH:mm", culture)}";
         // ── The run ───────────────────────────────────────────────────────────
         //
         // Synchronous here so the example stays a plain Generate() like every other
@@ -169,7 +175,7 @@ public static class BatchGenerationExample
 
         // The caveat sits with the figures it qualifies, not alone at the end of the document.
         doc.Add(Cell(
-            $"Run completed {GbDate(DateTime.Now)} on the machine that generated this document. "
+            $"Run completed {stamp} on the machine that generated this document. "
             + "Figures are a single sample, not a benchmark: they include process warm-up and whatever else the machine "
             + "was doing.",
             size: 8.5f,
@@ -348,5 +354,4 @@ public static class BatchGenerationExample
     /// </summary>
     private static string Money(decimal value, string symbol = "£", string culture = "en-GB") => (value < 0 ? "-" : string.Empty) + symbol + Math.Abs(value).ToString("N2", CultureInfo.GetCultureInfo(culture));
 
-    private static string GbDate(DateTime date) => date.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
 }

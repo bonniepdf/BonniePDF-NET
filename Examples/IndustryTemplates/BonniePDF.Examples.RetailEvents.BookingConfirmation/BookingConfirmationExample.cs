@@ -32,7 +32,6 @@ public static class BookingConfirmationExample
     private const string ManageUrl = "https://trips.example.com/manage/BKG-7Q4M2X";
     private const string CardEnding = "4821";
 
-    private static readonly DateTime Booked = new(2026, 8, 2);
 
     private sealed record Passenger(string Name, string Ticket, string SeatOut, string SeatBack);
 
@@ -91,8 +90,6 @@ public static class BookingConfirmationExample
 
     private static readonly string[] StayAddress = ["Rua Exemplo 12", "1100-000 Lisbon", "Portugal"];
 
-    private static readonly DateTime StayCheckIn = new(2026, 10, 10);
-    private static readonly DateTime StayCheckOut = new(2026, 10, 17);
 
     private static readonly PriceLine[] PriceLines =
     [
@@ -106,12 +103,17 @@ public static class BookingConfirmationExample
     public static Document Generate() => Generate(LoadDefaultAssets());
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        DateTime checkIn = day.AddDays(69);
+        DateTime checkOut = day.AddDays(76);
         ArgumentNullException.ThrowIfNull(assets);
         byte[] lisbonPhoto = GetAsset(assets, LisbonPhotoKey);
         int total = PriceLines.Sum(l => l.Pence);
-        int nights = (StayCheckOut - StayCheckIn).Days;
+        int nights = (checkOut - checkIn).Days;
 
         Document doc = new(new DocumentSettings { PageSize = PdfSize.A4, Margin = 38 });
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
@@ -134,7 +136,7 @@ public static class BookingConfirmationExample
         heading.Add(Cell("BOOKING CONFIRMATION", size: 8.5f, bold: true, color: Accent, marginBottom: 4f));
         heading.Add(H1($"Your trip to {Destination}"));
         heading.Add(Cell(
-            $"{GbDate(StayCheckIn)} to {GbDate(StayCheckOut)} · {nights} nights · {Passengers.Length} adults",
+            $"{GbDate(checkIn)} to {GbDate(checkOut)} · {nights} nights · {Passengers.Length} adults",
             color: Muted,
             marginBottom: 10f));
         heading.Add(Cell("BOOKING REFERENCE", size: 6.5f, bold: true, color: Muted, marginBottom: 2f));
@@ -181,16 +183,16 @@ public static class BookingConfirmationExample
             "Confirmed",
             [
                 Cell(
-                    $"Booked on {GbDate(Booked)} and paid in full by card ending {CardEnding}. "
+                    $"Booked on {GbDate(day)} and paid in full by card ending {CardEnding}. "
                     + "Keep this confirmation: you will be asked for the reference at check-in and at the hotel.",
                     size: 9f),
             ],
             Positive));
 
         doc.Add(H2("Your flights"));
-        foreach (FlightLeg leg in Legs)
+        for (int index = 0; index < Legs.Length; index++)
         {
-            doc.Add(LegCard(leg));
+            doc.Add(LegCard(Legs[index] with { Date = index == 0 ? checkIn : checkOut }));
         }
 
         doc.Add(H2("Travellers"));
@@ -217,8 +219,8 @@ public static class BookingConfirmationExample
         doc.Add(WeightedRow(
             [
                 stay,
-                Field("Check-in", $"{GbDate(StayCheckIn)}, from {StayCheckInFrom}"),
-                Field("Check-out", $"{GbDate(StayCheckOut)}, by {StayCheckOutBy}"),
+                Field("Check-in", $"{GbDate(checkIn)}, from {StayCheckInFrom}"),
+                Field("Check-out", $"{GbDate(checkOut)}, by {StayCheckOutBy}"),
                 Field("Room", $"{StayRoom}\n{StayBoard}"),
             ],
             spacing: 14f,

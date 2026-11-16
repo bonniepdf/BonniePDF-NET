@@ -16,9 +16,12 @@ public static class MultiSeriesLineChartExample
         ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, TimeZoneInfo? timeZone = null)
     {
-        int year = DateTime.Now.Year;
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        int year = day.Year - 1;
 
         Document document = new(new DocumentSettings
         {

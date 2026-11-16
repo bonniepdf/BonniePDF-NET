@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using BonniePDF;
 
@@ -36,8 +37,15 @@ public static class PdfComplianceExample
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability", "MA0051:Method is too long",
         Justification = "The example intentionally keeps generation inline.")]
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        int startYear = day.Year + (day.Month >= 4 ? 1 : 0);
+        string title = $"Your council tax for {startYear} to {startYear + 1}";
         // ── Footer: the sender on the left, a discreet standards badge on the right ──
         HorizontalStack footer = new() { WidthDistribution = WidthDistribution.Equal };
         footer.Add(new TextBlock("Sample Borough Council  ·  Revenues and Benefits") { FontSize = 8, Color = ColorPalette.Slate[500] });
@@ -58,7 +66,7 @@ public static class PdfComplianceExample
         {
             Metadata = new DocumentMetadata
             {
-                Title = "Your council tax for 2027 to 2028",
+                Title = title,
                 Author = "Sample Borough Council",
                 Subject = "Council tax notice, archival (PDF/A-2a) and accessible (PDF/UA-1).",
                 Keywords = "pdf/a-2a, pdf/ua-1, accessibility, archival, council tax, BonniePDF",
@@ -92,10 +100,10 @@ public static class PdfComplianceExample
         });
         HorizontalStack top = new() { WidthDistribution = WidthDistribution.Equal, Margin = new Thickness(0, 0, 0, 20) };
         top.Add(new TextBlock("Sample Resident\n12 Mill Lane\nSample Town\nST4 2QR"));
-        top.Add(new TextBlock("5 November 2026\nAccount 7700 4821 93\nBand D") { Alignment = TextAlignment.Right, Color = ColorPalette.Slate[600] });
+        top.Add(new TextBlock($"{DateText(day)}\nAccount 7700 4821 93\nBand D") { Alignment = TextAlignment.Right, Color = ColorPalette.Slate[600] });
         doc.Add(top);
 
-        doc.Add(new Heading("Your council tax for 2027 to 2028")
+        doc.Add(new Heading(title)
         {
             Level = 1,
             FontName = StandardFonts.HelveticaBold,
@@ -104,7 +112,7 @@ public static class PdfComplianceExample
             Margin = new Thickness(0, 0, 0, 8),
         });
         doc.Add(new TextBlock(
-            "This letter sets out your council tax for the year from 1 April 2027. The total is £2,230.76, which we will collect from your bank account in ten monthly instalments: £223.13 on 1 April, then £223.07.")
+            $"This letter sets out your council tax for the year from 1 April {startYear}. The total is £2,230.76, which we will collect from your bank account in ten monthly instalments: £223.13 on 1 April, then £223.07.")
         {
             Margin = new Thickness(0, 0, 0, 12),
         });

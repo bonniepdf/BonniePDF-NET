@@ -32,8 +32,6 @@ public static class FacturXInvoiceExample
     private static readonly Color RuleCol = ColorPalette.Slate[200];
     private static readonly Color Accent = ColorPalette.Blue[800]; // EU-flag blue
 
-    private const string Eur = "€";
-    private const string Locale = "en-GB";
     private const decimal VatRate = 0.19m;
 
     // Line items reconcile with the embedded XML: 40 × 85 + 1 × 600 = 4000 net.
@@ -44,8 +42,16 @@ public static class FacturXInvoiceExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        NumberFormatInfo currencyFormat = (NumberFormatInfo)culture.NumberFormat.Clone();
+        currencyFormat.CurrencySymbol = "€";
+        string Money(decimal amount) => amount.ToString("C2", currencyFormat).Replace(' ', '\u00A0');
         Document doc = new(new DocumentSettings
         {
             PageSize = PdfSize.A4,
@@ -83,11 +89,12 @@ public static class FacturXInvoiceExample
         Grid header = new(1.3f, 1f) { CellPadding = 0, Border = Border.None, Margin = new Thickness(0, 16, 0, 18) };
         header.AddRow(seller, titleStack);
         doc.Add(header);
+        doc.Add(Cell($"Generated {DateText(day)}", size: 8, color: Muted, margin: new Thickness(0, 0, 0, 8)));
 
         // ── Buyer + details ─────────────────────────────────────────────────
         VerticalStack details = new();
-        details.Add(TotalLine("Invoice date", "07 Jul 2026"));
-        details.Add(TotalLine("Due date", "21 Jul 2026"));
+        details.Add(TotalLine("Invoice date", DateText(new DateTime(2026, 7, 7))));
+        details.Add(TotalLine("Due date", DateText(new DateTime(2026, 7, 21))));
         details.Add(TotalLine("Buyer reference", "PO-2026-042"));
         details.Add(TotalLine("Terms", "14 days net"));
 
@@ -130,8 +137,8 @@ public static class FacturXInvoiceExample
             table.AddRow(
                 desc,
                 Cell(qty.ToString(CultureInfo.InvariantCulture), align: TextAlignment.Center),
-                Cell(Money(unitPrice, Eur, Locale), align: TextAlignment.Right),
-                Cell(Money(amount, Eur, Locale), align: TextAlignment.Right));
+                Cell(Money(unitPrice), align: TextAlignment.Right),
+                Cell(Money(amount), align: TextAlignment.Right));
         }
 
         doc.Add(table);
@@ -140,10 +147,10 @@ public static class FacturXInvoiceExample
         // ── Totals (mirror the embedded XML exactly: 4000 / 760 / 4760) ───────
         decimal vat = net * VatRate;
         VerticalStack totals = new();
-        totals.Add(TotalLine("Total net", Money(net, Eur, Locale)));
-        totals.Add(TotalLine("VAT (19%)", Money(vat, Eur, Locale)));
+        totals.Add(TotalLine("Total net", Money(net)));
+        totals.Add(TotalLine("VAT (19%)", Money(vat)));
         totals.Add(Divider(Ink, 0.6f));
-        totals.Add(TotalLine("Total due (EUR)", Money(net + vat, Eur, Locale), bold: true, size: 13, color: Accent));
+        totals.Add(TotalLine("Total due (EUR)", Money(net + vat), bold: true, size: 13, color: Accent));
 
         Container totalsBox = new()
         {
@@ -207,9 +214,6 @@ public static class FacturXInvoiceExample
 
         return b;
     }
-
-    private static string Money(decimal value, string symbol, string culture)
-        => symbol + value.ToString("N2", CultureInfo.GetCultureInfo(culture));
 
     // A single TextBlock using hard \n breaks, so an address or payment block
     // tags as one paragraph under PDF/UA.

@@ -148,8 +148,23 @@ public static class QuotationExample
     public static Document Generate() => Generate(LoadDefaultAssets());
 
     /// <summary>Builds the document using the supplied asset dictionary.</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        var quotation = Sample with
+        {
+            Reference = Sample.Reference with
+            {
+                QuoteNumber = $"QTE-{day.Year}-0417",
+                Issued = DateText(day),
+                ValidUntil = DateText(day.AddDays(30)),
+            },
+            Locale = culture.Name,
+        };
         DocumentSettings settings = new(PdfSize.A4, PageOrientation.Portrait, 40)
         {
             Conformance = PdfAConformance.PdfA2a,
@@ -157,7 +172,7 @@ public static class QuotationExample
             Language = "en-GB",
             FooterTemplate = pageNumber => new TextBlock
             {
-                Text = $"{Sample.Reference.QuoteNumber} · Page {pageNumber} of {TextElementBase.TotalPagesToken}",
+                Text = $"{quotation.Reference.QuoteNumber} · Page {pageNumber} of {TextElementBase.TotalPagesToken}",
                 FontName = StandardFonts.Helvetica,
                 FontSize = 7f,
                 Color = Faint,
@@ -166,7 +181,7 @@ public static class QuotationExample
         };
         settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9f).WithColor(Ink);
 
-        return BuildDocument(Sample, settings, assets);
+        return BuildDocument(quotation, settings, assets);
     }
 
     /// <summary>Pure builder: the same data always produces the same document.</summary>
@@ -510,8 +525,12 @@ public static class QuotationExample
         return stack;
     }
 
-    private static string Money(decimal value, QuotationData data) =>
-        value.ToString("C0", CultureInfo.GetCultureInfo(data.Locale));
+    private static string Money(decimal value, QuotationData data)
+    {
+        var format = (NumberFormatInfo)CultureInfo.GetCultureInfo(data.Locale).NumberFormat.Clone();
+        format.CurrencySymbol = data.Currency switch { "GBP" => "£", "EUR" => "€", "USD" => "$", _ => data.Currency };
+        return value.ToString("C0", format).Replace(' ', '\u00A0');
+    }
 
     // ── Domain model (the data-to-document boundary) ──────────────────────────
 

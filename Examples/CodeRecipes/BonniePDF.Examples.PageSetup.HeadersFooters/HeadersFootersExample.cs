@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using BonniePDF;
 namespace BonniePDF.Examples.PageSetup.HeadersFooters;
@@ -73,8 +74,13 @@ public static class HeadersFootersExample
 
     public static Document Generate() => Generate(LoadDefaultAssets());
 
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         Color teal = ColorPalette.Teal[700];
         HorizontalStack firstPage = new() { WidthDistribution = WidthDistribution.Weighted, Spacing = 6 };
         firstPage.Add(new Svg
@@ -158,6 +164,7 @@ public static class HeadersFootersExample
         foreach (var (depot, parcels, onTime, firstAttempt) in Depots)
             depots.AddRow(Cell(depot, TextAlignment.Left), Cell(parcels, TextAlignment.Right), Cell(onTime, TextAlignment.Right), Cell(firstAttempt, TextAlignment.Right));
         doc.Add(depots);
+        doc.Add(new TextBlock($"Generated {DateText(day)}") { FontSize = 8 });
         return doc;
     }
 

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using BonniePDF;
 
@@ -35,7 +36,7 @@ public static class OutpatientAppointmentLetterExample
 
     private static readonly Detail[] Appointment =
     [
-        new("Date", "Tuesday 15 September 2026"),
+        new("Date", ""),
         new("Time", "10:30 am"),
         new("Clinic", "Cardiology outpatient clinic"),
         new("Clinician", "Dr Sample Clinician"),
@@ -54,8 +55,14 @@ public static class OutpatientAppointmentLetterExample
     public static Document Generate() => Generate(LoadDefaultAssets());
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        string appointmentDate = day.AddDays(45).ToString("dddd d MMMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
         ArgumentNullException.ThrowIfNull(assets);
         string markSvg = Encoding.UTF8.GetString(GetAsset(assets, MarkSvgKey));
         string mapSvg = Encoding.UTF8.GetString(GetAsset(assets, MapSvgKey));
@@ -84,7 +91,7 @@ public static class OutpatientAppointmentLetterExample
         doc.Metadata.Subject = "Accessible Outpatient Appointment using entirely fictional data.";
         doc.Metadata.Keywords = "sample, healthcare, appointment, accessibility, fictional data";
 
-        doc.Add(Masthead(markSvg));
+        doc.Add(Masthead(markSvg, DateText(day)));
         doc.Add(SampleBanner());
 
         doc.Add(new Heading("Your outpatient appointment")
@@ -102,7 +109,7 @@ public static class OutpatientAppointmentLetterExample
             "We have arranged an outpatient appointment for you. The main details are shown below. " +
             "Please read the information on this page before you attend.", mb: 18));
 
-        doc.Add(AppointmentCard());
+        doc.Add(AppointmentCard(appointmentDate));
         AddActionsAndContact(doc, mapSvg);
 
         return doc;
@@ -153,7 +160,7 @@ public static class OutpatientAppointmentLetterExample
         doc.Add(Disclaimer());
     }
 
-    private static Grid Masthead(string markSvg)
+    private static Grid Masthead(string markSvg, string issued)
     {
         Grid masthead = new(1.5f, 1) { CellPadding = 0, Margin = new Thickness(0, 0, 0, 8) };
 
@@ -173,7 +180,7 @@ public static class OutpatientAppointmentLetterExample
 
         VerticalStack reference = new() { Spacing = 3 };
         reference.Add(new TextBlock
-            { Text = "Issued 1 August 2026", FontSize = 9.5f, Color = Muted, Alignment = TextAlignment.Right });
+            { Text = $"Issued {issued}", FontSize = 9.5f, Color = Muted, Alignment = TextAlignment.Right });
         reference.Add(new TextBlock
             { Text = "Reference SAMPLE-OP-1042", FontSize = 9.5f, Color = Muted, Alignment = TextAlignment.Right });
 
@@ -196,10 +203,10 @@ public static class OutpatientAppointmentLetterExample
         },
     };
 
-    private static Container AppointmentCard()
+    private static Container AppointmentCard(string appointmentDate)
     {
         Grid details = new(1, 1) { CellPadding = 5 };
-        details.AddRow(DetailStack(Appointment[0]), DetailStack(Appointment[1]));
+        details.AddRow(DetailStack(new Detail("Date", appointmentDate)), DetailStack(Appointment[1]));
         details.AddRow(DetailStack(Appointment[2]), DetailStack(Appointment[3]));
         details.AddRow(DetailStack(Appointment[4]), DetailStack(Appointment[5]));
 

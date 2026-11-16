@@ -85,8 +85,13 @@ public static class ExhibitBundleIndexExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         int totalItems = Sections.Sum(s => s.Items.Length);
         int totalPages = Sections.Sum(s => s.Items.Sum(i => i.Pages));
 
@@ -262,6 +267,7 @@ public static class ExhibitBundleIndexExample
             });
         }
 
+        doc.Add(new TextBlock($"Generated {DateText(day)}") { FontSize = 8 });
         return doc;
     }
 

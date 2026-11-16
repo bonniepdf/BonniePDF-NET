@@ -67,12 +67,16 @@ public static class AnnualReportExample
     private const string ReportTitle = "Annual Report 2025";
 
     // Captured once, when the document is generated - surfaced in the footer.
-    private static readonly string Generated =
-        "Generated " + new DateTime(2026, 6, 16, 10, 30, 0).ToString("d MMMM yyyy 'at' HH:mm", CultureInfo.InvariantCulture);
-
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime local = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).DateTime;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        string stamp = $"{DateText(local)} {local.ToString("HH:mm", culture)}";
+        string generated = $"Generated {stamp}";
         DocumentSettings settings = new()
         {
             PageSize = PdfSize.A4,
@@ -89,7 +93,7 @@ public static class AnnualReportExample
             // Suppressed on the cover; on every inner page they sit centred
             // inside the top/bottom margin bands painted by the background slot.
             HeaderTemplate = pageNumber => pageNumber == 1 ? null : HeaderRow(pageNumber),
-            FooterTemplate = pageNumber => pageNumber == 1 ? null : FooterRow(pageNumber),
+            FooterTemplate = pageNumber => pageNumber == 1 ? null : FooterRow(pageNumber, generated),
         };
 
         Document doc = new(settings);
@@ -124,7 +128,7 @@ public static class AnnualReportExample
         doc.Add(CoverSubtitle($"Fiscal Year {Year}"));
         doc.Add(new Spacer(40));
         doc.Add(CoverCredit("Prepared with BonniePDF"));
-        doc.Add(CoverCredit(Generated));
+        doc.Add(CoverCredit(generated));
 
         // ══════════════════════════════════════════════════════════════════
         //  Page 2 - letter to shareholders + performance highlights
@@ -251,8 +255,8 @@ public static class AnnualReportExample
 
     // The generation time needs a wider column than the page number, so the
     // footer leans on weighted columns rather than equal thirds.
-    private static HorizontalStack FooterRow(int pageNumber) => BandRow(
-        BandCell(Generated, TextAlignment.Left, bold: false, ColorPalette.Blue[600]),
+    private static HorizontalStack FooterRow(int pageNumber, string generated) => BandRow(
+        BandCell(generated, TextAlignment.Left, bold: false, ColorPalette.Blue[600]),
         BandCell($"{Company} - Confidential", TextAlignment.Center, bold: false, ColorPalette.Blue[600]),
         BandCell($"Page {pageNumber}", TextAlignment.Right, bold: true, Primary),
         leftWeight: 5, centerWeight: 4, rightWeight: 2);

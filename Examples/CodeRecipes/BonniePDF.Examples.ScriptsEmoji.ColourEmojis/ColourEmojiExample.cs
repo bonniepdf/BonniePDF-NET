@@ -1,3 +1,4 @@
+using System.Globalization;
 using BonniePDF;
 
 namespace BonniePDF.Examples.ScriptsEmoji.ColourEmojis;
@@ -19,8 +20,13 @@ public static class ColourEmojiExample
     ];
 
     /// <summary>Builds the document. Supply the two font assets or use the bundled example fonts.</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]>? assets = null)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]>? assets = null,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         Document doc = new();
         doc.Settings.EmojiRendering = EmojiRendering.Colour;
         doc.Settings.Conformance = PdfAConformance.PdfA2b;
@@ -34,7 +40,7 @@ public static class ColourEmojiExample
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily(text).WithSize(11).WithColor(ColorPalette.Slate[700]);
 
         doc.Add(new Heading("Team update") { Level = 1, FontSize = 26, Color = ColorPalette.Slate[900] });
-        doc.Add(new TextBlock("Week 45  ·  5 November 2026") { Color = ColorPalette.Slate[500], Margin = new Thickness(0, 2, 0, 18) });
+        doc.Add(new TextBlock($"Week 45  ·  5 November 2026  ·  Generated {DateText(day)}") { Color = ColorPalette.Slate[500], Margin = new Thickness(0, 2, 0, 18) });
 
         // Each item is a row: the emoji large in its own column, the news beside it.
         VerticalStack card = new() { Spacing = 16 };

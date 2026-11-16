@@ -134,8 +134,13 @@ public static class CustomerAccountStatementExample
     };
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         // The running balance is computed, never transcribed. A statement whose
         // closing figure does not follow from its own rows is the one defect this
         // document cannot have.
@@ -232,6 +237,7 @@ public static class CustomerAccountStatementExample
         refStack.Add(Cell(Number, align: TextAlignment.Right));
         titleRow.Add(refStack, 2);
         doc.Add(titleRow);
+        doc.Add(new TextBlock($"Generated {DateText(day)}") { FontSize = 8 });
 
         HorizontalStack parties = new()
         {

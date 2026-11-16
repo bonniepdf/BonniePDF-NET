@@ -75,8 +75,13 @@ public static class DunningLetterExample
         => Math.Max(0, (int)(asAt - item.Due).TotalDays);
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         Stage stage = Stages[StageNumber];
 
         // Days overdue are derived, so the same letter sent a week later says
@@ -133,6 +138,7 @@ public static class DunningLetterExample
         doc.Add(Cell(GbDate(LetterDate), size: 10f, color: Muted, marginBottom: 14f));
 
         doc.Add(H1($"Overdue account — {Money(principal)} outstanding"));
+        doc.Add(new TextBlock($"Generated {DateText(day)}") { FontSize = 8 });
         doc.Add(Cell($"Our reference {Reference} · your account {Account}", color: Muted, marginBottom: 14f));
 
         // ── The body ──────────────────────────────────────────────────────────

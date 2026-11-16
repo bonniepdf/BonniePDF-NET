@@ -25,8 +25,18 @@ public static class SaasInvoiceExample
     private static readonly Color Panel = ColorPalette.Slate[50];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        string DateAt(int days) => DateText(day.AddDays(days));
+        string invoiceNumber = $"INV-{day.Year}-0042";
+        NumberFormatInfo currency = (NumberFormatInfo)culture.NumberFormat.Clone();
+        currency.CurrencySymbol = "£";
+        string Money(double value) => value.ToString("C2", currency).Replace(' ', '\u00A0');
         Document doc = new(new DocumentSettings
         {
             PageSize = PdfSize.A4,
@@ -37,7 +47,7 @@ public static class SaasInvoiceExample
             DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(10).WithColor(BodyCol),
         });
 
-        doc.Metadata.Title = "Invoice INV-2026-0042";
+        doc.Metadata.Title = $"Invoice {invoiceNumber}";
         doc.Metadata.Author = "Sample Company Ltd";
         doc.Metadata.Subject = "Subscription invoice - accessible (PDF/UA) and archival (PDF/A-2a)";
 
@@ -47,9 +57,9 @@ public static class SaasInvoiceExample
         brand.Add(Tb("Infrastructure for builders", 9, Mute));
 
         VerticalStack meta = new();
-        meta.Add(Tb("Invoice  INV-2026-0042", 10, Ink, bold: true, align: TextAlignment.Right));
-        meta.Add(Tb("Issued  18 Jun 2026", 9, Mute, align: TextAlignment.Right));
-        meta.Add(Tb("Due  02 Jul 2026", 9, Mute, align: TextAlignment.Right));
+        meta.Add(Tb($"Invoice  {invoiceNumber}", 10, Ink, bold: true, align: TextAlignment.Right));
+        meta.Add(Tb($"Issued  {DateAt(0)}", 9, Mute, align: TextAlignment.Right));
+        meta.Add(Tb($"Due  {DateAt(14)}", 9, Mute, align: TextAlignment.Right));
 
         Grid headerTable = new(1f, 1f) { Border = Border.None, CellPadding = 0 };
         headerTable.AddRow(brand, meta);
@@ -94,7 +104,7 @@ public static class SaasInvoiceExample
         Grid summary = new(1f, 1.4f, 1f) { Border = Border.None, CellPadding = 0 };
         summary.AddRow(
             Fact("PLAN", "Pro, billed monthly"),
-            Fact("BILLING PERIOD", "18 Jun \u2013 17 Jul 2026"),
+            Fact("BILLING PERIOD", $"{DateAt(0)} – {DateAt(29)}"),
             Fact("CUSTOMER ID", "CUS-20418"));
         doc.Add(new Container
         {
@@ -122,10 +132,10 @@ public static class SaasInvoiceExample
         (string Desc, int Qty, double Unit)[] lines =
         {
             ("Pro plan - 25 seats (monthly)", 25, 18.0),
-            ("Proration - 5 seats added 4 Jun (14 of 30 days)", 5, 8.4),
+            ($"Proration - 5 seats added {DateAt(-14)} (14 of 30 days)", 5, 8.4),
             ("Additional storage - 2 TB", 2, 40.0),
             ("Premium support add-on", 1, 199.0),
-            ("Egress overage - June", 1, 36.5),
+            ("Egress overage - previous billing period", 1, 36.5),
         };
 
         double subtotal = 0;
@@ -171,17 +181,16 @@ public static class SaasInvoiceExample
         payInfo.Add(Tb("Pay by bank transfer or scan to pay", 10, Ink, bold: true, bottom: 6));
         payInfo.Add(Tb("Account name  Sample Company Ltd", 10, BodyCol, bottom: 2));
         payInfo.Add(Tb("Sort code  04-00-72    Account  19483055", 10, BodyCol, bottom: 2));
-        payInfo.Add(Tb("Reference  INV-2026-0042", 10, BodyCol, bottom: 2));
+        payInfo.Add(Tb($"Reference  {invoiceNumber}", 10, BodyCol, bottom: 2));
         payInfo.Add(Tb("Amount  " + Money(total), 10, Ink, bold: true));
 
         QRCode qr = new()
         {
-            Data = "https://pay.example.com/inv/INV-2026-0042",
+            Data = $"https://pay.example.com/inv/{invoiceNumber}",
             Size = 96,
             QuietZone = 1,
             ErrorCorrection = QrErrorCorrection.Medium,
-            AltText = "QR code to pay invoice INV-2026-0042 online, total £" +
-                      total.ToString("0.00", CultureInfo.InvariantCulture),
+            AltText = $"QR code to pay invoice {invoiceNumber} online, total {Money(total)}",
         };
         Container qrWrap = new() { Child = qr, Padding = new Thickness(6) };
 
@@ -207,7 +216,6 @@ public static class SaasInvoiceExample
         return doc;
     }
 
-    private static string Money(double n) => "£" + n.ToString("N2", CultureInfo.InvariantCulture);
 
     private static void TotalRow(Table t, string label, string value, bool bold = false)
     {

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using BonniePDF;
 
@@ -28,8 +29,17 @@ public static class GiftVoucherExample
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability", "MA0051:Method is too long",
         Justification = "The example intentionally keeps generation inline.")]
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        string expiry = DateText(day.AddYears(1));
+        NumberFormatInfo currencyFormat = (NumberFormatInfo)culture.NumberFormat.Clone();
+        currencyFormat.CurrencySymbol = "£";
+        string Money(decimal amount) => amount.ToString("C2", currencyFormat).Replace(' ', '\u00A0');
         ArgumentNullException.ThrowIfNull(assets);
         Document doc = new()
         {
@@ -73,7 +83,7 @@ public static class GiftVoucherExample
                 AltText = $"Voucher serial number barcode: {Serial}",
             },
         });
-        serialRow.Add(new TextBlock($"Valid until 5 November 2027\nSerial {Serial}") { FontSize = 7.5f, Color = ColorPalette.Stone[400] });
+        serialRow.Add(new TextBlock($"Valid until {expiry}\nSerial {Serial}") { FontSize = 7.5f, Color = ColorPalette.Stone[400] });
 
         HorizontalStack brandRow = new()
         {
@@ -135,7 +145,7 @@ public static class GiftVoucherExample
             Color = ColorPalette.Amber[800],
             Margin = new Thickness(0, 0, 0, 8),
         });
-        foreach (var (label, value) in new[] { ("Serial", Serial), ("Value", "£100.00"), ("Issued", "5 November 2026"), ("Expires", "5 November 2027") })
+        foreach (var (label, value) in new[] { ("Serial", Serial), ("Value", Money(100)), ("Issued", DateText(day)), ("Expires", expiry) })
         {
             VerticalStack field = new() { Margin = new Thickness(0, 0, 0, 4) };
             field.Add(new TextBlock(label) { FontSize = 6.5f, Color = ColorPalette.Stone[500] });

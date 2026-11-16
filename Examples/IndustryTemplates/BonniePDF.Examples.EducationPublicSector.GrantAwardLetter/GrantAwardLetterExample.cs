@@ -1,3 +1,4 @@
+using System.Globalization;
 using BonniePDF;
 
 namespace BonniePDF.Examples.EducationPublicSector.GrantAwardLetter;
@@ -45,8 +46,6 @@ public static class GrantAwardLetterExample
     [
         new("Decision", "Awarded"),
         new("Grant", "Community Project Grant"),
-        new("Award period", "1 Sep 2026 to 31 Aug 2027"),
-        new("First instalment", "Friday 26 September 2026"),
     ];
 
     /// <summary>Asset paths required by this example, relative to the shared <c>Examples/assets</c> directory.</summary>
@@ -59,8 +58,16 @@ public static class GrantAwardLetterExample
     public static Document Generate() => Generate(LoadDefaultAssets());
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate(IReadOnlyDictionary<string, byte[]> assets)
+    public static Document Generate(
+        IReadOnlyDictionary<string, byte[]> assets,
+        DateTimeOffset? now = null, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        DateTime awardStart = new DateTime(day.Year, day.Month, 1).AddMonths(1);
+        DateTime awardEnd = awardStart.AddYears(1).AddDays(-1);
+        DateTime firstInstalment = awardStart.AddDays(((int)DayOfWeek.Friday - (int)awardStart.DayOfWeek + 7) % 7 + 21);
         ArgumentNullException.ThrowIfNull(assets);
         byte[] gardenImage = GetAsset(assets, "images/newsletter/community-garden.jpg");
 
@@ -92,7 +99,7 @@ public static class GrantAwardLetterExample
 
         doc.Add(Masthead());
         doc.Add(ServiceHeader());
-        doc.Add(AddressBlock());
+        doc.Add(AddressBlock(DateText(day), day.Year));
 
         doc.Add(H1("Decision on your grant application", "decision"));
         doc.Add(Body("Dear Sample Recipient,", bold: true, mb: 8));
@@ -101,7 +108,7 @@ public static class GrantAwardLetterExample
             "successful. This letter explains what we have awarded, how your grant is paid, when it " +
             "starts, and what to do next."));
 
-        doc.Add(DecisionCallout(gardenImage));
+        doc.Add(DecisionCallout(gardenImage, $"{DateText(awardStart)} to {DateText(awardEnd)}", DateText(firstInstalment)));
 
         doc.Add(H2("How your grant is made up", "breakdown"));
         doc.Add(BreakdownTable());
@@ -172,7 +179,7 @@ public static class GrantAwardLetterExample
         return stack;
     }
 
-    private static Grid AddressBlock()
+    private static Grid AddressBlock(string issueDate, int year)
     {
         Grid top = new(1, 1)
         {
@@ -187,18 +194,18 @@ public static class GrantAwardLetterExample
             mb: 0);
 
         VerticalStack meta = new();
-        meta.Add(Body("Issued 4 August 2026", align: TextAlignment.Right, mb: 0));
-        meta.Add(Body("Reference SAMPLE-GRANT-2026-00417", align: TextAlignment.Right, color: Muted, size: 10, mb: 0));
+        meta.Add(Body($"Issued {issueDate}", align: TextAlignment.Right, mb: 0));
+        meta.Add(Body($"Reference SAMPLE-GRANT-{year}-00417", align: TextAlignment.Right, color: Muted, size: 10, mb: 0));
 
         top.AddRow(addr, meta);
         return top;
     }
 
-    private static Container DecisionCallout(byte[] gardenImage)
+    private static Container DecisionCallout(byte[] gardenImage, string awardPeriod, string firstInstalment)
     {
         Grid details = new(1, 1) { CellPadding = 5 };
         details.AddRow(DetailStack(DecisionDetails[0]), DetailStack(DecisionDetails[1]));
-        details.AddRow(DetailStack(DecisionDetails[2]), DetailStack(DecisionDetails[3]));
+        details.AddRow(DetailStack(new Detail("Award period", awardPeriod)), DetailStack(new Detail("First instalment", firstInstalment)));
 
         VerticalStack stack = new();
         stack.Add(new TextBlock { Text = "Our decision", FontSize = 11, Color = Muted });

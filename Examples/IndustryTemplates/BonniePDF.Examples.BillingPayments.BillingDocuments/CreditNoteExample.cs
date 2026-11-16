@@ -24,11 +24,6 @@ public static class CreditNoteExample
 {
     private const decimal VatRate = 0.2m;
 
-    private static readonly DateTime Issued = new(2026, 8, 11);
-    private static readonly DateTime InvoiceDated = new(2026, 8, 7);
-
-    private const string Number = "CRN-2026-0118";
-    private const string AgainstInvoice = "INV-2026-3340";
     private const string Account = "ACC-004182";
     private const string ReasonCode = "CR-04 — Billed in error";
     private const string Treatment = "Offset against the account balance";
@@ -68,8 +63,17 @@ public static class CreditNoteExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime issued = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
+        DateTime invoiceDate = issued.AddDays(-4);
+        // This live sample uses its own references, distinct from the statement’s historical entries.
+        string creditNumber = $"CRN-{issued.Year}-0218";
+        string invoiceNumber = $"INV-{invoiceDate.Year}-4340";
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
         decimal net = Lines.Sum(l => l.Quantity * l.UnitPrice);
         decimal vat = net * VatRate;
         decimal total = net + vat;
@@ -80,10 +84,10 @@ public static class CreditNoteExample
         doc.Settings.Language = "en-GB";
         doc.Settings.DefaultTextStyle = new TextStyle().WithFamily("Helvetica").WithSize(9.5f).WithColor(Ink);
         doc.Settings.FooterTemplate = pageNumber => Band(
-            $"Credit note {Number} against invoice {AgainstInvoice}",
+            $"Credit note {creditNumber} against invoice {invoiceNumber}",
             $"Page {pageNumber} of {TextElementBase.TotalPagesToken}");
 
-        doc.Metadata.Title = $"Credit note {Number} — against invoice {AgainstInvoice}";
+        doc.Metadata.Title = $"Credit note {creditNumber} — against invoice {invoiceNumber}";
         doc.Metadata.Author = "Sample Supplier Ltd";
         doc.Metadata.Subject =
             "Credit note against an earlier invoice: corrected lines with reasons, VAT reversal, and how the credit is applied (sample data).";
@@ -93,17 +97,17 @@ public static class CreditNoteExample
         // read at a glance must not be mistaken for another invoice.
         doc.Add(AccentBar(Negative));
         doc.Add(Cell("CREDIT NOTE", size: 8.5f, bold: true, color: Negative, marginBottom: 4f));
-        doc.Add(H1($"Credit note {Number}"));
+        doc.Add(H1($"Credit note {creditNumber}"));
         doc.Add(Cell(
-            $"Against invoice {AgainstInvoice} dated {GbDate(InvoiceDated)}",
+            $"Against invoice {invoiceNumber} dated {DateText(invoiceDate)}",
             color: Muted,
             marginBottom: 14f));
 
         doc.Add(WeightedRow(
             [
-                Field("Credit note date", GbDate(Issued)),
+                Field("Credit note date", DateText(issued)),
                 Field("Account", Account),
-                Field("Original invoice", AgainstInvoice),
+                Field("Original invoice", invoiceNumber),
                 Field("Reason code", ReasonCode),
             ],
             marginBottom: 6f));
@@ -174,14 +178,14 @@ public static class CreditNoteExample
         doc.Add(H2("VAT"));
         doc.Add(Cell(
             $"This credit note reverses output tax of {Money(vat)} previously accounted for on invoice "
-            + $"{AgainstInvoice}. The customer should adjust input tax recovered on that invoice by the same "
+            + $"{invoiceNumber}. The customer should adjust input tax recovered on that invoice by the same "
             + "amount in the period in which this credit note is received.",
             size: 9f,
             color: Muted,
             marginBottom: 10f));
 
         doc.Add(Cell(
-            $"Approved by {ApprovedBy} on {GbDate(Issued)}. Queries: quote {Number}.",
+            $"Approved by {ApprovedBy} on {DateText(issued)}. Queries: quote {creditNumber}.",
             size: 8.5f,
             color: Muted));
 
@@ -368,7 +372,6 @@ public static class CreditNoteExample
     /// </summary>
     private static string Money(decimal value, string symbol = "£", string culture = "en-GB") => (value < 0 ? "-" : string.Empty) + symbol + Math.Abs(value).ToString("N2", CultureInfo.GetCultureInfo(culture));
 
-    private static string GbDate(DateTime date) => date.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
 
     private static TextBlock AddressLines(IEnumerable<string> items, float size = 9f) => Cell(string.Join('\n', items), size: size);
 }

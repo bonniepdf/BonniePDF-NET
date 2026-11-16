@@ -90,8 +90,18 @@ public static class CommercialInvoiceExample
     ];
 
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
-    public static Document Generate()
+    public static Document Generate() => Generate(now: null);
+
+    public static Document Generate(DateTimeOffset? now, CultureInfo? culture = null, TimeZoneInfo? timeZone = null)
     {
+        DateTime local = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).DateTime;
+        culture ??= CultureInfo.GetCultureInfo("en-GB");
+        string DateText(DateTime value) => value.ToString(string.Equals(culture.Name, "en-US", StringComparison.Ordinal) ? "MM/dd/yyyy" : "d", culture);
+        string stamp = $"{DateText(local)} {local.ToString("HH:mm", culture)}";
+        NumberFormatInfo currencyFormat = (NumberFormatInfo)culture.NumberFormat.Clone();
+        currencyFormat.CurrencySymbol = "€";
+        string Money(decimal amount) => amount.ToString("C2", currencyFormat).Replace(' ', '\u00A0');
+        string Amount(int cents) => Money(cents / 100m);
         int goodsTotal = GoodsLines.Sum(g => g.Quantity * g.UnitCents);
         int invoiceTotal = goodsTotal + Freight + Insurance;
         int netGrams = GoodsLines.Sum(g => g.Quantity * g.NetGrams);
@@ -139,6 +149,7 @@ public static class CommercialInvoiceExample
         top.Add(heading, 3);
         top.Add(waybill, 2);
         doc.Add(top);
+        doc.Add(Cell($"Generated {stamp}", size: 8, color: Muted, marginBottom: 8));
 
         doc.Add(WeightedRow(
             [PartyBlock("Exporter", Exporter), PartyBlock("Consignee", Consignee), PartyBlock("Deliver to", DeliverTo)],
@@ -146,7 +157,7 @@ public static class CommercialInvoiceExample
             marginBottom: 4f));
         doc.Add(WeightedRow(
             [
-                Field("Invoice date", GbDate(InvoiceDate)),
+                Field("Invoice date", DateText(InvoiceDate)),
                 Field("Customer reference", CustomerReference),
                 Field("Delivery terms", Incoterm),
                 Field("Payment terms", PaymentTerms),
@@ -237,7 +248,7 @@ public static class CommercialInvoiceExample
                 size: 9f),
         ]));
         doc.Add(WeightedRow(
-            [Slot("Name and position", "Authorised signatory"), Slot("Signature", string.Empty), Slot("Date", GbDate(InvoiceDate))],
+            [Slot("Name and position", "Authorised signatory"), Slot("Signature", string.Empty), Slot("Date", DateText(InvoiceDate))],
             spacing: 22f,
             marginBottom: 6f));
 
@@ -248,9 +259,6 @@ public static class CommercialInvoiceExample
     private static string Thousands(int n) => NumberFormatter.Format(n, "N0");
 
     /// <summary>Cents as a decimal amount: 1,234.56.</summary>
-    private static string Amount(int cents) =>
-        $"{Thousands(cents / 100)}.{(cents % 100).ToString("D2", CultureInfo.InvariantCulture)}";
-
     /// <summary>Grams as kilograms to one decimal place, rounding half up: 290.1.</summary>
     private static string Kg(int grams)
     {
@@ -399,7 +407,6 @@ public static class CommercialInvoiceExample
         return row;
     }
 
-    private static string GbDate(DateTime date) => date.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
 
     private static TextBlock AddressLines(IEnumerable<string> items, float size = 9f) => Cell(string.Join('\n', items), size: size);
 }
