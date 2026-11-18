@@ -2,8 +2,8 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "text-engine-dotnet",
   "source": {
-    "commit": "1491a4e1f3e7e9df143f5fa166a1662b60b27d4f",
-    "dirty": true
+    "commit": "622b5fecb29bc9732e75d376a68c9e31c99fa856",
+    "dirty": false
   },
   "files": {
     "Api/ColourReadLimits.cs": "ff4d82765f68a1c7ab263df776d13df69433d144d8575ded49114bb008084d73",
