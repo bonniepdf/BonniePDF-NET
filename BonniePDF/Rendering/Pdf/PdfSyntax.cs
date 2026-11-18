@@ -192,7 +192,7 @@ internal static class PdfSyntax
         // rounded away - prints as "0", as it does in the TypeScript implementation
         // and in the double overload below.
         string s = value.ToString("0.###", CultureInfo.InvariantCulture);
-        return s == "-0" ? "0" : s;
+        return string.Equals(s, "-0", StringComparison.Ordinal) ? "0" : s;
     }
 
     /// <summary>
@@ -228,7 +228,7 @@ internal static class PdfSyntax
 
         string s = value.ToString("F3", CultureInfo.InvariantCulture);
         if (s.Contains('.', StringComparison.Ordinal)) s = s.TrimEnd('0').TrimEnd('.');
-        return s == "-0" ? "0" : s;
+        return string.Equals(s, "-0", StringComparison.Ordinal) ? "0" : s;
     }
 
     /// <summary>

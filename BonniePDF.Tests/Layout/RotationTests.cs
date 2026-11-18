@@ -44,6 +44,7 @@ public class RotationTests
         using var fixture = JsonDocument.Parse(json);
         using var doc = await BonniePDF.Document.FromDefinitionAsync(json);
         var output = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true });
+        Assert.NotNull(output.Snapshot);
         var all = Nodes(output.Snapshot.Root).ToArray();
         byte[] bytes = doc.GenerateBytes();
         string raw = Encoding.Latin1.GetString(bytes);
@@ -58,7 +59,7 @@ public class RotationTests
 
         foreach (var expected in fixture.RootElement.GetProperty("_expect").GetProperty("rectangles").EnumerateArray())
         {
-            var rect = all.Single(n => n.SourceId == expected.GetProperty("id").GetString()).Rects[0];
+            var rect = all.Single(n => string.Equals(n.SourceId, expected.GetProperty("id").GetString(), StringComparison.Ordinal)).Rects[0];
             Assert.Equal(expected.GetProperty("x").GetSingle(), rect.X, 3);
             Assert.Equal(expected.GetProperty("y").GetSingle(), rect.Y, 3);
             Assert.Equal(expected.GetProperty("width").GetSingle(), rect.Width, 3);

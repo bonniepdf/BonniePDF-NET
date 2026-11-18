@@ -315,7 +315,7 @@ public static class BusinessInvoiceExample
                 }.AlignLeft(),
                 new TextBlock
                 {
-                    Text = item.Qty.ToString(), FontName = StandardFonts.Helvetica, FontSize = 9,
+                    Text = item.Qty.ToString(System.Globalization.CultureInfo.InvariantCulture), FontName = StandardFonts.Helvetica, FontSize = 9,
                     Color = TextMedium
                 }.AlignCenter(),
                 new TextBlock

@@ -69,7 +69,7 @@ public class Line : ElementBase
             foreach (float dash in pattern)
             {
                 if (!float.IsFinite(dash) || dash <= 0)
-                    throw new ArgumentOutOfRangeException(nameof(DashPattern), "Dash lengths must be finite and positive.");
+                    throw new InvalidOperationException("DashPattern dash lengths must be finite and positive.");
             }
 
             float half = Thickness / 2;

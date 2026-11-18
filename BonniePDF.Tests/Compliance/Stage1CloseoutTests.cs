@@ -105,7 +105,7 @@ public class Stage1CloseoutTests
         for (int i = 1; i <= 80; i++)
         {
             table.AddRow(
-                new TextBlock { Text = i.ToString() },
+                new TextBlock { Text = i.ToString(System.Globalization.CultureInfo.InvariantCulture) },
                 new TextBlock { Text = $"Line item {i}: description that fills the row reasonably." },
                 new TextBlock { Text = $"£{i * 1.50:F2}" });
         }

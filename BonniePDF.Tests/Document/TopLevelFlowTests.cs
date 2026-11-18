@@ -92,8 +92,8 @@ public partial class TopLevelFlowTests
         foreach (List<string> ops in pages)
         {
             Assert.True(Balanced(ops));
-            Assert.Equal(["/P << /MCID 0 >> BDC", "q"], ops.Take(2));
-            Assert.Equal(["Q", "EMC"], ops.TakeLast(2));
+            Assert.Equal(["/P << /MCID 0 >> BDC", "q"], ops.Take(2), StringComparer.Ordinal);
+            Assert.Equal(["Q", "EMC"], ops.TakeLast(2), StringComparer.Ordinal);
         }
     }
 
@@ -112,7 +112,7 @@ public partial class TopLevelFlowTests
         foreach (List<string> ops in pages)
         {
             Assert.True(Balanced(ops));
-            Assert.Equal(["/Artifact BMC", "q"], ops.Take(2));
+            Assert.Equal(["/Artifact BMC", "q"], ops.Take(2), StringComparer.Ordinal);
         }
         Assert.DoesNotContain(ContentStreams(bytes), s => s.Contains("/MCID", StringComparison.Ordinal));
     }
@@ -131,7 +131,7 @@ public partial class TopLevelFlowTests
     private static bool Balanced(List<string> ops)
     {
         int opens = ops.Count(op => op.EndsWith(" BDC", StringComparison.Ordinal) || op.EndsWith(" BMC", StringComparison.Ordinal));
-        int closes = ops.Count(op => op == "EMC");
+        int closes = ops.Count(op => string.Equals(op, "EMC", StringComparison.Ordinal));
         return opens == closes;
     }
 
@@ -168,10 +168,10 @@ public partial class TopLevelFlowTests
         return streams;
     }
 
-    [GeneratedRegex(@"/Type\s*/Page(?![a-zA-Z])")]
+    [GeneratedRegex(@"/Type\s*/Page(?![a-zA-Z])", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex PageObject();
 
-    [GeneratedRegex(@"(?:^|\s)(?:q|Q|BDC|BMC|EMC)$")]
+    [GeneratedRegex(@"(?:^|\s)(?:q|Q|BDC|BMC|EMC)$", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex ScopeOperator();
 
     /// <summary>Returns the scripted status for each RenderStateful call.</summary>

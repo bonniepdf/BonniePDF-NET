@@ -98,7 +98,7 @@ public sealed partial class LicenseDeclarationTests : IDisposable
     private static string WithoutFileIdentifier(byte[] bytes) =>
         FileIdentifierRegex().Replace(Encoding.Latin1.GetString(bytes), "/ID [<MASKED> <MASKED>]");
 
-    [GeneratedRegex(@"/ID \[<[0-9A-F]*> <[0-9A-F]*>\]")]
+    [GeneratedRegex(@"/ID \[<[0-9A-F]*> <[0-9A-F]*>\]", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex FileIdentifierRegex();
 
     // ─────────────────────────────────────────────────────────────────────────

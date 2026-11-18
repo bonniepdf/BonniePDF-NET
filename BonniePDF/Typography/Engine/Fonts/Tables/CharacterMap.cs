@@ -193,7 +193,7 @@ namespace BonniePDF.Typography.Engine
 
         internal int Map(int scalar)
         {
-            if (scalar < 0 || scalar > 0x10ffff || (scalar >= 0xd800 && scalar <= 0xdfff)) throw new ArgumentOutOfRangeException("codePoint");
+            if (scalar < 0 || scalar > 0x10ffff || (scalar >= 0xd800 && scalar <= 0xdfff)) throw new ArgumentOutOfRangeException(nameof(scalar));
             int p = selected, format = data.U16(p);
             if (format == 0) return scalar < 256 ? data.U8(p + 6 + scalar) : 0;
             if (format == 6)

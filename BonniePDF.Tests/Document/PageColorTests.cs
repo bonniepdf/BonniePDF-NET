@@ -18,11 +18,11 @@ public class PageColorTests
     {
         string text = Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
 
-        int start = text.IndexOf("stream");
+        int start = text.IndexOf("stream", StringComparison.Ordinal);
         int contentStart = start + "stream".Length;
         if (contentStart < text.Length && text[contentStart] == '\r') contentStart++;
         if (contentStart < text.Length && text[contentStart] == '\n') contentStart++;
-        int end = text.IndexOf("endstream", contentStart);
+        int end = text.IndexOf("endstream", contentStart, StringComparison.Ordinal);
 
         return Decompress(Encoding.GetEncoding("ISO-8859-1").GetBytes(text, contentStart, end - contentStart));
     }
@@ -39,12 +39,12 @@ public class PageColorTests
         int idx = 0;
         while (true)
         {
-            int start = text.IndexOf("stream", idx);
+            int start = text.IndexOf("stream", idx, StringComparison.Ordinal);
             if (start == -1) break;
             int contentStart = start + "stream".Length;
             if (contentStart < text.Length && text[contentStart] == '\r') contentStart++;
             if (contentStart < text.Length && text[contentStart] == '\n') contentStart++;
-            int end = text.IndexOf("endstream", contentStart);
+            int end = text.IndexOf("endstream", contentStart, StringComparison.Ordinal);
             if (end == -1) break;
             string s = Decompress(Encoding.GetEncoding("ISO-8859-1").GetBytes(text, contentStart, end - contentStart));
             if (s.Contains(" re")) streams.Add(s);
@@ -106,8 +106,8 @@ public class PageColorTests
 
         // The fill rect must precede the text-showing operator (Tj) so it sits
         // behind the text in the painter's-model stream.
-        int fillIndex = stream.IndexOf(" re");
-        int textIndex = stream.IndexOf("Tj");
+        int fillIndex = stream.IndexOf(" re", StringComparison.Ordinal);
+        int textIndex = stream.IndexOf("Tj", StringComparison.Ordinal);
         Assert.True(fillIndex > -1);
         Assert.True(textIndex > -1);
         Assert.True(fillIndex < textIndex);

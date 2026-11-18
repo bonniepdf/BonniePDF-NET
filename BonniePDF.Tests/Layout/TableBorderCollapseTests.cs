@@ -14,13 +14,13 @@ public partial class TableBorderCollapseTests
 {
     private sealed record Stroke(string Colour, float Width, float X1, float Y1, float X2, float Y2, int Order);
 
-    [GeneratedRegex(@"^([\d.]+ [\d.]+ [\d.]+) RG$")]
+    [GeneratedRegex(@"^(?<1>[\d.]+ [\d.]+ [\d.]+) RG$", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex ColourLine();
 
-    [GeneratedRegex(@"^([\d.]+) w$")]
+    [GeneratedRegex(@"^(?<1>[\d.]+) w$", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex WidthLine();
 
-    [GeneratedRegex(@"^([\d.]+) ([\d.]+) m ([\d.]+) ([\d.]+) l S$")]
+    [GeneratedRegex(@"^(?<1>[\d.]+) (?<2>[\d.]+) m (?<3>[\d.]+) (?<4>[\d.]+) l S$", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SegmentLine();
 
     private static float F(string s) => float.Parse(s, CultureInfo.InvariantCulture);
@@ -83,7 +83,7 @@ public partial class TableBorderCollapseTests
         };
         table.AddRow(cell);
 
-        Assert.Equal(new[] { "1 0 0", "0 0 1", "0 0 0" }, Strokes(RenderTable(table)).Select(stroke => stroke.Colour));
+        Assert.Equal(new[] { "1 0 0", "0 0 1", "0 0 0" }, Strokes(RenderTable(table)).Select(stroke => stroke.Colour), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public partial class TableBorderCollapseTests
         table.AddRow(Cell("a", Color.Black, 1), Cell("b", Color.Red, 3));
 
         List<Stroke> strokes = Strokes(RenderTable(table));
-        float shared = strokes.Where(s => s.Colour == "0 0 0").Select(s => s.X1).Distinct().Order().ToList()[^1];
+        float shared = strokes.Where(s => string.Equals(s.Colour, "0 0 0", StringComparison.Ordinal)).Select(s => s.X1).Distinct().Order().ToList()[^1];
         List<Stroke> atShared = OnVertical(strokes, shared);
 
         // The left cell draws its right edge; the right cell's wider one is painted after it, over it.
@@ -140,7 +140,7 @@ public partial class TableBorderCollapseTests
         table.AddRow(Cell("a", Color.Red, 3), Cell("b", Color.Black, 1));
 
         List<Stroke> strokes = Strokes(RenderTable(table));
-        float shared = strokes.Where(s => s.Colour == "1 0 0").Select(s => s.X1).Distinct().Order().ToList()[^1];
+        float shared = strokes.Where(s => string.Equals(s.Colour, "1 0 0", StringComparison.Ordinal)).Select(s => s.X1).Distinct().Order().ToList()[^1];
         List<Stroke> atShared = OnVertical(strokes, shared);
 
         // The narrower right cell does not draw its left edge at all.
@@ -160,11 +160,11 @@ public partial class TableBorderCollapseTests
         List<Stroke> sLighter = Strokes(RenderTable(lighter));
 
         // Later cell darker: it paints over the shared edge, so black is the last stroke there.
-        float xDarker = sDarker.Where(s => s.Colour == "0 0 0").Select(s => s.X1).Min();
+        float xDarker = sDarker.Where(s => string.Equals(s.Colour, "0 0 0", StringComparison.Ordinal)).Select(s => s.X1).Min();
         Assert.Equal("0 0 0", OnVertical(sDarker, xDarker)[^1].Colour);
 
         // Later cell lighter: it does not draw, so only the earlier black one is there.
-        float xLighter = sLighter.Where(s => s.Colour == "0 0 0").Select(s => s.X1).Max();
+        float xLighter = sLighter.Where(s => string.Equals(s.Colour, "0 0 0", StringComparison.Ordinal)).Select(s => s.X1).Max();
         Assert.Single(OnVertical(sLighter, xLighter));
     }
 
@@ -194,8 +194,8 @@ public partial class TableBorderCollapseTests
         }));
 
         List<Stroke> strokes = Strokes(stream);
-        List<Stroke> frame = strokes.Where(s => s.Colour == "0 0 0").ToList();
-        List<Stroke> grid = strokes.Where(s => s.Colour != "0 0 0").ToList();
+        List<Stroke> frame = strokes.Where(s => string.Equals(s.Colour, "0 0 0", StringComparison.Ordinal)).ToList();
+        List<Stroke> grid = strokes.Where(s => !string.Equals(s.Colour, "0 0 0", StringComparison.Ordinal)).ToList();
 
         Assert.NotEmpty(frame);
         Assert.NotEmpty(grid);

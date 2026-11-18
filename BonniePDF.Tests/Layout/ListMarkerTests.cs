@@ -54,9 +54,9 @@ public sealed partial class ListMarkerTests
     private static string[] DrawnRuns(string content, bool tagged) =>
         (tagged ? ActualTextRun() : LiteralRun()).Matches(content).Select(m => m.Groups[1].Value).ToArray();
 
-    [GeneratedRegex(@"/ActualText \((.*?)\) >>")]
+    [GeneratedRegex(@"/ActualText \((?<1>.*?)\) >>", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex ActualTextRun();
 
-    [GeneratedRegex(@"\((.*?)\) Tj")]
+    [GeneratedRegex(@"\((?<1>.*?)\) Tj", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex LiteralRun();
 }

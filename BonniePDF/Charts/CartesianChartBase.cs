@@ -104,7 +104,7 @@ public abstract class CartesianChartBase : ChartBase
     public ChartOrientation Orientation { get; set; } = ChartOrientation.Vertical;
 
     /// <summary>Reference lines and bands on the value axis.</summary>
-    public List<ChartReference> References { get; set; } = [];
+    public IList<ChartReference> References { get; set; } = [];
 
     private protected virtual bool DrawCompact(ICanvas canvas, ChartData data) => false;
 

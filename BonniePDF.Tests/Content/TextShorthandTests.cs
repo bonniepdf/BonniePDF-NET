@@ -50,10 +50,10 @@ public sealed partial class TextShorthandTests : IDisposable
 
     private static int Count(string haystack, string pattern) => Regex.Count(haystack, pattern);
 
-    [GeneratedRegex(@"/ID \[<[0-9A-F]*> <[0-9A-F]*>\]")]
+    [GeneratedRegex(@"/ID \[<[0-9A-F]*> <[0-9A-F]*>\]", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex FileIdentifier();
 
-    [GeneratedRegex(@"[A-Z]{6}\+")]
+    [GeneratedRegex(@"[A-Z]{6}\+", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex FontSubsetTag();
 
     /// <summary>Build the same document two ways and require identical output.</summary>
@@ -81,8 +81,8 @@ public sealed partial class TextShorthandTests : IDisposable
         hello.Add(new TextBlock("Hello"));
         using BonniePDF.Document goodbye = NewDoc();
         goodbye.Add(new TextBlock("Goodbye"));
-        Assert.NotEqual(Svg(hello), Svg(goodbye));
-        Assert.NotEqual(Bytes(hello), Bytes(goodbye));
+        Assert.NotEqual(Svg(hello), Svg(goodbye), StringComparer.Ordinal);
+        Assert.NotEqual(Bytes(hello), Bytes(goodbye), StringComparer.Ordinal);
     }
 
     [Fact]

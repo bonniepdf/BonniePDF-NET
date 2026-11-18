@@ -70,7 +70,7 @@ public static class InternationalTypographyExample
 
         doc.Add(SectionHeading("Kerning and ligatures", "kerning", serif));
         doc.Add(Specimen("Off · font features kern and liga set to 0", serif, ColorPalette.Slate[100],
-            new Dictionary<string, int> { ["kern"] = 0, ["liga"] = 0 }));
+            new Dictionary<string, int>(StringComparer.Ordinal) { ["kern"] = 0, ["liga"] = 0 }));
         doc.Add(Specimen("On · the default for embedded fonts", serif, ColorPalette.Indigo[50]));
 
         // ── Right to left ─────────────────────────────────────────────────────

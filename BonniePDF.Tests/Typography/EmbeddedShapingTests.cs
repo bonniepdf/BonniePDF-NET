@@ -29,7 +29,7 @@ public sealed class EmbeddedShapingTests
     public void KeepsSourceCoordinatesAcrossControlsAndOtherScripts()
     {
         var font=new TtfFont(FontPath);const string source="fi\t\u03b1fi";
-        Assert.Equal(new[]{"fi","\u03b1","fi"},font.Shape(source).Records().Select(g=>source.Substring(g.Cluster,g.SourceLength)));
+        Assert.Equal(new[]{"fi","\u03b1","fi"},font.Shape(source).Records().Select(g=>source.Substring(g.Cluster,g.SourceLength)), StringComparer.Ordinal);
     }
     [Fact]
     public void FallbackKeepsTheCombiningGraphemeTogether()

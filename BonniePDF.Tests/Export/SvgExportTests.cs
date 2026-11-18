@@ -359,7 +359,7 @@ public class SvgExportTests
 
         // SVG should contain color information
         Assert.NotEmpty(svg);
-        Assert.Contains("fill", svg.ToLower());
+        Assert.Contains("fill", svg.ToLowerInvariant());
     }
 
     [Fact]
@@ -384,7 +384,7 @@ public class SvgExportTests
         int count = 0;
         int index = 0;
 
-        while ((index = text.IndexOf(pattern, index)) != -1)
+        while ((index = text.IndexOf(pattern, index, StringComparison.Ordinal)) != -1)
         {
             count++;
             index += pattern.Length;

@@ -401,7 +401,7 @@ public class ContainerTests
         public void StrokeRect(float x, float y, float width, float height, Color color, float strokeWidth) { }
         public void FillCircle(float cx, float cy, float radius, Color color) { }
         public void FillEllipse(float cx, float cy, float rx, float ry, Color color) { }
-        public void FillPath(IList<Point> points, Color color) { }
+        public void FillPath(IList<Point>? points, Color color) { }
         public void StrokeRoundedRect(float x, float y, float width, float height, float radius, Color color, float strokeWidth) { }
         public void DrawText(float x, float y, string text, Color color, float fontSize, string fontFamily, TextAlignment align) { }
         public void DrawTextRotated(float x, float y, string text, Color color, float fontSize, string fontFamily, float angleDegrees) { }
@@ -424,13 +424,13 @@ public class ContainerTests
         public void AddEllipse(float cx, float cy, float rx, float ry) { }
         public void AddCircle(float cx, float cy, float radius) { }
         public void ClosePath() { }
-        public void FillCurrentPath(Paint paint, FillRule fillRule) { }
+        public void FillCurrentPath(Paint paint, FillRule fillRule = FillRule.NonZero) { }
         public void StrokeCurrentPath(StrokeStyle style) { }
         public void Translate(float dx, float dy) { }
         public void Scale(float sx, float sy) { }
         public void Rotate(float angleDegrees) { }
         public void Transform(float a, float b, float c, float d, float tx, float ty) { }
-        public void ClipToCurrentPath(FillRule fillRule) { }
+        public void ClipToCurrentPath(FillRule fillRule = FillRule.NonZero) { }
         public void SetGlobalAlpha(float alpha) { }
     }
 }

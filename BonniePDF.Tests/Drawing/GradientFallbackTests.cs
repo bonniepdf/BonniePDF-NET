@@ -60,27 +60,27 @@ public partial class GradientFallbackTests
         haystack.Split(needle).Length - 1;
 
     /// <summary>A grey fill (equal channels), which is what a black-to-white ramp emits.</summary>
-    [GeneratedRegex(@"^(?<v>[\d.]+) \k<v> \k<v> rg$", RegexOptions.Multiline | RegexOptions.ExplicitCapture)]
+    [GeneratedRegex(@"^(?<v>[\d.]+) \k<v> \k<v> rg$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, RegexTimeout.Milliseconds)]
     private static partial Regex GreyFill();
 
     /// <summary>A pure-red fill, for the constant-colour fade case.</summary>
-    [GeneratedRegex(@"^(?<v>[\d.]+) 0 0 rg$", RegexOptions.Multiline | RegexOptions.ExplicitCapture)]
+    [GeneratedRegex(@"^(?<v>[\d.]+) 0 0 rg$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, RegexTimeout.Milliseconds)]
     private static partial Regex RedFill();
 
     /// <summary>Any RGB fill colour.</summary>
-    [GeneratedRegex(@"^(?<r>[\d.]+) (?<g>[\d.]+) (?<b>[\d.]+) rg$", RegexOptions.Multiline | RegexOptions.ExplicitCapture)]
+    [GeneratedRegex(@"^(?<r>[\d.]+) (?<g>[\d.]+) (?<b>[\d.]+) rg$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, RegexTimeout.Milliseconds)]
     private static partial Regex AnyFill();
 
     /// <summary>The x operand of a moveTo.</summary>
-    [GeneratedRegex(@"^(?<x>-?[\d.]+) -?[\d.]+ m$", RegexOptions.Multiline | RegexOptions.ExplicitCapture)]
+    [GeneratedRegex(@"^(?<x>-?[\d.]+) -?[\d.]+ m$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, RegexTimeout.Milliseconds)]
     private static partial Regex SegmentStartX();
 
     /// <summary>The x operand of a moveTo or lineTo.</summary>
-    [GeneratedRegex(@"^(?<x>-?[\d.]+) -?[\d.]+ [lm]$", RegexOptions.Multiline | RegexOptions.ExplicitCapture)]
+    [GeneratedRegex(@"^(?<x>-?[\d.]+) -?[\d.]+ [lm]$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, RegexTimeout.Milliseconds)]
     private static partial Regex SegmentX();
 
     /// <summary>The y operand of a moveTo or lineTo.</summary>
-    [GeneratedRegex(@"^-?[\d.]+ (?<y>-?[\d.]+) [lm]$", RegexOptions.Multiline | RegexOptions.ExplicitCapture)]
+    [GeneratedRegex(@"^-?[\d.]+ (?<y>-?[\d.]+) [lm]$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, RegexTimeout.Milliseconds)]
     private static partial Regex SegmentY();
 
     private static List<double> Values(Regex pattern, string content, string group) =>
@@ -246,11 +246,11 @@ public partial class GradientFallbackTests
         {
             string[] tok = line.Trim().Split(' ');
             string op = tok[^1];
-            if (op == "Q") alpha = 1;
-            else if (op == "gs" && tok[0].StartsWith("/GS_", StringComparison.Ordinal))
+            if (string.Equals(op, "Q", StringComparison.Ordinal)) alpha = 1;
+            else if (string.Equals(op, "gs", StringComparison.Ordinal) && tok[0].StartsWith("/GS_", StringComparison.Ordinal))
                 alpha = double.Parse(tok[0][4..], CultureInfo.InvariantCulture);
             else if (op is "m" or "l") xs.Add(double.Parse(tok[0], CultureInfo.InvariantCulture));
-            else if (op == "f")
+            else if (string.Equals(op, "f", StringComparison.Ordinal))
             {
                 fills.Add((alpha, xs.Min(), xs.Max()));
                 xs.Clear();

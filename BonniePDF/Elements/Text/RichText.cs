@@ -388,7 +388,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
             {
                 TextStyle spaceStyle = word.LeadingSpaceStyle ?? word.Style;
                 if (currentLine.Runs.Count > 0 && StylesEqual(currentLine.Runs[^1].Style, spaceStyle)
-                    && currentLine.Runs[^1].Link == word.LeadingSpaceLink)
+                    && string.Equals(currentLine.Runs[^1].Link, word.LeadingSpaceLink, StringComparison.Ordinal))
                     currentLine.Runs[^1].Text += " ";
                 else
                     currentLine.Runs.Add(new StyledRun
@@ -400,7 +400,7 @@ public class RichText : ElementBase, IStatefulElement, IRoleProvider
 
             // Add the word text with its own style
             if (currentLine.Runs.Count > 0 && StylesEqual(currentLine.Runs[^1].Style, word.Style)
-                && currentLine.Runs[^1].Link == word.Link)
+                && string.Equals(currentLine.Runs[^1].Link, word.Link, StringComparison.Ordinal))
                 currentLine.Runs[^1].Text += word.Text;
             else
                 currentLine.Runs.Add(new StyledRun { Text = word.Text!, Style = word.Style, Link = word.Link, LinkText = word.LinkText });

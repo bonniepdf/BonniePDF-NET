@@ -28,7 +28,7 @@ public class VeraPdfStageZeroCloseoutTests
     [Fact]
     public async Task TaggedSimpleDocument_PassesVeraPdfUa1()
     {
-        if (Environment.GetEnvironmentVariable("VERAPDF") != "1")
+        if (!string.Equals(Environment.GetEnvironmentVariable("VERAPDF"), "1", StringComparison.Ordinal))
         {
             // xUnit 2.x has no Assert.Skip - treat unset as a no-op so
             // day-to-day `dotnet test` runs stay fast and offline. The
@@ -45,7 +45,7 @@ public class VeraPdfStageZeroCloseoutTests
         HttpResponseMessage info;
         try
         {
-            info = await http.GetAsync($"{VeraPdfBaseUrl}/info").ConfigureAwait(false);
+            info = await http.GetAsync($"{VeraPdfBaseUrl}/info").ConfigureAwait(true);
         }
         catch (HttpRequestException ex)
         {
@@ -62,11 +62,11 @@ public class VeraPdfStageZeroCloseoutTests
         content.Add(pdf, "file", "simple-document-tagged.pdf");
         http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        HttpResponseMessage response = await http.PostAsync($"{VeraPdfBaseUrl}/validate/ua1", content).ConfigureAwait(false);
+        HttpResponseMessage response = await http.PostAsync($"{VeraPdfBaseUrl}/validate/ua1", content).ConfigureAwait(true);
         Assert.True(response.IsSuccessStatusCode,
-            $"VeraPDF /validate/ua1 returned {response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
+            $"VeraPDF /validate/ua1 returned {response.StatusCode}: {await response.Content.ReadAsStringAsync().ConfigureAwait(true)}");
 
-        string json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        string json = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
         ValidationVerdict verdict = ParseValidationVerdict(json);
 
         Assert.True(verdict.Compliant,
@@ -104,7 +104,7 @@ public class VeraPdfStageZeroCloseoutTests
                         if (!string.Equals(status.GetString(), "FAILED", StringComparison.OrdinalIgnoreCase)) continue;
 
                         string clause = rule.TryGetProperty("clause", out JsonElement c) ? c.GetString() ?? "" : "";
-                        string testNumber = rule.TryGetProperty("testNumber", out JsonElement t) ? t.GetInt32().ToString() : "";
+                        string testNumber = rule.TryGetProperty("testNumber", out JsonElement t) ? t.GetInt32().ToString(System.Globalization.CultureInfo.InvariantCulture) : "";
                         string description = rule.TryGetProperty("description", out JsonElement d) ? d.GetString() ?? "" : "";
                         failures.Add($"  [{clause}.{testNumber}] {description}");
                     }

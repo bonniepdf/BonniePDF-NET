@@ -12,13 +12,13 @@ namespace BonniePDF.Tests.Rendering;
 [Collection("Serial")]
 public partial class FontObjectOrderTests
 {
-    [GeneratedRegex(@"/ID \[[^\]]*\]")]
+    [GeneratedRegex(@"/ID \[[^\]]*\]", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex TrailerId();
 
-    [GeneratedRegex("[A-Z]{6}\\+")]
+    [GeneratedRegex("[A-Z]{6}\\+", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SubsetPrefix();
 
-    [GeneratedRegex(@"/(?:Creation|Mod)Date[^\n]*")]
+    [GeneratedRegex(@"/(?:Creation|Mod)Date[^\n]*", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex Dates();
 
     private static string Masked(byte[] pdf) =>

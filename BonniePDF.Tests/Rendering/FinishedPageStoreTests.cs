@@ -11,10 +11,10 @@ namespace BonniePDF.Tests.Rendering;
 /// </summary>
 public partial class FinishedPageStoreTests
 {
-    [System.Text.RegularExpressions.GeneratedRegex(@"/Contents (\d+) 0 R")]
+    [System.Text.RegularExpressions.GeneratedRegex(@"/Contents (?<1>\d+) 0 R", System.Text.RegularExpressions.RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial System.Text.RegularExpressions.Regex ContentsReference();
 
-    [System.Text.RegularExpressions.GeneratedRegex(@"/Length (\d+)")]
+    [System.Text.RegularExpressions.GeneratedRegex(@"/Length (?<1>\d+)", System.Text.RegularExpressions.RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial System.Text.RegularExpressions.Regex StreamLength();
 
     private static StringBuilder Page(string text) => new(text);

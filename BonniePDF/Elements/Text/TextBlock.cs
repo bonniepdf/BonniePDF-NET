@@ -595,7 +595,7 @@ public class TextBlock : TextElementBase, IStatefulElement, IRoleProvider
     private static readonly ConcurrentDictionary<Type, bool> s_ownWrapSegment = new();
 
     /// <summary>
-    /// <see cref="ComputeLines"/> for text that word-wraps as one segment (no breaks, no preserved
+    /// <see cref="TextElementBase.ComputeLines(string, float)"/> for text that word-wraps as one segment (no breaks, no preserved
     /// whitespace, left-to-right), without a list per call: false when the text is not like that.
     /// One line is stored as the layout at once and <paramref name="lines"/> is null; otherwise
     /// <paramref name="lines"/> holds them.

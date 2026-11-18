@@ -52,23 +52,8 @@ public class TaggedSimpleDocumentTests
             Margin = new Thickness(0, 0, 0, 12),
         });
 
-        doc.Add(new TextBlock
-        {
-            Text = "This document opts into PDF/UA-1 tagging by setting Settings.Accessibility = AccessibilityMode.PdfUa1.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            Color = ColorPalette.Slate[700],
-            Margin = new Thickness(0, 0, 0, 8),
-        });
-
-        doc.Add(new TextBlock
-        {
-            Text = "Existing elements tag themselves automatically - no semantic verbs required.",
-            FontName = StandardFonts.Helvetica,
-            FontSize = 12,
-            Color = ColorPalette.Slate[700],
-            Margin = new Thickness(0, 0, 0, 12),
-        });
+        doc.Add(BodyText("This document opts into PDF/UA-1 tagging by setting Settings.Accessibility = AccessibilityMode.PdfUa1.", spaceAfter: 8));
+        doc.Add(BodyText("Existing elements tag themselves automatically - no semantic verbs required.", spaceAfter: 12));
 
         doc.Add(new Heading("Scan to verify")
         {
@@ -89,6 +74,15 @@ public class TaggedSimpleDocumentTests
 
         return doc;
     }
+
+    private static TextBlock BodyText(string text, float spaceAfter) => new()
+    {
+        Text = text,
+        FontName = StandardFonts.Helvetica,
+        FontSize = 12,
+        Color = ColorPalette.Slate[700],
+        Margin = new Thickness(0, 0, 0, spaceAfter),
+    };
 
     internal static byte[] GenerateBytes()
     {
@@ -171,55 +165,5 @@ public class TaggedSimpleDocumentTests
         // PDF header
         string header = Encoding.ASCII.GetString(bytes, 0, 8);
         Assert.StartsWith("%PDF-1.7", header);
-    }
-}
-
-/// <summary>
-/// Tiny helpers shared between tagged-document tests.
-/// </summary>
-internal static class SubstringCounter
-{
-    public static int Count(string source, string needle)
-    {
-        int count = 0;
-        int idx = 0;
-        while ((idx = source.IndexOf(needle, idx, System.StringComparison.Ordinal)) >= 0)
-        {
-            count++;
-            idx += needle.Length;
-        }
-        return count;
-    }
-}
-
-internal static class PdfPageStreamSplitter
-{
-    /// <summary>
-    /// Pulls each page-content stream from the PDF body. Heuristic:
-    /// any uncompressed stream containing BT and ET is treated as a
-    /// page content stream. Good enough for tests; the real writer
-    /// always emits page content uncompressed for now.
-    /// </summary>
-    public static string[] Split(string pdf)
-    {
-        // Normalize CRLF to LF so the search works on both Windows and Linux/macOS.
-        // PdfWriter.WriteLine emits \r\n on Windows; the literals in Write() use \n.
-        pdf = pdf.Replace("\r\n", "\n", System.StringComparison.Ordinal);
-
-        var result = new System.Collections.Generic.List<string>();
-        int idx = 0;
-        while (true)
-        {
-            int streamStart = pdf.IndexOf("stream\n", idx, System.StringComparison.Ordinal);
-            if (streamStart < 0) break;
-            int contentStart = streamStart + "stream\n".Length;
-            int streamEnd = pdf.IndexOf("endstream", contentStart, System.StringComparison.Ordinal);
-            if (streamEnd < 0) break;
-            string content = pdf.Substring(contentStart, streamEnd - contentStart);
-            if (content.Contains("BT") && content.Contains("ET"))
-                result.Add(content);
-            idx = streamEnd + "endstream".Length;
-        }
-        return result.ToArray();
     }
 }

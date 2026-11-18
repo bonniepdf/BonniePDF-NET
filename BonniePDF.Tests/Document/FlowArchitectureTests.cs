@@ -515,8 +515,8 @@ public class FlowArchitectureTests
         string[] trimmedLines = lines.Select(l => l.Trim()).ToArray();
 
         // Should have at least 2 q's (one per element) and 2 Q's
-        int saveCount = trimmedLines.Count(l => l == "q");
-        int restoreCount = trimmedLines.Count(l => l == "Q");
+        int saveCount = trimmedLines.Count(l => string.Equals(l, "q", StringComparison.Ordinal));
+        int restoreCount = trimmedLines.Count(l => string.Equals(l, "Q", StringComparison.Ordinal));
         Assert.True(saveCount >= 2, $"Expected at least 2 SaveState (q) operators, found {saveCount}");
         Assert.True(restoreCount >= 2, $"Expected at least 2 RestoreState (Q) operators, found {restoreCount}");
     }

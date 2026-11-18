@@ -34,7 +34,7 @@ internal sealed class PerformanceEvents : EventSource
 
         public void Dispose()
         {
-            if (_stage != 0) Log.Leave((long)_stage, Stopwatch.GetTimestamp());
+            if (_stage != default(PerformanceStage)) Log.Leave((long)_stage, Stopwatch.GetTimestamp());
         }
     }
 }

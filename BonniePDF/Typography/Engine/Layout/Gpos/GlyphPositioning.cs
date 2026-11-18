@@ -83,7 +83,7 @@ namespace BonniePDF.Typography.Engine
                 adjustments[i] = adjustmentPool[i].Reset();
                 if (advanceWidth != null && glyphs[i].AdvanceOverride.HasValue)
                     adjustments[i].XAdvance = glyphs[i].AdvanceOverride.Value - advanceWidth(glyphs[i].Id);
-                if (advanceWidth != null && filter.IsMark(glyphs[i]) && !(options.Script == "arab" && UnicodeData.IsIgnorable(glyphs[i].Scalar)))
+                if (advanceWidth != null && filter.IsMark(glyphs[i]) && !(string.Equals(options.Script, "arab", StringComparison.Ordinal) && UnicodeData.IsIgnorable(glyphs[i].Scalar)))
                 {
                     adjustments[i].XAdvance = -advanceWidth(glyphs[i].Id);
                     adjustments[i].ZeroMarkAdvance = true;
@@ -253,22 +253,22 @@ namespace BonniePDF.Typography.Engine
         {
             inputCharge = 0;
             var header = headers.Get(index);
-            if (options.Script == "arab" || (header.Flags & 0xff1e) != 0 || limits.MaxNesting < 0) return -1;
+            if (string.Equals(options.Script, "arab", StringComparison.Ordinal) || (header.Flags & 0xff1e) != 0 || limits.MaxNesting < 0) return -1;
             int value = 1, ticks = 0;
             if (activeRule != null && !activeRule.Constant(out value, out ticks)) return -1;
             if (value == 0) return 1 + ticks;
-            int charge = 1 + ticks + 1 + header.Count;
+            int cost = 1 + ticks + 1 + header.Count;
             var plans = Contexts(index);
             if (plans != null)
             {
                 foreach (var plan in plans)
                 {
                     if (plan == null) continue;
-                    if (plan.Chained) charge += 1 + (plan.Backtrack.Length < 2 ? plan.Backtrack.Length : 0);
+                    if (plan.Chained) cost += 1 + (plan.Backtrack.Length < 2 ? plan.Backtrack.Length : 0);
                 }
                 inputCharge = 1 + ticks;
             }
-            return charge;
+            return cost;
         }
 
         // What the backtrack tests of a context with a longer backtrack charge for a rejected
@@ -399,7 +399,7 @@ namespace BonniePDF.Typography.Engine
             int at, int depth, Func<int, int> advanceWidth, bool rejected = false)
         {
             Tick();
-            if (options.Script == "arab" && UnicodeData.IsIgnorable(glyphs[at].Scalar)) return 0;
+            if (string.Equals(options.Script, "arab", StringComparison.Ordinal) && UnicodeData.IsIgnorable(glyphs[at].Scalar)) return 0;
             if (depth > limits.MaxNesting)
                 throw new InvalidDataException("GPOS recursion limit exceeded.");
             if (index < 0 || index >= headers.Count)
@@ -632,7 +632,7 @@ namespace BonniePDF.Typography.Engine
             for (int parent = at - 1; parent >= 0; parent--)
             {
                 Tick();
-                if (options.Script == "arab" && UnicodeData.IsIgnorable(glyphs[parent].Scalar)) continue;
+                if (string.Equals(options.Script, "arab", StringComparison.Ordinal) && UnicodeData.IsIgnorable(glyphs[parent].Scalar)) continue;
                 if (!filter.Ignored(glyphs[parent].Id, flags, markSet) && (!skipMarks || !filter.IsMark(glyphs[parent])))
                     return parent;
             }
@@ -710,7 +710,7 @@ namespace BonniePDF.Typography.Engine
                 penX[i] = x; penY[i] = y;
                 x = checked(x + (advanceWidth == null ? 0 : advanceWidth(glyphs[i].Id)) + adjustments[i].XAdvance);
                 y = checked(y + adjustments[i].YAdvance);
-                if ((options.Script == "hebr" || options.Script == "arab")) { penX[i] = -x; penY[i] = -y; }
+                if ((string.Equals(options.Script, "hebr", StringComparison.Ordinal) || string.Equals(options.Script, "arab", StringComparison.Ordinal))) { penX[i] = -x; penY[i] = -y; }
             }
             placedX = ResolveAxis(adjustments, penX, false);
             placedY = ResolveAxis(adjustments, penY, true);
@@ -778,7 +778,7 @@ namespace BonniePDF.Typography.Engine
             // glyph's advance, and removes the entry from both the next
             // glyph's placement and advance. Equal final ink positions alone
             // are insufficient: consumers also need the correct run width.
-            if (options.Script == "arab") {
+            if (string.Equals(options.Script, "arab", StringComparison.Ordinal)) {
                 int exitAdjustment = checked(placedX[at] + exit.X);
                 adjustments[at].XAdvance = checked(adjustments[at].XAdvance - exitAdjustment);
                 adjustments[at].XPlacement = checked(adjustments[at].XPlacement - exitAdjustment);

@@ -46,7 +46,7 @@ public class ChartTests
             return new Size(text.Length * fontSize * 0.6f, fontSize);
         }
 
-        public void DrawLine(float x1, float y1, float x2, float y2, Color color, float lineWidth = 1)
+        public void DrawLine(float x1, float y1, float x2, float y2, Color color, float lineWidth)
         {
             Operations.Add($"DrawLine({x1},{y1},{x2},{y2},{lineWidth})");
         }
@@ -71,9 +71,9 @@ public class ChartTests
             Operations.Add($"FillEllipse({cx},{cy},{rx},{ry})");
         }
 
-        public void FillPath(IList<Point> points, Color color)
+        public void FillPath(IList<Point>? points, Color color)
         {
-            Operations.Add($"FillPath({points.Count} points)");
+            Operations.Add($"FillPath({points?.Count ?? 0} points)");
         }
 
         public void DrawImage(ImageInfo image, float x, float y, float width, float height)
@@ -116,7 +116,7 @@ public class ChartTests
         public void AddCircle(float cx, float cy, float radius) =>
             Operations.Add($"AddCircle({cx},{cy},{radius})");
         public void ClosePath() => Operations.Add("ClosePath()");
-        public void FillCurrentPath(Paint paint, FillRule fillRule) =>
+        public void FillCurrentPath(Paint paint, FillRule fillRule = FillRule.NonZero) =>
             Operations.Add($"FillCurrentPath({fillRule})");
         public void StrokeCurrentPath(StrokeStyle style) =>
             Operations.Add("StrokeCurrentPath()");
@@ -125,7 +125,7 @@ public class ChartTests
         public void Rotate(float angleDegrees) => Operations.Add($"Rotate({angleDegrees})");
         public void Transform(float a, float b, float c, float d, float tx, float ty) =>
             Operations.Add($"Transform({a},{b},{c},{d},{tx},{ty})");
-        public void ClipToCurrentPath(FillRule fillRule) =>
+        public void ClipToCurrentPath(FillRule fillRule = FillRule.NonZero) =>
             Operations.Add($"ClipToCurrentPath({fillRule})");
         public void SetGlobalAlpha(float alpha) => Operations.Add($"SetGlobalAlpha({alpha})");
 
@@ -228,7 +228,7 @@ public class ChartTests
 
         chart.Draw(canvas, data);
 
-        Assert.Contains(canvas.Operations, op => op.StartsWith("FillRect") && op.Contains("800") && op.Contains("450"));
+        Assert.Contains(canvas.Operations, op => op.StartsWith("FillRect", StringComparison.Ordinal) && op.Contains("800") && op.Contains("450"));
     }
 
     [Fact]
@@ -244,7 +244,7 @@ public class ChartTests
         if (canvas.Operations.Count > 0)
         {
             string firstOp = canvas.Operations[0];
-            bool isFullCanvasFill = firstOp.StartsWith("FillRect") && firstOp.Contains("800") && firstOp.Contains("450");
+            bool isFullCanvasFill = firstOp.StartsWith("FillRect", StringComparison.Ordinal) && firstOp.Contains("800") && firstOp.Contains("450");
             Assert.False(isFullCanvasFill);
         }
     }
@@ -512,7 +512,8 @@ public class ChartTests
         var canvas = new MockCanvas();
         var data = new ChartData
         {
-            Title = null,
+            // Null is outside the declared contract; the chart must still skip the title rather than throw.
+            Title = null!,
             Series =
             [
                 new ChartSeries { DataPoints = [new() { Label = "A", Value = 10 }] }

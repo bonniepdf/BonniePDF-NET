@@ -42,7 +42,7 @@ public class TtfSubsetterStructuralTests
         data = subsetter.CreateSubset(usedGlyphs, charMap);
 
         int num = U16(data, 4);
-        dir = new Dictionary<string, (int, int, uint)>();
+        dir = new Dictionary<string, (int, int, uint)>(StringComparer.Ordinal);
         for (int i = 0; i < num; i++)
         {
             int o = 12 + i * 16;
@@ -95,7 +95,7 @@ public class TtfSubsetterStructuralTests
 
         foreach (var (tag, info) in dir)
         {
-            if (tag == "head")
+            if (string.Equals(tag, "head", StringComparison.Ordinal))
             {
                 // checkSumAdjustment is excluded from the head table's own checksum.
                 var copy = (byte[])b.Clone();

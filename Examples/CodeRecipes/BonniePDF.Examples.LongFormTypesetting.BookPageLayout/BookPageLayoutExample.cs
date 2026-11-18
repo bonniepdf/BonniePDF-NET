@@ -49,7 +49,7 @@ public static class BookPageLayoutExample
                 PageLabel = new PageLabel { StartAt = 42 },
                 FooterTemplate = pageNum => new TextBlock
                 {
-                    Text = (pageNum + 41).ToString(),
+                    Text = (pageNum + 41).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     FontName = StandardFonts.TimesBold,
                     FontSize = 10,
                     Color = ColorPalette.Slate[500],

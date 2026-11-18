@@ -17,7 +17,7 @@ internal static class PngPixelOperations
     {
         int pixels = rgba.Length / 4;
         if (rgba.Length % 4 != 0 || alpha.Length != pixels || color.Length != pixels * 3)
-            throw new ArgumentException("RGBA input and channel output lengths must describe the same pixels.");
+            throw new ArgumentException("RGBA input and channel output lengths must describe the same pixels.", nameof(rgba));
 
         int x = 0;
         if (BitConverter.IsLittleEndian && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))

@@ -18,10 +18,10 @@ namespace BonniePDF.Tests.Export;
 /// </summary>
 public sealed partial class SvgGlyphPositioningTests
 {
-    [GeneratedRegex(@"<text x=""([^""]+)""")]
+    [GeneratedRegex(@"<text x=""(?<1>[^""]+)""", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex TextXListRegex();
 
-    [GeneratedRegex(@"rotate\(([\-\d.]+)")]
+    [GeneratedRegex(@"rotate\((?<1>[\-\d.]+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex RotateRegex();
 
     /// <summary>The per-glyph x list of the first glyph-positioned run on the page.</summary>

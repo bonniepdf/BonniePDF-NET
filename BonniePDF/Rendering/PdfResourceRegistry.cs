@@ -53,9 +53,8 @@ internal sealed class TextRunFont(string resourceName, TtfFont? embeddedFont, Gl
     internal static TextRunFont Of(ResolvedTextRun run) =>
         new(run.ResourceName, run.EmbeddedFont, run.Tracker, run.CanTrackPreparedGlyphs, run.FontIdentifier);
 
-    internal bool Matches(string resourceName, TtfFont? embeddedFont, GlyphUsageTracker? tracker, bool canTrackPreparedGlyphs, string fontIdentifier) =>
-        ResourceName == resourceName && ReferenceEquals(EmbeddedFont, embeddedFont) && ReferenceEquals(Tracker, tracker) &&
-        CanTrackPreparedGlyphs == canTrackPreparedGlyphs && FontIdentifier == fontIdentifier;
+    internal bool Matches(string resourceName, TtfFont? embeddedFont, GlyphUsageTracker? tracker, bool canTrackPreparedGlyphs, string fontIdentifier) => string.Equals(ResourceName, resourceName, StringComparison.Ordinal) && ReferenceEquals(EmbeddedFont, embeddedFont) && ReferenceEquals(Tracker, tracker) &&
+        CanTrackPreparedGlyphs == canTrackPreparedGlyphs && string.Equals(FontIdentifier, fontIdentifier, StringComparison.Ordinal);
 }
 
 /// <summary>
@@ -463,7 +462,7 @@ internal class PdfResourceRegistry
         if (primaryFont == null && StandardFontCoverage.IsStandardTextFace(primaryFontIdentifier) &&
             !StandardFontCoverage.CoversAll(text)) return null;
         GlyphUsageTracker? tracker = primaryInfo?.Tracker;
-        bool canTrack = primaryInfo?.ResourceName == resourceName;
+        bool canTrack = string.Equals(primaryInfo?.ResourceName, resourceName, StringComparison.Ordinal);
         if (_wholeTextFonts.TryGetValue(primaryFontIdentifier, out TextRunFont? kept) &&
             kept.Matches(resourceName, primaryFont, tracker, canTrack, primaryFontIdentifier))
             return kept;
@@ -495,7 +494,7 @@ internal class PdfResourceRegistry
             {
                 new() { ResourceName = resourceName, EmbeddedFont = primaryFont,
                     Tracker = primaryInfo?.Tracker,
-                    CanTrackPreparedGlyphs = primaryInfo?.ResourceName == resourceName,
+                    CanTrackPreparedGlyphs = string.Equals(primaryInfo?.ResourceName, resourceName, StringComparison.Ordinal),
                     FontIdentifier = primaryFontIdentifier, Text = text }
             };
 
@@ -526,7 +525,7 @@ internal class PdfResourceRegistry
                     ResourceName = resourceName,
                     EmbeddedFont = primaryFont,
                     Tracker = primaryInfo?.Tracker,
-                    CanTrackPreparedGlyphs = primaryInfo?.ResourceName == resourceName,
+                    CanTrackPreparedGlyphs = string.Equals(primaryInfo?.ResourceName, resourceName, StringComparison.Ordinal),
                     FontIdentifier = primaryFontIdentifier,
                     Text = run.Text
                 });
@@ -584,7 +583,7 @@ internal class PdfResourceRegistry
             ResourceName = fbResource,
             EmbeddedFont = fbInfo?.Font,
             Tracker = fbInfo?.Tracker,
-            CanTrackPreparedGlyphs = fbInfo?.ResourceName == fbResource,
+            CanTrackPreparedGlyphs = string.Equals(fbInfo?.ResourceName, fbResource, StringComparison.Ordinal),
             FontIdentifier = fbIdentifier,
             Text = text
         };

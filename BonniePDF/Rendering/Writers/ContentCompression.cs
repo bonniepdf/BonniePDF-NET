@@ -32,7 +32,7 @@ internal static class ContentCompression
         return scratch.ToArray();
     }
 
-    /// <summary>Reverses <see cref="Compress"/>.</summary>
+    /// <summary>Reverses <see cref="Compress(ReadOnlySpan{byte})"/>.</summary>
     internal static byte[] Decompress(byte[] compressed)
     {
         using MemoryStream source = new(compressed);

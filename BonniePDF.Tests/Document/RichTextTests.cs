@@ -166,7 +166,7 @@ public class RichTextTests
         var rt=new RichText();rt.DefaultStyle.FontFamily=BonniePDF.Tests.Support.TestFonts.SerifRegularPath;
         rt.DefaultStyle.FontSize=12;rt.Span("A A A");rt.Alignment=TextAlignment.Justify;
         var (ctx,canvas)=MakeContext();rt.Render(ctx,20);
-        Assert.Equal(new[]{"A A"},canvas.Texts.Where(t=>Math.Abs(t.Y)<0.001f).Select(t=>t.Text));
+        Assert.Equal(new[]{"A A"},canvas.Texts.Where(t=>Math.Abs(t.Y)<0.001f).Select(t=>t.Text), StringComparer.Ordinal);
     }
 
     // --- Justify ---
@@ -184,11 +184,11 @@ public class RichTextTests
         var line1 = canvas.Texts.Where(t => Math.Abs(t.Y - 0) < 0.001f).ToList();
         var line2 = canvas.Texts.Where(t => Math.Abs(t.Y - LineHeight) < 0.001f).ToList();
 
-        Assert.Equal(new[] { "Hello", "world" }, line1.Select(t => t.Text));
+        Assert.Equal(new[] { "Hello", "world" }, line1.Select(t => t.Text), StringComparer.Ordinal);
         float rightEdge = line1.Max(t => t.X + W(t.Text));
         Close(width, rightEdge, 0.05f); // flush to the right margin
 
-        Assert.Equal(new[] { "Bonnie" }, line2.Select(t => t.Text));
+        Assert.Equal(new[] { "Bonnie" }, line2.Select(t => t.Text), StringComparer.Ordinal);
         Close(0, line2[0].X, 0.05f);
     }
 
@@ -209,8 +209,8 @@ public class RichTextTests
         TextStyle bold = new() { FontWeight = FontWeight.Bold };
         (RenderContext ctx, RecordingCanvas canvas) = MakeContext();
         new RichText().Span("Hello", bold).Span("World").Render(ctx, 500);
-        Assert.Equal(new[] { "Hello", "World" }, canvas.Texts.Select(t => t.Text));
-        Assert.NotEqual(canvas.Texts[0].FontFamily, canvas.Texts[1].FontFamily);
+        Assert.Equal(new[] { "Hello", "World" }, canvas.Texts.Select(t => t.Text), StringComparer.Ordinal);
+        Assert.NotEqual(canvas.Texts[0].FontFamily, canvas.Texts[1].FontFamily, StringComparer.Ordinal);
     }
 
     // --- Decorations ---
@@ -255,12 +255,12 @@ public class RichTextTests
         (RenderContext ctx1, RecordingCanvas canvas1) = MakeContext(60f);
         RenderStatus status1 = rt.RenderStateful(ctx1, 500);
         Assert.Equal(RenderStatus.Overflow, status1);
-        Assert.Equal(new[] { "L1", "L2", "L3" }, canvas1.Texts.Select(t => t.Text)); // 3, not 4
+        Assert.Equal(new[] { "L1", "L2", "L3" }, canvas1.Texts.Select(t => t.Text), StringComparer.Ordinal); // 3, not 4
 
         (RenderContext ctx2, RecordingCanvas canvas2) = MakeContext(5000f);
         RenderStatus status2 = rt.RenderStateful(ctx2, 500);
         Assert.Equal(RenderStatus.Complete, status2);
-        Assert.Equal(new[] { "L4", "L5" }, canvas2.Texts.Select(t => t.Text));
+        Assert.Equal(new[] { "L4", "L5" }, canvas2.Texts.Select(t => t.Text), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -284,7 +284,7 @@ public class RichTextTests
         (RenderContext ctx2, RecordingCanvas canvas2) = MakeContext(5000f);
         RenderStatus status = rt.RenderStateful(ctx2, 500);
         Assert.Equal(RenderStatus.Complete, status);
-        Assert.Equal(new[] { "one", "two" }, canvas2.Texts.Select(t => t.Text));
+        Assert.Equal(new[] { "one", "two" }, canvas2.Texts.Select(t => t.Text), StringComparer.Ordinal);
     }
 
     // Style snapshotting: the fluent builders mutate and return `this`, so a
@@ -351,7 +351,7 @@ public class RichTextTests
         public void StrokeRect(float x, float y, float width, float height, Color color, float strokeWidth) { }
         public void FillCircle(float cx, float cy, float radius, Color color) { }
         public void FillEllipse(float cx, float cy, float rx, float ry, Color color) { }
-        public void FillPath(IList<Point> points, Color color) { }
+        public void FillPath(IList<Point>? points, Color color) { }
         public void FillRoundedRect(float x, float y, float width, float height, float radius, Color color) { }
         public void StrokeRoundedRect(float x, float y, float width, float height, float radius, Color color, float strokeWidth) { }
         public void DrawTextRotated(float x, float y, string text, Color color, float fontSize, string fontFamily, float angleDegrees) { }
@@ -374,13 +374,13 @@ public class RichTextTests
         public void AddEllipse(float cx, float cy, float rx, float ry) { }
         public void AddCircle(float cx, float cy, float radius) { }
         public void ClosePath() { }
-        public void FillCurrentPath(Paint paint, FillRule fillRule) { }
+        public void FillCurrentPath(Paint paint, FillRule fillRule = FillRule.NonZero) { }
         public void StrokeCurrentPath(StrokeStyle style) { }
         public void Translate(float dx, float dy) { }
         public void Scale(float sx, float sy) { }
         public void Rotate(float angleDegrees) { }
         public void Transform(float a, float b, float c, float d, float tx, float ty) { }
-        public void ClipToCurrentPath(FillRule fillRule) { }
+        public void ClipToCurrentPath(FillRule fillRule = FillRule.NonZero) { }
         public void SetGlobalAlpha(float alpha) { }
     }
 }

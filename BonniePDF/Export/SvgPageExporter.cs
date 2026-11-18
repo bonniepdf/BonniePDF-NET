@@ -209,7 +209,7 @@ internal static class SvgPageExporter
             if (documentSourceId is not null)
             {
                 snapshot.Root.SourceId = documentSourceId;
-                LayoutNode? automaticPage = snapshot.Root.Children.FirstOrDefault(n => n.Type == "Page");
+                LayoutNode? automaticPage = snapshot.Root.Children.FirstOrDefault(n => string.Equals(n.Type, "Page", StringComparison.Ordinal));
                 if (automaticPage is not null && automaticPage.SourceId is null)
                     automaticPage.SourceId = documentSourceId;
             }

@@ -29,7 +29,7 @@ public class SettingsRulesTests
     {
         using JsonDocument description = JsonDocument.Parse(File.ReadAllText(DescriptionPath()));
         foreach (JsonElement rule in description.RootElement.GetProperty("settingsRules").GetProperty("rules").EnumerateArray())
-            if (rule.GetProperty("id").GetString() == id) return rule.GetProperty("text").GetString()!;
+            if (string.Equals(rule.GetProperty("id").GetString(), id, StringComparison.Ordinal)) return rule.GetProperty("text").GetString()!;
         throw new InvalidOperationException(id);
     }
 
@@ -53,7 +53,7 @@ public class SettingsRulesTests
                 "pdf/a-4" => PdfAConformance.PdfA4,
                 _ => PdfAConformance.None,
             };
-        if (settings.TryGetProperty("accessibility", out JsonElement a) && a.GetString() == "pdf/ua-1")
+        if (settings.TryGetProperty("accessibility", out JsonElement a) && string.Equals(a.GetString(), "pdf/ua-1", StringComparison.Ordinal))
             doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         if (settings.TryGetProperty("encryption", out JsonElement e))
         {
@@ -79,7 +79,7 @@ public class SettingsRulesTests
     [Fact]
     public void EveryErrorRuleHasAFixture()
     {
-        var named = new HashSet<string>();
+        var named = new HashSet<string>(StringComparer.Ordinal);
         foreach (string name in DefinitionFixtures.Names("settings-rules"))
         {
             using JsonDocument f = DefinitionFixtures.Parse("settings-rules", name);
@@ -87,7 +87,7 @@ public class SettingsRulesTests
         }
         using JsonDocument description = JsonDocument.Parse(File.ReadAllText(DescriptionPath()));
         foreach (JsonElement rule in description.RootElement.GetProperty("settingsRules").GetProperty("rules").EnumerateArray())
-            if (rule.GetProperty("outcome").GetString() == "error")
+            if (string.Equals(rule.GetProperty("outcome").GetString(), "error", StringComparison.Ordinal))
                 Assert.Contains(rule.GetProperty("id").GetString()!, named);
     }
 
@@ -116,7 +116,7 @@ public class SettingsRulesTests
                 Passwords = new DefinitionPasswords { Owner = "owner-secret" },
             });
             byte[] bytes = await doc.GenerateBytesAsync();
-            string expected = expect.GetProperty("pdfVersion").GetString() == "pdf-2.0" ? "%PDF-2.0" : "%PDF-1.7";
+            string expected = string.Equals(expect.GetProperty("pdfVersion").GetString(), "pdf-2.0", StringComparison.Ordinal) ? "%PDF-2.0" : "%PDF-1.7";
             Assert.Equal(expected, Encoding.ASCII.GetString(bytes, 0, 8));
             Assert.Equal(Version(expect.GetProperty("pdfVersion").GetString()!), doc.Settings.Version);
         }

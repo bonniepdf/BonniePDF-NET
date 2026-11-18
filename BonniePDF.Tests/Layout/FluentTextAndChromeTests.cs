@@ -12,7 +12,7 @@ namespace BonniePDF.Tests.Layout;
 public partial class FluentTextAndChromeTests
 {
     // A font selection followed by the text it draws: (font resource, text).
-    [GeneratedRegex(@"/F(\d+) [\d.]+ Tf\s*\((.*?)\) Tj")]
+    [GeneratedRegex(@"/F(?<1>\d+) [\d.]+ Tf\s*\((?<2>.*?)\) Tj", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex FontThenText();
 
     private static List<PageRenderOutput> RenderPages(BonniePDF.Document doc)
@@ -33,12 +33,12 @@ public partial class FluentTextAndChromeTests
             }))).Build();
 
         string stream = RenderPages(doc).Single().ContentStream;
-        Dictionary<string, string> fontOf = FontThenText().Matches(stream).ToDictionary(m => m.Groups[2].Value, m => m.Groups[1].Value);
+        Dictionary<string, string> fontOf = FontThenText().Matches(stream).ToDictionary(m => m.Groups[2].Value, m => m.Groups[1].Value, StringComparer.Ordinal);
 
         // Three spans, three runs - not one merged run in the default style.
-        Assert.Contains("Label: ", fontOf.Keys);
-        Assert.Contains("value", fontOf.Keys);
-        Assert.NotEqual(fontOf["Label: "], fontOf["value"]); // bold is a different font from regular
+        Assert.Contains("Label: ", fontOf.Keys, StringComparer.Ordinal);
+        Assert.Contains("value", fontOf.Keys, StringComparer.Ordinal);
+        Assert.NotEqual(fontOf["Label: "], fontOf["value"], StringComparer.Ordinal); // bold is a different font from regular
         Assert.Contains("1 0 0 rg", stream); // the red span's colour
     }
 
@@ -53,9 +53,9 @@ public partial class FluentTextAndChromeTests
             }))).Build();
 
         Dictionary<string, string> fontOf = FontThenText().Matches(RenderPages(doc).Single().ContentStream)
-            .ToDictionary(m => m.Groups[2].Value, m => m.Groups[1].Value);
+            .ToDictionary(m => m.Groups[2].Value, m => m.Groups[1].Value, StringComparer.Ordinal);
 
-        Assert.NotEqual(fontOf["Heading"], fontOf["body"]);
+        Assert.NotEqual(fontOf["Heading"], fontOf["body"], StringComparer.Ordinal);
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public partial class FluentTextAndChromeTests
 
     // ---- Page tokens in rich text ----
 
-    [GeneratedRegex(@"(?<!end)stream\r?\n")]
+    [GeneratedRegex(@"(?<!end)stream\r?\n", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex StreamKeyword();
 
     // Every FlateDecode stream in a generated PDF, inflated, as text.
@@ -131,7 +131,7 @@ public partial class FluentTextAndChromeTests
             try
             {
                 using var inflated = new MemoryStream();
-                using (var z = new ZLibStream(new MemoryStream(pdf, m.Index + m.Length, int.Parse(length.Groups[1].Value)), CompressionMode.Decompress))
+                using (var z = new ZLibStream(new MemoryStream(pdf, m.Index + m.Length, int.Parse(length.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture)), CompressionMode.Decompress))
                     z.CopyTo(inflated);
                 streams.Add(System.Text.Encoding.Latin1.GetString(inflated.ToArray()));
             }
@@ -144,7 +144,7 @@ public partial class FluentTextAndChromeTests
         return streams;
     }
 
-    [GeneratedRegex(@"/Length (\d+)")]
+    [GeneratedRegex(@"/Length (?<1>\d+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex LengthEntry();
 
     private static BonniePDF.Document TwoPageDocumentWithFooter(Action<BonniePDF.Fluent.TextDescriptor> footer) =>

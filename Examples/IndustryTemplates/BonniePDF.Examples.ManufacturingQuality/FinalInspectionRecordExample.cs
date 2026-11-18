@@ -231,7 +231,7 @@ public static class FinalInspectionRecordExample
     /// <summary>True when a result is a failed attribute check or a measurement outside its tolerance.</summary>
     private static bool Outside(string result, int check)
     {
-        if (result == "Fail") return true;
+        if (string.Equals(result, "Fail", StringComparison.Ordinal)) return true;
         if (Limits[check] is not { } limits) return false;
         double value = double.Parse(result, CultureInfo.InvariantCulture);
         return value < limits.Low || value > limits.High;

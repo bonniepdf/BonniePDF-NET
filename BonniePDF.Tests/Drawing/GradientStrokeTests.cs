@@ -35,7 +35,7 @@ public partial class GradientStrokeTests
 
     private static int Segments(string content) => content.Split(" l S\n").Length - 1;
 
-    [GeneratedRegex(@"^(?<v>[\d.]+) \k<v> \k<v> RG$", RegexOptions.Multiline | RegexOptions.ExplicitCapture)]
+    [GeneratedRegex(@"^(?<v>[\d.]+) \k<v> \k<v> RG$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, RegexTimeout.Milliseconds)]
     private static partial Regex GreyStroke();
 
     private static List<double> Greys(string content) =>

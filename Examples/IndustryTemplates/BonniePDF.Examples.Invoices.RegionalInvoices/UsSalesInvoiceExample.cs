@@ -93,6 +93,7 @@ public static class UsSalesInvoiceExample
         DateTime day = TimeZoneInfo.ConvertTime(now ?? DateTimeOffset.UtcNow, timeZone ?? TimeZoneInfo.Local).Date;
         int year = day.Year;
         DateTime due = day.AddDays(30);
+        CultureInfo dates = culture ?? CultureInfo.GetCultureInfo("en-US");
 
         Document doc = new(new DocumentSettings { PageSize = PdfSize.A4, Margin = 44 });
         doc.Settings.Conformance = PdfAConformance.PdfA2a;
@@ -144,8 +145,8 @@ public static class UsSalesInvoiceExample
 
         // ── Bill-to + details ────────────────────────────────────────────────
         VerticalStack details = new();
-        details.Add(TotalLine("Invoice date", day.ToString("MMM d, yyyy")));
-        details.Add(TotalLine("Due date (Net 30)", due.ToString("MMM d, yyyy")));
+        details.Add(TotalLine("Invoice date", day.ToString("MMM d, yyyy", dates)));
+        details.Add(TotalLine("Due date (Net 30)", due.ToString("MMM d, yyyy", dates)));
         details.Add(TotalLine("Purchase order", "PO-88213"));
         details.Add(TotalLine("Ship to", "Seattle, WA"));
 

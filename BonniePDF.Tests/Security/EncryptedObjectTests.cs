@@ -22,7 +22,7 @@ public class EncryptedObjectTests
                 return bytes;
             });
             Assert.Equal(item.GetProperty("expected").GetString(), actual);
-            Assert.Equal(item.GetProperty("decodedHex").EnumerateArray().Select(x => x.GetString()), decoded);
+            Assert.Equal(item.GetProperty("decodedHex").EnumerateArray().Select(x => x.GetString()), decoded, StringComparer.Ordinal);
         }
 
         foreach (JsonElement item in fixture.RootElement.GetProperty("invalid").EnumerateArray())
@@ -36,7 +36,7 @@ public class EncryptedObjectTests
     {
         var encryptor = new PdfEncryptor(new EncryptionSettings { UserPassword = "reader", OwnerPassword = "owner" }, new byte[16]);
         using MemoryStream stream = new();
-        var dict = new Dictionary<string, string>
+        var dict = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["/Lang"] = "(en-GB)",
             ["/Action"] = "<< /URI (https://example.com) >>"

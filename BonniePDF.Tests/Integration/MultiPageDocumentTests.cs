@@ -36,84 +36,22 @@ public class MultiPageDocumentTests : IntegrationTestBase
             });
 
             // Page 2: Bar Chart
-            doc.Add(new TextBlock
-            {
-                Text = "Sales Data - Bar Chart",
-                FontSize = 18,
-                FontName = StandardFonts.HelveticaBold,
-                Margin = new Thickness(0, 0, 0, 10)
-            });
+            doc.Add(SectionHeading("Sales Data - Bar Chart"));
 
-            ChartData barData = CreateTestChartData(6);
-            barData.Title = "Monthly Sales";
-            BarChart barChart = new()
-            {
-                Height = 300,
-                StretchToFit = true
-            };
-            barChart.Data = barData;
-            doc.Add(barChart);
+            doc.Add(WithData(new BarChart { Height = 300, StretchToFit = true }, CreateTestChartData(6), "Monthly Sales"));
 
             // Page 3: Line Chart
-            doc.Add(new TextBlock
-            {
-                Text = "Trend Analysis - Line Chart",
-                FontSize = 18,
-                FontName = StandardFonts.HelveticaBold,
-                Margin = new Thickness(0, 0, 0, 10)
-            });
+            doc.Add(SectionHeading("Trend Analysis - Line Chart"));
 
-            ChartData lineData = CreateTestChartData(10);
-            lineData.Title = "Growth Trend";
-            LineChart lineChart = new()
-            {
-                Height = 300,
-                StretchToFit = true
-            };
-            lineChart.Data = lineData;
-            doc.Add(lineChart);
+            doc.Add(WithData(new LineChart { Height = 300, StretchToFit = true }, CreateTestChartData(10), "Growth Trend"));
 
             // Page 4: Images
-            doc.Add(new TextBlock
-            {
-                Text = "Visual Assets",
-                FontSize = 18,
-                FontName = StandardFonts.HelveticaBold,
-                Margin = new Thickness(0, 0, 0, 10)
-            });
-
-            doc.Add(new TextBlock
-            {
-                Text = "Sample image embedded in PDF:",
-                FontSize = 12,
-                Margin = new Thickness(0, 0, 0, 10)
-            });
-
-            doc.Add(new Image
-            {
-                ImageData = imageData,
-                Width = 200,
-                Height = 200
-            });
+            AddVisualAssets(doc, imageData);
 
             // Page 5: Pie Chart
-            doc.Add(new TextBlock
-            {
-                Text = "Market Share - Pie Chart",
-                FontSize = 18,
-                FontName = StandardFonts.HelveticaBold,
-                Margin = new Thickness(0, 0, 0, 10)
-            });
+            doc.Add(SectionHeading("Market Share - Pie Chart"));
 
-            ChartData pieData = CreateTestChartData(4);
-            pieData.Title = "Market Distribution";
-            PieChart pieChart = new()
-            {
-                Height = 400,
-                StretchToFit = true
-            };
-            pieChart.Data = pieData;
-            doc.Add(pieChart);
+            doc.Add(WithData(new PieChart { Height = 400, StretchToFit = true }, CreateTestChartData(4), "Market Distribution"));
 
             doc.Save(outputPath);
         }
@@ -335,5 +273,39 @@ public class MultiPageDocumentTests : IntegrationTestBase
         AssertValidPdf(outputPath);
         AssertPdfHasPages(outputPath, 2);
         AssertPdfHasFonts(outputPath);
+    }
+
+    private static void AddVisualAssets(BonniePDF.Document doc, byte[] imageData)
+    {
+        doc.Add(SectionHeading("Visual Assets"));
+
+        doc.Add(new TextBlock
+        {
+            Text = "Sample image embedded in PDF:",
+            FontSize = 12,
+            Margin = new Thickness(0, 0, 0, 10)
+        });
+
+        doc.Add(new Image
+        {
+            ImageData = imageData,
+            Width = 200,
+            Height = 200
+        });
+    }
+
+    private static TextBlock SectionHeading(string text) => new()
+    {
+        Text = text,
+        FontSize = 18,
+        FontName = StandardFonts.HelveticaBold,
+        Margin = new Thickness(0, 0, 0, 10)
+    };
+
+    private static TChart WithData<TChart>(TChart chart, ChartData data, string title) where TChart : ChartBase
+    {
+        data.Title = title;
+        chart.Data = data;
+        return chart;
     }
 }

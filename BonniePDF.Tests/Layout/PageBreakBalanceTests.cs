@@ -20,10 +20,10 @@ namespace BonniePDF.Tests.Layout;
 /// </summary>
 public sealed partial class PageBreakBalanceTests
 {
-    [GeneratedRegex(@"(?:^|\s)q(?:\s|$)")]
+    [GeneratedRegex(@"(?:^|\s)q(?:\s|$)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SaveRegex();
 
-    [GeneratedRegex(@"(?:^|\s)Q(?:\s|$)")]
+    [GeneratedRegex(@"(?:^|\s)Q(?:\s|$)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex RestoreRegex();
 
     /// <summary>

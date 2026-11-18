@@ -27,6 +27,6 @@ public sealed partial class UncoveredWrapTests
         Assert.True(SvgTextElement().Count(svg) > 1);
     }
 
-    [GeneratedRegex("<text\\b")]
+    [GeneratedRegex("<text\\b", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SvgTextElement();
 }

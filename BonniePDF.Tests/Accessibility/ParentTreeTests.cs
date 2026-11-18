@@ -23,7 +23,7 @@ public class ParentTreeTests
         builder.End();
 
         var (writer, _) = Write(builder, pageIds: new[] { 200, 201 });
-        var p = writer.Objects.First(o => o.Dict.TryGetValue("/S", out var s) && s == "/P");
+        var p = writer.Objects.First(o => o.Dict.TryGetValue("/S", out var s) && string.Equals(s, "/P", StringComparison.Ordinal));
 
         Assert.Equal("[ 0 1 ]", p.Dict["/K"]);
         Assert.Equal("200 0 R", p.Dict["/Pg"]);
@@ -41,7 +41,7 @@ public class ParentTreeTests
         builder.End();
 
         var (writer, _) = Write(builder, pageIds: new[] { 200, 201 });
-        var p = writer.Objects.First(o => o.Dict.TryGetValue("/S", out var s) && s == "/P");
+        var p = writer.Objects.First(o => o.Dict.TryGetValue("/S", out var s) && string.Equals(s, "/P", StringComparison.Ordinal));
 
         Assert.False(p.Dict.ContainsKey("/Pg"));
         Assert.Equal(
@@ -58,7 +58,7 @@ public class ParentTreeTests
         builder.End();
 
         var (writer, rootId) = Write(builder, pageIds: new[] { 200, 201 });
-        var root = writer.Objects.First(o => o.Dict.TryGetValue("/Type", out var t) && t == "/StructTreeRoot");
+        var root = writer.Objects.First(o => o.Dict.TryGetValue("/Type", out var t) && string.Equals(t, "/StructTreeRoot", StringComparison.Ordinal));
 
         Assert.Equal(rootId, root.Id);
         Assert.True(root.Dict.ContainsKey("/ParentTree"));
@@ -78,8 +78,8 @@ public class ParentTreeTests
 
         var (writer, _) = Write(builder, pageIds: new[] { 200, 201 });
         var parentTree = writer.Objects.First(o => o.Dict.ContainsKey("/Nums"));
-        var p = writer.Objects.First(o => o.Dict.TryGetValue("/S", out var s) && s == "/P");
-        var h1 = writer.Objects.First(o => o.Dict.TryGetValue("/S", out var s) && s == "/H1");
+        var p = writer.Objects.First(o => o.Dict.TryGetValue("/S", out var s) && string.Equals(s, "/P", StringComparison.Ordinal));
+        var h1 = writer.Objects.First(o => o.Dict.TryGetValue("/S", out var s) && string.Equals(s, "/H1", StringComparison.Ordinal));
 
         Assert.Equal($"[ 0 [ {p.Id} 0 R ] 1 [ {h1.Id} 0 R ] ]", parentTree.Dict["/Nums"]);
     }
@@ -105,11 +105,11 @@ public class ParentTreeTests
         var writer = new FakeWriter();
         new StructureTreeWriter(writer).Write(builder); // no pageIds
 
-        var p = writer.Objects.First(o => o.Dict.TryGetValue("/S", out var s) && s == "/P");
+        var p = writer.Objects.First(o => o.Dict.TryGetValue("/S", out var s) && string.Equals(s, "/P", StringComparison.Ordinal));
         Assert.False(p.Dict.ContainsKey("/Pg"));
         Assert.Equal("[ 0 ]", p.Dict["/K"]);
 
-        var root = writer.Objects.First(o => o.Dict.TryGetValue("/Type", out var t) && t == "/StructTreeRoot");
+        var root = writer.Objects.First(o => o.Dict.TryGetValue("/Type", out var t) && string.Equals(t, "/StructTreeRoot", StringComparison.Ordinal));
         Assert.False(root.Dict.ContainsKey("/ParentTree"));
     }
 
@@ -128,20 +128,20 @@ public class ParentTreeTests
     {
         private int _nextId = 100;
         public List<EmittedObject> Objects { get; } = new();
-        public PdfEncryptor Encryptor { get; set; }
+        public PdfEncryptor? Encryptor { get; set; }
         public int GetNewId() => _nextId++;
 
-        public void WriteObject(int id, IDictionary<string, string> dict, string streamContent = null)
-            => Objects.Add(new EmittedObject(id, new Dictionary<string, string>(dict)));
+        public void WriteObject(int id, IDictionary<string, string> dict, string? streamContent = null)
+            => Objects.Add(new EmittedObject(id, new Dictionary<string, string>(dict, StringComparer.Ordinal)));
 
         public void WriteRawObject(int id, string body) { }
 
         public void WriteCompressedObject(int id, IDictionary<string, string> dict, string content) => WriteObject(id, dict, content);
         public void WriteBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) => WriteObject(id, dict);
         public void WriteCompressedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) => WriteObject(id, dict);
-        public int WriteLinkAnnotation(int id, BonniePDF.Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null) => id;
+        public int WriteLinkAnnotation(int id, BonniePDF.Hyperlink hyperlink, IList<int>? pageIds = null, int? structParentKey = null) => id;
         public int WriteViewerPreferences(int id, DocumentSettings settings) => id;
-        public void WriteCatalog(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions options) { }
+        public void WriteCatalog(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions? options) { }
         public void WriteUnencryptedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) { }
         public void Close(int rootId, int infoId = 0) { }
         public int WriteEncryptDictionary(int id) => id;

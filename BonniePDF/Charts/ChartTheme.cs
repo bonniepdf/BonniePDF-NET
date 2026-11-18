@@ -54,7 +54,7 @@ internal sealed class ChartTheme
     };
 
     /// <summary>The theme for a validated <see cref="ChartBase.Theme"/> name.</summary>
-    internal static ChartTheme For(string name) => name == "modern" ? Modern : Legacy;
+    internal static ChartTheme For(string name) => string.Equals(name, "modern", StringComparison.Ordinal) ? Modern : Legacy;
 
     /// <summary>Left edge of a left-aligned title; <c>null</c> centres the title on the chart.</summary>
     internal float? TitleX { get; private init; }
@@ -92,5 +92,5 @@ internal sealed class ChartTheme
 
     /// <summary>The colour of the series at <paramref name="index"/> when the chart supplies <paramref name="color"/> because the author set none.</summary>
     internal Color SeriesColor(Color color, int index) =>
-        SeriesPalette.Count > 0 && color.ToHexString() == LibrarySeriesColor ? SeriesPalette[Math.Max(0, index) % SeriesPalette.Count] : color;
+        SeriesPalette.Count > 0 && string.Equals(color.ToHexString(), LibrarySeriesColor, StringComparison.Ordinal) ? SeriesPalette[Math.Max(0, index) % SeriesPalette.Count] : color;
 }

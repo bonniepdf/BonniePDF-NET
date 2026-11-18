@@ -35,7 +35,7 @@ internal sealed class Program
 
     private static Dictionary<string, byte[]> LoadAssets(string assetsDir, params string[] paths)
     {
-        var assets = new Dictionary<string, byte[]>();
+        var assets = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         foreach (string path in paths)
         {
             string fullPath = Path.Combine(assetsDir, path.Replace('/', Path.DirectorySeparatorChar));

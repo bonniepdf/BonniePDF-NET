@@ -58,16 +58,16 @@ namespace BonniePDF.Typography.Engine
                     rank += end - start + 1;
                     last = end;
                 }
-                var bits = new ulong[(last >> 6) + 1];
+                var words = new ulong[(last >> 6) + 1];
                 for (int i = 0; i < count; i++)
                 {
                     int record = offset + 4 + i * stride;
                     int start = data.U16(record), end = format == 1 ? start : data.U16(record + 2);
-                    for (int glyph = start; glyph <= end; glyph++) bits[glyph >> 6] |= 1UL << (glyph & 63);
+                    for (int glyph = start; glyph <= end; glyph++) words[glyph >> 6] |= 1UL << (glyph & 63);
                 }
-                var before = new int[bits.Length];
-                for (int word = 1; word < bits.Length; word++) before[word] = before[word - 1] + PopCount(bits[word - 1]);
-                return new CoverageMap(bits, before);
+                var preceding = new int[words.Length];
+                for (int word = 1; word < words.Length; word++) preceding[word] = preceding[word - 1] + PopCount(words[word - 1]);
+                return new CoverageMap(words, preceding);
             }
             catch (Exception) { return null; }
         }
@@ -127,14 +127,14 @@ namespace BonniePDF.Typography.Engine
                     last = end;
                 }
                 if (last - low + 1 > MaxSpan) return null;
-                var classes = new ushort[last - low + 1];
+                var table = new ushort[last - low + 1];
                 for (int i = 0; i < ranges; i++)
                 {
                     int record = offset + 4 + i * 6, start = data.U16(record), end = data.U16(record + 2);
                     ushort value = (ushort)data.U16(record + 4);
-                    for (int glyph = start; glyph <= end; glyph++) classes[glyph - low] = value;
+                    for (int glyph = start; glyph <= end; glyph++) table[glyph - low] = value;
                 }
-                return new ClassMap(low, classes);
+                return new ClassMap(low, table);
             }
             catch (Exception) { return null; }
         }

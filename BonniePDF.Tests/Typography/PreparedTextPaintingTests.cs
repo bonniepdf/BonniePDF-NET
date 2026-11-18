@@ -123,7 +123,7 @@ public sealed class PreparedTextPaintingTests
         {
             case "justify": canvas.DrawTextJustified(10, 10, text, Color.Black, 12, "font", 500); break;
             case "rotate": canvas.DrawTextRotated(10, 10, text, Color.Black, 12, "font", 30); break;
-            default: canvas.DrawText(300, 10, text, Color.Black, 12, "font", mode == "right" ? TextAlignment.Right : TextAlignment.Center); break;
+            default: canvas.DrawText(300, 10, text, Color.Black, 12, "font", string.Equals(mode, "right", StringComparison.Ordinal) ? TextAlignment.Right : TextAlignment.Center); break;
         }
         return (content.ToString(), tracker);
     }

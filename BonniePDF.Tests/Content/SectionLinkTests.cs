@@ -127,7 +127,7 @@ public class SectionLinkTests
     {
         var rects = LinkRectangles(Raw(BuildDoc()));
         Assert.Single(rects);
-        Assert.NotEqual("0 0 0 0", rects[0]);
+        Assert.NotEqual("0 0 0 0", rects[0], StringComparer.Ordinal);
         string[] p = rects[0].Split(' ');
         var ci = System.Globalization.CultureInfo.InvariantCulture;
         Assert.True(float.Parse(p[2], ci) > float.Parse(p[0], ci));

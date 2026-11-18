@@ -35,7 +35,7 @@ namespace BonniePDF.Typography.Engine
         private void ComputeConstant()
         {
             if (required) { constantValue = 1; constantTicks = 0; return; }
-            if (options.Script == "arab" || tags.Contains("rtlm")) return;
+            if (string.Equals(options.Script, "arab", System.StringComparison.Ordinal) || tags.Contains("rtlm")) return;
             foreach (var feature in options.Features)
                 if (feature.Start != 0 || feature.End != int.MaxValue) return;
             int ticks = 0;
@@ -43,7 +43,7 @@ namespace BonniePDF.Typography.Engine
             {
                 ticks++;
                 int value = defaults[i];
-                foreach (var feature in options.Features) { ticks++; if (feature.Tag == tags[i]) value = feature.Value; }
+                foreach (var feature in options.Features) { ticks++; if (string.Equals(feature.Tag, tags[i], System.StringComparison.Ordinal)) value = feature.Value; }
                 if (value != 0) { constantValue = value; constantTicks = ticks; return; }
             }
             constantValue = 0; constantTicks = ticks;
@@ -55,8 +55,8 @@ namespace BonniePDF.Typography.Engine
             for (int i = 0; i < tags.Count; i++)
             {
                 tick();
-                int fallback = options.Script == "arab" && (tags[i] == "isol" || tags[i] == "init" || tags[i] == "medi" || tags[i] == "fina") && tags[i] != joiningForm ? 0 : defaults[i];
-                if (mirrored && tags[i] == "rtlm") continue;
+                int fallback = string.Equals(options.Script, "arab", System.StringComparison.Ordinal) && (string.Equals(tags[i], "isol", System.StringComparison.Ordinal) || string.Equals(tags[i], "init", System.StringComparison.Ordinal) || string.Equals(tags[i], "medi", System.StringComparison.Ordinal) || string.Equals(tags[i], "fina", System.StringComparison.Ordinal)) && !string.Equals(tags[i], joiningForm, System.StringComparison.Ordinal) ? 0 : defaults[i];
+                if (mirrored && string.Equals(tags[i], "rtlm", System.StringComparison.Ordinal)) continue;
                 int value = options.FeatureValue(tags[i], cluster, fallback, tick);
                 if (value != 0) return value;
             }

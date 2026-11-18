@@ -22,7 +22,7 @@ namespace BonniePDF.Typography.Engine
             {
                 int cp = input.Points[i], offset = input.Offsets[i], kind = LayoutUnicodeData.Bracket(cp, true);
                 string primary = LayoutUnicodeData.Script(cp), ext = LayoutUnicodeData.ScriptExtensions(cp);
-                var next = (ext.Length > 0 ? ext.Split(',') : new[] { primary }).Where(s => s != "Zyyy" && s != "Zinh").ToList();
+                var next = (ext.Length > 0 ? ext.Split(',') : new[] { primary }).Where(s => !string.Equals(s, "Zyyy", StringComparison.Ordinal) && !string.Equals(s, "Zinh", StringComparison.Ordinal)).ToList();
                 if (kind == 2) for (int j = stack.Count - 1; j >= 0; j--)
                 {
                     int close = stack[j].Item1;
@@ -39,7 +39,7 @@ namespace BonniePDF.Typography.Engine
                     else if (intersection.Count > 0) candidates = intersection;
                     else if (!anchored) candidates = next;
                     else if (boundaries.Contains(offset)) { preferred = Choose(); result.Add(new ScriptRun(start, offset, preferred)); start = offset; candidates = next; anchored = false; }
-                    if (primary != "Zinh") anchored = true;
+                    if (!string.Equals(primary, "Zinh", StringComparison.Ordinal)) anchored = true;
                     string selected = Choose();
                     if (anchored) for (int j = 0; j < stack.Count; j++) if (stack[j].Item2 == null) stack[j] = Tuple.Create(stack[j].Item1, selected);
                 }

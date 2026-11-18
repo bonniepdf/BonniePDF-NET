@@ -34,7 +34,7 @@ public class PageSlotsLayersTests
         Assert.Contains("BACKGROUNDMARKER", stream);
         Assert.Contains("BODYMARKER", stream);
         // Painter's model: whatever is emitted first is drawn first (behind).
-        Assert.True(stream.IndexOf("BACKGROUNDMARKER") < stream.IndexOf("BODYMARKER"));
+        Assert.True(stream.IndexOf("BACKGROUNDMARKER", StringComparison.Ordinal) < stream.IndexOf("BODYMARKER", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public class PageSlotsLayersTests
         string stream = RenderPageStream(doc);
 
         Assert.Contains("FOREGROUNDMARKER", stream);
-        Assert.True(stream.IndexOf("BODYMARKER") < stream.IndexOf("FOREGROUNDMARKER"));
+        Assert.True(stream.IndexOf("BODYMARKER", StringComparison.Ordinal) < stream.IndexOf("FOREGROUNDMARKER", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -60,9 +60,9 @@ public class PageSlotsLayersTests
 
         string stream = RenderPageStream(doc);
 
-        int bg = stream.IndexOf("BACKGROUNDMARKER");
-        int body = stream.IndexOf("BODYMARKER");
-        int fg = stream.IndexOf("FOREGROUNDMARKER");
+        int bg = stream.IndexOf("BACKGROUNDMARKER", StringComparison.Ordinal);
+        int body = stream.IndexOf("BODYMARKER", StringComparison.Ordinal);
+        int fg = stream.IndexOf("FOREGROUNDMARKER", StringComparison.Ordinal);
         Assert.True(bg < body);
         Assert.True(body < fg);
     }
@@ -76,7 +76,7 @@ public class PageSlotsLayersTests
         doc.Settings.Watermark = new Watermark { Text = "WMARK" };
 
         string stream = RenderPageStream(doc);
-        Assert.True(stream.IndexOf("BACKGROUNDMARKER") < stream.IndexOf("WMARK"));
+        Assert.True(stream.IndexOf("BACKGROUNDMARKER", StringComparison.Ordinal) < stream.IndexOf("WMARK", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -90,8 +90,8 @@ public class PageSlotsLayersTests
         string stream = RenderPageStream(doc);
         // Painter's model: body first, then the watermark on top, then the
         // explicit foreground stamp above everything.
-        Assert.True(stream.IndexOf("BODYMARKER") < stream.IndexOf("WMARK"));
-        Assert.True(stream.IndexOf("WMARK") < stream.IndexOf("FOREGROUNDMARKER"));
+        Assert.True(stream.IndexOf("BODYMARKER", StringComparison.Ordinal) < stream.IndexOf("WMARK", StringComparison.Ordinal));
+        Assert.True(stream.IndexOf("WMARK", StringComparison.Ordinal) < stream.IndexOf("FOREGROUNDMARKER", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -148,9 +148,9 @@ public class PageSlotsLayersTests
         Assert.NotNull(doc.Settings.PageForeground);
 
         string stream = RenderPageStream(doc);
-        int bg = stream.IndexOf("BACKGROUNDMARKER");
-        int body = stream.IndexOf("BODYMARKER");
-        int fg = stream.IndexOf("FOREGROUNDMARKER");
+        int bg = stream.IndexOf("BACKGROUNDMARKER", StringComparison.Ordinal);
+        int body = stream.IndexOf("BODYMARKER", StringComparison.Ordinal);
+        int fg = stream.IndexOf("FOREGROUNDMARKER", StringComparison.Ordinal);
         Assert.True(bg >= 0);
         Assert.True(bg < body);
         Assert.True(body < fg);
@@ -176,8 +176,8 @@ public class PageSlotsLayersTests
         layers.AddForeground(Text("LAYERFG"));
 
         string stream = RenderLayers(layers);
-        Assert.True(stream.IndexOf("LAYERBG") < stream.IndexOf("LAYERPRIMARY"));
-        Assert.True(stream.IndexOf("LAYERPRIMARY") < stream.IndexOf("LAYERFG"));
+        Assert.True(stream.IndexOf("LAYERBG", StringComparison.Ordinal) < stream.IndexOf("LAYERPRIMARY", StringComparison.Ordinal));
+        Assert.True(stream.IndexOf("LAYERPRIMARY", StringComparison.Ordinal) < stream.IndexOf("LAYERFG", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -229,8 +229,8 @@ public class PageSlotsLayersTests
         Assert.IsType<Layers>(container.Child);
 
         string stream = RenderLayers(container);
-        Assert.True(stream.IndexOf("CLAYERBG") < stream.IndexOf("CLAYERPRIMARY"));
-        Assert.True(stream.IndexOf("CLAYERPRIMARY") < stream.IndexOf("CLAYERFG"));
+        Assert.True(stream.IndexOf("CLAYERBG", StringComparison.Ordinal) < stream.IndexOf("CLAYERPRIMARY", StringComparison.Ordinal));
+        Assert.True(stream.IndexOf("CLAYERPRIMARY", StringComparison.Ordinal) < stream.IndexOf("CLAYERFG", StringComparison.Ordinal));
     }
 
     #endregion

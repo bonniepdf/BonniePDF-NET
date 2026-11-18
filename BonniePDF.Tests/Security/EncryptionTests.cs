@@ -106,7 +106,7 @@ public class EncryptionTests
         Assert.True(ms.Length > 0);
         ms.Position = 0;
         using StreamReader reader = new(ms);
-        string line = reader.ReadLine();
+        string? line = reader.ReadLine();
         Assert.StartsWith("%PDF-1.4", line);
     }
 

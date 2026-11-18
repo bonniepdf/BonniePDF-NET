@@ -16,10 +16,10 @@ namespace BonniePDF.Tests.Export;
 // export carries that subset as font CSS.
 public partial class SvgDocumentExportTests
 {
-    [GeneratedRegex("<svg\\b[^>]*>")]
+    [GeneratedRegex("<svg\\b[^>]*>", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SvgRoot();
 
-    [GeneratedRegex("\\b(width|height|viewBox)=\"([^\"]*)\"")]
+    [GeneratedRegex("\\b(?<1>width|height|viewBox)=\"(?<2>[^\"]*)\"", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex RootAttribute();
 
     /// <summary>The fixture document: tagged, titled, one light card holding
@@ -121,12 +121,10 @@ public partial class SvgDocumentExportTests
         Assert.Equal(0, report.ErrorCount);
         Assert.Equal(1, report.WarningCount);
         Assert.Equal(1, report.InfoCount);
-        Assert.Contains(report.Findings, f =>
-            f.Code == "contrast-insufficient" && f.Severity == ComplianceSeverity.Warning &&
-            f.Standard == "WCAG 2.2" && f.Clause == "WCAG 2.2 SC 1.4.3 (AA)" && f.NodeId == "n3");
-        Assert.Contains(report.Findings, f =>
-            f.Code == "doc-no-headings" && f.Severity == ComplianceSeverity.Info &&
-            f.Standard == "PDF/UA-1" && f.Clause == "ISO 14289-1:2014 §7.4" && f.NodeId is null);
+        Assert.Contains(report.Findings, f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal) && f.Severity == ComplianceSeverity.Warning &&
+string.Equals(f.Standard, "WCAG 2.2", StringComparison.Ordinal) && string.Equals(f.Clause, "WCAG 2.2 SC 1.4.3 (AA)", StringComparison.Ordinal) && string.Equals(f.NodeId, "n3", StringComparison.Ordinal));
+        Assert.Contains(report.Findings, f => string.Equals(f.Code, "doc-no-headings", StringComparison.Ordinal) && f.Severity == ComplianceSeverity.Info &&
+string.Equals(f.Standard, "PDF/UA-1", StringComparison.Ordinal) && string.Equals(f.Clause, "ISO 14289-1:2014 §7.4", StringComparison.Ordinal) && f.NodeId is null);
     }
 
     // ── without layout ───────────────────────────────────────────────────────
@@ -145,7 +143,7 @@ public partial class SvgDocumentExportTests
         using JsonDocument json = JsonDocument.Parse(export.ToJson());
         Assert.Equal(
             new[] { "fontFaceCss", "pages", "version" },
-            json.RootElement.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal));
+            json.RootElement.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal), StringComparer.Ordinal);
     }
 
     // ── JSON form ────────────────────────────────────────────────────────────
@@ -157,7 +155,7 @@ public partial class SvgDocumentExportTests
 
         Assert.Equal(
             new[] { "fontFaceCss", "pages", "report", "snapshot", "version" },
-            json.RootElement.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal));
+            json.RootElement.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal), StringComparer.Ordinal);
         Assert.All(EveryKey(json.RootElement), key => Assert.True(char.IsLower(key[0]), key));
     }
 
@@ -179,7 +177,7 @@ public partial class SvgDocumentExportTests
         {
             JsonElement severity = finding.GetProperty("severity");
             Assert.Equal(JsonValueKind.String, severity.ValueKind);
-            Assert.Contains(severity.GetString(), new[] { "error", "warning", "info" });
+            Assert.Contains(severity.GetString(), new[] { "error", "warning", "info" }, StringComparer.Ordinal);
         }
     }
 
@@ -194,7 +192,7 @@ public partial class SvgDocumentExportTests
         // expansion it becomes when widened to double.
         string shortest = height.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
         string widened = ((double)height).ToString("R", System.Globalization.CultureInfo.InvariantCulture);
-        Assert.NotEqual(shortest, widened);
+        Assert.NotEqual(shortest, widened, StringComparer.Ordinal);
         Assert.Contains($"\"height\":{shortest}", json, StringComparison.Ordinal);
         Assert.DoesNotContain(widened, json, StringComparison.Ordinal);
     }
@@ -214,7 +212,7 @@ public partial class SvgDocumentExportTests
         SvgDocumentExport export = WithLayout();
         using JsonDocument json = JsonDocument.Parse(export.ToJson());
 
-        Assert.Equal(export.Pages, json.RootElement.GetProperty("pages").EnumerateArray().Select(p => p.GetString()!));
+        Assert.Equal(export.Pages, json.RootElement.GetProperty("pages").EnumerateArray().Select(p => p.GetString()!), StringComparer.Ordinal);
         Assert.Equal(export.FontFaceCss, json.RootElement.GetProperty("fontFaceCss").GetString());
         Assert.Equal(1, json.RootElement.GetProperty("version").GetInt32());
     }

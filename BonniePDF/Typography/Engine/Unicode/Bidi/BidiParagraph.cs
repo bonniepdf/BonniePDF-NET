@@ -18,11 +18,12 @@ namespace BonniePDF.Typography.Engine
         internal BidiLine ReorderLine(int start = 0, int? end = null)
         {
             int first = Input.Offsets.IndexOf(start), last = Input.Offsets.IndexOf(end ?? Input.Text.Length);
-            if (first < 0 || last < first) throw new ArgumentException("Line range must contain complete scalars inside the paragraph.");
+            if (first < 0) throw new ArgumentException("Line range must contain complete scalars inside the paragraph.", nameof(start));
+            if (last < first) throw new ArgumentException("Line range must contain complete scalars inside the paragraph.", nameof(end));
             int[] levels = Levels.Skip(first).Take(last - first).ToArray();
-            bool White(int i) { string t = OriginalTypes[i]; return t == "WS" || t == "FSI" || t == "LRI" || t == "RLI" || t == "PDI"; }
+            bool White(int i) { string t = OriginalTypes[i]; return string.Equals(t, "WS", StringComparison.Ordinal) || string.Equals(t, "FSI", StringComparison.Ordinal) || string.Equals(t, "LRI", StringComparison.Ordinal) || string.Equals(t, "RLI", StringComparison.Ordinal) || string.Equals(t, "PDI", StringComparison.Ordinal); }
             // L1 uses original classes and skips all X9 characters.
-            for (int i = first; i < last; i++) if (OriginalTypes[i] == "S" || OriginalTypes[i] == "B")
+            for (int i = first; i < last; i++) if (string.Equals(OriginalTypes[i], "S", StringComparison.Ordinal) || string.Equals(OriginalTypes[i], "B", StringComparison.Ordinal))
             {
                 levels[i - first] = ParagraphLevel;
                 for (int j = i - 1; j >= first; j--) { if (levels[j - first] < 0) continue; if (!White(j)) break; levels[j - first] = ParagraphLevel; }

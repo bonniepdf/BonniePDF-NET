@@ -42,7 +42,7 @@ public static class LongBasketReceiptExample
         long total = 0;
         foreach (var line in lines)
         {
-            if (line.Quantity == 0 || line.UnitPence < 0 || line.DiscountPence < 0 || (line.Quantity < 0 && line.DiscountPence != 0) || (line.Quantity > 0 && line.DiscountPence > checked(line.Quantity * line.UnitPence))) throw new ArgumentException("Invalid receipt amount or return discount.");
+            if (line.Quantity == 0 || line.UnitPence < 0 || line.DiscountPence < 0 || (line.Quantity < 0 && line.DiscountPence != 0) || (line.Quantity > 0 && line.DiscountPence > checked(line.Quantity * line.UnitPence))) throw new ArgumentException("Invalid receipt amount or return discount.", nameof(lines));
             total = checked(total + line.Quantity * line.UnitPence - line.DiscountPence);
         }
         return total;

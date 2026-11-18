@@ -281,7 +281,7 @@ public static class ReactiveWorkOrderExample
             table.AddRow(
                 Text(p.PartNo),
                 Text(p.Description),
-                Text(p.Qty.ToString(), align: TextAlignment.Center),
+                Text(p.Qty.ToString(System.Globalization.CultureInfo.InvariantCulture), align: TextAlignment.Center),
                 Text(Gbp(p.Unit), align: TextAlignment.Right),
                 Text(Gbp(p.Qty * p.Unit), align: TextAlignment.Right));
         }

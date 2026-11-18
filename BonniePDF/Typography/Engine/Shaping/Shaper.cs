@@ -28,12 +28,12 @@ namespace BonniePDF.Typography.Engine
             if (text.Length > limits.MaxTextLength)
                 throw new ArgumentException("Text exceeds the configured UTF-16 limit.", "text");
             settings.ValidateText(text);
-            bool hebrew = settings.Script == "hebr", arabic = settings.Script == "arab", nativeRtl = hebrew || arabic;
+            bool hebrew = string.Equals(settings.Script, "hebr", StringComparison.Ordinal), arabic = string.Equals(settings.Script, "arab", StringComparison.Ordinal), nativeRtl = hebrew || arabic;
             var run = face.BeginRun();
             // Printable ASCII, and the stable Latin characters prose uses, have no canonical
             // decomposition or multi-scalar clusters. Keep the same lookup pipeline and all
             // bounded error paths.
-            bool simple = settings.Script == "latn" && settings.Direction == TextDirection.LeftToRight &&
+            bool simple = string.Equals(settings.Script, "latn", StringComparison.Ordinal) && settings.Direction == TextDirection.LeftToRight &&
                 text.Length <= limits.MaxGlyphs && text.Length * 3 <= limits.MaxOperations;
             for (int i = 0; simple && i < text.Length; i++)
                 simple = (text[i] >= 32 && text[i] <= 126) || (StableLatin(text[i]) && face.MapGlyph(text[i]) != 0);

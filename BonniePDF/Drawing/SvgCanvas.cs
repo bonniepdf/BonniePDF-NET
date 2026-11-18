@@ -238,7 +238,7 @@ internal partial class SvgCanvas : ICanvas
         {
             var font=run.Font;
             var glyphs=run.Glyphs;
-            for(int g=0;g<glyphs.Count;g++) {width+=(float)((double)glyphs.AdvanceX(g)*fontSize/font.UnitsPerEm)+_letterSpacing;if(run.Text.Substring(glyphs.Cluster(g),glyphs.SourceLength(g))==" ")width+=_wordSpacing;}
+            for(int g=0;g<glyphs.Count;g++) {width+=(float)((double)glyphs.AdvanceX(g)*fontSize/font.UnitsPerEm)+_letterSpacing;if(string.Equals(run.Text.Substring(glyphs.Cluster(g), glyphs.SourceLength(g)), " ", StringComparison.Ordinal)) width+=_wordSpacing;}
 
         }
 
@@ -290,7 +290,7 @@ internal partial class SvgCanvas : ICanvas
                     string source = run.Text.Substring(glyphs.Cluster(g), glyphs.SourceLength(g));
                     ColourGlyphPainter.Draw(graphics, runFont, glyphs, g, source, (float)cursor, baselineY, fontSize, Color.FromHex(fillHex));
                     cursor += glyphs.AdvanceX(g) * scale + letterSpacing;
-                    if (source == " ") cursor += extraPerSpace;
+                    if (string.Equals(source, " ", StringComparison.Ordinal)) cursor += extraPerSpace;
                 }
                 elements.Append($"<g role=\"img\" aria-label=\"{XmlEscape.EscapeXml(run.Text)}\"{extraAttributes}{transformAttr}>").Append(graphics.GetInnerSvg()).Append("</g>");
                 continue;
@@ -306,7 +306,7 @@ internal partial class SvgCanvas : ICanvas
                 {
                     string d=runFont.GlyphOutline(glyphs.Id(g));
                     if(d.Length>0) elements.Append($"<path d=\"{d}\" transform=\"translate({N(cursor+glyphs.OffsetX(g)*scale)} {N(baselineY-glyphs.OffsetY(g)*scale)}) scale({scale.ToString("0.#########", CultureInfo.InvariantCulture)} {(-scale).ToString("0.#########", CultureInfo.InvariantCulture)})\"/>");
-                    cursor+=glyphs.AdvanceX(g)*scale+letterSpacing;if(run.Text.Substring(glyphs.Cluster(g),glyphs.SourceLength(g))==" ")cursor+=extraPerSpace;
+                    cursor+=glyphs.AdvanceX(g)*scale+letterSpacing;if(string.Equals(run.Text.Substring(glyphs.Cluster(g), glyphs.SourceLength(g)), " ", StringComparison.Ordinal)) cursor+=extraPerSpace;
                 }
                 elements.Append("</g>");continue;
             }
@@ -315,7 +315,7 @@ internal partial class SvgCanvas : ICanvas
                 string source=run.Text.Substring(glyphs.Cluster(g),glyphs.SourceLength(g));
                 FontUsageSink?.Invoke(run.FontFamily,runFont,char.ConvertToUtf32(source,0));
                 xs.Add(N(cursor+glyphs.OffsetX(g)*scale));chars.Append(source);cursor+=glyphs.AdvanceX(g)*scale+letterSpacing;
-                if(source==" ")cursor+=extraPerSpace;
+                if(string.Equals(source, " ", StringComparison.Ordinal)) cursor+=extraPerSpace;
             }
 
             if (xs.Count == 0) continue;

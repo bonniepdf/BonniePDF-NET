@@ -14,21 +14,21 @@ namespace BonniePDF.Tests.Definition;
 /// </summary>
 public partial class DefinitionReaderTests
 {
-    [GeneratedRegex("<text[^>]*>([^<]*)</text>")]
+    [GeneratedRegex("<text[^>]*>(?<1>[^<]*)</text>", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SvgText();
 
-    [GeneratedRegex(@"/ID \[[^\]]*\]")]
+    [GeneratedRegex(@"/ID \[[^\]]*\]", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex TrailerId();
 
-    [GeneratedRegex("[A-Z]{6}\\+")]
+    [GeneratedRegex("[A-Z]{6}\\+", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SubsetPrefix();
 
     // The PDF dates and their XMP copies (as TypeScript's definition helpers mask them): two
     // generations a moment apart can straddle a second.
-    [GeneratedRegex(@"/(?:Creation|Mod)Date[^\n]*|\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})")]
+    [GeneratedRegex(@"/(?:Creation|Mod)Date[^\n]*|\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex Dates();
 
-    [GeneratedRegex(@"/BaseFont /(?:[A-Z]{6}\+)?([A-Za-z-]+)")]
+    [GeneratedRegex(@"/BaseFont /(?:[A-Z]{6}\+)?(?<1>[A-Za-z-]+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex BaseFont();
 
     /// <summary>A 1x1 PNG.</summary>
@@ -85,7 +85,7 @@ public partial class DefinitionReaderTests
                     foreach (LayoutNode c in n.Children) Walk(c);
                 }
                 Walk(exported.Snapshot!.Root);
-                foreach (JsonElement id in ids.EnumerateArray()) Assert.Contains(id.GetString()!, found);
+                foreach (JsonElement id in ids.EnumerateArray()) Assert.Contains(id.GetString()!, found, StringComparer.Ordinal);
             }
         }
     }
@@ -97,12 +97,12 @@ public partial class DefinitionReaderTests
 
         List<List<string>> pages = (await doc.GenerateSvgDocumentAsync()).Pages.Select(Texts).ToList();
 
-        Assert.Contains("Northwind — Confidential", pages[0]);
-        Assert.Contains("Page 1 of ", pages[0]);
-        Assert.Contains("Even: 2 / ", pages[1]);
-        Assert.DoesNotContain("Northwind — Confidential", pages[1]);
-        Assert.Contains("Page 3 of ", pages[2]);
-        Assert.All(pages, p => Assert.Contains("3", p));
+        Assert.Contains("Northwind — Confidential", pages[0], StringComparer.Ordinal);
+        Assert.Contains("Page 1 of ", pages[0], StringComparer.Ordinal);
+        Assert.Contains("Even: 2 / ", pages[1], StringComparer.Ordinal);
+        Assert.DoesNotContain("Northwind — Confidential", pages[1], StringComparer.Ordinal);
+        Assert.Contains("Page 3 of ", pages[2], StringComparer.Ordinal);
+        Assert.All(pages, p => Assert.Contains("3", p, StringComparer.Ordinal));
     }
 
     [Fact]
@@ -152,11 +152,11 @@ public partial class DefinitionReaderTests
 
         string tampered = definition.Replace(sha, new string('0', 64), StringComparison.Ordinal);
         DefinitionException hash = await Assert.ThrowsAsync<DefinitionException>(() => BonniePDF.Document.FromDefinitionAsync(tampered, new DefinitionReadOptions { Resources = (_, _, _) => Task.FromResult<byte[]?>(Png) }));
-        Assert.Equal(["/resources/hosted/sha256 resource-hash-mismatch", "/resources/inline/sha256 resource-hash-mismatch"], hash.Issues.Select(Key).Order(StringComparer.Ordinal));
+        Assert.Equal(["/resources/hosted/sha256 resource-hash-mismatch", "/resources/inline/sha256 resource-hash-mismatch"], hash.Issues.Select(Key).Order(StringComparer.Ordinal), StringComparer.Ordinal);
 
         string wrong = Minimal("""[{"content":[{"type":"Image","resource":"pic"}]}]""", Fill(""","resources":{"pic":{"kind":"image","mediaType":"image/jpeg","data":"@PNG@"}}""", ("PNG", Base64(Png))));
         DefinitionException type = await Assert.ThrowsAsync<DefinitionException>(() => BonniePDF.Document.FromDefinitionAsync(wrong));
-        Assert.Equal(["/resources/pic resource-type-mismatch"], type.Issues.Select(Key));
+        Assert.Equal(["/resources/pic resource-type-mismatch"], type.Issues.Select(Key), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -166,7 +166,7 @@ public partial class DefinitionReaderTests
 
         DefinitionException error = await Assert.ThrowsAsync<DefinitionException>(() =>
             BonniePDF.Document.FromDefinitionAsync(definition, new DefinitionReadOptions { Resources = (_, _, _) => Task.FromResult<byte[]?>(null) }));
-        Assert.Equal(["/resources/a/ref resource-unresolved", "/resources/b/ref resource-unresolved"], error.Issues.Select(Key));
+        Assert.Equal(["/resources/a/ref resource-unresolved", "/resources/b/ref resource-unresolved"], error.Issues.Select(Key), StringComparer.Ordinal);
 
         DefinitionException none = await Assert.ThrowsAsync<DefinitionException>(() => BonniePDF.Document.FromDefinitionAsync(definition));
         Assert.Equal(2, none.Issues.Count);
@@ -183,7 +183,7 @@ public partial class DefinitionReaderTests
         using BonniePDF.Document doc = await BonniePDF.Document.FromDefinitionAsync(definition);
 
         Assert.Equal([("Inter", 400), ("Inter", 700)], doc.Fonts.Faces.Select(f => (f.Family, f.Weight)));
-        var embedded = BaseFont().Matches(Encoding.Latin1.GetString(doc.GenerateBytes())).Select(m => m.Groups[1].Value).Distinct().Order(StringComparer.Ordinal).ToList();
+        var embedded = BaseFont().Matches(Encoding.Latin1.GetString(doc.GenerateBytes())).Select(m => m.Groups[1].Value).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToList();
         Assert.Equal(["LiberationSans", "LiberationSans-Bold"], embedded);
     }
 
@@ -236,7 +236,7 @@ public partial class DefinitionReaderTests
         string definition = Minimal(extra: ""","settings":{"encryption":{"algorithm":"aes-256","permissions":["print","copy"]},"pdfVersion":"pdf-1.7"}""");
 
         DefinitionException missing = await Assert.ThrowsAsync<DefinitionException>(() => BonniePDF.Document.FromDefinitionAsync(definition));
-        Assert.Equal(["/settings/encryption secret-required"], missing.Issues.Select(Key));
+        Assert.Equal(["/settings/encryption secret-required"], missing.Issues.Select(Key), StringComparer.Ordinal);
 
         using BonniePDF.Document doc = await BonniePDF.Document.FromDefinitionAsync(definition, new DefinitionReadOptions { Passwords = new DefinitionPasswords { Owner = "owner-secret" } });
         Assert.Contains("/Encrypt", Encoding.Latin1.GetString(doc.GenerateBytes()), StringComparison.Ordinal);
@@ -290,7 +290,7 @@ public partial class DefinitionReaderTests
         using BonniePDF.Document doc = await BonniePDF.Document.FromDefinitionAsync(Minimal(chart));
 
         List<string> texts = Texts((await doc.GenerateSvgDocumentAsync()).Pages[0]);
-        Assert.Contains("1,235", texts);
-        Assert.Contains("$4,000", texts);
+        Assert.Contains("1,235", texts, StringComparer.Ordinal);
+        Assert.Contains("$4,000", texts, StringComparer.Ordinal);
     }
 }

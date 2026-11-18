@@ -53,7 +53,7 @@ public class PageNumberOf : TextBlock
         string next = ctx.TocEntries.TryGetValue(AnchorTarget, out int page)
             ? page.ToString()
             : Placeholder;
-        if (next != Text)
+        if (!string.Equals(next, Text, StringComparison.Ordinal))
         {
             Text = next;
             ResetState();

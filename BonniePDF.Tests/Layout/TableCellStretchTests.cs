@@ -12,11 +12,11 @@ namespace BonniePDF.Tests.Layout;
 public partial class TableCellStretchTests
 {
     // A vertical border segment: "x y1 m x y2 l S".
-    [GeneratedRegex(@"([\d.]+) ([\d.]+) m \1 ([\d.]+) l S")]
+    [GeneratedRegex(@"(?<1>[\d.]+) (?<2>[\d.]+) m \1 (?<3>[\d.]+) l S", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex VerticalEdge();
 
     // A filled rectangle: "x y w h re" followed by a fill operator.
-    [GeneratedRegex(@"([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+) re\s*f")]
+    [GeneratedRegex(@"(?<1>[\d.]+) (?<2>[\d.]+) (?<3>[\d.]+) (?<4>[\d.]+) re\s*f", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex FilledRect();
 
     private static string FirstRowStream(Action<BonniePDF.Fluent.TableDescriptor> table)

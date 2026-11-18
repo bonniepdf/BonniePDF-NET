@@ -222,7 +222,7 @@ internal sealed partial class DefinitionValidator
                 if (bytes > _limits.ResourceBytes) LimitExceeded($"/resources/{Escape(entry.Name)}/data", "A resource");
                 if (_resourceBytes > _limits.ResourceBytesTotal) LimitExceeded("/resources", "The total size of resources");
             }
-            if (value.TryGetProperty("kind", out JsonElement kind) && kind.ValueKind == JsonValueKind.String && kind.GetString() == "font"
+            if (value.TryGetProperty("kind", out JsonElement kind) && kind.ValueKind == JsonValueKind.String && string.Equals(kind.GetString(), "font", StringComparison.Ordinal)
                 && value.TryGetProperty("family", out JsonElement family) && family.ValueKind == JsonValueKind.String)
             {
                 string weight = value.TryGetProperty("weight", out JsonElement w)
@@ -284,7 +284,7 @@ internal sealed partial class DefinitionValidator
         foreach (SettingsRule rule in data.Rules)
         {
             if (!rule.When.TrueForAll(Holds)) continue;
-            if (rule.Outcome == "sets")
+            if (string.Equals(rule.Outcome, "sets", StringComparison.Ordinal))
             {
                 foreach (KeyValuePair<string, string> pair in rule.Set ?? []) raised[pair.Key] = pair.Value;
             }
@@ -531,11 +531,11 @@ internal sealed partial class DefinitionValidator
     {
         if (!IsNumber(value))
         {
-            WrongType(path, head == "integer" ? "an integer" : "a number", value, owner);
+            WrongType(path, string.Equals(head, "integer", StringComparison.Ordinal) ? "an integer" : "a number", value, owner);
             return;
         }
         double n = Num(value);
-        if (head == "integer" && Math.Floor(n) != n) BadValue(path, $"Expected an integer; found {value.GetRawText()}.", owner, "an integer");
+        if (string.Equals(head, "integer", StringComparison.Ordinal) && Math.Floor(n) != n) BadValue(path, $"Expected an integer; found {value.GetRawText()}.", owner, "an integer");
         else if (spec.Min is { } min && n < min) BadValue(path, $"{value.GetRawText()} is below the minimum {min.ToString(CultureInfo.InvariantCulture)}.", owner, $">= {min.ToString(CultureInfo.InvariantCulture)}");
         else if (spec.Max is { } max && n > max) BadValue(path, $"{value.GetRawText()} is above the maximum {max.ToString(CultureInfo.InvariantCulture)}.", owner, $"<= {max.ToString(CultureInfo.InvariantCulture)}");
     }
@@ -633,7 +633,7 @@ internal sealed partial class DefinitionValidator
         }
         foreach (JsonProperty p in value.EnumerateObject())
         {
-            if (p.Name == "color") CheckKind("color", new KeySpec { Kind = "color" }, p.Value, $"{path}/color", owner, 0);
+            if (string.Equals(p.Name, "color", StringComparison.Ordinal)) CheckKind("color", new KeySpec { Kind = "color" }, p.Value, $"{path}/color", owner, 0);
             else if (p.Name is "width" or "top" or "right" or "bottom" or "left") CheckLength(p.Value, $"{path}/{p.Name}", owner);
             else BadValue($"{path}/{Escape(p.Name)}", $"`{p.Name}` is not a border key.", owner);
         }
@@ -678,7 +678,7 @@ internal sealed partial class DefinitionValidator
             if (t.ValueKind == JsonValueKind.String)
             {
                 CheckEnum("TextDecorationToken", t.GetString()!, $"{path}/{i}", owner);
-                none |= t.GetString() == "none";
+                none |= string.Equals(t.GetString(), "none", StringComparison.Ordinal);
             }
             else WrongType($"{path}/{i}", "a string", t, owner);
             i++;
@@ -841,13 +841,13 @@ internal sealed partial class DefinitionValidator
         foreach ((string key, string defKind) in spec.Defines ?? [])
         {
             if (node.TryGetProperty(key, out JsonElement defValue) && defValue.ValueKind == JsonValueKind.String)
-                (defKind == "anchor" ? _anchors : _tocIdentifiers).Add(defValue.GetString()!);
+                (string.Equals(defKind, "anchor", StringComparison.Ordinal) ? _anchors : _tocIdentifiers).Add(defValue.GetString()!);
         }
         foreach (string rule in spec.Rules ?? [])
         {
-            if (rule == "rotation" || rule == "transformWidth")
+            if (string.Equals(rule, "rotation", StringComparison.Ordinal) || string.Equals(rule, "transformWidth", StringComparison.Ordinal))
             {
-                if (node.TryGetProperty("mode", out var mode) && mode.ValueKind == JsonValueKind.String && mode.GetString() == "constrained"
+                if (node.TryGetProperty("mode", out var mode) && mode.ValueKind == JsonValueKind.String && string.Equals(mode.GetString(), "constrained", StringComparison.Ordinal)
                     && node.TryGetProperty("angle", out var angle) && angle.ValueKind == JsonValueKind.Number && angle.TryGetDouble(out var a) && double.IsFinite(a) && a % 90 != 0)
                     Error($"{path}/angle", "invalid-value", "Constrained rotation requires a multiple of 90 degrees.", id);
                 if (node.TryGetProperty("contentWidth", out var width))
@@ -863,8 +863,8 @@ internal sealed partial class DefinitionValidator
                     if (w is double size && (!double.IsFinite(size) || size <= 0)) Error($"{path}/contentWidth", "invalid-value", "Transform contentWidth must be positive.", id);
                 }
             }
-            else if (rule == "singleSeries") SingleSeries(node, path, id);
-            else if (rule == "chartDuplicates") ChartDuplicates(node, path, id);
+            else if (string.Equals(rule, "singleSeries", StringComparison.Ordinal)) SingleSeries(node, path, id);
+            else if (string.Equals(rule, "chartDuplicates", StringComparison.Ordinal)) ChartDuplicates(node, path, id);
         }
         if (type is "Table" or "Grid") TableWidth(node, path, id);
     }
@@ -877,7 +877,7 @@ internal sealed partial class DefinitionValidator
         foreach (JsonProperty p in node.EnumerateObject())
         {
             string key = p.Name;
-            if (key is "type" or "id" || key.StartsWith('_') || key == "$schema") continue;
+            if (key is "type" or "id" || key.StartsWith('_') || string.Equals(key, "$schema", StringComparison.Ordinal)) continue;
             if (!keys.TryGetValue(key, out KeySpec? keySpec))
             {
                 Unrecognised($"{path}/{Escape(key)}", $"`{key}`", "unknown-key", id);
@@ -956,7 +956,7 @@ internal sealed partial class DefinitionValidator
                 {
                     foreach (JsonElement c in cells.EnumerateArray())
                     {
-                        width += c.ValueKind == JsonValueKind.Object && c.TryGetProperty("type", out JsonElement t) && t.GetString() == "TableCell"
+                        width += c.ValueKind == JsonValueKind.Object && c.TryGetProperty("type", out JsonElement t) && string.Equals(t.GetString(), "TableCell", StringComparison.Ordinal)
                             && c.TryGetProperty("columnSpan", out JsonElement span) && IsNumber(span) ? (int)Num(span) : 1;
                     }
                 }
@@ -1101,7 +1101,7 @@ internal sealed partial class DefinitionValidator
         {
             string at = $"{path}/{c++}";
             if (cell.ValueKind == JsonValueKind.String) continue;
-            if (cell.ValueKind == JsonValueKind.Object && cell.TryGetProperty("type", out JsonElement t) && t.ValueKind == JsonValueKind.String && t.GetString() == "TableCell")
+            if (cell.ValueKind == JsonValueKind.Object && cell.TryGetProperty("type", out JsonElement t) && t.ValueKind == JsonValueKind.String && string.Equals(t.GetString(), "TableCell", StringComparison.Ordinal))
             {
                 ValidateShape(cell, D.Shapes["TableCell"], at, owner, "unknown-key", depth + 1);
                 continue;

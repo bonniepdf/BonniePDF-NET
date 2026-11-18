@@ -75,15 +75,15 @@ public sealed partial class InlineLinkTests
         return count;
     }
 
-    [GeneratedRegex(@"/Rect \[([\d. ]+)\]")]
+    [GeneratedRegex(@"/Rect \[(?<1>[\d. ]+)\]", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex LinkRect();
 
-    [GeneratedRegex(@"/StructParent \d+")]
+    [GeneratedRegex(@"/StructParent \d+", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex StructParent();
 
-    [GeneratedRegex(@"/P << /MCID \d+ >> BDC")]
+    [GeneratedRegex(@"/P << /MCID \d+ >> BDC", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex ParagraphContent();
 
-    [GeneratedRegex(@"\d[\d.]* [\d.]+ m [\d.]+ [\d.]+ l")]
+    [GeneratedRegex(@"\d[\d.]* [\d.]+ m [\d.]+ [\d.]+ l", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex UnderlineSegment();
 }

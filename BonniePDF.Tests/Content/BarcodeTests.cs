@@ -226,7 +226,7 @@ public class BarcodeTests
 
     private static string DecodeCode128(bool[] modules)
     {
-        var reverse = new Dictionary<string, int>();
+        var reverse = new Dictionary<string, int>(StringComparer.Ordinal);
         for (int v = 0; v < Code128Patterns.Length; v++) reverse[Code128Patterns[v]] = v;
 
         List<int> widths = RunLengths(modules);
@@ -253,7 +253,7 @@ public class BarcodeTests
         var sb = new StringBuilder();
         if (start == 105)
         {
-            foreach (int v in payload) sb.Append(v.ToString("D2"));
+            foreach (int v in payload) sb.Append(v.ToString("D2", System.Globalization.CultureInfo.InvariantCulture));
         }
         else
         {
@@ -341,7 +341,7 @@ public class BarcodeTests
 
     private static Dictionary<string, int> ReverseOf(string[] table)
     {
-        var map = new Dictionary<string, int>();
+        var map = new Dictionary<string, int>(StringComparer.Ordinal);
         for (int i = 0; i < table.Length; i++) map[table[i]] = i;
         return map;
     }

@@ -11,7 +11,7 @@ public class ImageWriterTests
         public List<(int id, IDictionary<string, string> dict, byte[] data)> WrittenObjects { get; } = new();
         private int _nextId = 2; // Start from 2 to avoid conflicts with test-provided IDs
 
-        public BonniePDF.Security.Encryption.PdfEncryptor Encryptor { get; set; }
+        public BonniePDF.Security.Encryption.PdfEncryptor? Encryptor { get; set; }
 
         public int GetNewId() => _nextId++;
 
@@ -20,56 +20,56 @@ public class ImageWriterTests
             WrittenObjects.Add((id, dict, data));
         }
 
-        public void WriteObject(int id, IDictionary<string, string> dict, string streamContent = null)
+        public void WriteObject(int id, IDictionary<string, string> dict, string? streamContent = null)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This fake writer does not support the call.");
         }
 
         public void WriteRawObject(int id, string body) { }
 
         public void WriteCompressedObject(int id, IDictionary<string, string> dict, string content)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This fake writer does not support the call.");
         }
 
         public void WriteCompressedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This fake writer does not support the call.");
         }
 
-        public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null)
+        public int WriteLinkAnnotation(int id, Hyperlink hyperlink, IList<int>? pageIds = null, int? structParentKey = null)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This fake writer does not support the call.");
         }
 
         public int WriteDocumentInfo(int id, DocumentMetadata metadata)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This fake writer does not support the call.");
         }
 
         public int WriteViewerPreferences(int id, BonniePDF.DocumentSettings settings)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This fake writer does not support the call.");
         }
 
-        public void WriteCatalog(int id, int pagesId, int firstPageId, BonniePDF.DocumentSettings settings, CatalogOptions options)
+        public void WriteCatalog(int id, int pagesId, int firstPageId, BonniePDF.DocumentSettings settings, CatalogOptions? options)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This fake writer does not support the call.");
         }
 
         public void WriteUnencryptedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This fake writer does not support the call.");
         }
 
         public void Close(int rootId, int infoId = 0)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This fake writer does not support the call.");
         }
 
         public int WriteEncryptDictionary(int id)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This fake writer does not support the call.");
         }
     }
 
@@ -85,7 +85,7 @@ public class ImageWriterTests
     [Fact]
     public void Constructor_WithNullWriter_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>(() => new ImageWriter((IPdfWriter)null));
+        Assert.Throws<ArgumentNullException>(() => new ImageWriter((IPdfWriter)null!));
     }
 
     [Fact]

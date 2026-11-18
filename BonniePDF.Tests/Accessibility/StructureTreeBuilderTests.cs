@@ -133,7 +133,7 @@ public class StructureTreeBuilderTests
                 "enter:P", "leave:P",
                 "leave:Sect", "leave:Document"
             },
-            visitor.Events);
+            visitor.Events, StringComparer.Ordinal);
     }
 
     [Fact]

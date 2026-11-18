@@ -284,7 +284,7 @@ public abstract class TextElementBase : ElementBase
         // A property the style does not supply returns to its library default, so a default that was
         // changed or removed since the last cascade does not leave its old value behind.
         bool fontChanged = false;
-        if (!_fontFamilyExplicit && _fontFamily != style.FontFamily)
+        if (!_fontFamilyExplicit && !string.Equals(_fontFamily, style.FontFamily, StringComparison.Ordinal))
         {
             _fontFamily = style.FontFamily;
             fontChanged = true;
@@ -376,7 +376,7 @@ public abstract class TextElementBase : ElementBase
         bool HasNonSpace(int count)
         {
             for (int i = 0; i < count; i++)
-                if (rest[i] != " ") return true;
+                if (!string.Equals(rest[i], " ", StringComparison.Ordinal)) return true;
             return false;
         }
 
@@ -414,7 +414,7 @@ public abstract class TextElementBase : ElementBase
                 breakOffset -= rest[safe - 1].Length;
             }
             int cut = -1;
-            if (rest[count] == " " && HasNonSpace(count))
+            if (string.Equals(rest[count], " ", StringComparison.Ordinal) && HasNonSpace(count))
             {
                 cut = count;
             }
@@ -422,7 +422,7 @@ public abstract class TextElementBase : ElementBase
             {
                 for (int i = count - 1; i > 0; i--)
                 {
-                    if (rest[i] == " " && HasNonSpace(i))
+                    if (string.Equals(rest[i], " ", StringComparison.Ordinal) && HasNonSpace(i))
                     {
                         cut = i;
                         break;
@@ -434,7 +434,7 @@ public abstract class TextElementBase : ElementBase
             {
                 lines.Add(string.Concat(rest.GetRange(0, cut)).TrimEnd(' '));
                 rest.RemoveRange(0, cut);
-                while (rest.Count > 0 && rest[0] == " ") rest.RemoveAt(0);
+                while (rest.Count > 0 && string.Equals(rest[0], " ", StringComparison.Ordinal)) rest.RemoveAt(0);
             }
             else
             {

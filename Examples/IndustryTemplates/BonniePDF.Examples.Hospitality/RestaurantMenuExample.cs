@@ -184,7 +184,7 @@ public static class RestaurantMenuExample
         detail.Add(new TextBlock(description) { FontSize = 8.5f });
         foreach (string mark in marks)
         {
-            var (_, _, fill, ink) = Array.Find(Marks, m => m.Mark == mark);
+            var (_, _, fill, ink) = Array.Find(Marks, m => string.Equals(m.Mark, mark, StringComparison.Ordinal));
             detail.Add(Badge(mark, fill, ink));
         }
         VerticalStack item = new() { Spacing = 1, Margin = new Thickness(0, 0, 0, 6) };

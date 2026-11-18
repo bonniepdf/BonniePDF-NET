@@ -21,7 +21,7 @@ public class PdfVersionTests
 
         ms.Position = 0;
         using StreamReader reader = new(ms);
-        string line = reader.ReadLine();
+        string? line = reader.ReadLine();
         Assert.StartsWith("%PDF-1.4", line);
     }
 
@@ -36,7 +36,7 @@ public class PdfVersionTests
 
         ms.Position = 0;
         using StreamReader reader = new(ms);
-        string line = reader.ReadLine();
+        string? line = reader.ReadLine();
         Assert.StartsWith("%PDF-1.7", line);
     }
 
@@ -120,7 +120,7 @@ public class PdfVersionTests
 
         ms.Position = 0;
         using StreamReader reader = new(ms);
-        string line = reader.ReadLine();
+        string? line = reader.ReadLine();
         Assert.StartsWith("%PDF-2.0", line);
     }
 
@@ -189,7 +189,7 @@ public class PdfVersionTests
         Assert.Equal(PdfVersion.Pdf20, doc.Settings.Version);
         ms.Position = 0;
         using StreamReader reader = new(ms);
-        string line = reader.ReadLine();
+        string? line = reader.ReadLine();
         Assert.StartsWith("%PDF-2.0", line);
     }
 

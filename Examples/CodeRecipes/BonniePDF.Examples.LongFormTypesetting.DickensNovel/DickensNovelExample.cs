@@ -28,7 +28,7 @@ public static partial class DickensNovelExample
     private static readonly string LocalFilePath = Path.Combine(AppContext.BaseDirectory, "pg98.txt");
 
     /// <summary>Matches chapter number lines: "CHAPTER I." … "CHAPTER XXIV."</summary>
-    [GeneratedRegex(@"^CHAPTER\s+[IVXLC]+\.$")]
+    [GeneratedRegex(@"^CHAPTER\s+[IVXLC]+\.$", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
     private static partial Regex ChapterLineRegex();
 
     /// <summary>
@@ -96,7 +96,7 @@ public static partial class DickensNovelExample
                 if (pageNum <= 1) return null;
                 return new TextBlock
                 {
-                    Text = pageNum.ToString(),
+                    Text = pageNum.ToString(System.Globalization.CultureInfo.InvariantCulture),
                     FontName = StandardFonts.TimesRoman,
                     FontSize = 9,
                     Color = ColorPalette.Slate[500],
@@ -539,48 +539,50 @@ public static partial class DickensNovelExample
         FlushParagraph(); // tail paragraph
         return sections;
     }
-}
 
-// ── Supporting types ──────────────────────────────────────────────────────────
+    // ── Supporting types ──────────────────────────────────────────────────────────
 
-/// <summary>Discriminates between the three kinds of content parsed from the Project Gutenberg source.</summary>
-internal enum SectionType
-{
-    BookTitle,
-    Chapter,
-    Paragraph
-}
-
-/// <summary>
-/// Represents a single parsed section of the novel - a book division, chapter heading, or body paragraph.
-/// </summary>
-internal sealed class NovelSection
-{
-    /// <summary>Creates a BookTitle or Paragraph section.</summary>
-    public NovelSection(SectionType type, string text)
+    /// <summary>Discriminates between the three kinds of content parsed from the Project Gutenberg source.</summary>
+    private enum SectionType
     {
-        Type = type;
-        Text = text;
+        BookTitle,
+        Chapter,
+        Paragraph
     }
 
-    /// <summary>Creates a Chapter section with a separate number and title.</summary>
-    public NovelSection(SectionType type, string number, string title)
+    /// <summary>
+    /// Represents a single parsed section of the novel - a book division, chapter heading, or body paragraph.
+    /// </summary>
+    private sealed class NovelSection
     {
-        Type = type;
-        Number = number;
-        Title = title;
-        Text = $"{number} - {title}";
+        /// <summary>Creates a BookTitle or Paragraph section.</summary>
+        public NovelSection(SectionType type, string text)
+        {
+            Type = type;
+            Text = text;
+            Number = string.Empty;
+            Title = string.Empty;
+        }
+
+        /// <summary>Creates a Chapter section with a separate number and title.</summary>
+        public NovelSection(SectionType type, string number, string title)
+        {
+            Type = type;
+            Number = number;
+            Title = title;
+            Text = $"{number} - {title}";
+        }
+
+        /// <summary>Gets the type of this section (BookTitle, Chapter, or Paragraph).</summary>
+        public SectionType Type { get; }
+
+        /// <summary>Full text (BookTitle / Paragraph) or "CHAPTER X. - Title" (Chapter).</summary>
+        public string Text { get; }
+
+        /// <summary>e.g. "CHAPTER I."  (Chapter sections only)</summary>
+        public string Number { get; }
+
+        /// <summary>e.g. "The Period"  (Chapter sections only)</summary>
+        public string Title { get; }
     }
-
-    /// <summary>Gets the type of this section (BookTitle, Chapter, or Paragraph).</summary>
-    public SectionType Type { get; }
-
-    /// <summary>Full text (BookTitle / Paragraph) or "CHAPTER X. - Title" (Chapter).</summary>
-    public string Text { get; }
-
-    /// <summary>e.g. "CHAPTER I."  (Chapter sections only)</summary>
-    public string Number { get; }
-
-    /// <summary>e.g. "The Period"  (Chapter sections only)</summary>
-    public string Title { get; }
 }

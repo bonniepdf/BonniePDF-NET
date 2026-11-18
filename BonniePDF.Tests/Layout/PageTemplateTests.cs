@@ -14,7 +14,7 @@ public class PageTemplateTests
     private static readonly string[] Members = ["default", "firstPage", "odd", "even"];
 
     /// <summary>One distinct marker element per member, so the answer can be read off by identity.</summary>
-    private static Dictionary<string, IElement> Markers() => new()
+    private static Dictionary<string, IElement> Markers() => new(StringComparer.Ordinal)
     {
         ["default"] = new Container { Height = 1 },
         ["firstPage"] = new Container { Height = 2 },
@@ -26,7 +26,7 @@ public class PageTemplateTests
     private static string? Resolve(string[] members, int page)
     {
         Dictionary<string, IElement> all = Markers();
-        IElement? Pick(string name) => members.Contains(name) ? all[name] : null;
+        IElement? Pick(string name) => members.Contains(name, StringComparer.Ordinal) ? all[name] : null;
         Func<int, IElement?> template = PageTemplate.FromElements(
             @default: Pick("default"), firstPage: Pick("firstPage"), odd: Pick("odd"), even: Pick("even"));
 
@@ -57,7 +57,7 @@ public class PageTemplateTests
     [MemberData(nameof(Cases))]
     public void ReturnsTheFirstPresentMemberForThePage(string id, string[] members, int page, string? expected)
     {
-        Assert.True(expected == Resolve(members, page), $"{id}, page {page}");
+        Assert.True(string.Equals(expected, Resolve(members, page), StringComparison.Ordinal), $"{id}, page {page}");
     }
 
     [Fact]

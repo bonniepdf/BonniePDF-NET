@@ -20,12 +20,12 @@ public class StructureTreeWriterTests
         // Two objects: the Document StructElem and the StructTreeRoot.
         Assert.Equal(2, writer.Objects.Count);
 
-        var documentElem = writer.Objects.First(o => o.Dict["/Type"] == "/StructElem");
+        var documentElem = writer.Objects.First(o => string.Equals(o.Dict["/Type"], "/StructElem", StringComparison.Ordinal));
         Assert.Equal("/Document", documentElem.Dict["/S"]);
         Assert.Equal($"{structTreeRootId} 0 R", documentElem.Dict["/P"]);
         Assert.False(documentElem.Dict.ContainsKey("/K")); // no children, no MCIDs
 
-        var root = writer.Objects.First(o => o.Dict["/Type"] == "/StructTreeRoot");
+        var root = writer.Objects.First(o => string.Equals(o.Dict["/Type"], "/StructTreeRoot", StringComparison.Ordinal));
         Assert.Equal($"[ {documentElem.Id} 0 R ]", root.Dict["/K"]);
     }
 
@@ -43,12 +43,12 @@ public class StructureTreeWriterTests
         var (writer, structTreeRootId) = WriteWithFake(builder);
 
         // Should have 4 StructElem objects + 1 StructTreeRoot.
-        var elems = writer.Objects.Where(o => o.Dict["/Type"] == "/StructElem").ToList();
+        var elems = writer.Objects.Where(o => string.Equals(o.Dict["/Type"], "/StructElem", StringComparison.Ordinal)).ToList();
         Assert.Equal(4, elems.Count);
 
         // Find them by role.
         EmittedObject ByRole(string role) =>
-            elems.First(e => e.Dict["/S"] == "/" + role);
+            elems.First(e => string.Equals(e.Dict["/S"], "/" + role, StringComparison.Ordinal));
 
         var doc = ByRole("Document");
         var sect = ByRole("Sect");
@@ -83,10 +83,8 @@ public class StructureTreeWriterTests
 
         var (writer, _) = WriteWithFake(builder);
 
-        var p = writer.Objects.First(o =>
-            o.Dict["/Type"] == "/StructElem" && o.Dict["/S"] == "/P");
-        var span = writer.Objects.First(o =>
-            o.Dict["/Type"] == "/StructElem" && o.Dict["/S"] == "/Span");
+        var p = writer.Objects.First(o => string.Equals(o.Dict["/Type"], "/StructElem", StringComparison.Ordinal) && string.Equals(o.Dict["/S"], "/P", StringComparison.Ordinal));
+        var span = writer.Objects.First(o => string.Equals(o.Dict["/Type"], "/StructElem", StringComparison.Ordinal) && string.Equals(o.Dict["/S"], "/Span", StringComparison.Ordinal));
 
         // P's /K = [ Span_ref, 0, 1, 3 ] - struct refs first, then MCIDs.
         Assert.Equal($"[ {span.Id} 0 R 0 1 3 ]", p.Dict["/K"]);
@@ -107,8 +105,7 @@ public class StructureTreeWriterTests
 
         var (writer, _) = WriteWithFake(builder);
 
-        var fig = writer.Objects.First(o =>
-            o.Dict["/Type"] == "/StructElem" && o.Dict["/S"] == "/Figure");
+        var fig = writer.Objects.First(o => string.Equals(o.Dict["/Type"], "/StructElem", StringComparison.Ordinal) && string.Equals(o.Dict["/S"], "/Figure", StringComparison.Ordinal));
 
         // Each piece of metadata is wrapped in PDF string-literal parens.
         Assert.StartsWith("(", fig.Dict["/Alt"]);
@@ -133,14 +130,14 @@ public class StructureTreeWriterTests
         var sequence = new List<string>();
         foreach (var o in writer.Objects)
         {
-            if (o.Dict["/Type"] == "/StructElem")
+            if (string.Equals(o.Dict["/Type"], "/StructElem", StringComparison.Ordinal))
                 sequence.Add(o.Dict["/S"]);
             else
                 sequence.Add(o.Dict["/Type"]);
         }
 
         // H1 emitted before Sect; Sect before Document; StructTreeRoot last.
-        Assert.Equal(new[] { "/H1", "/Sect", "/Document", "/StructTreeRoot" }, sequence);
+        Assert.Equal(new[] { "/H1", "/Sect", "/Document", "/StructTreeRoot" }, sequence, StringComparer.Ordinal);
     }
 
     // ── Fake writer helpers ─────────────────────────────────────────
@@ -160,15 +157,15 @@ public class StructureTreeWriterTests
         private int _nextId = 100;
         public List<EmittedObject> Objects { get; } = new();
 
-        public PdfEncryptor Encryptor { get; set; }
+        public PdfEncryptor? Encryptor { get; set; }
 
         public int GetNewId() => _nextId++;
 
-        public void WriteObject(int id, IDictionary<string, string> dict, string streamContent = null)
+        public void WriteObject(int id, IDictionary<string, string> dict, string? streamContent = null)
         {
             // Snapshot the dict - the production writer reads it once and
             // emits, but the tests want to assert against the recorded copy.
-            Objects.Add(new EmittedObject(id, new Dictionary<string, string>(dict)));
+            Objects.Add(new EmittedObject(id, new Dictionary<string, string>(dict, StringComparer.Ordinal)));
         }
 
         public void WriteRawObject(int id, string body) { }
@@ -182,9 +179,9 @@ public class StructureTreeWriterTests
         public void WriteCompressedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) =>
             WriteObject(id, dict);
 
-        public int WriteLinkAnnotation(int id, BonniePDF.Hyperlink hyperlink, IList<int> pageIds = null, int? structParentKey = null) => id;
+        public int WriteLinkAnnotation(int id, BonniePDF.Hyperlink hyperlink, IList<int>? pageIds = null, int? structParentKey = null) => id;
         public int WriteViewerPreferences(int id, DocumentSettings settings) => id;
-        public void WriteCatalog(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions options) { }
+        public void WriteCatalog(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions? options) { }
         public void WriteUnencryptedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) { }
         public void Close(int rootId, int infoId = 0) { }
         public int WriteEncryptDictionary(int id) => id;

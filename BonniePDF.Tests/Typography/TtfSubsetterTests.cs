@@ -21,7 +21,7 @@ public class TtfSubsetterTests
     [Fact]
     public void Constructor_WithNullFont_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>(() => new TtfSubsetter(null));
+        Assert.Throws<ArgumentNullException>(() => new TtfSubsetter(null!));
     }
 
     [Fact]
@@ -87,6 +87,7 @@ public class TtfSubsetterTests
         var charMap = new Dictionary<int, ushort> { ['A'] = glyphIdA };
 
         subsetter.CreateSubset(usedGlyphs, charMap);
+        Assert.NotNull(subsetter.OldToNewGidMap);
 
         // .notdef (glyph 0) should be included in the mapping
         Assert.Contains((ushort)0, subsetter.OldToNewGidMap.Keys);
@@ -109,6 +110,7 @@ public class TtfSubsetterTests
         };
 
         subsetter.CreateSubset(usedGlyphs, charMap);
+        Assert.NotNull(subsetter.OldToNewGidMap);
 
         var mapping = subsetter.OldToNewGidMap;
 
@@ -158,6 +160,7 @@ public class TtfSubsetterTests
         var charMap = new Dictionary<int, ushort>();
 
         byte[] subsetData = subsetter.CreateSubset(usedGlyphs, charMap);
+        Assert.NotNull(subsetter.OldToNewGidMap);
 
         Assert.NotNull(subsetData);
         Assert.True(subsetData.Length > 0);
@@ -199,6 +202,7 @@ public class TtfSubsetterTests
                            .ToDictionary(c => (int)c, c => font.GetGlyphId(c));
 
         byte[] subsetData = subsetter.CreateSubset(usedGlyphs, charMap);
+        Assert.NotNull(subsetter.OldToNewGidMap);
 
         Assert.NotNull(subsetData);
         Assert.True(subsetData.Length > 0);
@@ -226,6 +230,7 @@ public class TtfSubsetterTests
         };
 
         subsetter.CreateSubset(usedGlyphs, charMap);
+        Assert.NotNull(subsetter.OldToNewGidMap);
 
         var mapping = subsetter.OldToNewGidMap;
 
@@ -287,6 +292,7 @@ public class TtfSubsetterTests
         var charMap = new Dictionary<int, ushort> { ['A'] = glyphId };
 
         subsetter.CreateSubset(usedGlyphs, charMap);
+        Assert.NotNull(subsetter.OldToNewGidMap);
 
         var mapping = subsetter.OldToNewGidMap;
 
@@ -307,6 +313,7 @@ public class TtfSubsetterTests
         var charMap = new Dictionary<int, ushort> { ['A'] = glyphIdA };
 
         byte[] subsetData = subsetter.CreateSubset(usedGlyphs, charMap);
+        Assert.NotNull(subsetter.OldToNewGidMap);
 
         Assert.NotNull(subsetData);
 

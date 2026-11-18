@@ -49,18 +49,7 @@ public class LargeDocumentTests : IntegrationTestBase
                 });
 
                 // Add a small chart every 10 pages
-                if (i % 10 == 0)
-                {
-                    ChartData data = CreateTestChartData(5);
-                    data.Title = $"Chart on Page {i}";
-                    BarChart barChart = new()
-                    {
-                        Height = 200,
-                        StretchToFit = true
-                    };
-                    barChart.Data = data;
-                    doc.Add(barChart);
-                }
+                if (i % 10 == 0) doc.Add(SmallBarChart(5, $"Chart on Page {i}"));
             }
 
             doc.Save(outputPath);
@@ -345,15 +334,7 @@ public class LargeDocumentTests : IntegrationTestBase
                 // Add chart
                 if (i % 2 == 0)
                 {
-                    ChartData data = CreateTestChartData(8);
-                    data.Title = $"Chart {i + 1}";
-                    BarChart barChart = new()
-                    {
-                        Height = 200,
-                        StretchToFit = true
-                    };
-                    barChart.Data = data;
-                    doc.Add(barChart);
+                    doc.Add(SmallBarChart(8, $"Chart {i + 1}"));
                 }
 
                 // Add text
@@ -380,5 +361,18 @@ public class LargeDocumentTests : IntegrationTestBase
         // Memory usage should be reasonable (< 50MB for this document)
         Assert.True(memoryUsed < 50_000_000,
             $"Memory usage was {memoryUsed / 1_000_000}MB, expected < 50MB");
+    }
+
+    private static BarChart SmallBarChart(int points, string title)
+    {
+        ChartData data = CreateTestChartData(points);
+        data.Title = title;
+        BarChart barChart = new()
+        {
+            Height = 200,
+            StretchToFit = true
+        };
+        barChart.Data = data;
+        return barChart;
     }
 }

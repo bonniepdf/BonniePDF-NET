@@ -11,10 +11,10 @@ namespace BonniePDF.Tests.Rendering;
 /// </summary>
 public partial class PdfOutputStreamTests
 {
-    [GeneratedRegex(@"startxref\s+(\d+)")]
+    [GeneratedRegex(@"startxref\s+(?<1>\d+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex StartXref();
 
-    [GeneratedRegex(@"(\d{10}) 00000 n")]
+    [GeneratedRegex(@"(?<1>\d{10}) 00000 n", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex XrefEntry();
 
     private static BonniePDF.Document Sample()

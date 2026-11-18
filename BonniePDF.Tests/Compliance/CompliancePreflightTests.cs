@@ -31,11 +31,12 @@ public sealed class CompliancePreflightTests
             canvas.FillRect(0, 30, 16, 28, green);
             canvas.DrawText(8, 34, "Mixed backdrop", Color.White, 10, StandardFonts.Helvetica, TextAlignment.Left);
         }) { DrawWidth = 140, DrawHeight = 60, AltText = "Two sample labels" });
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
         var findings = CompliancePreflight.Evaluate(snapshot).Findings
             .Where(f => f.Code.StartsWith("contrast-", System.StringComparison.Ordinal))
             .Select(f => f.Code);
-        Assert.Equal(new[] { "contrast-insufficient", "contrast-unknown" }, findings);
+        Assert.Equal(new[] { "contrast-insufficient", "contrast-unknown" }, findings, StringComparer.Ordinal);
     }
 
     [Fact]
@@ -73,10 +74,10 @@ public sealed class CompliancePreflightTests
         doc.Add(new Heading("Overview") { Level = 1 });
         doc.Add(new QRCode { Data = "https://example.com" });
 
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
         Assert.NotNull(snapshot);
 
-        LayoutNode qrNode = Walk(snapshot.Root).First(n => n.Type == "QRCode");
+        LayoutNode qrNode = Walk(snapshot.Root).First(n => string.Equals(n.Type, "QRCode", StringComparison.Ordinal));
         Assert.NotNull(qrNode.A11y);
         Assert.Equal("Artifact", qrNode.A11y!.Role);
         Assert.True(qrNode.A11y.ImageLike);
@@ -87,7 +88,7 @@ public sealed class CompliancePreflightTests
         Assert.Equal("Report", snapshot.Meta.Title);
 
         ComplianceReport report = CompliancePreflight.Evaluate(snapshot);
-        ComplianceFinding? figure = report.Findings.FirstOrDefault(f => f.Code == "figure-missing-alt");
+        ComplianceFinding? figure = report.Findings.FirstOrDefault(f => string.Equals(f.Code, "figure-missing-alt", StringComparison.Ordinal));
         Assert.NotNull(figure);
         Assert.Equal(ComplianceSeverity.Error, figure!.Severity);
         Assert.Equal(qrNode.Id, figure.NodeId);
@@ -105,10 +106,11 @@ public sealed class CompliancePreflightTests
         doc.Add(new Heading("Intro") { Level = 1 });
         doc.Add(new QRCode { Data = "x", AltText = "Scan to open the portal" });
 
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
         ComplianceReport report = CompliancePreflight.Evaluate(snapshot);
 
-        Assert.DoesNotContain(report.Findings, f => f.Code == "figure-missing-alt");
+        Assert.DoesNotContain(report.Findings, f => string.Equals(f.Code, "figure-missing-alt", StringComparison.Ordinal));
         Assert.Equal(0, report.ErrorCount);
         Assert.True(report.Passed);
     }
@@ -119,13 +121,14 @@ public sealed class CompliancePreflightTests
         var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "Body text", FontSize = 12 });
 
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
         ComplianceReport report = CompliancePreflight.Evaluate(snapshot);
 
-        Assert.Equal(ComplianceSeverity.Info, report.Findings.First(f => f.Code == "doc-not-tagged").Severity);
-        Assert.Equal(ComplianceSeverity.Warning, report.Findings.First(f => f.Code == "doc-lang-missing").Severity);
-        Assert.Equal(ComplianceSeverity.Warning, report.Findings.First(f => f.Code == "doc-title-missing").Severity);
-        Assert.Contains(report.Findings, f => f.Code == "doc-no-headings");
+        Assert.Equal(ComplianceSeverity.Info, report.Findings.First(f => string.Equals(f.Code, "doc-not-tagged", StringComparison.Ordinal)).Severity);
+        Assert.Equal(ComplianceSeverity.Warning, report.Findings.First(f => string.Equals(f.Code, "doc-lang-missing", StringComparison.Ordinal)).Severity);
+        Assert.Equal(ComplianceSeverity.Warning, report.Findings.First(f => string.Equals(f.Code, "doc-title-missing", StringComparison.Ordinal)).Severity);
+        Assert.Contains(report.Findings, f => string.Equals(f.Code, "doc-no-headings", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -139,9 +142,10 @@ public sealed class CompliancePreflightTests
         table.AddRow(new TextBlock { Text = "Margin.Top" }, new TextBlock { Text = "Space above" });
         doc.Add(table);
 
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
 
-        var roles = new HashSet<string>();
+        var roles = new HashSet<string>(StringComparer.Ordinal);
         void Collect(LayoutNode n)
         {
             if (n.A11y?.Role is string r) roles.Add(r);
@@ -153,7 +157,7 @@ public sealed class CompliancePreflightTests
         Assert.Contains("TR", roles);
 
         ComplianceReport report = CompliancePreflight.Evaluate(snapshot);
-        Assert.DoesNotContain(report.Findings, f => f.Code == "table-no-header");
+        Assert.DoesNotContain(report.Findings, f => string.Equals(f.Code, "table-no-header", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -167,9 +171,10 @@ public sealed class CompliancePreflightTests
         table.AddRow(new TextBlock { Text = "Acme Inc" }, new TextBlock { Text = "42 Road" });
         doc.Add(table);
 
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
 
-        var roles = new HashSet<string>();
+        var roles = new HashSet<string>(StringComparer.Ordinal);
         void Collect(LayoutNode n)
         {
             if (n.A11y?.Role is string r) roles.Add(r);
@@ -182,7 +187,7 @@ public sealed class CompliancePreflightTests
         Assert.DoesNotContain("TH", roles);
 
         ComplianceReport report = CompliancePreflight.Evaluate(snapshot);
-        Assert.DoesNotContain(report.Findings, f => f.Code == "table-no-header");
+        Assert.DoesNotContain(report.Findings, f => string.Equals(f.Code, "table-no-header", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -196,9 +201,10 @@ public sealed class CompliancePreflightTests
         table.AddRow(new TextBlock { Text = "c" }, new TextBlock { Text = "d" });
         doc.Add(table);
 
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
         ComplianceReport report = CompliancePreflight.Evaluate(snapshot);
-        ComplianceFinding? finding = report.Findings.FirstOrDefault(f => f.Code == "table-no-header");
+        ComplianceFinding? finding = report.Findings.FirstOrDefault(f => string.Equals(f.Code, "table-no-header", StringComparison.Ordinal));
         Assert.NotNull(finding);
         Assert.Equal(ComplianceSeverity.Warning, finding!.Severity);
     }
@@ -212,10 +218,11 @@ public sealed class CompliancePreflightTests
         doc.Add(new Heading("One") { Level = 1 });
         doc.Add(new Heading("Three") { Level = 3 });
 
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
         ComplianceReport report = CompliancePreflight.Evaluate(snapshot);
 
-        ComplianceFinding? skip = report.Findings.FirstOrDefault(f => f.Code == "heading-skip");
+        ComplianceFinding? skip = report.Findings.FirstOrDefault(f => string.Equals(f.Code, "heading-skip", StringComparison.Ordinal));
         Assert.NotNull(skip);
         Assert.Equal("H3", skip!.Role);
         Assert.Equal(ComplianceSeverity.Warning, skip.Severity);

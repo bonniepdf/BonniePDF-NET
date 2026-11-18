@@ -240,7 +240,7 @@ internal sealed partial class DefinitionWriter
         foreach (string token in D.Enums["PdfPermission"].Tokens)
         {
             var flag = (PdfPermissions)DefinitionReader.EnumFromToken(typeof(PdfPermissions), token);
-            if ((mask & flag) != 0) list.Add(token);
+            if ((mask & flag) != PdfPermissions.None) list.Add(token);
         }
         return list;
     }
@@ -248,9 +248,9 @@ internal sealed partial class DefinitionWriter
     private static JsonNode TextDecorationWire(TextDecoration flags)
     {
         var parts = new List<string>();
-        if ((flags & TextDecoration.Underline) != 0) parts.Add("underline");
-        if ((flags & TextDecoration.Strikethrough) != 0) parts.Add("strikethrough");
-        if ((flags & TextDecoration.Overline) != 0) parts.Add("overline");
+        if ((flags & TextDecoration.Underline) != TextDecoration.None) parts.Add("underline");
+        if ((flags & TextDecoration.Strikethrough) != TextDecoration.None) parts.Add("strikethrough");
+        if ((flags & TextDecoration.Overline) != TextDecoration.None) parts.Add("overline");
         if (parts.Count == 0) return "none";
         if (parts.Count == 1) return parts[0];
         var list = new JsonArray();
@@ -461,13 +461,13 @@ internal sealed partial class DefinitionWriter
                 if (explicitly is false) continue;
                 setByAuthor |= explicitly is true;
             }
-            if (key == "alignment" && element is TextBlock or RichText)
+            if (string.Equals(key, "alignment", StringComparison.Ordinal) && element is TextBlock or RichText)
             {
                 bool explicitAlignment = element is TextBlock block ? block.AlignmentIsExplicit : ((RichText)element).AlignmentIsExplicit;
                 if (!explicitAlignment) continue;
                 setByAuthor = true;
             }
-            if (key == "bulletColor" && element is UnorderedList list)
+            if (string.Equals(key, "bulletColor", StringComparison.Ordinal) && element is UnorderedList list)
             {
                 // Unset, the bullets follow the text colour; writing that colour would fix them to it.
                 if (!list.BulletColorIsExplicit) continue;
@@ -479,7 +479,7 @@ internal sealed partial class DefinitionWriter
             JsonNode? wire = Wire(keySpec.Kind, property.GetValue(element));
             if (wire is null) continue;
             if (!keySpec.Required && !setByAuthor && Same(wire, Wire(keySpec.Kind, property.GetValue(blank)))) continue;
-            if (wire is JsonObject { Count: 0 } && head == "object") continue;
+            if (wire is JsonObject { Count: 0 } && string.Equals(head, "object", StringComparison.Ordinal)) continue;
             node[key] = wire;
         }
         return node;
@@ -611,9 +611,9 @@ internal sealed partial class DefinitionWriter
                     "footer" => table.FooterRows,
                     _ => [.. table.Rows],
                 };
-                if (rows.Count == 0 && key != "rows") return Slot.Write(null);
+                if (rows.Count == 0 && !string.Equals(key, "rows", StringComparison.Ordinal)) return Slot.Write(null);
                 var array = new JsonArray();
-                foreach (TableRow row in rows) array.Add(Row(row, $"{at}/{array.Count}", key == "header"));
+                foreach (TableRow row in rows) array.Add(Row(row, $"{at}/{array.Count}", string.Equals(key, "header", StringComparison.Ordinal)));
                 return Slot.Write(array);
             }
             case "Image.resource":
@@ -650,6 +650,7 @@ internal sealed partial class DefinitionWriter
                     }
                     case "style":
                     {
+                        if (s.Style is null) break;
                         JsonObject style = Shape(s.Style, D.Shapes["SeriesStyle"], new ChartSeriesStyle(), []);
                         if (style.Count > 0) node[key] = style;
                         break;
@@ -720,7 +721,7 @@ internal sealed partial class DefinitionWriter
     private JsonNode Cell(TableCell cell, string at, bool inHeader)
     {
         JsonObject? content = WriteElement(cell.Content, $"{at}/content");
-        bool plain = content is not null && content.Count == 2 && content["type"]?.GetValue<string>() == "TextBlock";
+        bool plain = content is not null && content.Count == 2 && string.Equals(content["type"]?.GetValue<string>(), "TextBlock", StringComparison.Ordinal);
         HashSet<string> skip = inHeader ? ["content", "type", "isHeader"] : ["content", "type"];
         JsonObject options = Shape(cell, D.Shapes["TableCell"], new TableCell { Content = new TextBlock { Text = string.Empty } }, skip);
         JsonNode contentNode = content is null ? string.Empty : plain ? content["text"]!.GetValue<string>() : content;
@@ -739,13 +740,13 @@ internal sealed partial class DefinitionWriter
     private static string MediaTypeOf(string kind, byte[] bytes)
     {
         static bool Starts(byte[] d, params byte[] sig) => d.Length >= sig.Length && sig.Select((b, i) => d[i] == b).All(x => x);
-        if (kind == "image")
+        if (string.Equals(kind, "image", StringComparison.Ordinal))
         {
             if (Starts(bytes, 0x89, 0x50, 0x4e, 0x47)) return "image/png";
             if (Starts(bytes, 0xff, 0xd8, 0xff)) return "image/jpeg";
         }
-        if (kind == "font") return Starts(bytes, 0x4f, 0x54, 0x54, 0x4f) ? "font/otf" : "font/ttf";
-        if (kind == "svg") return "image/svg+xml";
+        if (string.Equals(kind, "font", StringComparison.Ordinal)) return Starts(bytes, 0x4f, 0x54, 0x54, 0x4f) ? "font/otf" : "font/ttf";
+        if (string.Equals(kind, "svg", StringComparison.Ordinal)) return "image/svg+xml";
         return "application/octet-stream";
     }
 
@@ -823,8 +824,8 @@ internal sealed partial class DefinitionWriter
         }
         byte[] bytes = Encoding.UTF8.GetBytes(markup);
         string? named = _options.EmbedResources ? null : _options.ResourceRef?.Invoke(new DefinitionResourceDescriptor("svg", "image/svg+xml", bytes));
-        if (named is null) return Slot.Write(key == "svgData" ? markup : null);
-        return Slot.Write(key == "resource" ? Resource("svg", bytes) : null);
+        if (named is null) return Slot.Write(string.Equals(key, "svgData", StringComparison.Ordinal) ? markup : null);
+        return Slot.Write(string.Equals(key, "resource", StringComparison.Ordinal) ? Resource("svg", bytes) : null);
     }
 
     // ── the whole document ───────────────────────────────────────────────────
@@ -931,14 +932,14 @@ internal sealed partial class DefinitionWriter
         foreach ((string key, KeySpec keySpec) in D.Objects["Metadata"].Keys)
         {
             // A date the metadata gave itself when it was built is "the time it was made", not a chosen date.
-            if (key == "creationDate" && metadata.CreationDateIsBuiltIn) continue;
-            if (key == "modifiedDate" && metadata.ModifiedDateIsBuiltIn) continue;
+            if (string.Equals(key, "creationDate", StringComparison.Ordinal) && metadata.CreationDateIsBuiltIn) continue;
+            if (string.Equals(key, "modifiedDate", StringComparison.Ordinal) && metadata.ModifiedDateIsBuiltIn) continue;
             PropertyInfo property = DefinitionReader.FindProperty(typeof(DocumentMetadata), key)!;
             object? value = property.GetValue(metadata);
-            if (key == "customProperties" && value is IDictionary { Count: 0 }) value = null;
+            if (string.Equals(key, "customProperties", StringComparison.Ordinal) && value is IDictionary { Count: 0 }) value = null;
             JsonNode? wire = Wire(keySpec.Kind, value);
             if (wire is null) continue;
-            if (keySpec.Kind != "dateTime" && Same(wire, Wire(keySpec.Kind, property.GetValue(blank)))) continue;
+            if (!string.Equals(keySpec.Kind, "dateTime", StringComparison.Ordinal) && Same(wire, Wire(keySpec.Kind, property.GetValue(blank)))) continue;
             result[key] = wire;
         }
         return result;
@@ -985,7 +986,7 @@ internal sealed partial class DefinitionWriter
             object? value = property.GetValue(settings);
             JsonNode? wire = Wire(keySpec.Kind, value);
             // "No cap" is null here and the token "unlimited" on the wire.
-            if (wire is null && keySpec.Kind == "integerOrUnlimited" && blank.MaxImageDpi is not null) wire = "unlimited";
+            if (wire is null && string.Equals(keySpec.Kind, "integerOrUnlimited", StringComparison.Ordinal) && blank.MaxImageDpi is not null) wire = "unlimited";
             if (wire is null) continue;
             if (Same(wire, Wire(keySpec.Kind, property.GetValue(blank)))) continue;
             if (wire is JsonObject { Count: 0 } && keySpec.Kind.StartsWith("object:", StringComparison.Ordinal)) continue;

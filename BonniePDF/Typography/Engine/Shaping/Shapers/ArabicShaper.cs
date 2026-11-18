@@ -50,11 +50,11 @@ namespace BonniePDF.Typography.Engine
             for (int i = 0; i < run.Count; i++)
             {
                 string type = ArabicData.JoiningType(run[i].Scalar);
-                if (type == "T") continue;
-                run[i].JoiningForm = "RDL".IndexOf(type) >= 0 ? "isol" : "";
-                if (prior >= 0 && "DLC".IndexOf(previous) >= 0 && "DRC".IndexOf(type) >= 0)
+                if (string.Equals(type, "T", StringComparison.Ordinal)) continue;
+                run[i].JoiningForm = "RDL".IndexOf(type, StringComparison.Ordinal) >= 0 ? "isol" : "";
+                if (prior >= 0 && "DLC".IndexOf(previous, StringComparison.Ordinal) >= 0 && "DRC".IndexOf(type, StringComparison.Ordinal) >= 0)
                 {
-                    if (run[prior].JoiningForm.Length != 0) run[prior].JoiningForm = run[prior].JoiningForm == "fina" ? "medi" : "init";
+                    if (run[prior].JoiningForm.Length != 0) run[prior].JoiningForm = string.Equals(run[prior].JoiningForm, "fina", StringComparison.Ordinal) ? "medi" : "init";
                     if (run[i].JoiningForm.Length != 0) run[i].JoiningForm = "fina";
                     for (int j = prior; j <= i; j++) if (run[j].Cluster != Math.Min(run[prior].Cluster, run[i].Cluster)) run[j].UnsafeBefore = true;
                 }

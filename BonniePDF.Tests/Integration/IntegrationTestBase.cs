@@ -119,10 +119,10 @@ public abstract class IntegrationTestBase : IDisposable
         int pageCount = 0;
         int index = 0;
 
-        while ((index = content.IndexOf("/Type", index)) != -1)
+        while ((index = content.IndexOf("/Type", index, StringComparison.Ordinal)) != -1)
         {
             // Look ahead for /Page
-            int pageIndex = content.IndexOf("/Page", index);
+            int pageIndex = content.IndexOf("/Page", index, StringComparison.Ordinal);
             if (pageIndex != -1 && pageIndex - index < 20)
             {
                 // Make sure it's not /Pages (plural)
@@ -212,7 +212,7 @@ public abstract class IntegrationTestBase : IDisposable
     public void Dispose()
     {
         // Optionally keep files for debugging - set environment variable KEEP_TEST_FILES=1
-        bool keepFiles = Environment.GetEnvironmentVariable("KEEP_TEST_FILES") == "1";
+        bool keepFiles = string.Equals(Environment.GetEnvironmentVariable("KEEP_TEST_FILES"), "1", StringComparison.Ordinal);
 
         if (!keepFiles && Directory.Exists(OutputDirectory))
         {

@@ -55,7 +55,7 @@ public class VendoredTextTests
         Dictionary<string, string> listed = ListedFiles();
         string[] unlisted = Directory.GetFiles(Folder(), "*", SearchOption.AllDirectories)
             .Select(path => Path.GetRelativePath(Folder(), path).Replace('\\', '/'))
-            .Where(file => file != "VENDORED.json" && !listed.ContainsKey(file))
+            .Where(file => !string.Equals(file, "VENDORED.json", StringComparison.Ordinal) && !listed.ContainsKey(file))
             .ToArray();
         Assert.Empty(unlisted);
     }

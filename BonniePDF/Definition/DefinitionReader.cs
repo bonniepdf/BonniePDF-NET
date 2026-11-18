@@ -187,7 +187,7 @@ internal sealed class DefinitionReader
             foreach (JsonProperty entry in resources.EnumerateObject())
             {
                 JsonElement resource = entry.Value;
-                if (resource.GetProperty("kind").GetString() != "font") continue;
+                if (!string.Equals(resource.GetProperty("kind").GetString(), "font", StringComparison.Ordinal)) continue;
                 doc.Fonts.Add(
                     _resources[entry.Name],
                     resource.TryGetProperty("family", out JsonElement family) ? family.GetString() : null,
@@ -499,7 +499,7 @@ internal sealed class DefinitionReader
     private IElement TableElement(JsonElement node, ShapeSpec spec, string type)
     {
         float[] columns = node.TryGetProperty("columns", out JsonElement c) ? c.EnumerateArray().Select(x => (float)x.GetDouble()).ToArray() : [];
-        Table table = type == "Grid" ? new Grid(columns) : new Table(columns);
+        Table table = string.Equals(type, "Grid", StringComparison.Ordinal) ? new Grid(columns) : new Table(columns);
         Populate(table, node, spec, Skip("columns", "header", "rows", "footer"));
         if (node.TryGetProperty("header", out JsonElement header)) foreach (JsonElement row in header.EnumerateArray()) table.AddHeader(Row(row));
         if (node.TryGetProperty("rows", out JsonElement rows)) foreach (JsonElement row in rows.EnumerateArray()) table.AddRow(Row(row));
@@ -523,7 +523,7 @@ internal sealed class DefinitionReader
     private TableCell Cell(JsonElement cell)
     {
         if (cell.ValueKind == JsonValueKind.String) return new TableCell { Content = new TextBlock { Text = cell.GetString()! } };
-        if (cell.TryGetProperty("type", out JsonElement t) && t.GetString() == "TableCell")
+        if (cell.TryGetProperty("type", out JsonElement t) && string.Equals(t.GetString(), "TableCell", StringComparison.Ordinal))
         {
             JsonElement content = cell.GetProperty("content");
             var tableCell = new TableCell
@@ -593,7 +593,7 @@ internal sealed class DefinitionReader
             object collection = property.GetValue(target) ?? Activator.CreateInstance(
                 generic == typeof(IList<>) ? typeof(List<>).MakeGenericType(propertyType.GetGenericArguments()) : typeof(Dictionary<,>).MakeGenericType(propertyType.GetGenericArguments()))!;
             string inner = kind[(kind.IndexOf(':', StringComparison.Ordinal) + 1)..];
-            if (head == "array")
+            if (string.Equals(head, "array", StringComparison.Ordinal))
             {
                 Type itemType = propertyType.GetGenericArguments()[0];
                 foreach (JsonElement item in value.EnumerateArray()) ((IList)collection).Add(ConvertTo(itemType, inner, item));
@@ -689,7 +689,7 @@ internal sealed class DefinitionReader
 
     private object BuildObject(Type type, string shapeName, JsonElement value)
     {
-        if (shapeName == "BorderColors")
+        if (string.Equals(shapeName, "BorderColors", StringComparison.Ordinal))
         {
             Color? Side(string key) => value.TryGetProperty(key, out JsonElement c) ? ToColor(c.GetString()!) : null;
             return new BorderColors(Side("left"), Side("top"), Side("right"), Side("bottom"));

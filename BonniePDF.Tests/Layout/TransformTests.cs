@@ -25,7 +25,7 @@ public class TransformTests
         Assert.Equal(RenderStatus.WrapRequired, ((IStatefulElement)element).RenderStateful(ctx, 200));
         ctx.CurrentY = ctx.ContentTop;
         Assert.Equal(RenderStatus.Complete, ((IStatefulElement)element).RenderStateful(ctx, 200));
-        Assert.Contains(ctx.Resources.Diagnostics.All, d => d.Severity == DiagnosticSeverity.Error && d.Source == "pagination");
+        Assert.Contains(ctx.Resources.Diagnostics.All, d => d.Severity == DiagnosticSeverity.Error && string.Equals(d.Source, "pagination", StringComparison.Ordinal));
     }
     [Theory]
     [InlineData(false)]
@@ -55,6 +55,7 @@ public class TransformTests
         using var fixture = JsonDocument.Parse(json);
         using var doc = await BonniePDF.Document.FromDefinitionAsync(json);
         var output = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true });
+        Assert.NotNull(output.Snapshot);
         var all = Nodes(output.Snapshot.Root).ToArray();
         byte[] bytes = doc.GenerateBytes();
         string raw = Encoding.Latin1.GetString(bytes);
@@ -69,7 +70,7 @@ public class TransformTests
 
         foreach (var expected in fixture.RootElement.GetProperty("_expect").GetProperty("rectangles").EnumerateArray())
         {
-            var rect = all.Single(n => n.SourceId == expected.GetProperty("id").GetString()).Rects[0];
+            var rect = all.Single(n => string.Equals(n.SourceId, expected.GetProperty("id").GetString(), StringComparison.Ordinal)).Rects[0];
             Assert.Equal(expected.GetProperty("x").GetSingle(), rect.X, 3);
             Assert.Equal(expected.GetProperty("y").GetSingle(), rect.Y, 3);
             Assert.Equal(expected.GetProperty("width").GetSingle(), rect.Width, 3);

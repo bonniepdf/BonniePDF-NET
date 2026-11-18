@@ -102,6 +102,6 @@ public sealed partial class StandardFontEncodingTests
     public void Courier_IsMeasuredPerCharacter() =>
         Assert.Equal(1800f, Width("a\u00e9\u20ac", "Courier"));
 
-    [System.Text.RegularExpressions.GeneratedRegex(@"<<[^<>]*/Type /Font[^<>]*>>")]
+    [System.Text.RegularExpressions.GeneratedRegex(@"<<[^<>]*/Type /Font[^<>]*>>", System.Text.RegularExpressions.RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial System.Text.RegularExpressions.Regex FontDictionary();
 }

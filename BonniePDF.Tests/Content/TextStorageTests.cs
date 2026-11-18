@@ -12,16 +12,16 @@ public class TextStorageTests
         var second = new TextBlock("ffi");
         Assert.Null(first.FontFeatures);
         first.FontFeatures = null;
-        var input = new Dictionary<string, int> { ["liga"] = 0 };
+        var input = new Dictionary<string, int>(StringComparer.Ordinal) { ["liga"] = 0 };
         first.FontFeatures = input;
         input["liga"] = 1;
         Assert.Equal(0, first.FontFeatures!["liga"]);
         Assert.Null(second.FontFeatures);
-        Assert.Throws<ArgumentException>(() => first.FontFeatures = new Dictionary<string, int> { ["bad"] = 1 });
+        Assert.Throws<ArgumentException>(() => first.FontFeatures = new Dictionary<string, int>(StringComparer.Ordinal) { ["bad"] = 1 });
         Assert.Equal(0, first.FontFeatures!["liga"]);
         first.FontFeatures = null;
         Assert.Null(first.FontFeatures);
-        Assert.Throws<ArgumentOutOfRangeException>(() => first.FontFeatures = new Dictionary<string, int> { ["liga"] = -1 });
+        Assert.Throws<ArgumentOutOfRangeException>(() => first.FontFeatures = new Dictionary<string, int>(StringComparer.Ordinal) { ["liga"] = -1 });
         Assert.Null(first.FontFeatures);
         first.FontFeatures = input;
         Assert.Equal(1, first.FontFeatures!["liga"]);
@@ -33,11 +33,11 @@ public class TextStorageTests
         var previous = TextElementBase.AmbientDefaultStyle.Value;
         try
         {
-            var style = new TextStyle { FontFeatures = new Dictionary<string, int> { ["liga"] = 0 } };
+            var style = new TextStyle { FontFeatures = new Dictionary<string, int>(StringComparer.Ordinal) { ["liga"] = 0 } };
             TextElementBase.AmbientDefaultStyle.Value = style;
             var first = new TextBlock("ffi");
             var second = new TextBlock("ffi");
-            style.FontFeatures = new Dictionary<string, int> { ["liga"] = 1 };
+            style.FontFeatures = new Dictionary<string, int>(StringComparer.Ordinal) { ["liga"] = 1 };
             first.FontFeatures = null;
             Assert.Equal(0, second.FontFeatures!["liga"]);
             Assert.Null(first.FontFeatures);

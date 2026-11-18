@@ -92,7 +92,7 @@ public class ImageLoaderTests
     [Fact]
     public void Load_WithNullData_ThrowsArgumentException()
     {
-        Assert.Throws<ArgumentException>(() => ImageLoader.Load((byte[])null));
+        Assert.Throws<ArgumentException>(() => ImageLoader.Load((byte[])null!));
     }
 
     [Fact]
@@ -291,28 +291,29 @@ public class ImageLoaderTests
 
         using var png = new MemoryStream();
         png.Write(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 });
-        void Chunk(string type, byte[] data)
-        {
-            byte[] len = BitConverter.GetBytes(data.Length); Array.Reverse(len);
-            png.Write(len);
-            byte[] body = System.Text.Encoding.ASCII.GetBytes(type).Concat(data).ToArray();
-            png.Write(body);
-            uint crc = 0xFFFFFFFF;
-            foreach (byte v in body)
-            {
-                crc ^= v;
-                for (int k = 0; k < 8; k++) crc = (crc & 1) != 0 ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
-            }
-            byte[] crcBytes = BitConverter.GetBytes(~crc); Array.Reverse(crcBytes);
-            png.Write(crcBytes);
-        }
-
         byte[] w = BitConverter.GetBytes(width); Array.Reverse(w);
         byte[] h = BitConverter.GetBytes(height); Array.Reverse(h);
-        Chunk("IHDR", w.Concat(h).Concat(new byte[] { 8, 6, 0, 0, 0 }).ToArray());
-        Chunk("IDAT", zlib.ToArray());
-        Chunk("IEND", Array.Empty<byte>());
+        WritePngChunk(png, "IHDR", w.Concat(h).Concat(new byte[] { 8, 6, 0, 0, 0 }).ToArray());
+        WritePngChunk(png, "IDAT", zlib.ToArray());
+        WritePngChunk(png, "IEND", Array.Empty<byte>());
         return png.ToArray();
+    }
+
+    // Writes one PNG chunk: big-endian length, type and data, then the CRC-32 of type and data.
+    private static void WritePngChunk(Stream png, string type, byte[] data)
+    {
+        byte[] len = BitConverter.GetBytes(data.Length); Array.Reverse(len);
+        png.Write(len);
+        byte[] body = System.Text.Encoding.ASCII.GetBytes(type).Concat(data).ToArray();
+        png.Write(body);
+        uint crc = 0xFFFFFFFF;
+        foreach (byte v in body)
+        {
+            crc ^= v;
+            for (int k = 0; k < 8; k++) crc = (crc & 1) != 0 ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
+        }
+        byte[] crcBytes = BitConverter.GetBytes(~crc); Array.Reverse(crcBytes);
+        png.Write(crcBytes);
     }
 
     private static int Paeth(int a, int b, int c)
@@ -450,7 +451,7 @@ public class ImageLoaderTests
     // seqOrder to write them in a different order (the loader should sort).
     // announceTotal defaults to chunks.Length; pass a larger number to
     // simulate a truncated profile (the loader should then drop it).
-    private static byte[] CreateJpegWithIccProfile(byte[][] chunks, int[] seqOrder = null, int? announceTotal = null)
+    private static byte[] CreateJpegWithIccProfile(byte[][] chunks, int[]? seqOrder = null, int? announceTotal = null)
     {
         int total = announceTotal ?? chunks.Length;
         byte[] iccId = "ICC_PROFILE\0"u8.ToArray();

@@ -13,14 +13,14 @@ public partial class ContainerAndRowSplittingTests
 {
     private const int Rows = 60;
 
-    [GeneratedRegex(@"\(r(\d+)c0\)")]
+    [GeneratedRegex(@"\(r(?<1>\d+)c0\)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex RowLabel();
 
-    [GeneratedRegex(@"(?:^|\n)1 0 0 rg\n[\d.]+ [\d.]+ [\d.]+ [\d.]+ re")]
+    [GeneratedRegex(@"(?:^|\n)1 0 0 rg\n[\d.]+ [\d.]+ [\d.]+ [\d.]+ re", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex RedFill();
 
     // A horizontal border segment in black: "0 0 0 RG", a width, then "x1 y m x2 y l S".
-    [GeneratedRegex(@"0 0 0 RG\n[\d.]+ w\n([\d.]+) ([\d.]+) m ([\d.]+) \2 l S")]
+    [GeneratedRegex(@"0 0 0 RG\n[\d.]+ w\n(?<1>[\d.]+) (?<2>[\d.]+) m (?<3>[\d.]+) \2 l S", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex BlackHorizontal();
 
     // Horizontal black lines at least as wide as the box, on one page.

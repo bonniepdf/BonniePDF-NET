@@ -3,7 +3,7 @@ using BonniePDF.Examples.Hospitality;
 
 string output = args.FirstOrDefault() ?? Path.Combine(AppContext.BaseDirectory, "GeneratedPdfs");
 Directory.CreateDirectory(output);
-var assets = new Dictionary<string, byte[]>
+var assets = new Dictionary<string, byte[]>(StringComparer.Ordinal)
 {
     ["fonts/SourceSerif4-Regular.ttf"] = File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "fonts", "SourceSerif4-Regular.ttf")),
 };

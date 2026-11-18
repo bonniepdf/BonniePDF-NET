@@ -54,10 +54,10 @@ public sealed partial class RtlFallbackRunTests
         {
             string role = m.Groups[2].Value.Contains("hebrew", StringComparison.Ordinal) ? "primary" : "fallback";
             string painted = System.Net.WebUtility.HtmlDecode(m.Groups[3].Value);
-            if (pieces.Count > 0 && pieces[^1][0] == role) pieces[^1][1] += painted;
+            if (pieces.Count > 0 && string.Equals(pieces[^1][0], role, StringComparison.Ordinal)) pieces[^1][1] += painted;
             else pieces.Add([role, painted]);
         }
-        Assert.Equal(visual.Select(p => string.Join('|', p)), pieces.Select(p => string.Join('|', p)));
+        Assert.Equal(visual.Select(p => string.Join('|', p)), pieces.Select(p => string.Join('|', p)), StringComparer.Ordinal);
     }
 
     [Theory]
@@ -78,9 +78,9 @@ public sealed partial class RtlFallbackRunTests
         finally { InternalConfiguration.EnableCompression = true; }
     }
 
-    [GeneratedRegex("<text x=\"([^\"]+)\"[^>]*font-family:'([^']+)'[^>]*>([^<]*)</text>")]
+    [GeneratedRegex("<text x=\"(?<1>[^\"]+)\"[^>]*font-family:'(?<2>[^']+)'[^>]*>(?<3>[^<]*)</text>", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SvgTextRun();
 
-    [GeneratedRegex("/ActualText <FEFF([0-9A-F]+)>")]
+    [GeneratedRegex("/ActualText <FEFF(?<1>[0-9A-F]+)>", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex ActualText();
 }

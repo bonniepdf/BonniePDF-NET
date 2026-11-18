@@ -59,10 +59,10 @@ public partial class SvgGlyphFallbackTests
         return doc;
     }
 
-    [GeneratedRegex(@"<text x=""([^""]+)""")]
+    [GeneratedRegex(@"<text x=""(?<1>[^""]+)""", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex TextXListRegex();
 
-    [GeneratedRegex("font-family:'(bpf-[^']+)'")]
+    [GeneratedRegex("font-family:'(?<1>bpf-[^']+)'", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex FontFaceFamilyRegex();
 
     /// <summary>
@@ -86,13 +86,13 @@ public partial class SvgGlyphFallbackTests
 
             string primary = SvgCanvas.EmbeddedFontFamily(SymbolsPath);
             string[] faces = FontFaceFamilyRegex().Matches(export.FontFaceCss)
-                .Select(m => m.Groups[1].Value).Distinct().ToArray();
+                .Select(m => m.Groups[1].Value).Distinct(StringComparer.Ordinal).ToArray();
 
             // Two faces embedded: the primary, plus the fallback covering the rest.
-            Assert.Contains(primary, faces);
+            Assert.Contains(primary, faces, StringComparer.Ordinal);
             Assert.Equal(2, faces.Length);
 
-            string fallback = faces.Single(f => f != primary);
+            string fallback = faces.Single(f => !string.Equals(f, primary, StringComparison.Ordinal));
             Assert.Contains(primary, export.Pages[0], StringComparison.Ordinal);
             Assert.Contains(fallback, export.Pages[0], StringComparison.Ordinal);
         }

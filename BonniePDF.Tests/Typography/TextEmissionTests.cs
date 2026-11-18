@@ -30,9 +30,9 @@ public sealed class TextEmissionTests
                         Tracker = tracker, CanTrackPreparedGlyphs = true, Text = source }
                 });
             if (mode is "spaced" or "justify") canvas.SetTextSpacing(0.2f, 0.5f);
-            if (mode == "features") canvas.SetTextFeatures(new Dictionary<string, int>(StringComparer.Ordinal) { ["liga"] = 0, ["kern"] = 0 });
-            if (mode == "justify") canvas.DrawTextJustified(10, 10, text, Color.Black, 12, "font", 500);
-            else if (mode == "rotated") canvas.DrawTextRotated(10, 10, text, Color.Black, 12, "font", 30);
+            if (string.Equals(mode, "features", StringComparison.Ordinal)) canvas.SetTextFeatures(new Dictionary<string, int>(StringComparer.Ordinal) { ["liga"] = 0, ["kern"] = 0 });
+            if (string.Equals(mode, "justify", StringComparison.Ordinal)) canvas.DrawTextJustified(10, 10, text, Color.Black, 12, "font", 500);
+            else if (string.Equals(mode, "rotated", StringComparison.Ordinal)) canvas.DrawTextRotated(10, 10, text, Color.Black, 12, "font", 30);
             else canvas.DrawText(10, 10, text, Color.Black, 12, "font", TextAlignment.Left);
             Assert.Equal(fixture.GetProperty("content").GetString(), content.ToString());
             Assert.Equal(fixture.GetProperty("sources").EnumerateObject().Select(p => (ushort.Parse(p.Name), DecodeUnits(p.Value))).OrderBy(p => p.Item1),

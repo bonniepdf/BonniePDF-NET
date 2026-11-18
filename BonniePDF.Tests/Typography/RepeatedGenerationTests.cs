@@ -89,7 +89,7 @@ public sealed partial class RepeatedGenerationTests
             _ => [("sans", "Ab"), ("mono", "Ab \u2641 z")],
         };
         foreach ((string face, string text) in draws)
-            document.Add(new TextBlock(text) { FontName = face == "mono" ? mono : sans, FontSize = 12 });
+            document.Add(new TextBlock(text) { FontName = string.Equals(face, "mono", StringComparison.Ordinal) ? mono : sans, FontSize = 12 });
 
         string pdf = Encoding.Latin1.GetString(document.GenerateBytes());
         string[] embedded = CidFont().Matches(pdf).Select(m => m.Groups["name"].Value).Order(StringComparer.Ordinal).ToArray();
@@ -113,6 +113,6 @@ public sealed partial class RepeatedGenerationTests
     {
         string first = Normalise(Generate());
         for (int generation = 2; generation <= 40; generation++)
-            Assert.True(first == Normalise(Generate()), $"generation {generation} differs from generation 1");
+            Assert.True(string.Equals(first, Normalise(Generate()), StringComparison.Ordinal), $"generation {generation} differs from generation 1");
     }
 }

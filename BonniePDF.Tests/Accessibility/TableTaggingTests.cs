@@ -32,7 +32,7 @@ public class TableTaggingTests
         Assert.Equal(pages * 2 - 1, pdf.Split("/S /TBody", StringSplitOptions.None).Length - 1);
     }
 
-    private static string GenerateTaggedTable(System.Action<Table> populate, System.Action<Table> hookHeader = null)
+    private static string GenerateTaggedTable(System.Action<Table> populate, System.Action<Table>? hookHeader = null)
     {
         using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;

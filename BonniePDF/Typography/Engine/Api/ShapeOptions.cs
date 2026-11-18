@@ -20,7 +20,7 @@ namespace BonniePDF.Typography.Engine
             ValidateTag(script, "script"); ValidateTag(language, "language");
             if (direction < TextDirection.LeftToRight || direction > TextDirection.BottomToTop)
                 throw new ArgumentOutOfRangeException("direction");
-            Script = script == "DFLT" ? script : script.ToLowerInvariant();
+            Script = string.Equals(script, "DFLT", StringComparison.Ordinal) ? script : script.ToLowerInvariant();
             Language = language;
             Direction = direction; Limits = limits;
             var copy = new List<ShapeFeature>();
@@ -49,10 +49,10 @@ namespace BonniePDF.Typography.Engine
             {
                 int end = feature.End == int.MaxValue ? text.Length : feature.End;
                 if (feature.Start > text.Length || end > text.Length)
-                    throw new ArgumentException("A feature range exceeds the UTF-16 text length.", "features");
+                    throw new ArgumentException("A feature range exceeds the UTF-16 text length.", nameof(text));
                 if ((feature.Start < text.Length && char.IsLowSurrogate(text[feature.Start])) ||
                     (end < text.Length && char.IsLowSurrogate(text[end])))
-                    throw new ArgumentException("A feature range splits a surrogate pair.", "features");
+                    throw new ArgumentException("A feature range splits a surrogate pair.", nameof(text));
             }
         }
 
@@ -64,7 +64,7 @@ namespace BonniePDF.Typography.Engine
             {
                 var feature = Features[i];
                 if (tick != null) tick();
-                if (feature.Tag == tag && cluster >= feature.Start && cluster < feature.End) value = feature.Value;
+                if (string.Equals(feature.Tag, tag, StringComparison.Ordinal) && cluster >= feature.Start && cluster < feature.End) value = feature.Value;
             }
             return value;
         }

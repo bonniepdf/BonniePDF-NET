@@ -177,7 +177,7 @@ public static class AllergenMatrixExample
             Padding = new Thickness(4),
             Child = new TextBlock(answer.Word)
             {
-                FontName = answer.Word == "No" ? StandardFonts.Helvetica : StandardFonts.HelveticaBold,
+                FontName = string.Equals(answer.Word, "No", StringComparison.Ordinal) ? StandardFonts.Helvetica : StandardFonts.HelveticaBold,
                 FontSize = 7.5f,
                 Color = answer.Ink,
                 Alignment = TextAlignment.Center,

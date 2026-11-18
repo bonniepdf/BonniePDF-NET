@@ -5,6 +5,15 @@
        without this import every example project would silently lose those. -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove($(MSBuildThisFile), $(MSBuildThisFileDirectory)../))" />
 
+  <PropertyGroup>
+    <!-- MA0051 (method length): each example's document builder reads top to bottom as one linear
+         build, so a reader can copy a single method into an application.
+         MA0004 (ConfigureAwait): examples are console and ASP.NET Core apps, which have no
+         SynchronizationContext, so ConfigureAwait(false) changes nothing and only adds noise to code
+         people copy. The library keeps both rules. -->
+    <NoWarn>$(NoWarn);MA0051;MA0004</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- Every example declares a licence tier. See ExampleLicenseSetup.cs for why
          it is Evaluation, and why that is not a declaration on your behalf. -->

@@ -34,22 +34,22 @@ public partial class OversizedContentTests
             doc.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Warning).ToList());
     }
 
-    [GeneratedRegex(@"(?<!end)stream\r?\n")]
+    [GeneratedRegex(@"(?<!end)stream\r?\n", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex StreamKeyword();
 
-    [GeneratedRegex(@"/Length (\d+)")]
+    [GeneratedRegex(@"/Length (?<1>\d+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex LengthEntry();
 
-    [GeneratedRegex(@"1 0 0 1 (-?[\d.]+) (-?[\d.]+) Tm")]
+    [GeneratedRegex(@"1 0 0 1 (?<1>-?[\d.]+) (?<2>-?[\d.]+) Tm", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex TextMatrix();
 
-    [GeneratedRegex(@"/S /TR\b")]
+    [GeneratedRegex(@"/S /TR\b", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex RowTag();
 
-    [GeneratedRegex(@"/S /TD\b")]
+    [GeneratedRegex(@"/S /TD\b", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex CellTag();
 
-    [GeneratedRegex(@" c\n")]
+    [GeneratedRegex(@" c\n", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex CurveOperator();
 
     // The inflated streams that draw text or paths: page content, not fonts or images.
@@ -240,7 +240,7 @@ public partial class OversizedContentTests
             row.Add(new Spacer(10));
             doc.Add(row);
         });
-        Assert.Equal(["A HorizontalStack is taller than the page body and cannot be split: 158pt is cut off at the bottom of page 1."], r.Errors.Select(d => d.Message));
+        Assert.Equal(["A HorizontalStack is taller than the page body and cannot be split: 158pt is cut off at the bottom of page 1."], r.Errors.Select(d => d.Message), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -253,7 +253,7 @@ public partial class OversizedContentTests
             stack.Add(new Container { Height = 800 });
             doc.Add(stack);
         });
-        Assert.Equal(["A Container is taller than the page body and cannot be split: 58pt is cut off at the bottom of page 2."], r.Errors.Select(d => d.Message));
+        Assert.Equal(["A Container is taller than the page body and cannot be split: 58pt is cut off at the bottom of page 2."], r.Errors.Select(d => d.Message), StringComparer.Ordinal);
     }
 
     [Fact]

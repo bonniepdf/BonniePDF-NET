@@ -179,8 +179,8 @@ public sealed class ContrastPreflightTests
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
 
-        Assert.DoesNotContain(report.Findings, f => f.Code == "contrast-insufficient");
-        Assert.DoesNotContain(report.Findings, f => f.Code == "contrast-unknown");
+        Assert.DoesNotContain(report.Findings, f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal));
+        Assert.DoesNotContain(report.Findings, f => string.Equals(f.Code, "contrast-unknown", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -191,7 +191,7 @@ public sealed class ContrastPreflightTests
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
 
-        ComplianceFinding? finding = report.Findings.FirstOrDefault(f => f.Code == "contrast-insufficient");
+        ComplianceFinding? finding = report.Findings.FirstOrDefault(f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal));
         Assert.NotNull(finding);
         Assert.Equal(ComplianceSeverity.Warning, finding!.Severity);
         Assert.Equal("WCAG 2.2", finding.Standard);
@@ -227,7 +227,7 @@ public sealed class ContrastPreflightTests
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
 
-        Assert.DoesNotContain(report.Findings, f => f.Code == "contrast-insufficient");
+        Assert.DoesNotContain(report.Findings, f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -243,7 +243,7 @@ public sealed class ContrastPreflightTests
 
         LayoutSnapshot snapshot = Capture(doc);
 
-        LayoutNode cell = Walk(snapshot.Root).First(n => n.Type == "TableCell");
+        LayoutNode cell = Walk(snapshot.Root).First(n => string.Equals(n.Type, "TableCell", StringComparison.Ordinal));
         Assert.Equal("#1f2a37", cell.Paint?.Background);
     }
 
@@ -259,7 +259,7 @@ public sealed class ContrastPreflightTests
 
         LayoutSnapshot snapshot = Capture(doc);
 
-        LayoutNode link = Walk(snapshot.Root).First(n => n.Type == "Hyperlink");
+        LayoutNode link = Walk(snapshot.Root).First(n => string.Equals(n.Type, "Hyperlink", StringComparison.Ordinal));
         Assert.Equal("#999999", link.Paint?.Text);
         Assert.Equal(11f, link.Paint?.FontSize);
         // This link's FontName is the default (regular) Helvetica, so it is
@@ -280,7 +280,7 @@ public sealed class ContrastPreflightTests
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
 
-        ComplianceFinding? finding = report.Findings.FirstOrDefault(f => f.Code == "contrast-insufficient");
+        ComplianceFinding? finding = report.Findings.FirstOrDefault(f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal));
         Assert.NotNull(finding);
         Assert.Equal(ComplianceSeverity.Warning, finding!.Severity);
         Assert.Equal("WCAG 2.2", finding.Standard);
@@ -304,7 +304,7 @@ public sealed class ContrastPreflightTests
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
 
-        Assert.DoesNotContain(report.Findings, f => f.Code == "contrast-insufficient");
+        Assert.DoesNotContain(report.Findings, f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -318,10 +318,10 @@ public sealed class ContrastPreflightTests
         Assert.True(snapshot.Pages[0].BackdropUnknown);
 
         ComplianceReport report = CompliancePreflight.Evaluate(snapshot);
-        ComplianceFinding? unknown = report.Findings.FirstOrDefault(f => f.Code == "contrast-unknown");
+        ComplianceFinding? unknown = report.Findings.FirstOrDefault(f => string.Equals(f.Code, "contrast-unknown", StringComparison.Ordinal));
         Assert.NotNull(unknown);
         Assert.Equal(ComplianceSeverity.Info, unknown!.Severity);
-        Assert.DoesNotContain(report.Findings, f => f.Code == "contrast-insufficient");
+        Assert.DoesNotContain(report.Findings, f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -332,8 +332,8 @@ public sealed class ContrastPreflightTests
 
         ComplianceReport report = CompliancePreflight.Evaluate(Capture(doc));
 
-        Assert.Contains(report.Findings, f => f.Code == "contrast-unknown");
-        Assert.DoesNotContain(report.Findings, f => f.Code == "contrast-insufficient");
+        Assert.Contains(report.Findings, f => string.Equals(f.Code, "contrast-unknown", StringComparison.Ordinal));
+        Assert.DoesNotContain(report.Findings, f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -348,7 +348,7 @@ public sealed class ContrastPreflightTests
         Assert.Equal("#222222", snapshot.Pages[0].Color);
 
         ComplianceReport report = CompliancePreflight.Evaluate(snapshot);
-        Assert.Contains(report.Findings, f => f.Code == "contrast-insufficient");
+        Assert.Contains(report.Findings, f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -365,8 +365,8 @@ public sealed class ContrastPreflightTests
         ComplianceReport smallReport = CompliancePreflight.Evaluate(Capture(small));
         ComplianceReport largeReport = CompliancePreflight.Evaluate(Capture(large));
 
-        Assert.Contains(smallReport.Findings, f => f.Code == "contrast-insufficient");
-        Assert.DoesNotContain(largeReport.Findings, f => f.Code == "contrast-insufficient");
+        Assert.Contains(smallReport.Findings, f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal));
+        Assert.DoesNotContain(largeReport.Findings, f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -394,7 +394,7 @@ public sealed class ContrastPreflightTests
         };
 
         ComplianceReport report = CompliancePreflight.Evaluate(snapshot);
-        Assert.DoesNotContain(report.Findings, f => f.Standard == "WCAG 2.2");
+        Assert.DoesNotContain(report.Findings, f => string.Equals(f.Standard, "WCAG 2.2", StringComparison.Ordinal));
     }
 
     // ── includeWcag / IncludeWcag ──────────────────────────────────────────────
@@ -416,7 +416,7 @@ public sealed class ContrastPreflightTests
     {
         ComplianceReport report = CompliancePreflight.Evaluate(SuppressionFixture());
 
-        Assert.Single(report.Findings.Where(f => f.Code == "contrast-insufficient"));
+        Assert.Single(report.Findings, f => string.Equals(f.Code, "contrast-insufficient", StringComparison.Ordinal));
         Assert.Equal(1, report.WarningCount);
     }
 
@@ -426,7 +426,7 @@ public sealed class ContrastPreflightTests
         ComplianceReport report = CompliancePreflight.Evaluate(
             SuppressionFixture(), new CompliancePreflightOptions { IncludeWcag = false });
 
-        Assert.DoesNotContain(report.Findings, f => f.Standard == "WCAG 2.2");
+        Assert.DoesNotContain(report.Findings, f => string.Equals(f.Standard, "WCAG 2.2", StringComparison.Ordinal));
         Assert.Equal(0, report.WarningCount);
     }
 
@@ -439,7 +439,7 @@ public sealed class ContrastPreflightTests
             snapshot, new CompliancePreflightOptions { IncludeWcag = false });
 
         static string[] Ua(ComplianceReport r) =>
-            r.Findings.Where(f => f.Standard == "PDF/UA-1").Select(f => f.Code).ToArray();
+            r.Findings.Where(f => string.Equals(f.Standard, "PDF/UA-1", StringComparison.Ordinal)).Select(f => f.Code).ToArray();
 
         Assert.Equal(Ua(on), Ua(off));
         Assert.Equal(on.ErrorCount, off.ErrorCount);
@@ -455,7 +455,7 @@ public sealed class ContrastPreflightTests
             snapshot, new CompliancePreflightOptions { IncludeWcag = false });
 
         Assert.Equal(
-            on.Findings.Where(f => f.Standard != "WCAG 2.2").Select(f => f.Code).ToArray(),
+            on.Findings.Where(f => !string.Equals(f.Standard, "WCAG 2.2", StringComparison.Ordinal)).Select(f => f.Code).ToArray(),
             off.Findings.Select(f => f.Code).ToArray());
     }
 

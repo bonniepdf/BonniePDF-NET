@@ -51,7 +51,7 @@ public sealed partial class StandardFontFallbackTests : System.IDisposable
         using var document = new BonniePDF.Document();
         configure?.Invoke(document);
         foreach ((string font, string text) in draws) document.Add(new TextBlock(text) { FontName = font, FontSize = 12 });
-        string pdf = Encoding.Latin1.GetString(await document.GenerateBytesAsync());
+        string pdf = Encoding.Latin1.GetString(await document.GenerateBytesAsync().ConfigureAwait(true));
         string[] embedded = EmbeddedFont().Matches(pdf).Select(m => m.Groups["name"].Value).Order(System.StringComparer.Ordinal).ToArray();
         Diagnostic[] warnings = document.Diagnostics.Where(d => d.Category == DiagnosticCategory.Font).ToArray();
         return new Generated(embedded, pdf, warnings);

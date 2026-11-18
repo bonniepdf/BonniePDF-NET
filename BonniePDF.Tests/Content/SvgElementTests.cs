@@ -215,7 +215,7 @@ public class SvgElementTests
     {
         using BonniePDF.Document doc = Page(Text("No Such Font, sans-serif"));
         string ops = Ops(doc);
-        Assert.DoesNotContain(doc.Diagnostics, d => d.Source == "svg");
+        Assert.DoesNotContain(doc.Diagnostics, d => string.Equals(d.Source, "svg", StringComparison.Ordinal));
         Assert.Contains(" c\n", ops, StringComparison.Ordinal); // glyph outlines
     }
 
@@ -226,18 +226,18 @@ public class SvgElementTests
         // segments, this text was silently drawn as nothing.
         using JsonDocument corpus = JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Typography", "Fixtures", "cff.json")));
         byte[] bytes = Convert.FromBase64String(corpus.RootElement.GetProperty("fonts").EnumerateArray()
-            .First(f => f.GetProperty("id").GetString() == "SourceSans3").GetProperty("fontBase64").GetString()!);
+            .First(f => string.Equals(f.GetProperty("id").GetString(), "SourceSans3", StringComparison.Ordinal)).GetProperty("fontBase64").GetString()!);
         FontManager.RegisterFont(bytes, "Source Sans CFF");
         var face = new TextFontFaceAdapter(bytes, "Source Sans CFF");
         int contours = "office".Sum(c => face.Outline(face.GlyphIndex(c)).Count(s => s.Kind == GlyphSegmentKind.Close));
         Assert.True(contours >= 6);
 
         static BonniePDF.Document Drawing(string content) => Page(new Svg { SvgData = $"<svg {Ns} viewBox=\"0 0 100 20\">{content}</svg>" });
-        static int Closes(string ops) => ops.Split('\n').Count(line => line == "h");
+        static int Closes(string ops) => ops.Split('\n').Count(line => string.Equals(line, "h", StringComparison.Ordinal));
         using BonniePDF.Document doc = Drawing("<text x=\"0\" y=\"15\" font-family=\"Source Sans CFF\" font-size=\"12\">office</text>");
         using BonniePDF.Document empty = Drawing("");
         string ops = Ops(doc);
-        Assert.DoesNotContain(doc.Diagnostics, d => d.Source == "svg");
+        Assert.DoesNotContain(doc.Diagnostics, d => string.Equals(d.Source, "svg", StringComparison.Ordinal));
         Assert.Contains(" c\n", ops, StringComparison.Ordinal);
         // Every contour of every glyph is drawn: the closes beyond the empty drawing's own.
         Assert.Equal(contours, Closes(ops) - Closes(Ops(empty)));
@@ -248,7 +248,7 @@ public class SvgElementTests
     {
         using BonniePDF.Document doc = Page(Text("No Such Font"));
         doc.GenerateBytes();
-        Diagnostic reported = Assert.Single(doc.Diagnostics, d => d.Source == "svg");
+        Diagnostic reported = Assert.Single(doc.Diagnostics, d => string.Equals(d.Source, "svg", StringComparison.Ordinal));
         Assert.Contains("No Such Font", reported.Message, StringComparison.Ordinal);
     }
 
@@ -259,7 +259,7 @@ public class SvgElementTests
     {
         using BonniePDF.Document doc = Page(new Svg { SvgData = Filtered });
         SvgUnsupportedFeatureException error = Assert.Throws<SvgUnsupportedFeatureException>(() => doc.GenerateBytes());
-        Assert.Equal(["filter"], error.Features.Select(f => f.Feature));
+        Assert.Equal(["filter"], error.Features.Select(f => f.Feature), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -267,7 +267,7 @@ public class SvgElementTests
     {
         using BonniePDF.Document doc = Page(new Svg { SvgData = Filtered, StrictUnsupportedFeatures = false });
         string ops = Ops(doc);
-        Diagnostic reported = Assert.Single(doc.Diagnostics, d => d.Source == "svg");
+        Diagnostic reported = Assert.Single(doc.Diagnostics, d => string.Equals(d.Source, "svg", StringComparison.Ordinal));
         Assert.Contains("filter", reported.Message, StringComparison.Ordinal);
         Assert.Contains("1 0 0 rg", ops, StringComparison.Ordinal);
         Assert.Contains("0 0 1 rg", ops, StringComparison.Ordinal);
@@ -290,7 +290,7 @@ public class SvgElementTests
         Assert.Matches(@"/I\d+ Do", ops);
         Assert.DoesNotContain("1 0 0 rg", ops, StringComparison.Ordinal);
         Assert.True(ops.IndexOf(" Do", StringComparison.Ordinal) < ops.IndexOf("0 0 1 rg", StringComparison.Ordinal));
-        Assert.DoesNotContain(doc.Diagnostics, d => d.Source == "svg");
+        Assert.DoesNotContain(doc.Diagnostics, d => string.Equals(d.Source, "svg", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -353,7 +353,7 @@ public class SvgElementTests
         doc.Add(new Heading("Title") { Level = 1 });
         Assert.DoesNotContain("/S /Figure", Latin1.GetString(doc.GenerateBytes()), StringComparison.Ordinal);
         LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot!;
-        Assert.Contains(CompliancePreflight.Evaluate(snapshot).Findings, f => f.Code == "figure-missing-alt");
+        Assert.Contains(CompliancePreflight.Evaluate(snapshot).Findings, f => string.Equals(f.Code, "figure-missing-alt", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -361,7 +361,7 @@ public class SvgElementTests
     {
         using BonniePDF.Document doc = Tagged(new Svg { SvgData = Logo(), IsDecorative = true });
         LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot!;
-        Assert.DoesNotContain(CompliancePreflight.Evaluate(snapshot).Findings, f => f.Code == "figure-missing-alt");
+        Assert.DoesNotContain(CompliancePreflight.Evaluate(snapshot).Findings, f => string.Equals(f.Code, "figure-missing-alt", StringComparison.Ordinal));
     }
 
     // ---- Compliance ----

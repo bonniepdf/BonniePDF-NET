@@ -200,10 +200,10 @@ public static class CourseCertificateExample
                 .Select(word => word[0]))
             .ToUpperInvariant();
         float monogramWidth = canvas.MeasureText(monogram, 16, StandardFonts.TimesBold).Width;
-        canvas.DrawText(cx - monogramWidth / 2, cy - 13, monogram, FoilInk, 16, StandardFonts.TimesBold, 0);
+        canvas.DrawText(cx - monogramWidth / 2, cy - 13, monogram, FoilInk, 16, StandardFonts.TimesBold, TextAlignment.Left);
         string label = grade.ToUpperInvariant();
         float labelWidth = canvas.MeasureText(label, 5.5f, StandardFonts.HelveticaBold).Width;
-        canvas.DrawText(cx - labelWidth / 2, cy + 6, label, FoilInk, 5.5f, StandardFonts.HelveticaBold, 0);
+        canvas.DrawText(cx - labelWidth / 2, cy + 6, label, FoilInk, 5.5f, StandardFonts.HelveticaBold, TextAlignment.Left);
     })
     {
         DrawWidth = 84,

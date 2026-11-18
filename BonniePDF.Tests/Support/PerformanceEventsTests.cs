@@ -13,7 +13,7 @@ public sealed partial class PerformanceEventsTests
         private readonly int _thread = Environment.CurrentManagedThreadId;
         protected override void OnEventSourceCreated(EventSource source)
         {
-            if (source.Name == "BonniePDF-Performance") EnableEvents(source, EventLevel.Verbose);
+            if (string.Equals(source.Name, "BonniePDF-Performance", StringComparison.Ordinal)) EnableEvents(source, EventLevel.Verbose);
         }
         protected override void OnEventWritten(EventWrittenEventArgs data)
         {
@@ -55,6 +55,6 @@ public sealed partial class PerformanceEventsTests
         Assert.Equal(Normalize(before), Normalize(after));
     }
 
-    [GeneratedRegex(@"/ID \[<[0-9A-F]*> <[0-9A-F]*>\]")]
+    [GeneratedRegex(@"/ID \[<[0-9A-F]*> <[0-9A-F]*>\]", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex FileIdentifierRegex();
 }

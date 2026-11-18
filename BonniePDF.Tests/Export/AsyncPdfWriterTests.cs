@@ -45,7 +45,7 @@ public class AsyncPdfWriterTests
     [Fact]
     public void Constructor_WithNullStream_ThrowsArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>(() => new AsyncPdfWriter((Stream)null));
+        Assert.Throws<ArgumentNullException>(() => new AsyncPdfWriter((Stream)null!));
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public class AsyncPdfWriterTests
         // Parse the PDF header
         using var ms = new MemoryStream(pdfBytes);
         using var reader = new StreamReader(ms);
-        string header = reader.ReadLine();
+        string? header = reader.ReadLine();
 
         Assert.Equal("%PDF-1.4", header);
     }
@@ -90,7 +90,7 @@ public class AsyncPdfWriterTests
 
         using var ms = new MemoryStream(pdfBytes);
         using var reader = new StreamReader(ms);
-        string header = reader.ReadLine();
+        string? header = reader.ReadLine();
 
         Assert.Equal("%PDF-1.7", header);
     }
@@ -119,7 +119,7 @@ public class AsyncPdfWriterTests
             var stream = new MemoryStream();
             var writer = new AsyncPdfWriter(stream, leaveOpen: true);
 
-            var dict = new Dictionary<string, string>
+            var dict = new Dictionary<string, string>(StringComparer.Ordinal)
             {
                 ["/Type"] = "/Page",
                 ["/MediaBox"] = "[0 0 612 792]"
@@ -147,7 +147,7 @@ public class AsyncPdfWriterTests
             var stream = new MemoryStream();
             var writer = new AsyncPdfWriter(stream, leaveOpen: true);
 
-            var dict = new Dictionary<string, string>
+            var dict = new Dictionary<string, string>(StringComparer.Ordinal)
             {
                 ["/Length"] = "10"
             };
@@ -174,7 +174,7 @@ public class AsyncPdfWriterTests
             var stream = new MemoryStream();
             var writer = new AsyncPdfWriter(stream, leaveOpen: true);
 
-            var dict = new Dictionary<string, string>
+            var dict = new Dictionary<string, string>(StringComparer.Ordinal)
             {
                 ["/Type"] = "/XObject",
                 ["/Subtype"] = "/Image"
@@ -200,7 +200,7 @@ public class AsyncPdfWriterTests
             var stream = new MemoryStream();
             var writer = new AsyncPdfWriter(stream, leaveOpen: true);
 
-            var dict = new Dictionary<string, string> { ["/Type"] = "/Catalog" };
+            var dict = new Dictionary<string, string>(StringComparer.Ordinal) { ["/Type"] = "/Catalog" };
             await writer.WriteObjectAsync(1, dict);
             await writer.CloseAsync(1, 0);
             await writer.DisposeAsync();
@@ -222,7 +222,7 @@ public class AsyncPdfWriterTests
             var stream = new MemoryStream();
             var writer = new AsyncPdfWriter(stream, leaveOpen: true);
 
-            await writer.WriteObjectAsync(1, new Dictionary<string, string> { ["/Type"] = "/Catalog" });
+            await writer.WriteObjectAsync(1, new Dictionary<string, string>(StringComparer.Ordinal) { ["/Type"] = "/Catalog" });
             await writer.CloseAsync(1, 0);
             await writer.DisposeAsync();
             pdfBytes = stream.ToArray();
@@ -242,9 +242,9 @@ public class AsyncPdfWriterTests
             var stream = new MemoryStream();
             var writer = new AsyncPdfWriter(stream, leaveOpen: true);
 
-            await writer.WriteObjectAsync(1, new Dictionary<string, string> { ["/Type"] = "/Catalog" });
-            await writer.WriteObjectAsync(2, new Dictionary<string, string> { ["/Type"] = "/Pages" });
-            await writer.WriteObjectAsync(3, new Dictionary<string, string> { ["/Type"] = "/Page" });
+            await writer.WriteObjectAsync(1, new Dictionary<string, string>(StringComparer.Ordinal) { ["/Type"] = "/Catalog" });
+            await writer.WriteObjectAsync(2, new Dictionary<string, string>(StringComparer.Ordinal) { ["/Type"] = "/Pages" });
+            await writer.WriteObjectAsync(3, new Dictionary<string, string>(StringComparer.Ordinal) { ["/Type"] = "/Page" });
             await writer.CloseAsync(1, 0);
             await writer.DisposeAsync();
             pdfBytes = stream.ToArray();
@@ -252,9 +252,9 @@ public class AsyncPdfWriterTests
 
         string content = Encoding.ASCII.GetString(pdfBytes);
 
-        int pos1 = content.IndexOf("1 0 obj");
-        int pos2 = content.IndexOf("2 0 obj");
-        int pos3 = content.IndexOf("3 0 obj");
+        int pos1 = content.IndexOf("1 0 obj", StringComparison.Ordinal);
+        int pos2 = content.IndexOf("2 0 obj", StringComparison.Ordinal);
+        int pos3 = content.IndexOf("3 0 obj", StringComparison.Ordinal);
 
         Assert.True(pos1 < pos2);
         Assert.True(pos2 < pos3);
@@ -297,7 +297,7 @@ public class AsyncPdfWriterTests
         using var stream = new MemoryStream();
         var writer = new AsyncPdfWriter(stream, leaveOpen: true);
 
-        await writer.WriteObjectAsync(1, new Dictionary<string, string>());
+        await writer.WriteObjectAsync(1, new Dictionary<string, string>(StringComparer.Ordinal));
         await writer.CloseAsync(1, 0);
         await writer.DisposeAsync();
 
@@ -317,10 +317,10 @@ public class AsyncPdfWriterTests
         var writer = new AsyncPdfWriter(stream, leaveOpen: true);
 
         // Write multiple objects sequentially
-        await writer.WriteObjectAsync(1, new Dictionary<string, string> { ["/Type"] = "/Catalog" });
-        await writer.WriteObjectAsync(2, new Dictionary<string, string> { ["/Type"] = "/Pages" });
-        await writer.WriteObjectAsync(3, new Dictionary<string, string> { ["/Type"] = "/Page" });
-        await writer.WriteObjectAsync(4, new Dictionary<string, string> { ["/Type"] = "/Font" });
+        await writer.WriteObjectAsync(1, new Dictionary<string, string>(StringComparer.Ordinal) { ["/Type"] = "/Catalog" });
+        await writer.WriteObjectAsync(2, new Dictionary<string, string>(StringComparer.Ordinal) { ["/Type"] = "/Pages" });
+        await writer.WriteObjectAsync(3, new Dictionary<string, string>(StringComparer.Ordinal) { ["/Type"] = "/Page" });
+        await writer.WriteObjectAsync(4, new Dictionary<string, string>(StringComparer.Ordinal) { ["/Type"] = "/Font" });
         await writer.CloseAsync(1, 0);
         await writer.DisposeAsync();
 
@@ -343,7 +343,7 @@ public class AsyncPdfWriterTests
         // Create large stream content
         string largeContent = new string('X', 100000);
 
-        var dict = new Dictionary<string, string>
+        var dict = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["/Length"] = largeContent.Length.ToString()
         };
@@ -364,7 +364,7 @@ public class AsyncPdfWriterTests
         byte[] largeData = new byte[50000];
         new Random().NextBytes(largeData);
 
-        var dict = new Dictionary<string, string>
+        var dict = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["/Type"] = "/XObject",
             ["/Length"] = largeData.Length.ToString()

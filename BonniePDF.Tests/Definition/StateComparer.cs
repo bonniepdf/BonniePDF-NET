@@ -26,45 +26,55 @@ internal static class StateComparer
         if (type.IsPrimitive || type.IsEnum || a is string || a is decimal || a is DateTime || a is DateTimeOffset || a is TimeSpan)
             return Equals(a, b) ? null : $"{path}: {a} vs {b}";
         if (a is byte[] bytesA) return bytesA.AsSpan().SequenceEqual((byte[])b) ? null : $"{path}: bytes differ";
-        if (a is Delegate)
-        {
-            var ta = (Func<int, IElement?>?)(a as Func<int, IElement?>);
-            var tb = (Func<int, IElement?>?)(b as Func<int, IElement?>);
-            bool builtA = PageTemplate.TryGetElements(ta, out PageTemplateElements ea);
-            bool builtB = PageTemplate.TryGetElements(tb, out PageTemplateElements eb);
-            if (builtA != builtB) return $"{path}: a template built from elements vs a function";
-            return builtA ? Find(ea, eb, path + "(template)", seen) : null;
-        }
+        if (a is Delegate) return FindTemplate(a, b, path, seen);
         if (!seen.Add((a, b))) return null;
 
-        if (a is IDictionary da)
-        {
-            var db = (IDictionary)b;
-            if (da.Count != db.Count) return $"{path}: {da.Count} entries vs {db.Count}";
-            foreach (DictionaryEntry entry in da)
-            {
-                if (!db.Contains(entry.Key)) return $"{path}: missing key {entry.Key}";
-                string? d = Find(entry.Value, db[entry.Key], $"{path}[{entry.Key}]", seen);
-                if (d is not null) return d;
-            }
-            return null;
-        }
-        if (a is IEnumerable ea2 && type.Namespace?.StartsWith("BonniePDF", StringComparison.Ordinal) != true)
-        {
-            object?[] left = ea2.Cast<object?>().ToArray();
-            object?[] right = ((IEnumerable)b).Cast<object?>().ToArray();
-            if (left.Length != right.Length) return $"{path}: length {left.Length} vs {right.Length}";
-            for (int i = 0; i < left.Length; i++)
-            {
-                string? d = Find(left[i], right[i], $"{path}[{i}]", seen);
-                if (d is not null) return d;
-            }
-            return null;
-        }
+        if (a is IDictionary da) return FindEntries(da, (IDictionary)b, path, seen);
+        bool own = type.Namespace?.StartsWith("BonniePDF", StringComparison.Ordinal) == true;
+        if (a is IEnumerable sequence && !own) return FindItems(sequence, (IEnumerable)b, path, seen);
         // Types from elsewhere (locks, async locals, tasks) have no state a document's meaning depends on.
-        if (type.Namespace?.StartsWith("BonniePDF", StringComparison.Ordinal) != true && !type.IsGenericType) return null;
-        if (type.Namespace?.StartsWith("BonniePDF", StringComparison.Ordinal) != true) return null;
+        if (!own) return null;
+        return FindFields(a, b, type, path, seen);
+    }
 
+    /// <summary>A page template built from elements compares by those elements; any other function is opaque.</summary>
+    private static string? FindTemplate(object a, object b, string path, HashSet<(object, object)> seen)
+    {
+        var ta = a as Func<int, IElement?>;
+        var tb = b as Func<int, IElement?>;
+        bool builtA = PageTemplate.TryGetElements(ta, out PageTemplateElements ea);
+        bool builtB = PageTemplate.TryGetElements(tb, out PageTemplateElements eb);
+        if (builtA != builtB) return $"{path}: a template built from elements vs a function";
+        return builtA ? Find(ea, eb, path + "(template)", seen) : null;
+    }
+
+    private static string? FindEntries(IDictionary da, IDictionary db, string path, HashSet<(object, object)> seen)
+    {
+        if (da.Count != db.Count) return $"{path}: {da.Count} entries vs {db.Count}";
+        foreach (DictionaryEntry entry in da)
+        {
+            if (!db.Contains(entry.Key)) return $"{path}: missing key {entry.Key}";
+            string? d = Find(entry.Value, db[entry.Key], $"{path}[{entry.Key}]", seen);
+            if (d is not null) return d;
+        }
+        return null;
+    }
+
+    private static string? FindItems(IEnumerable a, IEnumerable b, string path, HashSet<(object, object)> seen)
+    {
+        object?[] left = a.Cast<object?>().ToArray();
+        object?[] right = b.Cast<object?>().ToArray();
+        if (left.Length != right.Length) return $"{path}: length {left.Length} vs {right.Length}";
+        for (int i = 0; i < left.Length; i++)
+        {
+            string? d = Find(left[i], right[i], $"{path}[{i}]", seen);
+            if (d is not null) return d;
+        }
+        return null;
+    }
+
+    private static string? FindFields(object a, object b, Type type, string path, HashSet<(object, object)> seen)
+    {
         var skip = new HashSet<string>(StringComparer.Ordinal);
         if (a is DocumentMetadata ma && b is DocumentMetadata mb)
         {

@@ -14,13 +14,13 @@ namespace BonniePDF.Tests.Typography;
 /// </summary>
 public partial class DocumentFontsTests
 {
-    [GeneratedRegex(@"/BaseFont /(?:[A-Z]{6}\+)?([A-Za-z0-9-]+)")]
+    [GeneratedRegex(@"/BaseFont /(?:[A-Z]{6}\+)?(?<1>[A-Za-z0-9-]+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex BaseFontName();
 
-    [GeneratedRegex(@"/ID \[[^\]]*\]|/(?:CreationDate|ModDate) \([^)]*\)")]
+    [GeneratedRegex(@"/ID \[[^\]]*\]|/(?:CreationDate|ModDate) \([^)]*\)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex TrailerId();
 
-    [GeneratedRegex("[A-Z]{6}\\+")]
+    [GeneratedRegex("[A-Z]{6}\\+", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SubsetPrefix();
 
     private static byte[] Bundled(string family, string subfamily) =>
@@ -34,7 +34,7 @@ public partial class DocumentFontsTests
 
     /// <summary>The base font names of every font in a PDF, subset prefix removed.</summary>
     private static List<string> EmbeddedFonts(byte[] pdf) =>
-        BaseFontName().Matches(Encoding.Latin1.GetString(pdf)).Select(m => m.Groups[1].Value).Distinct().Order(StringComparer.Ordinal).ToList();
+        BaseFontName().Matches(Encoding.Latin1.GetString(pdf)).Select(m => m.Groups[1].Value).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToList();
 
     /// <summary>Adds one face per spec ("400", "700", "400I"), each from the same font file.</summary>
     private static void FacesOf(DocumentFonts fonts, string family, params string[] specs)
@@ -76,7 +76,7 @@ public partial class DocumentFontsTests
         DocumentFonts fonts = new();
         FacesOf(fonts, "Inter", faces);
 
-        Assert.True(expected == Name(fonts.Resolve(family, (FontWeight)weight, italic)), $"{id}: {family} {weight}{(italic ? "I" : "")}");
+        Assert.True(string.Equals(expected, Name(fonts.Resolve(family, (FontWeight)weight, italic)), StringComparison.Ordinal), $"{id}: {family} {weight}{(italic ? "I" : "")}");
     }
 
     [Fact]
@@ -175,12 +175,12 @@ public partial class DocumentFontsTests
 
         Assert.Equal(["LiberationSans"], EmbeddedFonts(a.GenerateBytes()));
         Assert.Equal(["LiberationSerif"], EmbeddedFonts(b.GenerateBytes()));
-        Assert.DoesNotContain("LiberationSerif", EmbeddedFonts(neither.GenerateBytes()));
+        Assert.DoesNotContain("LiberationSerif", EmbeddedFonts(neither.GenerateBytes()), StringComparer.Ordinal);
         Assert.Null(FontManager.GetBytesForFamily("Inter", "Regular"));
     }
 
     [Fact]
-    public void LetsTwoDocumentsGenerateAtTheSameTimeWithoutSeeingEachOthersFonts()
+    public async Task LetsTwoDocumentsGenerateAtTheSameTimeWithoutSeeingEachOthersFonts()
     {
         byte[] Generate(byte[] font, string text)
         {
@@ -193,10 +193,10 @@ public partial class DocumentFontsTests
         Task<byte[]>[] tasks = Enumerable.Range(0, 16)
             .Select(i => Task.Run(() => i % 2 == 0 ? Generate(SansRegular, "sans") : Generate(SerifRegular, "serif")))
             .ToArray();
-        Task.WaitAll(tasks);
+        byte[][] results = await Task.WhenAll(tasks);
 
-        for (int i = 0; i < tasks.Length; i++)
-            Assert.Equal([i % 2 == 0 ? "LiberationSans" : "LiberationSerif"], EmbeddedFonts(tasks[i].Result));
+        for (int i = 0; i < results.Length; i++)
+            Assert.Equal([i % 2 == 0 ? "LiberationSans" : "LiberationSerif"], EmbeddedFonts(results[i]));
     }
 
     [Fact]

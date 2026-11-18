@@ -47,7 +47,7 @@ public sealed partial class GlobalFamilyResolutionTests : System.IDisposable
         {
             using var document = new BonniePDF.Document();
             build(document);
-            string pdf = Encoding.Latin1.GetString(await document.GenerateBytesAsync());
+            string pdf = Encoding.Latin1.GetString(await document.GenerateBytesAsync().ConfigureAwait(true));
             return new Generated(
                 EmbeddedFont().Matches(pdf).Select(m => m.Groups["name"].Value).Order(System.StringComparer.Ordinal).ToArray(),
                 Type1Font().Matches(pdf).Select(m => m.Groups["name"].Value).Distinct(System.StringComparer.Ordinal).Order(System.StringComparer.Ordinal).ToArray(),

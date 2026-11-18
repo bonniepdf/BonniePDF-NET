@@ -30,7 +30,7 @@ internal static class EmbeddedTextShaping
     private static GlyphRun ShapeBidi(FontFace face, string text, ShapeOptions? options)
     {
         var line = TextFlow.CurrentLine;
-        if (line is not null && line.Paragraph.Substring(line.Start, line.End - line.Start) != text) line = null;
+        if (line is not null && !string.Equals(line.Paragraph.Substring(line.Start, line.End - line.Start), text, System.StringComparison.Ordinal)) line = null;
         string paragraph = line?.Paragraph ?? text;
         int lineStart = line?.Start ?? 0, lineEnd = line?.End ?? text.Length;
         var resolved = TextItemizer.Resolve(paragraph, (_, _, _, _) => face,

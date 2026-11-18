@@ -36,9 +36,9 @@ public class DefinitionValidationTests
             List<string> expected = warnings.EnumerateArray()
                 .Select(w => $"{w.GetProperty("path").GetString()} {w.GetProperty("code").GetString()}")
                 .Order(StringComparer.Ordinal).ToList();
-            Assert.Equal(expected, result.Warnings.Select(Key).Order(StringComparer.Ordinal));
+            Assert.Equal(expected, result.Warnings.Select(Key).Order(StringComparer.Ordinal), StringComparer.Ordinal);
             DefinitionValidationResult strict = DocumentDefinition.Validate(fixture.RootElement, new DefinitionValidateOptions { Strict = true });
-            Assert.Equal(expected, strict.Errors.Select(Key).Order(StringComparer.Ordinal));
+            Assert.Equal(expected, strict.Errors.Select(Key).Order(StringComparer.Ordinal), StringComparer.Ordinal);
         }
     }
 
@@ -54,7 +54,7 @@ public class DefinitionValidationTests
 
         Assert.False(result.IsValid);
         Assert.Null(result.Definition);
-        Assert.Equal(expected, result.Errors.Select(Key).Order(StringComparer.Ordinal));
+        Assert.Equal(expected, result.Errors.Select(Key).Order(StringComparer.Ordinal), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public class DefinitionValidationTests
 
         Assert.Equal(
             ["/pages/0/content/0/height invalid-value", "/pages/0/content/1 unknown-type", "/pages/0/content/2 missing-required"],
-            r.Errors.Select(Key).Order(StringComparer.Ordinal));
+            r.Errors.Select(Key).Order(StringComparer.Ordinal), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -94,8 +94,8 @@ public class DefinitionValidationTests
         string doc = Minimal("""[{"content":[{"type":"Spacer","hieght":4}]}]""");
 
         Assert.True(DocumentDefinition.Validate(doc).IsValid);
-        Assert.Equal(["/pages/0/content/0/hieght unknown-key"], DocumentDefinition.Validate(doc).Warnings.Select(Key));
-        Assert.Equal(["/pages/0/content/0/hieght unknown-key"], DocumentDefinition.Validate(doc, new DefinitionValidateOptions { Strict = true }).Errors.Select(Key));
+        Assert.Equal(["/pages/0/content/0/hieght unknown-key"], DocumentDefinition.Validate(doc).Warnings.Select(Key), StringComparer.Ordinal);
+        Assert.Equal(["/pages/0/content/0/hieght unknown-key"], DocumentDefinition.Validate(doc, new DefinitionValidateOptions { Strict = true }).Errors.Select(Key), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public class DefinitionValidationTests
                 "/pages/0/content/0/margin invalid-value",
                 "/pages/0/content/0/width invalid-value",
             ],
-            r.Errors.Select(Key).Order(StringComparer.Ordinal));
+            r.Errors.Select(Key).Order(StringComparer.Ordinal), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -149,13 +149,13 @@ public class DefinitionValidationTests
     {
         DefinitionValidationResult r = DocumentDefinition.Validate(Minimal("""[{"content":[{"type":"Spacer","id":"-bad"},{"type":"Spacer","id":"a"},{"type":"Spacer","id":"a"}]}]"""));
 
-        Assert.Equal(["/pages/0/content/0/id invalid-value", "/pages/0/content/2/id duplicate-id"], r.Errors.Select(Key).Order(StringComparer.Ordinal));
+        Assert.Equal(["/pages/0/content/0/id invalid-value", "/pages/0/content/2/id duplicate-id"], r.Errors.Select(Key).Order(StringComparer.Ordinal), StringComparer.Ordinal);
     }
 
     [Fact]
     public void RequiresAtLeastOnePage()
     {
-        Assert.Equal(["/pages invalid-value"], DocumentDefinition.Validate(Minimal("[]")).Errors.Select(Key));
+        Assert.Equal(["/pages invalid-value"], DocumentDefinition.Validate(Minimal("[]")).Errors.Select(Key), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -167,7 +167,7 @@ public class DefinitionValidationTests
             """);
 
         Assert.Empty(DocumentDefinition.Validate(doc).Errors);
-        Assert.Equal(["/pages/0/content/0/rows/0 table-row-width"], DocumentDefinition.Validate(doc, new DefinitionValidateOptions { Strict = true }).Errors.Select(Key));
+        Assert.Equal(["/pages/0/content/0/rows/0 table-row-width"], DocumentDefinition.Validate(doc, new DefinitionValidateOptions { Strict = true }).Errors.Select(Key), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -175,7 +175,7 @@ public class DefinitionValidationTests
     {
         string chart = """[{"content":[{"type":"BarChart","data":{"series":[{"dataPoints":[{"label":"a","value":1,"labelFormat":"C0"}]}]}}]}]""";
 
-        Assert.Equal(["/pages/0/content/0/data/series/0/dataPoints/0/labelFormat unsupported-format"], DocumentDefinition.Validate(Minimal(chart)).Errors.Select(Key));
+        Assert.Equal(["/pages/0/content/0/data/series/0/dataPoints/0/labelFormat unsupported-format"], DocumentDefinition.Validate(Minimal(chart)).Errors.Select(Key), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public class DefinitionValidationTests
              "attachments":[{"resource":"missing","fileName":"x.txt"}]
             """));
 
-        Assert.Equal(["/attachments/0/resource dangling-reference", "/resources/b duplicate-font-face"], r.Errors.Select(Key).Order(StringComparer.Ordinal));
+        Assert.Equal(["/attachments/0/resource dangling-reference", "/resources/b duplicate-font-face"], r.Errors.Select(Key).Order(StringComparer.Ordinal), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -199,8 +199,8 @@ public class DefinitionValidationTests
     [Fact]
     public void ReadsNothingWithoutBothStampsAndNamesAnUnsupportedVersion()
     {
-        Assert.Equal([" missing-version"], DocumentDefinition.Validate("""{"pages":[]}""").Errors.Select(Key));
-        Assert.Equal([" missing-version"], DocumentDefinition.Validate("""{"version":1,"pages":[]}""").Errors.Select(Key));
+        Assert.Equal([" missing-version"], DocumentDefinition.Validate("""{"pages":[]}""").Errors.Select(Key), StringComparer.Ordinal);
+        Assert.Equal([" missing-version"], DocumentDefinition.Validate("""{"version":1,"pages":[]}""").Errors.Select(Key), StringComparer.Ordinal);
         DefinitionIssue two = DocumentDefinition.Validate("""{"version":2,"minorVersion":0,"pages":[]}""").Errors[0];
         Assert.Equal(("/version", "unsupported-version"), (two.Path, two.Code));
         DefinitionIssue text = DocumentDefinition.Validate("""{"version":"one","minorVersion":0,"pages":[]}""").Errors[0];
@@ -213,7 +213,7 @@ public class DefinitionValidationTests
         DefinitionValidationResult r = DocumentDefinition.Validate("""{"version":1,"minorVersion":4,"pages":[{"content":[{"type":"TextBlock","text":"x"}]}]}""");
 
         Assert.True(r.IsValid);
-        Assert.Equal(["/minorVersion newer-minor"], r.Warnings.Select(Key));
+        Assert.Equal(["/minorVersion newer-minor"], r.Warnings.Select(Key), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -223,20 +223,20 @@ public class DefinitionValidationTests
         Assert.Equal("limit-exceeded", DocumentDefinition.Validate(new string('[', 200) + new string(']', 200)).Errors[0].Code);
 
         string many = Minimal("""[{"content":[{"type":"Spacer"},{"type":"Spacer"},{"type":"Spacer"},{"type":"Spacer"},{"type":"Spacer"},{"type":"Spacer"}]}]""");
-        Assert.Equal(["limit-exceeded"], DocumentDefinition.Validate(many, new DefinitionValidateOptions { Limits = new DefinitionLimits { ElementNodes = 5 } }).Errors.Select(e => e.Code));
+        Assert.Equal(["limit-exceeded"], DocumentDefinition.Validate(many, new DefinitionValidateOptions { Limits = new DefinitionLimits { ElementNodes = 5 } }).Errors.Select(e => e.Code), StringComparer.Ordinal);
 
         string deep = """{"type":"Spacer"}""";
         for (int i = 0; i < 40; i++) deep = $$"""{"type":"Container","child":{{deep}}}""";
-        Assert.Equal(["limit-exceeded"], DocumentDefinition.Validate(Minimal($$"""[{"content":[{{deep}}]}]""")).Errors.Select(e => e.Code));
+        Assert.Equal(["limit-exceeded"], DocumentDefinition.Validate(Minimal($$"""[{"content":[{{deep}}]}]""")).Errors.Select(e => e.Code), StringComparer.Ordinal);
     }
 
     [Fact]
     public void RefusesALongStringAndTooManyPages()
     {
         string longText = Minimal($$"""[{"content":[{"type":"TextBlock","text":"{{new string('x', 50)}}"}]}]""");
-        Assert.Equal(["limit-exceeded"], DocumentDefinition.Validate(longText, new DefinitionValidateOptions { Limits = new DefinitionLimits { StringLength = 10 } }).Errors.Select(e => e.Code));
+        Assert.Equal(["limit-exceeded"], DocumentDefinition.Validate(longText, new DefinitionValidateOptions { Limits = new DefinitionLimits { StringLength = 10 } }).Errors.Select(e => e.Code), StringComparer.Ordinal);
 
         string pages = Minimal("""[{"content":[]},{"content":[]},{"content":[]}]""");
-        Assert.Equal(["limit-exceeded"], DocumentDefinition.Validate(pages, new DefinitionValidateOptions { Limits = new DefinitionLimits { Pages = 2 } }).Errors.Select(e => e.Code));
+        Assert.Equal(["limit-exceeded"], DocumentDefinition.Validate(pages, new DefinitionValidateOptions { Limits = new DefinitionLimits { Pages = 2 } }).Errors.Select(e => e.Code), StringComparer.Ordinal);
     }
 }

@@ -250,7 +250,7 @@ public static class BankStatementExample
     [
         .. Transactions
             .Where(t => t.Amount < 0 && !NotEveryday.Contains(t.Category))
-            .GroupBy(t => t.Category)
+            .GroupBy(t => t.Category, StringComparer.Ordinal)
             .Select(g => new CategorySpend(g.Key, g.Sum(t => -t.Amount)))
             .OrderByDescending(s => s.Pence)
             .ThenBy(s => s.Category, StringComparer.Ordinal)

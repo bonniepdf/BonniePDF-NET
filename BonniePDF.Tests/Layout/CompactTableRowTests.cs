@@ -27,7 +27,7 @@ public sealed partial class CompactTableRowTests
     private static string Normalize(byte[] bytes) =>
         FileIdentifierRegex().Replace(Encoding.Latin1.GetString(bytes), "/ID [<MASKED> <MASKED>]");
 
-    [GeneratedRegex(@"/ID \[<[0-9A-F]*> <[0-9A-F]*>\]")]
+    [GeneratedRegex(@"/ID \[<[0-9A-F]*> <[0-9A-F]*>\]", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex FileIdentifierRegex();
 
     private static bool IsCompact(Table table, int index)
@@ -66,7 +66,7 @@ public sealed partial class CompactTableRowTests
     {
         byte[] coloured = Generate(t => t.AddRow(new TextBlock("x"), new TextBlock("1")), t => t.Rows[0].WithBackground(Color.FromHex("#ff0000")));
         byte[] plain = Generate(t => t.AddRow(new TextBlock("x"), new TextBlock("1")));
-        Assert.NotEqual(Normalize(plain), Normalize(coloured));
+        Assert.NotEqual(Normalize(plain), Normalize(coloured), StringComparer.Ordinal);
         byte[] explicitColoured = Generate(t => t.AddRow(TableRow.From(new TextBlock("x"), new TextBlock("1")).WithBackground(Color.FromHex("#ff0000"))));
         Assert.Equal(Normalize(explicitColoured), Normalize(coloured));
     }
@@ -110,10 +110,10 @@ public sealed partial class CompactTableRowTests
         document.Add(table);
         LayoutSnapshot? snapshot = document.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
         Assert.NotNull(snapshot);
-        List<LayoutNode> rows = Walk(snapshot.Root).Where(n => n.Type == nameof(TableRow)).ToList();
+        List<LayoutNode> rows = Walk(snapshot.Root).Where(n => string.Equals(n.Type, nameof(TableRow), StringComparison.Ordinal)).ToList();
         Assert.Equal(5, rows.Count);
         Assert.Equal(5, rows.Select(r => r.Rects[0].Y).Distinct().Count());
-        Assert.All(rows, r => Assert.Single(r.Children, c => c.Type == nameof(TableCell)));
+        Assert.All(rows, r => Assert.Single(r.Children, c => string.Equals(c.Type, nameof(TableCell), StringComparison.Ordinal)));
     }
 
     private static IEnumerable<LayoutNode> Walk(LayoutNode node)

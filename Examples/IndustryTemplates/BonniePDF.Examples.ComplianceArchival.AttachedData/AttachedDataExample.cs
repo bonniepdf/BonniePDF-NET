@@ -67,8 +67,8 @@ public static class AttachedDataExample
         {
             table.AddRow(
                 Tb(quarter, 10, Ink),
-                Tb(revenue.ToString("N0"), 10, BodyCol, align: TextAlignment.Right),
-                Tb(customers.ToString(), 10, BodyCol, align: TextAlignment.Right));
+                Tb(revenue.ToString("N0", System.Globalization.CultureInfo.InvariantCulture), 10, BodyCol, align: TextAlignment.Right),
+                Tb(customers.ToString(System.Globalization.CultureInfo.InvariantCulture), 10, BodyCol, align: TextAlignment.Right));
         }
 
         doc.Add(table);

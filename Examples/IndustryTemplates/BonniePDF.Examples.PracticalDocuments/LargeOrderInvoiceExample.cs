@@ -114,9 +114,9 @@ public static class LargeOrderInvoiceExample
         var rates = new SortedDictionary<int, (long NetPence, long TaxPence)>();
         foreach (var line in lines)
         {
-            if (line.Quantity < 1 || line.UnitPence < 0 || line.DiscountPence < 0 || line.TaxPercent is < 0 or > 100) throw new ArgumentException("Invalid invoice line.");
+            if (line.Quantity < 1 || line.UnitPence < 0 || line.DiscountPence < 0 || line.TaxPercent is < 0 or > 100) throw new ArgumentException("Invalid invoice line.", nameof(lines));
             long net = checked(line.Quantity * line.UnitPence - line.DiscountPence);
-            if (net < 0) throw new ArgumentException("Invalid discounted line amount.");
+            if (net < 0) throw new ArgumentException("Invalid discounted line amount.", nameof(lines));
             long tax = checked(net * line.TaxPercent + 50) / 100;
             rates.TryGetValue(line.TaxPercent, out var group);
             rates[line.TaxPercent] = (checked(group.NetPence + net), checked(group.TaxPence + tax));

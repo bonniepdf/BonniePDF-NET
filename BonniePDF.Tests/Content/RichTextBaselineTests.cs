@@ -17,13 +17,13 @@ public sealed partial class RichTextBaselineTests
             .Span("small", new TextStyle { FontSize = 8 })
             .Span("sub", new TextStyle { FontSize = 8, BaselineAlignment = BaselineAlignment.Subscript })
             .Span("sup", new TextStyle { FontSize = 8, BaselineAlignment = BaselineAlignment.Superscript }));
-        var ys = new Dictionary<string, float>();
+        var ys = new Dictionary<string, float>(StringComparer.Ordinal);
         foreach (Match m in SvgText().Matches(doc.GenerateSvgPages()[0]))
             ys[m.Groups[2].Value.Trim()] = float.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture);
         return ys;
     }
 
-    [GeneratedRegex("<text[^>]*\\sy=\"([\\d.]+)\"[^>]*>([^<]*)</text>")]
+    [GeneratedRegex("<text[^>]*\\sy=\"(?<1>[\\d.]+)\"[^>]*>(?<2>[^<]*)</text>", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SvgText();
 
     [Fact]

@@ -84,39 +84,51 @@ public sealed class ColourEmojiTests
             string path = Path.Combine(Fixtures, name);
             var data = File.ReadAllBytes(path); var font = TtfFont.LoadFromBytes(data);
             Assert.Equal(f.GetProperty("sha256").GetString(), Convert.ToHexString(SHA256.HashData(data)).ToLowerInvariant());
-            var sources = new List<string>();
-            foreach (var c in fixture.RootElement.GetProperty("cases").EnumerateArray())
-            {
-                string id = c.GetProperty("id").GetString()!, text = c.GetProperty("text").GetString()!;
-                if (id == "mixed") continue;
-                var result = TextRunShaper.ShapeTextRuns(text, new[] { new ShaperFont { FontIdentifier = "emoji", Font = font } });
-                Assert.Empty(result.Unsupported); Assert.Equal(text, string.Concat(result.Runs.Select(r => r.Text)));
-                var glyphs = font.Shape(text).Records(); Assert.NotEmpty(glyphs); Assert.All(glyphs, g => Assert.NotEqual(0, g.Id));
-                if (id != "repeated") Assert.Single(glyphs);
-                if (id != "text-presentation") sources.Add(text);
-            }
-            using var doc = new BonniePDF.Document();
-            doc.Fonts.Add(File.ReadAllBytes(Path.Combine(Fixtures, "NotoSans-Regular.ttf")));
-            doc.Settings.EmojiRendering = EmojiRendering.Colour;
-            doc.Settings.Language = "en-GB"; doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
-            doc.Settings.Conformance = PdfAConformance.PdfA2b; doc.Metadata.Title = "Colour emoji conformance";
-            doc.Add(new TextBlock(string.Join(" ", sources)) { FontName = path, FontSize = 24 });
-            using var stream = new MemoryStream(); doc.Save(stream, true);
-            string svg = doc.GenerateSvgPages()[0];
-            Assert.Contains("<g role=\"img\" aria-label=", svg, StringComparison.Ordinal);
-            Assert.Contains(name.StartsWith("Twemoji", StringComparison.Ordinal) ? "<path" : "data:image/png;base64,", svg, StringComparison.Ordinal);
-            if (Environment.GetEnvironmentVariable("EMOJI_OUTPUT") is string output)
-            {
-                Directory.CreateDirectory(output); string prefix = "dotnet-" + name.Split('-')[0];
-                File.WriteAllBytes(Path.Combine(output, prefix + ".pdf"), stream.ToArray());
-                File.WriteAllText(Path.Combine(output, prefix + ".svg"), svg);
-            }
+            List<string> sources = ShapeFixtureCases(fixture.RootElement, font);
+            RenderConformanceSample(name, path, sources);
             if (!font.HasOutlines)
             {
                 using var outline = new BonniePDF.Document(); outline.Add(new TextBlock("😀") { FontName = path });
                 using var target = new MemoryStream();
                 Assert.Throws<NotSupportedException>(() => outline.Save(target, true));
             }
+        }
+    }
+
+    /// <summary>Shapes each fixture case in the font alone and returns the texts the conformance sample shows.</summary>
+    private static List<string> ShapeFixtureCases(JsonElement root, TtfFont font)
+    {
+        var sources = new List<string>();
+        foreach (var c in root.GetProperty("cases").EnumerateArray())
+        {
+            string id = c.GetProperty("id").GetString()!, text = c.GetProperty("text").GetString()!;
+            if (string.Equals(id, "mixed", StringComparison.Ordinal)) continue;
+            var result = TextRunShaper.ShapeTextRuns(text, new[] { new ShaperFont { FontIdentifier = "emoji", Font = font } });
+            Assert.Empty(result.Unsupported); Assert.Equal(text, string.Concat(result.Runs.Select(r => r.Text)));
+            var glyphs = font.Shape(text).Records(); Assert.NotEmpty(glyphs); Assert.All(glyphs, g => Assert.NotEqual(0, g.Id));
+            if (!string.Equals(id, "repeated", StringComparison.Ordinal)) Assert.Single(glyphs);
+            if (!string.Equals(id, "text-presentation", StringComparison.Ordinal)) sources.Add(text);
+        }
+        return sources;
+    }
+
+    private static void RenderConformanceSample(string name, string path, List<string> sources)
+    {
+        using var doc = new BonniePDF.Document();
+        doc.Fonts.Add(File.ReadAllBytes(Path.Combine(Fixtures, "NotoSans-Regular.ttf")));
+        doc.Settings.EmojiRendering = EmojiRendering.Colour;
+        doc.Settings.Language = "en-GB"; doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        doc.Settings.Conformance = PdfAConformance.PdfA2b; doc.Metadata.Title = "Colour emoji conformance";
+        doc.Add(new TextBlock(string.Join(" ", sources)) { FontName = path, FontSize = 24 });
+        using var stream = new MemoryStream(); doc.Save(stream, true);
+        string svg = doc.GenerateSvgPages()[0];
+        Assert.Contains("<g role=\"img\" aria-label=", svg, StringComparison.Ordinal);
+        Assert.Contains(name.StartsWith("Twemoji", StringComparison.Ordinal) ? "<path" : "data:image/png;base64,", svg, StringComparison.Ordinal);
+        if (Environment.GetEnvironmentVariable("EMOJI_OUTPUT") is string output)
+        {
+            Directory.CreateDirectory(output); string prefix = "dotnet-" + name.Split('-')[0];
+            File.WriteAllBytes(Path.Combine(output, prefix + ".pdf"), stream.ToArray());
+            File.WriteAllText(Path.Combine(output, prefix + ".svg"), svg);
         }
     }
 }

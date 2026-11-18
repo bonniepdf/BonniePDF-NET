@@ -51,7 +51,7 @@ public class LayoutMarginPaddingTests
 
         list.Render(ctx, 500);
 
-        Assert.Contains("DrawText(60,50,'1.',12,Helvetica,Left)", canvas.Operations);
+        Assert.Contains("DrawText(60,50,'1.',12,Helvetica,Left)", canvas.Operations, StringComparer.Ordinal);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class LayoutMarginPaddingTests
         RenderStatus status = toc.RenderStateful(ctx, 500);
 
         Assert.Equal(RenderStatus.Complete, status);
-        Assert.Contains("DrawText(60,50,'Chapter',12,Helvetica,Left)", canvas.Operations);
+        Assert.Contains("DrawText(60,50,'Chapter',12,Helvetica,Left)", canvas.Operations, StringComparer.Ordinal);
         Assert.Equal(50, ctx.CurrentX, 0.1);
     }
 
@@ -151,8 +151,8 @@ public class LayoutMarginPaddingTests
             Operations.Add($"FillCircle({cx},{cy},{radius})");
         public void FillEllipse(float cx, float cy, float rx, float ry, Color color) =>
             Operations.Add($"FillEllipse({cx},{cy},{rx},{ry})");
-        public void FillPath(IList<Point> points, Color color) =>
-            Operations.Add($"FillPath({points.Count} points)");
+        public void FillPath(IList<Point>? points, Color color) =>
+            Operations.Add($"FillPath({points?.Count ?? 0} points)");
         public void FillRoundedRect(float x, float y, float width, float height, float radius, Color color) =>
             Operations.Add($"FillRoundedRect({x},{y},{width},{height},{radius})");
         public void StrokeRoundedRect(float x, float y, float width, float height, float radius, Color color, float strokeWidth) =>
@@ -188,7 +188,7 @@ public class LayoutMarginPaddingTests
         public void AddCircle(float cx, float cy, float radius) =>
             Operations.Add($"AddCircle({cx},{cy},{radius})");
         public void ClosePath() => Operations.Add("ClosePath()");
-        public void FillCurrentPath(Paint paint, FillRule fillRule) =>
+        public void FillCurrentPath(Paint paint, FillRule fillRule = FillRule.NonZero) =>
             Operations.Add($"FillCurrentPath({fillRule})");
         public void StrokeCurrentPath(StrokeStyle style) =>
             Operations.Add("StrokeCurrentPath()");
@@ -197,7 +197,7 @@ public class LayoutMarginPaddingTests
         public void Rotate(float angleDegrees) => Operations.Add($"Rotate({angleDegrees})");
         public void Transform(float a, float b, float c, float d, float tx, float ty) =>
             Operations.Add($"Transform({a},{b},{c},{d},{tx},{ty})");
-        public void ClipToCurrentPath(FillRule fillRule) =>
+        public void ClipToCurrentPath(FillRule fillRule = FillRule.NonZero) =>
             Operations.Add($"ClipToCurrentPath({fillRule})");
         public void SetGlobalAlpha(float alpha) => Operations.Add($"SetGlobalAlpha({alpha})");
     }

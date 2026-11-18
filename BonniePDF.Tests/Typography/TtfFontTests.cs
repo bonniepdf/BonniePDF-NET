@@ -29,8 +29,8 @@ public class TtfFontTests
     {
         var font = new TtfFont(ArialFontPath);
 
-        Assert.NotEqual("Unknown", font.PostScriptName);
-        Assert.NotEqual("Unknown", font.FontFamily);
+        Assert.NotEqual("Unknown", font.PostScriptName, StringComparer.Ordinal);
+        Assert.NotEqual("Unknown", font.FontFamily, StringComparer.Ordinal);
         Assert.True(font.UnitsPerEm > 0);
         Assert.True(font.Ascender > 0);
         Assert.True(font.Descender < 0); // Descender is typically negative

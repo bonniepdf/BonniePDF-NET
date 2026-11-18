@@ -177,7 +177,7 @@ public partial class UntrustedInputTests
 
     // ---- link URIs ----
 
-    [GeneratedRegex(@"/URI \(((?:\\.|[^\\)])*)\)")]
+    [GeneratedRegex(@"/URI \((?<1>(?:\\.|[^\\)])*)\)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex UriEntry();
 
     private static string WrittenUri(string uri)
@@ -225,8 +225,8 @@ public partial class UntrustedInputTests
         var defs = new StringBuilder("<rect id=\"r0\" width=\"1\" height=\"1\"/>");
         for (int level = 1; level <= levels; level++)
         {
-            defs.Append($"<g id=\"r{level}\">");
-            for (int i = 0; i < fanOut; i++) defs.Append($"<use href=\"#r{level - 1}\"/>");
+            defs.Append(System.Globalization.CultureInfo.InvariantCulture, $"<g id=\"r{level}\">");
+            for (int i = 0; i < fanOut; i++) defs.Append(System.Globalization.CultureInfo.InvariantCulture, $"<use href=\"#r{level - 1}\"/>");
             defs.Append("</g>");
         }
         return $"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"><defs>{defs}</defs><use href=\"#r{levels}\"/></svg>";

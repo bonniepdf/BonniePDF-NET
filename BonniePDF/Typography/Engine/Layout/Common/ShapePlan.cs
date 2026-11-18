@@ -27,7 +27,7 @@ namespace BonniePDF.Typography.Engine
             {
                 Tick();
                 int p = list + 2 + i * 6;
-                if (data.Tag(p) == tag) return OpenTypeLayout.Offset16(data, origin < 0 ? list : origin, p + 4);
+                if (string.Equals(data.Tag(p), tag, StringComparison.Ordinal)) return OpenTypeLayout.Offset16(data, origin < 0 ? list : origin, p + 4);
             }
             return -1;
         }
@@ -47,7 +47,7 @@ namespace BonniePDF.Typography.Engine
             int script = Find(data, scripts, options.Script);
             if (script < 0) script = Find(data, scripts, "DFLT");
             if (script < 0) return;
-            int language = options.Language == "dflt" ? -1 : Find(data, script + 2, options.Language, script);
+            int language = string.Equals(options.Language, "dflt", StringComparison.Ordinal) ? -1 : Find(data, script + 2, options.Language, script);
             if (language < 0 && data.U16(script) != 0) language = OpenTypeLayout.Offset16(data, script, script);
             if (language < 0) return;
             if (data.U16(language) != 0) throw new InvalidDataException("Invalid " + kind + " language lookup order.");
@@ -64,11 +64,11 @@ namespace BonniePDF.Typography.Engine
                 if (index >= data.U16(features)) throw new InvalidDataException("Invalid " + kind + " feature index.");
                 int record = features + 2 + index * 6;
                 string tag = data.Tag(record);
-                bool arabic = options.Script == "arab" && kind == "GSUB";
+                bool arabic = string.Equals(options.Script, "arab", StringComparison.Ordinal) && string.Equals(kind, "GSUB", StringComparison.Ordinal);
                 int stage = arabic ? ArabicStage(tag) : 0;
-                int value = arabic && (tag == "isol" || tag == "fina" || tag == "medi" || tag == "init" || tag == "mset" || tag == "mark") ? 1 : DefaultValue(tag, kind, options.Direction);
+                int value = arabic && (string.Equals(tag, "isol", StringComparison.Ordinal) || string.Equals(tag, "fina", StringComparison.Ordinal) || string.Equals(tag, "medi", StringComparison.Ordinal) || string.Equals(tag, "init", StringComparison.Ordinal) || string.Equals(tag, "mset", StringComparison.Ordinal) || string.Equals(tag, "mark", StringComparison.Ordinal)) ? 1 : DefaultValue(tag, kind, options.Direction);
                 bool requested = false;
-                foreach (var feature in options.Features) { Tick(); requested |= feature.Tag == tag && feature.Value != 0; }
+                foreach (var feature in options.Features) { Tick(); requested |= string.Equals(feature.Tag, tag, StringComparison.Ordinal) && feature.Value != 0; }
                 if (index != required && value == 0 && !requested) continue;
                 int featureOffset = OpenTypeLayout.Offset16(data, features, record + 4), lookups = data.U16(featureOffset + 2);
                 data.Check(featureOffset + 4, lookups * 2);
@@ -81,7 +81,7 @@ namespace BonniePDF.Typography.Engine
                     long key = ((long)stage << 32) | (uint)lookup;
                     if (!rules.TryGetValue(key, out rule)) { rule = new LookupRule(lookup, options); rules.Add(key, rule); }
                     rule.Add(tag, value, index == required);
-                    if (tag == "kern") kern.Add(lookup);
+                    if (string.Equals(tag, "kern", StringComparison.Ordinal)) kern.Add(lookup);
                 }
             }
             Rules = new LookupRule[rules.Count]; rules.Values.CopyTo(Rules, 0);
@@ -94,18 +94,18 @@ namespace BonniePDF.Typography.Engine
 
         private static int ArabicStage(string tag)
         {
-            if (tag == "rtlm" || tag == "rtla" || tag == "ltra" || tag == "ltrm") return 0;
-            if (tag == "ccmp" || tag == "locl") return 1;
+            if (string.Equals(tag, "rtlm", StringComparison.Ordinal) || string.Equals(tag, "rtla", StringComparison.Ordinal) || string.Equals(tag, "ltra", StringComparison.Ordinal) || string.Equals(tag, "ltrm", StringComparison.Ordinal)) return 0;
+            if (string.Equals(tag, "ccmp", StringComparison.Ordinal) || string.Equals(tag, "locl", StringComparison.Ordinal)) return 1;
             int form = Array.IndexOf(ArabicForms, tag);
             return form >= 0 ? form + 2 : 8;
         }
 
         private static int DefaultValue(string tag, string kind, TextDirection direction)
         {
-            if (kind == "GSUB")
-                return tag == "ccmp" || tag == "locl" || tag == "rlig" || tag == "liga" || tag == "clig" || tag == "calt" || tag == "rclt" ||
-                    (direction == TextDirection.LeftToRight ? tag == "ltra" || tag == "ltrm" : tag == "rtla" || tag == "rtlm") ? 1 : 0;
-            return tag == "kern" || tag == "mark" || tag == "mkmk" || tag == "curs" || tag == "dist" || tag == "abvm" || tag == "blwm" ? 1 : 0;
+            if (string.Equals(kind, "GSUB", StringComparison.Ordinal))
+                return string.Equals(tag, "ccmp", StringComparison.Ordinal) || string.Equals(tag, "locl", StringComparison.Ordinal) || string.Equals(tag, "rlig", StringComparison.Ordinal) || string.Equals(tag, "liga", StringComparison.Ordinal) || string.Equals(tag, "clig", StringComparison.Ordinal) || string.Equals(tag, "calt", StringComparison.Ordinal) || string.Equals(tag, "rclt", StringComparison.Ordinal) ||
+                    (direction == TextDirection.LeftToRight ? string.Equals(tag, "ltra", StringComparison.Ordinal) || string.Equals(tag, "ltrm", StringComparison.Ordinal) : string.Equals(tag, "rtla", StringComparison.Ordinal) || string.Equals(tag, "rtlm", StringComparison.Ordinal)) ? 1 : 0;
+            return string.Equals(tag, "kern", StringComparison.Ordinal) || string.Equals(tag, "mark", StringComparison.Ordinal) || string.Equals(tag, "mkmk", StringComparison.Ordinal) || string.Equals(tag, "curs", StringComparison.Ordinal) || string.Equals(tag, "dist", StringComparison.Ordinal) || string.Equals(tag, "abvm", StringComparison.Ordinal) || string.Equals(tag, "blwm", StringComparison.Ordinal) ? 1 : 0;
         }
     }
 }

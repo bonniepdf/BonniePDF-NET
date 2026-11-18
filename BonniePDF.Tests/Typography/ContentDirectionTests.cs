@@ -9,7 +9,7 @@ namespace BonniePDF.Tests.Typography;
 [Collection("Serial")]
 public sealed partial class ContentDirectionTests
 {
-    [System.Text.RegularExpressions.GeneratedRegex(@"1 0 0 1 ([\d.]+) [\d.]+ Tm")]
+    [System.Text.RegularExpressions.GeneratedRegex(@"1 0 0 1 (?<1>[\d.]+) [\d.]+ Tm", System.Text.RegularExpressions.RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial System.Text.RegularExpressions.Regex TextPosition();
 
     private static string FixturePath(string name) => Path.Combine(AppContext.BaseDirectory, "Typography", "Fixtures", name);

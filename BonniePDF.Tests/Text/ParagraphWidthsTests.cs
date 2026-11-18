@@ -51,7 +51,7 @@ public class ParagraphWidthsTests(ITestOutputHelper output)
     [Fact]
     public void SpanWidthsEqualMeasuringTheSpan()
     {
-        var featureSets = new IReadOnlyDictionary<string, int>?[] { null, new Dictionary<string, int> { ["liga"] = 0 }, new Dictionary<string, int> { ["tnum"] = 1 } };
+        var featureSets = new IReadOnlyDictionary<string, int>?[] { null, new Dictionary<string, int>(StringComparer.Ordinal) { ["liga"] = 0 }, new Dictionary<string, int>(StringComparer.Ordinal) { ["tnum"] = 1 } };
         int fonts = 0;
         foreach (string font in FontPaths())
         {
@@ -79,7 +79,7 @@ public class ParagraphWidthsTests(ITestOutputHelper output)
                             if (!widths!.TryGetWidth(s, e, out float width)) continue;
                             answered++;
                             float measured = FontMetrics.GetStringWidth(text.Substring(s, e - s), font, 11, features);
-                            Assert.True(measured == width, $"{Path.GetFileName(font)} [{string.Join(",", features ?? new Dictionary<string, int>())}] \"{text.Substring(s, e - s)}\": {width} from the paragraph, {measured} measured");
+                            Assert.True(measured == width, $"{Path.GetFileName(font)} [{string.Join(",", features ?? new Dictionary<string, int>(StringComparer.Ordinal))}] \"{text.Substring(s, e - s)}\": {width} from the paragraph, {measured} measured");
                             // The line's glyphs, read the same way, are those of shaping the line on its own.
                             var sliced = widths.TryGetGlyphs(s, e);
                             Assert.NotNull(sliced);

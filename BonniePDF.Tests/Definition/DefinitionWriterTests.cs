@@ -21,15 +21,15 @@ public partial class DefinitionWriterTests
 {
     private static readonly DescriptionData D = ElementDescription.Data;
 
-    [GeneratedRegex(@"/ID \[[^\]]*\]")]
+    [GeneratedRegex(@"/ID \[[^\]]*\]", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex TrailerId();
 
-    [GeneratedRegex("[A-Z]{6}\\+")]
+    [GeneratedRegex("[A-Z]{6}\\+", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SubsetPrefix();
 
     // The PDF dates and their XMP copies (as TypeScript's definition helpers mask them): two
     // generations a moment apart can straddle a second.
-    [GeneratedRegex(@"/(?:Creation|Mod)Date[^\n]*|\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})")]
+    [GeneratedRegex(@"/(?:Creation|Mod)Date[^\n]*|\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex Dates();
 
     /// <summary>A 1x1 PNG.</summary>
@@ -41,9 +41,9 @@ public partial class DefinitionWriterTests
 
     private static async Task<(BonniePDF.Document First, BonniePDF.Document Second, DefinitionWriteResult Written, DefinitionWriteResult Rewritten)> RoundTrip(string json)
     {
-        BonniePDF.Document first = await BonniePDF.Document.FromDefinitionAsync(json);
+        BonniePDF.Document first = await BonniePDF.Document.FromDefinitionAsync(json).ConfigureAwait(true);
         DefinitionWriteResult written = first.ToDefinition();
-        BonniePDF.Document second = await BonniePDF.Document.FromDefinitionAsync(written.ToJson());
+        BonniePDF.Document second = await BonniePDF.Document.FromDefinitionAsync(written.ToJson()).ConfigureAwait(true);
         return (first, second, written, second.ToDefinition());
     }
 
@@ -111,25 +111,11 @@ public partial class DefinitionWriterTests
         switch (head)
         {
             case "string":
-                return [key switch
-                {
-                    "fontName" => "Times-Roman",
-                    "fontFamily" => "Times",
-                    "uri" => "https://example.com/a",
-                    "anchorTarget" => "target",
-                    "anchorId" => "anchor-x",
-                    "tocIdentifier" => "toc-x",
-                    _ => "sample",
-                }];
+                return [StringSample(key)];
             case "boolean":
                 return [true, false];
             case "integer" or "number":
-            {
-                double min = spec.Min ?? 0;
-                if (spec.Max is <= 1) return [0.5];
-                double v = head == "integer" ? min + 2 : min + 2.5;
-                return [spec.Max is { } max ? Math.Min(v, max) : v];
-            }
+                return [NumberSample(head, spec)];
             case "length":
                 return [13];
             case "color":
@@ -159,17 +145,35 @@ public partial class DefinitionWriterTests
                     _ => [],
                 };
             case "map":
-                return arg == "string" ? [new JsonObject { ["k"] = "v" }] : [];
+                return string.Equals(arg, "string", StringComparison.Ordinal) ? [new JsonObject { ["k"] = "v" }] : [];
             case "object":
-                return arg == "ChartData" ? [] : [SampleObject(ElementDescription.Shape(arg))];
+                return string.Equals(arg, "ChartData", StringComparison.Ordinal) ? [] : [SampleObject(ElementDescription.Shape(arg))];
             default:
                 return [];
         }
     }
 
+    private static string StringSample(string key) => key switch
+    {
+        "fontName" => "Times-Roman",
+        "fontFamily" => "Times",
+        "uri" => "https://example.com/a",
+        "anchorTarget" => "target",
+        "anchorId" => "anchor-x",
+        "tocIdentifier" => "toc-x",
+        _ => "sample",
+    };
+
+    private static double NumberSample(string head, KeySpec spec)
+    {
+        double min = spec.Min ?? 0;
+        if (spec.Max is <= 1) return 0.5;
+        double v = string.Equals(head, "integer", StringComparison.Ordinal) ? min + 2 : min + 2.5;
+        return spec.Max is { } max ? Math.Min(v, max) : v;
+    }
+
     /// <summary>Barcode.QuietZone is an int here where the wire says number, so its sample is a whole number.</summary>
-    private static JsonNode AsDotnetValue(string type, string key, JsonNode sample) =>
-        type == "Barcode" && key == "quietZone" ? 3 : sample;
+    private static JsonNode AsDotnetValue(string type, string key, JsonNode sample) => string.Equals(type, "Barcode", StringComparison.Ordinal) && string.Equals(key, "quietZone", StringComparison.Ordinal) ? 3 : sample;
 
     private static JsonObject SampleObject(ShapeSpec shape)
     {
@@ -200,15 +204,15 @@ public partial class DefinitionWriterTests
                 "listItems" => new JsonArray("a"),
                 "spans" => new JsonArray(new JsonObject { ["text"] = "a" }),
                 "rows" => new JsonArray(new JsonArray("a")),
-                _ when spec.Kind == "object:ChartData" => ChartData(),
-                _ when key == "role" => "P",
-                _ when key == "headingIdentifiers" => new JsonArray("h1"),
+                _ when string.Equals(spec.Kind, "object:ChartData", StringComparison.Ordinal) => ChartData(),
+                _ when string.Equals(key, "role", StringComparison.Ordinal) => "P",
+                _ when string.Equals(key, "headingIdentifiers", StringComparison.Ordinal) => new JsonArray("h1"),
                 _ => Samples(key, spec)[0],
             };
         }
-        if (type == "Hyperlink") node["uri"] = "https://example.com";
-        if (type == "Image") node["resource"] = "img";
-        if (type == "Svg") node["svgData"] = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"><rect width=\"10\" height=\"10\"/></svg>";
+        if (string.Equals(type, "Hyperlink", StringComparison.Ordinal)) node["uri"] = "https://example.com";
+        if (string.Equals(type, "Image", StringComparison.Ordinal)) node["resource"] = "img";
+        if (string.Equals(type, "Svg", StringComparison.Ordinal)) node["svgData"] = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"><rect width=\"10\" height=\"10\"/></svg>";
         return node;
     }
 
@@ -269,10 +273,10 @@ public partial class DefinitionWriterTests
                 JsonObject node = BaseNode(type);
                 node[key] = sample.DeepClone();
                 // A choice between keys (fontName/fontFamily, uri/targetPageIndex) makes some pairings illegal.
-                if (key == "targetPageIndex") node.Remove("uri");
-                if (key == "fontFamily") node.Remove("fontName");
-                if (key == "resource" && type == "Svg") node.Remove("svgData");
-                if (key == "svgData" && type == "Svg") node.Remove("resource");
+                if (string.Equals(key, "targetPageIndex", StringComparison.Ordinal)) node.Remove("uri");
+                if (string.Equals(key, "fontFamily", StringComparison.Ordinal)) node.Remove("fontName");
+                if (string.Equals(key, "resource", StringComparison.Ordinal) && string.Equals(type, "Svg", StringComparison.Ordinal)) node.Remove("svgData");
+                if (string.Equals(key, "svgData", StringComparison.Ordinal) && string.Equals(type, "Svg", StringComparison.Ordinal)) node.Remove("resource");
                 string json = DefinitionAround(node);
                 if (!DocumentDefinition.Validate(json).IsValid) continue;
 
@@ -282,7 +286,7 @@ public partial class DefinitionWriterTests
                     var (first, second, written, rewritten) = await RoundTrip(json);
                     string? diff = StateComparer.Find(first, second);
                     if (diff is not null) problems.Add($"{label}: state differs at {diff}");
-                    if (written.ToJson() != rewritten.ToJson()) problems.Add($"{label}: the canonical form is not stable");
+                    if (!string.Equals(written.ToJson(), rewritten.ToJson(), StringComparison.Ordinal)) problems.Add($"{label}: the canonical form is not stable");
                     // Either the value is written back exactly, or it is the default and is left out.
                     JsonArray content = written.Definition["pages"]![0]!["content"]!.AsArray();
                     JsonObject back = content[^1]!.AsObject();
@@ -387,7 +391,7 @@ public partial class DefinitionWriterTests
         doc.Add(DebugSource.Mark(new TextBlock { Text = "b" }, "not valid!"));
         doc.Add(DebugSource.Mark(new TextBlock { Text = "c" }, "title"));
         JsonArray content = doc.ToDefinition().Definition["pages"]![0]!["content"]!.AsArray();
-        Assert.Equal(["title", null, null], content.Select(n => n!["id"]?.GetValue<string>()));
+        Assert.Equal(["title", null, null], content.Select(n => n!["id"]?.GetValue<string>()), StringComparer.Ordinal);
     }
 
     // ── text: written only when set ──────────────────────────────────────────
@@ -450,8 +454,8 @@ public partial class DefinitionWriterTests
         Assert.Equal(written.ToJson(), rewritten.ToJson());
         Assert.Equal(
             ["version", "minorVersion", "settings", "metadata", "resources", "attachments", "pages"],
-            written.Definition.Select(p => p.Key));
-        Assert.Equal(["font-1", "image-1", "attachment-1"], written.Definition["resources"]!.AsObject().Select(p => p.Key));
+            written.Definition.Select(p => p.Key), StringComparer.Ordinal);
+        Assert.Equal(["font-1", "image-1", "attachment-1"], written.Definition["resources"]!.AsObject().Select(p => p.Key), StringComparer.Ordinal);
         Assert.Equal("2020-01-02T03:04:05.000Z", written.Definition["metadata"]!["creationDate"]!.GetValue<string>());
         Assert.Equal(Masked(first.GenerateBytes()), Masked(second.GenerateBytes()));
     }
@@ -469,8 +473,8 @@ public partial class DefinitionWriterTests
         using BonniePDF.Document capped = await BonniePDF.Document.FromDefinitionAsync(Json("150"));
         Assert.Equal("""{"maxImageDpi":150}""", capped.ToDefinition().Definition["settings"]!.ToJsonString());
 
-        Assert.Equal(["/settings/maxImageDpi invalid-value"], DocumentDefinition.Validate(Json("\"lots\"")).Errors.Select(e => $"{e.Path} {e.Code}"));
-        Assert.Equal(["/settings/maxImageDpi invalid-value"], DocumentDefinition.Validate(Json("0")).Errors.Select(e => $"{e.Path} {e.Code}"));
+        Assert.Equal(["/settings/maxImageDpi invalid-value"], DocumentDefinition.Validate(Json("\"lots\"")).Errors.Select(e => $"{e.Path} {e.Code}"), StringComparer.Ordinal);
+        Assert.Equal(["/settings/maxImageDpi invalid-value"], DocumentDefinition.Validate(Json("0")).Errors.Select(e => $"{e.Path} {e.Code}"), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -486,7 +490,7 @@ public partial class DefinitionWriterTests
         using var doc = new BonniePDF.Document();
         doc.Add(new Image { ImageData = Png });
         doc.Add(new Image { ImageData = (byte[])Png.Clone() });
-        Assert.Equal(["image-1"], doc.ToDefinition().Definition["resources"]!.AsObject().Select(p => p.Key));
+        Assert.Equal(["image-1"], doc.ToDefinition().Definition["resources"]!.AsObject().Select(p => p.Key), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -494,7 +498,7 @@ public partial class DefinitionWriterTests
     {
         using var doc = new BonniePDF.Document();
         doc.Add(new Image { ImageData = Png });
-        DefinitionWriteResult named = doc.ToDefinition(new DefinitionWriteOptions { ResourceRef = r => r.Kind == "image" ? "northwind-logo" : null });
+        DefinitionWriteResult named = doc.ToDefinition(new DefinitionWriteOptions { ResourceRef = r => string.Equals(r.Kind, "image", StringComparison.Ordinal) ? "northwind-logo" : null });
         JsonNode resource = named.Definition["resources"]!["image-1"]!;
         Assert.Equal("northwind-logo", resource["ref"]!.GetValue<string>());
         Assert.Matches("^[0-9a-f]{64}$", resource["sha256"]!.GetValue<string>());
@@ -582,7 +586,7 @@ public partial class DefinitionWriterTests
         DefinitionException error = Assert.Throws<DefinitionException>(() => doc.ToDefinition());
         Assert.Equal(
             ["/settings/footerTemplate unrepresentable", "/pages/0/content/1 unrepresentable"],
-            error.Issues.Select(i => $"{i.Path} {i.Code}"));
+            error.Issues.Select(i => $"{i.Path} {i.Code}"), StringComparer.Ordinal);
     }
 
     [Fact]
@@ -592,7 +596,7 @@ public partial class DefinitionWriterTests
         DefinitionWriteResult result = doc.ToDefinition(new DefinitionWriteOptions { OnUnrepresentable = DefinitionUnrepresentable.Drop });
         Assert.Equal(
             ["/settings/footerTemplate dropped", "/pages/0/content/1 dropped"],
-            result.Notes.Select(n => $"{n.Path} {n.Code}"));
+            result.Notes.Select(n => $"{n.Path} {n.Code}"), StringComparer.Ordinal);
         Assert.Equal(
             """{"version":1,"minorVersion":0,"pages":[{"content":[{"type":"TextBlock","text":"Kept"}]}]}""",
             result.ToJson());
@@ -608,6 +612,6 @@ public partial class DefinitionWriterTests
         DefinitionException error = Assert.Throws<DefinitionException>(() => doc.ToDefinition());
         Assert.Equal(
             ["/pages/0/content/0 unrepresentable", "/pages/0/content/1 unrepresentable", "/pages/0/content/2 unrepresentable"],
-            error.Issues.Select(i => $"{i.Path} {i.Code}"));
+            error.Issues.Select(i => $"{i.Path} {i.Code}"), StringComparer.Ordinal);
     }
 }

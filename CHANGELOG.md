@@ -5,6 +5,17 @@ Versions use CalVer (`yyyy.m.minor`), decided by the versioning tool, and are
 shared with the TypeScript implementation: `BonniePDF` and `@bonniepdf/core`
 at the same version are the same library.
 
+## Unreleased
+
+### Breaking changes
+
+- **Chart references:** `CartesianChartBase.References` is now `IList<ChartReference>` rather than `List<ChartReference>`. Collection initialisers, `Add` and indexing work as before; calls to `List`-only members such as `AddRange` need to go through a `List<ChartReference>` you assign.
+- **Render-time validation:** an invalid `Line.DashPattern` or `Table.RunningTotalColumn` now throws `InvalidOperationException` instead of `ArgumentOutOfRangeException`, because the value is checked when the document is generated rather than when it is set.
+
+### Fixes
+
+- **Definition export:** `ToDefinition()` no longer throws `NullReferenceException` for a chart series whose `Style` is `null`; the series is written without a `style` entry.
+
 ## 2026.11.13
 
 Status: Released

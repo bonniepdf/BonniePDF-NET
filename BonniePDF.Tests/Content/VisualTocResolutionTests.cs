@@ -79,7 +79,7 @@ public class VisualTocResolutionTests
         string pdf = BuildPdf();
         var dests = GoToDestinations(pdf);
         Assert.Equal(3, dests.Count);
-        Assert.Equal(3, new HashSet<string>(dests).Count);
+        Assert.Equal(3, new HashSet<string>(dests, StringComparer.Ordinal).Count);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class VisualTocResolutionTests
         Assert.Equal(3, rects.Count);
         foreach (string rect in rects)
         {
-            Assert.NotEqual("0 0 0 0", rect);
+            Assert.NotEqual("0 0 0 0", rect, StringComparer.Ordinal);
             string[] parts = rect.Split(' ');
             Assert.True(float.Parse(parts[2], System.Globalization.CultureInfo.InvariantCulture)
                         > float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture));

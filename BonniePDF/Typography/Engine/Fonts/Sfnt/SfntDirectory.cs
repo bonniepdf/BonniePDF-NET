@@ -23,7 +23,7 @@ namespace BonniePDF.Typography.Engine
         {
             count = 1;
             int offset = 0;
-            if (data.Tag(0) == "ttcf")
+            if (string.Equals(data.Tag(0), "ttcf", StringComparison.Ordinal))
             {
                 uint version = data.U32(4);
                 if (version != 0x10000 && version != 0x20000)
@@ -56,11 +56,11 @@ namespace BonniePDF.Typography.Engine
             }
             if (faceIndex < 0 || faceIndex >= count)
                 throw new ArgumentOutOfRangeException("faceIndex");
-            if (countOnly && data.Tag(0) == "ttcf") return offset;
+            if (countOnly && string.Equals(data.Tag(0), "ttcf", StringComparison.Ordinal)) return offset;
             uint sfnt = data.U32(offset);
             if (sfnt != 0x10000 && sfnt != 0x74727565 && sfnt != 0x4f54544f)
                 throw new NotSupportedException("Use static TrueType or CFF 1 OpenType fonts, or CBDT bitmaps. WOFF is unsupported.");
-            if (data.Tag(0) == "ttcf" && sfnt == 0x4f54544f) throw new NotSupportedException("CFF collections are unsupported; supply an individual OTF.");
+            if (string.Equals(data.Tag(0), "ttcf", StringComparison.Ordinal) && sfnt == 0x4f54544f) throw new NotSupportedException("CFF collections are unsupported; supply an individual OTF.");
             return offset;
         }
 

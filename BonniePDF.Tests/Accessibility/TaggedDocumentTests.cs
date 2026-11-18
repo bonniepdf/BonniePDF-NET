@@ -51,7 +51,7 @@ public class TaggedDocumentTests
         Assert.DoesNotContain("/StructTreeRoot", pdf);
     }
 
-    private static string GeneratePdf(AccessibilityMode accessibility, string language, bool pdfA = false)
+    private static string GeneratePdf(AccessibilityMode accessibility, string? language, bool pdfA = false)
     {
         using var doc = new BonniePDF.Document();
         doc.Settings.Version = PdfVersion.Pdf17;

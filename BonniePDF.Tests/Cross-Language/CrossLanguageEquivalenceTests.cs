@@ -46,7 +46,7 @@ public class CrossLanguageEquivalenceTests
         IDictionary<string, int> fp = Fingerprint(pdf);
 
         // Same expectations as in the TS sibling test.
-        Assert.Equal(new SortedDictionary<string, int>
+        Assert.Equal(new SortedDictionary<string, int>(StringComparer.Ordinal)
         {
             ["Document"] = 1,
             ["H1"] = 1,
@@ -58,7 +58,7 @@ public class CrossLanguageEquivalenceTests
             ["TH"] = 4,        // 4 header cells
             ["TD"] = 12,       // 3 body rows × 4 cells
             ["Link"] = 1,
-        }, new SortedDictionary<string, int>(fp));
+        }, new SortedDictionary<string, int>(fp, StringComparer.Ordinal));
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class CrossLanguageEquivalenceTests
         string pdf = Generate(Stage1CloseoutTests.BuildDickensNovelDocument());
         IDictionary<string, int> fp = Fingerprint(pdf);
 
-        Assert.Equal(new SortedDictionary<string, int>
+        Assert.Equal(new SortedDictionary<string, int>(StringComparer.Ordinal)
         {
             ["Document"] = 1,
             ["TOC"] = 1,
@@ -75,7 +75,7 @@ public class CrossLanguageEquivalenceTests
             ["Link"] = 3, // one per TOCI entry - PDF/UA 14.8.4.4.2 requires TOC links to be tagged
             ["H1"] = 3,
             ["P"] = 3,
-        }, new SortedDictionary<string, int>(fp));
+        }, new SortedDictionary<string, int>(fp, StringComparer.Ordinal));
     }
 
     [Fact]
@@ -92,8 +92,8 @@ public class CrossLanguageEquivalenceTests
         IDictionary<string, int> fp = Fingerprint(pdf);
 
         Assert.Equal(
-            new SortedSet<string> { "Document", "Table", "THead", "TBody", "TR", "TH", "TD" },
-            new SortedSet<string>(fp.Keys));
+            new SortedSet<string>(StringComparer.Ordinal) { "Document", "Table", "THead", "TBody", "TR", "TH", "TD" },
+            new SortedSet<string>(fp.Keys, StringComparer.Ordinal));
 
         // Body cells are deterministic: 80 rows × 3 columns = 240.
         Assert.Equal(240, fp["TD"]);
@@ -127,7 +127,7 @@ public class CrossLanguageEquivalenceTests
     /// </summary>
     private static IDictionary<string, int> Fingerprint(string pdf)
     {
-        var result = new SortedDictionary<string, int>();
+        var result = new SortedDictionary<string, int>(StringComparer.Ordinal);
         foreach (string role in Roles)
         {
             int count = SubstringCounter.Count(pdf, $"/S /{role}");
@@ -136,7 +136,7 @@ public class CrossLanguageEquivalenceTests
             // count reflects only direct "/S /Role" matches.
             foreach (string longer in Roles)
             {
-                if (longer.Length > role.Length && longer.StartsWith(role))
+                if (longer.Length > role.Length && longer.StartsWith(role, StringComparison.Ordinal))
                     count -= SubstringCounter.Count(pdf, $"/S /{longer}");
             }
             if (count > 0) result[role] = count;

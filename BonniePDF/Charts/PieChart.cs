@@ -113,7 +113,7 @@ public class PieChart : ChartBase
     private string _totalPosition = "legend";
 
     /// <summary>The total sits in the donut hole rather than the legend.</summary>
-    private bool TotalInCentre => IsDonut && TotalPosition == "center";
+    private bool TotalInCentre => IsDonut && string.Equals(TotalPosition, "center", StringComparison.Ordinal);
 
     /// <summary>
     /// Fill each slice with a gradient from a lighter tint of its colour at the centre side to its

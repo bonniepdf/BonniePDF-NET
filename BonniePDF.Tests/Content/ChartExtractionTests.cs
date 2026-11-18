@@ -27,8 +27,8 @@ public class ChartExtractionTests
             chart.Width = 640;
             chart.Height = 360;
             chart.BackgroundColor = Color.FromHex("#ffffff80");
-            chart.Title = variant == "minimal" ? "" : "Sales & <margin>";
-            if (variant != "empty")
+            chart.Title = string.Equals(variant, "minimal", StringComparison.Ordinal) ? "" : "Sales & <margin>";
+            if (!string.Equals(variant, "empty", StringComparison.Ordinal))
             {
                 for (int i = 0; i < 2; i++)
                 {
@@ -45,13 +45,13 @@ public class ChartExtractionTests
             chart.Data.XAxis.Legend = "Quarter";
             if (chart is CartesianChartBase cartesian)
             {
-                cartesian.Orientation = variant == "horizontal" ? ChartOrientation.Horizontal : ChartOrientation.Vertical;
-                cartesian.ShowLegend = variant != "minimal";
+                cartesian.Orientation = string.Equals(variant, "horizontal", StringComparison.Ordinal) ? ChartOrientation.Horizontal : ChartOrientation.Vertical;
+                cartesian.ShowLegend = !string.Equals(variant, "minimal", StringComparison.Ordinal);
             }
             if (chart is PieChart pie)
             {
-                pie.IsDonut = variant != "horizontal";
-                pie.ShowLegend = variant != "minimal";
+                pie.IsDonut = !string.Equals(variant, "horizontal", StringComparison.Ordinal);
+                pie.ShowLegend = !string.Equals(variant, "minimal", StringComparison.Ordinal);
             }
             string hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(chart.ToSvg()))).ToLowerInvariant();
             Assert.Equal(c["netSvg"]!.GetValue<string>(), hash);

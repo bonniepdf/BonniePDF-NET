@@ -704,7 +704,7 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
         int column = RunningTotalColumn!.Value;
         int columns = ColumnCount();
         if (column < 1 || column >= columns)
-            throw new ArgumentOutOfRangeException(nameof(RunningTotalColumn), "RunningTotalColumn must be a column index from 1 to the last column.");
+            throw new InvalidOperationException("RunningTotalColumn must be a column index from 1 to the last column.");
         decimal sum = 0m;
         foreach (decimal value in _runningValues) sum += value;
         string total = RunningTotalPrefix + ChartNumberFormat.Format(sum, RunningTotalFormat);

@@ -22,7 +22,7 @@ namespace BonniePDF.Typography.Engine
             foreach (var c in source)
             {
                 var prior = output.Count == 0 ? null : output[output.Count - 1];
-                if (prior != null && prior.End == c.Start && prior.Face == c.Face && prior.Script == c.Script && prior.Level == c.Level)
+                if (prior != null && prior.End == c.Start && prior.Face == c.Face && string.Equals(prior.Script, c.Script, StringComparison.Ordinal) && prior.Level == c.Level)
                     output[output.Count - 1] = new TextItem(prior.Start, c.End, prior.Script, prior.Level, prior.Face);
                 else output.Add(c);
             }
@@ -32,7 +32,8 @@ namespace BonniePDF.Typography.Engine
         {
             string text = Bidi.Input.Text; int last = end ?? text.Length; options = options ?? new ShapeOptions(); options.ValidateText(text);
             var boundaries = new HashSet<int>(clusters.Select(c => c.Start)); boundaries.Add(text.Length);
-            if (!boundaries.Contains(start) || !boundaries.Contains(last) || last < start) throw new ArgumentException("Line range must contain complete grapheme clusters.");
+            if (!boundaries.Contains(start)) throw new ArgumentException("Line range must contain complete grapheme clusters.", nameof(start));
+            if (!boundaries.Contains(last) || last < start) throw new ArgumentException("Line range must contain complete grapheme clusters.", nameof(end));
             var line = Bidi.ReorderLine(start, last); int first = Bidi.Input.Offsets.IndexOf(start), scalar = first;
             var selected = new List<TextItem>();
             foreach (var c in clusters) if (c.Start >= start && c.End <= last)
@@ -45,7 +46,7 @@ namespace BonniePDF.Typography.Engine
             var shaped = new List<ShapedTextItem>(); int count = 0;
             foreach (var item in Merge(selected))
             {
-                if (item.Script != "Latn" && item.Script != "Grek" && item.Script != "Cyrl" && item.Script != "Hebr" && item.Script != "Arab" && item.Script != "Zyyy" && item.Script != "Zinh")
+                if (!string.Equals(item.Script, "Latn", StringComparison.Ordinal) && !string.Equals(item.Script, "Grek", StringComparison.Ordinal) && !string.Equals(item.Script, "Cyrl", StringComparison.Ordinal) && !string.Equals(item.Script, "Hebr", StringComparison.Ordinal) && !string.Equals(item.Script, "Arab", StringComparison.Ordinal) && !string.Equals(item.Script, "Zyyy", StringComparison.Ordinal) && !string.Equals(item.Script, "Zinh", StringComparison.Ordinal))
                     throw new NotSupportedException("No shaper is available for script " + item.Script + ".");
                 var features = new List<ShapeFeature>();
                 foreach (var f in options.Features)
@@ -53,7 +54,7 @@ namespace BonniePDF.Typography.Engine
                     int a = Math.Max(item.Start, f.Start), b = Math.Min(item.End, f.End);
                     if (a < b) features.Add(new ShapeFeature(f.Tag, f.Value, a - item.Start, b - item.Start));
                 }
-                var settings = new ShapeOptions(item.Script == "Zyyy" || item.Script == "Zinh" ? "DFLT" : item.Script.ToLowerInvariant(), options.Language,
+                var settings = new ShapeOptions(string.Equals(item.Script, "Zyyy", StringComparison.Ordinal) || string.Equals(item.Script, "Zinh", StringComparison.Ordinal) ? "DFLT" : item.Script.ToLowerInvariant(), options.Language,
                     item.Level % 2 != 0 ? TextDirection.RightToLeft : TextDirection.LeftToRight, features, options.Limits ?? Limits);
                 var result = Shaper.Shape(item.Face, text.Substring(item.Start, item.End - item.Start), settings, true);
                 var packed = result.Run;

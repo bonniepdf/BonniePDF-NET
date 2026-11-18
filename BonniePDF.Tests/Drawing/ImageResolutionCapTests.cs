@@ -14,16 +14,16 @@ public partial class ImageResolutionCapTests
 {
     private sealed record EmbeddedImage(int Width, int Height, bool HasSoftMask, byte[] Pixels);
 
-    [GeneratedRegex(@"\d+ 0 obj\s*<<([^>]*?/Subtype\s*/Image[^>]*?)>>\s*stream\r?\n")]
+    [GeneratedRegex(@"\d+ 0 obj\s*<<(?<1>[^>]*?/Subtype\s*/Image[^>]*?)>>\s*stream\r?\n", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex ImageObject();
 
-    [GeneratedRegex(@"/Length (\d+)")]
+    [GeneratedRegex(@"/Length (?<1>\d+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex Length();
 
-    [GeneratedRegex(@"/Width (\d+)")]
+    [GeneratedRegex(@"/Width (?<1>\d+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex Width();
 
-    [GeneratedRegex(@"/Height (\d+)")]
+    [GeneratedRegex(@"/Height (?<1>\d+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex Height();
 
     // The image XObjects in a PDF, with their stream contents inflated.
@@ -34,9 +34,9 @@ public partial class ImageResolutionCapTests
         foreach (Match m in ImageObject().Matches(text))
         {
             string dict = m.Groups[1].Value;
-            int length = int.Parse(Length().Match(dict).Groups[1].Value);
-            int width = int.Parse(Width().Match(dict).Groups[1].Value);
-            int height = int.Parse(Height().Match(dict).Groups[1].Value);
+            int length = int.Parse(Length().Match(dict).Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+            int width = int.Parse(Width().Match(dict).Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+            int height = int.Parse(Height().Match(dict).Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
             using var inflated = new MemoryStream();
             using (var z = new ZLibStream(new MemoryStream(pdf, m.Index + m.Length, length), CompressionMode.Decompress))
                 z.CopyTo(inflated);
@@ -131,13 +131,13 @@ public partial class ImageResolutionCapTests
     }
 
     [Fact]
-    public void TheSyncAndAsyncPaths_EmbedIdenticalPixels()
+    public async Task TheSyncAndAsyncPaths_EmbedIdenticalPixels()
     {
         using PdfDocument sync = DocumentWith(288, Png(1200, 600, 75));
         using PdfDocument async = DocumentWith(288, Png(1200, 600, 75));
 
         var a = EmbeddedImages(sync.GenerateBytes());
-        var b = EmbeddedImages(async.GenerateBytesAsync().GetAwaiter().GetResult());
+        var b = EmbeddedImages(await async.GenerateBytesAsync());
 
         Assert.Equal(a.Count, b.Count);
         for (int i = 0; i < a.Count; i++)

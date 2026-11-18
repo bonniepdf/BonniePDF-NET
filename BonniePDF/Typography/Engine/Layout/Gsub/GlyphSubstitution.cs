@@ -29,7 +29,7 @@ namespace BonniePDF.Typography.Engine
         private readonly ShapingLimits limits;
         internal GlyphSubstitution(byte[] bytes, int glyphCount, byte[] gdef, ShapingLimits limits = null, ShapeOptions options = null)
         {
-            arabic = options != null && options.Script == "arab";
+            arabic = options != null && string.Equals(options.Script, "arab", StringComparison.Ordinal);
             charge = Tick;
             this.limits = limits ?? new ShapingLimits();
             this.glyphCount = glyphCount;
@@ -179,16 +179,16 @@ namespace BonniePDF.Typography.Engine
             int value = 1, ticks = 0;
             if (activeRule != null && !activeRule.Constant(out value, out ticks)) return -1;
             if (value == 0) return 1 + ticks;
-            int charge = 1 + ticks + header.Count;
+            int cost = 1 + ticks + header.Count;
             var plans = Contexts(index);
             if (plans != null)
                 foreach (var plan in plans)
                 {
                     if (plan == null) continue;
-                    if (plan.Chained) charge += 1 + (plan.Backtrack.Length < 2 ? plan.Backtrack.Length : 0);
+                    if (plan.Chained) cost += 1 + (plan.Backtrack.Length < 2 ? plan.Backtrack.Length : 0);
                 }
             if (plans != null) inputCharge = 1 + ticks;
-            return charge;
+            return cost;
         }
 
         // What the backtrack tests of a context with a longer backtrack charge for a rejected
@@ -644,9 +644,9 @@ namespace BonniePDF.Typography.Engine
             int relativeSet = data.U16(header + 2 + setIndex * 2);
             if (relativeSet == 0)
                 return 0;
-            int set = checked(sub + relativeSet), rules = data.U16(set);
-            data.Check(set + 2, rules * 2);
-            for (int ruleIndex = 0; ruleIndex < rules; ruleIndex++)
+            int set = checked(sub + relativeSet), ruleCount = data.U16(set);
+            data.Check(set + 2, ruleCount * 2);
+            for (int ruleIndex = 0; ruleIndex < ruleCount; ruleIndex++)
             {
                 Tick();
                 int p = data.Relative16(set, set + 2 + ruleIndex * 2), mode = format == 1 ? 0 : 1;

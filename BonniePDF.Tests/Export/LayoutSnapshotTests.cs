@@ -28,7 +28,7 @@ public partial class LayoutSnapshotTests
         Assert.Equal(expected, LayoutRecorder.PaintOf(element, type)?.Background);
     }
 
-    [GeneratedRegex(@"/ID \[[^\]]*\]|/(?:CreationDate|ModDate) \([^)]*\)")]
+    [GeneratedRegex(@"/ID \[[^\]]*\]|/(?:CreationDate|ModDate) \([^)]*\)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex TrailerId();
 
     private static IEnumerable<LayoutNode> Walk(LayoutNode node)
@@ -55,7 +55,8 @@ public partial class LayoutSnapshotTests
         doc.Add(new TextBlock { Text = "First", FontSize = 14 });
         doc.Add(new TextBlock { Text = "Second", FontSize = 11 });
 
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
 
         Assert.NotNull(snapshot);
         Assert.Equal(LayoutSnapshotSchema.Version, snapshot.Version);
@@ -76,10 +77,11 @@ public partial class LayoutSnapshotTests
         var doc = new BonniePDF.Document();
         doc.Add(new TextBlock { Text = "Measure me", FontSize = 14 });
 
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
         LayoutSnapshot.PageSize size = snapshot.Pages[0];
 
-        LayoutNode text = Walk(snapshot.Root).First(n => n.Type == "TextBlock");
+        LayoutNode text = Walk(snapshot.Root).First(n => string.Equals(n.Type, "TextBlock", StringComparison.Ordinal));
         Assert.NotEmpty(text.Rects);
         LayoutRect r = text.Rects[0];
         Assert.Equal(0, r.Page);
@@ -98,8 +100,9 @@ public partial class LayoutSnapshotTests
         stack.Add(new TextBlock { Text = "B", FontSize = 12 });
         doc.Add(stack);
 
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
-        LayoutNode vstack = Walk(snapshot.Root).First(n => n.Type == "VerticalStack");
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
+        LayoutNode vstack = Walk(snapshot.Root).First(n => string.Equals(n.Type, "VerticalStack", StringComparison.Ordinal));
         Assert.Equal(new[] { "TextBlock", "TextBlock" }, vstack.Children.Select(c => c.Type).ToArray());
     }
 
@@ -113,8 +116,9 @@ public partial class LayoutSnapshotTests
         doc.Add(new TextBlock { Text = "Before", FontSize = 12 });
         doc.Add(new BonniePDF.Hyperlink("https://example.com", "Visit example"));
 
-        LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
-        LayoutNode link = Walk(snapshot.Root).First(n => n.Type == "Hyperlink");
+        LayoutSnapshot? snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(snapshot);
+        LayoutNode link = Walk(snapshot.Root).First(n => string.Equals(n.Type, "Hyperlink", StringComparison.Ordinal));
         Assert.NotNull(link.A11y);
         Assert.Equal("Link", link.A11y!.Role);
         Assert.True(link.A11y.Tagged);
@@ -130,6 +134,7 @@ public partial class LayoutSnapshotTests
 
         SvgDocumentExport export = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true });
         Assert.True(export.Pages.Count > 1);
+        Assert.NotNull(export.Snapshot);
         Assert.Equal(export.Pages.Count, export.Snapshot.Pages.Count);
 
         LayoutNode page = export.Snapshot.Root.Children[0];
@@ -153,12 +158,14 @@ public partial class LayoutSnapshotTests
             return d;
         }
 
-        LayoutSnapshot a = Build().GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
-        LayoutSnapshot b = Build().GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        LayoutSnapshot? a = Build().GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(a);
+        LayoutSnapshot? b = Build().GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot;
+        Assert.NotNull(b);
 
         var idsA = Walk(a.Root).Select(n => n.Id).ToList();
         var idsB = Walk(b.Root).Select(n => n.Id).ToList();
-        Assert.Equal(idsA.Count, idsA.Distinct().Count()); // unique
+        Assert.Equal(idsA.Count, idsA.Distinct(StringComparer.Ordinal).Count()); // unique
         Assert.Equal(idsA, idsB);                          // deterministic
     }
 
@@ -194,7 +201,7 @@ public partial class LayoutSnapshotTests
 
         LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot!;
 
-        List<LayoutNode> nodes = Walk(snapshot.Root).Where(n => n.Type == "TextBlock").ToList();
+        List<LayoutNode> nodes = Walk(snapshot.Root).Where(n => string.Equals(n.Type, "TextBlock", StringComparison.Ordinal)).ToList();
         Assert.Equal("src:test-title", nodes[0].SourceId);
         Assert.Null(nodes[1].SourceId);
     }
@@ -207,7 +214,7 @@ public partial class LayoutSnapshotTests
 
         LayoutSnapshot snapshot = doc.GenerateSvgDocument(new SvgPageExportOptions { CaptureLayout = true }).Snapshot!;
 
-        Assert.Null(Walk(snapshot.Root).Single(n => n.Type == "TextBlock").SourceId);
+        Assert.Null(Walk(snapshot.Root).Single(n => string.Equals(n.Type, "TextBlock", StringComparison.Ordinal)).SourceId);
     }
 
     [Fact]

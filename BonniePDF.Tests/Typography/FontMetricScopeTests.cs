@@ -50,11 +50,11 @@ public class FontMetricScopeTests
 
         Task<float> sansWidth = Task.Run(() => MeasureInScope(sans, ready));
         Task<float> serifWidth = Task.Run(() => MeasureInScope(serif, ready));
-        await Task.WhenAll(sansWidth, serifWidth);
+        float[] widths = await Task.WhenAll(sansWidth, serifWidth);
 
-        Assert.Equal(FontMetrics.GetKernedStringWidth(ProbeText, sans, 11), sansWidth.Result, 3);
-        Assert.Equal(FontMetrics.GetKernedStringWidth(ProbeText, serif, 11), serifWidth.Result, 3);
-        Assert.NotEqual(sansWidth.Result, serifWidth.Result);
+        Assert.Equal(FontMetrics.GetKernedStringWidth(ProbeText, sans, 11), widths[0], 3);
+        Assert.Equal(FontMetrics.GetKernedStringWidth(ProbeText, serif, 11), widths[1], 3);
+        Assert.NotEqual(widths[0], widths[1]);
     }
 
     [Fact]

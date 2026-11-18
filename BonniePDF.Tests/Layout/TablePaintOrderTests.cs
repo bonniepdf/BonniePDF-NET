@@ -16,13 +16,13 @@ public partial class TablePaintOrderTests
 
     private sealed record Page(List<Rect> Fills, List<Rect> Strokes);
 
-    [GeneratedRegex(@"^([\d.]+) w$")]
+    [GeneratedRegex(@"^(?<1>[\d.]+) w$", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex WidthLine();
 
-    [GeneratedRegex(@"^([\d.-]+) ([\d.-]+) ([\d.-]+) ([\d.-]+) re f$")]
+    [GeneratedRegex(@"^(?<1>[\d.-]+) (?<2>[\d.-]+) (?<3>[\d.-]+) (?<4>[\d.-]+) re f$", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex FillLine();
 
-    [GeneratedRegex(@"^([\d.-]+) ([\d.-]+) m ([\d.-]+) ([\d.-]+) l S$")]
+    [GeneratedRegex(@"^(?<1>[\d.-]+) (?<2>[\d.-]+) m (?<3>[\d.-]+) (?<4>[\d.-]+) l S$", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SegmentLine();
 
     private static float F(string s) => float.Parse(s, CultureInfo.InvariantCulture);

@@ -13,7 +13,10 @@ internal static class ChartBars
         if (!double.IsFinite(radius) || radius < 0) throw new ArgumentOutOfRangeException(nameof(style), "CornerRadius must be finite and nonnegative.");
         if (g is not null && (g.StartColor.ScA != 1 || g.EndColor.ScA != 1 || g.Scope is not "bar" and not "plot")) throw new ArgumentException("Bar gradients require opaque colours and scope bar or plot.", nameof(style));
         if (!theme.StyledGeometry && radius == 0 && g is null) { sink.FillRect(x, y, w, h, color); return; }
-        if (!float.IsFinite(x) || !float.IsFinite(y) || !float.IsFinite(w) || !float.IsFinite(h)) throw new ArgumentException("Bar geometry must be finite.");
+        if (!float.IsFinite(x)) throw new ArgumentException("Bar geometry must be finite.", nameof(x));
+        if (!float.IsFinite(y)) throw new ArgumentException("Bar geometry must be finite.", nameof(y));
+        if (!float.IsFinite(w)) throw new ArgumentException("Bar geometry must be finite.", nameof(w));
+        if (!float.IsFinite(h)) throw new ArgumentException("Bar geometry must be finite.", nameof(h));
         if (w == 0 || h == 0) return;
         double x0 = Math.Min(x, x + w), x1 = Math.Max(x, x + w), y0 = Math.Min(y, y + h), y1 = Math.Max(y, y + h);
         double r = Math.Min(radius, Math.Min((x1 - x0) / 2, (y1 - y0) / 2)), k = 0.5522847498307936;
@@ -33,9 +36,10 @@ internal static class ChartBars
         ChartResolvedGradient? gradient = null;
         if (g is not null)
         {
-            double px = g.Scope == "plot" ? plotX : x0, py = g.Scope == "plot" ? plotY : y0, pw = g.Scope == "plot" ? plotW : x1 - x0, ph = g.Scope == "plot" ? plotH : y1 - y0;
+            bool plotScope = string.Equals(g.Scope, "plot", StringComparison.Ordinal);
+            double px = plotScope ? plotX : x0, py = plotScope ? plotY : y0, pw = plotScope ? plotW : x1 - x0, ph = plotScope ? plotH : y1 - y0;
             double sx = horizontal ? px + pw : px, sy = py, ex = px, ey = horizontal ? py : py + ph;
-            if (g.Scope == "bar" && ((horizontal && w < 0) || (!horizontal && h < 0))) { (sx, ex) = (ex, sx); (sy, ey) = (ey, sy); }
+            if (string.Equals(g.Scope, "bar", StringComparison.Ordinal) && ((horizontal && w < 0) || (!horizontal && h < 0))) { (sx, ex) = (ex, sx); (sy, ey) = (ey, sy); }
             gradient = new(sx, sy, ex, ey, g.StartColor, g.EndColor);
         }
         ChartVector.Fill(sink, new ChartPathPlan(commands, color, gradient));

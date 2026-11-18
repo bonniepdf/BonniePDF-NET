@@ -84,8 +84,8 @@ public static class ExpenseReportExample
         [
             .. Categories.Select(category => (
                 category,
-                rows.Count(r => r.Line.Category == category),
-                rows.Where(r => r.Line.Category == category).Sum(r => r.Pence))),
+                rows.Count(r => string.Equals(r.Line.Category, category, StringComparison.Ordinal)),
+                rows.Where(r => string.Equals(r.Line.Category, category, StringComparison.Ordinal)).Sum(r => r.Pence))),
         ];
         if (byCategory.Sum(c => c.Pence) != total)
         {
@@ -164,7 +164,7 @@ public static class ExpenseReportExample
                 Td(line.Description),
                 Td(line.Category, color: Muted),
                 Td(line.Receipt ? "Yes" : "No", bold: !line.Receipt, color: line.Receipt ? Positive : Negative),
-                Td(line.Currency == "GBP" ? "—" : $"{line.Currency} {Amount(line.Minor)}", color: Muted, align: TextAlignment.Right),
+                Td(string.Equals(line.Currency, "GBP", StringComparison.Ordinal) ? "—" : $"{line.Currency} {Amount(line.Minor)}", color: Muted, align: TextAlignment.Right),
                 Td(Money(row.Pence), bold: true, align: TextAlignment.Right),
                 Td(row.Flag == string.Empty ? "OK" : row.Flag, bold: row.Flag != string.Empty, color: row.Flag == string.Empty ? Muted : Negative));
         }
@@ -242,13 +242,12 @@ public static class ExpenseReportExample
     }
 
     /// <summary>The line in pence. Euros convert at the claim rate, rounding half up, in whole numbers.</summary>
-    private static int ToPence(ExpenseLine line) =>
-        line.Currency == "GBP" ? line.Minor : (line.Minor * EurRate + 5_000) / 10_000;
+    private static int ToPence(ExpenseLine line) => string.Equals(line.Currency, "GBP", StringComparison.Ordinal) ? line.Minor : (line.Minor * EurRate + 5_000) / 10_000;
 
     /// <summary>Empty when the line is within policy; otherwise the reason it needs a second look.</summary>
     private static string PolicyFlag(ExpenseLine line, int pence)
     {
-        if (line.Category == "Meals" && pence > MealLimit)
+        if (string.Equals(line.Category, "Meals", StringComparison.Ordinal) && pence > MealLimit)
         {
             return "Over meal limit";
         }

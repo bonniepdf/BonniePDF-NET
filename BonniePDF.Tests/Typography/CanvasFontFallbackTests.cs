@@ -20,10 +20,10 @@ public sealed partial class CanvasFontFallbackTests
         document.Fonts.Add(File.ReadAllBytes(TestFonts.SansRegularPath));
         draw(document, primary);
         string pdf = Encoding.Latin1.GetString(document.GenerateBytes());
-        return BaseFont().Matches(pdf).Select(m => m.Groups[1].Value).Distinct().Order(StringComparer.Ordinal).ToArray();
+        return BaseFont().Matches(pdf).Select(m => m.Groups[1].Value).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
     }
 
-    [GeneratedRegex(@"/BaseFont /[A-Z]{6}\+([^\s/]+)")]
+    [GeneratedRegex(@"/BaseFont /[A-Z]{6}\+(?<1>[^\s/]+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex BaseFont();
 
     [Fact]

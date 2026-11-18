@@ -33,7 +33,7 @@ public class VeraPdfStageOneCloseoutTests
 
     private static async Task ValidateAsync(BonniePDF.Document doc, string filename)
     {
-        if (Environment.GetEnvironmentVariable("VERAPDF") != "1")
+        if (!string.Equals(Environment.GetEnvironmentVariable("VERAPDF"), "1", StringComparison.Ordinal))
         {
             // xUnit 2.x has no Assert.Skip - treat unset as a no-op so
             // day-to-day `dotnet test` runs stay fast and offline.
@@ -71,7 +71,7 @@ public class VeraPdfStageOneCloseoutTests
 
         HttpResponseMessage response = await http.PostAsync($"{VeraPdfBaseUrl}/validate/ua1", content).ConfigureAwait(false);
         Assert.True(response.IsSuccessStatusCode,
-            $"VeraPDF /validate/ua1 returned {response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
+            $"VeraPDF /validate/ua1 returned {response.StatusCode}: {await response.Content.ReadAsStringAsync().ConfigureAwait(true)}");
 
         string json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         ValidationVerdict verdict = ParseValidationVerdict(json);
@@ -111,7 +111,7 @@ public class VeraPdfStageOneCloseoutTests
                         if (!string.Equals(status.GetString(), "FAILED", StringComparison.OrdinalIgnoreCase)) continue;
 
                         string clause = rule.TryGetProperty("clause", out JsonElement c) ? c.GetString() ?? "" : "";
-                        string testNumber = rule.TryGetProperty("testNumber", out JsonElement t) ? t.GetInt32().ToString() : "";
+                        string testNumber = rule.TryGetProperty("testNumber", out JsonElement t) ? t.GetInt32().ToString(System.Globalization.CultureInfo.InvariantCulture) : "";
                         string description = rule.TryGetProperty("description", out JsonElement d) ? d.GetString() ?? "" : "";
                         failures.Add($"  [{clause}.{testNumber}] {description}");
                     }

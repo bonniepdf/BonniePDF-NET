@@ -12,7 +12,7 @@ namespace BonniePDF.Tests.Layout;
 /// </summary>
 public partial class AmbientTextAlignmentTests
 {
-    [GeneratedRegex(@"1 0 0 1 ([\d.]+) [\d.]+ Tm[\s\S]{0,80}?\((.*?)\) Tj")]
+    [GeneratedRegex(@"1 0 0 1 (?<1>[\d.]+) [\d.]+ Tm[\s\S]{0,80}?\((?<2>.*?)\) Tj", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex TextRun();
 
     private static readonly string LongTitle =

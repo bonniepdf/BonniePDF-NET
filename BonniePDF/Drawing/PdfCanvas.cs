@@ -781,7 +781,7 @@ internal class PdfCanvas : ICanvas
             var run = prepared.Run;
             if(prepared.Text.Length==0) continue;
             var font = run.EmbeddedFont;
-            var glyphs = prepared.Glyphs!;
+            var glyphs = prepared.Glyphs;
             // The codes are written into a buffer the canvas keeps; only the first glyphs.Count are read.
             ushort[]? codes = null;
             if (run.CanTrackPreparedGlyphs && run.Tracker is not null && font is not null)
@@ -812,6 +812,8 @@ internal class PdfCanvas : ICanvas
                 _stream.Append(") Tj\n");
                 continue;
             }
+            // An embedded-font run is always prepared with its shaped glyphs.
+            if (glyphs is null) throw new InvalidOperationException("An embedded-font text run has no prepared glyphs.");
 
             bool colourFont = font.HasColour && EmojiRenderingResolver?.Invoke() == EmojiRendering.Colour;
             if (font.HasColour && !font.HasOutlines && !colourFont) throw new NotSupportedException("The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.");
@@ -884,7 +886,7 @@ internal class PdfCanvas : ICanvas
                 string source = prepared.Text.Substring(glyphs.Cluster(glyph), glyphs.SourceLength(glyph));
                 if (font.HasColour) ColourGlyphPainter.Draw(this, font, glyphs, glyph, source, (float)cursor, baseline, size, colour);
                 cursor += (double)glyphs.AdvanceX(glyph) * size / font.UnitsPerEm + _letterSpacing;
-                if (source == " ") cursor += wordSpacing ?? _wordSpacing;
+                if (string.Equals(source, " ", StringComparison.Ordinal)) cursor += wordSpacing ?? _wordSpacing;
             }
         }
     }

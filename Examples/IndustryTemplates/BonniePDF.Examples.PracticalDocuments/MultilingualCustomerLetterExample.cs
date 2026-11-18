@@ -136,7 +136,7 @@ public static class MultilingualCustomerLetterExample
         { Metadata = new DocumentMetadata { Title = "Multilingual customer letter" } };
 
         // Each font is added once, however many letters use it.
-        var faces = new Dictionary<string, DocumentFontFace>();
+        var faces = new Dictionary<string, DocumentFontFace>(StringComparer.Ordinal);
         for (int index = 0; index < Letters.Length; index++)
         {
             Letter letter = Letters[index];
@@ -194,7 +194,7 @@ public static class MultilingualCustomerLetterExample
             heading.Add(Body(letter.Address));
             var letterCulture = (CultureInfo)CultureInfo.GetCultureInfo(letter.Locale).Clone();
             letterCulture.DateTimeFormat.Calendar = new GregorianCalendar();
-            string datePattern = letter.Locale == "he-IL" ? "d 'ב'MMMM yyyy" : "d MMMM yyyy";
+            string datePattern = string.Equals(letter.Locale, "he-IL", StringComparison.Ordinal) ? "d 'ב'MMMM yyyy" : "d MMMM yyyy";
             heading.Add(Body(day.ToString(datePattern, letterCulture), color: ColorPalette.Slate[500], align: TextAlignment.End));
 
             VerticalStack content = new()

@@ -268,7 +268,7 @@ public static class UkDegreeTranscriptExample
         bands.AddHeader(Th("Classification", TextAlignment.Left), Th("Average", TextAlignment.Right));
         foreach (var (name, range) in Bands)
         {
-            bool awarded = name == Award;
+            bool awarded = string.Equals(name, Award, StringComparison.Ordinal);
             string font = awarded ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
             Color ink = awarded ? Navy : Ink;
             TableRow row = new()

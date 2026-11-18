@@ -110,18 +110,18 @@ public sealed partial class RunningTotalTests
         Assert.Contains("RunningTotalColumn", error.ToString());
     }
 
-    [GeneratedRegex(">([^<]*)<")]
+    [GeneratedRegex(">(?<1>[^<]*)<", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex ElementText();
 
-    [GeneratedRegex(@"Line (\d+)")]
+    [GeneratedRegex(@"Line (?<1>\d+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex LineLabel();
 
-    [GeneratedRegex(@"/S /TR\b")]
+    [GeneratedRegex(@"/S /TR\b", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex RowTag();
 
-    [GeneratedRegex(@"/Artifact\b")]
+    [GeneratedRegex(@"/Artifact\b", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex ArtifactTag();
 
-    [GeneratedRegex("<text[^>]*>Carried forward<")]
+    [GeneratedRegex("<text[^>]*>Carried forward<", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex CarriedForwardLabel();
 }

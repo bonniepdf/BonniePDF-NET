@@ -99,12 +99,12 @@ public class ChartTaggingTests
             {
                 taggedDepth++;
             }
-            else if (line == "/Artifact BMC")
+            else if (string.Equals(line, "/Artifact BMC", StringComparison.Ordinal))
             {
                 Assert.True(taggedDepth == 0,
                     "An /Artifact region was opened inside tagged content, which PDF/UA-1 7.1 forbids.");
             }
-            else if (line == "EMC" && taggedDepth > 0)
+            else if (string.Equals(line, "EMC", StringComparison.Ordinal) && taggedDepth > 0)
             {
                 taggedDepth--;
             }

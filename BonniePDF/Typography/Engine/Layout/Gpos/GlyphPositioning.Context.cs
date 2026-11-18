@@ -118,9 +118,9 @@ namespace BonniePDF.Typography.Engine
             int relativeSet = data.U16(header + 2 + setIndex * 2);
             if (relativeSet == 0)
                 return 0;
-            int set = checked(sub + relativeSet), rules = data.U16(set);
-            data.Check(set + 2, rules * 2);
-            for (int ruleIndex = 0; ruleIndex < rules; ruleIndex++)
+            int set = checked(sub + relativeSet), ruleCount = data.U16(set);
+            data.Check(set + 2, ruleCount * 2);
+            for (int ruleIndex = 0; ruleIndex < ruleCount; ruleIndex++)
             {
                 Tick();
                 int p = Offset(set, set + 2 + ruleIndex * 2), mode = format == 1 ? 0 : 1;
