@@ -97,7 +97,7 @@ public static class DeliveryNoteExample
         doc.Add(Cell(
             "This is not an invoice. No payment is due against this document.",
             color: Muted,
-            marginBottom: 14f));
+            marginBottom: 4f));
 
         doc.Add(WeightedRow(
             [
