@@ -10,7 +10,7 @@
     <RootNamespace>BonniePDF</RootNamespace>
     <AssemblyName>BonniePDF</AssemblyName>
     <Description>Zero-dependency PDF generation engine for .NET and C#. Build complex, auto-paginating documents from code with a Fluent API or object model: tables, vector charts, SVG import, barcodes, Factur-X/ZUGFeRD e-invoices, tagged PDF/UA-1 and PDF/UA-2 accessibility, and PDF/A-1 through PDF/A-4 archival output.</Description>
-    <Version>2026.11.13</Version>
+    <Version>2026.11.21</Version>
     <Authors>CodeFocus Limited</Authors>
     <Copyright>Copyright © 2026 CodeFocus Limited</Copyright>
     <!-- Custom source-available Community License for eligible use; paid use is
