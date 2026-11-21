@@ -29,6 +29,7 @@
     <PackageTags>pdf;pdf-generation;pdf-a;pdf-ua;accessible-pdf;tagged-pdf;wcag;invoice;factur-x;zugferd;charting;report;tables;barcode;qrcode;svg;csharp;dotnet</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
+    <PackageReleaseNotes>Release notes: https://github.com/bonniepdf/BonniePDF-NET/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Deliberate, individually-justified suppressions only (audited 2026-07 - see comments below).

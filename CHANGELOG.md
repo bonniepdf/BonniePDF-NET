@@ -7,6 +7,10 @@ at the same version are the same library.
 
 ## Unreleased
 
+### Package
+
+- The NuGet listing links to these release notes.
+
 ## 2026.11.21
 
 Status: Released
