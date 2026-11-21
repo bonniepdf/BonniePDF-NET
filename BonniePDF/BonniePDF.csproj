@@ -9,7 +9,7 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>BonniePDF</RootNamespace>
     <AssemblyName>BonniePDF</AssemblyName>
-    <Description>BonniePDF is a high-performance, zero-dependency PDF generation engine for .NET. Engineered for speed and compliance, it features an intuitive Fluent API for building complex documents, reports, integrated charting, and native PDF/A support.</Description>
+    <Description>Zero-dependency PDF generation engine for .NET and C#. Build complex, auto-paginating documents from code with a Fluent API or object model: tables, vector charts, SVG import, barcodes, Factur-X/ZUGFeRD e-invoices, tagged PDF/UA-1 and PDF/UA-2 accessibility, and PDF/A-1 through PDF/A-4 archival output.</Description>
     <Version>2026.11.13</Version>
     <Authors>CodeFocus Limited</Authors>
     <Copyright>Copyright © 2026 CodeFocus Limited</Copyright>
@@ -26,8 +26,9 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryUrl>https://github.com/bonniepdf/BonniePDF-NET</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>pdf;generation;charting;report</PackageTags>
+    <PackageTags>pdf;pdf-generation;pdf-a;pdf-ua;accessible-pdf;tagged-pdf;wcag;invoice;factur-x;zugferd;charting;report;tables;barcode;qrcode;svg;csharp;dotnet</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Deliberate, individually-justified suppressions only (audited 2026-07 - see comments below).
@@ -57,7 +58,7 @@
     <!-- Packing on every dev build is slow and noisy; run `dotnet pack` explicitly (CI does this on release). -->
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>BonniePDF</Title>
-    <PackageProjectUrl>https://bonniepdf.dev</PackageProjectUrl>
+    <PackageProjectUrl>https://www.bonniepdf.dev</PackageProjectUrl>
     <!-- Symbol package (.snupkg) + deterministic, CI-verifiable builds so consumers can step into
          BonniePDF source from a debugger without a local checkout. -->
     <IncludeSymbols>true</IncludeSymbols>
@@ -102,6 +103,10 @@
     </None>
     <!-- Pack the README so it renders on the NuGet.org listing page. -->
     <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
