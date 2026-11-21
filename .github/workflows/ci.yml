@@ -5,13 +5,14 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
 
 permissions:
   contents: write
   actions: write
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && 'manual' || 'automatic' }}
   cancel-in-progress: true
 
 jobs:
@@ -19,9 +20,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Delete this workflow's prior runs before doing anything else, so the
-    # Actions tab only ever shows the current run. Best-effort: never block
-    # the real job if the cleanup API call hiccups.
+    # Keep runs from other triggers so manual CI cannot erase push checks.
+    # The cleanup is best effort.
     - name: Delete prior workflow runs
       continue-on-error: true
       env:
@@ -30,6 +30,7 @@ jobs:
         gh run list \
           --repo "${{ github.repository }}" \
           --workflow ci.yml \
+          --event "${{ github.event_name }}" \
           --json databaseId \
           --jq '.[].databaseId' \
           --limit 100 \
