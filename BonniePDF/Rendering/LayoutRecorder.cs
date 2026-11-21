@@ -89,7 +89,7 @@ public sealed class NodeAccessibility
 /// </summary>
 public sealed class SnapshotMeta
 {
-    /// <summary>The document's declared AccessibilityMode as an int (0 = None, 1 = PdfUa1).</summary>
+    /// <summary>The document's declared AccessibilityMode as an int (0 = None, 1 = PdfUa1, 2 = PdfUa2).</summary>
     public int AccessibilityMode { get; init; }
     /// <summary>The document's declared PDF/A conformance name (e.g. "None", "PdfA2b").</summary>
     public string Conformance { get; init; } = "None";

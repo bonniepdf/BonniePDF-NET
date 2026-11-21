@@ -41,18 +41,25 @@ public class DocumentSettingsAccessibilityTests
     public void AccessibilityAndPdfAAreOrthogonal()
     {
         // ZUGFeRD-style: PDF/A on, accessibility off.
-        var zugferdStyle = new DocumentSettings { PdfAEnabled = true, Accessibility = AccessibilityMode.None };
-        Assert.True(zugferdStyle.PdfAEnabled);
+        var zugferdStyle = new DocumentSettings { Conformance = PdfAConformance.PdfA3b, Accessibility = AccessibilityMode.None };
+        Assert.Equal(PdfAConformance.PdfA3b, zugferdStyle.Conformance);
         Assert.Equal(AccessibilityMode.None, zugferdStyle.Accessibility);
 
         // PDF/UA on, PDF/A off.
-        var uaOnly = new DocumentSettings { PdfAEnabled = false, Accessibility = AccessibilityMode.PdfUa1 };
-        Assert.False(uaOnly.PdfAEnabled);
+        var uaOnly = new DocumentSettings { Conformance = PdfAConformance.None, Accessibility = AccessibilityMode.PdfUa1 };
+        Assert.Equal(PdfAConformance.None, uaOnly.Conformance);
         Assert.Equal(AccessibilityMode.PdfUa1, uaOnly.Accessibility);
 
         // Both on (e.g. PDF/A-3a + PDF/UA-1).
-        var both = new DocumentSettings { PdfAEnabled = true, Accessibility = AccessibilityMode.PdfUa1 };
-        Assert.True(both.PdfAEnabled);
+        var both = new DocumentSettings { Conformance = PdfAConformance.PdfA3a, Accessibility = AccessibilityMode.PdfUa1 };
+        Assert.Equal(PdfAConformance.PdfA3a, both.Conformance);
         Assert.Equal(AccessibilityMode.PdfUa1, both.Accessibility);
+    }
+
+    [Fact]
+    public void ConformanceIsTheOnlyPdfASetting()
+    {
+        // The legacy PdfAEnabled alias was removed before first release.
+        Assert.Null(typeof(DocumentSettings).GetProperty("PdfAEnabled"));
     }
 }

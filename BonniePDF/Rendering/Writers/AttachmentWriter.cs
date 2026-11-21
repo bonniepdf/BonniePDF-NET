@@ -35,12 +35,28 @@ internal class AttachmentWriter
     }
 
     /// <summary>
+    /// The media type written for an attachment that names none. Set under
+    /// PDF/A, which requires every embedded file to state one (spec 04 §10.1);
+    /// null leaves <c>/Subtype</c> out.
+    /// </summary>
+    internal string? DefaultMediaType { get; init; }
+
+    /// <summary>
+    /// True under PDF/UA-2, which requires a <c>/Desc</c> on every embedded
+    /// file (ISO 14289-2 8.14.1): an attachment with no description is
+    /// described by its file name (spec 04 §10.1).
+    /// </summary>
+    internal bool DescribeByFileName { get; init; }
+
+    /// <summary>
     /// The result of writing a document's attachments: the object ID of the
     /// <c>/EmbeddedFiles</c> name-tree dictionary (referenced from the catalog
     /// as <c>/Names &lt;&lt; /EmbeddedFiles N 0 R &gt;&gt;</c>) and the filespec
-    /// object IDs for the catalog's <c>/AF</c> array.
+    /// object IDs for the catalog's <c>/AF</c> array. <c>DescribedByFileName</c>
+    /// lists, in file-name order, the attachments whose <c>/Desc</c> is their
+    /// file name (spec 04 §10.1), so the caller can warn about each.
     /// </summary>
-    internal readonly record struct Result(int NamesEmbeddedFilesId, IList<int> AssociatedFileIds);
+    internal readonly record struct Result(int NamesEmbeddedFilesId, IList<int> AssociatedFileIds, IList<string> DescribedByFileName);
 
     /// <summary>
     /// Writes every attachment and the enclosing name tree. Returns a
@@ -51,7 +67,7 @@ internal class AttachmentWriter
     {
         List<FileAttachment> ordered = OrderAndValidate(attachments);
         if (ordered.Count == 0)
-            return new Result(0, new List<int>());
+            return new Result(0, new List<int>(), new List<string>());
 
         List<int> afIds = new(ordered.Count);
         List<(string Name, int FilespecId)> nameEntries = new(ordered.Count);
@@ -59,10 +75,10 @@ internal class AttachmentWriter
         foreach (FileAttachment a in ordered)
         {
             int streamId = _writer!.GetNewId();
-            _writer!.WriteBinaryObject(streamId, BuildEmbeddedFileDict(a), a.Content);
+            _writer!.WriteBinaryObject(streamId, BuildEmbeddedFileDict(a, DefaultMediaType), a.Content);
 
             int filespecId = _writer!.GetNewId();
-            _writer!.WriteObject(filespecId, BuildFilespecDict(a, streamId));
+            _writer!.WriteObject(filespecId, BuildFilespecDict(a, streamId, DescribeByFileName));
 
             afIds.Add(filespecId);
             nameEntries.Add((a.FileName, filespecId));
@@ -71,7 +87,7 @@ internal class AttachmentWriter
         int namesId = _writer!.GetNewId();
         _writer!.WriteObject(namesId, BuildNameTreeDict(nameEntries));
 
-        return new Result(namesId, afIds);
+        return new Result(namesId, afIds, DescribedByFileNameOf(ordered));
     }
 
     /// <summary>Asynchronous sibling of <see cref="WriteAttachments"/>.</summary>
@@ -80,7 +96,7 @@ internal class AttachmentWriter
     {
         List<FileAttachment> ordered = OrderAndValidate(attachments);
         if (ordered.Count == 0)
-            return new Result(0, new List<int>());
+            return new Result(0, new List<int>(), new List<string>());
 
         List<int> afIds = new(ordered.Count);
         List<(string Name, int FilespecId)> nameEntries = new(ordered.Count);
@@ -88,11 +104,11 @@ internal class AttachmentWriter
         foreach (FileAttachment a in ordered)
         {
             int streamId = _asyncWriter!.GetNewId();
-            await _asyncWriter!.WriteBinaryObjectAsync(streamId, BuildEmbeddedFileDict(a), a.Content, a.Content.Length, cancellationToken)
+            await _asyncWriter!.WriteBinaryObjectAsync(streamId, BuildEmbeddedFileDict(a, DefaultMediaType), a.Content, a.Content.Length, cancellationToken)
                 .ConfigureAwait(false);
 
             int filespecId = _asyncWriter!.GetNewId();
-            await _asyncWriter!.WriteObjectAsync(filespecId, BuildFilespecDict(a, streamId), null, cancellationToken)
+            await _asyncWriter!.WriteObjectAsync(filespecId, BuildFilespecDict(a, streamId, DescribeByFileName), null, cancellationToken)
                 .ConfigureAwait(false);
 
             afIds.Add(filespecId);
@@ -103,8 +119,13 @@ internal class AttachmentWriter
         await _asyncWriter!.WriteObjectAsync(namesId, BuildNameTreeDict(nameEntries), null, cancellationToken)
             .ConfigureAwait(false);
 
-        return new Result(namesId, afIds);
+        return new Result(namesId, afIds, DescribedByFileNameOf(ordered));
     }
+
+    /// <summary>The file names, in write order, of the attachments described by their file name.</summary>
+    private List<string> DescribedByFileNameOf(List<FileAttachment> ordered) => DescribeByFileName
+        ? ordered.Where(a => string.IsNullOrEmpty(a.Description)).Select(a => a.FileName).ToList()
+        : new List<string>();
 
     /// <summary>
     /// Drops attachments with no name or empty content, then orders the
@@ -123,7 +144,7 @@ internal class AttachmentWriter
             .ToList();
     }
 
-    private static Dictionary<string, string> BuildEmbeddedFileDict(FileAttachment a)
+    private static Dictionary<string, string> BuildEmbeddedFileDict(FileAttachment a, string? defaultMediaType)
     {
         StringBuilder paramsDict = new();
         paramsDict.Append("<< /Size ").Append(a.Content.Length.ToString(CultureInfo.InvariantCulture));
@@ -141,13 +162,14 @@ internal class AttachmentWriter
             [PdfKeys.EmbeddedFile.Parameters] = paramsDict.ToString(),
         };
 
-        if (!string.IsNullOrEmpty(a.MediaType))
-            dict[PdfKeys.Common.Subtype] = "/" + EncodeName(a.MediaType);
+        string? mediaType = string.IsNullOrEmpty(a.MediaType) ? defaultMediaType : a.MediaType;
+        if (!string.IsNullOrEmpty(mediaType))
+            dict[PdfKeys.Common.Subtype] = "/" + EncodeName(mediaType);
 
         return dict;
     }
 
-    private static Dictionary<string, string> BuildFilespecDict(FileAttachment a, int streamId)
+    private static Dictionary<string, string> BuildFilespecDict(FileAttachment a, int streamId, bool describeByFileName)
     {
         Dictionary<string, string> dict = new()
         {
@@ -158,8 +180,10 @@ internal class AttachmentWriter
             [PdfKeys.FileSpecification.AssociatedFileRelationship] = "/" + a.Relationship,
         };
 
-        if (!string.IsNullOrEmpty(a.Description))
-            dict[PdfKeys.FileSpecification.Description] = PdfSyntax.EncodeMetadataString(a.Description);
+        string? description = !string.IsNullOrEmpty(a.Description) ? a.Description
+            : describeByFileName ? a.FileName : null;
+        if (!string.IsNullOrEmpty(description))
+            dict[PdfKeys.FileSpecification.Description] = PdfSyntax.EncodeMetadataString(description);
 
         return dict;
     }

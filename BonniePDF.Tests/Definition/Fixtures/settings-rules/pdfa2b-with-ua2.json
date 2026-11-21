@@ -1,0 +1,26 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/pdfa2b-with-ua2",
+    "description": "PDF/UA-2 cannot be combined with PDF/A-2b, a PDF 1.7 format."
+  },
+  "_expect": {
+    "valid": false,
+    "rule": "ua2-excludes-pdfa1-3"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "conformance": "pdf/a-2b",
+    "accessibility": "pdf/ua-2"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

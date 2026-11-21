@@ -271,30 +271,17 @@ public class DocumentSettings
     public PdfAConformance Conformance { get; set; } = PdfAConformance.None;
 
     /// <summary>
-    /// Legacy boolean view of <see cref="Conformance"/>, not a separate PDF/A
-    /// setting. Reading it returns <c>true</c> whenever any PDF/A level is
-    /// selected. Writing it replaces the exact conformance level:
-    /// <c>true</c> selects <see cref="PdfAConformance.PdfA2b"/>, the modern
-    /// visual-reproducibility baseline, while <c>false</c> selects
-    /// <see cref="PdfAConformance.None"/>. Prefer <see cref="Conformance"/> in
-    /// new code when the precise PDF/A profile matters.
-    /// </summary>
-    public bool PdfAEnabled
-    {
-        get => Conformance != PdfAConformance.None;
-        set => Conformance = value ? PdfAConformance.PdfA2b : PdfAConformance.None;
-    }
-
-    /// <summary>
     /// Gets or sets the accessibility / tagged-PDF conformance mode.
     /// Default <see cref="AccessibilityMode.None"/> - the writer
     /// produces an untagged PDF and ignores all tagging machinery.
-    /// Set to <see cref="AccessibilityMode.PdfUa1"/> to opt the
-    /// document into PDF/UA-1 emission (structure tree, MCIDs, XMP
-    /// conformance claim, <c>/Lang</c>, <c>/MarkInfo</c>).
+    /// Set to <see cref="AccessibilityMode.PdfUa1"/> (PDF 1.7) or
+    /// <see cref="AccessibilityMode.PdfUa2"/> (PDF 2.0) to opt the document
+    /// into tagged output (structure tree, MCIDs, XMP conformance claim,
+    /// <c>/Lang</c>, <c>/MarkInfo</c>).
     ///
-    /// Orthogonal to <see cref="PdfAEnabled"/>: a document can be
-    /// PDF/A, PDF/UA, both, or neither.
+    /// Orthogonal to <see cref="Conformance"/>: a document can be
+    /// PDF/A, PDF/UA, both, or neither. PDF/UA-2 combines with
+    /// <see cref="PdfAConformance.PdfA4"/> only; PDF/UA-1 with PDF/A-1, -2 and -3.
     /// </summary>
     public AccessibilityMode Accessibility { get; set; } = AccessibilityMode.None;
 

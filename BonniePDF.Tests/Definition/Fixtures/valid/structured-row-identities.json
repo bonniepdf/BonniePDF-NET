@@ -1,0 +1,40 @@
+{
+  "_fixture": {
+    "id": "document-definition/valid/structured-row-identities",
+    "description": "Unique cell-content identities in a structured row are visited once."
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "Table",
+          "columns": [
+            1,
+            1
+          ],
+          "rows": [
+            {
+              "cells": [
+                {
+                  "type": "TextBlock",
+                  "id": "first-cell",
+                  "text": "First"
+                },
+                {
+                  "type": "TableCell",
+                  "content": {
+                    "type": "TextBlock",
+                    "id": "second-cell",
+                    "text": "Second"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

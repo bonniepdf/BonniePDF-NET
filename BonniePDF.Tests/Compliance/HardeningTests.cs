@@ -69,7 +69,7 @@ public class HardeningTests
             string pdf = Encoding.ASCII.GetString(Generate(doc =>
             {
                 doc.Settings.Version = PdfVersion.Pdf17;
-                doc.Settings.PdfAEnabled = true;
+                doc.Settings.Conformance = PdfAConformance.PdfA2b;
                 doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
                 doc.Settings.Language = "en-GB";
                 doc.Add(new Heading("Combined") { TocIdentifier = "c", Level = 1, FontSize = 18 });
@@ -342,13 +342,13 @@ public class HardeningTests
     [Fact]
     public void Fixture11c_PdfaidXmpBlockEmitted_WhenBundledFontsPresent()
     {
-        // With Liberation Sans auto-registered, pdfAEnabled = true should produce
+        // With Liberation Sans auto-registered, PDF/A-2b should produce
         // a genuine PDF/A-1b document (pdfaid:part and /OutputIntents present).
         // This is the Stage 2 deliverable: no longer lying about PDF/A.
         string pdf = Encoding.ASCII.GetString(Generate(doc =>
         {
             doc.Settings.Version = PdfVersion.Pdf17;
-            doc.Settings.PdfAEnabled = true;
+            doc.Settings.Conformance = PdfAConformance.PdfA2b;
             doc.Add(new TextBlock { Text = "Hello PDF/A", FontSize = 12 });
         }));
 

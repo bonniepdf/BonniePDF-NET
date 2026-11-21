@@ -145,7 +145,9 @@ internal class PdfDocumentSerializer
                     {
                         structParentKey = AnnotStructParentBase + globalAnnotIndex++;
                     }
-                    writer.WriteLinkAnnotation(annotId, link, pageIds, structParentKey);
+                    int? goTo = ReserveGoTo(taggingContext, writer.GetNewId, link);
+                    if (goTo.HasValue) writer.WriteObject(annotId, PdfObjectBuilders.LinkAnnotation(link, pageIds, structParentKey, goTo));
+                    else writer.WriteLinkAnnotation(annotId, link, pageIds, structParentKey);
                     annotIds.Add(annotId);
                     if (taggingContext != null) BindAnnotation(link, annotId, pageId, structParentKey, annotBindings);
                 }
@@ -183,7 +185,7 @@ internal class PdfDocumentSerializer
         // ISO 19005-4 clauses 6.1.3-4/5 prohibit the legacy trailer /Info
         // dictionary (except for a narrow PieceInfo/ModDate case). PDF/A-4
         // metadata lives in XMP, so omit /Info entirely for the effective claim.
-        if (claims.Conformance == PdfAConformance.PdfA4)
+        if (claims.Conformance.IsPdfA4Level())
         {
             documentInfoId = 0;
         }
@@ -209,12 +211,13 @@ internal class PdfDocumentSerializer
             metadataWriter.WriteXmpMetadata(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings, claims.Conformance, claims.PdfUa);
         }
 
-        // Write Bookmarks for PDF 1.7
-        if (_document.Settings.Version == PdfVersion.Pdf17 && _document.Settings.HasBookmarks)
+        // Write Bookmarks for PDF 1.7 and 2.0
+        if (_document.Settings.Version is PdfVersion.Pdf17 or PdfVersion.Pdf20 && _document.Settings.HasBookmarks)
         {
             NavigationWriter navWriter = new(writer);
             int outlinesStartId = writer.GetNewId();
-            catalogOptions.OutlinesId = navWriter.WriteOutlineTree(outlinesStartId, _document.Settings.Bookmarks, pageIds);
+            catalogOptions.OutlinesId = navWriter.WriteOutlineTree(outlinesStartId, _document.Settings.Bookmarks, pageIds,
+                OutlineGoTos(taggingContext, writer.GetNewId));
         }
 
         // Write PDF/A Output Intents (PDF/A-1/2/3 on PDF 1.7, PDF/A-4 on PDF 2.0)
@@ -236,9 +239,16 @@ internal class PdfDocumentSerializer
         if (taggingContext != null)
         {
             StructureTreeWriter structureTreeWriter = new(writer);
-            catalogOptions.StructTreeRootId = structureTreeWriter.Write(taggingContext.Tree, pageIds, annotBindings);
+            catalogOptions.StructTreeRootId = structureTreeWriter.Write(taggingContext.Tree, pageIds, annotBindings,
+                taggingContext.Pdf20 ? taggingContext : null);
             catalogOptions.Tagged = true;
             catalogOptions.Language = _document.Settings.Language;
+            if (taggingContext.Pdf20)
+            {
+                catalogOptions.OpenActionId = ReserveOpenAction(taggingContext, writer.GetNewId);
+                foreach ((int id, Dictionary<string, string> action) in GoToActions(taggingContext, pageIds, structureTreeWriter.ElementIds))
+                    writer.WriteObject(id, action);
+            }
         }
 
         // Write /PageLabels number tree if configured (PDF §12.4.2).
@@ -254,10 +264,15 @@ internal class PdfDocumentSerializer
         IList<FileAttachment>? attachmentsToWrite = ResolveAttachments();
         if (attachmentsToWrite != null)
         {
-            AttachmentWriter attachmentWriter = new(writer);
+            AttachmentWriter attachmentWriter = new(writer)
+            {
+                DefaultMediaType = AttachmentRules.DefaultMediaType(_document.Settings.Conformance),
+                DescribeByFileName = _document.Settings.Accessibility == AccessibilityMode.PdfUa2,
+            };
             AttachmentWriter.Result attachmentResult = attachmentWriter.WriteAttachments(attachmentsToWrite);
             catalogOptions.NamesEmbeddedFilesId = attachmentResult.NamesEmbeddedFilesId;
             catalogOptions.AssociatedFileIds = attachmentResult.AssociatedFileIds;
+            WarnDescribedByFileName(attachmentResult);
         }
 
         // Write Catalog
@@ -367,7 +382,11 @@ internal class PdfDocumentSerializer
                     {
                         structParentKey = AnnotStructParentBase + globalAnnotIndex++;
                     }
-                    await writer.WriteLinkAnnotationAsync(annotId, link, pageIds, structParentKey, cancellationToken).ConfigureAwait(false);
+                    int? goTo = ReserveGoTo(taggingContext, writer.GetNewId, link);
+                    if (goTo.HasValue)
+                        await writer.WriteObjectAsync(annotId, PdfObjectBuilders.LinkAnnotation(link, pageIds, structParentKey, goTo), null, cancellationToken).ConfigureAwait(false);
+                    else
+                        await writer.WriteLinkAnnotationAsync(annotId, link, pageIds, structParentKey, cancellationToken).ConfigureAwait(false);
                     annotIds.Add(annotId);
                     if (taggingContext != null) BindAnnotation(link, annotId, pageId, structParentKey, annotBindings);
                 }
@@ -398,7 +417,7 @@ internal class PdfDocumentSerializer
         MetadataWriter metadataWriter = new(writer);
         // PDF/A-4 metadata is carried by XMP; see the sync path for the
         // ISO 19005-4 /Info restriction.
-        if (claims.Conformance == PdfAConformance.PdfA4)
+        if (claims.Conformance.IsPdfA4Level())
         {
             documentInfoId = 0;
         }
@@ -424,12 +443,13 @@ internal class PdfDocumentSerializer
             await metadataWriter.WriteXmpMetadataAsync(catalogOptions.XmpMetadataId, _document.Metadata, _document.Settings, claims.Conformance, claims.PdfUa, cancellationToken).ConfigureAwait(false);
         }
 
-        // Write Bookmarks for PDF 1.7
-        if (_document.Settings.Version == PdfVersion.Pdf17 && _document.Settings.HasBookmarks)
+        // Write Bookmarks for PDF 1.7 and 2.0
+        if (_document.Settings.Version is PdfVersion.Pdf17 or PdfVersion.Pdf20 && _document.Settings.HasBookmarks)
         {
             NavigationWriter navWriter = new(writer);
             int outlinesStartId = writer.GetNewId();
-            catalogOptions.OutlinesId = await navWriter.WriteOutlineTreeAsync(outlinesStartId, _document.Settings.Bookmarks, pageIds, cancellationToken).ConfigureAwait(false);
+            catalogOptions.OutlinesId = await navWriter.WriteOutlineTreeAsync(outlinesStartId, _document.Settings.Bookmarks, pageIds,
+                OutlineGoTos(taggingContext, writer.GetNewId), cancellationToken).ConfigureAwait(false);
         }
 
         // Write PDF/A Output Intents (PDF/A-1/2/3 on PDF 1.7, PDF/A-4 on PDF 2.0)
@@ -451,10 +471,16 @@ internal class PdfDocumentSerializer
         if (taggingContext != null)
         {
             StructureTreeWriter structureTreeWriter = new(writer);
-            catalogOptions.StructTreeRootId = await structureTreeWriter.WriteAsync(taggingContext.Tree, pageIds, annotBindings, cancellationToken)
-                .ConfigureAwait(false);
+            catalogOptions.StructTreeRootId = await structureTreeWriter.WriteAsync(taggingContext.Tree, pageIds, annotBindings,
+                taggingContext.Pdf20 ? taggingContext : null, cancellationToken).ConfigureAwait(false);
             catalogOptions.Tagged = true;
             catalogOptions.Language = _document.Settings.Language;
+            if (taggingContext.Pdf20)
+            {
+                catalogOptions.OpenActionId = ReserveOpenAction(taggingContext, writer.GetNewId);
+                foreach ((int id, Dictionary<string, string> action) in GoToActions(taggingContext, pageIds, structureTreeWriter.ElementIds))
+                    await writer.WriteObjectAsync(id, action, null, cancellationToken).ConfigureAwait(false);
+            }
         }
 
         // Write /PageLabels number tree if configured (PDF §12.4.2).
@@ -470,11 +496,16 @@ internal class PdfDocumentSerializer
         IList<FileAttachment>? attachmentsToWrite = ResolveAttachments();
         if (attachmentsToWrite != null)
         {
-            AttachmentWriter attachmentWriter = new(writer);
+            AttachmentWriter attachmentWriter = new(writer)
+            {
+                DefaultMediaType = AttachmentRules.DefaultMediaType(_document.Settings.Conformance),
+                DescribeByFileName = _document.Settings.Accessibility == AccessibilityMode.PdfUa2,
+            };
             AttachmentWriter.Result attachmentResult = await attachmentWriter
                 .WriteAttachmentsAsync(attachmentsToWrite, cancellationToken).ConfigureAwait(false);
             catalogOptions.NamesEmbeddedFilesId = attachmentResult.NamesEmbeddedFilesId;
             catalogOptions.AssociatedFileIds = attachmentResult.AssociatedFileIds;
+            WarnDescribedByFileName(attachmentResult);
         }
 
         // Write Catalog
@@ -537,7 +568,7 @@ internal class PdfDocumentSerializer
         // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
         // independently of any PDF/A claim - substitute embedded Liberation for
         // the standard-14 references in tagged output too.
-        ctx.Resources.EmbedStandardFonts = _document.Settings.Accessibility == AccessibilityMode.PdfUa1;
+        ctx.Resources.EmbedStandardFonts = _document.Settings.Accessibility.IsTagged();
         return ctx;
     }
 
@@ -605,9 +636,56 @@ internal class PdfDocumentSerializer
         [PdfKeys.NumberTree.Numbers] = $"[ 0 << {BuildPageLabelEntry(label)} >> ]"
     };
 
+    /// <summary>
+    /// Under PDF/UA-2, reserves the go-to action an in-document link's annotation
+    /// points at; it is written once the structure tree has object numbers.
+    /// </summary>
+    private static int? ReserveGoTo(TaggingContext? tagging, Func<int> newId, Hyperlink link)
+    {
+        if (tagging is not { Pdf20: true } || !link.TargetPageIndex.HasValue) return null;
+        int id = newId();
+        tagging.PendingGoTos.Add(new PendingGoTo(id, link.TargetPageIndex.Value, link.DestinationAnchor, "/Fit"));
+        return id;
+    }
+
+    /// <summary>Under PDF/UA-2, reserves a go-to action for each bookmark; otherwise null, and bookmarks keep /Dest.</summary>
+    private static Func<int, int>? OutlineGoTos(TaggingContext? tagging, Func<int> newId)
+    {
+        if (tagging is not { Pdf20: true }) return null;
+        return pageIndex =>
+        {
+            int id = newId();
+            tagging.PendingGoTos.Add(new PendingGoTo(id, pageIndex, null, "/Fit"));
+            return id;
+        };
+    }
+
+    /// <summary>Reserves the PDF/UA-2 opening action: the first page, in the document's default view.</summary>
+    private int ReserveOpenAction(TaggingContext tagging, Func<int> newId)
+    {
+        int id = newId();
+        tagging.PendingGoTos.Add(new PendingGoTo(id, 0, null, PdfObjectBuilders.OpenActionView(_document.Settings)));
+        return id;
+    }
+
+    /// <summary>
+    /// The reserved go-to actions, in reservation order, each with a page destination
+    /// and a structure destination (spec 04 §3.4).
+    /// </summary>
+    private static IEnumerable<(int Id, Dictionary<string, string> Action)> GoToActions(
+        TaggingContext tagging, IList<int> pageIds, IReadOnlyDictionary<StructureElement, int> elementIds)
+    {
+        foreach (PendingGoTo pending in tagging.PendingGoTos)
+        {
+            int page = Math.Max(0, Math.Min(pending.PageIndex, pageIds.Count - 1));
+            StructureElement target = StructureTargets.Resolve(tagging, pending.Anchor, page);
+            yield return (pending.ActionId, PdfObjectBuilders.GoToAction(pageIds[page], elementIds[target], pending.View));
+        }
+    }
+
     private bool UsesEmbeddedStandardFonts() =>
         _document.Settings.Conformance != PdfAConformance.None ||
-        _document.Settings.Accessibility == AccessibilityMode.PdfUa1;
+        _document.Settings.Accessibility.IsTagged();
 
     /// <summary>
     /// Applies the embedded-file conformance guard (<see cref="AttachmentRules"/>)
@@ -632,6 +710,22 @@ internal class PdfDocumentSerializer
         }
 
         return attachments;
+    }
+
+    /// <summary>
+    /// Records one warning for each attachment whose PDF/UA-2 <c>/Desc</c> is its
+    /// file name (spec 04 §10.1): the name satisfies the rule without telling a
+    /// reader what the file is.
+    /// </summary>
+    private void WarnDescribedByFileName(AttachmentWriter.Result result)
+    {
+        foreach (string fileName in result.DescribedByFileName)
+        {
+            _diagnostics.AddWarning(DiagnosticCategory.Attachment,
+                $"Attachment '{fileName}' has no description; PDF/UA-2 requires one, so its file name was used. " +
+                "Give it a description that tells readers what the file contains.",
+                fileName);
+        }
     }
 
     /// <summary>
@@ -680,8 +774,9 @@ internal class PdfDocumentSerializer
     private TaggingContext? CreateTaggingContext()
     {
         if (_document.Settings.Accessibility == AccessibilityMode.None) return null;
-        if (_document.Settings.Version != PdfVersion.Pdf17) return null;
-        return new TaggingContext(new StructureTreeBuilder());
+        bool pdf20 = _document.Settings.Accessibility == AccessibilityMode.PdfUa2;
+        if (_document.Settings.Version != (pdf20 ? PdfVersion.Pdf20 : PdfVersion.Pdf17)) return null;
+        return new TaggingContext(new StructureTreeBuilder()) { Pdf20 = pdf20 };
     }
 
     /// <summary>

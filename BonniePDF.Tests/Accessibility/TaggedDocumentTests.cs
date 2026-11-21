@@ -43,7 +43,7 @@ public class TaggedDocumentTests
     [Fact]
     public void PdfAOnlyStillEmitsMarkInfoForBackCompat()
     {
-        // Long-standing behaviour: PdfAEnabled adds /MarkInfo. Make sure this
+        // Long-standing behaviour: PDF/A adds /MarkInfo. Make sure this
         // path is unchanged when tagging is off.
         string pdf = GeneratePdf(accessibility: AccessibilityMode.None, language: null, pdfA: true);
 
@@ -57,7 +57,7 @@ public class TaggedDocumentTests
         doc.Settings.Version = PdfVersion.Pdf17;
         doc.Settings.Accessibility = accessibility;
         doc.Settings.Language = language;
-        doc.Settings.PdfAEnabled = pdfA;
+        doc.Settings.Conformance = pdfA ? PdfAConformance.PdfA2b : PdfAConformance.None;
 
         using var ms = new MemoryStream();
         doc.Save(ms, true);

@@ -2,7 +2,7 @@ namespace BonniePDF;
 
 /// <summary>
 /// Accessibility / tagged-PDF conformance mode for the document.
-/// Independent of <see cref="DocumentSettings.PdfAEnabled"/>; both can be
+/// Independent of <see cref="DocumentSettings.Conformance"/>; both can be
 /// enabled together, separately, or not at all.
 ///
 /// When set to a non-<see cref="None"/> value, the writer emits a PDF
@@ -12,16 +12,11 @@ namespace BonniePDF;
 /// screen readers and assistive tech to interpret the document.
 ///
 /// <para>
-/// <b>Why no <c>PdfUa2</c> here yet:</b> PDF/UA-2 (ISO 14289-2:2024) is
-/// bound to PDF 2.0 output. A PDF 2.0 writer now exists
-/// (<see cref="PdfVersion.Pdf20"/>, used by the PDF/A-4 baseline), but the
-/// PDF 2.0 tagged-PDF structure model that PDF/UA-2 requires is not
-/// implemented - the structure tree is still emitted for PDF 1.7 only.
-/// Adding a <c>PdfUa2</c> value before that lands would create a "lying
-/// enum" - the same kind of claim-without-substance the honest-claim
-/// guard exists to prevent. Requesting <see cref="PdfUa1"/> on a PDF 2.0
-/// document throws rather than silently dropping the tagging. Roadmap, not
-/// launch - do not add <c>PdfUa2</c> speculatively.
+/// <see cref="PdfUa1"/> is PDF 1.7 output and <see cref="PdfUa2"/> is PDF 2.0
+/// output; each selects its PDF version automatically. Asking for a version the
+/// level cannot use (PDF/UA-1 with <see cref="PdfVersion.Pdf20"/>, PDF/UA-2 with
+/// <see cref="PdfVersion.Pdf17"/> or a PDF/A-1, -2 or -3 level) throws rather
+/// than dropping the tagging or the claim.
 /// </para>
 ///
 /// Tagged-PDF behaviour is defined by the shared specification, which both
@@ -41,4 +36,24 @@ public enum AccessibilityMode
     /// <c>ua1</c>) to pass.
     /// </summary>
     PdfUa1 = 1,
+
+    /// <summary>
+    /// PDF/UA-2 (ISO 14289-2:2024) tagged output on PDF 2.0. Everything
+    /// <see cref="PdfUa1"/> writes, with the structure tree in the PDF 2.0
+    /// namespace, structure destinations for in-document links and bookmarks,
+    /// list numbering on lists, and table-of-contents entries that reference
+    /// their targets (VeraPDF profile <c>ua2</c>). Combines with
+    /// <see cref="PdfAConformance.PdfA4"/>, not with PDF/A-1, -2 or -3.
+    /// </summary>
+    PdfUa2 = 2,
+}
+
+/// <summary>What each <see cref="AccessibilityMode"/> means to the engine.</summary>
+internal static class AccessibilityModeExtensions
+{
+    /// <summary>True for either PDF/UA level: the document is tagged and claims PDF/UA.</summary>
+    public static bool IsTagged(this AccessibilityMode mode) => mode is AccessibilityMode.PdfUa1 or AccessibilityMode.PdfUa2;
+
+    /// <summary>The claim's spec token: <c>pdf/ua-1</c> or <c>pdf/ua-2</c>.</summary>
+    public static string ClaimToken(this AccessibilityMode mode) => mode == AccessibilityMode.PdfUa2 ? "pdf/ua-2" : "pdf/ua-1";
 }

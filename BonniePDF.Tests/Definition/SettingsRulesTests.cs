@@ -51,10 +51,16 @@ public class SettingsRulesTests
                 "pdf/a-3b" => PdfAConformance.PdfA3b,
                 "pdf/a-3a" => PdfAConformance.PdfA3a,
                 "pdf/a-4" => PdfAConformance.PdfA4,
+                "pdf/a-4f" => PdfAConformance.PdfA4f,
                 _ => PdfAConformance.None,
             };
-        if (settings.TryGetProperty("accessibility", out JsonElement a) && string.Equals(a.GetString(), "pdf/ua-1", StringComparison.Ordinal))
-            doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
+        if (settings.TryGetProperty("accessibility", out JsonElement a))
+            doc.Settings.Accessibility = a.GetString() switch
+            {
+                "pdf/ua-1" => AccessibilityMode.PdfUa1,
+                "pdf/ua-2" => AccessibilityMode.PdfUa2,
+                _ => AccessibilityMode.None,
+            };
         if (settings.TryGetProperty("encryption", out JsonElement e))
         {
             doc.Settings.Encryption = new EncryptionSettings

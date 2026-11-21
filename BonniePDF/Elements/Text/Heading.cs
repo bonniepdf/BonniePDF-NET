@@ -96,9 +96,15 @@ public class Heading : TextBlock, IStatefulElement, IRoleProvider
         if (_tocRegistered) return;
         int pageNumber = ctx.CurrentPageIndex + 1;
         if (!string.IsNullOrEmpty(TocIdentifier))
+        {
             ctx.TocEntries[TocIdentifier] = pageNumber;
+            ctx.Tagging?.RecordAnchor(TocIdentifier, this);
+        }
         if (!string.IsNullOrEmpty(AnchorId))
+        {
             ctx.TocEntries[AnchorId] = pageNumber;
+            ctx.Tagging?.RecordAnchor(AnchorId, this);
+        }
         _tocRegistered = true;
     }
 

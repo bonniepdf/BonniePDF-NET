@@ -153,6 +153,8 @@ public final class Validate {
         String pdfUaPart = firstXmlElementValue(text, "pdfuaid", "part");
         if ("1".equals(pdfUaPart)) {
             flavours.add(PDFAFlavour.fromString("ua1"));
+        } else if ("2".equals(pdfUaPart)) {
+            flavours.add(PDFAFlavour.fromString("ua2"));
         }
 
         return flavours;
@@ -168,7 +170,11 @@ public final class Validate {
                 }
                 return part + conformance.toLowerCase();
             case "4":
-                return "4";
+                // PDF/A-4 has no conformance letter; PDF/A-4f and -4e carry F or E.
+                if (conformance == null || conformance.isEmpty()) {
+                    return "4";
+                }
+                return "4" + conformance.toLowerCase();
             default:
                 return null;
         }

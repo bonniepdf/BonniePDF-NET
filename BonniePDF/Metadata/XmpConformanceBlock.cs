@@ -85,6 +85,9 @@ internal sealed class XmpConformanceBlock
     /// <summary>PDF/A-4: ISO 19005-4:2020 baseline. No legacy A/B/U conformance suffix.</summary>
     public static XmpConformanceBlock PdfA4() => PdfAid("4", rev: "2020");
 
+    /// <summary>PDF/A-4f: ISO 19005-4:2020, part 4, conformance F (embedded files of any type).</summary>
+    public static XmpConformanceBlock PdfA4F() => PdfAid("4", "F", "2020");
+
     /// <summary>
     /// Returns the conformance block matching <paramref name="conformance"/>,
     /// or <c>null</c> if no PDF/A claim should be emitted.
@@ -98,6 +101,7 @@ internal sealed class XmpConformanceBlock
         PdfAConformance.PdfA3b => PdfA3B(),
         PdfAConformance.PdfA3a => PdfA3A(),
         PdfAConformance.PdfA4 => PdfA4(),
+        PdfAConformance.PdfA4f => PdfA4F(),
         _ => null,
     };
 
@@ -129,6 +133,38 @@ internal sealed class XmpConformanceBlock
                     valueType: "Integer",
                     category: "internal",
                     description: "Indicates, which part of ISO 14289 standard is followed")
+            ]));
+
+    /// <summary>
+    /// PDF/UA-2 conformance claim (ISO 14289-2:2024): <c>pdfuaid:part</c> 2 and
+    /// <c>pdfuaid:rev</c> 2024 (VeraPDF profile <c>ua2</c>, rules 5-2 and 5-5).
+    /// The extension schema describes both properties, for a PDF/A claim that
+    /// checks it.
+    /// </summary>
+    public static XmpConformanceBlock PdfUa2() => new(
+        prefix: "pdfuaid",
+        namespaceUri: "http://www.aiim.org/pdfua/ns/id/",
+        elements:
+        [
+            new KeyValuePair<string, string>("part", "2"),
+            new KeyValuePair<string, string>("rev", "2024")
+        ],
+        extensionSchema: new XmpExtensionSchema(
+            namespaceUri: "http://www.aiim.org/pdfua/ns/id/",
+            prefix: "pdfuaid",
+            schemaName: "PDF/UA identification schema",
+            properties:
+            [
+                new XmpExtensionSchemaProperty(
+                    name: "part",
+                    valueType: "Integer",
+                    category: "internal",
+                    description: "Indicates, which part of ISO 14289 standard is followed"),
+                new XmpExtensionSchemaProperty(
+                    name: "rev",
+                    valueType: "Integer",
+                    category: "internal",
+                    description: "Indicates the year of the revision of the part of ISO 14289 that is followed")
             ]));
 
     /// <summary>

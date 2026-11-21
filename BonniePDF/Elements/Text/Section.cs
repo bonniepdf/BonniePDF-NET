@@ -48,5 +48,6 @@ public class Section : ElementBase
     protected override void RenderContent(RenderContext ctx, float contentWidth)
     {
         ctx.TocEntries[AnchorId] = ctx.CurrentPageIndex + 1;
+        ctx.Tagging?.RecordAnchor(AnchorId, this);
     }
 }

@@ -63,6 +63,15 @@ public class UnorderedList : ListElementBase
         _nestedLists.Add(nestedList);
     }
 
+    /// <inheritdoc/>
+    internal override string ListNumbering => BulletStyle switch
+    {
+        BulletStyle.Disc => "Disc",
+        BulletStyle.Circle => "Circle",
+        BulletStyle.Square => "Square",
+        _ => "Unordered",
+    };
+
     /// <summary>Returns the lists nested inside this list.</summary>
     public override IReadOnlyList<ListElementBase> GetNestedLists()
     {

@@ -156,6 +156,11 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
     private void DrawTaggedTocEntry(RenderContext ctx, string identifier, float contentWidth, float y)
     {
         var tagging = ctx.Tagging;
+        if (tagging is { Pdf20: true })
+        {
+            DrawPdf20TocEntry(ctx, tagging, identifier, contentWidth, y);
+            return;
+        }
         bool tagThisEntry = tagging != null;
         if (tagThisEntry)
         {
@@ -174,6 +179,31 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
                 ctx.Canvas.EndMarkedContent();
                 tagging!.Tree.End();
             }
+        }
+    }
+
+    /// <summary>
+    /// The PDF/UA-2 form of an entry (spec 04 §3.4): a <c>TOCI</c> naming its target
+    /// with <c>/Ref</c> (8.2.5.8), holding no content itself, around a <c>Reference</c>
+    /// that holds the entry's text and its link annotation (ISO/TS 32005 Table 5
+    /// forbids content and <c>Link</c> directly in a <c>TOCI</c>; 8.2.5.20 lets a link
+    /// annotation sit in a <c>Reference</c>).
+    /// </summary>
+    private void DrawPdf20TocEntry(RenderContext ctx, TaggingContext tagging, string identifier, float contentWidth, float y)
+    {
+        StructureElement entry = tagging.Tree.Begin(SemanticRole.TOCI);
+        entry.RefTarget = new StructureRef(identifier, ctx.TocEntries.TryGetValue(identifier, out int page) ? page - 1 : 0);
+        tagging.Tree.Begin(SemanticRole.Reference);
+        ctx.Canvas.BeginMarkedContent("Reference");
+        try
+        {
+            DrawTocEntry(ctx, identifier, contentWidth, y);
+        }
+        finally
+        {
+            ctx.Canvas.EndMarkedContent();
+            tagging.Tree.End();
+            tagging.Tree.End();
         }
     }
 
@@ -227,7 +257,8 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
         int targetPage = ctx.TocEntries.TryGetValue(identifier, out int p) ? p - 1 : 0;
         Hyperlink link = new Hyperlink(identifier)
         {
-            TargetPageIndex = targetPage
+            TargetPageIndex = targetPage,
+            DestinationAnchor = identifier
         };
         link.SetRenderBounds(pdfX, pdfY, contentWidth, lineHeight);
 
@@ -236,6 +267,13 @@ public class VisualToc : ElementBase, IStatefulElement, IRoleProvider
         // it never passes through the pipeline's per-element ChildTagging wrap
         // that assigns LinkedStructElement (PDF/UA 14.8.4.4.2 requires every
         // Link annotation to be tagged). Open/close that wrap explicitly here.
+        if (ctx.Tagging is { Pdf20: true } pdf20)
+        {
+            // PDF/UA-2: the annotation belongs to the entry's Reference.
+            link.LinkedStructElement = pdf20.Tree.Current;
+            ctx.RegisterHyperlink(link);
+            return;
+        }
         ChildTagToken token = ChildTagging.BeginChildTag(ctx, link);
         try
         {

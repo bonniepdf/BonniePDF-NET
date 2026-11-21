@@ -45,6 +45,7 @@ public class SectionLink : Hyperlink
     /// </summary>
     public override void Render(RenderContext ctx, float width)
     {
+        DestinationAnchor = AnchorTarget;
         TargetPageIndex = ctx.TocEntries.TryGetValue(AnchorTarget, out int pageNumber)
             ? pageNumber - 1
             : 0;

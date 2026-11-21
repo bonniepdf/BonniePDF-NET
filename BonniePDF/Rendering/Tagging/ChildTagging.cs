@@ -61,6 +61,7 @@ internal static class ChildTagging
         else if (tagThis)
         {
             StructureElement elem = tagging!.Tree.Begin(role!.Value);
+            tagging.ElementStructure.TryAdd(child, elem);
             if (child is IAltTextProvider alt && !string.IsNullOrEmpty(alt.AltText))
                 tagging.Tree.SetAlt(alt.AltText);
             // Wire the struct element back to a Hyperlink so the serializer can write

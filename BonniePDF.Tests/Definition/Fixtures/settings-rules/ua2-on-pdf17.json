@@ -1,0 +1,26 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/ua2-on-pdf17",
+    "description": "PDF/UA-2 cannot be combined with an explicit PDF 1.7."
+  },
+  "_expect": {
+    "valid": false,
+    "rule": "ua2-needs-pdf20"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "accessibility": "pdf/ua-2",
+    "pdfVersion": "pdf-1.7"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

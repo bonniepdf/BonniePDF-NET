@@ -26,7 +26,7 @@ public sealed class FallbackFont
 /// </summary>
 /// <remarks>
 /// Fonts registered here are automatically substituted for standard PDF Type-1
-/// fonts (Helvetica, Times-Roman, Courier) when <c>PdfAEnabled = true</c> is set
+/// fonts (Helvetica, Times-Roman, Courier) when a PDF/A <c>Conformance</c> is set
 /// on <see cref="BonniePDF.DocumentSettings"/>. This lets the library
 /// produce genuinely PDF/A-1b–conformant output without the caller having to supply
 /// font paths on every element.

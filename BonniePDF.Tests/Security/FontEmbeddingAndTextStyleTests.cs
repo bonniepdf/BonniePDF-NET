@@ -44,7 +44,7 @@ public class FontEmbeddingAndTextStyleTests
             string pdf = Encoding.ASCII.GetString(Generate(doc =>
             {
                 doc.Settings.Version = PdfVersion.Pdf17;
-                doc.Settings.PdfAEnabled = true;
+                doc.Settings.Conformance = PdfAConformance.PdfA2b;
                 doc.Add(new TextBlock { Text = "Test", FontName = StandardFonts.Helvetica });
             }));
             // Without embedded fonts, the PDF/A claim should be suppressed
@@ -65,7 +65,7 @@ public class FontEmbeddingAndTextStyleTests
         string pdf = Encoding.ASCII.GetString(Generate(doc =>
         {
             doc.Settings.Version = PdfVersion.Pdf17;
-            doc.Settings.PdfAEnabled = true;
+            doc.Settings.Conformance = PdfAConformance.PdfA2b;
             doc.Add(new TextBlock { Text = "Test", FontName = StandardFonts.Helvetica });
         }));
         Assert.Contains("pdfaid:part", pdf);

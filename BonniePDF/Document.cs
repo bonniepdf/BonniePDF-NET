@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BonniePDF.Rendering.Writers;
@@ -150,10 +151,11 @@ public class Document : IDisposable
     /// Files embedded into the generated PDF as associated files (PDF/A-3 /
     /// ZUGFeRD). Add to this collection directly, or use the
     /// <see cref="Attach(FileAttachment)"/> / <see cref="Attach(string, byte[], AttachmentRelationship, string)"/>
-    /// helpers. Embedded files are honoured under <c>None</c>, PDF/A-3, and
-    /// PDF/A-4; under levels that forbid them (PDF/A-1, PDF/A-2) they are
-    /// dropped at save time with a diagnostic, keeping the conformance claim
-    /// honest.
+    /// helpers. Embedded files are honoured under <c>None</c>, PDF/A-3 and
+    /// PDF/A-4f; under PDF/A-1, PDF/A-2 and PDF/A-4 they are dropped at save
+    /// time with a diagnostic, keeping the conformance claim honest. Under
+    /// PDF/UA-2, an attachment with no <c>Description</c> is described by its
+    /// file name and records a warning.
     /// </summary>
     /// <example>
     /// <code>
@@ -729,10 +731,20 @@ public class Document : IDisposable
                 "AES-256 encryption requires PdfVersion.Pdf17 or PdfVersion.Pdf20. Set Settings.Version accordingly.");
         }
 
+        // PDF/UA-2 is PDF 2.0 output; PDF/A-1, -2 and -3 are PDF 1.7 formats, so
+        // no file can claim both. PDF/A-4 and -4f are the PDF 2.0 archival levels.
+        if (Settings.Accessibility == AccessibilityMode.PdfUa2 &&
+            Settings.Conformance != PdfAConformance.None && !Settings.Conformance.IsPdfA4Level())
+        {
+            throw new InvalidOperationException(
+                $"PDF/UA-2 requires PDF 2.0, which {Settings.Conformance} cannot use. " +
+                $"Use PdfAConformance.PdfA4 with AccessibilityMode.PdfUa2, or AccessibilityMode.PdfUa1 with {Settings.Conformance}.");
+        }
+
         // PDF/A version requirements. Silently upgrade rather than throw -
         // the caller asked for archival output, so honour that intent.
-        // PDF/A-1/2/3 are built on PDF 1.7; PDF/A-4 is built on PDF 2.0.
-        if (Settings.Conformance == PdfAConformance.PdfA4)
+        // PDF/A-1/2/3 are built on PDF 1.7; PDF/A-4 and -4f are built on PDF 2.0.
+        if (Settings.Conformance.IsPdfA4Level())
         {
             Settings.Version = PdfVersion.Pdf20;
         }
@@ -761,13 +773,25 @@ public class Document : IDisposable
             Settings.Version = PdfVersion.Pdf17;
         }
 
-        // PDF/UA-1 is bound to PDF 1.7. PDF/UA-2 (the PDF 2.0 accessibility
-        // standard) is not implemented yet, so reject PDF/UA-1 on a PDF 2.0
-        // document rather than silently dropping the tagging.
+        // PDF/UA-1 is bound to PDF 1.7: reject it on a PDF 2.0 document rather
+        // than silently dropping the tagging.
         if (Settings.Accessibility == AccessibilityMode.PdfUa1 && Settings.Version == PdfVersion.Pdf20)
         {
             throw new InvalidOperationException(
-                "PDF/UA-1 output is only supported with PdfVersion.Pdf17. PDF/UA-2 for PdfVersion.Pdf20 is not implemented yet.");
+                "PDF/UA-1 output is only supported with PdfVersion.Pdf17. Use AccessibilityMode.PdfUa2 for PdfVersion.Pdf20.");
+        }
+
+        // PDF/UA-2 is bound to PDF 2.0. Upgrade the default version as PDF/UA-1
+        // does; an explicit PDF 1.7 request cannot carry it.
+        if (Settings.Accessibility == AccessibilityMode.PdfUa2)
+        {
+            if (Settings.Version == PdfVersion.Pdf17)
+            {
+                throw new InvalidOperationException(
+                    "PDF/UA-2 output requires PdfVersion.Pdf20. Leave Settings.Version at its default, set it to PdfVersion.Pdf20, " +
+                    "or use AccessibilityMode.PdfUa1 for PDF 1.7.");
+            }
+            Settings.Version = PdfVersion.Pdf20;
         }
 
         // Bookmarks require PDF 1.7 or later
@@ -775,6 +799,16 @@ public class Document : IDisposable
         {
             throw new InvalidOperationException(
                 "Bookmarks require PdfVersion.Pdf17 or PdfVersion.Pdf20. Set Settings.Version accordingly.");
+        }
+
+        // PDF/A-4f is the PDF/A-4 level that carries files, and must carry at
+        // least one (ISO 19005-4 6.9). An attachment with no name or no content
+        // is dropped before writing, so it does not count.
+        if (Settings.Conformance == PdfAConformance.PdfA4f &&
+            !Attachments.Any(a => !string.IsNullOrEmpty(a.FileName) && a.Content is { Length: > 0 }))
+        {
+            throw new InvalidOperationException(
+                "PdfA4f requires at least one attachment. Attach a file with doc.Attach(...), or use PdfAConformance.PdfA4.");
         }
     }
 

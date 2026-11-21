@@ -44,6 +44,8 @@ public abstract class ListElementBase : TextElementBase
         if (tagging is not null)
         {
             tagging.Tree.Begin(SemanticRole.L);
+            // PDF/UA-2 8.2.5.25: a list whose items carry labels names its numbering.
+            if (tagging.Pdf20) tagging.Tree.SetAttributes($"<< /O /List /ListNumbering /{ListNumbering} >>");
             ctx.Canvas.BeginContainerContent("L");
         }
         try
@@ -68,6 +70,12 @@ public abstract class ListElementBase : TextElementBase
     /// handles the outer <c>L</c> structure-element wrapper.
     /// </summary>
     protected abstract void RenderItems(RenderContext ctx, float contentWidth);
+
+    /// <summary>
+    /// The PDF <c>ListNumbering</c> value for this list's labels (ISO 32000-2 Table 386),
+    /// written under PDF/UA-2. A list type the library does not know is <c>Unordered</c>.
+    /// </summary>
+    internal virtual string ListNumbering => "Unordered";
 
     /// <summary>
     /// Measures the height of list items, accounting for item spacing.

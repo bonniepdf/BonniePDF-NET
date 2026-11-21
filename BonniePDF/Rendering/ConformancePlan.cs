@@ -9,7 +9,7 @@ internal sealed record ConformancePlan(PdfAConformance Conformance, bool PdfUa, 
     public bool PdfA => Conformance != PdfAConformance.None;
 
     /// <summary>
-    /// The honest-claim guard. PDF/A and PDF/UA-1 both require every
+    /// The honest-claim guard. PDF/A and PDF/UA both require every
     /// font to be embedded, so when a standard-14 reference could not be, both
     /// claims are withheld for this generation and each is reported as a
     /// <see cref="DiagnosticCategory.Compliance"/> warning. Tagging is kept. The
@@ -20,15 +20,16 @@ internal sealed record ConformancePlan(PdfAConformance Conformance, bool PdfUa, 
     {
         IReadOnlyList<string> unembedded = resources.GetNonEmbeddedStandardFonts();
         bool fontsUnembedded = unembedded.Count > 0;
-        bool pdfUaRequested = settings.Accessibility == AccessibilityMode.PdfUa1;
-        bool pdfA = settings.PdfAEnabled && !fontsUnembedded;
+        bool pdfUaRequested = settings.Accessibility.IsTagged();
+        bool pdfARequested = settings.Conformance != PdfAConformance.None;
+        bool pdfA = pdfARequested && !fontsUnembedded;
         bool pdfUa = pdfUaRequested && !fontsUnembedded;
 
         string fonts = fontsUnembedded ? string.Join(", ", unembedded) : "standard-14 fonts";
         const string remedy =
             "Register the Liberation fonts (or use embeddable fonts) and generate again to keep the claim. " +
             "The rest of the document is unchanged.";
-        if (settings.PdfAEnabled && !pdfA)
+        if (pdfARequested && !pdfA)
         {
             string token = PdfAToken(settings.Conformance);
             diagnostics.AddWarning(DiagnosticCategory.Compliance,
@@ -36,14 +37,15 @@ internal sealed record ConformancePlan(PdfAConformance Conformance, bool PdfUa, 
         }
         if (pdfUaRequested && !pdfUa)
         {
+            string token = settings.Accessibility.ClaimToken();
             diagnostics.AddWarning(DiagnosticCategory.Compliance,
-                $"The pdf/ua-1 claim was withheld: these fonts could not be embedded: {fonts}. " +
-                $"The document is still tagged. {remedy}", "pdf/ua-1");
+                $"The {token} claim was withheld: these fonts could not be embedded: {fonts}. " +
+                $"The document is still tagged. {remedy}", token);
         }
 
         // Under PDF/A the OutputIntent goes with the claim; a PDF/UA-only
         // document always carries one, for colour management rather than as a claim.
-        bool needsOutputIntent = pdfA || (pdfUaRequested && !settings.PdfAEnabled);
+        bool needsOutputIntent = pdfA || (pdfUaRequested && !pdfARequested);
         return new ConformancePlan(pdfA ? settings.Conformance : PdfAConformance.None, pdfUa, needsOutputIntent);
     }
 

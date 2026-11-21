@@ -41,9 +41,8 @@ public enum PdfAConformance
     /// <summary>
     /// PDF/A-2b (ISO 19005-2:2011, conformance B). Modernised visual
     /// reproducibility based on PDF 1.7 - allows transparency, JPEG2000,
-    /// optional content (layers), and OpenType font embedding. The
-    /// default baseline for new BonniePDF documents that opt in via the
-    /// obsolete <c>PdfAEnabled = true</c>.
+    /// optional content (layers), and OpenType font embedding. The level
+    /// <c>AsPdfA()</c> selects.
     /// </summary>
     PdfA2b = 3,
 
@@ -73,8 +72,25 @@ public enum PdfAConformance
     /// Drops the legacy a/b/u conformance split - there is a single
     /// PDF/A-4 baseline with no "a"/"b" suffix. Requires
     /// <see cref="PdfVersion.Pdf20"/>; the serializer auto-upgrades the
-    /// version when this value is selected. The PDF/A-4f (embedded files)
-    /// and PDF/A-4e (engineering) profiles are not implemented yet.
+    /// version when this value is selected. Attachments are dropped: PDF/A-4
+    /// accepts only embedded files that are themselves PDF/A. Use
+    /// <see cref="PdfA4f"/> to carry them. The PDF/A-4e (engineering) profile
+    /// is not implemented.
     /// </summary>
     PdfA4 = 7,
+
+    /// <summary>
+    /// PDF/A-4f (ISO 19005-4:2020, conformance F). PDF/A-4 that carries
+    /// attachments of any type. Requires <see cref="PdfVersion.Pdf20"/>, which
+    /// the serializer selects, and at least one attachment.
+    /// </summary>
+    PdfA4f = 8,
+}
+
+/// <summary>What each <see cref="PdfAConformance"/> means to the engine.</summary>
+internal static class PdfAConformanceExtensions
+{
+    /// <summary>True for PDF/A-4 and PDF/A-4f, the PDF 2.0 levels.</summary>
+    public static bool IsPdfA4Level(this PdfAConformance conformance) =>
+        conformance is PdfAConformance.PdfA4 or PdfAConformance.PdfA4f;
 }

@@ -36,12 +36,12 @@ internal class NavigationWriter
     /// <param name="bookmarks">The list of bookmarks.</param>
     /// <param name="pageIds">List of object IDs for the document's pages.</param>
     /// <returns>The root ID if outlines were written, 0 otherwise.</returns>
-    public int WriteOutlineTree(int rootId, IList<BookmarkItem>? bookmarks, IList<int> pageIds)
+    public int WriteOutlineTree(int rootId, IList<BookmarkItem>? bookmarks, IList<int> pageIds, Func<int, int>? reserveGoTo = null)
     {
         if (bookmarks == null || bookmarks.Count == 0)
             return 0;
 
-        foreach ((int id, Dictionary<string, string> dict) in BuildOutlineObjects(rootId, bookmarks, pageIds, _writer!.GetNewId))
+        foreach ((int id, Dictionary<string, string> dict) in BuildOutlineObjects(rootId, bookmarks, pageIds, _writer!.GetNewId, reserveGoTo))
             _writer!.WriteObject(id, dict);
 
         return rootId;
@@ -56,12 +56,13 @@ internal class NavigationWriter
     /// <param name="pageIds">List of object IDs for the document's pages.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The root ID if outlines were written, 0 otherwise.</returns>
-    public async Task<int> WriteOutlineTreeAsync(int rootId, IList<BookmarkItem>? bookmarks, IList<int> pageIds, CancellationToken cancellationToken = default)
+    public async Task<int> WriteOutlineTreeAsync(int rootId, IList<BookmarkItem>? bookmarks, IList<int> pageIds,
+        Func<int, int>? reserveGoTo = null, CancellationToken cancellationToken = default)
     {
         if (bookmarks == null || bookmarks.Count == 0)
             return 0;
 
-        foreach ((int id, Dictionary<string, string> dict) in BuildOutlineObjects(rootId, bookmarks, pageIds, _asyncWriter!.GetNewId))
+        foreach ((int id, Dictionary<string, string> dict) in BuildOutlineObjects(rootId, bookmarks, pageIds, _asyncWriter!.GetNewId, reserveGoTo))
             await _asyncWriter!.WriteObjectAsync(id, dict, null, cancellationToken).ConfigureAwait(false);
 
         return rootId;
@@ -72,7 +73,7 @@ internal class NavigationWriter
     /// each bookmark node in write order, so both writers emit the same objects as they are built.
     /// </summary>
     private static IEnumerable<(int Id, Dictionary<string, string> Dict)> BuildOutlineObjects(int rootId,
-        IList<BookmarkItem> bookmarks, IList<int> pageIds, Func<int> newId)
+        IList<BookmarkItem> bookmarks, IList<int> pageIds, Func<int> newId, Func<int, int>? reserveGoTo)
     {
         // Flatten the bookmark tree to assign IDs
         List<(BookmarkItem item, int id, int parentId, int depth)> flatList = new();
@@ -134,7 +135,12 @@ internal class NavigationWriter
             // Destination
             int pageIdx = Math.Min(item.PageIndex, pageIds.Count - 1);
             pageIdx = Math.Max(pageIdx, 0);
-            dict[PdfKeys.Outline.Destination] = $"[ {pageIds[pageIdx]} 0 R /Fit ]";
+            // Under PDF/UA-2 the item's target is a go-to action carrying a
+            // structure destination, written once the structure tree exists.
+            if (reserveGoTo != null)
+                dict[PdfKeys.Annotation.Action] = $"{reserveGoTo(pageIdx)} 0 R";
+            else
+                dict[PdfKeys.Outline.Destination] = $"[ {pageIds[pageIdx]} 0 R /Fit ]";
 
             // Prev/Next siblings
             if (siblingIdx > 0)

@@ -1,0 +1,46 @@
+{
+  "_fixture": {
+    "id": "document-definition/invalid/structured-row-identities",
+    "description": "An actual ID collision is reported once at the second cell content."
+  },
+  "_expectErrors": [
+    {
+      "path": "/pages/0/content/0/rows/0/cells/1/content/id",
+      "code": "duplicate-id"
+    }
+  ],
+  "version": 1,
+  "minorVersion": 0,
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "Table",
+          "columns": [
+            1,
+            1
+          ],
+          "rows": [
+            {
+              "cells": [
+                {
+                  "type": "TextBlock",
+                  "id": "first-cell",
+                  "text": "First"
+                },
+                {
+                  "type": "TableCell",
+                  "content": {
+                    "type": "TextBlock",
+                    "id": "first-cell",
+                    "text": "Second"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

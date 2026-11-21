@@ -136,6 +136,17 @@ internal static class SemanticRoleExtensions
     }
 
     /// <summary>
+    /// False for the PDF 1.7 types the PDF 2.0 standard structure namespace dropped
+    /// (ISO 32000-2 §14.8.6); those stay in the default PDF 1.7 namespace.
+    /// </summary>
+    public static bool InPdf20Namespace(this SemanticRole role) => role switch
+    {
+        SemanticRole.Art or SemanticRole.BlockQuote or SemanticRole.TOC or SemanticRole.TOCI or SemanticRole.Index or
+        SemanticRole.Quote or SemanticRole.Note or SemanticRole.Reference or SemanticRole.BibEntry or SemanticRole.Code => false,
+        _ => true,
+    };
+
+    /// <summary>
     /// Returns <c>true</c> for grouping/container roles whose content is
     /// referenced by child structure elements rather than directly by an
     /// MCID. Container roles emit <c>BMC</c> (no MCID) in the content

@@ -1,0 +1,26 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/pdfa2a-with-ua2",
+    "description": "An \"a\" level with PDF/UA-2 reports the version conflict, not missing tagging."
+  },
+  "_expect": {
+    "valid": false,
+    "rule": "ua2-excludes-pdfa1-3"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "conformance": "pdf/a-2a",
+    "accessibility": "pdf/ua-2"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

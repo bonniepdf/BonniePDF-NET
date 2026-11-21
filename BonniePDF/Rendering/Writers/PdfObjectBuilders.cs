@@ -13,7 +13,7 @@ namespace BonniePDF.Rendering.Writers;
 internal static class PdfObjectBuilders
 {
     /// <summary>Builds a link annotation dictionary for a hyperlink.</summary>
-    internal static Dictionary<string, string> LinkAnnotation(Hyperlink hyperlink, IList<int>? pageIds, int? structParentKey)
+    internal static Dictionary<string, string> LinkAnnotation(Hyperlink hyperlink, IList<int>? pageIds, int? structParentKey, int? goToActionId = null)
     {
         Dictionary<string, string> dict = new()
         {
@@ -38,7 +38,12 @@ internal static class PdfObjectBuilders
         if (structParentKey.HasValue)
             dict[PdfKeys.Annotation.StructureParent] = structParentKey.Value.ToString();
 
-        if (hyperlink.TargetPageIndex.HasValue && pageIds != null)
+        if (goToActionId.HasValue)
+        {
+            // PDF/UA-2: a go-to action with a structure destination (spec 04 §3.4).
+            dict[PdfKeys.Annotation.Action] = $"{goToActionId.Value} 0 R";
+        }
+        else if (hyperlink.TargetPageIndex.HasValue && pageIds != null)
         {
             int pageIdx = Math.Max(0, Math.Min(hyperlink.TargetPageIndex.Value, pageIds.Count - 1));
             dict[PdfKeys.Annotation.Action] = $"<< /S /GoTo /D [{pageIds[pageIdx]} 0 R /Fit] >>";
@@ -87,9 +92,10 @@ internal static class PdfObjectBuilders
             [PdfKeys.Catalog.Pages] = $"{pagesId} 0 R"
         };
 
-        // Add OpenAction
-        string openAction = GetOpenActionString(firstPageId, settings);
-        dict[PdfKeys.Catalog.OpenAction] = openAction;
+        // Add OpenAction: a go-to action object under PDF/UA-2, else a destination.
+        dict[PdfKeys.Catalog.OpenAction] = options?.OpenActionId > 0
+            ? $"{options.OpenActionId} 0 R"
+            : GetOpenActionString(firstPageId, settings);
 
         // Add PageMode - auto-set to UseOutlines when outlines are present
         if (options?.OutlinesId > 0)
@@ -219,17 +225,28 @@ internal static class PdfObjectBuilders
     /// <summary>
     /// Gets the OpenAction string for the specified zoom level
     /// </summary>
-    private static string GetOpenActionString(int firstPageId, DocumentSettings settings)
+    private static string GetOpenActionString(int firstPageId, DocumentSettings settings) =>
+        $"[ {firstPageId} 0 R {OpenActionView(settings)} ]";
+
+    /// <summary>The view part of the opening destination: <c>/Fit</c>, <c>/FitH 0</c>, ...</summary>
+    internal static string OpenActionView(DocumentSettings settings) => settings.DefaultZoom switch
     {
-        return settings.DefaultZoom switch
-        {
-            ZoomLevel.FitPage => $"[ {firstPageId} 0 R /Fit ]",
-            ZoomLevel.FitWidth => $"[ {firstPageId} 0 R /FitH 0 ]",
-            ZoomLevel.FitHeight => $"[ {firstPageId} 0 R /FitV 0 ]",
-            ZoomLevel.Custom => $"[ {firstPageId} 0 R /XYZ 0 {settings.CustomZoomLevel} null ]",
-            _ => $"[ {firstPageId} 0 R /Fit ]"
-        };
-    }
+        ZoomLevel.FitWidth => "/FitH 0",
+        ZoomLevel.FitHeight => "/FitV 0",
+        ZoomLevel.Custom => $"/XYZ 0 {settings.CustomZoomLevel} null",
+        _ => "/Fit"
+    };
+
+    /// <summary>
+    /// A go-to action with both a page destination, for readers without PDF 2.0
+    /// structure destinations, and a structure destination (ISO 32000-2 Table 202).
+    /// </summary>
+    internal static Dictionary<string, string> GoToAction(int pageId, int structElemId, string view) => new()
+    {
+        ["/S"] = "/GoTo",
+        ["/D"] = $"[{pageId} 0 R {view}]",
+        ["/SD"] = $"[{structElemId} 0 R {view}]",
+    };
 
     /// <summary>
     /// Gets the PageMode string for PDF output

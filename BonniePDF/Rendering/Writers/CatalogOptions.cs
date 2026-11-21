@@ -13,6 +13,9 @@ internal class CatalogOptions
     /// </summary>
     public int ViewerPrefsId { get; set; }
 
+    /// <summary>The go-to action object written as /OpenAction under PDF/UA-2 (0 writes the destination inline).</summary>
+    public int OpenActionId { get; set; }
+
     /// <summary>
     /// The outlines (bookmarks) root object ID (0 if none).
     /// </summary>

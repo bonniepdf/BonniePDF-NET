@@ -100,6 +100,9 @@ internal sealed class StructureElement
     /// </summary>
     public string? Attributes { get; set; }
 
+    /// <summary>The element this one refers to, written as /Ref under PDF/UA-2 (a TOC entry's target).</summary>
+    public StructureRef? RefTarget { get; set; }
+
     /// <summary>
     /// Visit this element and (recursively) all of its descendants in
     /// document order.
@@ -152,3 +155,6 @@ internal sealed class StructureElement
             Append(sb, child, depth + 1);
     }
 }
+
+/// <summary>A reference target: the anchor it names, if any, and the page it resolves to.</summary>
+internal sealed record StructureRef(string? Anchor, int PageIndex);

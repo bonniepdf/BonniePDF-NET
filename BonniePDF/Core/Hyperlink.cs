@@ -89,6 +89,13 @@ public class Hyperlink : IElement, IRoleProvider
     /// </summary>
     internal StructureElement? LinkedStructElement { get; set; }
 
+    /// <summary>
+    /// The anchor an in-document link targets (a section link's anchor, a TOC
+    /// entry's identifier), so a structure destination can point at the element
+    /// that registered it (spec 04 §3.4). Null for page and URI links.
+    /// </summary>
+    internal string? DestinationAnchor { get; set; }
+
     // Internal properties set during rendering
     /// <summary>Gets the X position of the rendered annotation rectangle in PDF coordinates (bottom-left origin).</summary>
     internal float RenderX { get; private set; }

@@ -95,16 +95,21 @@ jobs:
           find Examples -path '*/GeneratedPdfs/attached-data.pdf' -exec cp {} generated-pdfs/ \;
           # Symmetric baseline fixtures. Each one's XMP claim drives the auto
           # detector: part=3 conformance=A selects veraPDF flavour 3a, part=4
-          # selects flavour 4. Without them those levels are never validated,
-          # because no example document claims them.
+          # selects flavour 4, part=4 conformance=F selects 4f and pdfuaid
+          # part=2 selects ua2. Without them those levels are never
+          # validated, because no example document claims them.
           find Examples -path '*/GeneratedPdfs/pdfa1b_baseline.pdf' -exec cp {} generated-pdfs/ \;
           find Examples -path '*/GeneratedPdfs/pdfa1a_baseline.pdf' -exec cp {} generated-pdfs/ \;
           find Examples -path '*/GeneratedPdfs/pdfa3a_baseline.pdf' -exec cp {} generated-pdfs/ \;
           find Examples -path '*/GeneratedPdfs/pdfa4_baseline.pdf' -exec cp {} generated-pdfs/ \;
+          find Examples -path '*/GeneratedPdfs/pdfua2_baseline.pdf' -exec cp {} generated-pdfs/ \;
+          find Examples -path '*/GeneratedPdfs/pdfa4f_baseline.pdf' -exec cp {} generated-pdfs/ \;
           test -s generated-pdfs/pdfa1b_baseline.pdf
           test -s generated-pdfs/pdfa1a_baseline.pdf
           test -s generated-pdfs/pdfa3a_baseline.pdf
           test -s generated-pdfs/pdfa4_baseline.pdf
+          test -s generated-pdfs/pdfua2_baseline.pdf
+          test -s generated-pdfs/pdfa4f_baseline.pdf
           ls -l generated-pdfs
 
       # `auto` reads each PDF's XMP conformance claims (pdfaid + pdfuaid) and

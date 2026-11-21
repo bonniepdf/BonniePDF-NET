@@ -103,7 +103,7 @@ internal static class SvgPageExporter
         options ??= new SvgPageExportOptions();
         DocumentSettings settings = document.Settings;
         bool embedStandardFonts = settings.Conformance != PdfAConformance.None ||
-                                  settings.Accessibility == AccessibilityMode.PdfUa1;
+                                  settings.Accessibility.IsTagged();
         using IDisposable fontScope = FontMetrics.BeginDocumentScope(embedStandardFonts, document.Fonts);
 
         var svgOptions = new SvgRenderOptions
@@ -125,7 +125,7 @@ internal static class SvgPageExporter
         // stack and the page previews in whatever face the viewer happens to have -
         // not the face the PDF actually carries, and not what the TypeScript
         // exporter emits for the same document.
-        ctx.Resources.EmbedStandardFonts = settings.Accessibility == AccessibilityMode.PdfUa1;
+        ctx.Resources.EmbedStandardFonts = settings.Accessibility.IsTagged();
         ctx.Resources.MissingGlyphs = settings.MissingGlyphs;
         ctx.Resources.OversizedContent = settings.OversizedContent;
 

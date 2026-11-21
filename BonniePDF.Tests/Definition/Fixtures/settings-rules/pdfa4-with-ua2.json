@@ -1,0 +1,26 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/pdfa4-with-ua2",
+    "description": "PDF/A-4 and PDF/UA-2 are both PDF 2.0 and combine."
+  },
+  "_expect": {
+    "valid": true,
+    "pdfVersion": "pdf-2.0"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "conformance": "pdf/a-4",
+    "accessibility": "pdf/ua-2"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

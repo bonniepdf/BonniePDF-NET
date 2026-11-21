@@ -49,12 +49,12 @@ public class PdfVersionTests
     }
 
     [Fact]
-    public void AsPdfA_SetsVersionAndFlag()
+    public void AsPdfA_SelectsPdfA2bAndVersion()
     {
         using BonniePDF.Document doc = new();
         doc.Settings.AsPdfA();
         Assert.Equal(PdfVersion.Pdf17, doc.Settings.Version);
-        Assert.True(doc.Settings.PdfAEnabled);
+        Assert.Equal(PdfAConformance.PdfA2b, doc.Settings.Conformance);
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public class PdfVersionTests
         using BonniePDF.Document doc = new();
         doc.Settings.AsPdf20();
         Assert.Equal(PdfVersion.Pdf20, doc.Settings.Version);
-        Assert.False(doc.Settings.PdfAEnabled);
+        Assert.Equal(PdfAConformance.None, doc.Settings.Conformance);
     }
 
     [Fact]
@@ -106,7 +106,6 @@ public class PdfVersionTests
         doc.Settings.AsPdfA4();
         Assert.Equal(PdfVersion.Pdf20, doc.Settings.Version);
         Assert.Equal(PdfAConformance.PdfA4, doc.Settings.Conformance);
-        Assert.True(doc.Settings.PdfAEnabled);
     }
 
     [Fact]

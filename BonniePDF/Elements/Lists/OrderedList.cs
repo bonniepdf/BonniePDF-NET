@@ -50,6 +50,16 @@ public class OrderedList : ListElementBase
         _nestedLists.Add(nestedList);
     }
 
+    /// <inheritdoc/>
+    internal override string ListNumbering => NumberFormat switch
+    {
+        NumberFormat.UpperRoman => "UpperRoman",
+        NumberFormat.LowerRoman => "LowerRoman",
+        NumberFormat.UpperAlpha => "UpperAlpha",
+        NumberFormat.LowerAlpha => "LowerAlpha",
+        _ => "Decimal",
+    };
+
     /// <summary>Returns the lists nested inside this list.</summary>
     public override IReadOnlyList<ListElementBase> GetNestedLists()
     {

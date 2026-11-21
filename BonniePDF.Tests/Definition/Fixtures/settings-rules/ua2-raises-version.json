@@ -1,0 +1,25 @@
+{
+  "_fixture": {
+    "id": "document-definition/settings-rules/ua2-raises-version",
+    "description": "PDF/UA-2 raises the default PDF version to 2.0."
+  },
+  "_expect": {
+    "valid": true,
+    "pdfVersion": "pdf-2.0"
+  },
+  "version": 1,
+  "minorVersion": 0,
+  "settings": {
+    "accessibility": "pdf/ua-2"
+  },
+  "pages": [
+    {
+      "content": [
+        {
+          "type": "TextBlock",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}

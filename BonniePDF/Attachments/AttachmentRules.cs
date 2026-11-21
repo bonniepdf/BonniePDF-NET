@@ -23,8 +23,11 @@ public static class AttachmentRules
     /// for an arbitrary byte payload.</item>
     /// <item>PDF/A-3 (3a/3b) - allowed; ISO 19005-3 exists precisely to carry
     /// associated files of any type (the ZUGFeRD / Factur-X basis).</item>
-    /// <item>PDF/A-4 - allowed; built on PDF 2.0, which permits associated
-    /// files.</item>
+    /// <item>PDF/A-4 - forbidden here; ISO 19005-4 6.9 permits embedding
+    /// only files that are themselves PDF/A-1, -2 or -4, which the engine
+    /// cannot verify.</item>
+    /// <item>PDF/A-4f - allowed; the PDF/A-4 level that carries files of
+    /// any type.</item>
     /// </list>
     /// </summary>
     public static bool AllowsEmbeddedFiles(PdfAConformance conformance) => conformance switch
@@ -32,7 +35,16 @@ public static class AttachmentRules
         PdfAConformance.None => true,
         PdfAConformance.PdfA3a => true,
         PdfAConformance.PdfA3b => true,
-        PdfAConformance.PdfA4 => true,
+        PdfAConformance.PdfA4f => true,
         _ => false,
     };
+
+    /// <summary>
+    /// The media type written for an attachment that names none: under PDF/A,
+    /// <c>application/octet-stream</c>, because PDF/A-3 (6.8) and PDF/A-4 (6.9)
+    /// require every embedded file to state one (spec 04 §10.1). Otherwise null,
+    /// and <c>/Subtype</c> is left out.
+    /// </summary>
+    internal static string? DefaultMediaType(PdfAConformance conformance) =>
+        conformance == PdfAConformance.None ? null : "application/octet-stream";
 }

@@ -38,6 +38,18 @@ internal sealed class Program
             doc.Save(Path.Combine(outputDir, "pdfa4_baseline.pdf"));
         }
 
+        Console.WriteLine("Generating PDF/UA-2 validation fixture...");
+        using (var doc = PdfUa2ValidationExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "pdfua2_baseline.pdf"));
+        }
+
+        Console.WriteLine("Generating PDF/A-4f validation fixture...");
+        using (var doc = PdfA4fValidationExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "pdfa4f_baseline.pdf"));
+        }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

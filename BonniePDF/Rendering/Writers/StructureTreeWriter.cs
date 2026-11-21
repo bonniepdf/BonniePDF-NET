@@ -74,46 +74,69 @@ internal sealed class StructureTreeWriter
     public int Write(
         StructureTreeBuilder builder,
         IList<int>? pageIds = null,
-        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>? annotBindings = null)
+        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>? annotBindings = null,
+        TaggingContext? pdf20 = null)
     {
         int structTreeRootId = _writer!.GetNewId();
         int parentTreeId = (pageIds != null && pageIds.Count > 0) ? _writer!.GetNewId() : 0;
+        int namespaceId = pdf20 != null ? _writer!.GetNewId() : 0;
 
         var elementIds = new Dictionary<StructureElement, int>(ReferenceEqualityComparer.Instance);
         var parentTreeNums = pageIds != null
             ? BuildEmptyParentTreeNums(pageIds.Count)
             : null;
 
-        WriteSubtree(builder.Root, structTreeRootId, elementIds, pageIds, parentTreeNums);
+        AllocateIds(builder.Root, elementIds, _writer!.GetNewId);
+        var shape = new TreeShape(elementIds, pageIds, namespaceId, pdf20);
+        WriteSubtree(builder.Root, structTreeRootId, shape, parentTreeNums);
 
         if (parentTreeId > 0)
             _writer!.WriteObject(parentTreeId, BuildParentTreeDict(parentTreeNums, elementIds, annotBindings));
 
         _writer!.WriteObject(structTreeRootId,
-            BuildStructTreeRootDict(builder.Root, elementIds, parentTreeId, parentTreeNums, annotBindings));
+            BuildStructTreeRootDict(builder.Root, elementIds, parentTreeId, parentTreeNums, annotBindings, namespaceId));
+        if (namespaceId > 0) _writer!.WriteObject(namespaceId, BuildNamespaceDict());
 
+        ElementIds = elementIds;
         return structTreeRootId;
     }
+
+    /// <summary>The object number of each structure element, after <see cref="Write"/> or <see cref="WriteAsync"/>.</summary>
+    public IReadOnlyDictionary<StructureElement, int> ElementIds { get; private set; } =
+        new Dictionary<StructureElement, int>(ReferenceEqualityComparer.Instance);
+
+    /// <summary>
+    /// Numbers every element in pre-order before any is written, so an element can
+    /// refer to one later in the tree (/Ref). Pre-order is the order the numbers were
+    /// always given in, so the output is unchanged.
+    /// </summary>
+    private static void AllocateIds(StructureElement element, IDictionary<StructureElement, int> elementIds, Func<int> newId)
+    {
+        elementIds[element] = newId();
+        foreach (var child in element.Children) AllocateIds(child, elementIds, newId);
+    }
+
+    /// <summary>What every element's dictionary is built from.</summary>
+    private sealed record TreeShape(
+        IDictionary<StructureElement, int> ElementIds, IList<int>? PageIds, int NamespaceId, TaggingContext? Pdf20);
 
     private void WriteSubtree(
         StructureElement element,
         int parentId,
-        IDictionary<StructureElement, int> elementIds,
-        IList<int>? pageIds,
+        TreeShape shape,
         IList<List<(int mcid, StructureElement elem)>>? parentTreeNums)
     {
-        int id = _writer!.GetNewId();
-        elementIds[element] = id;
+        int id = shape.ElementIds[element];
 
         foreach (var child in element.Children)
-            WriteSubtree(child, id, elementIds, pageIds, parentTreeNums);
+            WriteSubtree(child, id, shape, parentTreeNums);
 
         // Record this element's contribution to /ParentTree for every
         // (page, mcid) pair it claims.
         if (parentTreeNums != null)
             RecordParentTreeContributions(element, parentTreeNums);
 
-        _writer!.WriteObject(id, BuildStructElemDict(element, parentId, elementIds, pageIds));
+        _writer!.WriteObject(id, BuildStructElemDict(element, parentId, shape));
     }
 
     // ── Async ─────────────────────────────────────────────────────────
@@ -123,17 +146,21 @@ internal sealed class StructureTreeWriter
         StructureTreeBuilder builder,
         IList<int>? pageIds = null,
         IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>? annotBindings = null,
+        TaggingContext? pdf20 = null,
         CancellationToken cancellationToken = default)
     {
         int structTreeRootId = _asyncWriter!.GetNewId();
         int parentTreeId = (pageIds != null && pageIds.Count > 0) ? _asyncWriter!.GetNewId() : 0;
+        int namespaceId = pdf20 != null ? _asyncWriter!.GetNewId() : 0;
 
         var elementIds = new Dictionary<StructureElement, int>(ReferenceEqualityComparer.Instance);
         var parentTreeNums = pageIds != null
             ? BuildEmptyParentTreeNums(pageIds.Count)
             : null;
 
-        await WriteSubtreeAsync(builder.Root, structTreeRootId, elementIds, pageIds, parentTreeNums, cancellationToken)
+        AllocateIds(builder.Root, elementIds, _asyncWriter!.GetNewId);
+        var shape = new TreeShape(elementIds, pageIds, namespaceId, pdf20);
+        await WriteSubtreeAsync(builder.Root, structTreeRootId, shape, parentTreeNums, cancellationToken)
             .ConfigureAwait(false);
 
         if (parentTreeId > 0)
@@ -145,48 +172,52 @@ internal sealed class StructureTreeWriter
 
         await _asyncWriter!
             .WriteObjectAsync(structTreeRootId,
-                BuildStructTreeRootDict(builder.Root, elementIds, parentTreeId, parentTreeNums, annotBindings), null, cancellationToken)
+                BuildStructTreeRootDict(builder.Root, elementIds, parentTreeId, parentTreeNums, annotBindings, namespaceId), null, cancellationToken)
             .ConfigureAwait(false);
+        if (namespaceId > 0)
+            await _asyncWriter!.WriteObjectAsync(namespaceId, BuildNamespaceDict(), null, cancellationToken).ConfigureAwait(false);
 
+        ElementIds = elementIds;
         return structTreeRootId;
     }
 
     private async Task WriteSubtreeAsync(
         StructureElement element,
         int parentId,
-        IDictionary<StructureElement, int> elementIds,
-        IList<int>? pageIds,
+        TreeShape shape,
         IList<List<(int mcid, StructureElement elem)>>? parentTreeNums,
         CancellationToken cancellationToken)
     {
-        int id = _asyncWriter!.GetNewId();
-        elementIds[element] = id;
+        int id = shape.ElementIds[element];
 
         foreach (var child in element.Children)
-            await WriteSubtreeAsync(child, id, elementIds, pageIds, parentTreeNums, cancellationToken).ConfigureAwait(false);
+            await WriteSubtreeAsync(child, id, shape, parentTreeNums, cancellationToken).ConfigureAwait(false);
 
         if (parentTreeNums != null)
             RecordParentTreeContributions(element, parentTreeNums);
 
         await _asyncWriter!
-            .WriteObjectAsync(id, BuildStructElemDict(element, parentId, elementIds, pageIds), null, cancellationToken)
+            .WriteObjectAsync(id, BuildStructElemDict(element, parentId, shape), null, cancellationToken)
             .ConfigureAwait(false);
     }
 
     // ── Shared dict construction ──────────────────────────────────────
 
-    private static Dictionary<string, string> BuildStructElemDict(
-        StructureElement element,
-        int parentObjectId,
-        IDictionary<StructureElement, int> elementIds,
-        IList<int>? pageIds)
+    private static Dictionary<string, string> BuildStructElemDict(StructureElement element, int parentObjectId, TreeShape shape)
     {
+        IDictionary<StructureElement, int> elementIds = shape.ElementIds;
+        IList<int>? pageIds = shape.PageIds;
         var dict = new Dictionary<string, string>
         {
             [PdfKeys.Common.Type] = "/StructElem",
             [PdfKeys.Structure.Role] = "/" + element.Role.ToPdfTag(),
             [PdfKeys.Structure.Parent] = $"{parentObjectId} 0 R",
         };
+
+        // PDF/UA-2: a type the PDF 2.0 namespace defines is written in it; the
+        // types it dropped stay in the default PDF 1.7 namespace (spec 04 §3.4).
+        if (shape.NamespaceId > 0 && element.Role.InPdf20Namespace())
+            dict["/NS"] = $"{shape.NamespaceId} 0 R";
 
         // /K + /Pg emission. Three cases:
         //   1. No children, no MCIDs => omit /K (allowed by spec).
@@ -217,15 +248,30 @@ internal sealed class StructureTreeWriter
         if (!string.IsNullOrEmpty(element.Attributes))
             dict[PdfKeys.Structure.Attributes] = element.Attributes;
 
+        if (shape.Pdf20 != null && element.RefTarget is { } target)
+        {
+            StructureElement referenced = StructureTargets.Resolve(shape.Pdf20, target.Anchor, target.PageIndex);
+            if (elementIds.TryGetValue(referenced, out int referencedId))
+                dict["/Ref"] = $"[ {referencedId} 0 R ]";
+        }
+
         return dict;
     }
+
+    /// <summary>The PDF 2.0 standard structure namespace (ISO 32000-2 §14.7.4.2).</summary>
+    private static Dictionary<string, string> BuildNamespaceDict() => new()
+    {
+        [PdfKeys.Common.Type] = "/Namespace",
+        ["/NS"] = "(http://iso.org/pdf2/ssn)",
+    };
 
     private static Dictionary<string, string> BuildStructTreeRootDict(
         StructureElement documentRoot,
         IDictionary<StructureElement, int> elementIds,
         int parentTreeId,
         IList<List<(int mcid, StructureElement elem)>>? parentTreeNums,
-        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>? annotBindings = null)
+        IList<(StructureElement structElem, int annotId, int pageObjectId, int structParentKey)>? annotBindings = null,
+        int namespaceId = 0)
     {
         var dict = new Dictionary<string, string>
         {
@@ -247,6 +293,8 @@ internal sealed class StructureTreeWriter
             }
             dict[PdfKeys.Structure.ParentTreeNextKey] = nextKey.ToString(CultureInfo.InvariantCulture);
         }
+
+        if (namespaceId > 0) dict["/Namespaces"] = $"[ {namespaceId} 0 R ]";
 
         return dict;
     }
