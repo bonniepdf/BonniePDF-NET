@@ -25,9 +25,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Delete this workflow's prior runs before doing anything else, so the
-      # Actions tab only ever shows the current run. Best-effort: never block
-      # the real job if the cleanup API call hiccups.
+      # Delete this workflow's prior runs on the same branch before doing anything
+      # else, so the Actions tab shows one run per branch. Only the same branch:
+      # a pull request's run must not delete master's, because the release
+      # pre-flight checks that master's latest commit passed. Best-effort: never
+      # block the real job if the cleanup API call hiccups.
       - name: Delete prior workflow runs
         continue-on-error: true
         env:
@@ -36,6 +38,7 @@ jobs:
           gh run list \
             --repo "${{ github.repository }}" \
             --workflow validate-accessibility.yml \
+            --branch "${{ github.head_ref || github.ref_name }}" \
             --json databaseId \
             --jq '.[].databaseId' \
             --limit 100 \

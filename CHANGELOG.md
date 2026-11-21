@@ -7,10 +7,6 @@ at the same version are the same library.
 
 ## Unreleased
 
-### Package
-
-- The NuGet listing links to these release notes.
-
 ## 2026.11.21
 
 Status: Released
@@ -44,6 +40,7 @@ Date: 2026-11-21
 ### Packaging & Documentation
 
 - Point `PackageProjectUrl` and README links directly at canonical `https://www.bonniepdf.dev` URLs and expand NuGet package tags and description for PDF/UA, PDF/A, Factur-X, and ZUGFeRD discovery.
+- The NuGet listing links to these release notes.
 
 ### Examples
 
