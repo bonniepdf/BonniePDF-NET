@@ -7,6 +7,15 @@ at the same version are the same library.
 
 ## Unreleased
 
+### Fixes
+
+- **PDF/A, XMP & tagging:** emit UTC `Z` dates and split `,`/`;` keywords in XMP, align ICC profile and tagged `/Link` key order, and emit `/DisplayDocTitle true` without mutating `Settings.DisplayDocTitle`.
+- **Text `FontFeatures`:** track explicit assignment so inherited `DefaultTextStyle.FontFeatures` updates on regeneration.
+- **Document Definition:** skip unknown element types and enum tokens under `BestEffort = true`, make `PageNumberOf.text` optional, support `SectionLink.Underline` and `Grid.AlternateRowBackgroundColor`, and let per-side border overrides win over `width`.
+- **SVG export:** emit `font-display:block` on `@font-face` rules and scope embedded font subsets to `MaxPages`.
+- **Layout snapshots & preflight:** write `paint.textBackdrop` in `ToJson()`, capture `VisualToc` paint, record cell fills on split table rows, and update the `table-no-header` fix hint (`AddHeader`, `IsHeader`, `Grid`, `Presentation = true`).
+- **Imported SVG fonts:** check `FontManager` before standard aliases in `FontFamilyResolver.ResolveKnown`.
+
 ## 2026.11.21
 
 Status: Released
