@@ -216,6 +216,7 @@ internal sealed record TextOptions : IEquatable<TextOptions>
     }
 
     internal IReadOnlyDictionary<string, int>? FontFeatures { get; init; }
+    internal bool FontFeaturesExplicit { get; init; }
     internal string? FontFamily { get; init; }
     internal FontWeight Weight { get; init; } = FontWeight.Normal;
     internal bool Italic { get; init; }
@@ -251,6 +252,7 @@ internal sealed record TextOptions : IEquatable<TextOptions>
 
     public bool Equals(TextOptions? other) =>
         other is not null && OptionEquality.Same(FontFeatures, other.FontFeatures)
+        && FontFeaturesExplicit == other.FontFeaturesExplicit
         && string.Equals(FontFamily, other.FontFamily, StringComparison.Ordinal) && Weight == other.Weight && Italic == other.Italic
         && string.Equals(FontName, other.FontName, StringComparison.Ordinal) && FontExplicit == other.FontExplicit
         && FontFamilyExplicit == other.FontFamilyExplicit && WeightExplicit == other.WeightExplicit && ItalicExplicit == other.ItalicExplicit

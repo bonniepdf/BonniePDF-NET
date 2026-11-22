@@ -603,10 +603,6 @@
       }
     },
     "TextBlockKeys": {
-      "text": {
-        "kind": "string",
-        "required": true
-      },
       "alignment": {
         "kind": "enum:TextAlignment"
       },
@@ -1360,7 +1356,12 @@
         "TextElement",
         "TextBlockKeys"
       ],
-      "keys": {},
+      "keys": {
+        "text": {
+          "kind": "string",
+          "required": true
+        }
+      },
       "conflicts": [
         [
           "fontName",
@@ -1375,6 +1376,10 @@
         "TextBlockKeys"
       ],
       "keys": {
+        "text": {
+          "kind": "string",
+          "required": true
+        },
         "level": {
           "kind": "integer",
           "min": 1,
@@ -1430,6 +1435,9 @@
         "TextBlockKeys"
       ],
       "keys": {
+        "text": {
+          "kind": "string"
+        },
         "anchorTarget": {
           "kind": "string",
           "required": true
@@ -1533,6 +1541,9 @@
         },
         "color": {
           "kind": "color"
+        },
+        "underline": {
+          "kind": "boolean"
         }
       },
       "refs": {
@@ -2060,6 +2071,9 @@
         "Bordered"
       ],
       "keys": {
+        "alternateRowBackgroundColor": {
+          "kind": "color"
+        },
         "columns": {
           "kind": "array:number"
         },

@@ -17,7 +17,11 @@ public abstract class TextElementBase : ElementBase
     {
         get => _text.FontFeatures;
         // TextStyle validates the features and takes a private copy.
-        set => _text = _text.With(value is null ? null : new TextStyle { FontFeatures = value }.FontFeatures, static (o, v) => o with { FontFeatures = v });
+        set
+        {
+            IReadOnlyDictionary<string, int>? features = value is null ? null : new TextStyle { FontFeatures = value }.FontFeatures;
+            _text = _text.With(features, static (o, v) => o with { FontFeatures = v, FontFeaturesExplicit = true });
+        }
     }
 
     /// <summary>
@@ -78,6 +82,7 @@ public abstract class TextElementBase : ElementBase
     internal bool TextColorIsExplicit => _textColorExplicit;
     internal bool LineHeightIsExplicit => _lineHeightExplicit;
     internal bool DecorationIsExplicit => _decorationExplicit;
+    internal bool FontFeaturesIsExplicit => _text.FontFeaturesExplicit;
 
     private void ApplyDefaultStyle(TextStyle style)
     {
@@ -277,7 +282,8 @@ public abstract class TextElementBase : ElementBase
     public void ApplyDefaultStyleIfNotSet(TextStyle? style)
     {
         if (style == null) return;
-        FontFeatures ??= style.FontFeatures;
+        if (!_text.FontFeaturesExplicit)
+            _text = _text.With(style.FontFeatures, static (o, v) => o with { FontFeatures = v });
 
         // Family, weight and italic cascade independently. Writing the backing fields leaves the explicit
         // flags alone, so a later cascade can still replace what this one supplied.

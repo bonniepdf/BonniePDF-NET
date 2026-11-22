@@ -31,11 +31,15 @@ internal sealed class DefinitionReader
         ["pdfVersion"] = ["Version"],
     };
 
-    private readonly Dictionary<string, byte[]> _resources;
+    private static readonly object SkipValue = new();
 
-    private DefinitionReader(Dictionary<string, byte[]> resources)
+    private readonly Dictionary<string, byte[]> _resources;
+    private readonly bool _bestEffort;
+
+    private DefinitionReader(Dictionary<string, byte[]> resources, bool bestEffort)
     {
         _resources = resources;
+        _bestEffort = bestEffort;
     }
 
     // ── entry ────────────────────────────────────────────────────────────────
@@ -51,7 +55,7 @@ internal sealed class DefinitionReader
         }
 
         Dictionary<string, byte[]> resources = await LoadResourcesAsync(definition, options, cancellationToken).ConfigureAwait(false);
-        var reader = new DefinitionReader(resources);
+        var reader = new DefinitionReader(resources, options.BestEffort);
         return reader.Build(definition, options);
     }
 
@@ -217,7 +221,10 @@ internal sealed class DefinitionReader
             if (entry.TryGetProperty("pageColor", out JsonElement color)) page.PageColor = ToColor(color.GetString()!);
             if (entry.TryGetProperty("background", out JsonElement background)) page.PageBackground = Element(background);
             if (entry.TryGetProperty("foreground", out JsonElement foreground)) page.PageForeground = Element(foreground);
-            foreach (JsonElement node in entry.GetProperty("content").EnumerateArray()) page.Add(Element(node));
+            foreach (JsonElement node in entry.GetProperty("content").EnumerateArray())
+            {
+                if (Element(node) is { } el) page.Add(el);
+            }
             index++;
         }
 
@@ -250,22 +257,34 @@ internal sealed class DefinitionReader
 
     // ── elements ─────────────────────────────────────────────────────────────
 
-    /// <summary>Builds an element, and marks it with its `id`.</summary>
-    private IElement Element(JsonElement node)
+    /// <summary>Builds an element, and marks it with its `id`. Returns null when an unknown type is skipped under BestEffort.</summary>
+    private IElement? Element(JsonElement node)
     {
-        IElement element = Build(node);
-        if (node.TryGetProperty("id", out JsonElement id)) DebugSource.Mark(element, id.GetString()!);
+        IElement? element = Build(node);
+        if (element is not null && node.TryGetProperty("id", out JsonElement id)) DebugSource.Mark(element, id.GetString()!);
         return element;
     }
 
-    private IEnumerable<IElement> Elements(JsonElement nodes) => nodes.EnumerateArray().Select(Element).ToList();
+    private IEnumerable<IElement> Elements(JsonElement nodes)
+    {
+        var list = new List<IElement>();
+        foreach (JsonElement node in nodes.EnumerateArray())
+        {
+            if (Element(node) is { } el) list.Add(el);
+        }
+        return list;
+    }
 
     private static HashSet<string> Skip(params string[] keys) => new(keys, StringComparer.Ordinal);
 
-    private IElement Build(JsonElement node)
+    private IElement? Build(JsonElement node)
     {
         string type = node.GetProperty("type").GetString()!;
-        ShapeSpec spec = D.Elements[type];
+        if (!D.Elements.TryGetValue(type, out ShapeSpec? spec))
+        {
+            if (_bestEffort) return null;
+            throw new DefinitionException([new DefinitionIssue("", "unknown-type", $"Element type {type} is not supported by this reader.")]);
+        }
         IElement? Child() => node.TryGetProperty("child", out JsonElement c) ? Element(c) : null;
 
         switch (type)
@@ -311,8 +330,14 @@ internal sealed class DefinitionReader
                 Populate(e, node, spec, []);
                 foreach (JsonElement c in node.GetProperty("children").EnumerateArray())
                 {
-                    if (!c.TryGetProperty("type", out _) && c.TryGetProperty("element", out JsonElement inner)) e.Add(Element(inner), (float)c.GetProperty("weight").GetDouble());
-                    else e.Add(Element(c));
+                    if (!c.TryGetProperty("type", out _) && c.TryGetProperty("element", out JsonElement inner))
+                    {
+                        if (Element(inner) is { } innerEl) e.Add(innerEl, (float)c.GetProperty("weight").GetDouble());
+                    }
+                    else if (Element(c) is { } childEl)
+                    {
+                        e.Add(childEl);
+                    }
                 }
                 return e;
             }
@@ -331,7 +356,13 @@ internal sealed class DefinitionReader
                 return Populated(new PageBreak(), node, spec);
             case "SemanticGroup":
             {
-                var e = new SemanticGroup(EnumFromToken<SemanticRole>(node.GetProperty("role").GetString()!));
+                string roleToken = node.GetProperty("role").GetString()!;
+                if (!TryEnumFromToken(typeof(SemanticRole), roleToken, out object? roleObj))
+                {
+                    if (_bestEffort) return null;
+                    throw new InvalidOperationException($"SemanticRole has no member for the token \"{roleToken}\".");
+                }
+                var e = new SemanticGroup((SemanticRole)roleObj!);
                 Populate(e, node, spec, Skip("role"));
                 foreach (IElement child in Elements(node.GetProperty("children"))) e.Add(child);
                 return e;
@@ -391,7 +422,7 @@ internal sealed class DefinitionReader
                 foreach (JsonElement item in node.GetProperty("items").EnumerateArray())
                 {
                     if (item.ValueKind == JsonValueKind.String) e.AddItem(item.GetString()!);
-                    else e.AddNestedList((UnorderedList)Element(item));
+                    else if (Element(item) is UnorderedList nested) e.AddNestedList(nested);
                 }
                 return e;
             }
@@ -402,7 +433,7 @@ internal sealed class DefinitionReader
                 foreach (JsonElement item in node.GetProperty("items").EnumerateArray())
                 {
                     if (item.ValueKind == JsonValueKind.String) e.AddItem(item.GetString()!);
-                    else e.AddNestedList((OrderedList)Element(item));
+                    else if (Element(item) is OrderedList nested) e.AddNestedList(nested);
                 }
                 return e;
             }
@@ -528,12 +559,14 @@ internal sealed class DefinitionReader
             JsonElement content = cell.GetProperty("content");
             var tableCell = new TableCell
             {
-                Content = content.ValueKind == JsonValueKind.String ? new TextBlock { Text = content.GetString()! } : Element(content),
+                Content = content.ValueKind == JsonValueKind.String
+                    ? new TextBlock { Text = content.GetString()! }
+                    : Element(content) ?? new TextBlock { Text = string.Empty },
             };
             Populate(tableCell, cell, D.Shapes["TableCell"], Skip("content", "type"));
             return tableCell;
         }
-        return new TableCell { Content = Element(cell) };
+        return new TableCell { Content = Element(cell) ?? new TextBlock { Text = string.Empty } };
     }
 
     // ── populating objects ───────────────────────────────────────────────────
@@ -607,7 +640,8 @@ internal sealed class DefinitionReader
             return;
         }
 
-        property.SetValue(target, ConvertTo(propertyType, kind, value));
+        object? converted = ConvertTo(propertyType, kind, value);
+        if (!ReferenceEquals(converted, SkipValue)) property.SetValue(target, converted);
     }
 
     // ── value conversion ─────────────────────────────────────────────────────
@@ -749,8 +783,8 @@ internal sealed class DefinitionReader
     private static Border ToBorder(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) return new Border(ToPoints(value));
-        if (value.TryGetProperty("width", out JsonElement width)) return new Border(ToPoints(width));
-        float Side(string key) => value.TryGetProperty(key, out JsonElement s) ? ToPoints(s) : 0f;
+        float baseWidth = value.TryGetProperty("width", out JsonElement width) ? ToPoints(width) : 0f;
+        float Side(string key) => value.TryGetProperty(key, out JsonElement s) ? ToPoints(s) : baseWidth;
         return new Border(Side("left"), Side("top"), Side("right"), Side("bottom"));
     }
 
@@ -780,11 +814,17 @@ internal sealed class DefinitionReader
     private static FontWeight ToFontWeight(JsonElement value) =>
         value.ValueKind == JsonValueKind.Number ? (FontWeight)(int)value.GetDouble() : EnumFromToken<FontWeight>(value.GetString()!);
 
-    private static object ToFlags(Type enumType, JsonElement value)
+    private object ToFlags(Type enumType, JsonElement value)
     {
         IEnumerable<string> tokens = value.ValueKind == JsonValueKind.Array ? value.EnumerateArray().Select(t => t.GetString()!) : [value.GetString()!];
         long mask = 0;
-        foreach (string token in tokens) mask |= Convert.ToInt64(EnumFromToken(enumType, token), CultureInfo.InvariantCulture);
+        foreach (string token in tokens)
+        {
+            if (TryEnumFromToken(enumType, token, out object? parsed))
+                mask |= Convert.ToInt64(parsed, CultureInfo.InvariantCulture);
+            else if (!_bestEffort)
+                throw new InvalidOperationException($"{enumType.Name} has no member for the token \"{token}\".");
+        }
         return Enum.ToObject(enumType, mask);
     }
 
@@ -794,18 +834,35 @@ internal sealed class DefinitionReader
         where T : struct, Enum =>
         (T)EnumFromToken(typeof(T), token);
 
-    internal static object EnumFromToken(Type enumType, string token)
+    private static bool TryEnumFromToken(Type enumType, string token, out object? result)
     {
         string wanted = Normalise(token);
         foreach (string name in Enum.GetNames(enumType))
-            if (string.Equals(Normalise(name), wanted, StringComparison.OrdinalIgnoreCase)) return Enum.Parse(enumType, name);
-        throw new InvalidOperationException($"{enumType.Name} has no member for the token \"{token}\".");
+        {
+            if (string.Equals(Normalise(name), wanted, StringComparison.OrdinalIgnoreCase))
+            {
+                result = Enum.Parse(enumType, name);
+                return true;
+            }
+        }
+        result = null;
+        return false;
     }
 
+    internal static object EnumFromToken(Type enumType, string token) =>
+        TryEnumFromToken(enumType, token, out object? result)
+            ? result!
+            : throw new InvalidOperationException($"{enumType.Name} has no member for the token \"{token}\".");
+
     /// <summary>Converts a wire token to the enum the property has, using the description's .NET mapping where the names differ.</summary>
-    private static object ToEnum(Type target, string enumName, string token)
+    private object ToEnum(Type target, string enumName, string token)
     {
         EnumSpec spec = D.Enums[enumName];
+        if (!spec.Tokens.Contains(token))
+        {
+            if (_bestEffort) return SkipValue;
+            throw new InvalidOperationException($"{target.Name} has no member for the token \"{token}\".");
+        }
         if (target == typeof(string))
         {
             // A property that holds the value as text (the chart's shape rendering) takes the mapped member.

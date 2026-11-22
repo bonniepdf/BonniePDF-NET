@@ -456,6 +456,7 @@ internal sealed partial class DefinitionWriter
                     "color" => t.TextColorIsExplicit,
                     "lineHeight" => t.LineHeightIsExplicit,
                     "decoration" => t.DecorationIsExplicit,
+                    "fontFeatures" => t.FontFeaturesIsExplicit,
                     _ => null,
                 };
                 if (explicitly is false) continue;
