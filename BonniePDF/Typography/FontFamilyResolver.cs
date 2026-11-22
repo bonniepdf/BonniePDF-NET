@@ -123,6 +123,7 @@ public static class FontFamilyResolver
         bool isBold = weight >= FontWeight.SemiBold;
         if (CustomFamilies.TryGetValue(family, out FontFamilyDefinition? definition))
             return definition.GetVariant(isBold, italic);
+        if (FontManager.ResolveFamily(family, weight, italic) is { } registered) return registered;
         return StandardFonts.TryGetValue((ResolveAlias(family), isBold, italic), out string? fontName) ? fontName : null;
     }
 

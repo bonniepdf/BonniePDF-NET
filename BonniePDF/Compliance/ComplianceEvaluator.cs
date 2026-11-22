@@ -487,7 +487,7 @@ public static class CompliancePreflight
             Standard = Ua,
             Clause = "ISO 14289-1:2014 §7.5",
             Message = "Table has no header cells (TH); screen readers cannot associate data cells with headers.",
-            FixHint = "Mark the header row/column cells as headers (e.g. Table.AddHeaderRow / cell.IsHeader).",
+            FixHint = "Mark header rows or cells as headers (e.g. table.AddHeader / cell.IsHeader), or use Grid or Table.Presentation = true for layout grids.",
             NodeId = table.Id,
             Role = "Table",
             Page = PageOf(table)

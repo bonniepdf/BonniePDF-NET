@@ -124,6 +124,7 @@ internal static class SvgDocumentExportJson
             w.WriteStartObject("paint");
             if (paint.Text is not null) w.WriteString("text", paint.Text);
             if (paint.TextAlpha is float textAlpha) w.WriteNumber("textAlpha", textAlpha);
+            if (paint.TextBackdrop is not null) w.WriteString("textBackdrop", paint.TextBackdrop);
             if (paint.Background is not null) w.WriteString("background", paint.Background);
             if (paint.BackgroundAlpha is float backgroundAlpha) w.WriteNumber("backgroundAlpha", backgroundAlpha);
             if (paint.FontSize is float fontSize) w.WriteNumber("fontSize", fontSize);

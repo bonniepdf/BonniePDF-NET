@@ -468,6 +468,14 @@ internal sealed class LayoutRecorder
             paint.FontSize = link.FontSize;
             if (FontNameLooksBold(link.FontName)) paint.Bold = true;
         }
+        else if (element is VisualToc toc)
+        {
+            paint.Text = ColorToHex(toc.Color);
+            float tocAlpha = AlphaOf(toc.Color);
+            if (tocAlpha < 1f) paint.TextAlpha = tocAlpha;
+            paint.FontSize = toc.FontSize;
+            if (FontNameLooksBold(toc.FontName)) paint.Bold = true;
+        }
 
         Color? ownBackground = element switch
         {

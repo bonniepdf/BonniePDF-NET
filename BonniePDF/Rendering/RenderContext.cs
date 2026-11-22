@@ -510,23 +510,47 @@ public class RenderContext
     internal TtfFont? ResolveEmbeddedFont(string fontIdentifier) => Resources.ResolveEmbeddedFont(fontIdentifier);
 
     // ── SVG embedded-font usage ─────────────────────────────────────────────────
-    // Accumulated across every SvgCanvas this context creates, so the page
-    // exporter can embed a minimal subset (only used glyphs) of each font.
-    private readonly Dictionary<string, (TtfFont Font, HashSet<int> CodePoints)> _svgFontUsage = new();
+    // Accumulated per page across every SvgCanvas this context creates, so the page
+    // exporter can embed a minimal subset (only used glyphs) of each font for the
+    // emitted page range.
+    private readonly Dictionary<int, Dictionary<string, (TtfFont Font, HashSet<int> CodePoints)>> _pageSvgFontUsage = new();
 
     internal void TrackSvgFontUsage(string fontFamily, TtfFont font, int codePoint)
     {
-        if (!_svgFontUsage.TryGetValue(fontFamily, out var entry))
+        if (!_pageSvgFontUsage.TryGetValue(CurrentPageIndex, out var pageUsage))
+        {
+            pageUsage = new Dictionary<string, (TtfFont Font, HashSet<int> CodePoints)>();
+            _pageSvgFontUsage[CurrentPageIndex] = pageUsage;
+        }
+        if (!pageUsage.TryGetValue(fontFamily, out var entry))
         {
             entry = (font, new HashSet<int>());
-            _svgFontUsage[fontFamily] = entry;
+            pageUsage[fontFamily] = entry;
         }
         entry.CodePoints.Add(codePoint);
     }
 
     /// <summary>Per embedded font (keyed by PDF font name): the resolved face and
-    /// every code point drawn with it, for building minimal SVG font subsets.</summary>
-    internal IReadOnlyDictionary<string, (TtfFont Font, HashSet<int> CodePoints)> SvgFontUsage => _svgFontUsage;
+    /// every code point drawn with it across the first <paramref name="pageCount"/> pages,
+    /// for building minimal SVG font subsets.</summary>
+    internal IReadOnlyDictionary<string, (TtfFont Font, HashSet<int> CodePoints)> GetSvgFontUsage(int pageCount)
+    {
+        var merged = new Dictionary<string, (TtfFont Font, HashSet<int> CodePoints)>();
+        for (int page = 0; page < pageCount; page++)
+        {
+            if (!_pageSvgFontUsage.TryGetValue(page, out var pageUsage)) continue;
+            foreach (KeyValuePair<string, (TtfFont Font, HashSet<int> CodePoints)> kvp in pageUsage)
+            {
+                if (!merged.TryGetValue(kvp.Key, out var entry))
+                {
+                    entry = (kvp.Value.Font, new HashSet<int>());
+                    merged[kvp.Key] = entry;
+                }
+                entry.CodePoints.UnionWith(kvp.Value.CodePoints);
+            }
+        }
+        return merged;
+    }
 
     /// <summary>
     /// Records the characters in <paramref name="text"/> as used by the specified font,

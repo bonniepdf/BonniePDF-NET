@@ -1175,6 +1175,8 @@ public class Table : BorderedElementBase, IStatefulElement, IRoleProvider, IBord
                 ctx.CurrentX = cellX[i] + padding.Left;
                 ctx.CurrentY = cellTop;
                 rec?.OpenNode(cell, LayoutRecorder.CaptureTypeOf(cell), LayoutRecorder.CaptureNameOf(cell), page, cellX[i], top, cellWidth[i]);
+                Color? cellBg = CellFill(cell, row, dataIndex);
+                if (cellBg.HasValue) rec?.AnnotatePaint(cell, LayoutRecorder.PaintForBackground(cellBg.Value));
 
                 SplitCellTag tag = OpenSplitCellTag(ctx, split, i, cell, content, dataTagging, presTagging);
                 try

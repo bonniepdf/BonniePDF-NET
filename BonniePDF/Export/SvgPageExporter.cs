@@ -218,7 +218,7 @@ internal static class SvgPageExporter
         // Evaluated over the finished snapshot. The evaluator is pure, and neither
         // the snapshot nor any page changes.
         ComplianceReport? report = snapshot is null ? null : CompliancePreflight.Evaluate(snapshot);
-        return new SvgDocumentExport(results, BuildFontFaceCss(ctx.SvgFontUsage), snapshot, report);
+        return new SvgDocumentExport(results, BuildFontFaceCss(ctx.GetSvgFontUsage(limit)), snapshot, report);
     }
 
     /// <summary>
@@ -259,7 +259,7 @@ internal static class SvgPageExporter
 
             sb.Append("@font-face{font-family:'")
               .Append(SvgCanvas.EmbeddedFontFamily(kvp.Key))
-              .Append("';font-display:swap;src:url(\"data:font/ttf;base64,")
+              .Append("';font-display:block;src:url(\"data:font/ttf;base64,")
               .Append(Convert.ToBase64String(bytes))
               .Append("\") format(\"truetype\");}");
         }
