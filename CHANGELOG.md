@@ -30,7 +30,6 @@ Date: 2026-11-21
 
 - Generate tagged PDF 2.0 documents with PDF/UA-2.
 - Combine PDF/UA-2 and PDF/A-4f to retain attachments in an accessible archival PDF.
-- Select PDF/A through the conformance setting.
 
 ### Breaking changes
 
@@ -43,7 +42,6 @@ Date: 2026-11-21
 
 ### Document Engine & API
 
-- **`PdfAEnabled` is removed:** `DocumentSettings.PdfAEnabled` is gone. `Conformance` is the only setting that selects PDF/A; replace `PdfAEnabled = true` with `Conformance = PdfAConformance.PdfA2b`, the level it selected. `AsPdfA()` still selects PDF/A-2b.
 - **PDF/UA-2:** `AccessibilityMode.PdfUa2` writes PDF/UA-2 (ISO 14289-2:2024) on PDF 2.0, alone or with `PdfAConformance.PdfA4`, and passes veraPDF's PDF/UA-2 profile. On top of PDF/UA-1's tagging it writes the structure tree in the PDF 2.0 namespace, gives every list its numbering style, links each table-of-contents entry to its heading, and makes in-document links, bookmarks and the opening view go to structure elements as well as pages, so assistive technology lands on the right heading. It raises the default PDF version to 2.0; an explicit PDF 1.7, or PDF/A-1, -2 or -3, throws. PDF/UA-1 output is unchanged.
 - **Bookmarks on PDF 2.0:** a PDF/A-4 document lost its bookmarks, because they were written for PDF 1.7 only. They are now written on PDF 2.0 too.
 - **PDF/A-4 drops attachments:** a PDF/A-4 document with attachments embedded them and claimed PDF/A-4, which veraPDF rejects: PDF/A-4 accepts only embedded files that are themselves PDF/A, and the engine cannot check that. As under PDF/A-1 and -2, the attachments are now dropped with an `Attachment` warning and the claim kept. Use PDF/A-4f to keep them, or PDF/A-3 for e-invoices.
