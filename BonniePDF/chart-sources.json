@@ -2,12 +2,12 @@
   "version": 1,
   "source": {
     "name": "BonnieCharts",
-    "sha256": "641e6be88aa3e51060ab170a8a4b3333c8988acad7485c7303802e08c0acad6b",
+    "sha256": "dca90fa05680aa8a2fdbebbd4054969b9265b769391ceebc478eda25f6850c95",
     "files": {
       "typescript/src/Charts/AreaChart.ts": "f2b0846e97bb58a2250094da4324eff6b2927eb48574647026f863427d737c82",
       "typescript/src/Charts/BarChart.ts": "886320a1b81388f477b0f0dc4998392cd98dcb35e3417d26de69e34ea5b6d148",
       "typescript/src/Charts/CartesianChartBase.ts": "1218aeb696608b66fa266bc0fd1da61ba00d6587b8a131a1983b2ec594b9ea28",
-      "typescript/src/Charts/ChartBarStyle.ts": "032de3bf17121c8f6fa1aec301dfb66f003cf964cc0cafa74388822649f7e222",
+      "typescript/src/Charts/ChartBarStyle.ts": "4d170960c9d6b9511c67bb299519ad7995d9a768d07c5209013f51376993ec7b",
       "typescript/src/Charts/ChartBase.ts": "8f612af917043736080e43afd11601d0dff9ee4b1a8eb2ce9019fe06095dd04a",
       "typescript/src/Charts/ChartHost.ts": "486015f086a0028b8a736f56a288e46859293167f909321f8e87ebf64588b0ac",
       "typescript/src/Charts/ChartNumberFormat.ts": "672f842bf54f0bad3d69a2128aac649342549878765769e1b79bd1d50896b9a6",
