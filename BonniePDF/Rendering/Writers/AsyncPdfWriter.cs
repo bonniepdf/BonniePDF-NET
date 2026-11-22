@@ -280,9 +280,10 @@ internal class AsyncPdfWriter : IAsyncPdfWriter
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>The object ID of the viewer preferences, or 0 if no preferences are set</returns>
     public async Task<int> WriteViewerPreferencesAsync(int id, DocumentSettings settings,
+        bool forceDisplayDocTitle = false,
         CancellationToken cancellationToken = default)
     {
-        Dictionary<string, string>? dict = PdfObjectBuilders.ViewerPreferences(settings);
+        Dictionary<string, string>? dict = PdfObjectBuilders.ViewerPreferences(settings, forceDisplayDocTitle);
         if (dict == null)
             return 0;
 

@@ -95,8 +95,8 @@ internal class ComplianceWriter
     private static Dictionary<string, string> IccProfileDictionary(int decodedLength) => new()
     {
         [PdfKeys.ColorProfile.Components] = "3",
-        [PdfKeys.Stream.Filter] = "/FlateDecode",
-        [PdfKeys.Stream.DecodedLength] = decodedLength.ToString()
+        [PdfKeys.Stream.DecodedLength] = decodedLength.ToString(),
+        [PdfKeys.Stream.Filter] = "/FlateDecode"
     };
 
     private static Dictionary<string, string> OutputIntentDictionary(int iccProfileId) => new()

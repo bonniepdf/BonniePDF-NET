@@ -47,7 +47,7 @@ public class ImageWriterTests
             throw new NotSupportedException("This fake writer does not support the call.");
         }
 
-        public int WriteViewerPreferences(int id, BonniePDF.DocumentSettings settings)
+        public int WriteViewerPreferences(int id, BonniePDF.DocumentSettings settings, bool forceDisplayDocTitle = false)
         {
             throw new NotSupportedException("This fake writer does not support the call.");
         }

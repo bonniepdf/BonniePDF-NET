@@ -140,7 +140,7 @@ public class ParentTreeTests
         public void WriteBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) => WriteObject(id, dict);
         public void WriteCompressedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) => WriteObject(id, dict);
         public int WriteLinkAnnotation(int id, BonniePDF.Hyperlink hyperlink, IList<int>? pageIds = null, int? structParentKey = null) => id;
-        public int WriteViewerPreferences(int id, DocumentSettings settings) => id;
+        public int WriteViewerPreferences(int id, DocumentSettings settings, bool forceDisplayDocTitle = false) => id;
         public void WriteCatalog(int id, int pagesId, int firstPageId, DocumentSettings settings, CatalogOptions? options) { }
         public void WriteUnencryptedBinaryObject(int id, IDictionary<string, string> dict, byte[] streamContent) { }
         public void Close(int rootId, int infoId = 0) { }

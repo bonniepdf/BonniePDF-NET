@@ -253,9 +253,9 @@ internal class PdfWriter : IPdfWriter, IDisposable
     /// <param name="id">The object ID for the viewer preferences</param>
     /// <param name="settings">The document settings containing viewer preferences</param>
     /// <returns>The object ID of the viewer preferences, or 0 if no preferences are set</returns>
-    public int WriteViewerPreferences(int id, DocumentSettings settings)
+    public int WriteViewerPreferences(int id, DocumentSettings settings, bool forceDisplayDocTitle = false)
     {
-        Dictionary<string, string>? dict = PdfObjectBuilders.ViewerPreferences(settings);
+        Dictionary<string, string>? dict = PdfObjectBuilders.ViewerPreferences(settings, forceDisplayDocTitle);
         if (dict == null)
             return 0;
 

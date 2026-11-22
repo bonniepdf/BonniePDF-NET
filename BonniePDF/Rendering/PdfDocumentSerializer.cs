@@ -196,12 +196,12 @@ internal class PdfDocumentSerializer
 
         CatalogOptions catalogOptions = new();
 
-        // PDF/UA-1 mandates /DisplayDocTitle true (Matterhorn Protocol §7-1).
-        if (taggingContext != null) _document.Settings.DisplayDocTitle = true;
-        if (HasViewerPreferences(_document.Settings))
+        // PDF/UA mandates /DisplayDocTitle true (Matterhorn Protocol §7-1) without mutating caller settings.
+        bool forceDisplayDocTitle = taggingContext != null;
+        if (HasViewerPreferences(_document.Settings) || forceDisplayDocTitle)
         {
             catalogOptions.ViewerPrefsId = writer.GetNewId();
-            writer.WriteViewerPreferences(catalogOptions.ViewerPrefsId, _document.Settings);
+            writer.WriteViewerPreferences(catalogOptions.ViewerPrefsId, _document.Settings, forceDisplayDocTitle);
         }
 
         // Write XMP Metadata for PDF 1.7 and 2.0
@@ -428,12 +428,12 @@ internal class PdfDocumentSerializer
 
         CatalogOptions catalogOptions = new();
 
-        // PDF/UA-1 mandates /DisplayDocTitle true (Matterhorn Protocol §7-1).
-        if (taggingContext != null) _document.Settings.DisplayDocTitle = true;
-        if (HasViewerPreferences(_document.Settings))
+        // PDF/UA mandates /DisplayDocTitle true (Matterhorn Protocol §7-1) without mutating caller settings.
+        bool forceDisplayDocTitle = taggingContext != null;
+        if (HasViewerPreferences(_document.Settings) || forceDisplayDocTitle)
         {
             catalogOptions.ViewerPrefsId = writer.GetNewId();
-            await writer.WriteViewerPreferencesAsync(catalogOptions.ViewerPrefsId, _document.Settings, cancellationToken).ConfigureAwait(false);
+            await writer.WriteViewerPreferencesAsync(catalogOptions.ViewerPrefsId, _document.Settings, forceDisplayDocTitle, cancellationToken).ConfigureAwait(false);
         }
 
         // Write XMP Metadata for PDF 1.7 and 2.0

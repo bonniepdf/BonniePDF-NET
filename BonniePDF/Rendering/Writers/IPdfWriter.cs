@@ -56,7 +56,7 @@ internal interface IPdfWriter
     /// <summary>
     /// Writes viewer preferences to the document catalog.
     /// </summary>
-    int WriteViewerPreferences(int id, DocumentSettings settings);
+    int WriteViewerPreferences(int id, DocumentSettings settings, bool forceDisplayDocTitle = false);
 
     /// <summary>
     /// Writes a PDF catalog object with catalog options

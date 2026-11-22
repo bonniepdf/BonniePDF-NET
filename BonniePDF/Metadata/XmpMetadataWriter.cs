@@ -1,271 +1,256 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Xml;
+using System.Text;
 
 namespace BonniePDF.Metadata;
 
 /// <summary>
 /// Generates XMP metadata XML for PDF documents.
-/// XMP (Extensible Metadata Platform) provides standardized metadata
-/// that is required for PDF/A compliance and optional for PDF 1.7.
+/// Produces the canonical RDF/XML packet layout shared across implementations.
 /// </summary>
 internal static class XmpMetadataWriter
 {
-    private static class XmpNamespaces
-    {
-        public const string Rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-        public const string Dc = "http://purl.org/dc/elements/1.1/";
-        public const string Xmp = "http://ns.adobe.com/xap/1.0/";
-        public const string Pdf = "http://ns.adobe.com/pdf/1.3/";
-        public const string Xml = "http://www.w3.org/XML/1998/namespace";
-        public const string AdobeMeta = "adobe:ns:meta/";
-        // PDF/A extension-schema namespaces (ISO 19005-1 §6.7.11,
-        // -2/-3 §6.6.2.3) - describe non-predefined XMP schemas so
-        // PDF/A validators accept properties from them.
-        public const string PdfaExtension = "http://www.aiim.org/pdfa/ns/extension/";
-        public const string PdfaSchema = "http://www.aiim.org/pdfa/ns/schema#";
-        public const string PdfaProperty = "http://www.aiim.org/pdfa/ns/property#";
-    }
-
-    private static class XmlPrefixes
-    {
-        public const string Rdf = "rdf";
-        public const string Dc = "dc";
-        public const string Xmp = "xmp";
-        public const string Pdf = "pdf";
-        public const string Xml = "xml";
-        public const string AdobeX = "x";
-        public const string PdfaExtension = "pdfaExtension";
-        public const string PdfaSchema = "pdfaSchema";
-        public const string PdfaProperty = "pdfaProperty";
-    }
-
-    private static class XmlElements
-    {
-        // RDF
-        public const string RdfRoot = "RDF";
-        public const string Description = "Description";
-        public const string Alt = "Alt";
-        public const string Seq = "Seq";
-        public const string Bag = "Bag";
-        public const string ListItem = "li";
-
-        // Dublin Core (DC)
-        public const string DcTitle = "title";
-        public const string DcCreator = "creator";
-        public const string DcSubject = "subject";
-        public const string DcDescription = "description";
-
-        // XMP / PDF
-        public const string XmpMeta = "xmpmeta";
-        public const string Keywords = "Keywords";
-        public const string CreatorTool = "CreatorTool";
-        public const string CreateDate = "CreateDate";
-        public const string ModifyDate = "ModifyDate";
-        public const string Producer = "Producer";
-    }
-
-    private static class XmpPacket
-    {
-        public const string InstructionName = "xpacket";
-        // The id is a standard GUID required by the XMP specification
-        public const string BeginAttribute = "begin=\"\uFEFF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"";
-        public const string EndAttribute = "end=\"w\"";
-    }
-
-    private const string Iso8601Format = "yyyy-MM-ddTHH:mm:sszzz";
-    private const string DefaultLanguage = "x-default";
+    private const string Iso8601UtcFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    private static readonly char[] KeywordSeparators = [',', ';'];
 
     /// <summary>
     /// Generates the XMP XML string from document metadata, including
-    /// any conformance-namespace blocks the caller wants to claim
-    /// (PDF/A, PDF/UA, ZUGFeRD/Factur-X, …). Blocks compose - pass any
-    /// combination.
+    /// any conformance-namespace blocks the document claims
+    /// (PDF/A, PDF/UA, ZUGFeRD/Factur-X).
     /// </summary>
     public static string GenerateXmpXml(
         DocumentMetadata metadata,
         IReadOnlyList<XmpConformanceBlock>? conformanceBlocks = null)
     {
-        var settings = new XmlWriterSettings
+        IReadOnlyList<XmpConformanceBlock> blocks = conformanceBlocks ?? [];
+        var sb = new StringBuilder(1024);
+        sb.Append("<?xpacket begin=\"\uFEFF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>\n");
+        sb.Append("<x:xmpmeta xmlns:x=\"adobe:ns:meta/\">\n");
+        sb.Append("  <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n");
+
+        bool wroteDescription = false;
+
+        // 1. Conformance namespaces (pdfaid, pdfuaid, fx, ...) in one rdf:Description
+        if (blocks.Count > 0)
         {
-            Indent = true,
-            IndentChars = "  ",
-            NewLineChars = "\n",
-            OmitXmlDeclaration = true
-        };
-
-        using var sw = new StringWriter();
-        using (var xw = XmlWriter.Create(sw, settings))
-        {
-            xw.WriteProcessingInstruction(XmpPacket.InstructionName, XmpPacket.BeginAttribute);
-
-            xw.WriteStartElement(XmlPrefixes.AdobeX, XmlElements.XmpMeta, XmpNamespaces.AdobeMeta);
-            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.RdfRoot, XmpNamespaces.Rdf);
-            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Description, XmpNamespaces.Rdf);
-            xw.WriteAttributeString(XmlPrefixes.Rdf, "about", XmpNamespaces.Rdf, string.Empty);
-
-            WriteMetadataElements(xw, metadata);
-            WriteConformanceBlocks(xw, conformanceBlocks);
-            WriteExtensionSchemas(xw, conformanceBlocks);
-
-            xw.WriteEndElement(); // rdf:Description
-            xw.WriteEndElement(); // rdf:RDF
-            xw.WriteEndElement(); // x:xmpmeta
-
-            xw.WriteProcessingInstruction(XmpPacket.InstructionName, XmpPacket.EndAttribute);
-        }
-
-        return sw.ToString();
-    }
-
-    /// <summary>
-    /// Emit each <see cref="XmpConformanceBlock"/> inside the open
-    /// <c>rdf:Description</c>. Blocks share the same RDF description
-    /// per the additive-hook design - namespaces are scoped via
-    /// per-element <c>xmlns:prefix</c> declarations that XmlWriter
-    /// emits automatically.
-    /// </summary>
-    private static void WriteConformanceBlocks(XmlWriter xw, IReadOnlyList<XmpConformanceBlock>? blocks)
-    {
-        if (blocks == null) return;
-        foreach (var block in blocks)
-        {
-            foreach (var element in block.Elements)
+            wroteDescription = true;
+            sb.Append("    <rdf:Description rdf:about=\"\"");
+            foreach (XmpConformanceBlock block in blocks)
             {
-                xw.WriteElementString(block.Prefix, element.Key, block.NamespaceUri, element.Value);
+                sb.Append(" xmlns:").Append(block.Prefix).Append("=\"").Append(block.NamespaceUri).Append('"');
             }
+            sb.Append(">\n");
+            foreach (XmpConformanceBlock block in blocks)
+            {
+                foreach (KeyValuePair<string, string> element in block.Elements)
+                {
+                    sb.Append("      <").Append(block.Prefix).Append(':').Append(element.Key).Append('>');
+                    AppendEscapedXmlText(sb, element.Value);
+                    sb.Append("</").Append(block.Prefix).Append(':').Append(element.Key).Append(">\n");
+                }
+            }
+            sb.Append("    </rdf:Description>\n");
         }
-    }
 
-    /// <summary>
-    /// Emits a <c>pdfaExtension:schemas</c> bag describing any
-    /// non-predefined XMP namespaces referenced by the conformance
-    /// blocks. Required by PDF/A-2/3 §6.6.2.3.1 for any namespace not
-    /// in the predefined set (dc, xmp, pdf, pdfaid, …). Skipped unless
-    /// at least one block actually carries a PDF/A claim - without
-    /// PDF/A there's no validator that checks this rule and the bag
-    /// would be dead weight.
-    /// </summary>
-    private static void WriteExtensionSchemas(XmlWriter xw, IReadOnlyList<XmpConformanceBlock>? blocks)
-    {
-        if (blocks == null) return;
+        // 2. Dublin Core - title, creator (author), subject (keywords), description (subject).
+        bool hasTitle = !string.IsNullOrEmpty(metadata?.Title);
+        bool hasAuthor = !string.IsNullOrEmpty(metadata?.Author);
+        bool hasKeywords = !string.IsNullOrEmpty(metadata?.Keywords);
+        bool hasSubject = !string.IsNullOrEmpty(metadata?.Subject);
+
+        if (hasTitle || hasAuthor || hasKeywords || hasSubject)
+        {
+            wroteDescription = true;
+            sb.Append("    <rdf:Description rdf:about=\"\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
+            if (hasTitle)
+            {
+                sb.Append("      <dc:title>\n");
+                sb.Append("        <rdf:Alt>\n");
+                sb.Append("          <rdf:li xml:lang=\"x-default\">");
+                AppendEscapedXmlText(sb, metadata!.Title!);
+                sb.Append("</rdf:li>\n");
+                sb.Append("        </rdf:Alt>\n");
+                sb.Append("      </dc:title>\n");
+            }
+            if (hasAuthor)
+            {
+                sb.Append("      <dc:creator>\n");
+                sb.Append("        <rdf:Seq>\n");
+                sb.Append("          <rdf:li>");
+                AppendEscapedXmlText(sb, metadata!.Author!);
+                sb.Append("</rdf:li>\n");
+                sb.Append("        </rdf:Seq>\n");
+                sb.Append("      </dc:creator>\n");
+            }
+            if (hasKeywords)
+            {
+                string[] tokens = metadata!.Keywords!.Split(
+                    KeywordSeparators,
+                    StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                sb.Append("      <dc:subject>\n");
+                sb.Append("        <rdf:Bag>\n");
+                foreach (string keyword in tokens)
+                {
+                    sb.Append("          <rdf:li>");
+                    AppendEscapedXmlText(sb, keyword);
+                    sb.Append("</rdf:li>\n");
+                }
+                sb.Append("        </rdf:Bag>\n");
+                sb.Append("      </dc:subject>\n");
+            }
+            if (hasSubject)
+            {
+                sb.Append("      <dc:description>\n");
+                sb.Append("        <rdf:Alt>\n");
+                sb.Append("          <rdf:li xml:lang=\"x-default\">");
+                AppendEscapedXmlText(sb, metadata!.Subject!);
+                sb.Append("</rdf:li>\n");
+                sb.Append("        </rdf:Alt>\n");
+                sb.Append("      </dc:description>\n");
+            }
+            sb.Append("    </rdf:Description>\n");
+        }
+
+        // 3. PDF schema - Keywords, Producer.
+        bool hasProducer = !string.IsNullOrEmpty(metadata?.Producer);
+        if (hasKeywords || hasProducer)
+        {
+            wroteDescription = true;
+            sb.Append("    <rdf:Description rdf:about=\"\" xmlns:pdf=\"http://ns.adobe.com/pdf/1.3/\">\n");
+            if (hasKeywords)
+            {
+                sb.Append("      <pdf:Keywords>");
+                AppendEscapedXmlText(sb, metadata!.Keywords!);
+                sb.Append("</pdf:Keywords>\n");
+            }
+            if (hasProducer)
+            {
+                sb.Append("      <pdf:Producer>");
+                AppendEscapedXmlText(sb, metadata!.Producer!);
+                sb.Append("</pdf:Producer>\n");
+            }
+            sb.Append("    </rdf:Description>\n");
+        }
+
+        // 4. XMP basic schema - CreatorTool, CreateDate, ModifyDate.
+        bool hasCreator = !string.IsNullOrEmpty(metadata?.Creator);
+        bool hasCreationDate = metadata?.CreationDate.HasValue == true;
+        bool hasModifiedDate = metadata?.ModifiedDate.HasValue == true;
+        if (hasCreator || hasCreationDate || hasModifiedDate)
+        {
+            wroteDescription = true;
+            sb.Append("    <rdf:Description rdf:about=\"\" xmlns:xmp=\"http://ns.adobe.com/xap/1.0/\">\n");
+            if (hasCreator)
+            {
+                sb.Append("      <xmp:CreatorTool>");
+                AppendEscapedXmlText(sb, metadata!.Creator!);
+                sb.Append("</xmp:CreatorTool>\n");
+            }
+            if (hasCreationDate)
+            {
+                sb.Append("      <xmp:CreateDate>");
+                sb.Append(FormatIso8601(metadata!.CreationDate!.Value));
+                sb.Append("</xmp:CreateDate>\n");
+            }
+            if (hasModifiedDate)
+            {
+                sb.Append("      <xmp:ModifyDate>");
+                sb.Append(FormatIso8601(metadata!.ModifiedDate!.Value));
+                sb.Append("</xmp:ModifyDate>\n");
+            }
+            sb.Append("    </rdf:Description>\n");
+        }
+
+        // 5. PDF/A extension schema declarations (ISO 19005-2/3 §6.6.2.3).
         bool hasPdfA = false;
-        var schemas = new List<XmpExtensionSchema>();
-        foreach (var block in blocks)
+        List<XmpExtensionSchema>? extensionSchemas = null;
+        foreach (XmpConformanceBlock block in blocks)
         {
-            if (string.Equals(block.Prefix, "pdfaid", System.StringComparison.Ordinal)) hasPdfA = true;
-            if (block.ExtensionSchema != null) schemas.Add(block.ExtensionSchema);
-        }
-        if (!hasPdfA || schemas.Count == 0) return;
-
-        xw.WriteStartElement(XmlPrefixes.PdfaExtension, "schemas", XmpNamespaces.PdfaExtension);
-        xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Bag, XmpNamespaces.Rdf);
-        foreach (var schema in schemas)
-        {
-            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf);
-            xw.WriteAttributeString(XmlPrefixes.Rdf, "parseType", XmpNamespaces.Rdf, "Resource");
-
-            xw.WriteElementString(XmlPrefixes.PdfaSchema, "namespaceURI", XmpNamespaces.PdfaSchema, schema.NamespaceUri);
-            xw.WriteElementString(XmlPrefixes.PdfaSchema, "prefix", XmpNamespaces.PdfaSchema, schema.Prefix);
-            xw.WriteElementString(XmlPrefixes.PdfaSchema, "schema", XmpNamespaces.PdfaSchema, schema.SchemaName);
-
-            xw.WriteStartElement(XmlPrefixes.PdfaSchema, "property", XmpNamespaces.PdfaSchema);
-            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Seq, XmpNamespaces.Rdf);
-            foreach (var prop in schema.Properties)
+            if (string.Equals(block.Prefix, "pdfaid", StringComparison.Ordinal)) hasPdfA = true;
+            if (block.ExtensionSchema != null)
             {
-                xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf);
-                xw.WriteAttributeString(XmlPrefixes.Rdf, "parseType", XmpNamespaces.Rdf, "Resource");
-                xw.WriteElementString(XmlPrefixes.PdfaProperty, "name", XmpNamespaces.PdfaProperty, prop.Name);
-                xw.WriteElementString(XmlPrefixes.PdfaProperty, "valueType", XmpNamespaces.PdfaProperty, prop.ValueType);
-                xw.WriteElementString(XmlPrefixes.PdfaProperty, "category", XmpNamespaces.PdfaProperty, prop.Category);
-                xw.WriteElementString(XmlPrefixes.PdfaProperty, "description", XmpNamespaces.PdfaProperty, prop.Description);
-                xw.WriteEndElement(); // rdf:li
+                extensionSchemas ??= [];
+                extensionSchemas.Add(block.ExtensionSchema);
             }
-            xw.WriteEndElement(); // rdf:Seq
-            xw.WriteEndElement(); // pdfaSchema:property
-
-            xw.WriteEndElement(); // rdf:li
         }
-        xw.WriteEndElement(); // rdf:Bag
-        xw.WriteEndElement(); // pdfaExtension:schemas
+        if (hasPdfA && extensionSchemas is { Count: > 0 })
+        {
+            wroteDescription = true;
+            sb.Append("    <rdf:Description rdf:about=\"\"\n");
+            sb.Append("        xmlns:pdfaExtension=\"http://www.aiim.org/pdfa/ns/extension/\"\n");
+            sb.Append("        xmlns:pdfaSchema=\"http://www.aiim.org/pdfa/ns/schema#\"\n");
+            sb.Append("        xmlns:pdfaProperty=\"http://www.aiim.org/pdfa/ns/property#\">\n");
+            sb.Append("      <pdfaExtension:schemas>\n");
+            sb.Append("        <rdf:Bag>\n");
+            foreach (XmpExtensionSchema schema in extensionSchemas)
+            {
+                sb.Append("          <rdf:li rdf:parseType=\"Resource\">\n");
+                sb.Append("            <pdfaSchema:namespaceURI>");
+                AppendEscapedXmlText(sb, schema.NamespaceUri);
+                sb.Append("</pdfaSchema:namespaceURI>\n");
+                sb.Append("            <pdfaSchema:prefix>");
+                AppendEscapedXmlText(sb, schema.Prefix);
+                sb.Append("</pdfaSchema:prefix>\n");
+                sb.Append("            <pdfaSchema:schema>");
+                AppendEscapedXmlText(sb, schema.SchemaName);
+                sb.Append("</pdfaSchema:schema>\n");
+                sb.Append("            <pdfaSchema:property>\n");
+                sb.Append("              <rdf:Seq>\n");
+                foreach (XmpExtensionSchemaProperty prop in schema.Properties)
+                {
+                    sb.Append("                <rdf:li rdf:parseType=\"Resource\">\n");
+                    sb.Append("                  <pdfaProperty:name>");
+                    AppendEscapedXmlText(sb, prop.Name);
+                    sb.Append("</pdfaProperty:name>\n");
+                    sb.Append("                  <pdfaProperty:valueType>");
+                    AppendEscapedXmlText(sb, prop.ValueType);
+                    sb.Append("</pdfaProperty:valueType>\n");
+                    sb.Append("                  <pdfaProperty:category>");
+                    AppendEscapedXmlText(sb, prop.Category);
+                    sb.Append("</pdfaProperty:category>\n");
+                    sb.Append("                  <pdfaProperty:description>");
+                    AppendEscapedXmlText(sb, prop.Description);
+                    sb.Append("</pdfaProperty:description>\n");
+                    sb.Append("                </rdf:li>\n");
+                }
+                sb.Append("              </rdf:Seq>\n");
+                sb.Append("            </pdfaSchema:property>\n");
+                sb.Append("          </rdf:li>\n");
+            }
+            sb.Append("        </rdf:Bag>\n");
+            sb.Append("      </pdfaExtension:schemas>\n");
+            sb.Append("    </rdf:Description>\n");
+        }
+
+        if (!wroteDescription)
+        {
+            sb.Append("    <rdf:Description rdf:about=\"\"/>\n");
+        }
+
+        sb.Append("  </rdf:RDF>\n");
+        sb.Append("</x:xmpmeta>\n");
+        sb.Append("<?xpacket end=\"w\"?>");
+        return sb.ToString();
     }
 
-    private static void WriteMetadataElements(XmlWriter xw, DocumentMetadata metadata)
+    private static void AppendEscapedXmlText(StringBuilder sb, string text)
     {
-        if (!string.IsNullOrEmpty(metadata.Title))
+        foreach (char c in text)
         {
-            xw.WriteStartElement(XmlPrefixes.Dc, XmlElements.DcTitle, XmpNamespaces.Dc);
-            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Alt, XmpNamespaces.Rdf);
-            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf);
-            xw.WriteAttributeString(XmlPrefixes.Xml, "lang", XmpNamespaces.Xml, DefaultLanguage);
-            xw.WriteString(metadata.Title);
-            xw.WriteEndElement(); // rdf:li
-            xw.WriteEndElement(); // rdf:Alt
-            xw.WriteEndElement(); // dc:title
-        }
-
-        if (!string.IsNullOrEmpty(metadata.Author))
-        {
-            xw.WriteStartElement(XmlPrefixes.Dc, XmlElements.DcCreator, XmpNamespaces.Dc);
-            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Seq, XmpNamespaces.Rdf);
-            xw.WriteElementString(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf, metadata.Author);
-            xw.WriteEndElement(); // rdf:Seq
-            xw.WriteEndElement(); // dc:creator
-        }
-
-        if (!string.IsNullOrEmpty(metadata.Keywords))
-        {
-            xw.WriteStartElement(XmlPrefixes.Dc, XmlElements.DcSubject, XmpNamespaces.Dc);
-            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Bag, XmpNamespaces.Rdf);
-
-            var keywords = metadata.Keywords.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            foreach (string keyword in keywords)
+            switch (c)
             {
-                xw.WriteElementString(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf, keyword);
+                case '&': sb.Append("&amp;"); break;
+                case '<': sb.Append("&lt;"); break;
+                case '>': sb.Append("&gt;"); break;
+                default: sb.Append(c); break;
             }
-
-            xw.WriteEndElement(); // rdf:Bag
-            xw.WriteEndElement(); // dc:subject
-
-            xw.WriteElementString(XmlPrefixes.Pdf, XmlElements.Keywords, XmpNamespaces.Pdf, metadata.Keywords);
         }
-
-        if (!string.IsNullOrEmpty(metadata.Subject))
-        {
-            xw.WriteStartElement(XmlPrefixes.Dc, XmlElements.DcDescription, XmpNamespaces.Dc);
-            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.Alt, XmpNamespaces.Rdf);
-            xw.WriteStartElement(XmlPrefixes.Rdf, XmlElements.ListItem, XmpNamespaces.Rdf);
-            xw.WriteAttributeString(XmlPrefixes.Xml, "lang", XmpNamespaces.Xml, DefaultLanguage);
-            xw.WriteString(metadata.Subject);
-            xw.WriteEndElement(); // rdf:li
-            xw.WriteEndElement(); // rdf:Alt
-            xw.WriteEndElement(); // dc:description
-        }
-
-        if (!string.IsNullOrEmpty(metadata.Creator))
-            xw.WriteElementString(XmlPrefixes.Xmp, XmlElements.CreatorTool, XmpNamespaces.Xmp, metadata.Creator);
-
-        if (metadata.CreationDate.HasValue)
-            xw.WriteElementString(XmlPrefixes.Xmp, XmlElements.CreateDate, XmpNamespaces.Xmp, FormatIso8601(metadata.CreationDate.Value));
-
-        if (metadata.ModifiedDate.HasValue)
-            xw.WriteElementString(XmlPrefixes.Xmp, XmlElements.ModifyDate, XmpNamespaces.Xmp, FormatIso8601(metadata.ModifiedDate.Value));
-
-        if (!string.IsNullOrEmpty(metadata.Producer))
-            xw.WriteElementString(XmlPrefixes.Pdf, XmlElements.Producer, XmpNamespaces.Pdf, metadata.Producer);
-
-        // Conformance blocks (PDF/A, PDF/UA, ZUGFeRD, …) are emitted by
-        // WriteConformanceBlocks above - see design note for
-        // the additive-hook rationale.
     }
 
-    /// <summary>
-    /// Formats a DateTimeOffset as ISO 8601 string.
-    /// </summary>
+    /// <summary>Formats a DateTimeOffset as a UTC ISO 8601 string (e.g. 2026-05-24T07:23:11Z).</summary>
     private static string FormatIso8601(DateTimeOffset date)
     {
-        return date.ToString(Iso8601Format, CultureInfo.InvariantCulture);
+        return date.ToUniversalTime().ToString(Iso8601UtcFormat, CultureInfo.InvariantCulture);
     }
 }

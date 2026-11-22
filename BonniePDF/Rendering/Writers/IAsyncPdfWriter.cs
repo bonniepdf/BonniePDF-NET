@@ -60,6 +60,7 @@ internal interface IAsyncPdfWriter : IAsyncDisposable
     /// Writes viewer preferences to the document catalog asynchronously.
     /// </summary>
     Task<int> WriteViewerPreferencesAsync(int id, DocumentSettings settings,
+        bool forceDisplayDocTitle = false,
         CancellationToken cancellationToken = default);
 
     /// <summary>

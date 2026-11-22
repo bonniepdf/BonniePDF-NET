@@ -49,6 +49,6 @@ public class CultureInvariantDateTests
     {
         var metadata = new DocumentMetadata { CreationDate = When };
         string xml = Under(culture, () => XmpMetadataWriter.GenerateXmpXml(metadata));
-        Assert.Contains("2026-09-23T14:05:09+00:00", xml, StringComparison.Ordinal);
+        Assert.Contains("2026-09-23T14:05:09Z", xml, StringComparison.Ordinal);
     }
 }

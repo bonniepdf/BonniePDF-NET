@@ -33,11 +33,6 @@ internal static class PdfObjectBuilders
             [PdfKeys.Annotation.Contents] = $"({PdfSyntax.Escape(hyperlink.Text ?? string.Empty)})",
         };
 
-        // /StructParent wires this annotation into the parent tree
-        // for reverse MCID→StructElem lookup by accessible viewers.
-        if (structParentKey.HasValue)
-            dict[PdfKeys.Annotation.StructureParent] = structParentKey.Value.ToString();
-
         if (goToActionId.HasValue)
         {
             // PDF/UA-2: a go-to action with a structure destination (spec 04 §3.4).
@@ -53,11 +48,16 @@ internal static class PdfObjectBuilders
             dict[PdfKeys.Annotation.Action] = $"<< /S /URI /URI ({PdfSyntax.Escape(PdfSyntax.EncodeUri(hyperlink.Uri ?? ""))}) >>";
         }
 
+        // /StructParent wires this annotation into the parent tree
+        // for reverse MCID→StructElem lookup by accessible viewers.
+        if (structParentKey.HasValue)
+            dict[PdfKeys.Annotation.StructureParent] = structParentKey.Value.ToString();
+
         return dict;
     }
 
     /// <summary>Builds the viewer preferences dictionary, or null when no preference is set.</summary>
-    internal static Dictionary<string, string>? ViewerPreferences(DocumentSettings settings)
+    internal static Dictionary<string, string>? ViewerPreferences(DocumentSettings settings, bool forceDisplayDocTitle = false)
     {
         Dictionary<string, string> dict = new();
 
@@ -76,7 +76,7 @@ internal static class PdfObjectBuilders
         if (settings.CenterWindow)
             dict[PdfKeys.ViewerPreferences.CenterWindow] = "true";
 
-        if (settings.DisplayDocTitle)
+        if (settings.DisplayDocTitle || forceDisplayDocTitle)
             dict[PdfKeys.ViewerPreferences.DisplayDocumentTitle] = "true";
 
         // Only write if there are actual preferences
