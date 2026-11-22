@@ -106,9 +106,10 @@ public sealed partial class PdfUa2Tests
         Assert.Contains($"/Namespaces [ {ns} 0 R ]", root, StringComparison.Ordinal);
 
         var withoutNs = StructElems(objects).Where(e => !e.Value.Contains($"/NS {ns} 0 R", StringComparison.Ordinal))
-            .Select(e => Role(e.Value)).Distinct().Order(StringComparer.Ordinal);
-        Assert.Equal(["Reference", "TOC", "TOCI"], withoutNs);
-        Assert.Contains($"/NS {ns} 0 R", StructElems(objects).Single(e => Role(e.Value) == "Document").Value, StringComparison.Ordinal);
+            .Select(e => Role(e.Value)).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal);
+        Assert.Equal(["Reference", "TOC", "TOCI"], withoutNs, StringComparer.Ordinal);
+        string document = StructElems(objects).Single(e => string.Equals(Role(e.Value), "Document", StringComparison.Ordinal)).Value;
+        Assert.Contains($"/NS {ns} 0 R", document, StringComparison.Ordinal);
     }
 
     [Theory]
@@ -142,7 +143,8 @@ public sealed partial class PdfUa2Tests
     {
         Dictionary<int, string> objects = Objects(Probe());
         int[] pages = PageIds(objects);
-        List<KeyValuePair<int, string>> entries = StructElems(objects).Where(e => Role(e.Value) == "TOCI").ToList();
+        List<KeyValuePair<int, string>> entries = StructElems(objects)
+            .Where(e => string.Equals(Role(e.Value), "TOCI", StringComparison.Ordinal)).ToList();
         Assert.Equal(2, entries.Count);
         string[] headings = ["H1:Intro", "H1:Details"];
         for (int i = 0; i < entries.Count; i++)
@@ -153,10 +155,11 @@ public sealed partial class PdfUa2Tests
             int[] kids = Refs(Kids(entry));
             Assert.Equal("Reference", Role(objects[kids[0]]));
             Assert.Contains("/Type /OBJR", objects[kids[0]], StringComparison.Ordinal);
-            int target = int.Parse(RefEntry().Match(entry).Groups[1].Value, CultureInfo.InvariantCulture);
+            int target = int.Parse(RefEntry().Match(entry).Groups["targetId"].Value, CultureInfo.InvariantCulture);
             Assert.Equal(headings[i], $"{Role(objects[target])}:{HeadingOnPage(objects, pages, target)}");
         }
-        Assert.DoesNotContain(StructElems(objects), e => Role(e.Value) == "Link" && Role(objects[Parent(e.Value)]) is "TOCI" or "Reference");
+        Assert.DoesNotContain(StructElems(objects), e =>
+            string.Equals(Role(e.Value), "Link", StringComparison.Ordinal) && Role(objects[Parent(e.Value)]) is "TOCI" or "Reference");
     }
 
     // ── Destinations ────────────────────────────────────────────────
@@ -232,7 +235,8 @@ public sealed partial class PdfUa2Tests
         {
             using BonniePDF.Document doc = Probe();
             string pdf = Latin1(doc.GenerateBytes());
-            Assert.Single(doc.Diagnostics, d => d.Category == DiagnosticCategory.Compliance && d.Source == "pdf/ua-2");
+            Assert.Single(doc.Diagnostics, d =>
+                d.Category == DiagnosticCategory.Compliance && string.Equals(d.Source, "pdf/ua-2", StringComparison.Ordinal));
             Assert.DoesNotContain("pdfuaid", pdf, StringComparison.Ordinal);
             foreach (string kept in new[] { "%PDF-2.0", "/Namespaces", "/ListNumbering", "/SD" })
                 Assert.Contains(kept, pdf, StringComparison.Ordinal);
@@ -316,27 +320,27 @@ public sealed partial class PdfUa2Tests
     private static IEnumerable<KeyValuePair<int, string>> StructElems(Dictionary<int, string> objects) =>
         objects.Where(o => o.Value.Contains("/Type /StructElem", StringComparison.Ordinal)).OrderBy(o => o.Key);
 
-    private static string Role(string dict) => RoleEntry().Match(dict).Groups[1].Value;
+    private static string Role(string dict) => RoleEntry().Match(dict).Groups["role"].Value;
 
-    private static string Kids(string dict) => KidsEntry().Match(dict).Groups[1].Value;
+    private static string Kids(string dict) => KidsEntry().Match(dict).Groups["kids"].Value;
 
-    private static int Parent(string dict) => int.Parse(ParentEntry().Match(dict).Groups[1].Value, CultureInfo.InvariantCulture);
+    private static int Parent(string dict) => int.Parse(ParentEntry().Match(dict).Groups["parentId"].Value, CultureInfo.InvariantCulture);
 
     private static int[] Refs(string array) =>
-        StructRef().Matches(array).Select(m => int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture)).ToArray();
+        StructRef().Matches(array).Select(m => int.Parse(m.Groups["objectId"].Value, CultureInfo.InvariantCulture)).ToArray();
 
     private static int[] PageIds(Dictionary<int, string> objects)
     {
         string pages = objects.Values.Single(v => v.Contains("/Type /Pages", StringComparison.Ordinal));
-        return Refs(PagesKids().Match(pages).Groups[1].Value);
+        return Refs(PagesKids().Match(pages).Groups["kids"].Value);
     }
 
     /// <summary>(page index of /D, role of /SD's element) for a go-to action; headings carry their text.</summary>
     private static (int Page, string Target) GoTo(Dictionary<int, string> objects, int[] pages, string action)
     {
         Match m = GoToEntries().Match(action);
-        int page = Array.IndexOf(pages, int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture));
-        int element = int.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture);
+        int page = Array.IndexOf(pages, int.Parse(m.Groups["pageId"].Value, CultureInfo.InvariantCulture));
+        int element = int.Parse(m.Groups["elementId"].Value, CultureInfo.InvariantCulture);
         string role = Role(objects[element]);
         return (page, role.StartsWith('H') ? $"{role}:{HeadingOnPage(objects, pages, element)}" : role);
     }
@@ -345,7 +349,7 @@ public sealed partial class PdfUa2Tests
     private static string HeadingOnPage(Dictionary<int, string> objects, int[] pages, int element)
     {
         Match pg = PageEntry().Match(objects[element]);
-        return Array.IndexOf(pages, int.Parse(pg.Groups[1].Value, CultureInfo.InvariantCulture)) == 0 ? "Intro" : "Details";
+        return Array.IndexOf(pages, int.Parse(pg.Groups["pageId"].Value, CultureInfo.InvariantCulture)) == 0 ? "Intro" : "Details";
     }
 
     private static string[] ListNumberings(ListElementBase list)
@@ -353,40 +357,40 @@ public sealed partial class PdfUa2Tests
         using var doc = new BonniePDF.Document();
         Configure(doc);
         doc.Add(list);
-        return StructElems(Objects(doc)).Where(e => Role(e.Value) == "L")
-            .Select(e => ListNumberingEntry().Match(e.Value).Groups[1].Value).ToArray();
+        return StructElems(Objects(doc)).Where(e => string.Equals(Role(e.Value), "L", StringComparison.Ordinal))
+            .Select(e => ListNumberingEntry().Match(e.Value).Groups["numbering"].Value).ToArray();
     }
 
-    [GeneratedRegex(@"(?<id>\d+) 0 obj\s*(?<body>.*?)endobj", RegexOptions.Singleline | RegexOptions.ExplicitCapture)]
+    [GeneratedRegex(@"(?<id>\d+) 0 obj\s*(?<body>.*?)endobj", RegexOptions.Singleline | RegexOptions.ExplicitCapture, RegexTimeout.Milliseconds)]
     private static partial Regex IndirectObject();
 
-    [GeneratedRegex(@"/S /(\w+)")]
+    [GeneratedRegex(@"/S /(?<role>\w+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex RoleEntry();
 
-    [GeneratedRegex(@"/K \[([^\]]*)\]")]
+    [GeneratedRegex(@"/K \[(?<kids>[^\]]*)\]", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex KidsEntry();
 
-    [GeneratedRegex(@"/P (\d+) 0 R")]
+    [GeneratedRegex(@"/P (?<parentId>\d+) 0 R", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex ParentEntry();
 
-    [GeneratedRegex(@"/Pg (\d+) 0 R")]
+    [GeneratedRegex(@"/Pg (?<pageId>\d+) 0 R", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex PageEntry();
 
-    [GeneratedRegex(@"(?<!/Pg |/Obj )(\d+) 0 R")]
+    [GeneratedRegex(@"(?<!/Pg |/Obj )(?<objectId>\d+) 0 R", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex StructRef();
 
-    [GeneratedRegex(@"/Kids \[([^\]]*)\]")]
+    [GeneratedRegex(@"/Kids \[(?<kids>[^\]]*)\]", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex PagesKids();
 
-    [GeneratedRegex(@"/Ref \[ (\d+) 0 R \]")]
+    [GeneratedRegex(@"/Ref \[ (?<targetId>\d+) 0 R \]", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex RefEntry();
 
-    [GeneratedRegex(@"^\s*\d+ 0 R\s*$")]
+    [GeneratedRegex(@"^\s*\d+ 0 R\s*$", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex SingleRef();
 
-    [GeneratedRegex(@"/D \[(\d+) 0 R [^\]]*\]\s+/SD \[(\d+) 0 R")]
+    [GeneratedRegex(@"/D \[(?<pageId>\d+) 0 R [^\]]*\]\s+/SD \[(?<elementId>\d+) 0 R", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex GoToEntries();
 
-    [GeneratedRegex(@"/ListNumbering /(\w+)")]
+    [GeneratedRegex(@"/ListNumbering /(?<numbering>\w+)", RegexOptions.None, RegexTimeout.Milliseconds)]
     private static partial Regex ListNumberingEntry();
 }
