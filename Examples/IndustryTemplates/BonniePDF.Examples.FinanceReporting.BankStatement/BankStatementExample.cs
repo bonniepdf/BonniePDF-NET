@@ -148,6 +148,17 @@ public static class BankStatementExample
         doc.Add(H2("Where your everyday money went"));
         doc.Add(new BarChart
         {
+            Theme = "modern",
+            BarStyle = new ChartBarStyle
+            {
+                CornerRadius = 4,
+                Gradient = new ChartLinearGradient
+                {
+                    StartColor = Color.FromHex("#14b8a6"),
+                    EndColor = Color.FromHex("#0f766e"),
+                    Scope = "bar",
+                },
+            },
             Data = new ChartData
             {
                 Series =

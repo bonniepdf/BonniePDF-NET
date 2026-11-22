@@ -297,6 +297,8 @@ public static class LabReportExample
         })
         {
             Theme = "modern",
+            Curve = "smooth",
+            DefaultMarkerHaloWidth = 1.5f,
             AltText = altText,
             Height = 130,
             StretchToFit = true,

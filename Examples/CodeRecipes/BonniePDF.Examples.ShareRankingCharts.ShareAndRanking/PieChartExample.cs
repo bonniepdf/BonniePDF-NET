@@ -80,9 +80,8 @@ public static class PieChartExample
                 new ChartSeries
                 {
                     Name = "Revenue",
-                    // The share goes in the label, so the legend reads "Online shop (40%) - 412,600".
                     DataPoints = Channels
-                        .Select(c => new ChartDataPoint { Label = $"{c.Channel} ({Share(c.Revenue)})", Value = c.Revenue, LabelFormat = "N0" })
+                        .Select(c => new ChartDataPoint { Label = c.Channel, Value = c.Revenue, LabelFormat = "N0" })
                         .ToList()
                 }
             ]
@@ -90,6 +89,15 @@ public static class PieChartExample
 
         PieChart chart = new(data)
         {
+            Theme = "modern",
+            SliceGradient = true,
+            SliceBorderWidth = 1.5f,
+            DonutHoleRatio = 0.56f,
+            SliceLabelMode = "callout",
+            LegendFormat = "labelValuePercent",
+            BorderRadius = 8,
+            BorderColor = Color.FromHex("#e2e8f0"),
+            BorderWidth = 1,
             AltText = "Donut chart of revenue by channel, year to March 2026: "
                 + string.Join(", ", Channels.Select(c => $"{c.Channel} {Share(c.Revenue)}"))
                 + $". Total {Money(total)}.",

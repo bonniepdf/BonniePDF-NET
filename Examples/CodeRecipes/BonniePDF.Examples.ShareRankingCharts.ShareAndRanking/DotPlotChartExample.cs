@@ -101,10 +101,31 @@ public static class DotPlotChartExample
             Height = 380,
             StretchToFit = true,
             DotColor = Color.FromHex("#14b8a6"),
+            DefaultDotRadius = 6,
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
             Theme = "modern",
+            AutoLayout = true,
+            DefaultMarkerShape = "diamond",
+            DefaultMarkerFill = "hollow",
+            Subtitle = "Hollow diamond markers positioned along a value axis with target threshold",
+            BorderRadius = 8,
+            BorderColor = Color.FromHex("#e2e8f0"),
+            BorderWidth = 1,
+            References =
+            [
+                new ChartReference
+                {
+                    Value = 7500,
+                    Label = "Target £7,500",
+                    LabelPosition = "end",
+                    LabelBackgroundColor = Color.FromHex("#ccfbf1"),
+                    Color = Color.FromHex("#0f766e"),
+                    Thickness = 1.5f,
+                    DashPattern = [5f, 3f],
+                },
+            ],
             BackgroundColor = Color.White
         };
 

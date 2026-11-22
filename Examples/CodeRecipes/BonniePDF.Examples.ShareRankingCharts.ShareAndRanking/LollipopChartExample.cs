@@ -109,6 +109,25 @@ public static class LollipopChartExample
             LabelFontSize = 9,
             ShowValueLabels = true,
             Theme = "modern",
+            AutoLayout = true,
+            DefaultMarkerHaloWidth = 1.5f,
+            Subtitle = "Stems with haloed circular heads and monthly benchmark overlay",
+            BorderRadius = 8,
+            BorderColor = Color.FromHex("#e2e8f0"),
+            BorderWidth = 1,
+            References =
+            [
+                new ChartReference
+                {
+                    Value = 2000,
+                    Label = "Benchmark £2,000",
+                    LabelPosition = "start",
+                    LabelBackgroundColor = Color.FromHex("#fce7f3"),
+                    Color = Color.FromHex("#db2777"),
+                    Thickness = 1.5f,
+                    DashPattern = [5f, 3f],
+                },
+            ],
             BackgroundColor = Color.White
         };
 

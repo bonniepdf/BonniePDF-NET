@@ -64,6 +64,19 @@ public static class FinancialDashboardExample
         {
             Theme = "modern", Height = 142, StretchToFit = true, ShowValueLabels = false, FontFamily = StandardFonts.Helvetica, LabelFontSize = 8,
             BarStyle = new ChartBarStyle { CornerRadius = 4, Gradient = new ChartLinearGradient { StartColor = Color.FromHex("#60a5fa"), EndColor = Blue, Scope = "bar" } },
+            References =
+            [
+                new ChartReference
+                {
+                    Value = 185,
+                    Label = "Avg £185k",
+                    LabelPosition = "start",
+                    LabelBackgroundColor = Color.FromHex("#eff6ff"),
+                    Color = Blue,
+                    Thickness = 1,
+                    DashPattern = [4f, 2f],
+                },
+            ],
             Data = new ChartData
             {
                 Series = [new ChartSeries { Name = "Revenue", Color = Blue, DataPoints = months.Select((label, i) => new ChartDataPoint { Label = label, Value = (decimal)revenue[i] }).ToList() }],
@@ -73,7 +86,7 @@ public static class FinancialDashboardExample
         };
         PieChart donut = new()
         {
-            Theme = "modern", Height = 132, StretchToFit = true, IsDonut = true, ShowLegend = false, ShowTotal = false,
+            Theme = "modern", SliceGradient = true, SliceBorderWidth = 1.5f, Height = 132, StretchToFit = true, IsDonut = true, ShowLegend = false, ShowTotal = false,
             Colors = ["#2563eb", "#0d9488", "#7c3aed", "#d97706"],
             Data = new ChartData { Series = [new ChartSeries { DataPoints = products.Select(p => new ChartDataPoint { Label = p.Name, Value = (decimal)p.Revenue }).ToList() }] },
             AltText = "Revenue mix: Enterprise £910,000; Professional £650,000; Starter £446,000; Services £222,000. Total £2,228,000."

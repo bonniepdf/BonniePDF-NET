@@ -274,6 +274,9 @@ public static class StatutoryComplianceReportExample
             ],
         })
         {
+            Theme = "modern",
+            SliceGradient = true,
+            SliceBorderWidth = 1.5f,
             AltText = "Donut chart of inspection status for 128 assets: 117 compliant, 6 due within 30 days, 5 overdue.",
             IsDonut = true,
             ShowLegend = false, // the legend below states counts in words, in matching colours
@@ -307,6 +310,8 @@ public static class StatutoryComplianceReportExample
             YAxis = new AxisOptions { MinValue = 0, MaxValue = 100, StepCount = 4, Suffix = "%" },
         })
         {
+            Theme = "modern",
+            BarStyle = new ChartBarStyle { CornerRadius = 3 },
             AltText =
                 "Bar chart of percentage compliance by category: fire safety 96, water hygiene 88, electrical 93, gas " +
                 "safety 100, lifts and lifting 85, emergency lighting 92, F-gas and HVAC 90, asbestos management 100.",

@@ -82,12 +82,26 @@ public static class MultiSeriesLineChartExample
         ChartSeries previousYear = new()
         {
             Name = $"{year - 1}",
-            Color = Color.FromHex("#94a3b8")
+            Color = Color.FromHex("#94a3b8"),
+            Style = new ChartSeriesStyle
+            {
+                DashPattern = [6f, 3f],
+                MarkerShape = "diamond",
+                MarkerFill = "hollow",
+                MarkerRadius = 4f,
+            },
         };
         ChartSeries currentYear = new()
         {
             Name = $"{year}",
-            Color = Color.FromHex("#4f46e5")
+            Color = Color.FromHex("#4f46e5"),
+            Style = new ChartSeriesStyle
+            {
+                LineWidth = 2.5f,
+                MarkerShape = "circle",
+                MarkerHaloWidth = 1.5f,
+                MarkerRadius = 4.5f,
+            },
         };
 
         for (int i = 0; i < MonthLabels.Length; i++)
@@ -103,6 +117,7 @@ public static class MultiSeriesLineChartExample
             YAxis = new AxisOptions
             {
                 Prefix = "£",
+                ValueFormat = "K0",
                 MaxValue = 150000,
                 StepCount = 5,
                 Legend = "Revenue"
@@ -123,6 +138,25 @@ public static class MultiSeriesLineChartExample
             // Twelve points per line: value labels would collide, so the axis carries the scale.
             ShowValueLabels = false,
             Theme = "modern",
+            AutoLayout = true,
+            Curve = "smooth",
+            LegendPosition = "top",
+            BorderRadius = 8,
+            BorderColor = Color.FromHex("#e2e8f0"),
+            BorderWidth = 1,
+            References =
+            [
+                new ChartReference
+                {
+                    Value = 100000,
+                    Label = "£100K milestone",
+                    LabelPosition = "start",
+                    LabelBackgroundColor = Color.FromHex("#eef2ff"),
+                    Color = Color.FromHex("#4f46e5"),
+                    Thickness = 1.25f,
+                    DashPattern = [4f, 3f],
+                },
+            ],
             BackgroundColor = Color.White
         };
 

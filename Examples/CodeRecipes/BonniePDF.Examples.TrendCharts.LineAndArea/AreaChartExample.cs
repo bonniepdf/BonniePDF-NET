@@ -102,6 +102,27 @@ public static class AreaChartExample
         // Create the area chart
         AreaChart areaChart = new(chartData)
         {
+            Theme = "modern",
+            AutoLayout = true,
+            Curve = "smooth",
+            AreaGradient = true,
+            Subtitle = "Smooth spline with vertical fade gradient and break-even reference line",
+            BorderRadius = 8,
+            BorderColor = Color.FromHex("#e2e8f0"),
+            BorderWidth = 1,
+            References =
+            [
+                new ChartReference
+                {
+                    Value = 7500,
+                    Label = "Break-even £7.5k",
+                    LabelPosition = "start",
+                    LabelBackgroundColor = Color.FromHex("#fae8ff"),
+                    Color = Color.FromHex("#9333ea"),
+                    Thickness = 1.5f,
+                    DashPattern = [5f, 3f],
+                },
+            ],
             AltText = "Area chart showing monthly sales performance from January to December",
             Height = 380,
             StretchToFit = true,
@@ -111,7 +132,7 @@ public static class AreaChartExample
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            BackgroundColor = Color.White
         };
 
         // Add the chart to the document

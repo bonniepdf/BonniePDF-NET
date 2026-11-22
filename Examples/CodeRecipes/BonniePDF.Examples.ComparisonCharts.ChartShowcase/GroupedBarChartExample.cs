@@ -74,7 +74,7 @@ public static class GroupedBarChartExample
 
         ChartData chartData = new()
         {
-            YAxis = { MaxValue = 35000, Prefix = "£", StepCount = 7, ShowGridLines = true }
+            YAxis = { MaxValue = 35000, Prefix = "£", ValueFormat = "K0", StepCount = 7, ShowGridLines = true }
         };
         chartData.Series.Add(electronicsSeries);
         chartData.Series.Add(clothingSeries);
@@ -90,6 +90,13 @@ public static class GroupedBarChartExample
             FontFamily = StandardFonts.Helvetica,
             ShowValueLabels = true,
             Theme = "modern",
+            AutoLayout = true,
+            LegendPosition = "top",
+            Subtitle = "Three product lines compared across all four quarters of 2026",
+            BorderRadius = 8,
+            BorderColor = Color.FromHex("#e2e8f0"),
+            BorderWidth = 1,
+            BarStyle = new ChartBarStyle { CornerRadius = 4 },
             BackgroundColor = Color.White,
         };
 

@@ -62,18 +62,19 @@ public static class HorizontalBarChartExample
                     Color = Color.FromHex("#4f46e5"),
                     DataPoints =
                     [
-                        new ChartDataPoint { Label = "South East", Value = 261000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Midlands", Value = 203000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "North West", Value = 187000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "North East", Value = 142000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "South West", Value = 118000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "East Anglia", Value = 96000, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "South East", Value = 261000 },
+                        new ChartDataPoint { Label = "Midlands", Value = 203000 },
+                        new ChartDataPoint { Label = "North West", Value = 187000 },
+                        new ChartDataPoint { Label = "North East", Value = 142000 },
+                        new ChartDataPoint { Label = "South West", Value = 118000 },
+                        new ChartDataPoint { Label = "East Anglia", Value = 96000 },
                     ]
                 }
             ],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
+                ValueFormat = "K0",
                 MaxValue = 300000,
                 StepCount = 5,
                 ShowGridLines = true,
@@ -93,7 +94,37 @@ public static class HorizontalBarChartExample
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
+            ValueLabelPosition = "inside",
+            ValueLabelPrefix = "£",
+            ValueLabelFormat = "K0",
             Theme = "modern",
+            AutoLayout = true,
+            BorderRadius = 8,
+            BorderColor = Color.FromHex("#e2e8f0"),
+            BorderWidth = 1,
+            BarStyle = new ChartBarStyle
+            {
+                CornerRadius = 5,
+                Gradient = new ChartLinearGradient
+                {
+                    StartColor = Color.FromHex("#6366f1"),
+                    EndColor = Color.FromHex("#4338ca"),
+                    Scope = "bar",
+                },
+            },
+            References =
+            [
+                new ChartReference
+                {
+                    Value = 168000,
+                    Label = "UK Avg £168K",
+                    LabelPosition = "end",
+                    LabelBackgroundColor = Color.FromHex("#e0e7ff"),
+                    Color = Color.FromHex("#3730a3"),
+                    Thickness = 1.5f,
+                    DashPattern = [4f, 3f],
+                },
+            ],
             BackgroundColor = Color.White
         };
 

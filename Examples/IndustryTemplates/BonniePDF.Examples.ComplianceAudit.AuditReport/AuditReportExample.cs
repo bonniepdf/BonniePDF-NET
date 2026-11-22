@@ -171,6 +171,9 @@ public static class AuditReportExample
 
     private static PieChart ControlDonut() => new(ControlData())
     {
+        Theme = "modern",
+        SliceGradient = true,
+        SliceBorderWidth = 1.5f,
         AltText = "Donut chart: 71 compliant, 15 partial, 5 non-conformant, 2 not applicable of 93 controls.",
         Height = 130,
         StretchToFit = true,
@@ -200,6 +203,8 @@ public static class AuditReportExample
 
     private static BarChart SeverityBars() => new(SeverityData())
     {
+        Theme = "modern",
+        BarStyle = new ChartBarStyle { CornerRadius = 4 },
         AltText = "Column chart of findings by severity: 2 Critical, 4 High, 4 Medium, 2 Low.",
         Height = 130,
         StretchToFit = true,

@@ -109,6 +109,35 @@ public static class BarChartExample
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             Theme = "modern",
+            AutoLayout = true,
+            Subtitle = "FY 2026 monthly sales with plot-scoped gradient and annual target overlay",
+            Caption = "Source: Monthly sales ledger (GBP)",
+            BorderRadius = 8,
+            BorderColor = Color.FromHex("#e2e8f0"),
+            BorderWidth = 1,
+            BarStyle = new ChartBarStyle
+            {
+                CornerRadius = 6,
+                Gradient = new ChartLinearGradient
+                {
+                    StartColor = Color.FromHex("#818cf8"),
+                    EndColor = Color.FromHex("#4f46e5"),
+                    Scope = "plot",
+                },
+            },
+            References =
+            [
+                new ChartReference
+                {
+                    Value = 9000,
+                    Label = "Target £9k",
+                    LabelPosition = "end",
+                    LabelBackgroundColor = Color.FromHex("#fef3c7"),
+                    Color = Color.FromHex("#d97706"),
+                    Thickness = 1.5f,
+                    DashPattern = [5f, 3f],
+                },
+            ],
             BackgroundColor = Color.White
         };
 

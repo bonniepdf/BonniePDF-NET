@@ -83,6 +83,26 @@ public static class LineChartExample
         // Create the line chart
         LineChart lineChart = new(chartData)
         {
+            Theme = "modern",
+            AutoLayout = true,
+            Curve = "smooth",
+            DefaultMarkerHaloWidth = 1.5f,
+            Subtitle = "Monotone cubic spline with haloed markers and target band",
+            Caption = "Target corridor: £8,000 to £11,000 monthly recurring revenue",
+            BorderRadius = 8,
+            BorderColor = Color.FromHex("#e2e8f0"),
+            BorderWidth = 1,
+            References =
+            [
+                new ChartReference
+                {
+                    Value = 8000,
+                    EndValue = 11000,
+                    Label = "Target band",
+                    LabelPosition = "end",
+                    Color = Color.FromHex("#ede9fe"),
+                },
+            ],
             AltText = "Line chart showing monthly revenue trends from January to December",
             Height = 380,
             StretchToFit = true,
@@ -90,7 +110,7 @@ public static class LineChartExample
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
-            BackgroundColor = Color.FromHex("#fafafa")
+            BackgroundColor = Color.White
         };
 
         // Add the chart to the document

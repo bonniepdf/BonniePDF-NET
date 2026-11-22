@@ -61,20 +61,21 @@ public static class HorizontalLollipopChartExample
                     Color = Color.FromHex("#7c3aed"),
                     DataPoints =
                     [
-                        new ChartDataPoint { Label = "Product H", Value = 91000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product F", Value = 83000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product D", Value = 71000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product B", Value = 62000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product E", Value = 55000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product G", Value = 49000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product A", Value = 45000, LabelFormat = "N0" },
-                        new ChartDataPoint { Label = "Product C", Value = 38500, LabelFormat = "N0" },
+                        new ChartDataPoint { Label = "Product H", Value = 91000 },
+                        new ChartDataPoint { Label = "Product F", Value = 83000 },
+                        new ChartDataPoint { Label = "Product D", Value = 71000 },
+                        new ChartDataPoint { Label = "Product B", Value = 62000 },
+                        new ChartDataPoint { Label = "Product E", Value = 55000 },
+                        new ChartDataPoint { Label = "Product G", Value = 49000 },
+                        new ChartDataPoint { Label = "Product A", Value = 45000 },
+                        new ChartDataPoint { Label = "Product C", Value = 38500 },
                     ]
                 }
             ],
             YAxis = new AxisOptions
             {
                 Prefix = "£",
+                ValueFormat = "K0",
                 MaxValue = 100000,
                 StepCount = 5,
                 ShowGridLines = true,
@@ -93,7 +94,28 @@ public static class HorizontalLollipopChartExample
             FontFamily = StandardFonts.Helvetica,
             LabelFontSize = 9,
             ShowValueLabels = true,
+            ValueLabelPrefix = "£",
+            ValueLabelFormat = "K1",
             Theme = "modern",
+            AutoLayout = true,
+            DefaultMarkerShape = "diamond",
+            DefaultMarkerHaloWidth = 1.5f,
+            BorderRadius = 8,
+            BorderColor = Color.FromHex("#e2e8f0"),
+            BorderWidth = 1,
+            References =
+            [
+                new ChartReference
+                {
+                    Value = 60000,
+                    Label = "Quota £60K",
+                    LabelPosition = "end",
+                    LabelBackgroundColor = Color.FromHex("#ede9fe"),
+                    Color = Color.FromHex("#6d28d9"),
+                    Thickness = 1.5f,
+                    DashPattern = [4f, 3f],
+                },
+            ],
             BackgroundColor = Color.White
         };
 

@@ -32,6 +32,12 @@ internal sealed class Program
             doc.Save(Path.Combine(outputDir, "horizontal_lollipop_chart_example.pdf"));
         }
 
+        Console.WriteLine("Generating Heatmap Chart...");
+        using (var doc = HeatmapChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "heatmap_chart_example.pdf"));
+        }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

@@ -245,8 +245,10 @@ public static class PatientSummaryExample
             Height = 112,
             StretchToFit = true,
             Theme = "modern",
+            Curve = "smooth",
+            DefaultMarkerHaloWidth = 1.5f,
             ShowValueLabels = false,
-            References = [new ChartReference { Value = 2, EndValue = 3, Color = ColorPalette.Teal[50] }],
+            References = [new ChartReference { Value = 2, EndValue = 3, Label = "Target 2.0-3.0", LabelPosition = "end", Color = ColorPalette.Teal[50] }],
             AltText = "INR results for the eight weeks to 18 June 2026 against the target range of 2.0 to 3.0: 1.8, 2.1, 2.6, 3.4, 2.9, 2.4, 2.2 and 2.5. Two results fell outside the range, on 30 April and 21 May.",
         });
         chart.Add(Tb("Weekly INR. Two readings fell outside the shaded target range.", 7, Mute));
@@ -414,6 +416,9 @@ public static class PatientSummaryExample
         })
         {
             Sparkline = true,
+            Curve = "smooth",
+            SparklineFillOpacity = 0.16f,
+            SparklineShowEndpoints = true,
             BackgroundColor = flagged ? ColorPalette.Amber[50] : ColorPalette.Slate[50],
             Height = 16,
             StretchToFit = true,

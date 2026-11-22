@@ -96,6 +96,7 @@ public static class HorizontalGroupedBarChartExample
             YAxis = new AxisOptions
             {
                 Prefix = "£",
+                ValueFormat = "K0",
                 MaxValue = 110000,
                 StepCount = 5,
                 ShowGridLines = true,
@@ -120,6 +121,12 @@ public static class HorizontalGroupedBarChartExample
             ShowValueLabels = true, // keep it uncluttered with 3 series
             ShowLegend = true,
             Theme = "modern",
+            AutoLayout = true,
+            LegendPosition = "top",
+            BorderRadius = 8,
+            BorderColor = Color.FromHex("#e2e8f0"),
+            BorderWidth = 1,
+            BarStyle = new ChartBarStyle { CornerRadius = 4 },
             BackgroundColor = Color.White
         };
 

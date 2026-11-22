@@ -38,6 +38,30 @@ internal sealed class Program
             doc.Save(Path.Combine(outputDir, "horizontal_grouped_bar_chart_example.pdf"));
         }
 
+        Console.WriteLine("Generating Stacked Bar Chart...");
+        using (var doc = StackedBarChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "stacked_bar_chart_example.pdf"));
+        }
+
+        Console.WriteLine("Generating Combo Chart...");
+        using (var doc = ComboChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "combo_chart_example.pdf"));
+        }
+
+        Console.WriteLine("Generating Waterfall Chart...");
+        using (var doc = WaterfallChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "waterfall_chart_example.pdf"));
+        }
+
+        Console.WriteLine("Generating Bullet Chart...");
+        using (var doc = BulletChartExample.Generate())
+        {
+            doc.Save(Path.Combine(outputDir, "bullet_chart_example.pdf"));
+        }
+
         Console.WriteLine("Done! Files saved to " + outputDir);
     }
 }

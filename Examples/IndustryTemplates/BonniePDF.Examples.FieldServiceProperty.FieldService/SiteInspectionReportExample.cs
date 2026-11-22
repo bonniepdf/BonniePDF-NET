@@ -332,6 +332,8 @@ public static class SiteInspectionReportExample
 
         return new BarChart
         {
+            Theme = "modern",
+            BarStyle = new ChartBarStyle { CornerRadius = 4 },
             Data = data,
             AltText = "Horizontal bar chart of open items by trade: "
                       + string.Join(", ", entries.Select(e => $"{e.Key} {e.Value}"))

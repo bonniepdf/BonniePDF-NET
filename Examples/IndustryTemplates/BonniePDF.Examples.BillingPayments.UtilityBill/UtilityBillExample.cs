@@ -290,6 +290,7 @@ public static class UtilityBillExample
             AltText =
                 $"Monthly energy use over the last twelve months, from {data.History[0].Month} to {data.History[^1].Month}, ranging from {min} to {max} units. Use peaks in winter and falls through the summer.",
             Theme = "modern",
+            BarStyle = new ChartBarStyle { CornerRadius = 4 },
             Height = 150,
             StretchToFit = true,
             BarColor = Accent,

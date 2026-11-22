@@ -123,6 +123,10 @@ public static class CarbonEmissionsReportExample
             ],
         })
         {
+            Theme = "modern",
+            SliceGradient = true,
+            SliceBorderWidth = 1.5f,
+            DonutHoleRatio = 0.56f,
             AltText = $"Donut chart of emissions by scope: scope 1 {Thousands(byScope[0])}, scope 2 {Thousands(byScope[1])}, scope 3 {Thousands(byScope[2])} tonnes. Total {Thousands(total)} tonnes.",
             Height = 220,
             StretchToFit = true,
@@ -197,7 +201,29 @@ public static class CarbonEmissionsReportExample
         BarChart history = new(new ChartData { Series = [series], YAxis = new AxisOptions { MaxValue = 30, StepCount = 6 } })
         {
             Theme = "modern",
-            References = [new ChartReference { Value = Target / 1000m, Color = ColorPalette.Green[900], Thickness = 1.5f, DashPattern = [5, 3] }],
+            BarStyle = new ChartBarStyle
+            {
+                CornerRadius = 4,
+                Gradient = new ChartLinearGradient
+                {
+                    StartColor = Color.FromHex("#22c55e"),
+                    EndColor = Color.FromHex("#15803d"),
+                    Scope = "bar",
+                },
+            },
+            References =
+            [
+                new ChartReference
+                {
+                    Value = Target / 1000m,
+                    Label = "2030 target",
+                    LabelPosition = "end",
+                    LabelBackgroundColor = Color.FromHex("#dcfce7"),
+                    Color = ColorPalette.Green[900],
+                    Thickness = 1.5f,
+                    DashPattern = [5, 3],
+                },
+            ],
             AltText = $"Bar chart of total emissions in thousands of tonnes: {string.Join(", ", History.Select(h => $"{h.Year} {(h.Value / 1000.0).ToString("F1", CultureInfo.InvariantCulture)}"))}. The 2030 target is {(Target / 1000.0).ToString("F2", CultureInfo.InvariantCulture)} thousand tonnes.",
             Height = 230,
             StretchToFit = true,
