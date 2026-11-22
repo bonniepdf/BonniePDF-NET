@@ -7,6 +7,11 @@ at the same version are the same library.
 
 ## Unreleased
 
+### Features
+
+- **New chart families:** added `StackedBarChart` (`absolute` and 100% `percent` modes), `StackedAreaChart`, dual-axis `ComboChart`, `WaterfallChart`, `ScatterChart` (with bubble sizing and OLS linear trendlines), `BulletChart`, and `HeatmapChart`, with full Document Definition 1.0, PDF/UA tagging, and layout snapshot support.
+- **Chart rendering, themes & layout:** added `dark` and monochrome `print` (pure-vector hatch patterns) themes, composable `ChartThemeDefinition` (`CustomTheme`), `AutoScale` (Heckbert nice ticks), `AutoLayout` dynamic margins, `K<n>` compact number formatting (`K`/`M`/`B`/`T`), smooth monotone splines and step curves, dashed series, shaped/hollow/haloed markers, vertical `AreaGradient` fades, `PieChart` radial-elbow callout labels and configurable `DonutHoleRatio`/`SliceBorderWidth`, annotated `ChartReference` labels, card borders, `Subtitle`/`Caption`, flexible `LegendPosition`, and `InheritDocumentFont`.
+
 ### Fixes
 
 - **PDF/A, XMP & tagging:** emit UTC `Z` dates and split `,`/`;` keywords in XMP, align ICC profile and tagged `/Link` key order, and emit `/DisplayDocTitle true` without mutating `Settings.DisplayDocTitle`.

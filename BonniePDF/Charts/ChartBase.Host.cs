@@ -21,6 +21,9 @@ public abstract partial class ChartBase : ElementBase, IRoleProvider, IAltTextPr
     /// </summary>
     public bool StretchToFit { get; set; }
 
+    internal void ApplyCascadedTextStyle(TextStyle style) =>
+        InheritedFontFamily = string.IsNullOrEmpty(style.FontFamily) ? null : style.FontFamily;
+
     /// <inheritdoc />
     protected override float GetPreferredContentWidth() => Width;
 

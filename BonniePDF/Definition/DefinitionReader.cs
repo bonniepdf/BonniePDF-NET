@@ -472,16 +472,30 @@ internal sealed class DefinitionReader
                 return Populated(new BarChart(), node, spec);
             case "GroupedBarChart":
                 return Populated(new GroupedBarChart(), node, spec);
+            case "StackedBarChart":
+                return Populated(new StackedBarChart(), node, spec);
             case "LineChart":
                 return Populated(new LineChart(), node, spec);
             case "AreaChart":
                 return Populated(new AreaChart(), node, spec);
+            case "StackedAreaChart":
+                return Populated(new StackedAreaChart(), node, spec);
+            case "ComboChart":
+                return Populated(new ComboChart(), node, spec);
+            case "WaterfallChart":
+                return Populated(new WaterfallChart(), node, spec);
+            case "ScatterChart":
+                return Populated(new ScatterChart(), node, spec);
             case "DotPlotChart":
                 return Populated(new DotPlotChart(), node, spec);
             case "LollipopChart":
                 return Populated(new LollipopChart(), node, spec);
             case "PieChart":
                 return Populated(new PieChart(), node, spec);
+            case "BulletChart":
+                return Populated(new BulletChart(), node, spec);
+            case "HeatmapChart":
+                return Populated(new HeatmapChart(), node, spec);
             default:
                 throw new DefinitionException([new DefinitionIssue("", "unknown-type", $"Element type {type} is not supported by this reader.")]);
         }
@@ -620,7 +634,7 @@ internal sealed class DefinitionReader
         string head = kind.Split(':')[0];
 
         // Collections and maps: fill the property's own collection when it has no setter.
-        if (head is "array" or "map" && propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() is { } generic
+        if (head is "array" or "map" && !property.CanWrite && propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() is { } generic
             && (generic == typeof(IList<>) || generic == typeof(IDictionary<,>)))
         {
             object collection = property.GetValue(target) ?? Activator.CreateInstance(
@@ -664,6 +678,10 @@ internal sealed class DefinitionReader
                 return value.ValueKind == JsonValueKind.String ? null : ToNumericType(type, value.GetDouble());
             case "number":
                 return type == typeof(decimal) ? ToDecimal(value) : ToNumericType(type, value.GetDouble());
+            case "nullableNumber":
+                return value.ValueKind == JsonValueKind.Null
+                    ? null
+                    : type == typeof(decimal) ? ToDecimal(value) : ToNumericType(type, value.GetDouble());
             case "length":
                 return ToNumericType(type, ToPoints(value));
             case "spacing":

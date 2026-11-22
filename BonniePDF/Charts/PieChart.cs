@@ -2,386 +2,412 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using BonniePDF.Drawing;
 
 namespace BonniePDF;
 
 /// <summary>
-/// Pie chart that renders pie slices with a legend on the right side.
-/// Supports donut style with a transparent center hole.
-/// Uses the ICanvas interface for rendering, making it backend-agnostic.
-/// All layout is computed dynamically from Width and Height, so the chart
-/// adapts correctly to any size or StretchToFit mode.
+/// Pie and donut chart with modern theme support, gradient slices, centre totals, and optional callout labels.
 /// </summary>
 public class PieChart : ChartBase
 {
-    public PieChart()
-    {
-    }
+    public PieChart() { }
+    public PieChart(ChartData data) : base(data) { }
 
-    /// <summary>Creates a pie chart bound to its document data.</summary>
-    public PieChart(ChartData data) : base(data)
-    {
-    }
-
-    // Layout proportions (relative to chart dimensions)
     private const float TitleAreaHeight = 60;
-    private const float TopPadding = 20; // padding between title and pie top
-    private const float BottomPadding = 20; // padding at bottom
-    private const float LeftPadding = 20; // padding on left of pie
-    private const float LegendGapFromPie = 30; // gap between pie right edge and legend
-    private const float RightPadding = 20; // padding on right of legend
+    private const float TopPadding = 20;
+    private const float BottomPadding = 20;
+    private const float LeftPadding = 20;
+    private const float LegendGapFromPie = 30;
+    private const float RightPadding = 20;
 
-    // Legend item layout
     private const float LegendItemHeight = 24;
     private const float LegendBoxSize = 14;
     private const float LegendBoxTextGap = 8;
     private const float LegendFontSize = 11;
-    private const float TotalRowGap = 8; // gap between last legend item and total row
+    private const float TotalRowGap = 8;
 
-    // Donut hole proportions
-    private const float DonutHoleRatio = 0.33f; // donut hole radius as fraction of pie radius
-    private const float CentreTotalHoleRatio = 0.56f; // a donut with its total in the hole needs a wider hole
+    private const float DefaultDonutHoleRatio = 0.33f;
+    private const float CentreTotalHoleRatio = 0.56f;
     private const float CentreValueMaxSize = 22f;
     private const float CentreValueMinSize = 7f;
     private const float CentreLabelGap = 3f;
+    private const double RoundedK = 0.5522847498307933;
     private static readonly Color CentreValueColor = Color.FromHex("#111827");
 
-    private const string FontFamily = StandardFonts.Helvetica;
-
-    // Styling constants
-    private static readonly Color LegendTextColor = Color.FromHex("#333333");
-
-    // Default colors matching the SVG
     private static readonly string[] DefaultColors =
     {
         "#4f46e5", "#7c3aed", "#a855f7", "#d946ef", "#ec4899", "#f43f5e",
         "#f97316", "#eab308", "#84cc16", "#22c55e", "#14b8a6", "#06b6d4"
     };
 
-    /// <summary>
-    /// Custom colors to use for the pie slices.
-    /// If null, uses the default color palette.
-    /// </summary>
-    public IList<string>? Colors { get; set; }
+    private float? _donutHoleRatio;
 
-    /// <summary>
-    /// Whether to render as a donut chart with a transparent center hole.
-    /// Default is true.
-    /// </summary>
+    public IList<string>? Colors { get; set; }
     public bool IsDonut { get; set; } = true;
 
-    /// <summary>
-    /// Label prefix for the total row in the legend (e.g. "Total").
-    /// Default is "Total".
-    /// </summary>
-    public string TotalLabel { get; set; } = "Total";
-
-    /// <summary>
-    /// Number format for the total: <c>G</c> (default), <c>F&lt;n&gt;</c>, <c>N&lt;n&gt;</c> or <c>P&lt;n&gt;</c>.
-    /// Culture-invariant; see <see cref="ChartNumberFormat"/>. Anything else throws when the chart is drawn.
-    /// </summary>
-    public string? TotalValueFormat { get; set; }
-
-    /// <summary>
-    /// Whether to show the legend.
-    /// Default is true.
-    /// </summary>
-    public bool ShowLegend { get; set; } = true;
-
-    /// <summary>
-    /// Whether to show the total value as a summary row below the legend items.
-    /// Default is true.
-    /// </summary>
-    public bool ShowTotal { get; set; } = true;
-
-    /// <summary>
-    /// Where the total is shown: <c>"legend"</c> (default), as a row below the legend items, or
-    /// <c>"center"</c>, as a large figure with <see cref="TotalLabel"/> beneath it in the donut hole,
-    /// which then widens to fit. A full pie has no hole, so it keeps the total in the legend.
-    /// </summary>
-    public string TotalPosition
+    public float? DonutHoleRatio
     {
-        get => _totalPosition;
+        get => _donutHoleRatio;
         set
         {
-            if (value is not "legend" and not "center") throw new ArgumentException("Invalid total position.", nameof(value));
-            _totalPosition = value;
+            if (value.HasValue && (!float.IsFinite(value.Value) || value.Value < 0f || value.Value > 0.85f))
+                throw new ArgumentOutOfRangeException(nameof(value), "DonutHoleRatio must be finite and between 0 and 0.85.");
+            _donutHoleRatio = value;
         }
     }
-    private string _totalPosition = "legend";
 
-    /// <summary>The total sits in the donut hole rather than the legend.</summary>
-    private bool TotalInCentre => IsDonut && string.Equals(TotalPosition, "center", StringComparison.Ordinal);
-
-    /// <summary>
-    /// Fill each slice with a gradient from a lighter tint of its colour at the centre side to its
-    /// own colour at the rim. Slice colours must be opaque. Default is false.
-    /// </summary>
+    public float SliceBorderWidth { get; set; }
+    public string TotalLabel { get; set; } = "Total";
+    public string? TotalValueFormat { get; set; }
+    public string? ValueFormat { get; set; }
+    public string PercentFormat { get; set; } = "F0";
+    public string LegendFormat { get; set; } = "labelValue";
+    public string SliceLabelMode { get; set; } = "none";
+    public bool ShowLegend { get; set; } = true;
+    public bool ShowTotal { get; set; } = true;
+    public string TotalPosition { get; set; } = "legend";
     public bool SliceGradient { get; set; }
 
-    internal override bool UsesStyledGeometry => base.UsesStyledGeometry || SliceGradient;
+    internal override bool UsesStyledGeometry => base.UsesStyledGeometry || SliceGradient || SliceBorderWidth > 0 || SliceLabelMode is "callout";
 
-    /// <summary>
-    /// Draws the pie chart content.
-    /// All positions are computed dynamically from Width and Height.
-    /// </summary>
+    private bool TotalInCentre => IsDonut && string.Equals(TotalPosition, "center", StringComparison.Ordinal);
+
     protected override void DrawContent(ICanvas canvas, ChartData data)
     {
         if (data.Series.Count == 0 || data.Series[0].DataPoints.Count == 0) return;
 
         IList<ChartDataPoint> dataPoints = data.Series[0].DataPoints;
-
-        // Calculate total value
         decimal total = dataPoints.Sum(dp => dp.Value);
+        PieLayout layout = CalculateLayout(canvas, dataPoints, total, !string.IsNullOrEmpty(data.Title), !string.IsNullOrEmpty(data.Subtitle));
+        var angles = CalculateSliceAngles(dataPoints, total);
+        var colors = GetColors(dataPoints.Count);
 
-        // Calculate dynamic layout
-        var layout = CalculateLayout(dataPoints.Count, !string.IsNullOrEmpty(data.Title));
-
-        // Calculate start angle for each slice
-        List<(float startAngle, float endAngle)> angles = CalculateSliceAngles(dataPoints, total);
-
-        // Get colors to use
-        List<Color> colors = GetColors(dataPoints.Count);
-
-        // Draw pie slices (annular sectors when IsDonut, full wedges otherwise)
         DrawPieSlices(canvas, dataPoints, angles, colors, layout);
 
-        // Draw legend (including optional total row)
-        if (ShowLegend) DrawLegend(canvas, dataPoints, colors, layout, total);
+        if (SliceLabelMode is "inside")
+            DrawInsideSliceLabels(canvas, dataPoints, angles, colors, layout, total);
+        else if (SliceLabelMode is "callout")
+            DrawCalloutLabels(canvas, dataPoints, angles, layout, total);
 
-        if (ShowTotal && TotalInCentre) DrawCentreTotal(canvas, total, layout);
+        if (ShowLegend) DrawLegend(canvas, dataPoints, colors, layout, total);
+        if (ShowTotal && TotalInCentre) DrawCentreTotal(canvas, dataPoints, layout, total);
     }
 
-    /// <summary>
-    /// Draws the total in the donut hole: the figure as large as fits (up to 22pt, shrinking a
-    /// point at a time while it is wider than 80% of the hole), with <see cref="TotalLabel"/>
-    /// beneath it at 55% of that size, the pair centred on the hole.
-    /// </summary>
-    private void DrawCentreTotal(ICanvas canvas, decimal total, PieLayout layout)
+    private string FormatSliceValue(ChartDataPoint dp)
+    {
+        if (dp.HasExplicitLabelFormat) return dp.FormattedValue;
+        return !string.IsNullOrEmpty(ValueFormat) ? ChartNumberFormat.Format(dp.Value, ValueFormat) : dp.FormattedValue;
+    }
+
+    private string FormatSlicePercent(decimal value, decimal total)
+    {
+        decimal pct = total > 0 ? (value / total) * 100m : 0m;
+        return $"{ChartNumberFormat.Format(pct, PercentFormat)}%";
+    }
+
+    private string FormatLegendEntry(ChartDataPoint dp, decimal total) => LegendFormat switch
+    {
+        "labelOnly" => dp.Label,
+        "labelPercent" => $"{dp.Label} ({FormatSlicePercent(dp.Value, total)})",
+        "labelValuePercent" => $"{dp.Label} - {FormatSliceValue(dp)} ({FormatSlicePercent(dp.Value, total)})",
+        _ => $"{dp.Label} - {FormatSliceValue(dp)}",
+    };
+
+    private void DrawCentreTotal(ICanvas canvas, IList<ChartDataPoint> dataPoints, PieLayout layout, decimal total)
     {
         string value = ChartNumberFormat.Format(total, TotalValueFormat);
         float maxWidth = layout.DonutHoleRadius * 1.6f;
         float size = MathF.Min(CentreValueMaxSize, MathF.Floor(layout.DonutHoleRadius * 0.45f));
-        while (size > CentreValueMinSize && canvas.MeasureText(value, size, StandardFonts.HelveticaBold).Width > maxWidth)
-            size -= 1;
+        string boldFont = ResolveTitleFontFamily();
+        string regularFont = ResolveFontFamily();
+        while (size > CentreValueMinSize && canvas.MeasureText(value, size, boldFont).Width > maxWidth)
+            size -= 1f;
         float labelSize = MathF.Max(CentreValueMinSize, MathF.Round(size * 0.55f, MidpointRounding.AwayFromZero));
-        bool hasLabel = TotalLabel.Length > 0;
+        bool hasLabel = !string.IsNullOrEmpty(TotalLabel);
         float blockHeight = size + (hasLabel ? CentreLabelGap + labelSize : 0);
-        float top = layout.CenterY - blockHeight / 2;
-        canvas.DrawText(layout.CenterX, top, value, CentreValueColor, size, StandardFonts.HelveticaBold, TextAlignment.Center);
+        float top = layout.CenterY - blockHeight / 2f;
+        Color valueColor = Appearance.BackgroundColor.HasValue ? Appearance.TitleColor : CentreValueColor;
+        canvas.DrawText(layout.CenterX, top, value, valueColor, size, boldFont, TextAlignment.Center);
         if (hasLabel)
-            canvas.DrawText(layout.CenterX, top + size + CentreLabelGap, TotalLabel, LegendTextColor, labelSize, FontFamily, TextAlignment.Center);
+            canvas.DrawText(layout.CenterX, top + size + CentreLabelGap, TotalLabel, Appearance.LegendTextColor, labelSize, regularFont, TextAlignment.Center);
     }
 
-    /// <summary>
-    /// Computes all layout metrics from the current Width and Height.
-    ///
-    /// The title band is only reserved when a title is actually drawn; a titleless
-    /// pie centres symmetrically in the box instead of being pushed down by the
-    /// empty title gap.
-    /// </summary>
-    private PieLayout CalculateLayout(int dataPointCount, bool hasTitle)
+    private PieLayout CalculateLayout(ICanvas canvas, IList<ChartDataPoint> dataPoints, decimal total, bool hasTitle, bool hasSubtitle)
     {
-        float titleBand = hasTitle ? TitleAreaHeight : 0;
+        float titleBand = (hasTitle ? TitleAreaHeight : 0) + (hasSubtitle ? 18 : 0);
+        float captionBand = !string.IsNullOrEmpty(Caption) ? 16 : 0;
+        float availableHeight = Height - titleBand - TopPadding - BottomPadding - captionBand;
+        string font = ResolveFontFamily();
 
-        // Available vertical space for the pie (between title and bottom padding)
-        float availableHeight = Height - titleBand - TopPadding - BottomPadding;
-
-        // Estimate legend width when legend is shown
         float legendWidth = 0;
         if (ShowLegend)
         {
-            // Reserve a reasonable width for legend items
-            // LegendBoxSize + gap + ~150pt for text
-            legendWidth = LegendBoxSize + LegendBoxTextGap + 150;
+            if (AutoLayout)
+            {
+                float maxW = 0;
+                foreach (var dp in dataPoints)
+                {
+                    float w = canvas.MeasureText(FormatLegendEntry(dp, total), LegendFontSize, font).Width;
+                    if (w > maxW) maxW = w;
+                }
+                if (ShowTotal && !TotalInCentre)
+                {
+                    float tw = canvas.MeasureText($"{TotalLabel}: {ChartNumberFormat.Format(total, TotalValueFormat)}", LegendFontSize, font).Width;
+                    if (tw > maxW) maxW = tw;
+                }
+                legendWidth = MathF.Max(80, MathF.Min(Width * 0.45f, MathF.Ceiling(LegendBoxSize + LegendBoxTextGap + maxW + 6)));
+            }
+            else
+            {
+                legendWidth = LegendBoxSize + LegendBoxTextGap + 150;
+            }
         }
 
-        // Available horizontal space for the pie
-        float availableWidthForPie = Width - LeftPadding - RightPadding;
-        if (ShowLegend)
-            availableWidthForPie -= legendWidth + LegendGapFromPie;
+        float calloutReserve = 0;
+        if (SliceLabelMode is "callout")
+        {
+            float maxLbl = 0;
+            foreach (var dp in dataPoints)
+            {
+                float w = canvas.MeasureText($"{dp.Label} {FormatSlicePercent(dp.Value, total)}", 9, font).Width;
+                if (w > maxLbl) maxLbl = w;
+            }
+            calloutReserve = MathF.Min(Width * 0.25f, maxLbl + 24);
+        }
 
-        // Pie radius is constrained by both available width and height
-        float maxRadiusFromWidth = availableWidthForPie / 2;
-        float maxRadiusFromHeight = availableHeight / 2;
-        float pieRadius = Math.Min(maxRadiusFromWidth, maxRadiusFromHeight);
-        pieRadius = Math.Max(pieRadius, 20); // minimum viable radius
+        float availableWidthForPie = Width - LeftPadding - RightPadding - calloutReserve * 2;
+        if (ShowLegend) availableWidthForPie -= legendWidth + LegendGapFromPie;
 
-        // Center the pie vertically in the available area
-        float pieCenterY = titleBand + TopPadding + availableHeight / 2;
-
-        // Center the pie horizontally in its allocated space
+        float pieRadius = MathF.Max(MathF.Min(availableWidthForPie / 2f, availableHeight / 2f), 20f);
+        float pieCenterY = titleBand + TopPadding + availableHeight / 2f;
         float pieAreaWidth = Width - (ShowLegend ? legendWidth + LegendGapFromPie + RightPadding : RightPadding) - LeftPadding;
-        float pieCenterX = LeftPadding + pieAreaWidth / 2;
+        float pieCenterX = LeftPadding + pieAreaWidth / 2f;
+        float legendX = pieCenterX + pieRadius + calloutReserve + LegendGapFromPie;
+        float totalLegendHeight = dataPoints.Count * LegendItemHeight;
+        float legendStartY = pieCenterY - totalLegendHeight / 2f;
 
-        // Legend position: to the right of the pie
-        float legendX = pieCenterX + pieRadius + LegendGapFromPie;
+        float holeRatio = !IsDonut
+            ? 0f
+            : _donutHoleRatio ?? (TotalInCentre && ShowTotal ? CentreTotalHoleRatio : DefaultDonutHoleRatio);
 
-        // Vertically center the legend items relative to the pie center
-        float totalLegendHeight = dataPointCount * LegendItemHeight;
-        float legendStartY = pieCenterY - totalLegendHeight / 2;
-
-        // Donut hole radius
-        float donutHoleRadius = pieRadius * (TotalInCentre && ShowTotal ? CentreTotalHoleRatio : DonutHoleRatio);
-
-        return new PieLayout(pieCenterX, pieCenterY, pieRadius, donutHoleRadius, legendX, legendStartY);
+        return new PieLayout(pieCenterX, pieCenterY, pieRadius, pieRadius * holeRatio, legendX, legendStartY, titleBand + TopPadding, Height - BottomPadding - captionBand);
     }
 
-    /// <summary>
-    /// Calculates the start and end angles for each pie slice.
-    /// </summary>
-    private static List<(float startAngle, float endAngle)> CalculateSliceAngles(IList<ChartDataPoint> dataPoints,
-        decimal total)
+    private static List<(float StartAngle, float EndAngle)> CalculateSliceAngles(IList<ChartDataPoint> dataPoints, decimal total)
     {
-        List<(float startAngle, float endAngle)> angles = new();
-        float currentAngle = -90; // Start from top (12 o'clock position)
-
-        foreach (ChartDataPoint dataPoint in dataPoints)
+        List<(float, float)> angles = new(dataPoints.Count);
+        float current = -90f;
+        foreach (ChartDataPoint dp in dataPoints)
         {
-            float sliceAngle = (float)(360 * (double)(dataPoint.Value / total));
-            float endAngle = currentAngle + sliceAngle;
-            angles.Add((currentAngle, endAngle));
-            currentAngle = endAngle;
+            float slice = total > 0 ? (float)(360 * (double)(dp.Value / total)) : 0f;
+            angles.Add((current, current + slice));
+            current += slice;
         }
-
         return angles;
     }
 
-    /// <summary>
-    /// Gets the colors to use for the pie slices.
-    /// </summary>
     private List<Color> GetColors(int count)
     {
-        List<Color> colors = new();
-        IList<string> sourceColors = Colors ?? new List<string>(DefaultColors);
-
-        for (int i = 0; i < count; i++)
-        {
-            string colorHex = sourceColors[i % sourceColors.Count];
-            colors.Add(Color.FromHex(colorHex));
-        }
-
-        return colors;
+        IList<string> src = Colors ?? DefaultColors;
+        List<Color> result = new(count);
+        for (int i = 0; i < count; i++) result.Add(Color.FromHex(src[i % src.Count]));
+        return result;
     }
 
-    /// <summary>
-    /// Draws the pie slices.
-    /// Uses annular sector paths when IsDonut is true (transparent center hole),
-    /// or full triangular wedge paths when IsDonut is false.
-    /// </summary>
     private void DrawPieSlices(ICanvas canvas, IList<ChartDataPoint> dataPoints,
-        List<(float startAngle, float endAngle)> angles, List<Color> colors, PieLayout layout)
+        IList<(float StartAngle, float EndAngle)> angles, IList<Color> colors, PieLayout layout)
     {
+        Color borderColor = EffectiveBackgroundColor ?? Color.White;
         for (int i = 0; i < dataPoints.Count; i++)
         {
-            (float startAngle, float endAngle) = angles[i];
+            var (startAngle, endAngle) = angles[i];
+            if (endAngle <= startAngle) continue;
             Color color = colors[i];
-
-            List<Point> path = IsDonut
+            IList<Point> path = IsDonut
                 ? CreateAnnularSectorPath(startAngle, endAngle, layout)
                 : CreatePieSlicePath(startAngle, endAngle, layout);
-
             if (SliceGradient) ChartVector.Fill(canvas, GradientSlice(path, startAngle, endAngle, color, layout));
             else canvas.FillPath(path, color);
+
+            if (SliceBorderWidth > 0)
+            {
+                List<ChartPathCommand> cmds = new(path.Count + 1);
+                for (int n = 0; n < path.Count; n++) cmds.Add(new(n == 0 ? "M" : "L", [path[n].X, path[n].Y]));
+                cmds.Add(new("Z", []));
+                ChartVector.Stroke(canvas, new ChartStrokePlan(cmds, borderColor, SliceBorderWidth, "butt", "round"));
+            }
         }
     }
 
-    /// <summary>
-    /// A slice outline painted along its bisector, from its tint at the inner edge (the centre, or the
-    /// donut hole) to its own colour at the rim.
-    /// </summary>
-    private ChartPathPlan GradientSlice(List<Point> path, float startAngle, float endAngle, Color color, PieLayout layout)
+    private void DrawInsideSliceLabels(ICanvas canvas, IList<ChartDataPoint> dataPoints,
+        IList<(float StartAngle, float EndAngle)> angles, IList<Color> colors, PieLayout layout, decimal total)
     {
-        double middle = (startAngle + endAngle) / 2.0 * Math.PI / 180;
-        double inner = IsDonut ? layout.DonutHoleRadius : 0;
-        List<ChartPathCommand> commands = [.. path.Select((p, n) => new ChartPathCommand(n == 0 ? "M" : "L", [p.X, p.Y])), new ChartPathCommand("Z", [])];
-        return new ChartPathPlan(commands, color, new ChartResolvedGradient(
-            layout.CenterX + inner * Math.Cos(middle), layout.CenterY + inner * Math.Sin(middle),
-            layout.CenterX + layout.Radius * Math.Cos(middle), layout.CenterY + layout.Radius * Math.Sin(middle),
-            ChartTint.Tint(color), color));
+        string font = ResolveFontFamily();
+        const float fontSize = 9;
+        float midRadius = IsDonut ? (layout.DonutHoleRadius + layout.Radius) / 2f : layout.Radius * 0.65f;
+        for (int i = 0; i < dataPoints.Count; i++)
+        {
+            ChartDataPoint dp = dataPoints[i];
+            if (dp.Value <= 0) continue;
+            var (startAngle, endAngle) = angles[i];
+            double spanRad = (endAngle - startAngle) * Math.PI / 180.0;
+            string text = FormatSlicePercent(dp.Value, total);
+            Size measured = canvas.MeasureText(text, fontSize, font);
+            double chord = 2 * midRadius * Math.Sin(Math.Min(Math.PI, spanRad) / 2.0);
+            if (chord < measured.Width + 4) continue;
+            double midRad = (startAngle + endAngle) / 2.0 * Math.PI / 180.0;
+            float x = layout.CenterX + (float)(midRadius * Math.Cos(midRad));
+            float y = layout.CenterY + (float)(midRadius * Math.Sin(midRad)) - fontSize / 2f;
+            canvas.DrawText(x, y, text, ChartValueScale.ContrastTextColor(colors[i]), fontSize, font, TextAlignment.Center);
+        }
     }
 
-    /// <summary>
-    /// Creates a full triangular wedge path for a pie slice (non-donut mode).
-    /// </summary>
-    private static List<Point> CreatePieSlicePath(float startAngle, float endAngle, PieLayout layout)
+    private void DrawCalloutLabels(ICanvas canvas, IList<ChartDataPoint> dataPoints,
+        IList<(float StartAngle, float EndAngle)> angles, PieLayout layout, decimal total)
     {
-        List<Point> path = new();
+        string font = ResolveFontFamily();
+        const float fontSize = 9;
+        const float rowHeight = fontSize + 4;
+        List<(string Text, double MidRad, float AnchorY, float Y)> right = new();
+        List<(string Text, double MidRad, float AnchorY, float Y)> left = new();
 
-        // Start at the center
-        path.Add(new Point(layout.CenterX, layout.CenterY));
+        for (int i = 0; i < dataPoints.Count; i++)
+        {
+            ChartDataPoint dp = dataPoints[i];
+            if (dp.Value <= 0) continue;
+            var (startAngle, endAngle) = angles[i];
+            double midRad = (startAngle + endAngle) / 2.0 * Math.PI / 180.0;
+            float anchorY = layout.CenterY + (float)(layout.Radius * Math.Sin(midRad));
+            string text = $"{dp.Label} {FormatSlicePercent(dp.Value, total)}";
+            if (Math.Cos(midRad) >= 0) right.Add((text, midRad, anchorY, anchorY));
+            else left.Add((text, midRad, anchorY, anchorY));
+        }
 
-        // Add arc points
+        void Relax(List<(string Text, double MidRad, float AnchorY, float Y)> items, bool isRight)
+        {
+            items.Sort((a, b) => a.AnchorY.CompareTo(b.AnchorY));
+            for (int i = 1; i < items.Count; i++)
+                if (items[i].Y < items[i - 1].Y + rowHeight)
+                    items[i] = (items[i].Text, items[i].MidRad, items[i].AnchorY, items[i - 1].Y + rowHeight);
+            if (items.Count > 0 && items[^1].Y > layout.PlotBottom - rowHeight / 2f)
+            {
+                items[^1] = (items[^1].Text, items[^1].MidRad, items[^1].AnchorY, layout.PlotBottom - rowHeight / 2f);
+                for (int i = items.Count - 2; i >= 0; i--)
+                    if (items[i].Y > items[i + 1].Y - rowHeight)
+                        items[i] = (items[i].Text, items[i].MidRad, items[i].AnchorY, items[i + 1].Y - rowHeight);
+                if (items[0].Y < layout.PlotTop + rowHeight / 2f)
+                    items[0] = (items[0].Text, items[0].MidRad, items[0].AnchorY, layout.PlotTop + rowHeight / 2f);
+            }
+            float dir = isRight ? 1f : -1f;
+            float endX = layout.CenterX + dir * (layout.Radius + 18);
+            foreach (var item in items)
+            {
+                double sx = layout.CenterX + (layout.Radius + 2) * Math.Cos(item.MidRad);
+                double sy = layout.CenterY + (layout.Radius + 2) * Math.Sin(item.MidRad);
+                double mx = layout.CenterX + (layout.Radius + 10) * Math.Cos(item.MidRad);
+                double my = layout.CenterY + (layout.Radius + 10) * Math.Sin(item.MidRad);
+                ChartVector.Stroke(canvas, new ChartStrokePlan(
+                    [new("M", [sx, sy]), new("L", [mx, my]), new("L", [endX, item.Y])],
+                    Appearance.AxisColor, 0.75, "butt", "round"));
+                canvas.DrawText(endX + dir * 4, item.Y - fontSize / 2f, item.Text, Appearance.LegendTextColor, fontSize, font,
+                    isRight ? TextAlignment.Left : TextAlignment.Right);
+            }
+        }
+
+        Relax(right, true);
+        Relax(left, false);
+    }
+
+    private ChartPathPlan GradientSlice(IList<Point> path, float startAngle, float endAngle, Color color, PieLayout layout)
+    {
+        double middle = (startAngle + endAngle) / 2.0 * Math.PI / 180.0;
+        double inner = IsDonut ? layout.DonutHoleRadius : 0.0;
+        List<ChartPathCommand> cmds = new(path.Count + 1);
+        for (int n = 0; n < path.Count; n++) cmds.Add(new(n == 0 ? "M" : "L", [path[n].X, path[n].Y]));
+        cmds.Add(new("Z", []));
+        return new ChartPathPlan(
+            cmds,
+            color,
+            new ChartResolvedGradient(
+                layout.CenterX + inner * Math.Cos(middle),
+                layout.CenterY + inner * Math.Sin(middle),
+                layout.CenterX + layout.Radius * Math.Cos(middle),
+                layout.CenterY + layout.Radius * Math.Sin(middle),
+                ChartTint.Tint(color),
+                color));
+    }
+
+    private static IList<Point> CreatePieSlicePath(float startAngle, float endAngle, PieLayout layout)
+    {
+        List<Point> path = [new Point(layout.CenterX, layout.CenterY)];
         int segments = Math.Max((int)Math.Ceiling((endAngle - startAngle) / 5), 1);
         for (int i = 0; i <= segments; i++)
         {
             float angle = startAngle + (endAngle - startAngle) * i / segments;
             float radians = (float)(angle * Math.PI / 180);
-            float x = layout.CenterX + (float)(layout.Radius * Math.Cos(radians));
-            float y = layout.CenterY + (float)(layout.Radius * Math.Sin(radians));
-            path.Add(new Point(x, y));
+            path.Add(new Point(layout.CenterX + (float)(layout.Radius * Math.Cos(radians)), layout.CenterY + (float)(layout.Radius * Math.Sin(radians))));
         }
-
         return path;
     }
 
-    /// <summary>
-    /// Creates an annular sector path for a donut slice (donut mode).
-    /// The path traces the outer arc forward then the inner arc in reverse,
-    /// producing a ring wedge with a genuinely transparent center.
-    /// </summary>
-    private static List<Point> CreateAnnularSectorPath(float startAngle, float endAngle, PieLayout layout)
+    private static IList<Point> CreateAnnularSectorPath(float startAngle, float endAngle, PieLayout layout)
     {
         List<Point> path = new();
         int segments = Math.Max((int)Math.Ceiling((endAngle - startAngle) / 5), 1);
-
-        // Outer arc: startAngle → endAngle
         for (int i = 0; i <= segments; i++)
         {
             float angle = startAngle + (endAngle - startAngle) * i / segments;
             float radians = (float)(angle * Math.PI / 180);
-            path.Add(new Point(
-                layout.CenterX + (float)(layout.Radius * Math.Cos(radians)),
-                layout.CenterY + (float)(layout.Radius * Math.Sin(radians))
-            ));
+            path.Add(new Point(layout.CenterX + (float)(layout.Radius * Math.Cos(radians)), layout.CenterY + (float)(layout.Radius * Math.Sin(radians))));
         }
-
-        // Inner arc: endAngle → startAngle (reversed)
         for (int i = segments; i >= 0; i--)
         {
             float angle = startAngle + (endAngle - startAngle) * i / segments;
             float radians = (float)(angle * Math.PI / 180);
-            path.Add(new Point(
-                layout.CenterX + (float)(layout.DonutHoleRadius * Math.Cos(radians)),
-                layout.CenterY + (float)(layout.DonutHoleRadius * Math.Sin(radians))
-            ));
+            path.Add(new Point(layout.CenterX + (float)(layout.DonutHoleRadius * Math.Cos(radians)), layout.CenterY + (float)(layout.DonutHoleRadius * Math.Sin(radians))));
         }
-
         return path;
     }
 
-    /// <summary>
-    /// Draws the legend on the right side, with an optional total summary row below.
-    /// </summary>
-    private void DrawLegend(ICanvas canvas, IList<ChartDataPoint> dataPoints, List<Color> colors, PieLayout layout,
-        decimal total)
+    private void DrawLegendSwatch(ICanvas canvas, float x, float y, Color color)
     {
+        if (!Appearance.RoundedLegendSwatches)
+        {
+            canvas.FillRect(x, y, LegendBoxSize, LegendBoxSize, color);
+            return;
+        }
+        const double s = 12, r = 3, c = RoundedK * r;
+        double ox = x + 1, oy = y + 1;
+        ChartVector.Fill(canvas, new ChartPathPlan(
+        [
+            new("M", [ox + r, oy]),
+            new("L", [ox + s - r, oy]),
+            new("C", [ox + s - r + c, oy, ox + s, oy + r - c, ox + s, oy + r]),
+            new("L", [ox + s, oy + s - r]),
+            new("C", [ox + s, oy + s - r + c, ox + s - r + c, oy + s, ox + s - r, oy + s]),
+            new("L", [ox + r, oy + s]),
+            new("C", [ox + r - c, oy + s, ox, oy + s - r + c, ox, oy + s - r]),
+            new("L", [ox, oy + r]),
+            new("C", [ox, oy + r - c, ox + r - c, oy, ox + r, oy]),
+            new("Z", []),
+        ], color, null));
+    }
+
+    private void DrawLegend(ICanvas canvas, IList<ChartDataPoint> dataPoints, IList<Color> colors, PieLayout layout, decimal total)
+    {
+        Color textColor = Appearance.LegendTextColor;
+        string font = ResolveFontFamily();
+
         for (int i = 0; i < dataPoints.Count; i++)
         {
-            ChartDataPoint dataPoint = dataPoints[i];
-            Color color = colors[i];
+            ChartDataPoint dp = dataPoints[i];
             float y = layout.LegendStartY + i * LegendItemHeight;
-
-            // Draw color box
-            canvas.FillRect(layout.LegendX, y, LegendBoxSize, LegendBoxSize, color);
-
-            // Draw label text (vertically centered with the color box)
-            string labelText = $"{dataPoint.Label} - {dataPoint.FormattedValue}";
+            DrawLegendSwatch(canvas, layout.LegendX, y, colors[i]);
+            string labelText = FormatLegendEntry(dp, total);
             float textX = layout.LegendX + LegendBoxSize + LegendBoxTextGap;
-            float textY = y + LegendBoxSize / 2 - LegendFontSize / 2;
-            canvas.DrawText(textX, textY, labelText, LegendTextColor, LegendFontSize, FontFamily, TextAlignment.Left);
+            float textY = y + LegendBoxSize / 2f - LegendFontSize / 2f;
+            canvas.DrawText(textX, textY, labelText, textColor, LegendFontSize, font, TextAlignment.Left);
         }
 
         if (ShowTotal && !TotalInCentre)
@@ -389,42 +415,17 @@ public class PieChart : ChartBase
             string totalText = $"{TotalLabel}: {ChartNumberFormat.Format(total, TotalValueFormat)}";
             float textX = layout.LegendX + LegendBoxSize + LegendBoxTextGap;
             float totalY = layout.LegendStartY + dataPoints.Count * LegendItemHeight + TotalRowGap;
-            canvas.DrawText(textX, totalY, totalText, LegendTextColor, LegendFontSize, FontFamily, TextAlignment.Left);
+            canvas.DrawText(textX, totalY, totalText, textColor, LegendFontSize, font, TextAlignment.Left);
         }
     }
 
-    /// <summary>
-    /// Holds all computed layout positions for a pie chart render pass.
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    private readonly record struct PieLayout(
+    private sealed record PieLayout(
         float CenterX,
         float CenterY,
         float Radius,
         float DonutHoleRadius,
         float LegendX,
-        float LegendStartY)
-    {
-        public bool Equals(PieLayout other)
-        {
-            return Math.Abs(CenterX - other.CenterX) < 0.0001f &&
-                   Math.Abs(CenterY - other.CenterY) < 0.0001f &&
-                   Math.Abs(Radius - other.Radius) < 0.0001f &&
-                   Math.Abs(DonutHoleRadius - other.DonutHoleRadius) < 0.0001f &&
-                   Math.Abs(LegendX - other.LegendX) < 0.0001f &&
-                   Math.Abs(LegendStartY - other.LegendStartY) < 0.0001f;
-        }
-
-        public override int GetHashCode()
-        {
-            var hash = new HashCode();
-            hash.Add(CenterX);
-            hash.Add(CenterY);
-            hash.Add(Radius);
-            hash.Add(DonutHoleRadius);
-            hash.Add(LegendX);
-            hash.Add(LegendStartY);
-            return hash.ToHashCode();
-        }
-    }
+        float LegendStartY,
+        float PlotTop,
+        float PlotBottom);
 }

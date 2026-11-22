@@ -1,29 +1,55 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
 using System;
+using System.Collections.Generic;
 using BonniePDF.Drawing;
 
 namespace BonniePDF;
 
 /// <summary>
 /// Base class for all charts that provides common functionality for drawing charts
-/// using the ICanvas interface. This ensures charts can be rendered to any backend
-/// (PDF, SVG, etc.) without modification.
+/// using the ICanvas interface.
 /// </summary>
 public abstract partial class ChartBase
 {
+    private const double RoundedK = 0.5522847498307933;
     private string _theme = "legacy";
-    /// <summary>Appearance preset: "legacy" (default) or "modern".</summary>
-    public string Theme { get => _theme; set { if (value is not "legacy" and not "modern") throw new ArgumentException("Invalid chart theme.", nameof(value)); _theme = value; } }
-    /// <summary>The values and behaviours behind <see cref="Theme"/>.</summary>
-    internal ChartTheme Appearance => ChartTheme.For(Theme);
-    internal virtual bool UsesStyledGeometry => Appearance.StyledGeometry;
+    private ChartThemeDefinition? _customTheme;
+    private ChartTheme _resolvedTheme = ChartTheme.Legacy;
+    private float _borderRadius;
+    private float _borderWidth;
 
-    /// <summary>Creates an empty chart for construct-then-mutate authoring.</summary>
-    protected ChartBase()
+    /// <summary>Ambient document default font family supplied by a PDF host when <see cref="InheritDocumentFont"/> is true.</summary>
+    protected string? InheritedFontFamily { get; set; }
+
+    /// <summary>Appearance preset: "legacy" (default), "modern", "dark", or "print".</summary>
+    public string Theme
     {
+        get => _theme;
+        set
+        {
+            if (!ChartTheme.IsValidPreset(value)) throw new ArgumentException("Invalid chart theme.", nameof(value));
+            _theme = value;
+            _resolvedTheme = ChartTheme.Resolve(_theme, _customTheme);
+        }
     }
 
-    /// <summary>Creates a chart bound to the data it will render.</summary>
+    /// <summary>Optional composable theme overrides applied on top of a built-in preset.</summary>
+    public ChartThemeDefinition? CustomTheme
+    {
+        get => _customTheme;
+        set
+        {
+            _customTheme = value;
+            _resolvedTheme = ChartTheme.Resolve(_theme, _customTheme);
+        }
+    }
+
+    /// <summary>The values and behaviours behind <see cref="Theme"/> and <see cref="CustomTheme"/>.</summary>
+    internal ChartTheme Appearance => _resolvedTheme;
+    internal virtual bool UsesStyledGeometry => Appearance.StyledGeometry || _borderRadius > 0 || (BorderColor.HasValue && _borderWidth > 0);
+
+    protected ChartBase() { }
+
     protected ChartBase(ChartData data)
     {
         Data = data ?? throw new ArgumentNullException(nameof(data));
@@ -31,92 +57,167 @@ public abstract partial class ChartBase
 
     private ChartData _data = new();
 
-    /// <summary>Data rendered by this chart when it is used as a document element.</summary>
     public ChartData Data
     {
         get => _data;
         set => _data = value ?? throw new ArgumentNullException(nameof(value));
     }
 
-    /// <summary>Visible title drawn inside the chart.</summary>
     public string Title
     {
         get => Data.Title;
         set => Data.Title = value;
     }
 
-    /// <summary>Alternate text description for screen readers.</summary>
-    public string AltText { get; set; } = string.Empty;
-
-    /// <summary>Marks the chart as decorative even when alternate text is present.</summary>
-    public bool IsDecorative { get; set; }
-
-    /// <summary>
-    /// Width of the chart canvas in points
-    /// </summary>
-    public float Width { get; set; } = 800;
-
-    /// <summary>
-    /// Height of the chart canvas in points
-    /// </summary>
-    public float Height { get; set; } = 450;
-
-    /// <summary>
-    /// Background color for the chart (default: null/transparent).
-    /// When null, no background is drawn, allowing the chart to blend with document content.
-    /// Set to Color.White for standalone chart images.
-    /// </summary>
-    public Color? BackgroundColor { get; set; }
-
-    /// <summary>
-    /// Preferred root <c>shape-rendering</c> for standalone SVG export
-    /// (<see cref="SvgExportExtensions.ToSvg(ChartBase, ChartData)"/>).
-    /// <c>null</c> (the default) keeps the SVG default antialiasing, which is
-    /// required for charts with diagonal lines, arcs, or circles. Axis-aligned
-    /// charts (bar, grouped bar) set this to <c>"crispEdges"</c> so their bars
-    /// and gridlines snap to the pixel grid instead of softening into blurred
-    /// edges. Text is governed by <c>text-rendering</c>, so it is unaffected.
-    /// </summary>
-    public string? SvgShapeRendering { get; set; }
-
-    /// <summary>
-    /// Draws the chart to the specified canvas.
-    /// This method handles the common setup (background, title) and calls the abstract DrawContent method.
-    /// </summary>
-    /// <param name="canvas">The canvas to draw to</param>
-    /// <param name="data">The chart data to render</param>
-    public virtual void Draw(ICanvas canvas, ChartData data)
+    /// <summary>Optional subtitle drawn beneath the chart title.</summary>
+    public string Subtitle
     {
-        // Draw background only if a color is specified
-        if (BackgroundColor.HasValue) canvas.FillRect(0, 0, Width, Height, BackgroundColor.Value);
-
-        // Draw title if present
-        if (!string.IsNullOrEmpty(data.Title)) DrawTitle(canvas, data.Title);
-
-        // Draw chart-specific content
-        DrawContent(canvas, data);
+        get => Data.Subtitle;
+        set => Data.Subtitle = value;
     }
 
-    /// <summary>Draws the chart's owned <see cref="Data"/> to a canvas.</summary>
+    /// <summary>Optional source or footnote line drawn at the bottom-left of the chart.</summary>
+    public string Caption { get; set; } = string.Empty;
+
+    /// <summary>Enable content-aware dynamic margins based on measured text bounds.</summary>
+    public bool AutoLayout { get; set; }
+
+    /// <summary>When hosted in BonniePDF, inherit the document's default font family instead of Helvetica.</summary>
+    public bool InheritDocumentFont { get; set; }
+
+    public string AltText { get; set; } = string.Empty;
+    public bool IsDecorative { get; set; }
+    public float Width { get; set; } = 800;
+    public float Height { get; set; } = 450;
+    public Color? BackgroundColor { get; set; }
+
+    /// <summary>Optional card border corner radius in points.</summary>
+    public float BorderRadius
+    {
+        get => _borderRadius;
+        set
+        {
+            if (!float.IsFinite(value) || value < 0) throw new ArgumentOutOfRangeException(nameof(value), "BorderRadius must be finite and nonnegative.");
+            _borderRadius = value;
+        }
+    }
+
+    /// <summary>Optional card border colour.</summary>
+    public Color? BorderColor { get; set; }
+
+    /// <summary>Optional card border stroke width in points.</summary>
+    public float BorderWidth
+    {
+        get => _borderWidth;
+        set
+        {
+            if (!float.IsFinite(value) || value < 0) throw new ArgumentOutOfRangeException(nameof(value), "BorderWidth must be finite and nonnegative.");
+            _borderWidth = value;
+        }
+    }
+
+    public string? SvgShapeRendering { get; set; }
+
+    protected Color? EffectiveBackgroundColor => BackgroundColor ?? Appearance.BackgroundColor;
+
+    protected string ResolveFontFamily(string? explicitFamily = null)
+    {
+        ChartTheme t = Appearance;
+        if ((InheritDocumentFont || string.Equals(t.FontFamily, "inherit", StringComparison.Ordinal)) && !string.IsNullOrEmpty(InheritedFontFamily))
+            return InheritedFontFamily;
+        if (!string.IsNullOrEmpty(explicitFamily) && !string.Equals(explicitFamily, StandardFonts.Helvetica, StringComparison.Ordinal))
+            return explicitFamily;
+        return string.Equals(t.FontFamily, "inherit", StringComparison.Ordinal) ? StandardFonts.Helvetica : t.FontFamily;
+    }
+
+    protected string ResolveTitleFontFamily()
+    {
+        ChartTheme t = Appearance;
+        if ((InheritDocumentFont || string.Equals(t.FontFamily, "inherit", StringComparison.Ordinal)) && !string.IsNullOrEmpty(InheritedFontFamily))
+            return InheritedFontFamily;
+        return t.TitleFontFamily;
+    }
+
+    private static List<ChartPathCommand> RoundedRectCommands(double x, double y, double w, double h, double radius)
+    {
+        double r = Math.Min(Math.Max(0, radius), Math.Min(w / 2.0, h / 2.0));
+        if (r <= 0)
+        {
+            return
+            [
+                new("M", [x, y]),
+                new("L", [x + w, y]),
+                new("L", [x + w, y + h]),
+                new("L", [x, y + h]),
+                new("Z", []),
+            ];
+        }
+        double c = RoundedK * r;
+        return
+        [
+            new("M", [x + r, y]),
+            new("L", [x + w - r, y]),
+            new("C", [x + w - r + c, y, x + w, y + r - c, x + w, y + r]),
+            new("L", [x + w, y + h - r]),
+            new("C", [x + w, y + h - r + c, x + w - r + c, y + h, x + w - r, y + h]),
+            new("L", [x + r, y + h]),
+            new("C", [x + r - c, y + h, x, y + h - r + c, x, y + h - r]),
+            new("L", [x, y + r]),
+            new("C", [x, y + r - c, x + r - c, y, x + r, y]),
+            new("Z", []),
+        ];
+    }
+
+    public virtual void Draw(ICanvas canvas, ChartData data)
+    {
+        Color? bg = EffectiveBackgroundColor;
+        if (bg.HasValue)
+        {
+            if (_borderRadius > 0)
+                ChartVector.Fill(canvas, new ChartPathPlan(RoundedRectCommands(0, 0, Width, Height, _borderRadius), bg.Value, null));
+            else
+                canvas.FillRect(0, 0, Width, Height, bg.Value);
+        }
+
+        if (!string.IsNullOrEmpty(data.Title)) DrawTitle(canvas, data.Title);
+        if (!string.IsNullOrEmpty(data.Subtitle)) DrawSubtitle(canvas, data.Subtitle, !string.IsNullOrEmpty(data.Title));
+
+        DrawContent(canvas, data);
+
+        if (!string.IsNullOrEmpty(Caption)) DrawCaption(canvas, Caption);
+
+        if (BorderColor.HasValue && _borderWidth > 0)
+        {
+            double inset = _borderWidth / 2.0;
+            ChartVector.Stroke(canvas, new ChartStrokePlan(
+                RoundedRectCommands(inset, inset, Width - _borderWidth, Height - _borderWidth, Math.Max(0, _borderRadius - inset)),
+                BorderColor.Value,
+                _borderWidth,
+                "butt",
+                "round"));
+        }
+    }
+
     public void Draw(ICanvas canvas) => Draw(canvas, Data);
 
-    /// <summary>
-    /// Draws the chart title in the theme's title style.
-    /// </summary>
-    /// <param name="canvas">The canvas to draw to</param>
-    /// <param name="title">The title text</param>
     protected virtual void DrawTitle(ICanvas canvas, string title)
     {
         ChartTheme t = Appearance;
-        canvas.DrawText(t.TitleX ?? Width / 2, t.TitleY, title, t.TitleColor, t.TitleFontSize, t.TitleFontFamily, t.TitleAlignment);
+        canvas.DrawText(t.TitleX ?? Width / 2, t.TitleY, title, t.TitleColor, t.TitleFontSize, ResolveTitleFontFamily(), t.TitleAlignment);
     }
 
-    /// <summary>
-    /// Draws the chart-specific content.
-    /// Derived classes must implement this to provide their specific drawing logic.
-    /// </summary>
-    /// <param name="canvas">The canvas to draw to</param>
-    /// <param name="data">The chart data to render</param>
-    protected abstract void DrawContent(ICanvas canvas, ChartData data);
+    protected virtual void DrawSubtitle(ICanvas canvas, string subtitle, bool hasTitle)
+    {
+        ChartTheme t = Appearance;
+        float y = hasTitle ? t.TitleY + t.TitleFontSize + 4 : t.TitleY;
+        canvas.DrawText(t.TitleX ?? Width / 2, y, subtitle, t.SubtitleColor, 11, ResolveFontFamily(), t.TitleAlignment);
+    }
 
+    protected virtual void DrawCaption(ICanvas canvas, string caption)
+    {
+        ChartTheme t = Appearance;
+        canvas.DrawText(t.TitleX ?? 20, Height - 14, caption, t.SubtitleColor, 8.5f, ResolveFontFamily(), TextAlignment.Left);
+    }
+
+    protected abstract void DrawContent(ICanvas canvas, ChartData data);
 }

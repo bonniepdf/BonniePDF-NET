@@ -1,185 +1,228 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using BonniePDF.Drawing;
 
 namespace BonniePDF;
 
 /// <summary>
 /// Base class for Cartesian charts (charts with X and Y axes).
-/// Provides common functionality for drawing axes, grid lines, labels, and legends.
-/// Uses the Template Method pattern to ensure consistent drawing order across all derived charts.
 /// </summary>
 public abstract class CartesianChartBase : ChartBase
 {
     private readonly List<ChartLabelBox> _labelBoxes = new();
-    private ChartData? _renderData;
+    protected ChartData? _renderData;
+    protected float _plotLeft = LeftPadding;
+    protected float _plotRight = RightPadding;
+    protected decimal _effectiveMin;
+    protected decimal _effectiveMax = 10000;
+    protected int _effectiveStepCount = 5;
+    protected string _effectiveTickFormat = "N0";
+
     protected void DrawPlacedLabel(ICanvas canvas, float x, float y, string text, Color color, float size, string family, TextAlignment align)
     {
         if (Appearance.MeasuredLabels) ChartLabels.Draw(canvas, _labelBoxes, Width, Height, x, y, text, color, size, family, align);
         else canvas.DrawText(x, y, text, color, size, family, align);
     }
 
-    private Color ThemeAxisColor => Appearance.AxisColor;
-    private Color ThemeGridColor => Appearance.GridLineColor;
+    protected Color ThemeAxisColor => Appearance.AxisColor;
+    protected Color ThemeGridColor => Appearance.GridLineColor;
 
-    protected CartesianChartBase()
-    {
-    }
+    protected CartesianChartBase() { }
+    protected CartesianChartBase(ChartData data) : base(data) { }
 
-    protected CartesianChartBase(ChartData data) : base(data)
-    {
-    }
-
-    // Layout constants (relative to chart height)
-    protected const float TitleAreaHeight = 60; // Space for title at top
-    protected const float BottomPadding = 70; // Space for x-axis labels and legend
-
-    /// <summary>
-    /// Top band reserved when <see cref="ChartData.Title"/> is empty. Just enough
-    /// headroom for value labels sitting above the tallest data point, so a
-    /// titleless chart's plot area stretches up instead of leaving the title gap empty.
-    /// </summary>
+    protected const float TitleAreaHeight = 60;
+    protected const float BottomPadding = 70;
     protected const float TopPadding = 20;
-
-    /// <summary>
-    /// Bottom band reserved when no legend is drawn there. Holds only the
-    /// category/value tick labels (<see cref="DrawXAxisLabels"/> at
-    /// <c>baselineY + 15</c>, font <see cref="AxisLabelFontSize"/>), so a
-    /// legend-free chart's plot area stretches down instead of reserving the full
-    /// <see cref="BottomPadding"/> band.
-    /// </summary>
     protected const float AxisLabelBand = 30;
-
-    protected const float LeftPadding = 80; // Space for y-axis labels and legend
-    protected const float RightPadding = 40; // Right margin
+    protected const float LeftPadding = 80;
+    protected const float RightPadding = 40;
     protected const float AxisLineWidth = 1f;
     protected const float GridLineWidth = 0.5f;
     protected const float AxisLabelFontSize = 10;
     protected const float LegendFontSize = 11;
 
-    // Legacy styling constants; the active theme supplies the colours actually drawn.
     protected static readonly Color AxisColor = ChartTheme.Legacy.AxisColor;
     protected static readonly Color GridLineColor = ChartTheme.Legacy.GridLineColor;
 
-    /// <summary>Category-axis presentation owned by this chart.</summary>
     public AxisOptions XAxis
     {
         get => Data.XAxis;
         set => Data.XAxis = value ?? throw new ArgumentNullException(nameof(value));
     }
 
-    /// <summary>Value-axis presentation owned by this chart.</summary>
     public AxisOptions YAxis
     {
         get => Data.YAxis;
         set => Data.YAxis = value ?? throw new ArgumentNullException(nameof(value));
     }
 
-    /// <summary>
-    /// Font family for labels
-    /// </summary>
     public string FontFamily { get; set; } = StandardFonts.Helvetica;
-
-    /// <summary>
-    /// Whether to show value labels above each data point
-    /// </summary>
     public bool ShowValueLabels { get; set; } = true;
-
-    /// <summary>
-    /// Font size for value labels above data points
-    /// </summary>
     public float LabelFontSize { get; set; } = 9;
-
-    /// <summary>
-    /// Whether to show a legend for multiple series (default: true).
-    /// </summary>
+    public string? ValueLabelFormat { get; set; }
+    public string ValueLabelPrefix { get; set; } = "";
+    public string ValueLabelSuffix { get; set; } = "";
+    public string ValueLabelPosition { get; set; } = "outside";
     public bool ShowLegend { get; set; } = true;
-
-    /// <summary>
-    /// Controls whether the chart renders with vertical or horizontal orientation.
-    /// In horizontal mode, categories run along the Y-axis (left) and values along the X-axis (bottom).
-    /// Setting this on any chart type enables horizontal rendering without needing a separate class.
-    /// </summary>
+    public string LegendPosition { get; set; } = "bottom";
     public ChartOrientation Orientation { get; set; } = ChartOrientation.Vertical;
-
-    /// <summary>Reference lines and bands on the value axis.</summary>
     public IList<ChartReference> References { get; set; } = [];
+    public bool? ClipToPlotArea { get; set; }
+
+    protected virtual bool DefaultAutoScale => false;
+    protected virtual bool DefaultIncludeZero => true;
+    protected virtual bool DefaultClipToPlotArea => false;
+    protected virtual bool SupportsInlineLegend => false;
+    protected bool EffectiveClipToPlotArea => ClipToPlotArea ?? DefaultClipToPlotArea;
+    protected string EffectiveFontFamily => ResolveFontFamily(FontFamily);
 
     private protected virtual bool DrawCompact(ICanvas canvas, ChartData data) => false;
 
-    /// <summary>
-    /// Draws the chart content using a Template Method pattern.
-    /// This ensures consistent drawing order across all Cartesian chart types:
-    /// 1. Grid lines (behind everything)
-    /// 2. Value-axis labels (behind data)
-    /// 3. Chart-specific data elements (bars, lines, etc.)
-    /// 4. Value labels (on top of data)
-    /// 5. Category-axis labels
-    /// 6. Axis lines (on top of everything to prevent overlap)
-    /// 7. Legend (for multi-series charts)
-    /// </summary>
-    protected sealed override void DrawContent(ICanvas canvas, ChartData data)
+    protected virtual (double Min, double Max)? GetValueDataRange(ChartData data)
     {
-        ChartData? previousData=_renderData;
-        try {
-        _labelBoxes.Clear();
-        _renderData = data;
-        if (data.Series.Count == 0) return;
-        ChartValueScale.Check(data.YAxis.MinValue, data.YAxis.MaxValue);
-
-        if (DrawCompact(canvas, data)) return;
-        (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) = CalculateLayout(data);
-        DrawReferences(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, bands: true);
-
-        // 1. Draw grid lines first (behind everything)
-        if (data.YAxis.ShowGridLines)
-            DrawGridLines(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
-
-        // 2. Draw value-axis labels (behind data)
-        DrawYAxisLabels(canvas, data, chartAreaHeight, baselineY, topY);
-
-        // 3. Draw value-axis legend
-        if (!string.IsNullOrEmpty(data.YAxis.Legend))
-            DrawYAxisLegend(canvas, data.YAxis, chartAreaWidth, chartAreaHeight, topY, baselineY);
-
-        // 4. Draw chart-specific data elements
-        DrawAllSeries(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
-
-        DrawReferences(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, bands: false);
-
-        // 5. Draw value labels on top of data
-        if (ShowValueLabels)
-            DrawValueLabels(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
-
-        // 6. Draw category-axis labels
-        DrawXAxisLabels(canvas, data, chartAreaWidth, chartAreaHeight, baselineY);
-
-        // 7. Draw category-axis legend
-        if (!string.IsNullOrEmpty(data.XAxis.Legend))
-            DrawXAxisLegend(canvas, data.XAxis.Legend, chartAreaWidth, chartAreaHeight, baselineY);
-
-        // 8. Draw axis lines LAST (on top of everything to prevent overlap)
-        if (Appearance.AxisFrame) DrawAxisLines(canvas, chartAreaWidth, baselineY, topY);
-        else
+        double min = double.PositiveInfinity;
+        double max = double.NegativeInfinity;
+        foreach (var series in data.Series)
         {
-            float baseline = Orientation == ChartOrientation.Horizontal ? baselineY : ValueOrigin(data, chartAreaWidth, chartAreaHeight, baselineY);
-            canvas.DrawLine(LeftPadding, baseline, LeftPadding + chartAreaWidth, baseline, ThemeAxisColor, Appearance.AxisLineWidth);
+            foreach (var dp in series.DataPoints)
+            {
+                double v = (double)dp.Value;
+                if (v < min) min = v;
+                if (v > max) max = v;
+            }
         }
-
-        // 9. Draw legend for multi-series charts
-        if (ShowLegend && data.Series.Count > 1)
-            DrawLegend(canvas, data, chartAreaWidth);
-
-        } finally {_renderData=previousData;_labelBoxes.Clear();}
+        return min <= max ? (min, max) : null;
     }
 
-    private void DrawReferences(ICanvas canvas, ChartData data, float width, float height, float baseline, bool bands)
+    protected virtual void ResolveValueScale(ChartData data)
     {
-        bool horizontal = Orientation == ChartOrientation.Horizontal;
-        decimal min = data.YAxis.MinValue;
-        decimal max = data.YAxis.MaxValue;
-        foreach (ChartReference reference in References)
+        AxisOptions axis = data.YAxis;
+        bool useAuto = axis.AutoScale || (DefaultAutoScale && !axis.HasMaxValue);
+        if (useAuto)
+        {
+            var range = GetValueDataRange(data);
+            if (range.HasValue)
+            {
+                var nice = ChartValueScale.ComputeNiceScale(
+                    range.Value.Min,
+                    range.Value.Max,
+                    axis.StepCount,
+                    axis.IncludeZero ?? DefaultIncludeZero,
+                    axis.Headroom ?? (ShowValueLabels ? 0.05 : 0),
+                    axis.HasMinValue ? (double)axis.MinValue : null,
+                    axis.HasMaxValue ? (double)axis.MaxValue : null);
+                _effectiveMin = nice.MinValue;
+                _effectiveMax = nice.MaxValue;
+                _effectiveStepCount = nice.StepCount;
+                _effectiveTickFormat = axis.ValueFormat ?? nice.AutoFormat;
+                return;
+            }
+        }
+        _effectiveMin = axis.MinValue;
+        _effectiveMax = axis.MaxValue;
+        _effectiveStepCount = axis.StepCount > 0 ? axis.StepCount : 5;
+        _effectiveTickFormat = axis.ValueFormat ?? "N0";
+    }
+
+    protected string FormatPointValue(ChartDataPoint dp, decimal? overrideValue = null)
+    {
+        decimal val = overrideValue ?? dp.Value;
+        string fmt = dp.HasExplicitLabelFormat ? dp.LabelFormat : (ValueLabelFormat ?? dp.LabelFormat);
+        return $"{ValueLabelPrefix}{ChartNumberFormat.Format(val, fmt)}{ValueLabelSuffix}";
+    }
+
+    protected virtual float GetExtraRightMargin(ICanvas canvas, ChartData data) => 0f;
+
+    protected virtual void DrawAfterSeries(ICanvas canvas, ChartData data, float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) { }
+
+    protected bool ShouldDrawLegend(ChartData data) => ShowLegend && LegendPosition is not "none" && data.Series.Count > 1;
+
+    protected string EffectiveLegendPosition() => LegendPosition is "inline" && !SupportsInlineLegend ? "top" : LegendPosition;
+
+    protected sealed override void DrawContent(ICanvas canvas, ChartData data)
+    {
+        ChartData? previousData = _renderData;
+        float prevLeft = _plotLeft;
+        float prevRight = _plotRight;
+        try
+        {
+            _labelBoxes.Clear();
+            _renderData = data;
+            if (data.Series.Count == 0) return;
+            ResolveValueScale(data);
+            ChartValueScale.Check(_effectiveMin, _effectiveMax);
+
+            if (DrawCompact(canvas, data)) return;
+            var layout = CalculateLayoutWithCanvas(canvas, data);
+            _plotLeft = layout.PlotLeft;
+            _plotRight = layout.PlotRight;
+
+            DrawReferences(canvas, data, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.BaselineY, bands: true);
+
+            if (data.YAxis.ShowGridLines && Appearance.GridLineStyle is not "none")
+                DrawGridLines(canvas, data, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.BaselineY, layout.TopY);
+
+            DrawYAxisLabels(canvas, data, layout.ChartAreaHeight, layout.BaselineY, layout.TopY);
+
+            if (!string.IsNullOrEmpty(data.YAxis.Legend))
+                DrawYAxisLegend(canvas, data.YAxis, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.TopY, layout.BaselineY);
+
+            if (EffectiveClipToPlotArea)
+            {
+                ChartVector.PushClipRect(canvas, _plotLeft, layout.TopY, layout.ChartAreaWidth, layout.ChartAreaHeight);
+                try
+                {
+                    DrawAllSeries(canvas, data, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.BaselineY, layout.TopY);
+                }
+                finally { ChartVector.PopClip(canvas); }
+            }
+            else
+            {
+                DrawAllSeries(canvas, data, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.BaselineY, layout.TopY);
+            }
+
+            DrawAfterSeries(canvas, data, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.BaselineY, layout.TopY);
+            DrawReferences(canvas, data, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.BaselineY, bands: false);
+
+            if (ShowValueLabels)
+                DrawValueLabels(canvas, data, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.BaselineY, layout.TopY);
+
+            DrawXAxisLabels(canvas, data, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.BaselineY);
+
+            if (!string.IsNullOrEmpty(data.XAxis.Legend))
+                DrawXAxisLegend(canvas, data.XAxis.Legend, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.BaselineY);
+
+            if (Appearance.AxisFrame) DrawAxisFrameLines(canvas, layout.ChartAreaWidth, layout.BaselineY, layout.TopY);
+            else
+            {
+                float baseline = Orientation == ChartOrientation.Horizontal ? layout.BaselineY : ValueOrigin(data, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.BaselineY);
+                canvas.DrawLine(_plotLeft, baseline, _plotLeft + layout.ChartAreaWidth, baseline, ThemeAxisColor, Appearance.AxisLineWidth);
+            }
+
+            if (ShouldDrawLegend(data))
+                DrawLegendInPosition(canvas, data, layout);
+        }
+        finally
+        {
+            _renderData = previousData;
+            _plotLeft = prevLeft;
+            _plotRight = prevRight;
+            _labelBoxes.Clear();
+        }
+    }
+
+    protected void DrawReferences(
+        ICanvas canvas, ChartData data, float width, float height, float baseline, bool bands,
+        IList<ChartReference>? customRefs = null, decimal? customMin = null, decimal? customMax = null, bool? forceHorizontal = null)
+    {
+        bool horizontal = forceHorizontal ?? (Orientation == ChartOrientation.Horizontal);
+        decimal min = customMin ?? _effectiveMin;
+        decimal max = customMax ?? _effectiveMax;
+        IList<ChartReference> list = customRefs ?? References;
+        foreach (ChartReference reference in list)
         {
             if (reference.EndValue.HasValue != bands) continue;
             float a = (float)ChartValueScale.Fraction(reference.Value, min, max);
@@ -189,16 +232,85 @@ public abstract class CartesianChartBase : ChartBase
                 float low = MathF.Max(0, MathF.Min(a, b));
                 float high = MathF.Min(1, MathF.Max(a, b));
                 if (!(high > low)) continue;
-                if (horizontal) canvas.FillRect(LeftPadding + low * width, baseline - height, (high - low) * width, height, reference.Color);
-                else canvas.FillRect(LeftPadding, baseline - high * height, width, (high - low) * height, reference.Color);
+                float rx = horizontal ? _plotLeft + low * width : _plotLeft;
+                float ry = horizontal ? baseline - height : baseline - high * height;
+                float rw = horizontal ? (high - low) * width : width;
+                float rh = horizontal ? height : (high - low) * height;
+                canvas.FillRect(rx, ry, rw, rh, reference.Color);
+                if (!string.IsNullOrEmpty(reference.Label))
+                    DrawReferenceLabel(canvas, reference, rx, ry, rw, rh, true, horizontal);
             }
             else if (a >= 0 && a <= 1 && float.IsFinite(reference.Thickness) && reference.Thickness > 0)
             {
-                float x = horizontal ? LeftPadding + a * width : LeftPadding;
+                float x = horizontal ? _plotLeft + a * width : _plotLeft;
                 float y = baseline - (horizontal ? height : a * height);
-                DrawReferenceLine(canvas, x, y, horizontal ? height : width, horizontal, reference);
+                float len = horizontal ? height : width;
+                DrawReferenceLine(canvas, x, y, len, horizontal, reference);
+                if (!string.IsNullOrEmpty(reference.Label))
+                    DrawReferenceLabel(canvas, reference, x, y, horizontal ? 0 : len, horizontal ? len : 0, false, horizontal);
             }
         }
+    }
+
+    private void DrawReferenceLabel(ICanvas canvas, ChartReference reference, float x, float y, float w, float h, bool isBand, bool verticalLine)
+    {
+        string label = reference.Label!;
+        const float fontSize = 8.5f;
+        string family = EffectiveFontFamily;
+        Size measured = canvas.MeasureText(label, fontSize, family);
+        string pos = string.IsNullOrEmpty(reference.LabelPosition) ? "end" : reference.LabelPosition;
+        string placement = reference.LabelPlacement ?? (isBand ? "inside" : "above");
+        Color textColor = reference.LabelColor ?? (reference.Color.ScA < 0.5f
+            ? new Color(reference.Color.R, reference.Color.G, reference.Color.B, (byte)255)
+            : reference.Color);
+
+        float tx, ty;
+        TextAlignment align;
+
+        if (isBand)
+        {
+            if (pos is "start") { tx = x + 6; align = TextAlignment.Left; }
+            else if (pos is "center") { tx = x + w / 2; align = TextAlignment.Center; }
+            else { tx = x + w - 6; align = TextAlignment.Right; }
+            ty = placement is "below" ? y + h + 3 : placement is "above" ? y - fontSize - 3 : y + 4;
+        }
+        else if (verticalLine)
+        {
+            tx = placement is "below" ? x - 4 : x + 4;
+            align = placement is "below" ? TextAlignment.Right : TextAlignment.Left;
+            ty = pos is "start" ? y + h - fontSize - 4 : pos is "center" ? y + h / 2 - fontSize / 2 : y + 4;
+        }
+        else
+        {
+            if (pos is "start") { tx = x + 4; align = TextAlignment.Left; }
+            else if (pos is "center") { tx = x + w / 2; align = TextAlignment.Center; }
+            else { tx = x + w - 4; align = TextAlignment.Right; }
+            ty = placement is "below" ? y + 4 : y - fontSize - 4;
+        }
+
+        if (reference.LabelBackgroundColor.HasValue)
+        {
+            float px = align == TextAlignment.Right ? tx - measured.Width - 4 : align == TextAlignment.Center ? tx - measured.Width / 2 - 4 : tx - 4;
+            float py = ty - 2;
+            float pw = measured.Width + 8;
+            float ph = fontSize + 4;
+            const double r = 2;
+            List<ChartPathCommand> cmds =
+            [
+                new("M", [px + r, py]),
+                new("L", [px + pw - r, py]),
+                new("L", [px + pw, py + r]),
+                new("L", [px + pw, py + ph - r]),
+                new("L", [px + pw - r, py + ph]),
+                new("L", [px + r, py + ph]),
+                new("L", [px, py + ph - r]),
+                new("L", [px, py + r]),
+                new("Z", []),
+            ];
+            ChartVector.Fill(canvas, new ChartPathPlan(cmds, reference.LabelBackgroundColor.Value, null));
+        }
+
+        canvas.DrawText(tx, ty, label, textColor, fontSize, family, align);
     }
 
     private static void DrawReferenceLine(ICanvas canvas, float x, float y, float length, bool vertical, ChartReference reference)
@@ -229,57 +341,43 @@ public abstract class CartesianChartBase : ChartBase
         }
     }
 
-    /// <summary>
-    /// Draws all series in the chart.
-    /// </summary>
     protected virtual void DrawAllSeries(ICanvas canvas, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
         foreach (ChartSeries series in data.Series)
         {
-            IList<Point> coordinates = CalculateSeriesCoordinates(
-                series, data, chartAreaWidth, chartAreaHeight, baselineY);
-
-            DrawSeriesElements(canvas, data, series, coordinates,
-                chartAreaWidth, chartAreaHeight, baselineY, topY);
+            IList<Point> coordinates = CalculateSeriesCoordinates(series, data, chartAreaWidth, chartAreaHeight, baselineY);
+            DrawSeriesElements(canvas, data, series, coordinates, chartAreaWidth, chartAreaHeight, baselineY, topY);
         }
     }
 
-    /// <summary>
-    /// Calculates screen-space coordinates for a series.
-    /// In vertical mode: category index → X position, normalised value → Y position.
-    /// In horizontal mode: category index → Y position, normalised value → X position.
-    /// Derived charts receive pre-computed Point coordinates and draw relative to them,
-    /// so most derived chart drawing logic works correctly in both orientations.
-    /// </summary>
     protected IList<Point> CalculateSeriesCoordinates(
         ChartSeries series, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY)
     {
         int dataPointCount = series.DataPoints.Count;
         List<Point> coordinates = new();
+        if (dataPointCount == 0) return coordinates;
 
         if (Orientation == ChartOrientation.Horizontal)
         {
             float topY = baselineY - chartAreaHeight;
             float totalSpace = chartAreaHeight / dataPointCount;
-
             for (int i = 0; i < dataPointCount; i++)
             {
                 float y = topY + i * totalSpace + totalSpace / 2;
-                decimal normalizedValue = ChartValueScale.Fraction(series.DataPoints[i].Value, data.YAxis.MinValue, data.YAxis.MaxValue);
-                float x = LeftPadding + (float)(normalizedValue * (decimal)chartAreaWidth);
+                decimal normalizedValue = ChartValueScale.Fraction(series.DataPoints[i].Value, _effectiveMin, _effectiveMax);
+                float x = _plotLeft + (float)(normalizedValue * (decimal)chartAreaWidth);
                 coordinates.Add(new Point(x, y));
             }
         }
         else
         {
             float totalSpace = chartAreaWidth / dataPointCount;
-
             for (int i = 0; i < dataPointCount; i++)
             {
-                float x = LeftPadding + i * totalSpace + totalSpace / 2;
-                decimal normalizedValue = ChartValueScale.Fraction(series.DataPoints[i].Value, data.YAxis.MinValue, data.YAxis.MaxValue);
+                float x = _plotLeft + i * totalSpace + totalSpace / 2;
+                decimal normalizedValue = ChartValueScale.Fraction(series.DataPoints[i].Value, _effectiveMin, _effectiveMax);
                 float y = baselineY - (float)(normalizedValue * (decimal)chartAreaHeight);
                 coordinates.Add(new Point(x, y));
             }
@@ -288,25 +386,17 @@ public abstract class CartesianChartBase : ChartBase
         return coordinates;
     }
 
-    /// <summary>
-    /// Where bars, area fills and stems start: value zero limited to the axis range. A y coordinate in
-    /// vertical mode and an x coordinate in horizontal mode.
-    /// </summary>
     internal float ValueOrigin(ChartData data, float chartAreaWidth, float chartAreaHeight, float baselineY)
     {
-        decimal fraction = ChartValueScale.OriginFraction(data.YAxis.MinValue, data.YAxis.MaxValue);
+        decimal fraction = ChartValueScale.OriginFraction(_effectiveMin, _effectiveMax);
         return Orientation == ChartOrientation.Horizontal
-            ? LeftPadding + (float)(fraction * (decimal)chartAreaWidth)
+            ? _plotLeft + (float)(fraction * (decimal)chartAreaWidth)
             : baselineY - (float)(fraction * (decimal)chartAreaHeight);
     }
 
-    /// <summary>
-    /// Draws the connecting line between consecutive data points for a series.
-    /// </summary>
     internal static void DrawConnectingLine(ICanvas canvas, IList<Point> coordinates, Color color, float lineWidth)
     {
         if (coordinates.Count < 2) return;
-
         for (int i = 0; i < coordinates.Count - 1; i++)
         {
             var p1 = coordinates[i];
@@ -315,116 +405,213 @@ public abstract class CartesianChartBase : ChartBase
         }
     }
 
-    /// <summary>
-    /// Draws the chart-specific elements for a single series.
-    /// Derived classes must implement this to provide their specific drawing logic for each series.
-    /// </summary>
-    /// <param name="canvas">The canvas to draw to</param>
-    /// <param name="data">The chart data containing all series</param>
-    /// <param name="series">The specific series to draw</param>
-    /// <param name="coordinates">Pre-calculated screen-space coordinates for this series' data points</param>
-    /// <param name="chartAreaWidth">Width of the chart drawing area</param>
-    /// <param name="chartAreaHeight">Height of the chart drawing area</param>
-    /// <param name="baselineY">Y coordinate of the bottom of the chart area</param>
-    /// <param name="topY">Y coordinate of the top of the chart area</param>
-    protected abstract void DrawSeriesElements(ICanvas canvas, ChartData data, ChartSeries series,
-        IList<Point> coordinates,
+    protected void DrawSeriesLine(ICanvas canvas, IList<Point> coordinates, Color color, float lineWidth, string curve = "linear", float[]? dashPattern = null)
+    {
+        if (coordinates.Count < 2) return;
+        bool hasDash = dashPattern is { Length: > 0 };
+        if (curve is "linear" && !hasDash)
+        {
+            DrawConnectingLine(canvas, coordinates, color, lineWidth);
+            return;
+        }
+        double[]? dashDouble = null;
+        if (hasDash)
+        {
+            dashDouble = new double[dashPattern!.Length];
+            for (int i = 0; i < dashPattern.Length; i++) dashDouble[i] = dashPattern[i];
+            ChartCurves.ValidateDashPattern(dashDouble, ChartCurves.PolylineLength((IReadOnlyList<Point>)coordinates));
+        }
+        var cmds = ChartCurves.BuildCurveCommands((IReadOnlyList<Point>)coordinates, curve, Orientation == ChartOrientation.Horizontal);
+        ChartVector.Stroke(canvas, new ChartStrokePlan(cmds, color, lineWidth, hasDash ? "butt" : "round", "round", 10, dashDouble));
+    }
+
+    protected abstract void DrawSeriesElements(
+        ICanvas canvas, ChartData data, ChartSeries series, IList<Point> coordinates,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY);
 
-    /// <summary>
-    /// Draws value labels beyond each point, away from the value origin: above or right of a value at
-    /// or above it, below or left of a value below it.
-    /// </summary>
-    protected virtual void DrawValueLabels(ICanvas canvas, ChartData data,
+    protected void DrawBarValueLabel(
+        ICanvas canvas, float barX, float barY, float barW, float barH, string text, Color barColor,
+        bool below, float offset, float pointX, float pointY, bool outsideAlignCenter = true)
+    {
+        string family = EffectiveFontFamily;
+        if (ValueLabelPosition is "inside" or "auto")
+        {
+            Size measured = canvas.MeasureText(text, LabelFontSize, family);
+            float absW = MathF.Abs(barW);
+            float absH = MathF.Abs(barH);
+            if (absW >= measured.Width + 6 && absH >= LabelFontSize + 6)
+            {
+                float rx = barW < 0 ? barX + barW : barX;
+                float ry = barH < 0 ? barY + barH : barY;
+                Color contrast = ChartValueScale.ContrastTextColor(barColor);
+                canvas.DrawText(rx + absW / 2, ry + absH / 2 - LabelFontSize / 2, text, contrast, LabelFontSize, family, TextAlignment.Center);
+                return;
+            }
+            if (ValueLabelPosition is "inside") return;
+        }
+
+        if (Orientation == ChartOrientation.Horizontal)
+        {
+            DrawPlacedLabel(canvas, below ? pointX - offset : pointX + offset, pointY - LabelFontSize / 2, text, barColor, LabelFontSize, family, below ? TextAlignment.Right : TextAlignment.Left);
+        }
+        else
+        {
+            DrawPlacedLabel(canvas, pointX, below ? pointY + offset : pointY - offset - LabelFontSize, text, barColor, LabelFontSize, family, outsideAlignCenter ? TextAlignment.Center : TextAlignment.Left);
+        }
+    }
+
+    protected virtual void DrawValueLabels(
+        ICanvas canvas, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
         if (!ShowValueLabels) return;
+        string family = EffectiveFontFamily;
 
         foreach (ChartSeries series in data.Series)
         {
-            IList<Point> coordinates = CalculateSeriesCoordinates(
-                series, data, chartAreaWidth, chartAreaHeight, baselineY);
-
+            IList<Point> coordinates = CalculateSeriesCoordinates(series, data, chartAreaWidth, chartAreaHeight, baselineY);
             Color labelColor = ResolveSeriesColor(series);
             float offset = GetLabelVerticalOffset(series);
 
             for (int i = 0; i < series.DataPoints.Count; i++)
             {
-                var point = coordinates[i];
-                string text = series.DataPoints[i].FormattedValue;
-                bool below = ChartValueScale.IsBelowOrigin(series.DataPoints[i].Value, data.YAxis.MinValue, data.YAxis.MaxValue);
+                Point point = coordinates[i];
+                string text = FormatPointValue(series.DataPoints[i]);
+                bool below = ChartValueScale.IsBelowOrigin(series.DataPoints[i].Value, _effectiveMin, _effectiveMax);
 
                 if (Orientation == ChartOrientation.Horizontal)
-                    DrawPlacedLabel(canvas, below ? point.X - offset : point.X + offset, point.Y - LabelFontSize / 2, text,
-                        labelColor, LabelFontSize, FontFamily, below ? TextAlignment.Right : TextAlignment.Left);
+                {
+                    DrawPlacedLabel(canvas, below ? point.X - offset : point.X + offset, point.Y - LabelFontSize / 2, text, labelColor, LabelFontSize, family, below ? TextAlignment.Right : TextAlignment.Left);
+                }
                 else
-                    DrawPlacedLabel(canvas, point.X, below ? point.Y + offset : point.Y - offset - LabelFontSize, text,
-                        labelColor, LabelFontSize, FontFamily, TextAlignment.Center);
+                {
+                    DrawPlacedLabel(canvas, point.X, below ? point.Y + offset : point.Y - offset - LabelFontSize, text, labelColor, LabelFontSize, family, TextAlignment.Center);
+                }
             }
         }
     }
 
-    /// <summary>
-    /// Gets the offset (in points) to apply when positioning value labels near data points.
-    /// In vertical mode this is the gap above the data point; in horizontal mode to the right.
-    /// Default implementation returns 7. Derived classes can override for custom behaviour.
-    /// </summary>
     protected virtual float GetLabelVerticalOffset(ChartSeries series) => 7;
 
-    /// <summary>
-    /// Draws the legend showing all series names and colors.
-    /// </summary>
-    protected virtual void DrawLegendSwatch(ICanvas canvas, float x, float y, float size, ChartSeries series) => canvas.FillRect(x, y, size, size, ResolveSeriesColor(series));
-    protected virtual void DrawLegend(ICanvas canvas, ChartData data, float chartAreaWidth)
+    protected virtual void DrawLegendSwatch(ICanvas canvas, float x, float y, float size, ChartSeries series) =>
+        canvas.FillRect(x, y, size, size, ResolveSeriesColor(series));
+
+    private void DrawLegendInPosition(ICanvas canvas, ChartData data, (float PlotLeft, float PlotRight, float ChartAreaWidth, float ChartAreaHeight, float BaselineY, float TopY) layout)
     {
-        if (Appearance.FlowLegend)
+        string pos = EffectiveLegendPosition();
+        if (pos is "none") return;
+        if (pos is "bottom") { DrawLegend(canvas, data, layout.ChartAreaWidth); return; }
+        string family = EffectiveFontFamily;
+
+        if (pos is "top")
         {
-            float x = LeftPadding, y = Height - 42;
-            foreach (var series in data.Series)
+            ChartTheme t = Appearance;
+            float y = !string.IsNullOrEmpty(data.Title) ? t.TitleY + t.TitleFontSize + (!string.IsNullOrEmpty(data.Subtitle) ? 19 : 8) : 10;
+            float x = _plotLeft;
+            foreach (ChartSeries series in data.Series)
             {
-                float w = canvas.MeasureText(series.Name, 11, FontFamily).Width + 32;
-                if (x + w > Width - 16 && x > LeftPadding) { x = LeftPadding; y += 18; }
-                if (y + 12 > Height - 4) break;
+                float w = canvas.MeasureText(series.Name, 11, family).Width + 32;
+                if (x + w > Width - 16 && x > _plotLeft) { x = _plotLeft; y += 18; }
                 DrawLegendSwatch(canvas, x, y, 12, series);
-                canvas.DrawText(x + 18, y, series.Name, ThemeAxisColor, 11, FontFamily, TextAlignment.Left); x += w;
+                canvas.DrawText(x + 18, y, series.Name, ThemeAxisColor, 11, family, TextAlignment.Left);
+                x += w;
             }
             return;
         }
-        float legendY = Height - 40;
-        float legendStartX = LeftPadding;
-        float legendItemWidth = 150;
-        float colorBoxSize = 12;
+        if (pos is "right")
+        {
+            const float rowH = 20;
+            float totalH = data.Series.Count * rowH;
+            float startY = layout.TopY + MathF.Max(0, (layout.ChartAreaHeight - totalH) / 2);
+            float x = _plotLeft + layout.ChartAreaWidth + 16;
+            for (int i = 0; i < data.Series.Count; i++)
+            {
+                ChartSeries series = data.Series[i];
+                float y = startY + i * rowH;
+                DrawLegendSwatch(canvas, x, y, 12, series);
+                canvas.DrawText(x + 18, y, series.Name, ThemeAxisColor, 11, family, TextAlignment.Left);
+            }
+            return;
+        }
+        if (pos is "inline")
+        {
+            List<(ChartSeries Series, float TargetY, float Y)> items = new();
+            foreach (ChartSeries series in data.Series)
+            {
+                var coords = CalculateSeriesCoordinates(series, data, layout.ChartAreaWidth, layout.ChartAreaHeight, layout.BaselineY);
+                if (coords.Count == 0) continue;
+                Point last = coords[^1];
+                items.Add((series, last.Y - 5.5f, last.Y - 5.5f));
+            }
+            items.Sort((a, b) => a.TargetY.CompareTo(b.TargetY));
+            const float minGap = 14;
+            for (int i = 1; i < items.Count; i++)
+            {
+                if (items[i].Y < items[i - 1].Y + minGap) items[i] = (items[i].Series, items[i].TargetY, items[i - 1].Y + minGap);
+            }
+            float maxY = layout.BaselineY - 11;
+            if (items.Count > 0 && items[^1].Y > maxY)
+            {
+                items[^1] = (items[^1].Series, items[^1].TargetY, maxY);
+                for (int i = items.Count - 2; i >= 0; i--)
+                {
+                    if (items[i].Y > items[i + 1].Y - minGap) items[i] = (items[i].Series, items[i].TargetY, items[i + 1].Y - minGap);
+                }
+            }
+            float x = _plotLeft + layout.ChartAreaWidth + 8;
+            foreach (var item in items)
+                canvas.DrawText(x, item.Y, item.Series.Name, ResolveSeriesColor(item.Series), 10, family, TextAlignment.Left);
+        }
+    }
+
+    protected virtual void DrawLegend(ICanvas canvas, ChartData data, float chartAreaWidth)
+    {
+        string family = EffectiveFontFamily;
+        float captionLift = !string.IsNullOrEmpty(Caption) ? 16 : 0;
+        if (Appearance.FlowLegend)
+        {
+            float x = _plotLeft, y = Height - 42 - captionLift;
+            foreach (ChartSeries series in data.Series)
+            {
+                float w = canvas.MeasureText(series.Name, 11, family).Width + 32;
+                if (x + w > Width - 16 && x > _plotLeft) { x = _plotLeft; y += 18; }
+                if (y + 12 > Height - 4 - captionLift) break;
+                DrawLegendSwatch(canvas, x, y, 12, series);
+                canvas.DrawText(x + 18, y, series.Name, ThemeAxisColor, 11, family, TextAlignment.Left);
+                x += w;
+            }
+            return;
+        }
+        float legendY = Height - 40 - captionLift;
+        float legendStartX = _plotLeft;
+        const float legendItemWidth = 150;
+        const float colorBoxSize = 12;
 
         for (int i = 0; i < data.Series.Count; i++)
         {
             ChartSeries series = data.Series[i];
             float x = legendStartX + i * legendItemWidth;
-
             DrawLegendSwatch(canvas, x, legendY, colorBoxSize, series);
-
-            canvas.DrawText(x + colorBoxSize + 5, legendY + colorBoxSize / 2 - LegendFontSize / 2,
-                series.Name, ThemeAxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
+            canvas.DrawText(x + colorBoxSize + 5, legendY + colorBoxSize / 2 - LegendFontSize / 2, series.Name, ThemeAxisColor, LegendFontSize, family, TextAlignment.Left);
         }
     }
 
-    /// <summary>
-    /// Draws grid lines across the chart area.
-    /// In vertical mode: horizontal lines at value intervals.
-    /// In horizontal mode: vertical lines at value intervals.
-    /// </summary>
-    protected void DrawGridLines(ICanvas canvas, ChartData data, float chartAreaWidth, float chartAreaHeight,
-        float baselineY, float topY)
+    protected virtual void DrawGridLines(ICanvas canvas, ChartData data,
+        float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
-        int stepCount = data.YAxis.StepCount;
-        if (stepCount <= 0) stepCount = 5;
+        int stepCount = _effectiveStepCount > 0 ? _effectiveStepCount : 5;
+        bool dashed = Appearance.GridLineStyle is "dashed";
 
         if (Orientation == ChartOrientation.Horizontal)
         {
             float stepWidth = chartAreaWidth / stepCount;
             for (int i = 1; i <= stepCount; i++)
             {
-                float x = LeftPadding + i * stepWidth;
-                canvas.DrawLine(x, topY, x, baselineY, ThemeGridColor, GridLineWidth);
+                float x = _plotLeft + i * stepWidth;
+                if (dashed)
+                    ChartVector.Stroke(canvas, new ChartStrokePlan([new("M", [x, topY]), new("L", [x, baselineY])], ThemeGridColor, GridLineWidth, "butt", "miter", 10, [3, 3]));
+                else
+                    canvas.DrawLine(x, topY, x, baselineY, ThemeGridColor, GridLineWidth);
             }
         }
         else
@@ -433,228 +620,368 @@ public abstract class CartesianChartBase : ChartBase
             for (int i = 1; i <= stepCount; i++)
             {
                 float y = baselineY - i * stepHeight;
-                float x1 = LeftPadding;
-                float x2 = LeftPadding + chartAreaWidth;
-                canvas.DrawLine(x1, y, x2, y, ThemeGridColor, GridLineWidth);
+                float x1 = _plotLeft;
+                float x2 = _plotLeft + chartAreaWidth;
+                if (dashed)
+                    ChartVector.Stroke(canvas, new ChartStrokePlan([new("M", [x1, y]), new("L", [x2, y])], ThemeGridColor, GridLineWidth, "butt", "miter", 10, [3, 3]));
+                else
+                    canvas.DrawLine(x1, y, x2, y, ThemeGridColor, GridLineWidth);
             }
         }
     }
 
-    /// <summary>
-    /// Draws the X and Y axis lines.
-    /// These are in the same physical positions for both orientations:
-    /// the left vertical line and the bottom horizontal line.
-    /// </summary>
-    protected static void DrawAxisLines(ICanvas canvas, float chartAreaWidth, float baselineY, float topY)
+    protected void DrawAxisFrameLines(ICanvas canvas, float chartAreaWidth, float baselineY, float topY)
     {
-        // The X and Y axis lines are axis-aligned, so render them with crisp edges
-        // on every chart type (a sharp, fully-opaque hairline rather than a blurred
-        // antialiased one) while leaving any diagonal/curved series geometry smooth.
         canvas.BeginCrispEdges();
-
-        // Left vertical line
-        canvas.DrawLine(LeftPadding, topY, LeftPadding, baselineY, AxisColor, AxisLineWidth);
-
-        // Bottom horizontal line
-        canvas.DrawLine(LeftPadding, baselineY, LeftPadding + chartAreaWidth, baselineY, AxisColor, AxisLineWidth);
-
+        canvas.DrawLine(_plotLeft, topY, _plotLeft, baselineY, ThemeAxisColor, AxisLineWidth);
+        canvas.DrawLine(_plotLeft, baselineY, _plotLeft + chartAreaWidth, baselineY, ThemeAxisColor, AxisLineWidth);
         canvas.EndCrispEdges();
     }
 
-    /// <summary>
-    /// Draws value-axis labels.
-    /// In vertical mode: numbers on the left side at each step.
-    /// In horizontal mode: numbers along the bottom at each step.
-    /// </summary>
-    protected void DrawYAxisLabels(ICanvas canvas, ChartData data, float chartAreaHeight, float baselineY, float topY)
+    protected static void DrawAxisLines(ICanvas canvas, float chartAreaWidth, float baselineY, float topY)
     {
-        int stepCount = data.YAxis.StepCount;
-        if (stepCount <= 0) stepCount = 5;
+        canvas.BeginCrispEdges();
+        canvas.DrawLine(LeftPadding, topY, LeftPadding, baselineY, AxisColor, AxisLineWidth);
+        canvas.DrawLine(LeftPadding, baselineY, LeftPadding + chartAreaWidth, baselineY, AxisColor, AxisLineWidth);
+        canvas.EndCrispEdges();
+    }
 
-        decimal minValue = data.YAxis.MinValue;
-        decimal maxValue = data.YAxis.MaxValue;
-        decimal range = maxValue - minValue;
-        decimal stepValue = range / stepCount;
+    protected virtual void DrawYAxisLabels(ICanvas canvas, ChartData data,
+        float chartAreaHeight, float baselineY, float topY)
+    {
+        int stepCount = _effectiveStepCount > 0 ? _effectiveStepCount : 5;
+        decimal minValue = _effectiveMin;
+        decimal maxValue = _effectiveMax;
+        decimal stepValue = (maxValue - minValue) / stepCount;
+        string family = EffectiveFontFamily;
+        string fmt = _effectiveTickFormat;
 
         if (Orientation == ChartOrientation.Horizontal)
         {
-            float chartAreaWidth = Width - LeftPadding - RightPadding;
+            float chartAreaWidth = Width - _plotLeft - _plotRight;
             float stepWidth = chartAreaWidth / stepCount;
-
             for (int i = 0; i <= stepCount; i++)
             {
-                float x = LeftPadding + i * stepWidth;
+                float x = _plotLeft + i * stepWidth;
                 decimal value = minValue + i * stepValue;
-                string label = $"{data.YAxis.Prefix}{ChartNumberFormat.Format(value, "N0")}{data.YAxis.Suffix}";
-                canvas.DrawText(x, baselineY + 8, label, ThemeAxisColor, AxisLabelFontSize, FontFamily,
-                    TextAlignment.Center);
+                string label = $"{data.YAxis.Prefix}{ChartNumberFormat.Format(value, fmt)}{data.YAxis.Suffix}";
+                canvas.DrawText(x, baselineY + 8, label, ThemeAxisColor, AxisLabelFontSize, family, TextAlignment.Center);
             }
         }
         else
         {
             float stepHeight = chartAreaHeight / stepCount;
-
             for (int i = 0; i <= stepCount; i++)
             {
                 float y = baselineY - i * stepHeight;
                 decimal value = minValue + i * stepValue;
-                string label = $"{data.YAxis.Prefix}{ChartNumberFormat.Format(value, "N0")}{data.YAxis.Suffix}";
-                canvas.DrawText(LeftPadding - 8, y - AxisLabelFontSize / 2, label, ThemeAxisColor, AxisLabelFontSize,
-                    FontFamily, TextAlignment.Right);
+                string label = $"{data.YAxis.Prefix}{ChartNumberFormat.Format(value, fmt)}{data.YAxis.Suffix}";
+                canvas.DrawText(_plotLeft - 8, y - AxisLabelFontSize / 2, label, ThemeAxisColor, AxisLabelFontSize, family, TextAlignment.Right);
             }
         }
     }
 
-    /// <summary>
-    /// Draws the value-axis legend.
-    /// In vertical mode: on the left side (horizontal or rotated text).
-    /// In horizontal mode: centred below the chart as the bottom-axis legend.
-    /// </summary>
-    protected void DrawYAxisLegend(ICanvas canvas, AxisOptions yAxis,
+    protected virtual void DrawYAxisLegend(ICanvas canvas, AxisOptions yAxis,
         float chartAreaWidth, float chartAreaHeight, float topY, float baselineY)
     {
+        string family = EffectiveFontFamily;
         if (Orientation == ChartOrientation.Horizontal)
         {
-            float x = LeftPadding + chartAreaWidth / 2;
-            float y = Height - 15;
-            canvas.DrawText(x, y, yAxis.Legend, ThemeAxisColor, LegendFontSize, FontFamily, TextAlignment.Center);
+            float x = _plotLeft + chartAreaWidth / 2;
+            float y = Height - 15 - (!string.IsNullOrEmpty(Caption) ? 16 : 0);
+            canvas.DrawText(x, y, yAxis.Legend, ThemeAxisColor, LegendFontSize, family, TextAlignment.Center);
         }
         else if (yAxis.VerticalLegend)
         {
-            float x = 15;
-            float textWidth = canvas.MeasureText(yAxis.Legend, LegendFontSize, FontFamily).Width;
+            const float x = 15;
+            float textWidth = canvas.MeasureText(yAxis.Legend, LegendFontSize, family).Width;
             float y = topY + chartAreaHeight / 2 + textWidth / 2 - LegendFontSize;
-            canvas.DrawTextRotated(x, y, yAxis.Legend, ThemeAxisColor, LegendFontSize, FontFamily, 90);
+            canvas.DrawTextRotated(x, y, yAxis.Legend, ThemeAxisColor, LegendFontSize, family, 90);
         }
         else
         {
-            float x = 10;
+            const float x = 10;
             float y = topY + chartAreaHeight / 2;
-            canvas.DrawText(x, y, yAxis.Legend, ThemeAxisColor, LegendFontSize, FontFamily, TextAlignment.Left);
+            canvas.DrawText(x, y, yAxis.Legend, ThemeAxisColor, LegendFontSize, family, TextAlignment.Left);
         }
     }
 
-    /// <summary>
-    /// Draws the category-axis legend.
-    /// In vertical mode: centred below the x-axis labels.
-    /// In horizontal mode: rotated on the left side.
-    /// </summary>
-    protected void DrawXAxisLegend(ICanvas canvas, string legend,
+    protected virtual void DrawXAxisLegend(ICanvas canvas, string legend,
         float chartAreaWidth, float chartAreaHeight, float baselineY)
     {
+        string family = EffectiveFontFamily;
         if (Orientation == ChartOrientation.Horizontal)
         {
-            float x = 15;
-            float textWidth = canvas.MeasureText(legend, LegendFontSize, FontFamily).Width;
+            const float x = 15;
+            float textWidth = canvas.MeasureText(legend, LegendFontSize, family).Width;
             float y = TitleAreaHeight + chartAreaHeight / 2 + textWidth / 2 - LegendFontSize;
-            canvas.DrawTextRotated(x, y, legend, ThemeAxisColor, LegendFontSize, FontFamily, 90);
+            canvas.DrawTextRotated(x, y, legend, ThemeAxisColor, LegendFontSize, family, 90);
         }
         else
         {
-            float x = LeftPadding + chartAreaWidth / 2;
-            // Center the legend in the space below the x-axis tick labels (within the
-            // bottom-padding band), then shift up by half the font size to account for
-            // DrawText's `y` representing the top of the text box rather than its visual center.
+            float x = _plotLeft + chartAreaWidth / 2;
             float labelsBottom = baselineY + 15 + AxisLabelFontSize;
             float marginBottom = baselineY + BottomPadding;
             float y = (labelsBottom + marginBottom) / 2 - LegendFontSize / 2;
-            canvas.DrawText(x, y, legend, ThemeAxisColor, LegendFontSize, FontFamily, TextAlignment.Center);
+            canvas.DrawText(x, y, legend, ThemeAxisColor, LegendFontSize, family, TextAlignment.Center);
         }
     }
 
-    /// <summary>
-    /// Draws category-axis labels (data point labels).
-    /// In vertical mode: below each point along the X-axis.
-    /// In horizontal mode: to the left of each point along the Y-axis.
-    /// </summary>
+    private static List<string> WrapLabelTwoLines(ICanvas canvas, string text, float maxWidth, float fontSize, string family)
+    {
+        if (canvas.MeasureText(text, fontSize, family).Width <= maxWidth) return [text];
+        string[] words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length <= 1)
+        {
+            string truncated = text;
+            while (truncated.Length > 1 && canvas.MeasureText(truncated + "...", fontSize, family).Width > maxWidth)
+                truncated = truncated[..^1];
+            return [truncated + "..."];
+        }
+        int bestSplit = 1;
+        float bestMax = float.PositiveInfinity;
+        for (int s = 1; s < words.Length; s++)
+        {
+            float w1 = canvas.MeasureText(string.Join(" ", words[..s]), fontSize, family).Width;
+            float w2 = canvas.MeasureText(string.Join(" ", words[s..]), fontSize, family).Width;
+            float m = MathF.Max(w1, w2);
+            if (m < bestMax) { bestMax = m; bestSplit = s; }
+        }
+        return [string.Join(" ", words[..bestSplit]), string.Join(" ", words[bestSplit..])];
+    }
+
+    protected string ResolveEffectiveOverflow(ICanvas canvas, ChartData data, float chartAreaWidth)
+    {
+        string mode = data.XAxis.LabelOverflow;
+        if (mode is not "auto") return mode;
+        var pts = data.Series.Count > 0 ? data.Series[0].DataPoints : null;
+        if (pts is null || pts.Count == 0) return "omit";
+        float slot = chartAreaWidth / pts.Count;
+        string family = EffectiveFontFamily;
+        bool collides = false;
+        bool allFitTwoLines = true;
+        foreach (var dp in pts)
+        {
+            if (canvas.MeasureText(dp.Label, AxisLabelFontSize, family).Width > slot - 4)
+            {
+                collides = true;
+                var lines = WrapLabelTwoLines(canvas, dp.Label, slot - 4, AxisLabelFontSize, family);
+                if (lines.Exists(l => l.EndsWith("...", StringComparison.Ordinal) || canvas.MeasureText(l, AxisLabelFontSize, family).Width > slot - 2))
+                    allFitTwoLines = false;
+            }
+        }
+        if (!collides) return "omit";
+        return allFitTwoLines ? "wrap" : "rotate";
+    }
+
     protected virtual void DrawXAxisLabels(ICanvas canvas, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY)
     {
         if (data.Series.Count == 0) return;
-
         ChartSeries firstSeries = data.Series[0];
         int dataPointCount = firstSeries.DataPoints.Count;
+        if (dataPointCount == 0) return;
+        string family = EffectiveFontFamily;
 
         if (Orientation == ChartOrientation.Horizontal)
         {
             float topY = baselineY - chartAreaHeight;
             float totalSpace = chartAreaHeight / dataPointCount;
-
             for (int i = 0; i < dataPointCount; i++)
             {
                 float y = topY + i * totalSpace + totalSpace / 2;
                 string label = firstSeries.DataPoints[i].Label;
-                DrawPlacedLabel(canvas, LeftPadding - 8, y - AxisLabelFontSize / 2, label,
-                    ThemeAxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Right);
+                DrawPlacedLabel(canvas, _plotLeft - 8, y - AxisLabelFontSize / 2, label, ThemeAxisColor, AxisLabelFontSize, family, TextAlignment.Right);
             }
         }
         else
         {
             float labelY = baselineY + 15;
             float totalSpace = chartAreaWidth / dataPointCount;
+            string overflow = ResolveEffectiveOverflow(canvas, data, chartAreaWidth);
 
             for (int i = 0; i < dataPointCount; i++)
             {
-                float x = LeftPadding + i * totalSpace + totalSpace / 2;
+                float x = _plotLeft + i * totalSpace + totalSpace / 2;
                 string label = firstSeries.DataPoints[i].Label;
-                DrawPlacedLabel(canvas, x, labelY, label, ThemeAxisColor, AxisLabelFontSize, FontFamily, TextAlignment.Center);
+                if (overflow is "rotate")
+                {
+                    float w = canvas.MeasureText(label, AxisLabelFontSize, family).Width;
+                    float dx = w * 0.70710678f;
+                    canvas.DrawTextRotated(x - dx * 0.5f, labelY + dx * 0.5f, label, ThemeAxisColor, AxisLabelFontSize, family, 45);
+                }
+                else if (overflow is "wrap")
+                {
+                    var lines = WrapLabelTwoLines(canvas, label, totalSpace - 4, AxisLabelFontSize, family);
+                    for (int li = 0; li < lines.Count; li++)
+                        canvas.DrawText(x, labelY + li * (AxisLabelFontSize + 2), lines[li], ThemeAxisColor, AxisLabelFontSize, family, TextAlignment.Center);
+                }
+                else
+                {
+                    DrawPlacedLabel(canvas, x, labelY, label, ThemeAxisColor, AxisLabelFontSize, family, TextAlignment.Center);
+                }
             }
         }
     }
 
-    /// <summary>
-    /// Gets the default color for the first series.
-    /// Derived classes can override this to provide their specific default color.
-    /// </summary>
     protected virtual Color GetDefaultSeriesColor() => Color.FromHex("#4f46e5");
 
-    /// <summary>
-    /// The colour a series is drawn in: its own when the author set one, otherwise the chart's own colour
-    /// (<c>BarColor</c>, <c>LineColor</c>, <c>AreaColor</c>, <c>DotColor</c>, <c>LollipopColor</c>).
-    /// </summary>
-    protected Color ResolveSeriesColor(ChartSeries series)
+    protected Color ResolveSeriesColor(ChartSeries series) =>
+        series.HasColor ? series.Color : Appearance.SeriesColor(GetDefaultSeriesColor(), (_renderData ?? Data).Series.IndexOf(series));
+
+    protected string ResolveSeriesPattern(ChartSeries series, int index)
     {
-        if (series.HasColor) return series.Color;
-        Color color = GetDefaultSeriesColor();
-        return Appearance.SeriesColor(color, (_renderData ?? Data).Series.IndexOf(series));
+        if (!string.IsNullOrEmpty(series.Style?.Pattern)) return series.Style!.Pattern!;
+        return Appearance.SeriesPatterns.Count > 0 ? Appearance.SeriesPatterns[Math.Max(0, index) % Appearance.SeriesPatterns.Count] : "none";
     }
 
-    /// <summary>
-    /// Reports whether a legend occupies the bottom band for this chart+data, which
-    /// requires reserving the full <see cref="BottomPadding"/>. Mirrors where each
-    /// legend is actually drawn: the multi-series legend sits at <c>Height - 40</c>;
-    /// in horizontal mode the value-axis legend runs along the bottom; in vertical
-    /// mode the category-axis legend sits below the tick labels. (A vertical-mode
-    /// value-axis legend is drawn on the left, so it does not reserve bottom space.)
-    /// </summary>
-    protected virtual bool ReservesBottomLegendBand(ChartData data)
+    protected string ResolveSeriesMarkerShape(ChartSeries series, int index, string fallback = "circle")
     {
-        if (ShowLegend && data.Series.Count > 1) return true;
+        if (!string.IsNullOrEmpty(series.Style?.MarkerShape)) return series.Style!.MarkerShape!;
+        return Appearance.SeriesMarkerShapes.Count > 0 ? Appearance.SeriesMarkerShapes[Math.Max(0, index) % Appearance.SeriesMarkerShapes.Count] : fallback;
+    }
+
+    protected float[]? ResolveSeriesDashPattern(ChartSeries series, int index)
+    {
+        if (series.Style?.DashPattern is not null) return series.Style.DashPattern;
+        return Appearance.SeriesDashPatterns.Count > 0 ? Appearance.SeriesDashPatterns[Math.Max(0, index) % Appearance.SeriesDashPatterns.Count] : null;
+    }
+
+    protected bool ReservesBottomLegendBand(ChartData data)
+    {
+        if (ShouldDrawLegend(data) && EffectiveLegendPosition() is "bottom") return true;
         if (Orientation == ChartOrientation.Horizontal) return !string.IsNullOrEmpty(data.YAxis.Legend);
         return !string.IsNullOrEmpty(data.XAxis.Legend);
     }
 
-    /// <summary>
-    /// Calculates the chart layout dimensions.
-    ///
-    /// The top and bottom bands are content-aware so a chart's plot area fills the
-    /// available box instead of reserving space for absent decorations. The title
-    /// band collapses to <see cref="TopPadding"/> when there is no title, and the
-    /// bottom band collapses to <see cref="AxisLabelBand"/> when no legend is drawn
-    /// there. <c>baselineY</c> (and therefore the axis, tick labels, and legends)
-    /// depends only on the bottom band, so collapsing the title band shifts nothing
-    /// below it — it only lets the bars/series grow taller.
-    /// </summary>
     protected (float chartAreaWidth, float chartAreaHeight, float baselineY, float topY) CalculateLayout(ChartData data)
     {
-        float topBand = string.IsNullOrEmpty(data.Title) ? TopPadding : TitleAreaHeight;
+        float topBand = !string.IsNullOrEmpty(data.Title) ? TitleAreaHeight : TopPadding;
         float bottomBand = ReservesBottomLegendBand(data) ? BottomPadding : AxisLabelBand;
 
         float chartAreaWidth = Width - LeftPadding - RightPadding;
         float chartAreaHeight = Height - topBand - bottomBand;
         float baselineY = topBand + chartAreaHeight;
         float topY = topBand;
-
         return (chartAreaWidth, chartAreaHeight, baselineY, topY);
+    }
+
+    private (float PlotLeft, float PlotRight, float ChartAreaWidth, float ChartAreaHeight, float BaselineY, float TopY) CalculateLayoutWithCanvas(ICanvas canvas, ChartData data)
+    {
+        float extraRight = GetExtraRightMargin(canvas, data);
+        bool hasEnhancedLayout = AutoLayout || !string.IsNullOrEmpty(data.Subtitle) || !string.IsNullOrEmpty(Caption)
+            || LegendPosition is not "bottom" || data.XAxis.LabelOverflow is not "omit" || extraRight > 0;
+
+        if (!hasEnhancedLayout)
+        {
+            var (cw, ch, by, ty) = CalculateLayout(data);
+            return (LeftPadding, RightPadding, cw, ch, by, ty);
+        }
+
+        string family = EffectiveFontFamily;
+        float plotLeft = LeftPadding;
+        float plotRight = MathF.Max(RightPadding, extraRight);
+
+        if (AutoLayout)
+        {
+            float maxLeftText = 0;
+            if (Orientation == ChartOrientation.Horizontal)
+            {
+                if (data.Series.Count > 0)
+                {
+                    foreach (var dp in data.Series[0].DataPoints)
+                    {
+                        float w = canvas.MeasureText(dp.Label, AxisLabelFontSize, family).Width;
+                        if (w > maxLeftText) maxLeftText = w;
+                    }
+                }
+            }
+            else
+            {
+                int steps = _effectiveStepCount > 0 ? _effectiveStepCount : 5;
+                decimal stepVal = (_effectiveMax - _effectiveMin) / steps;
+                for (int i = 0; i <= steps; i++)
+                {
+                    decimal v = _effectiveMin + i * stepVal;
+                    string lbl = $"{data.YAxis.Prefix}{ChartNumberFormat.Format(v, _effectiveTickFormat)}{data.YAxis.Suffix}";
+                    float w = canvas.MeasureText(lbl, AxisLabelFontSize, family).Width;
+                    if (w > maxLeftText) maxLeftText = w;
+                }
+            }
+            bool hasLeftLegend = Orientation == ChartOrientation.Horizontal ? !string.IsNullOrEmpty(data.XAxis.Legend) : !string.IsNullOrEmpty(data.YAxis.Legend);
+            plotLeft = MathF.Max(24, MathF.Min(Width * 0.35f, MathF.Ceiling(maxLeftText + 16 + (hasLeftLegend ? 24 : 0))));
+            plotRight = MathF.Max(20, extraRight);
+            if (Orientation == ChartOrientation.Horizontal && ShowValueLabels)
+            {
+                float maxValW = 0;
+                foreach (var s in data.Series)
+                    foreach (var dp in s.DataPoints)
+                    {
+                        float w = canvas.MeasureText(FormatPointValue(dp), LabelFontSize, family).Width;
+                        if (w > maxValW) maxValW = w;
+                    }
+                plotRight = MathF.Max(plotRight, MathF.Min(Width * 0.25f, MathF.Ceiling(maxValW + 20)));
+            }
+        }
+
+        string legendPos = ShouldDrawLegend(data) ? EffectiveLegendPosition() : "none";
+        if (legendPos is "right" or "inline")
+        {
+            float maxNameW = 0;
+            foreach (var s in data.Series)
+            {
+                float w = canvas.MeasureText(s.Name, 11, family).Width;
+                if (w > maxNameW) maxNameW = w;
+            }
+            float needed = MathF.Min(Width * 0.35f, MathF.Ceiling(maxNameW + (legendPos is "right" ? 40 : 20)));
+            plotRight = MathF.Max(plotRight, needed);
+        }
+
+        float topBand = !string.IsNullOrEmpty(data.Title) ? TitleAreaHeight : TopPadding;
+        if (!string.IsNullOrEmpty(data.Subtitle)) topBand += !string.IsNullOrEmpty(data.Title) ? 18 : 24;
+        if (legendPos is "top") topBand += 24;
+
+        float bottomBand = ReservesBottomLegendBand(data) ? BottomPadding : AxisLabelBand;
+        if (!string.IsNullOrEmpty(Caption)) bottomBand += 16;
+
+        float prelimW = MathF.Max(40, Width - plotLeft - plotRight);
+        if (Orientation == ChartOrientation.Vertical && data.XAxis.LabelOverflow is not "omit")
+        {
+            string eff = ResolveEffectiveOverflow(canvas, data, prelimW);
+            if (eff is "rotate")
+            {
+                float maxLbl = 0;
+                if (data.Series.Count > 0)
+                    foreach (var dp in data.Series[0].DataPoints)
+                    {
+                        float w = canvas.MeasureText(dp.Label, AxisLabelFontSize, family).Width;
+                        if (w > maxLbl) maxLbl = w;
+                    }
+                bottomBand += MathF.Min(60, MathF.Ceiling(maxLbl * 0.70710678f * 0.65f));
+            }
+            else if (eff is "wrap")
+            {
+                bottomBand += 14;
+            }
+        }
+
+        float maxHorizMargin = Width * 0.6f;
+        if (plotLeft + plotRight > maxHorizMargin)
+        {
+            float scale = maxHorizMargin / (plotLeft + plotRight);
+            plotLeft *= scale;
+            plotRight *= scale;
+        }
+        float maxVertMargin = Height * 0.6f;
+        if (topBand + bottomBand > maxVertMargin)
+        {
+            float scale = maxVertMargin / (topBand + bottomBand);
+            topBand *= scale;
+            bottomBand *= scale;
+        }
+
+        float cw2 = Width - plotLeft - plotRight;
+        float ch2 = Height - topBand - bottomBand;
+        return (plotLeft, plotRight, cw2, ch2, topBand + ch2, topBand);
     }
 }

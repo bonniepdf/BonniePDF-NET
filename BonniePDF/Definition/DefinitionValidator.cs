@@ -33,7 +33,7 @@ internal sealed partial class DefinitionValidator
 
     private static readonly string[] SideKeys = ["top", "right", "bottom", "left"];
     private static readonly string[] TableSlots = ["header", "rows", "footer"];
-    private static readonly string[] ChartDuplicateKeys = ["title", "xAxis", "yAxis"];
+    private static readonly string[] ChartDuplicateKeys = ["title", "subtitle", "xAxis", "yAxis"];
 
     private sealed record Ref(string Kind, JsonElement Value, string Path, string? Id);
 
@@ -442,6 +442,10 @@ internal sealed partial class DefinitionValidator
             case "integer":
                 CheckNumber(head, spec, value, path, owner);
                 return;
+            case "nullableNumber":
+                if (value.ValueKind == JsonValueKind.Null) return;
+                CheckNumber("number", spec, value, path, owner);
+                return;
             case "integerOrUnlimited":
                 if (value.ValueKind == JsonValueKind.String && string.Equals(value.GetString(), "unlimited", StringComparison.Ordinal)) return;
                 if (value.ValueKind == JsonValueKind.String) BadValue(path, $"{JsonSerializer.Serialize(value.GetString())} is not \"unlimited\" or an integer.", owner, "an integer or \"unlimited\"");
@@ -497,7 +501,7 @@ internal sealed partial class DefinitionValidator
             case "chartNumberFormat":
                 if (value.ValueKind != JsonValueKind.String) WrongType(path, "a format string", value, owner);
                 else if (!ChartNumberFormat.IsSupported(value.GetString()))
-                    Error(path, "unsupported-format", $"Chart number format {JsonSerializer.Serialize(value.GetString())} is not supported. Use G, F<n>, N<n> or P<n>, with n from 0 to 15.", owner);
+                    Error(path, "unsupported-format", $"Chart number format {JsonSerializer.Serialize(value.GetString())} is not supported. Use G, F<n>, N<n>, P<n> or K<n>, with n from 0 to 15.", owner);
                 return;
             case "array":
                 CheckArray(arg, spec, value, path, owner, depth);
@@ -722,7 +726,7 @@ internal sealed partial class DefinitionValidator
         int i = 0;
         foreach (JsonElement item in value.EnumerateArray())
         {
-            if (item.ValueKind == JsonValueKind.Null) BadValue($"{path}/{i}", "null is not a value in a definition.", owner);
+            if (item.ValueKind == JsonValueKind.Null && !string.Equals(itemKind, "nullableNumber", StringComparison.Ordinal)) BadValue($"{path}/{i}", "null is not a value in a definition.", owner);
             else CheckKind(itemKind, new KeySpec { Kind = itemKind, Min = spec.Min, Max = spec.Max }, item, $"{path}/{i}", owner, depth);
             if (_aborted) return;
             i++;

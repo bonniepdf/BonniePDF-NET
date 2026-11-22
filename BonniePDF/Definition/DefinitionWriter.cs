@@ -74,11 +74,18 @@ internal sealed partial class DefinitionWriter
         (typeof(DataMatrix), "DataMatrix", () => new DataMatrix()),
         (typeof(BarChart), "BarChart", () => new BarChart()),
         (typeof(GroupedBarChart), "GroupedBarChart", () => new GroupedBarChart()),
+        (typeof(StackedBarChart), "StackedBarChart", () => new StackedBarChart()),
         (typeof(LineChart), "LineChart", () => new LineChart()),
         (typeof(AreaChart), "AreaChart", () => new AreaChart()),
+        (typeof(StackedAreaChart), "StackedAreaChart", () => new StackedAreaChart()),
+        (typeof(ComboChart), "ComboChart", () => new ComboChart()),
+        (typeof(WaterfallChart), "WaterfallChart", () => new WaterfallChart()),
+        (typeof(ScatterChart), "ScatterChart", () => new ScatterChart()),
         (typeof(DotPlotChart), "DotPlotChart", () => new DotPlotChart()),
         (typeof(LollipopChart), "LollipopChart", () => new LollipopChart()),
         (typeof(PieChart), "PieChart", () => new PieChart()),
+        (typeof(BulletChart), "BulletChart", () => new BulletChart()),
+        (typeof(HeatmapChart), "HeatmapChart", () => new HeatmapChart()),
     ];
 
     private static readonly Dictionary<Type, string> TypeByClass = Catalogue.ToDictionary(e => e.Class, e => e.Name);
@@ -298,7 +305,7 @@ internal sealed partial class DefinitionWriter
                 return JsonValue.Create((string)value);
             case "boolean":
                 return JsonValue.Create((bool)value);
-            case "integer" or "integerOrUnlimited" or "number" or "length":
+            case "integer" or "integerOrUnlimited" or "number" or "nullableNumber" or "length":
                 return Number(value);
             case "color":
                 return Colour(value is string text ? DefinitionReader.ToColor(text) : (Color)value);
@@ -621,10 +628,17 @@ internal sealed partial class DefinitionWriter
                 return ImageResource((Image)element, parent, id);
             case "Svg.resource" or "Svg.svgData":
                 return SvgSource((Svg)element, key, parent, id);
-            case "BarChart.data" or "GroupedBarChart.data" or "LineChart.data" or "AreaChart.data"
+            case "BarChart.data" or "GroupedBarChart.data" or "StackedBarChart.data"
+                or "LineChart.data" or "AreaChart.data" or "StackedAreaChart.data"
+                or "ComboChart.data" or "WaterfallChart.data" or "ScatterChart.data"
                 or "DotPlotChart.data" or "LollipopChart.data" or "PieChart.data":
                 return Slot.Write(ChartData((ChartBase)element));
             default:
+                if (element is ChartBase chart && string.Equals(key, "theme", StringComparison.Ordinal) && chart.CustomTheme is not null)
+                {
+                    Cannot(at, id, "Custom ChartThemeDefinition objects cannot be written to a Document Definition.");
+                    return Slot.Write(null);
+                }
                 return Slot.Ordinary;
         }
     }
@@ -645,7 +659,12 @@ internal sealed partial class DefinitionWriter
                     {
                         var points = new JsonArray();
                         foreach (ChartDataPoint point in s.DataPoints)
-                            points.Add(Shape(point, D.Shapes["DataPoint"], new ChartDataPoint(), []));
+                        {
+                            JsonObject pt = Shape(point, D.Shapes["DataPoint"], new ChartDataPoint(), []);
+                            if ((point.Kind is "delta" || point.HasExplicitValue) && !pt.ContainsKey("value"))
+                                pt["value"] = Number(point.Value);
+                            points.Add(pt);
+                        }
                         node[key] = points;
                         break;
                     }

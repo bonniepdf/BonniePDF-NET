@@ -702,6 +702,11 @@ public class Document : IDisposable
             t.CascadedTextStyle = style;
         }
 
+        if (el is ChartBase chart)
+        {
+            chart.ApplyCascadedTextStyle(style);
+        }
+
         IEnumerable<IElement> children = el is ListElementBase list ? list.GetNestedLists() : el.GetChildren();
         foreach (IElement child in children)
             ApplyStyleToElement(child, style);

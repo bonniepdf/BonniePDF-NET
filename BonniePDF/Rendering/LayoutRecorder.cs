@@ -363,7 +363,8 @@ internal sealed class LayoutRecorder
     {
         "Image", "Svg", "QRCode", "Barcode", "DataMatrix", "CanvasElement",
         "BarChart", "GroupedBarChart", "LineChart", "AreaChart", "PieChart",
-        "DotPlotChart", "LollipopChart", "ChartElement", "GroupedBarChartElement"
+        "DotPlotChart", "LollipopChart", "StackedBarChart", "StackedAreaChart", "ComboChart",
+        "WaterfallChart", "ScatterChart", "BulletChart", "HeatmapChart", "ChartElement", "GroupedBarChartElement"
     };
 
     /// <summary>
