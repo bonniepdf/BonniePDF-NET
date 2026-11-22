@@ -7,9 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing release tag (for example v2026.11.13)'
+        description: 'Version tag (the tag must exist when publishing)'
         required: true
         type: string
+      validate_only:
+        description: Check NuGet trusted publishing without uploading a package
+        type: boolean
+        default: false
 
 # Serialize a tag push and manual retries of the same release.
 concurrency:
@@ -21,8 +25,20 @@ permissions:
   id-token: write  # NuGet OIDC trusted publishing
 
 jobs:
+  validate:
+    if: inputs.validate_only
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+    - name: Check BonniePDF trusted publisher identity
+      run: echo "BonniePDF uses ${GITHUB_REPOSITORY} (ID ${GITHUB_REPOSITORY_ID}), publish.yml, with no environment."
+    - uses: NuGet/login@v1
+      with:
+        user: ${{ vars.NUGET_USER }}
+
   publish:
-    if: github.event_name == 'push' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    if: ${{ !inputs.validate_only && (github.event_name == 'push' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)) }}
     runs-on: ubuntu-latest
 
     steps:
