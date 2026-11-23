@@ -7,6 +7,16 @@ at the same version are the same library.
 
 ## Unreleased
 
+## 2026.11.23
+
+Status: Released
+Date: 2026-11-23
+
+### Highlights
+
+- Expand built-in vector charting to 14 chart families with stacked bar, stacked area, dual-axis combo, waterfall, scatter and bubble, bullet, and heatmap charts.
+- Add automatic chart axis scaling and layout, compact `K`/`M`/`B`/`T` number formatting, and `modern`, `dark`, and monochrome hatch-pattern `print` themes.
+
 ### Features
 
 - **New chart families:** added `StackedBarChart` (`absolute` and 100% `percent` modes), `StackedAreaChart`, dual-axis `ComboChart`, `WaterfallChart`, `ScatterChart` (with bubble sizing and OLS linear trendlines), `BulletChart`, and `HeatmapChart`, with full Document Definition 1.0, PDF/UA tagging, and layout snapshot support.

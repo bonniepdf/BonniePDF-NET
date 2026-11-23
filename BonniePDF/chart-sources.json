@@ -2,7 +2,7 @@
   "version": 1,
   "source": {
     "name": "BonnieCharts",
-    "sha256": "0ce5f77e8ec89b7e7be7d9eb32cc67a7574d2d5fbb60097d1e1452b19b1375e6",
+    "sha256": "dd117a072791e9290e4753edbe0bf629089a9a5e241bb6e22996eedaeda82a70",
     "files": {
       "typescript/src/Charts/AreaChart.ts": "1c0be90f5b6e479ec14855101f8d7687637db24ff31b02ec85ef90e066c585ba",
       "typescript/src/Charts/BarChart.ts": "1b9a9bd7eb7ef3ac9fcd0ef18e017373e1ad1ce9e665c66d6c08208050417013",
@@ -110,7 +110,7 @@
       "integration/original-files.json": "61ada299ac7683070c431b2a78b05c8ae8910ea78e5cad72c20d96ab6c915039",
       "integration/typescript/Charts/ChartBase.ts.slots": "ad29eebb31907dbf931e570342cc96ee693c6d496d468c7bd40469c9892665c7",
       "integration/typescript/Charts/ChartHost.ts": "b9081349ff4fdeabfae9acc0a76a7806d2e637c82c312cae05c7ad09a6da5206",
-      "integration/typescript/Charts/Graphics/ChartVector.ts": "0df74275f56c40fb5640af370e3ebb88694378ca3c6224a0cee3fa44df6443d0",
+      "integration/typescript/Charts/Graphics/ChartVector.ts": "26bc407934ce03ae03e247ed332624d4466f9347e1af50fa95ba21330bba58a4",
       "fixtures/appearance-cases.json": "9b42c9102f54fb2a3c517588fc46612b882a78904a6955fa3afe1107f97bf9a7",
       "fixtures/appearance.json": "b4f1c07965c7844070baabe2abf1d06d5dedc7bc2eda97d3ab31670e4d3df79e",
       "fixtures/cases.json": "f1190e5d14fc376e4bfae60d218b4364cfb004b959e3f533c3c9c01d853f114c",
