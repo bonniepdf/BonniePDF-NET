@@ -141,7 +141,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Meziantou.Analyzer" Version="3.0.317" />
+    <PackageReference Update="Meziantou.Analyzer" Version="3.0.342" />
   </ItemGroup>
 
 </Project>
