@@ -1,7 +1,7 @@
 BONNIEPDF COMMERCIAL LICENSE AGREEMENT 1.0
 
 Version 1.0
-Effective 23 October 2026
+Effective 22 November 2026
 
 This agreement governs commercial licences for the BonniePDF Software,
 including its digital-signing packages. It is a business-to-business agreement
