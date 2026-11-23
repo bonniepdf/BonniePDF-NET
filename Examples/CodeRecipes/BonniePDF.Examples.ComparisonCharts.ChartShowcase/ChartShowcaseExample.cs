@@ -9,7 +9,7 @@ namespace BonniePDF.Examples.ComparisonCharts.ChartShowcase;
 [System.ComponentModel.DisplayName("Charting Examples")]
 [System.ComponentModel.Category("Comparison Charts")]
 [System.ComponentModel.Description(
-    "A comprehensive 15-page landscape PDF showcasing all 14 chart families including bar, grouped bar, stacked bar, line, area, stacked area, combo, waterfall, scatter, dot plot, lollipop, pie/donut, bullet, and heatmap charts.")]
+    "A comprehensive 17-page landscape PDF showcasing all 14 chart families including bar, grouped bar, stacked bar, line, area, stacked area, combo, waterfall, scatter, dot plot, lollipop, pie/donut, bullet, and heatmap charts.")]
 public static class ChartShowcaseExample
 {
     /// <summary>Builds the document. Export the result with GenerateBytes() or GenerateBytesAsync().</summary>
@@ -147,7 +147,7 @@ public static class ChartShowcaseExample
 
         document.Add(new TextBlock
         {
-            Text = "Rounded gradient bars, clear value labels and a modern chart theme",
+            Text = "Rounded gradient bars, annotated target reference line and a modern chart theme",
             FontSize = 11,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Left,
@@ -285,7 +285,7 @@ public static class ChartShowcaseExample
 
         document.Add(new TextBlock
         {
-            Text = "Connected data points with markers and value labels",
+            Text = "Smooth monotone spline with haloed markers and value labels",
             FontSize = 11,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Left,
@@ -345,7 +345,7 @@ public static class ChartShowcaseExample
 
         document.Add(new TextBlock
         {
-            Text = $"Comparing {year - 1} and {year} revenue with multiple series",
+            Text = $"Comparing {year - 1} and {year} revenue with smooth curves, per-series dash patterns and marker shapes",
             FontSize = 11,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Left,
@@ -640,7 +640,7 @@ public static class ChartShowcaseExample
 
         document.Add(new TextBlock
         {
-            Text = "Four product lines, a coordinated palette and a clear revenue breakdown",
+            Text = "Radial-elbow callout labels, gradient slices, centre total and rich legend formatting",
             FontSize = 11,
             Color = ColorPalette.Slate[600],
             Alignment = TextAlignment.Left,
