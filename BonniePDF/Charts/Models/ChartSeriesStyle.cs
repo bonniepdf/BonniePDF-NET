@@ -1,4 +1,5 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
+using System.Collections.Generic;
 namespace BonniePDF;
 
 /// <summary>
@@ -38,4 +39,16 @@ public class ChartSeriesStyle
 
     /// <summary>Optional vector hatch/dot pattern fill for monochrome print accessibility.</summary>
     public string? Pattern { get; set; }
+
+    /// <summary>Fill of this series' marks (a colour or a gradient). The series colour remains the stroke and legend colour.</summary>
+    public ChartFill? Fill { get; set; }
+
+    /// <summary>Error bars drawn at each point of the series (bar, grouped bar, line, area and dot plot charts).</summary>
+    public ChartErrorBars? ErrorBars { get; set; }
+
+    /// <summary>Horizontal error bars at each point of a scatter series.</summary>
+    public ChartErrorBars? XErrorBars { get; set; }
+
+    /// <summary>Shadow, glow or gloss for this series' marks (a glow on a line is a halo around the stroke).</summary>
+    public IList<ChartEffect> Effects { get; set; } = new List<ChartEffect>();
 }

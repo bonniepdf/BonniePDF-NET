@@ -1,0 +1,1928 @@
+[
+  {
+    "chart": "ArcDiagramChart",
+    "id": "arc-diagram-basic",
+    "options": {
+      "theme": "modern",
+      "width": 560,
+      "height": 280,
+      "nodes": [
+        {
+          "id": "auth",
+          "label": "Auth"
+        },
+        {
+          "id": "api",
+          "label": "API"
+        },
+        {
+          "id": "billing",
+          "label": "Billing"
+        },
+        {
+          "id": "search",
+          "label": "Search"
+        },
+        {
+          "id": "notify",
+          "label": "Notify"
+        }
+      ],
+      "links": [
+        {
+          "source": "auth",
+          "target": "api",
+          "value": 30
+        },
+        {
+          "source": "api",
+          "target": "billing",
+          "value": 22
+        },
+        {
+          "source": "api",
+          "target": "search",
+          "value": 40
+        },
+        {
+          "source": "billing",
+          "target": "notify",
+          "value": 15
+        },
+        {
+          "source": "auth",
+          "target": "notify",
+          "value": 10
+        }
+      ],
+      "data": {
+        "title": "Service dependencies"
+      }
+    }
+  },
+  {
+    "chart": "AreaChart",
+    "id": "ann-area-line-anchors",
+    "options": {
+      "width": 520,
+      "height": 320,
+      "data": {
+        "title": "Revenue",
+        "yAxis": {
+          "minValue": 0,
+          "maxValue": 100,
+          "stepCount": 4
+        },
+        "series": [
+          {
+            "name": "Rev",
+            "color": "#2563eb",
+            "dataPoints": [
+              {
+                "label": "Q1",
+                "value": 40
+              },
+              {
+                "label": "Q2",
+                "value": 60
+              },
+              {
+                "label": "Q3",
+                "value": 55
+              },
+              {
+                "label": "Q4",
+                "value": 90
+              }
+            ]
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "type": "callout",
+          "target": {
+            "series": 0,
+            "point": 2
+          },
+          "text": "Dip"
+        }
+      ]
+    }
+  },
+  {
+    "chart": "BarChart",
+    "id": "err-extends-range",
+    "options": {
+      "width": 520,
+      "height": 320,
+      "data": {
+        "series": [
+          {
+            "name": "S",
+            "color": "#2563eb",
+            "style": {
+              "errorBars": {
+                "type": "fixed",
+                "amount": 30
+              }
+            },
+            "dataPoints": [
+              {
+                "label": "Jan",
+                "value": 10
+              },
+              {
+                "label": "Feb",
+                "value": 20
+              },
+              {
+                "label": "Mar",
+                "value": 30
+              },
+              {
+                "label": "Apr",
+                "value": 40
+              },
+              {
+                "label": "May",
+                "value": 50
+              },
+              {
+                "label": "Jun",
+                "value": 60
+              }
+            ]
+          }
+        ],
+        "yAxis": {
+          "autoScale": true,
+          "stepCount": 4
+        }
+      }
+    }
+  },
+  {
+    "chart": "BoxPlotChart",
+    "id": "log-boxplot",
+    "options": {
+      "width": 480,
+      "height": 320,
+      "data": {
+        "yAxis": {
+          "scale": "log"
+        },
+        "series": [
+          {
+            "dataPoints": [
+              {
+                "label": "A",
+                "samples": [
+                  1,
+                  2,
+                  3,
+                  50,
+                  400
+                ]
+              },
+              {
+                "label": "B",
+                "samples": [
+                  5,
+                  9,
+                  70,
+                  80,
+                  900
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "BulletChart",
+    "id": "bullet-vertical-plain",
+    "options": {
+      "width": 120,
+      "height": 240,
+      "orientation": "Vertical",
+      "value": 30,
+      "target": 40,
+      "minValue": 0,
+      "maxValue": 100
+    }
+  },
+  {
+    "chart": "CandlestickChart",
+    "id": "candle-default",
+    "options": {
+      "width": 520,
+      "height": 320,
+      "data": {
+        "title": "ACME",
+        "series": [
+          {
+            "name": "ACME",
+            "dataPoints": [
+              {
+                "label": "Mon",
+                "open": 100,
+                "high": 108,
+                "low": 97,
+                "close": 105
+              },
+              {
+                "label": "Tue",
+                "open": 105,
+                "high": 110,
+                "low": 101,
+                "close": 103
+              },
+              {
+                "label": "Wed",
+                "open": 103,
+                "high": 104,
+                "low": 95,
+                "close": 96
+              },
+              {
+                "label": "Thu",
+                "open": 96,
+                "high": 106,
+                "low": 94,
+                "close": 104
+              },
+              {
+                "label": "Fri",
+                "open": 104,
+                "high": 112,
+                "low": 103,
+                "close": 111
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "ChordChart",
+    "id": "chord-basic",
+    "options": {
+      "theme": "modern",
+      "width": 480,
+      "height": 380,
+      "nodes": [
+        {
+          "id": "na",
+          "label": "North America"
+        },
+        {
+          "id": "eu",
+          "label": "Europe"
+        },
+        {
+          "id": "ap",
+          "label": "Asia Pacific"
+        },
+        {
+          "id": "la",
+          "label": "Latin America"
+        }
+      ],
+      "links": [
+        {
+          "source": "na",
+          "target": "eu",
+          "value": 45
+        },
+        {
+          "source": "eu",
+          "target": "ap",
+          "value": 35
+        },
+        {
+          "source": "ap",
+          "target": "na",
+          "value": 50
+        },
+        {
+          "source": "na",
+          "target": "la",
+          "value": 25
+        },
+        {
+          "source": "eu",
+          "target": "na",
+          "value": 30
+        }
+      ],
+      "data": {
+        "title": "Regional trade flows"
+      }
+    }
+  },
+  {
+    "chart": "ComboChart",
+    "id": "combo-range-series",
+    "options": {
+      "width": 520,
+      "height": 320,
+      "data": {
+        "title": "Estimate and interval",
+        "series": [
+          {
+            "name": "Interval",
+            "color": "#2563eb",
+            "seriesType": "range",
+            "dataPoints": [
+              {
+                "label": "Jan",
+                "low": 8,
+                "high": 16
+              },
+              {
+                "label": "Feb",
+                "low": 10,
+                "high": 20
+              },
+              {
+                "label": "Mar",
+                "low": 13,
+                "high": 27
+              },
+              {
+                "label": "Apr",
+                "low": 15,
+                "high": 33
+              },
+              {
+                "label": "May",
+                "low": 17,
+                "high": 41
+              }
+            ]
+          },
+          {
+            "name": "Estimate",
+            "color": "#e11d48",
+            "seriesType": "line",
+            "dataPoints": [
+              {
+                "label": "Jan",
+                "value": 12
+              },
+              {
+                "label": "Feb",
+                "value": 15
+              },
+              {
+                "label": "Mar",
+                "value": 20
+              },
+              {
+                "label": "Apr",
+                "value": 24
+              },
+              {
+                "label": "May",
+                "value": 29
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "DotPlotChart",
+    "id": "err-per-point",
+    "options": {
+      "width": 520,
+      "height": 320,
+      "data": {
+        "yAxis": {
+          "minValue": 0,
+          "maxValue": 120,
+          "stepCount": 4
+        },
+        "series": [
+          {
+            "name": "S",
+            "color": "#2563eb",
+            "style": {},
+            "dataPoints": [
+              {
+                "label": "Jan",
+                "value": 12,
+                "errorPlus": 4,
+                "errorMinus": 2
+              },
+              {
+                "label": "Feb",
+                "value": 19
+              },
+              {
+                "label": "Mar",
+                "value": 31,
+                "errorPlus": 8
+              },
+              {
+                "label": "Apr",
+                "value": 40
+              },
+              {
+                "label": "May",
+                "value": 58
+              },
+              {
+                "label": "Jun",
+                "value": 70
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "DumbbellChart",
+    "id": "dumbbell-default",
+    "options": {
+      "width": 480,
+      "height": 340,
+      "data": {
+        "title": "Plan vs actual",
+        "series": [
+          {
+            "name": "Plan",
+            "color": "#2563eb",
+            "dataPoints": [
+              {
+                "label": "North",
+                "value": 40
+              },
+              {
+                "label": "South",
+                "value": 55
+              },
+              {
+                "label": "East",
+                "value": 30
+              },
+              {
+                "label": "West",
+                "value": 62
+              }
+            ]
+          },
+          {
+            "name": "Actual",
+            "color": "#0d9488",
+            "dataPoints": [
+              {
+                "label": "North",
+                "value": 52
+              },
+              {
+                "label": "South",
+                "value": 48
+              },
+              {
+                "label": "East",
+                "value": 61
+              },
+              {
+                "label": "West",
+                "value": 60
+              }
+            ]
+          }
+        ]
+      },
+      "showValueLabels": true
+    }
+  },
+  {
+    "chart": "FunnelChart",
+    "id": "funnel-point-colours",
+    "options": {
+      "width": 480,
+      "height": 320,
+      "data": {
+        "series": [
+          {
+            "dataPoints": [
+              {
+                "label": "A",
+                "value": 10,
+                "color": "#e11d48"
+              },
+              {
+                "label": "B",
+                "value": 5
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "GanttChart",
+    "id": "gantt-default",
+    "options": {
+      "width": 640,
+      "height": 340,
+      "tasks": [
+        {
+          "id": "a",
+          "label": "Research",
+          "start": "2026-01-05",
+          "end": "2026-01-30",
+          "progress": 1,
+          "group": "Discovery"
+        },
+        {
+          "id": "b",
+          "label": "Interviews",
+          "start": "2026-01-12",
+          "end": "2026-02-13",
+          "progress": 0.6,
+          "group": "Discovery"
+        },
+        {
+          "id": "c",
+          "label": "Design",
+          "start": "2026-02-02",
+          "end": "2026-03-20",
+          "progress": 0.4,
+          "group": "Build",
+          "dependsOn": [
+            "a"
+          ]
+        },
+        {
+          "id": "d",
+          "label": "Develop",
+          "start": "2026-03-02",
+          "end": "2026-05-08",
+          "progress": 0.1,
+          "group": "Build",
+          "dependsOn": [
+            "c"
+          ],
+          "color": "#e11d48"
+        },
+        {
+          "id": "e",
+          "label": "Launch",
+          "start": "2026-05-15",
+          "milestone": true,
+          "dependsOn": [
+            "d"
+          ]
+        }
+      ],
+      "data": {
+        "title": "Website relaunch"
+      }
+    }
+  },
+  {
+    "chart": "GaugeChart",
+    "id": "gauge-basic",
+    "options": {
+      "theme": "modern",
+      "width": 420,
+      "height": 260,
+      "value": 74,
+      "minValue": 0,
+      "maxValue": 100,
+      "target": 80,
+      "unit": "%",
+      "bands": [
+        {
+          "max": 50,
+          "color": "#fecaca"
+        },
+        {
+          "max": 80,
+          "color": "#fde68a"
+        },
+        {
+          "max": 100,
+          "color": "#bbf7d0"
+        }
+      ],
+      "data": {
+        "title": "Service health"
+      }
+    }
+  },
+  {
+    "chart": "GroupedBarChart",
+    "id": "groups-grouped",
+    "options": {
+      "width": 480,
+      "height": 300,
+      "data": {
+        "title": "Revenue",
+        "yAxis": {
+          "minValue": 0,
+          "maxValue": 6,
+          "stepCount": 3
+        },
+        "series": [
+          {
+            "name": "2025",
+            "color": "#1c398e",
+            "dataPoints": [
+              {
+                "label": "Q1",
+                "value": 3.1
+              },
+              {
+                "label": "Q2",
+                "value": 3.6
+              },
+              {
+                "label": "Q3",
+                "value": 4
+              },
+              {
+                "label": "Q4",
+                "value": 4.2
+              }
+            ]
+          },
+          {
+            "name": "2026",
+            "color": "#00786f",
+            "dataPoints": [
+              {
+                "label": "Q1",
+                "value": 2.2
+              },
+              {
+                "label": "Q2",
+                "value": 2.9
+              },
+              {
+                "label": "Q3",
+                "value": 3.7
+              },
+              {
+                "label": "Q4",
+                "value": 4.6
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "HeatmapChart",
+    "id": "heatmap-cohort",
+    "options": {
+      "theme": "modern",
+      "width": 560,
+      "height": 340,
+      "xCategories": [
+        "M0",
+        "M1",
+        "M2"
+      ],
+      "yCategories": [
+        "Jan",
+        "Feb"
+      ],
+      "values": [
+        [
+          100,
+          82,
+          71
+        ],
+        [
+          100,
+          86,
+          null
+        ]
+      ],
+      "valueSuffix": "%",
+      "data": {
+        "title": "Cohort Retention"
+      }
+    }
+  },
+  {
+    "chart": "HistogramChart",
+    "id": "hist-sturges",
+    "options": {
+      "width": 480,
+      "height": 300,
+      "data": {
+        "title": "Response time",
+        "series": [
+          {
+            "name": "Latency",
+            "color": "#2563eb",
+            "dataPoints": [
+              {
+                "label": "",
+                "value": 2
+              },
+              {
+                "label": "",
+                "value": 3
+              },
+              {
+                "label": "",
+                "value": 3
+              },
+              {
+                "label": "",
+                "value": 4
+              },
+              {
+                "label": "",
+                "value": 4
+              },
+              {
+                "label": "",
+                "value": 4
+              },
+              {
+                "label": "",
+                "value": 5
+              },
+              {
+                "label": "",
+                "value": 5
+              },
+              {
+                "label": "",
+                "value": 6
+              },
+              {
+                "label": "",
+                "value": 7
+              },
+              {
+                "label": "",
+                "value": 8
+              },
+              {
+                "label": "",
+                "value": 8
+              },
+              {
+                "label": "",
+                "value": 9
+              },
+              {
+                "label": "",
+                "value": 12
+              },
+              {
+                "label": "",
+                "value": 15
+              },
+              {
+                "label": "",
+                "value": 3
+              },
+              {
+                "label": "",
+                "value": 4
+              },
+              {
+                "label": "",
+                "value": 5
+              },
+              {
+                "label": "",
+                "value": 5
+              },
+              {
+                "label": "",
+                "value": 6
+              }
+            ]
+          }
+        ]
+      },
+      "showValueLabels": true
+    }
+  },
+  {
+    "chart": "LineChart",
+    "id": "log-line-minor-grid",
+    "options": {
+      "width": 480,
+      "height": 320,
+      "data": {
+        "title": "Log",
+        "yAxis": {
+          "scale": "log",
+          "showMinorGridLines": true,
+          "valueFormat": "N0"
+        },
+        "series": [
+          {
+            "name": "S",
+            "color": "#2563eb",
+            "dataPoints": [
+              {
+                "label": "A",
+                "value": 3
+              },
+              {
+                "label": "B",
+                "value": 40
+              },
+              {
+                "label": "C",
+                "value": 520
+              },
+              {
+                "label": "D",
+                "value": 6100
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "LollipopChart",
+    "id": "lollipop-default",
+    "options": {
+      "width": 480,
+      "height": 300,
+      "data": {
+        "title": "Response rate",
+        "yAxis": {
+          "minValue": 0,
+          "maxValue": 100,
+          "stepCount": 4
+        },
+        "series": [
+          {
+            "name": "Rate",
+            "dataPoints": [
+              {
+                "label": "North",
+                "value": 72
+              },
+              {
+                "label": "South",
+                "value": 58
+              },
+              {
+                "label": "East",
+                "value": 81
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "NightingaleRoseChart",
+    "id": "nightingale-rose-basic",
+    "options": {
+      "theme": "modern",
+      "width": 480,
+      "height": 360,
+      "data": {
+        "title": "Seasonal demand",
+        "series": [
+          {
+            "name": "Demand",
+            "dataPoints": [
+              {
+                "label": "Jan",
+                "value": 40
+              },
+              {
+                "label": "Mar",
+                "value": 58
+              },
+              {
+                "label": "May",
+                "value": 76
+              },
+              {
+                "label": "Jul",
+                "value": 95
+              },
+              {
+                "label": "Sep",
+                "value": 64
+              },
+              {
+                "label": "Nov",
+                "value": 50
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "PackedCircleChart",
+    "id": "packed-circle-basic",
+    "options": {
+      "theme": "modern",
+      "width": 480,
+      "height": 360,
+      "nodes": [
+        {
+          "id": "eu",
+          "label": "Europe"
+        },
+        {
+          "id": "na",
+          "label": "North America"
+        },
+        {
+          "id": "uk",
+          "parentId": "eu",
+          "label": "UK",
+          "value": 42
+        },
+        {
+          "id": "de",
+          "parentId": "eu",
+          "label": "Germany",
+          "value": 36
+        },
+        {
+          "id": "us",
+          "parentId": "na",
+          "label": "USA",
+          "value": 120
+        },
+        {
+          "id": "ca",
+          "parentId": "na",
+          "label": "Canada",
+          "value": 24
+        }
+      ],
+      "data": {
+        "title": "Market share clusters"
+      }
+    }
+  },
+  {
+    "chart": "PartitionChart",
+    "id": "partition-basic",
+    "options": {
+      "theme": "modern",
+      "width": 560,
+      "height": 320,
+      "nodes": [
+        {
+          "id": "eu",
+          "label": "Europe"
+        },
+        {
+          "id": "na",
+          "label": "North America"
+        },
+        {
+          "id": "uk",
+          "parentId": "eu",
+          "label": "UK",
+          "value": 42
+        },
+        {
+          "id": "de",
+          "parentId": "eu",
+          "label": "Germany",
+          "value": 36
+        },
+        {
+          "id": "us",
+          "parentId": "na",
+          "label": "USA",
+          "value": 120
+        },
+        {
+          "id": "ca",
+          "parentId": "na",
+          "label": "Canada",
+          "value": 24
+        }
+      ],
+      "data": {
+        "title": "Revenue breakdown ($M)"
+      }
+    }
+  },
+  {
+    "chart": "PictographChart",
+    "id": "pictograph-basic",
+    "options": {
+      "theme": "modern",
+      "width": 520,
+      "height": 280,
+      "icon": "person",
+      "unitValue": 10,
+      "showTrack": true,
+      "trackTotal": 10,
+      "valueSuffix": "%",
+      "data": {
+        "title": "Remote work share",
+        "series": [
+          {
+            "name": "Share",
+            "dataPoints": [
+              {
+                "label": "Engineering",
+                "value": 85
+              },
+              {
+                "label": "Design",
+                "value": 70
+              },
+              {
+                "label": "Sales",
+                "value": 45
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "PieChart",
+    "id": "groups-pie",
+    "options": {
+      "width": 420,
+      "height": 300,
+      "data": {
+        "title": "Share",
+        "series": [
+          {
+            "name": "Share",
+            "dataPoints": [
+              {
+                "label": "A",
+                "value": 50
+              },
+              {
+                "label": "B",
+                "value": 30
+              },
+              {
+                "label": "C",
+                "value": 20
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "ProgressRingChart",
+    "id": "progress-ring-basic",
+    "options": {
+      "theme": "modern",
+      "width": 440,
+      "height": 280,
+      "centerSubtext": "Move goal",
+      "rings": [
+        {
+          "label": "Move",
+          "value": 84,
+          "max": 100
+        },
+        {
+          "label": "Exercise",
+          "value": 68,
+          "max": 100
+        },
+        {
+          "label": "Stand",
+          "value": 92,
+          "max": 100
+        }
+      ],
+      "data": {
+        "title": "Daily goals"
+      }
+    }
+  },
+  {
+    "chart": "PyramidChart",
+    "id": "pyramid-basic",
+    "options": {
+      "theme": "modern",
+      "width": 520,
+      "height": 320,
+      "data": {
+        "title": "Support tiers",
+        "series": [
+          {
+            "name": "Tickets",
+            "dataPoints": [
+              {
+                "label": "Tier 3 Escalations",
+                "value": 120
+              },
+              {
+                "label": "Tier 2 Specialists",
+                "value": 480
+              },
+              {
+                "label": "Tier 1 Frontline",
+                "value": 1400
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "RadarChart",
+    "id": "radar-polygon",
+    "options": {
+      "width": 480,
+      "height": 360,
+      "data": {
+        "title": "Skills",
+        "series": [
+          {
+            "name": "Team A",
+            "color": "#2563eb",
+            "dataPoints": [
+              {
+                "label": "Speed",
+                "value": 80
+              },
+              {
+                "label": "Quality",
+                "value": 65
+              },
+              {
+                "label": "Cost",
+                "value": 50
+              },
+              {
+                "label": "Support",
+                "value": 90
+              },
+              {
+                "label": "Reach",
+                "value": 70
+              }
+            ]
+          },
+          {
+            "name": "Team B",
+            "color": "#0d9488",
+            "dataPoints": [
+              {
+                "label": "Speed",
+                "value": 55
+              },
+              {
+                "label": "Quality",
+                "value": 85
+              },
+              {
+                "label": "Cost",
+                "value": 75
+              },
+              {
+                "label": "Support",
+                "value": 60
+              },
+              {
+                "label": "Reach",
+                "value": 45
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "RadialBarChart",
+    "id": "radial-bar-basic",
+    "options": {
+      "theme": "modern",
+      "width": 460,
+      "height": 320,
+      "maxValue": 100,
+      "valueSuffix": "%",
+      "data": {
+        "title": "Team readiness",
+        "series": [
+          {
+            "name": "Readiness",
+            "dataPoints": [
+              {
+                "label": "Security",
+                "value": 92
+              },
+              {
+                "label": "Reliability",
+                "value": 84
+              },
+              {
+                "label": "Docs",
+                "value": 68
+              },
+              {
+                "label": "Testing",
+                "value": 76
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "RangeAreaChart",
+    "id": "rangearea-default",
+    "options": {
+      "width": 480,
+      "height": 340,
+      "data": {
+        "title": "Forecast",
+        "series": [
+          {
+            "name": "Sales",
+            "dataPoints": [
+              {
+                "label": "Jan",
+                "low": 10,
+                "high": 14
+              },
+              {
+                "label": "Feb",
+                "low": 12,
+                "high": 18
+              },
+              {
+                "label": "Mar",
+                "low": 15,
+                "high": 24
+              },
+              {
+                "label": "Apr",
+                "low": 16,
+                "high": 30
+              },
+              {
+                "label": "May",
+                "low": 18,
+                "high": 38
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "SankeyChart",
+    "id": "sankey-default",
+    "options": {
+      "width": 640,
+      "height": 380,
+      "data": {
+        "title": "Energy flow"
+      },
+      "nodes": [
+        {
+          "id": "coal",
+          "label": "Coal"
+        },
+        {
+          "id": "gas",
+          "label": "Gas"
+        },
+        {
+          "id": "wind",
+          "label": "Wind"
+        },
+        {
+          "id": "grid",
+          "label": "Grid"
+        },
+        {
+          "id": "home",
+          "label": "Homes"
+        },
+        {
+          "id": "ind",
+          "label": "Industry"
+        },
+        {
+          "id": "loss",
+          "label": "Losses"
+        }
+      ],
+      "links": [
+        {
+          "source": "coal",
+          "target": "grid",
+          "value": 40
+        },
+        {
+          "source": "gas",
+          "target": "grid",
+          "value": 35
+        },
+        {
+          "source": "wind",
+          "target": "grid",
+          "value": 25
+        },
+        {
+          "source": "grid",
+          "target": "home",
+          "value": 45
+        },
+        {
+          "source": "grid",
+          "target": "ind",
+          "value": 40
+        },
+        {
+          "source": "grid",
+          "target": "loss",
+          "value": 15
+        }
+      ]
+    }
+  },
+  {
+    "chart": "ScatterChart",
+    "id": "svg-mark-titles-scatter",
+    "options": {
+      "width": 420,
+      "height": 300,
+      "data": {
+        "title": "S",
+        "xAxis": {
+          "minValue": 0,
+          "maxValue": 10,
+          "stepCount": 5
+        },
+        "yAxis": {
+          "minValue": 0,
+          "maxValue": 10,
+          "stepCount": 5
+        },
+        "series": [
+          {
+            "name": "S",
+            "dataPoints": [
+              {
+                "label": "p",
+                "x": 2,
+                "value": 3
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "SlopeChart",
+    "id": "slope-default",
+    "options": {
+      "width": 480,
+      "height": 340,
+      "data": {
+        "title": "Market share",
+        "series": [
+          {
+            "name": "Acme",
+            "dataPoints": [
+              {
+                "label": "2024",
+                "value": 31
+              },
+              {
+                "label": "2026",
+                "value": 38
+              }
+            ]
+          },
+          {
+            "name": "Globex",
+            "dataPoints": [
+              {
+                "label": "2024",
+                "value": 29
+              },
+              {
+                "label": "2026",
+                "value": 27
+              }
+            ]
+          },
+          {
+            "name": "Initech",
+            "dataPoints": [
+              {
+                "label": "2024",
+                "value": 28
+              },
+              {
+                "label": "2026",
+                "value": 26
+              }
+            ]
+          },
+          {
+            "name": "Umbrella",
+            "dataPoints": [
+              {
+                "label": "2024",
+                "value": 12
+              },
+              {
+                "label": "2026",
+                "value": 9
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "StackedAreaChart",
+    "id": "stacked-area-smooth",
+    "options": {
+      "theme": "modern",
+      "width": 560,
+      "height": 340,
+      "curve": "smooth",
+      "data": {
+        "title": "Cumulative Usage",
+        "series": [
+          {
+            "name": "Web",
+            "dataPoints": [
+              {
+                "label": "Jan",
+                "value": 20
+              },
+              {
+                "label": "Feb",
+                "value": 30
+              },
+              {
+                "label": "Mar",
+                "value": 45
+              }
+            ]
+          },
+          {
+            "name": "API",
+            "dataPoints": [
+              {
+                "label": "Jan",
+                "value": 15
+              },
+              {
+                "label": "Feb",
+                "value": 22
+              },
+              {
+                "label": "Mar",
+                "value": 35
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "StackedBarChart",
+    "id": "groups-stacked",
+    "options": {
+      "width": 480,
+      "height": 300,
+      "data": {
+        "title": "Revenue",
+        "yAxis": {
+          "minValue": 0,
+          "maxValue": 6,
+          "stepCount": 3
+        },
+        "series": [
+          {
+            "name": "2025",
+            "color": "#1c398e",
+            "dataPoints": [
+              {
+                "label": "Q1",
+                "value": 3.1
+              },
+              {
+                "label": "Q2",
+                "value": 3.6
+              },
+              {
+                "label": "Q3",
+                "value": 4
+              },
+              {
+                "label": "Q4",
+                "value": 4.2
+              }
+            ]
+          },
+          {
+            "name": "2026",
+            "color": "#00786f",
+            "dataPoints": [
+              {
+                "label": "Q1",
+                "value": 2.2
+              },
+              {
+                "label": "Q2",
+                "value": 2.9
+              },
+              {
+                "label": "Q3",
+                "value": 3.7
+              },
+              {
+                "label": "Q4",
+                "value": 4.6
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "StatTileChart",
+    "id": "stat-tile-basic",
+    "options": {
+      "theme": "executive",
+      "width": 340,
+      "height": 220,
+      "label": "Monthly recurring revenue",
+      "value": 128400,
+      "valueFormat": "N0",
+      "valuePrefix": "$",
+      "comparisonValue": 112000,
+      "comparisonLabel": "vs last month",
+      "trend": [
+        96,
+        102,
+        108,
+        112,
+        121,
+        128.4
+      ],
+      "target": 150000
+    }
+  },
+  {
+    "chart": "SunburstChart",
+    "id": "sunburst-default",
+    "options": {
+      "width": 520,
+      "height": 460,
+      "data": {
+        "title": "Revenue by region"
+      },
+      "nodes": [
+        {
+          "id": "eu",
+          "label": "Europe"
+        },
+        {
+          "id": "na",
+          "label": "North America"
+        },
+        {
+          "id": "ap",
+          "label": "Asia Pacific"
+        },
+        {
+          "id": "uk",
+          "parentId": "eu",
+          "label": "UK",
+          "value": 42
+        },
+        {
+          "id": "de",
+          "parentId": "eu",
+          "label": "Germany",
+          "value": 36
+        },
+        {
+          "id": "fr",
+          "parentId": "eu",
+          "label": "France",
+          "value": 24
+        },
+        {
+          "id": "us",
+          "parentId": "na",
+          "label": "USA",
+          "value": 120
+        },
+        {
+          "id": "ca",
+          "parentId": "na",
+          "label": "Canada",
+          "value": 18
+        },
+        {
+          "id": "jp",
+          "parentId": "ap",
+          "label": "Japan",
+          "value": 50
+        },
+        {
+          "id": "au",
+          "parentId": "ap",
+          "label": "Australia",
+          "value": 20
+        },
+        {
+          "id": "in",
+          "parentId": "ap",
+          "label": "India",
+          "value": 30,
+          "color": "#e11d48"
+        }
+      ]
+    }
+  },
+  {
+    "chart": "TimelineChart",
+    "id": "timeline-default",
+    "options": {
+      "width": 640,
+      "height": 300,
+      "data": {
+        "title": "Product timeline"
+      },
+      "events": [
+        {
+          "date": "2026-01-12",
+          "label": "Kickoff",
+          "detail": "Team formed"
+        },
+        {
+          "date": "2026-02-02",
+          "label": "Prototype"
+        },
+        {
+          "date": "2026-02-10",
+          "label": "User tests",
+          "detail": "12 sessions"
+        },
+        {
+          "date": "2026-03-18",
+          "label": "Beta"
+        },
+        {
+          "date": "2026-03-25",
+          "label": "Press"
+        },
+        {
+          "date": "2026-04-30",
+          "label": "Launch",
+          "detail": "Public"
+        }
+      ]
+    }
+  },
+  {
+    "chart": "TreemapChart",
+    "id": "treemap-default",
+    "options": {
+      "width": 600,
+      "height": 380,
+      "data": {
+        "title": "Revenue by region"
+      },
+      "nodes": [
+        {
+          "id": "eu",
+          "label": "Europe"
+        },
+        {
+          "id": "na",
+          "label": "North America"
+        },
+        {
+          "id": "ap",
+          "label": "Asia Pacific"
+        },
+        {
+          "id": "uk",
+          "parentId": "eu",
+          "label": "UK",
+          "value": 42
+        },
+        {
+          "id": "de",
+          "parentId": "eu",
+          "label": "Germany",
+          "value": 36
+        },
+        {
+          "id": "fr",
+          "parentId": "eu",
+          "label": "France",
+          "value": 24
+        },
+        {
+          "id": "us",
+          "parentId": "na",
+          "label": "USA",
+          "value": 120
+        },
+        {
+          "id": "ca",
+          "parentId": "na",
+          "label": "Canada",
+          "value": 18
+        },
+        {
+          "id": "jp",
+          "parentId": "ap",
+          "label": "Japan",
+          "value": 50
+        },
+        {
+          "id": "au",
+          "parentId": "ap",
+          "label": "Australia",
+          "value": 20
+        },
+        {
+          "id": "in",
+          "parentId": "ap",
+          "label": "India",
+          "value": 30
+        },
+        {
+          "id": "sg",
+          "parentId": "ap",
+          "label": "Singapore",
+          "value": 6,
+          "color": "#e11d48"
+        }
+      ]
+    }
+  },
+  {
+    "chart": "VennChart",
+    "id": "venn-basic",
+    "options": {
+      "theme": "modern",
+      "width": 480,
+      "height": 320,
+      "sets": [
+        {
+          "id": "ts",
+          "label": "TypeScript",
+          "size": 120
+        },
+        {
+          "id": "net",
+          "label": ".NET",
+          "size": 95
+        },
+        {
+          "id": "pdf",
+          "label": "PDF Export",
+          "size": 80
+        }
+      ],
+      "intersections": [
+        {
+          "sets": [
+            "ts",
+            "net"
+          ],
+          "size": 30
+        },
+        {
+          "sets": [
+            "ts",
+            "pdf"
+          ],
+          "size": 25
+        },
+        {
+          "sets": [
+            "net",
+            "pdf"
+          ],
+          "size": 20
+        },
+        {
+          "sets": [
+            "ts",
+            "net",
+            "pdf"
+          ],
+          "size": 12
+        }
+      ],
+      "data": {
+        "title": "Customer stack overlap"
+      }
+    }
+  },
+  {
+    "chart": "WaffleChart",
+    "id": "waffle-basic",
+    "options": {
+      "theme": "modern",
+      "width": 480,
+      "height": 300,
+      "data": {
+        "title": "Customer plan mix",
+        "series": [
+          {
+            "name": "Plans",
+            "dataPoints": [
+              {
+                "label": "Enterprise",
+                "value": 42
+              },
+              {
+                "label": "Team",
+                "value": 35
+              },
+              {
+                "label": "Starter",
+                "value": 23
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "chart": "WaterfallChart",
+    "id": "groups-waterfall",
+    "options": {
+      "width": 480,
+      "height": 300,
+      "data": {
+        "title": "Bridge",
+        "series": [
+          {
+            "dataPoints": [
+              {
+                "label": "Start",
+                "value": 4,
+                "kind": "total"
+              },
+              {
+                "label": "Up",
+                "value": 2
+              },
+              {
+                "label": "Down",
+                "value": -1
+              },
+              {
+                "label": "End",
+                "kind": "total"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

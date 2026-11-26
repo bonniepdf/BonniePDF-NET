@@ -10,6 +10,20 @@ namespace BonniePDF;
 /// </summary>
 public class AreaChart : CartesianChartBase
 {
+    internal override bool SupportsAnnotations => true;
+
+    internal override bool SupportsTimeAxis => true;
+
+    /// <summary>Thin lines from each point to the category axis.</summary>
+    public bool DropLines { get; set; }
+
+    /// <inheritdoc />
+    protected override void DrawAllSeries(ICanvas canvas, ChartData data, float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
+    {
+        if (DropLines) DrawDropLines(canvas, data, chartAreaWidth, chartAreaHeight, baselineY);
+        base.DrawAllSeries(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
+    }
+
     private const string DefaultAreaColorHex = "#4f46e5";
 
     public AreaChart() { }
@@ -44,7 +58,7 @@ public class AreaChart : CartesianChartBase
         float[]? dash = ResolveSeriesDashPattern(series, seriesIdx);
 
         DrawAreaFill(canvas, coordinates, origin, color, fillOpacity, curve);
-        DrawSeriesLine(canvas, coordinates, color, lineWidth, curve, dash);
+        DrawSeriesLine(canvas, coordinates, ResolveSeriesStrokeColor(series), lineWidth, curve, dash, ResolveLineEffects(series));
     }
 
     protected override float GetLabelVerticalOffset(ChartSeries series) => 7;

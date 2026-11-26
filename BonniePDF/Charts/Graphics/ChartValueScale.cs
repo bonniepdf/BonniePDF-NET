@@ -20,6 +20,9 @@ internal static class ChartValueScale
     }
 
     /// <summary>The fraction of the plot at which <paramref name="value"/> sits.</summary>
+    /// <summary>Fraction of the way from <paramref name="min"/> to <paramref name="max"/> on a logarithmic scale. The base cancels, so it is not needed.</summary>
+    internal static double LogFraction(double value, double min, double max) => (Math.Log(value) - Math.Log(min)) / (Math.Log(max) - Math.Log(min));
+
     internal static decimal Fraction(decimal value, decimal min, decimal max) => (value - min) / (max - min);
 
     /// <summary>The value at which bars, area fills and stems start: zero, limited to the range.</summary>
@@ -116,6 +119,16 @@ internal static class ChartValueScale
     {
         double lum = 0.2126 * SrgbLinear(background.ScR) + 0.7152 * SrgbLinear(background.ScG) + 0.0722 * SrgbLinear(background.ScB);
         return lum < 0.1791 ? Color.White : Color.FromHex("#0f172a");
+    }
+
+    /// <summary>WCAG 2.1 relative luminance of an opaque colour.</summary>
+    internal static double RelativeLuminance(Color c) => 0.2126 * SrgbLinear(c.ScR) + 0.7152 * SrgbLinear(c.ScG) + 0.0722 * SrgbLinear(c.ScB);
+
+    /// <summary>WCAG 2.1 contrast ratio (1 to 21) between two opaque colours.</summary>
+    internal static double ContrastRatio(Color a, Color b)
+    {
+        double la = RelativeLuminance(a), lb = RelativeLuminance(b);
+        return (Math.Max(la, lb) + 0.05) / (Math.Min(la, lb) + 0.05);
     }
 
     /// <summary>Blends a possibly translucent colour over an opaque background.</summary>

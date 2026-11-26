@@ -78,7 +78,7 @@ public class BulletChart : ChartBase
         string font = ResolveFontFamily();
         bool horizontal = Orientation == ChartOrientation.Horizontal;
         float titlePad = !string.IsNullOrEmpty(data.Title) ? 36f : 0f;
-        float scaleBand = ShowScale ? 16f : 0f;
+        float scaleBand = horizontal && ShowScale ? 16f : 0f;
         float captionPad = !string.IsNullOrEmpty(Caption) ? 16f : 0f;
 
         float leftPad = 8f, rightPad = 8f;
@@ -88,13 +88,32 @@ public class BulletChart : ChartBase
         if (horizontal && ShowValueLabel)
             rightPad = MathF.Min(Width * 0.25f, MathF.Ceiling(canvas.MeasureText(formattedVal, 10, font).Width + 14));
 
+        // Vertical strips carry their label above, the value below and the scale on the right.
+        bool vertical = !horizontal;
+        float labelBand = vertical && !string.IsNullOrEmpty(Label) ? MathF.Ceiling(canvas.MeasureText(Label, 10, font).Height) + 6f : 0f;
+        float valueBand = vertical && ShowValueLabel ? 16f : 0f;
+        if (vertical && ShowScale)
+        {
+            float widest = 0f;
+            for (int i = 0; i <= 4; i++)
+            {
+                decimal v = MinValue + (i / 4m) * (maxV - MinValue);
+                string text = $"{ValuePrefix}{ChartNumberFormat.Format(v, ValueFormat)}{ValueSuffix}";
+                widest = MathF.Max(widest, canvas.MeasureText(text, 8, font).Width);
+            }
+            rightPad = 8f + 4f + MathF.Ceiling(widest);
+        }
+
         float plotX = leftPad;
-        float plotY = titlePad + 6f;
+        float plotY = titlePad + 6f + labelBand;
         float plotW = MathF.Max(10f, Width - leftPad - rightPad);
-        float plotH = MathF.Max(10f, Height - plotY - 6f - scaleBand - captionPad);
+        float plotH = MathF.Max(10f, Height - plotY - 6f - scaleBand - captionPad - valueBand);
 
         if (horizontal && !string.IsNullOrEmpty(Label))
             canvas.DrawText(plotX - 8, plotY + plotH / 2f - 5, Label, Appearance.TitleColor, 10, font, TextAlignment.Right);
+
+        if (vertical && !string.IsNullOrEmpty(Label))
+            canvas.DrawText(plotX + plotW / 2f, titlePad + 6f, Label, Appearance.TitleColor, 10, font, TextAlignment.Center);
 
         var sortedRanges = Ranges.Where(r => r.Max > MinValue).OrderByDescending(r => r.Max).ToList();
         if (sortedRanges.Count == 0)
@@ -145,6 +164,20 @@ public class BulletChart : ChartBase
 
         if (horizontal && ShowValueLabel)
             canvas.DrawText(plotX + plotW + 6, plotY + plotH / 2f - 5, formattedVal, Appearance.TitleColor, 10, font, TextAlignment.Left);
+
+        if (vertical && ShowValueLabel)
+            canvas.DrawText(plotX + plotW / 2f, plotY + plotH + 4, formattedVal, Appearance.TitleColor, 10, font, TextAlignment.Center);
+
+        if (ShowScale && vertical)
+        {
+            for (int i = 0; i <= 4; i++)
+            {
+                float ty = plotY + plotH - (i / 4f) * plotH;
+                decimal v = MinValue + (i / 4m) * (maxV - MinValue);
+                string lbl = $"{ValuePrefix}{ChartNumberFormat.Format(v, ValueFormat)}{ValueSuffix}";
+                canvas.DrawText(plotX + plotW + 4, ty - 4, lbl, Appearance.AxisColor, 8, font, TextAlignment.Left);
+            }
+        }
 
         if (ShowScale && horizontal)
         {

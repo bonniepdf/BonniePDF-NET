@@ -6,13 +6,17 @@ namespace BonniePDF;
 
 internal static class ChartBars
 {
-    internal static void Draw(ICanvas sink, float x, float y, float w, float h, Color color, ChartBarStyle style, ChartTheme theme, bool horizontal, float plotX, float plotY, float plotW, float plotH)
+    internal static void Draw(ICanvas sink, float x, float y, float w, float h, Color color, ChartBarStyle style, ChartTheme theme, bool horizontal, float plotX, float plotY, float plotW, float plotH, (ChartFill Fill, Func<ChartBox, ChartFillBoxes> Boxes)? paint = null, IReadOnlyList<ChartResolvedEffect>? effects = null)
     {
         double radius = style.CornerRadius ?? theme.BarCornerRadius;
-        ChartLinearGradient? g = style.Gradient;
+        // A theme that tints fills gives every plain bar a gradient from a lighter tint at the value end to its colour at the baseline.
+        ChartLinearGradient? g = style.Gradient ?? (string.Equals(theme.AutoFill, "tint", StringComparison.Ordinal) && paint is null && color.ScA == 1f
+            ? new ChartLinearGradient { StartColor = ChartTint.Tint(color), EndColor = color, Scope = "bar" } : null);
         if (!double.IsFinite(radius) || radius < 0) throw new ArgumentOutOfRangeException(nameof(style), "CornerRadius must be finite and nonnegative.");
         if (g is not null && (g.StartColor.ScA != 1 || g.EndColor.ScA != 1 || g.Scope is not "bar" and not "plot")) throw new ArgumentException("Bar gradients require opaque colours and scope bar or plot.", nameof(style));
-        if (!theme.StyledGeometry && radius == 0 && g is null) { sink.FillRect(x, y, w, h, color); return; }
+        IReadOnlyList<ChartResolvedEffect>? resolvedEffects = effects is { Count: > 0 } ? effects : null;
+        bool outlined = string.Equals(theme.MarkOutline, "darker", StringComparison.Ordinal);
+        if (!theme.StyledGeometry && radius == 0 && g is null && paint is null && resolvedEffects is null && !outlined) { sink.FillRect(x, y, w, h, color); return; }
         if (!float.IsFinite(x)) throw new ArgumentException("Bar geometry must be finite.", nameof(x));
         if (!float.IsFinite(y)) throw new ArgumentException("Bar geometry must be finite.", nameof(y));
         if (!float.IsFinite(w)) throw new ArgumentException("Bar geometry must be finite.", nameof(w));
@@ -34,6 +38,14 @@ internal static class ChartBars
         if (tl != 0) Add("C", x0, y0 + tl - k * tl, x0 + tl - k * tl, y0, x0 + tl, y0);
         Add("Z");
         ChartResolvedGradient? gradient = null;
+        if (paint is { } p)
+        {
+            // A point or series fill wins over the bar style's two-stop gradient.
+            ChartResolvedFill resolved = p.Fill.Resolve(p.Boxes(new ChartBox(x0, y0, x1 - x0, y1 - y0)));
+            ChartVector.Fill(sink, new ChartPathPlan(commands, color, resolved.Gradient, resolved.Radial, resolvedEffects));
+            if (outlined) ChartVector.Stroke(sink, new ChartStrokePlan(commands, ChartTint.Darken(color), 1, "butt", "round"));
+            return;
+        }
         if (g is not null)
         {
             bool plotScope = string.Equals(g.Scope, "plot", StringComparison.Ordinal);
@@ -42,6 +54,7 @@ internal static class ChartBars
             if (string.Equals(g.Scope, "bar", StringComparison.Ordinal) && ((horizontal && w < 0) || (!horizontal && h < 0))) { (sx, ex) = (ex, sx); (sy, ey) = (ey, sy); }
             gradient = new(sx, sy, ex, ey, g.StartColor, g.EndColor);
         }
-        ChartVector.Fill(sink, new ChartPathPlan(commands, color, gradient));
+        ChartVector.Fill(sink, new ChartPathPlan(commands, color, gradient, null, resolvedEffects));
+        if (outlined) ChartVector.Stroke(sink, new ChartStrokePlan(commands, ChartTint.Darken(color), 1, "butt", "round"));
     }
 }

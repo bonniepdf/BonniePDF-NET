@@ -106,6 +106,8 @@ public class StackedBarChart : CartesianChartBase
         base.ResolveValueScale(data);
     }
 
+    internal override bool SupportsDepth3d => true;
+
     protected override void DrawAllSeries(ICanvas canvas, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
@@ -161,8 +163,13 @@ public class StackedBarChart : CartesianChartBase
                     if (gap > 0 && startVal != 0) xStart += val > 0 ? gap : -gap;
                     float w = xEnd - xStart;
                     float by = center - thickness / 2f;
-                    ChartBars.Draw(canvas, xStart, by, w, thickness, color, style, Appearance, true, _plotLeft, topY, chartAreaWidth, chartAreaHeight);
-                    if (pat is not "none") ChartPatterns.FillRect(canvas, w < 0 ? xStart + w : xStart, by, MathF.Abs(w), thickness, new ChartPatternFill(pat, Color.White));
+                    int categoryX = i;
+                    MarkGroup(canvas, data, series, categoryX, new ChartGroupAnchor(xStart, center, "x"), () =>
+                    {
+                        DrawBarDepth(canvas, xStart, by, w, thickness, color);
+                        ChartBars.Draw(canvas, xStart, by, w, thickness, color, style, Appearance, true, _plotLeft, topY, chartAreaWidth, chartAreaHeight);
+                        if (pat is not "none") ChartPatterns.FillRect(canvas, w < 0 ? xStart + w : xStart, by, MathF.Abs(w), thickness, new ChartPatternFill(pat, Color.White));
+                    });
                 }
                 else
                 {
@@ -171,8 +178,13 @@ public class StackedBarChart : CartesianChartBase
                     if (gap > 0 && startVal != 0) yStart += val > 0 ? -gap : gap;
                     float h = yStart - yEnd;
                     float bx = center - thickness / 2f;
-                    ChartBars.Draw(canvas, bx, yEnd, thickness, h, color, style, Appearance, false, _plotLeft, topY, chartAreaWidth, chartAreaHeight);
-                    if (pat is not "none") ChartPatterns.FillRect(canvas, bx, h < 0 ? yEnd + h : yEnd, thickness, MathF.Abs(h), new ChartPatternFill(pat, Color.White));
+                    int categoryY = i;
+                    MarkGroup(canvas, data, series, categoryY, new ChartGroupAnchor(center, yStart, "y"), () =>
+                    {
+                        DrawBarDepth(canvas, bx, yEnd, thickness, h, color);
+                        ChartBars.Draw(canvas, bx, yEnd, thickness, h, color, style, Appearance, false, _plotLeft, topY, chartAreaWidth, chartAreaHeight);
+                        if (pat is not "none") ChartPatterns.FillRect(canvas, bx, h < 0 ? yEnd + h : yEnd, thickness, MathF.Abs(h), new ChartPatternFill(pat, Color.White));
+                    });
                 }
             }
         }
@@ -239,7 +251,7 @@ public class StackedBarChart : CartesianChartBase
             {
                 decimal net = posAcc != 0 ? posAcc : negAcc;
                 string fmt = StackTotalFormat ?? ValueLabelFormat ?? "G";
-                string txt = $"{ValueLabelPrefix}{ChartNumberFormat.Format(net, fmt)}{ValueLabelSuffix}";
+                string txt = ChartNumberFormat.ApplyAffixes(ChartNumberFormat.Format(net, fmt), ValueLabelPrefix, ValueLabelSuffix, NegativeStyle);
                 float fNet = (float)ChartValueScale.Fraction(net, _effectiveMin, _effectiveMax);
                 if (horizontal)
                 {

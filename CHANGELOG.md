@@ -7,6 +7,10 @@ at the same version are the same library.
 
 ## Unreleased
 
+### Features
+
+- **Charting engine:** sync updated BonnieCharts sources across 40 chart families, presentation themes, paint gradients, visual effects, annotations, pseudo-3D depth, and shared chart type fixtures.
+
 ## 2026.11.23
 
 Status: Released

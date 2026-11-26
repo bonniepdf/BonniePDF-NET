@@ -1,40 +1,80 @@
 <Project>
   <ItemGroup>
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/AreaChart.cs" ExpectedHash="59EC2111FC81F1DCA840616E142411CDE2810CD4487D47469E21065A1FF29487" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/BarChart.cs" ExpectedHash="675E2CC6BEC2451125C78B733F65297777F645AAEC3FC5A31573269AC566C5A4" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/BulletChart.cs" ExpectedHash="D4519CBA20ECCACF2F178CB353FA5FD42082A8FD3A1192A4BD77AC12D1F118AE" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/CartesianChartBase.cs" ExpectedHash="73A4499F37727B965FF1650BD609C7B1FA77B1CC67718443F06001622C63FC9B" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartBarStyle.cs" ExpectedHash="0AB78B147BF04C1EFCA1D39576FC500761EEC3A94ECCFBFBB0B71CBD83B78CA6" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartBase.cs" ExpectedHash="54F90C92B1C05E02DCB5FCDE9C5EA12F4614677A2A41566AC510096828DC8BD3" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartNumberFormat.cs" ExpectedHash="D96D63CEFCFFE3E2FAD09772FBFFA44F561ADC252E6797CE4211936CFB9E5C93" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ArcDiagramChart.cs" ExpectedHash="12CEE30359CDFF4AD5997C655A3D729D6EB6BC1BA4F8FA9A1F8E3E293A9B5C97" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/AreaChart.cs" ExpectedHash="FEF774C82EC5BFE3ED79EEBF07486F0B7B29B7A98DB875104E83C5C71825D36E" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/BarChart.cs" ExpectedHash="7F2797C8E1EDAAB57A1392F30E40A632891A17CF1EA21D40A02BAA6966FCB951" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/BoxPlotChart.cs" ExpectedHash="D11A9E8ECB677D68A872DA096429A5877D8841558D9B3E1AD872048489B293AC" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/BulletChart.cs" ExpectedHash="BBCAFBA9FECA684FCC33DB7CFED7B7A716B1877691C9B23819A335559A831A47" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/CandlestickChart.cs" ExpectedHash="40E863C3D643DF79C9FED4D00726E68809647BEEE0E73F2932ED75E7ABFDD5B5" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/CartesianChartBase.cs" ExpectedHash="120D09DEF6FE503DB13D0718E65A6CD74B95555AA07A608B7AAC33511AD6AE7A" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartBarStyle.cs" ExpectedHash="D798745D47CA4F9511942ACD4042A70E6B88BA60B1DD2CF396F177FEF2D29461" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartBase.cs" ExpectedHash="81461A6612958D63D63F095E53DDDC49A09A980CBBFCEF073ED153293D7131FC" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartNumberFormat.cs" ExpectedHash="E497ABD2C3393F50746AC5BA0151D7F935FC6DB01EAAE67E517CF0C3EF8EA9FA" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartOrientation.cs" ExpectedHash="4D8807546055A7556D0F5E5E2CFFCDCF8A9C031FD74D7B12852217350E2FE07F" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartReference.cs" ExpectedHash="6937E988F77A51FD60CFAD458AAEE7DC1ECEB4ACB301833FF195C42A8E1D5AFB" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartTheme.cs" ExpectedHash="7B66A38F1EAB6C05D8A246AC4DCEAB292DE55FBB31B3419CC29DABBCB015CFD5" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ComboChart.cs" ExpectedHash="54F7FB9B91E3CA65FA9FAE5334C90ADD20A4469388E77A240FA3C23314CC86FD" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/DotPlotChart.cs" ExpectedHash="129CFB47EE3C27DCF05DD1EEA8F0613A2F8CDD9712DF55184CDFF5B040656C49" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartBars.cs" ExpectedHash="E33177FD305779C8D35A1ED408714480B481E5225567F4C7ED92D1D59957A40F" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartTheme.cs" ExpectedHash="2C33BFC0EE27228BEBEE38455064FAB6FEDB003F63E3AAE5FE82F9D700BF0F48" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChordChart.cs" ExpectedHash="98FE9C22F054CE2B0414F458AA045B08D8E0494632F62A84C63EBA83EB8DD6CF" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ComboChart.cs" ExpectedHash="0730776665DAC17DD11D91618E9DD6EE4BF6104DA3E470445690480DF925A752" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/DotPlotChart.cs" ExpectedHash="FE665EF4785AC8AF3AAD1D63C39E2A160D100453AFA2FC740495C92355C9F5E3" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/DumbbellChart.cs" ExpectedHash="95BB4CEFE1D72521A8255EF7F8E775789172C16E80F59ABE4553143447C60497" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/FunnelChart.cs" ExpectedHash="6C01261EEF8139F5DABC2CB7A42339ADAFBAAFA00543333BD7A0B479CC0E09BF" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/GanttChart.cs" ExpectedHash="0A9300D3FF51C74A743B149DE3F9D3A202FD88D87318DA3D6974399AD724EFA8" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/GaugeChart.cs" ExpectedHash="188F11378209CD465A03E7E16AA2B8CF190E33F599E39CA6AEBC14FA7EC97E38" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartAnalysis.cs" ExpectedHash="4B270C4AB15B34036EDF67D1A342B59D0903A887A487B15B6203ADF2369B89EA" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartAnnotations.cs" ExpectedHash="246A90C810B5EC58D1CAC9181711F76DB8F502A45309EE627532BEEDBD66E89E" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartArc.cs" ExpectedHash="2D8709EB73035EFF4DEF4BBDC249D4CEBECF608CFFA65BA9FD1C2850EDAFA077" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartBars.cs" ExpectedHash="4ED6F53A9B592757696F570BAC4E24FE2C702B1258485B49D3A4A511EB6C56B4" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartCategoryColors.cs" ExpectedHash="B836F479817593BEC3A3A4CD83840A65CC604AA672E8705268E04FCE5748325A" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartCurves.cs" ExpectedHash="FB9530AAAAA57D84D44B04EDF12BCBCB1D3902E7848C6D5FF1A521607BB93A0F" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartDates.cs" ExpectedHash="83410860E0B0D68AEAAE630A7F9D8585AC2678F3432340D15BAA26538F62CCC5" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartDepth3d.cs" ExpectedHash="C869A67C19C2423D4781A2FF4BB3104C1246BA98111A386477ED0539A181A3EC" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartEffects.cs" ExpectedHash="C370246CEC47157BE00922500C002A529C9B50F997D48D8A5059091567D805D7" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartFill.cs" ExpectedHash="4397E67D0DD964A58B93DC0D404D9B545139966D1DE320266348F47FA24E3BEC" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartGroups.cs" ExpectedHash="584C0D2D103C5F9BDFFEB7E2587F8ED98F3BBED701F78EB5D836D05AA427D3D7" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartHierarchy.cs" ExpectedHash="278C6AEB9D9B2EBBCAFB63CB66C8670F5B7794B4F03B751B08188DF766C3B0B4" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartLabels.cs" ExpectedHash="D7DCA53E2FDB01C2CEC361037BD149AFA21D0CB718CFAAAAF4130C6A02456A89" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartMarkers.cs" ExpectedHash="0209113DF58F9D7106FEB67820E24793E40355A2F4A0EEC5BB8037717CAD2CC3" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartPathPlan.cs" ExpectedHash="5E5984567782A4167E239DA26DA3DB73E9BF33220776561BC6AB5034731FA5A5" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartPathPlan.cs" ExpectedHash="41F350213A8543BB3A5FA29BE8655575F888AF552FFD6AE6E8C7425FDC3BD725" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartPatterns.cs" ExpectedHash="F614A0623936DE78105C6BE173CED0B47528B4AA05853473696293BB1F08C9AA" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartTint.cs" ExpectedHash="FEBF44284D3B1ECA343222B45B734A2297F0046D7C2970058A457713DAA26D7D" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartValueScale.cs" ExpectedHash="BF94F639FCBA5DDD76682A8376CB5E825BA60F0F44DAF6CAA625871F290A34C4" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartVector.cs" ExpectedHash="7C1AED7264AF9DBAE07270CB7238E2693371A9A971031EB9401F5CD0F3001790" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/GroupedBarChart.cs" ExpectedHash="8EDBE98EBCABE8318684FA20A46755BFFDE3B0888307A3A9780E9194678DEFA8" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartPie3d.cs" ExpectedHash="B20282254CFD16E6B9987D1BF3553BCA38C6C25708178417812A2D35DB096CFC" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartTemplate.cs" ExpectedHash="33C87401C76DA1716B1D2ED7C567245BF1AA168C43A1EAB4C9869EBBA23B2C7D" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartTimeAxis.cs" ExpectedHash="354A384771049E98692D05C87BD5F50D61985FF1EE2B89A921D2E54C2A2DC6CB" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartTint.cs" ExpectedHash="316A65E82A0D749B0B92D60E8A45D36710B3AD429D26ED9B8F4C894EDA5681B2" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartTrendlineMath.cs" ExpectedHash="9FC712F160F0B1290EFEE72F7205A146B396562B83E1F38CDA530A8CD48DD538" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartValueScale.cs" ExpectedHash="AFE250067E3DBD010DD58CECE0692830C2F34E212D172278ACABB5BEABB552B9" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Graphics/ChartVector.cs" ExpectedHash="BC1837E0F099ECAEC455012CEC086F97760AF34860629EF6E60E8EE0007513A4" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/GroupedBarChart.cs" ExpectedHash="7B319C6EE6C23706135FB065BAEE66FEB64FFF7EE4F063FB12085D048641DC52" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/HeatmapChart.cs" ExpectedHash="C5A58E58EA33C2CBFC822E7084E999FF77350DA62C8E50D60055133966BB4BD5" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/LineChart.cs" ExpectedHash="D3C952F843C7D924D306E3EC7C8FEF240F41D8B6D99236ED1098CAD2DD6F8F7C" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/LollipopChart.cs" ExpectedHash="5757B5BDBFCF011DC9C65C8C8A9EC4E5A7FAAD752C642F780F3573A1EFF4FC94" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/AxisOptions.cs" ExpectedHash="ACF1F2AD307F18A0C248D56EFC126D1B7B92B73B8AD70F69EC6EAD2EF70C5EA4" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/HistogramChart.cs" ExpectedHash="8DCDE218CBB6A8DF97CD1486669F7999BAEB9BB1338032C3BAD077BEC408C289" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/LineChart.cs" ExpectedHash="95BFB8A47D34CEFC96BAA12CBC2FF70A8F08A5B05B8D6DC42B7358F47E2CE426" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/LollipopChart.cs" ExpectedHash="6B94B2F88A4F42E52E446ABB1654B0BC2248D39D39EE1864E1CBEEC1D2B9240A" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/AxisOptions.cs" ExpectedHash="B51C2A261760BF7C8224DC8A3D66BED8C504B36AB17269C0A4F4A422EA16BDDB" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartData.cs" ExpectedHash="5D69573CF9DD4C479788D5ACD2A2E58AF4632E84F34A8BDCE461188E94D96680" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartDataPoint.cs" ExpectedHash="7670C057FF4BED1D8D2D075B9D900C9BBBD5682AE2DE851D746D321C621A5437" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartDataPoint.cs" ExpectedHash="E3113782A25AD91459C928116705FE4C737AF2C4BCF6856C11B006C50289BC58" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartSeries.cs" ExpectedHash="24163B3641363022D917FA32D6AE5634E83BB66B27307B4640EE09D252C8D43F" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartSeriesStyle.cs" ExpectedHash="17285A136A62D8B4F7D819BF83E4F35B63A426DADB7534997F5351043307760A" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/PieChart.cs" ExpectedHash="A085614AD930CCF8FE1756E71F6DBA6AA5387661FEACEF211C64D72BC381497F" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ScatterChart.cs" ExpectedHash="ABD25E95B6917458228B8DDC38BEB71B7A515566C846237F8A84074C2CB943F8" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/Models/ChartSeriesStyle.cs" ExpectedHash="B47187BBCFFA6CD2631CCB8BF287C27BA61CC351DAD3B9DE87A11213EBE519AD" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/NightingaleRoseChart.cs" ExpectedHash="639D96F419F919358E3A9F17DFB0057D83045365C443015126954DE7B4927C6C" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/PackedCircleChart.cs" ExpectedHash="0B13E3C07E6D204B5A276842BD1FD54FAC7ADF753CF039AE4A5585034E3694AE" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/PartitionChart.cs" ExpectedHash="9BEA21B221DF24EE73F724BA3EAE4C80F77FBE3F83532379737D88DA81374BF6" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/PictographChart.cs" ExpectedHash="8E152689CFC93D8C443F15209D8C1B53979C11BC1A74B770BAA14D8DA09F851A" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/PieChart.cs" ExpectedHash="769AD165703E17CD3B50C5D26F3BBBD31C51A77743F95E89485661ECA65AF1C3" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ProgressRingChart.cs" ExpectedHash="79481AAF1AA01C25B75B9206D7DBC393D1D2488E981D6E6EFCCBCF5FD52481B4" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/PyramidChart.cs" ExpectedHash="9EBFEBF04D438219A89E4F0E929A17E694270FB4190926FB864BD7B61FC1EEC8" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/RadarChart.cs" ExpectedHash="E409AC676CCBCF1BF7F61F1064B150701C3F8F55884A735E33B6F1208CFC9003" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/RadialBarChart.cs" ExpectedHash="4EFA59429C74E5F2698A23B01F32E686EB9718C788A2A027D3B26D5238319809" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/RangeAreaChart.cs" ExpectedHash="FFA446F1928739D0294405A77F022A96689F19DEC1D6F969DBB0C21613532943" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/SankeyChart.cs" ExpectedHash="F93DE0F5C6D6B9D69F92AE57410B87EEBDCEBDF15FDAFADCF590FA6ED35CBFC1" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ScatterChart.cs" ExpectedHash="DD6D7D9FC24F96D32A8707A1DE47989554C92BC69D726BD7D8B32B38C8CE153C" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/SlopeChart.cs" ExpectedHash="E998DCFFA2FCA0FA7FA43CE81E673DDC903B65F1FD603933A65D93BF2A20588F" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/StackedAreaChart.cs" ExpectedHash="005D4624DC73946910B4C91DA126B4BE8DA379802FFCFA7BD09659CF6EE4D517" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/StackedBarChart.cs" ExpectedHash="3EE2799911D7C69F46E1CD8EDB6D6CD2065CEB9E50FE2E79C14254859A7820BE" />
-    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/WaterfallChart.cs" ExpectedHash="9F9D3DAC466276B6902AC1AD3FC4D89F33ABD937D7B12AF8F2077312A43C53F0" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/StackedBarChart.cs" ExpectedHash="3CE05F5797CD95B2CA0F09A77BECF2E1BA13FD9D27B70F8ABC083EA0FF583E43" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/StatTileChart.cs" ExpectedHash="F640FBF1821A5974CA53702E2DC601B82644FDE97D9F0FD73828F5B447851159" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/SunburstChart.cs" ExpectedHash="50C10A4ECB9EE766A6D27681CE94298421C3B5ECA250B35FE3C162F45ADA8FC9" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/TimelineChart.cs" ExpectedHash="DFCBF326E2478116709225B429A7E648C1B5544E11FB06E85B4F5FA00F784ADB" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/TreemapChart.cs" ExpectedHash="12BE58615F99D913EB340DD502DD9AA2425F41D6F9ACCDE388CF67D9A7884972" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/VennChart.cs" ExpectedHash="B44C3B9226D2C71518499F3EA43646F42046087F1DF8C212346A055C6FC45585" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/WaffleChart.cs" ExpectedHash="7FA76C8790AB745539422F73CBEE963E822FEE17EB0707810EEFF7C460EAE1B3" />
+    <ChartSource Include="$(MSBuildThisFileDirectory)Charts/WaterfallChart.cs" ExpectedHash="7ECC0105BEF33A0DE1F608C69EE13ABFCBD638BDBB8CEC42477CA35AAFAC19C3" />
     <ChartSource Include="$(MSBuildThisFileDirectory)Charts/ChartBase.Host.cs" ExpectedHash="FA66C4D5B89CFF32ADBACCE2B5DDD71483AE401AD6C096729B536ACCBB6B7C30" />
   </ItemGroup>
   <Target Name="VerifyChartSources" BeforeTargets="CoreCompile">

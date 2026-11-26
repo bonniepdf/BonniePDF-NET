@@ -1,4 +1,5 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
+using System.Linq;
 using System;
 using System.Collections.Generic;
 
@@ -34,13 +35,49 @@ public sealed class ChartThemeDefinition
     public bool? PdfTextBaseline { get; set; }
     public bool? TabularNums { get; set; }
     public bool? RoundedLegendSwatches { get; set; }
+    /// <summary>Whether a reference label with no explicit colour must meet 4.5:1 contrast against the chart background.</summary>
+    public bool? AdaptiveReferenceLabels { get; set; }
+    /// <summary>Chart background (a colour or gradient). A chart's own <c>BackgroundFill</c> or <c>BackgroundColor</c> wins.</summary>
+    public ChartFill? BackgroundFill { get; set; }
+    /// <summary>Fill of the plot rectangle of Cartesian charts.</summary>
+    public ChartFill? PlotAreaFill { get; set; }
+    /// <summary>Colour of a border around the plot rectangle.</summary>
+    public Color? PlotAreaBorderColor { get; set; }
+    /// <summary>Corner radius of the chart card. A chart's own <c>BorderRadius</c> greater than zero wins.</summary>
+    public float? CardRadius { get; set; }
+    /// <summary>Border colour of the chart card. A chart's own <c>BorderColor</c> wins.</summary>
+    public Color? CardBorderColor { get; set; }
+    /// <summary>Border width of the chart card. A chart's own <c>BorderWidth</c> greater than zero wins.</summary>
+    public float? CardBorderWidth { get; set; }
+    /// <summary>Distance between the chart edge and its card, leaving room for the card's shadow.</summary>
+    public float? CardInset { get; set; }
+    /// <summary>Effects on the chart card.</summary>
+    public IList<ChartEffect>? CardEffects { get; set; }
+    /// <summary>Default effects on bars.</summary>
+    public IList<ChartEffect>? BarEffects { get; set; }
+    /// <summary>Default effects on line strokes.</summary>
+    public IList<ChartEffect>? LineEffects { get; set; }
+    /// <summary>Default effects on pie slices.</summary>
+    public IList<ChartEffect>? SliceEffects { get; set; }
+    /// <summary>How a series colour becomes a fill: <c>solid</c> (default) or <c>tint</c> (a gradient from a lighter tint at the value end).</summary>
+    public string? AutoFill { get; set; }
+    /// <summary><c>darker</c> outlines bars and slices in a darker shade of their colour.</summary>
+    public string? MarkOutline { get; set; }
+    /// <summary>Ordered colours for lines and markers of series without a colour, when fills use a paler palette.</summary>
+    public IReadOnlyList<Color>? StrokePalette { get; set; }
+    /// <summary>Colour of increases (waterfall deltas, growth annotations).</summary>
+    public Color? PositiveColor { get; set; }
+    /// <summary>Colour of decreases.</summary>
+    public Color? NegativeColor { get; set; }
+    /// <summary>Colour of totals.</summary>
+    public Color? TotalColor { get; set; }
 }
 
 /// <summary>
 /// Everything a chart theme decides. Charts read these values rather than testing the theme name,
 /// so each theme is described once, here.
 /// </summary>
-internal sealed class ChartTheme
+internal sealed record ChartTheme
 {
     private const string LibrarySeriesColor = "#4f46e5";
 
@@ -72,6 +109,7 @@ internal sealed class ChartTheme
         PdfTextBaseline = false,
         TabularNums = false,
         RoundedLegendSwatches = false,
+        AdaptiveReferenceLabels = false,
     };
 
     internal static readonly ChartTheme Modern = new()
@@ -102,6 +140,7 @@ internal sealed class ChartTheme
         PdfTextBaseline = true,
         TabularNums = true,
         RoundedLegendSwatches = true,
+        AdaptiveReferenceLabels = true,
     };
 
     internal static readonly ChartTheme Dark = new()
@@ -132,6 +171,7 @@ internal sealed class ChartTheme
         PdfTextBaseline = true,
         TabularNums = true,
         RoundedLegendSwatches = true,
+        AdaptiveReferenceLabels = true,
     };
 
     internal static readonly ChartTheme Print = new()
@@ -162,9 +202,103 @@ internal sealed class ChartTheme
         PdfTextBaseline = true,
         TabularNums = true,
         RoundedLegendSwatches = true,
+        AdaptiveReferenceLabels = true,
     };
 
-    internal static bool IsValidPreset(string? name) => name is "legacy" or "modern" or "dark" or "print";
+
+    private static IReadOnlyList<Color> Hex(params string[] values) => values.Select(Color.FromHex).ToList();
+    private static IReadOnlyList<ChartResolvedEffect> Shadow(double opacity, double blur, double offsetY) =>
+        ChartEffect.ResolveAll([new ChartShadowEffect { Opacity = opacity, Blur = blur, OffsetY = offsetY }])!;
+
+    /// <summary>Board decks and annual reports: restrained blue, teal and amber on white, a quiet card with a soft shadow.</summary>
+    internal static readonly ChartTheme Executive = Modern with
+    {
+        SeriesPalette = Hex("#1c398e", "#00786f", "#bb4d00", "#45556c", "#432dd7", "#7e2a0c"),
+        TitleColor = Color.FromHex("#0f172b"),
+        SubtitleColor = Color.FromHex("#45556c"),
+        AxisColor = Color.FromHex("#45556c"),
+        GridLineColor = Color.FromHex("#e2e8f0"),
+        LegendTextColor = Color.FromHex("#1d293d"),
+        BarCornerRadius = 2,
+        CardRadius = 10,
+        CardBorderColor = Color.FromHex("#e2e8f0"),
+        CardBorderWidth = 1,
+        CardInset = 12,
+        CardEffects = Shadow(0.1, 12, 4),
+        PositiveColor = Color.FromHex("#00786f"),
+        NegativeColor = Color.FromHex("#c10007"),
+        TotalColor = Color.FromHex("#1c398e"),
+    };
+
+    /// <summary>Marketing and keynote slides: saturated colours, tinted fills, raised bars and slices.</summary>
+    internal static readonly ChartTheme Vivid = Modern with
+    {
+        SeriesPalette = Hex("#155dfc", "#e60076", "#e17100", "#009966", "#7f22fe", "#e7000b"),
+        TitleColor = Color.FromHex("#0f172b"),
+        TitleFontSize = 22,
+        SubtitleColor = Color.FromHex("#45556c"),
+        AxisColor = Color.FromHex("#45556c"),
+        GridLineStyle = "none",
+        LegendTextColor = Color.FromHex("#1d293d"),
+        BarCornerRadius = 6,
+        CardRadius = 12,
+        CardInset = 14,
+        CardEffects = Shadow(0.16, 16, 6),
+        AutoFill = "tint",
+        BarEffects = Shadow(0.18, 6, 2),
+        SliceEffects = Shadow(0.18, 6, 2),
+        PositiveColor = Color.FromHex("#009966"),
+        NegativeColor = Color.FromHex("#e7000b"),
+        TotalColor = Color.FromHex("#155dfc"),
+    };
+
+    /// <summary>Friendly internal reports: pale fills outlined in a darker shade, lines in the darker shade, a white plot on a pale card.</summary>
+    internal static readonly ChartTheme Pastel = Modern with
+    {
+        BackgroundColor = Color.FromHex("#f8fafc"),
+        PlotAreaFill = ChartFill.Solid(Color.FromHex("#ffffff")),
+        PlotAreaBorderColor = Color.FromHex("#e2e8f0"),
+        SeriesPalette = Hex("#8ec5ff", "#fda5d5", "#ffd230", "#5ee9b5", "#c4b4ff", "#ffa2a2"),
+        StrokePalette = Hex("#1447e6", "#c6005c", "#bb4d00", "#007a55", "#7008e7", "#c10007"),
+        MarkOutline = "darker",
+        TitleColor = Color.FromHex("#1d293d"),
+        SubtitleColor = Color.FromHex("#45556c"),
+        AxisColor = Color.FromHex("#45556c"),
+        GridLineStyle = "dashed",
+        GridLineColor = Color.FromHex("#e2e8f0"),
+        LegendTextColor = Color.FromHex("#1d293d"),
+        BarCornerRadius = 8,
+        CardRadius = 14,
+        CardBorderColor = Color.FromHex("#e2e8f0"),
+        CardBorderWidth = 1,
+        PositiveColor = Color.FromHex("#007a55"),
+        NegativeColor = Color.FromHex("#c10007"),
+        TotalColor = Color.FromHex("#1447e6"),
+    };
+
+    /// <summary>Dark keynote and dashboard slides: a gradient slate surface, bright series colours, glowing lines.</summary>
+    internal static readonly ChartTheme Midnight = Modern with
+    {
+        BackgroundFill = new ChartLinearFill { Angle = 90, Stops = [new() { Offset = 0, Color = Color.FromHex("#0f172b") }, new() { Offset = 1, Color = Color.FromHex("#1d293d") }] },
+        SeriesPalette = Hex("#00bcff", "#fb64b6", "#fdc700", "#00d492", "#a684ff", "#ff8904"),
+        TitleColor = Color.FromHex("#f8fafc"),
+        TitleFontSize = 22,
+        SubtitleColor = Color.FromHex("#90a1b9"),
+        AxisColor = Color.FromHex("#cad5e2"),
+        GridLineColor = Color.FromHex("#314158"),
+        LegendTextColor = Color.FromHex("#e2e8f0"),
+        BarCornerRadius = 6,
+        CardRadius = 12,
+        CardInset = 14,
+        CardEffects = Shadow(0.4, 18, 6),
+        AutoFill = "tint",
+        LineEffects = ChartEffect.ResolveAll([new ChartGlowEffect { Opacity = 0.45, Radius = 5 }])!,
+        PositiveColor = Color.FromHex("#00d492"),
+        NegativeColor = Color.FromHex("#ff6467"),
+        TotalColor = Color.FromHex("#00bcff"),
+    };
+
+    internal static bool IsValidPreset(string? name) => name is "legacy" or "modern" or "dark" or "print" or "executive" or "vivid" or "pastel" or "midnight";
 
     internal static ChartTheme For(string name) => name switch
     {
@@ -172,6 +306,10 @@ internal sealed class ChartTheme
         "dark" => Dark,
         "print" => Print,
         "legacy" => Legacy,
+        "executive" => Executive,
+        "vivid" => Vivid,
+        "pastel" => Pastel,
+        "midnight" => Midnight,
         _ => throw new ArgumentException("Invalid chart theme.", nameof(name)),
     };
 
@@ -207,6 +345,24 @@ internal sealed class ChartTheme
             PdfTextBaseline = custom.PdfTextBaseline ?? b.PdfTextBaseline,
             TabularNums = custom.TabularNums ?? b.TabularNums,
             RoundedLegendSwatches = custom.RoundedLegendSwatches ?? b.RoundedLegendSwatches,
+            AdaptiveReferenceLabels = custom.AdaptiveReferenceLabels ?? b.AdaptiveReferenceLabels,
+            BackgroundFill = custom.BackgroundFill ?? b.BackgroundFill,
+            PlotAreaFill = custom.PlotAreaFill ?? b.PlotAreaFill,
+            PlotAreaBorderColor = custom.PlotAreaBorderColor ?? b.PlotAreaBorderColor,
+            CardRadius = custom.CardRadius ?? b.CardRadius,
+            CardBorderColor = custom.CardBorderColor ?? b.CardBorderColor,
+            CardBorderWidth = custom.CardBorderWidth ?? b.CardBorderWidth,
+            CardInset = custom.CardInset ?? b.CardInset,
+            CardEffects = ChartEffect.ResolveAll(custom.CardEffects) ?? b.CardEffects,
+            BarEffects = ChartEffect.ResolveAll(custom.BarEffects) ?? b.BarEffects,
+            LineEffects = ChartEffect.ResolveAll(custom.LineEffects) ?? b.LineEffects,
+            SliceEffects = ChartEffect.ResolveAll(custom.SliceEffects) ?? b.SliceEffects,
+            AutoFill = custom.AutoFill ?? b.AutoFill,
+            MarkOutline = custom.MarkOutline ?? b.MarkOutline,
+            StrokePalette = custom.StrokePalette ?? b.StrokePalette,
+            PositiveColor = custom.PositiveColor ?? b.PositiveColor,
+            NegativeColor = custom.NegativeColor ?? b.NegativeColor,
+            TotalColor = custom.TotalColor ?? b.TotalColor,
         };
     }
 
@@ -236,6 +392,24 @@ internal sealed class ChartTheme
     internal bool PdfTextBaseline { get; private init; }
     internal bool TabularNums { get; private init; }
     internal bool RoundedLegendSwatches { get; private init; }
+    internal bool AdaptiveReferenceLabels { get; private init; }
+    internal ChartFill? BackgroundFill { get; private init; }
+    internal ChartFill? PlotAreaFill { get; private init; }
+    internal Color? PlotAreaBorderColor { get; private init; }
+    internal float? CardRadius { get; private init; }
+    internal Color? CardBorderColor { get; private init; }
+    internal float? CardBorderWidth { get; private init; }
+    internal float? CardInset { get; private init; }
+    internal IReadOnlyList<ChartResolvedEffect> CardEffects { get; private init; } = [];
+    internal IReadOnlyList<ChartResolvedEffect> BarEffects { get; private init; } = [];
+    internal IReadOnlyList<ChartResolvedEffect> LineEffects { get; private init; } = [];
+    internal IReadOnlyList<ChartResolvedEffect> SliceEffects { get; private init; } = [];
+    internal string AutoFill { get; private init; } = "solid";
+    internal string MarkOutline { get; private init; } = "none";
+    internal IReadOnlyList<Color> StrokePalette { get; private init; } = [];
+    internal Color? PositiveColor { get; private init; }
+    internal Color? NegativeColor { get; private init; }
+    internal Color? TotalColor { get; private init; }
 
     internal Color SeriesColor(Color color, int index) =>
         SeriesPalette.Count > 0 && string.Equals(color.ToHexString(), LibrarySeriesColor, StringComparison.Ordinal)

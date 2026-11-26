@@ -43,6 +43,15 @@ public class ComboChart : CartesianChartBase
     private bool UsesSecondary(ChartData data) =>
         SecondaryYAxis is not null || data.Series.Any(s => s.ValueAxis is "secondary");
 
+    /// <summary>The lowest and highest value a point spans: its <c>Low</c> and <c>High</c> for a range series, else its value.</summary>
+    private static (double Low, double High) Extent(ChartSeries series, ChartDataPoint dp)
+    {
+        if (series.SeriesType is not "range") return ((double)dp.Value, (double)dp.Value);
+        if (dp.Low is not { } low || dp.High is not { } high) throw new InvalidOperationException("Range series points need low and high.");
+        if (!(low <= high)) throw new InvalidOperationException("Range series points must satisfy low <= high.");
+        return ((double)low, (double)high);
+    }
+
     protected override (double Min, double Max)? GetValueDataRange(ChartData data)
     {
         double min = double.PositiveInfinity, max = double.NegativeInfinity;
@@ -51,9 +60,9 @@ public class ComboChart : CartesianChartBase
             if (s.ValueAxis is "secondary") continue;
             foreach (var dp in s.DataPoints)
             {
-                double v = (double)dp.Value;
-                if (v < min) min = v;
-                if (v > max) max = v;
+                (double lo, double hi) = Extent(s, dp);
+                if (lo < min) min = lo;
+                if (hi > max) max = hi;
             }
         }
         return min <= max ? (min, max) : base.GetValueDataRange(data);
@@ -62,7 +71,7 @@ public class ComboChart : CartesianChartBase
     protected override void ResolveValueScale(ChartData data)
     {
         if (Orientation == ChartOrientation.Horizontal)
-            throw new NotSupportedException("ComboChart only supports vertical orientation.");
+            throw new InvalidOperationException("ComboChart only supports vertical orientation.");
         base.ResolveValueScale(data);
         _hasSecondary = UsesSecondary(data);
         if (!_hasSecondary) return;
@@ -77,9 +86,9 @@ public class ComboChart : CartesianChartBase
                 if (s.ValueAxis is not "secondary") continue;
                 foreach (var dp in s.DataPoints)
                 {
-                    double v = (double)dp.Value;
-                    if (v < min) min = v;
-                    if (v > max) max = v;
+                    (double lo, double hi) = Extent(s, dp);
+                    if (lo < min) min = lo;
+                    if (hi > max) max = hi;
                 }
             }
             if (min <= max)
@@ -112,7 +121,7 @@ public class ComboChart : CartesianChartBase
         float maxW = 0;
         for (int i = 0; i <= steps; i++)
         {
-            string lbl = $"{secAxis.Prefix}{ChartNumberFormat.Format(_secMin + i * stepVal, _secTickFormat)}{secAxis.Suffix}";
+            string lbl = ChartNumberFormat.ApplyAffixes(ChartNumberFormat.Format(_secMin + i * stepVal, _secTickFormat), secAxis.Prefix, secAxis.Suffix, secAxis.NegativeStyle);
             float w = canvas.MeasureText(lbl, AxisLabelFontSize, family).Width;
             if (w > maxW) maxW = w;
         }
@@ -139,6 +148,24 @@ public class ComboChart : CartesianChartBase
     protected override void DrawAllSeries(ICanvas canvas, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
+        // 0. Range series, beneath everything else
+        foreach (ChartSeries series in data.Series)
+        {
+            if (series.SeriesType is not "range" || series.DataPoints.Count < 2) continue;
+            decimal rmin = series.ValueAxis is "secondary" ? _secMin : _effectiveMin;
+            decimal rmax = series.ValueAxis is "secondary" ? _secMax : _effectiveMax;
+            double slot = chartAreaWidth / (double)series.DataPoints.Count;
+            (double, double) At(int i, double v) => (_plotLeft + i * slot + slot / 2, baselineY - (double)ChartValueScale.Fraction((decimal)v, rmin, rmax) * chartAreaHeight);
+            List<(double X, double Y)> highs = series.DataPoints.Select((p, i) => At(i, Extent(series, p).High)).ToList();
+            List<(double X, double Y)> lows = series.DataPoints.Select((p, i) => At(i, Extent(series, p).Low)).ToList();
+            Color rcolor = ResolveSeriesColor(series);
+            List<ChartPathCommand> Edge(List<(double X, double Y)> pts) => pts.Select((p, i) => new ChartPathCommand(i == 0 ? "M" : "L", [p.X, p.Y])).ToList();
+            List<ChartPathCommand> band = [.. Edge(highs), .. Enumerable.Reverse(lows).Select(p => new ChartPathCommand("L", [p.X, p.Y])), new ChartPathCommand("Z", [])];
+            ChartVector.Fill(canvas, new ChartPathPlan(band, rcolor.WithAlpha(series.Style?.FillOpacity ?? 0.3f), null));
+            ChartVector.Stroke(canvas, new ChartStrokePlan(Edge(highs), rcolor, 1.5, "butt", "round", 10));
+            ChartVector.Stroke(canvas, new ChartStrokePlan(Edge(lows), rcolor, 1.5, "butt", "round", 10));
+        }
+
         // 1. Area series
         for (int sIdx = 0; sIdx < data.Series.Count; sIdx++)
         {
@@ -223,7 +250,7 @@ public class ComboChart : CartesianChartBase
         for (int i = 0; i <= steps; i++)
         {
             float y = baselineY - i * stepH;
-            string lbl = $"{secAxis.Prefix}{ChartNumberFormat.Format(_secMin + i * stepVal, _secTickFormat)}{secAxis.Suffix}";
+            string lbl = ChartNumberFormat.ApplyAffixes(ChartNumberFormat.Format(_secMin + i * stepVal, _secTickFormat), secAxis.Prefix, secAxis.Suffix, secAxis.NegativeStyle);
             canvas.DrawText(rightX + 8, y - AxisLabelFontSize / 2f, lbl, ThemeAxisColor, AxisLabelFontSize, family, TextAlignment.Left);
         }
         if (!string.IsNullOrEmpty(secAxis.Legend))

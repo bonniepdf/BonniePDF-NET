@@ -12,6 +12,24 @@ namespace BonniePDF;
 /// </summary>
 public static partial class ChartNumberFormat
 {
+    /// <summary>
+    /// Wraps formatted number text in a prefix and suffix, placing a leading minus sign by <paramref name="style"/>:
+    /// <c>minusAfterPrefix</c> (<c>$-1.1</c>, the default, as in earlier releases), <c>minus</c> (<c>-$1.1</c>) or
+    /// <c>parentheses</c> (<c>($1.1)</c>).
+    /// </summary>
+    public static string ApplyAffixes(string text, string prefix, string suffix, string style = "minusAfterPrefix")
+    {
+        bool negative = text.Length > 0 && text[0] == '-';
+        if (!negative || string.Equals(style, "minusAfterPrefix", StringComparison.Ordinal)) return $"{prefix}{text}{suffix}";
+        string magnitude = text.Substring(1);
+        return style switch
+        {
+            "parentheses" => $"({prefix}{magnitude}{suffix})",
+            "minus" => $"-{prefix}{magnitude}{suffix}",
+            _ => throw new ArgumentOutOfRangeException(nameof(style), $"Unsupported negativeStyle '{style}'. Use minus, parentheses or minusAfterPrefix."),
+        };
+    }
+
     private const int MaxDecimals = 15;
     private static readonly string[] CompactSuffixes = ["", "K", "M", "B", "T"];
 

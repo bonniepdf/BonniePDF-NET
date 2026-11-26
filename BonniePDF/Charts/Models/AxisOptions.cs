@@ -43,9 +43,20 @@ public class AxisOptions
     /// <summary>Fractional headroom (0..0.5) beyond extreme values before rounding; null defers to chart default.</summary>
     public double? Headroom { get; set; }
 
-    /// <summary>Number format string (<c>G</c>, <c>F&lt;n&gt;</c>, <c>N&lt;n&gt;</c>, <c>P&lt;n&gt;</c>, <c>C&lt;n&gt;</c>) for axis tick labels.</summary>
+    /// <summary>Number format string (<c>G</c>, <c>F&lt;n&gt;</c>, <c>N&lt;n&gt;</c>, <c>P&lt;n&gt;</c>, <c>K&lt;n&gt;</c>) for axis tick labels.</summary>
     public string? ValueFormat { get; set; }
 
     /// <summary>Category-axis label overflow strategy: <c>omit</c> (default), <c>rotate</c>, <c>wrap</c>, or <c>auto</c>.</summary>
     public string LabelOverflow { get; set; } = "omit";
+    /// <summary>Where a negative tick's minus sign goes relative to <see cref="Prefix"/>: <c>minusAfterPrefix</c> (default, <c>$-1</c>), <c>minus</c> (<c>-$1</c>) or <c>parentheses</c> (<c>($1)</c>).</summary>
+    public string NegativeStyle { get; set; } = "minusAfterPrefix";
+
+    /// <summary><c>linear</c> (default) or <c>log</c>. A logarithmic value axis needs every plotted value and bound above zero; bars then start at the lower bound.</summary>
+    public string Scale { get; set; } = "linear";
+
+    /// <summary>Base of a logarithmic axis, above 1 (<c>10</c>). Ticks sit at its integer powers.</summary>
+    public double LogBase { get; set; } = 10;
+
+    /// <summary>On a logarithmic axis, draw faint gridlines at 2 to base-1 times each power.</summary>
+    public bool ShowMinorGridLines { get; set; }
 }

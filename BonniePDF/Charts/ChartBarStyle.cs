@@ -1,4 +1,5 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
+using System.Collections.Generic;
 namespace BonniePDF;
 
 /// <summary>Opaque two-stop gradient with bar-relative or plot-relative coordinates.</summary>
@@ -18,4 +19,6 @@ public sealed class ChartBarStyle
     public float? CornerRadius { get; set; }
     /// <summary>Optional opaque linear fill. Null keeps the resolved series colour.</summary>
     public ChartLinearGradient? Gradient { get; set; }
+    /// <summary>Shadow, glow or gloss for every bar.</summary>
+    public IList<ChartEffect> Effects { get; set; } = new List<ChartEffect>();
 }

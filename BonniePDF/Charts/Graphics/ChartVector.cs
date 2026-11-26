@@ -22,13 +22,35 @@ internal static class ChartVector
         }
     }
 
+    // PDF canvases do not expose whether transparency is allowed (PDF/A-1 forbids it), so shadow and glow are omitted here and
+    // only the opaque-safe parts of an effect (the gloss overlay) are drawn.
+    /// <summary>PDF canvases keep no groups: the marks are drawn as they are.</summary>
+    internal static void WithGroup(ICanvas sink, Func<ChartGroupInfo> info, Action draw) => draw();
+
     internal static void Fill(ICanvas sink, ChartPathPlan plan)
+    {
+        if (plan.Effects is { Count: > 0 })
+        {
+            foreach (ChartPathPlan expanded in ChartEffects.Expand(plan, "none")) FillOne(sink, expanded);
+            return;
+        }
+        FillOne(sink, plan);
+    }
+
+    private static void FillOne(ICanvas sink, ChartPathPlan plan)
     {
         sink.SaveState();
         try
         {
             Replay(sink, plan.Commands);
-            if (plan.Gradient is { } g)
+            if (plan.RadialGradient is { } rg)
+            {
+                GradientStop[] radialStops = new GradientStop[rg.Stops.Count];
+                for (int i = 0; i < rg.Stops.Count; i++) radialStops[i] = new GradientStop((float)rg.Stops[i].Offset, rg.Stops[i].Color);
+                Point? focal = rg.Fx != rg.Cx || rg.Fy != rg.Cy ? new Point((float)rg.Fx, (float)rg.Fy) : null;
+                sink.FillCurrentPath(new RadialGradientPaint(new Point((float)rg.Cx, (float)rg.Cy), (float)rg.R, radialStops, focal));
+            }
+            else if (plan.Gradient is { } g)
             {
                 GradientStop[] stops;
                 if (g.Stops is { Count: >= 2 })
@@ -52,6 +74,16 @@ internal static class ChartVector
     }
 
     internal static void Stroke(ICanvas sink, ChartStrokePlan plan)
+    {
+        if (plan.Effects is { Count: > 0 })
+        {
+            foreach (ChartStrokePlan expanded in ChartEffects.ExpandStroke(plan, "none")) StrokeOne(sink, expanded);
+            return;
+        }
+        StrokeOne(sink, plan);
+    }
+
+    private static void StrokeOne(ICanvas sink, ChartStrokePlan plan)
     {
         bool hasSegment = false;
         foreach (var c in plan.Commands) { if (c.Op is "L" or "C") { hasSegment = true; break; } }

@@ -1,5 +1,6 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using BonniePDF.Drawing;
 
@@ -67,8 +68,9 @@ public class ScatterChart : CartesianChartBase
             for (int i = 0; i < s.DataPoints.Count; i++)
             {
                 double x = (double)PointX(s, i);
-                if (x < xMin) xMin = x;
-                if (x > xMax) xMax = x;
+                (double plus, double minus)? xe = XErrorAmounts(s, i);
+                if (x - (xe?.minus ?? 0) < xMin) xMin = x - (xe?.minus ?? 0);
+                if (x + (xe?.plus ?? 0) > xMax) xMax = x + (xe?.plus ?? 0);
                 if (s.DataPoints[i].Size is decimal sz)
                 {
                     if (sz <= 0) throw new ArgumentOutOfRangeException(nameof(data), "ScatterChart bubble sizes must be finite and positive.");
@@ -104,6 +106,78 @@ public class ScatterChart : CartesianChartBase
             _xTickFormat = xAxis.ValueFormat ?? "N0";
         }
         ChartValueScale.Check(_xMin, _xMax);
+    }
+
+    internal override bool SupportsErrorBars => true;
+
+    /// <summary>The amounts left and right of a point's x that its horizontal error bars span, or <see langword="null"/>.</summary>
+    private static (double Plus, double Minus)? XErrorAmounts(ChartSeries series, int index)
+    {
+        ChartErrorBars? config = series.Style?.XErrorBars;
+        if (config is null) return null;
+        config.Validate();
+        List<double> xs = Enumerable.Range(0, series.DataPoints.Count).Select(i => (double)PointX(series, i)).ToList();
+        double x = xs[index];
+        double baseAmount = config.Amount;
+        if (string.Equals(config.Type, "percent", StringComparison.Ordinal)) baseAmount = Math.Abs(x) * config.Amount / 100;
+        else if (string.Equals(config.Type, "stdDev", StringComparison.Ordinal)) baseAmount = ChartTrendlineMath.SampleStandardDeviation(xs) * config.Amount;
+        else if (string.Equals(config.Type, "stdError", StringComparison.Ordinal)) baseAmount = ChartTrendlineMath.SampleStandardDeviation(xs) / Math.Sqrt(xs.Count) * config.Amount;
+        return (string.Equals(config.Direction, "minus", StringComparison.Ordinal) ? 0 : baseAmount, string.Equals(config.Direction, "plus", StringComparison.Ordinal) ? 0 : baseAmount);
+    }
+
+    internal override void DrawTrendlines(ICanvas canvas, ChartData data, float chartAreaWidth, float chartAreaHeight, float baselineY)
+    {
+        string family = EffectiveFontFamily;
+        foreach (ChartTrendline t in Trendlines)
+        {
+            t.Validate();
+            int index = t.Series is int n ? n : t.Series is string name ? data.Series.ToList().FindIndex(s => string.Equals(s.Name, name, StringComparison.Ordinal)) : -1;
+            if (index < 0 || index >= data.Series.Count) throw new InvalidOperationException($"Trendline names a missing series '{t.Series}'.");
+            ChartSeries series = data.Series[index];
+            List<double> xs = Enumerable.Range(0, series.DataPoints.Count).Select(i => (double)PointX(series, i)).ToList();
+            List<double> ys = series.DataPoints.Select(p => (double)p.Value).ToList();
+            TrendlineFit fit = ChartTrendlineMath.Fit(t.Type, xs, ys, t.Order, t.Period);
+            Color color = t.Color ?? RawSeriesStrokeColor(series);
+            List<Point> pts = fit.Points.Select(p => new Point(
+                (float)(_plotLeft + (double)ChartValueScale.Fraction((decimal)p.X, _xMin, _xMax) * chartAreaWidth),
+                (float)(baselineY - (double)Fraction((decimal)p.Y) * chartAreaHeight))).ToList();
+            StrokeFit(canvas, t, fit, pts, color, family, true);
+        }
+    }
+
+    private void DrawScatterErrorBars(ICanvas canvas, ChartSeries series, List<(double Xv, double Yv, float Px, float Py, float R, bool IsBubble)> items, float chartAreaWidth, float chartAreaHeight, float baselineY)
+    {
+        ChartErrorBars? y = series.Style?.ErrorBars;
+        ChartErrorBars? xcfg = series.Style?.XErrorBars;
+        void Draw(ChartErrorBars? config, float x1, float y1, float x2, float y2, float capDx, float capDy, Color color)
+        {
+            float width = config?.Width ?? 1;
+            canvas.DrawLine(x1, y1, x2, y2, color, width);
+            float cap = config?.CapWidth ?? 6;
+            if (cap > 0)
+            {
+                canvas.DrawLine(x1 - capDx * cap, y1 - capDy * cap, x1 + capDx * cap, y1 + capDy * cap, color, width);
+                canvas.DrawLine(x2 - capDx * cap, y2 - capDy * cap, x2 + capDx * cap, y2 + capDy * cap, color, width);
+            }
+        }
+        for (int i = 0; i < items.Count; i++)
+        {
+            var pt = items[i];
+            if (ErrorAmounts(series, i) is { } ya)
+            {
+                Color color = y?.Color ?? Appearance.LegendTextColor;
+                float lo = baselineY - (float)(Fraction((decimal)(pt.Yv - ya.Minus)) * (decimal)chartAreaHeight);
+                float hi = baselineY - (float)(Fraction((decimal)(pt.Yv + ya.Plus)) * (decimal)chartAreaHeight);
+                Draw(y, pt.Px, lo, pt.Px, hi, 0.5f, 0, color);
+            }
+            if (XErrorAmounts(series, i) is { } xa)
+            {
+                Color color = xcfg?.Color ?? Appearance.LegendTextColor;
+                float lo = _plotLeft + (float)(ChartValueScale.Fraction((decimal)(pt.Xv - xa.Minus), _xMin, _xMax) * (decimal)chartAreaWidth);
+                float hi = _plotLeft + (float)(ChartValueScale.Fraction((decimal)(pt.Xv + xa.Plus), _xMin, _xMax) * (decimal)chartAreaWidth);
+                Draw(xcfg, lo, pt.Py, hi, pt.Py, 0, 0.5f, color);
+            }
+        }
     }
 
     private float BubbleRadius(decimal? size, float fallback)
@@ -156,20 +230,38 @@ public class ScatterChart : CartesianChartBase
                 items.Add(((double)xv, (double)dp.Value, px, py, r, dp.Size.HasValue));
             }
 
-            var sorted = new List<(double Xv, double Yv, float Px, float Py, float R, bool IsBubble)>(items);
-            sorted.Sort((a, b) => b.R.CompareTo(a.R));
-            foreach (var pt in sorted)
+            // Largest bubbles first so smaller bubbles remain visible on top; ties keep input order.
+            foreach (int pointIndex in Enumerable.Range(0, items.Count).OrderByDescending(n => items[n].R))
             {
-                if (pt.IsBubble)
+                var pt = items[pointIndex];
+                int seriesIndex = sIdx;
+                ChartVector.WithGroup(canvas, () =>
                 {
-                    canvas.FillCircle(pt.Px, pt.Py, pt.R, color.WithAlpha(BubbleFillOpacity));
-                    ChartMarkers.Draw(canvas, pt.Px, pt.Py, pt.R, color, "circle", "hollow", 0, new Color((byte)0, (byte)0, (byte)0, (byte)0), 1f);
-                }
-                else
+                    ChartDataPoint point = series.DataPoints[pointIndex];
+                    string description = DescribeMark("{series}, {label}: {x}, {y}", new Dictionary<string, object>
+                    {
+                        ["series"] = series.Name,
+                        ["label"] = point.Label,
+                        ["x"] = ChartNumberFormat.Format((decimal)pt.Xv, "G"),
+                        ["y"] = FormatPointValue(point),
+                        ["raw"] = point.Value,
+                    });
+                    return new ChartGroupInfo("mark", SeriesIndex: seriesIndex, PointIndex: pointIndex, Name: point.Label, Description: description, Anchor: new ChartGroupAnchor(pt.Px, pt.Py, "both"));
+                }, () =>
                 {
-                    ChartMarkers.Draw(canvas, pt.Px, pt.Py, pt.R, color, shape, fill, series.Style?.MarkerHaloWidth ?? 0f, bg, 1.5f);
-                }
+                    if (pt.IsBubble)
+                    {
+                        canvas.FillCircle(pt.Px, pt.Py, pt.R, color.WithAlpha(BubbleFillOpacity));
+                        ChartMarkers.Draw(canvas, pt.Px, pt.Py, pt.R, color, "circle", "hollow", 0, new Color((byte)0, (byte)0, (byte)0, (byte)0), 1f);
+                    }
+                    else
+                    {
+                        ChartMarkers.Draw(canvas, pt.Px, pt.Py, pt.R, color, shape, fill, series.Style?.MarkerHaloWidth ?? 0f, bg, 1.5f);
+                    }
+                });
             }
+
+            DrawScatterErrorBars(canvas, series, items, chartAreaWidth, chartAreaHeight, baselineY);
 
             if (ShowTrendline is "linear" && items.Count >= 2)
             {
@@ -237,7 +329,7 @@ public class ScatterChart : CartesianChartBase
         {
             float x = _plotLeft + i * stepW;
             decimal v = _xMin + i * stepVal;
-            string label = $"{data.XAxis.Prefix}{ChartNumberFormat.Format(v, _xTickFormat)}{data.XAxis.Suffix}";
+            string label = ChartNumberFormat.ApplyAffixes(ChartNumberFormat.Format(v, _xTickFormat), data.XAxis.Prefix, data.XAxis.Suffix, data.XAxis.NegativeStyle);
             canvas.DrawText(x, baselineY + 12, label, ThemeAxisColor, AxisLabelFontSize, family, TextAlignment.Center);
         }
     }

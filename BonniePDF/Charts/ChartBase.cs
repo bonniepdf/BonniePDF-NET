@@ -46,7 +46,8 @@ public abstract partial class ChartBase
 
     /// <summary>The values and behaviours behind <see cref="Theme"/> and <see cref="CustomTheme"/>.</summary>
     internal ChartTheme Appearance => _resolvedTheme;
-    internal virtual bool UsesStyledGeometry => Appearance.StyledGeometry || _borderRadius > 0 || (BorderColor.HasValue && _borderWidth > 0);
+    internal virtual bool UsesStyledGeometry => Appearance.StyledGeometry || EffectiveCardRadius > 0 || (EffectiveBorderColor.HasValue && EffectiveBorderWidth > 0)
+        || EffectiveBackgroundFill is { IsSolid: false } || EffectiveCardEffects.Count > 0;
 
     protected ChartBase() { }
 
@@ -87,9 +88,28 @@ public abstract partial class ChartBase
 
     public string AltText { get; set; } = string.Empty;
     public bool IsDecorative { get; set; }
+
+    /// <summary>
+    /// The accessible description of each mark, for sinks that keep groups (<c>SvgOptions.MarkTitles</c>). <c>{series}</c>, <c>{label}</c> and
+    /// <c>{value}</c> (formatted as the chart would label it) are replaced, and <c>{raw}</c> is the number, which takes a format: <c>{raw:F1}</c>.
+    /// Null uses the chart family's default, <c>{series}, {label}: {value}</c> for category charts.
+    /// </summary>
+    public string? MarkDescriptionTemplate { get; set; }
+
+    /// <summary>Builds a mark's description from <see cref="MarkDescriptionTemplate"/>, or from the family's <paramref name="fallback"/> template.</summary>
+    internal string DescribeMark(string fallback, IReadOnlyDictionary<string, object> tokens) => ChartTemplate.Apply(MarkDescriptionTemplate ?? fallback, tokens);
     public float Width { get; set; } = 800;
     public float Height { get; set; } = 450;
     public Color? BackgroundColor { get; set; }
+
+    /// <summary>Background fill (a colour, or a linear or radial gradient). Takes precedence over <see cref="BackgroundColor"/>.</summary>
+    public ChartFill? BackgroundFill { get; set; }
+
+    /// <summary>Shadow, glow or gloss for the chart card (its background shape; white when the chart sets none).</summary>
+    public IList<ChartEffect> CardEffects { get; set; } = new List<ChartEffect>();
+
+    /// <summary>Distance in points between the chart edge and its card (background, border and effects), leaving room for a shadow.</summary>
+    public float? CardInset { get; set; }
 
     /// <summary>Optional card border corner radius in points.</summary>
     public float BorderRadius
@@ -118,7 +138,31 @@ public abstract partial class ChartBase
 
     public string? SvgShapeRendering { get; set; }
 
-    protected Color? EffectiveBackgroundColor => BackgroundColor ?? Appearance.BackgroundColor;
+    // A gradient background stands in as its middle colour wherever a single surface colour is needed (contrast, borders).
+    protected Color? EffectiveBackgroundColor => EffectiveBackgroundFill?.FallbackColor ?? BackgroundColor ?? Appearance.BackgroundColor;
+
+    /// <summary>The chart's own fill, else (when the chart sets no background colour) the theme's.</summary>
+    internal ChartFill? EffectiveBackgroundFill => BackgroundFill ?? (BackgroundColor is null ? Appearance.BackgroundFill : null);
+
+    /// <summary>The card corner radius: the chart's own when greater than zero, else the theme's.</summary>
+    internal float EffectiveCardRadius => _borderRadius > 0 ? _borderRadius : Appearance.CardRadius ?? 0;
+
+    internal Color? EffectiveBorderColor => BorderColor ?? Appearance.CardBorderColor;
+
+    internal float EffectiveBorderWidth => _borderWidth > 0 ? _borderWidth : Appearance.CardBorderWidth ?? 0;
+
+    internal float EffectiveCardInset => CardInset ?? Appearance.CardInset ?? 0;
+
+    internal IReadOnlyList<ChartResolvedEffect> EffectiveCardEffects => ChartEffect.ResolveAll(CardEffects) ?? Appearance.CardEffects;
+
+    /// <summary>The chart rectangle.</summary>
+    internal ChartBox ChartRect => new(0, 0, Width, Height);
+
+    /// <summary>The plot rectangle gradient fills may span; charts without a plot use the whole chart.</summary>
+    internal virtual ChartBox PlotRect => ChartRect;
+
+    /// <summary>The boxes a fill's geometry can be relative to, for a mark occupying <paramref name="mark"/>.</summary>
+    internal ChartFillBoxes FillBoxes(ChartBox mark) => new(mark, PlotRect, ChartRect);
 
     protected string ResolveFontFamily(string? explicitFamily = null)
     {
@@ -171,10 +215,24 @@ public abstract partial class ChartBase
     public virtual void Draw(ICanvas canvas, ChartData data)
     {
         Color? bg = EffectiveBackgroundColor;
-        if (bg.HasValue)
+        float cardInset = EffectiveCardInset;
+        if (!float.IsFinite(cardInset) || cardInset < 0) throw new InvalidOperationException("CardInset must be finite and nonnegative.");
+        float radius = EffectiveCardRadius;
+        IReadOnlyList<ChartResolvedEffect> cardEffects = EffectiveCardEffects;
+        List<ChartPathCommand> cardPath = RoundedRectCommands(cardInset, cardInset, Width - 2 * cardInset, Height - 2 * cardInset, radius);
+        if (EffectiveBackgroundFill is { IsSolid: false } backgroundFill)
         {
-            if (_borderRadius > 0)
-                ChartVector.Fill(canvas, new ChartPathPlan(RoundedRectCommands(0, 0, Width, Height, _borderRadius), bg.Value, null));
+            ChartResolvedFill resolved = backgroundFill.Resolve(FillBoxes(new ChartBox(cardInset, cardInset, Width - 2 * cardInset, Height - 2 * cardInset)));
+            ChartVector.Fill(canvas, new ChartPathPlan(cardPath, resolved.Color, resolved.Gradient, resolved.Radial, cardEffects.Count > 0 ? cardEffects : null));
+        }
+        else if (cardEffects.Count > 0)
+        {
+            ChartVector.Fill(canvas, new ChartPathPlan(cardPath, bg ?? Color.White, null, null, cardEffects));
+        }
+        else if (bg.HasValue)
+        {
+            if (radius > 0 || cardInset > 0)
+                ChartVector.Fill(canvas, new ChartPathPlan(cardPath, bg.Value, null));
             else
                 canvas.FillRect(0, 0, Width, Height, bg.Value);
         }
@@ -186,13 +244,15 @@ public abstract partial class ChartBase
 
         if (!string.IsNullOrEmpty(Caption)) DrawCaption(canvas, Caption);
 
-        if (BorderColor.HasValue && _borderWidth > 0)
+        Color? borderColor = EffectiveBorderColor;
+        float borderWidth = EffectiveBorderWidth;
+        if (borderColor.HasValue && borderWidth > 0)
         {
-            double inset = _borderWidth / 2.0;
+            double half = borderWidth / 2.0 + cardInset;
             ChartVector.Stroke(canvas, new ChartStrokePlan(
-                RoundedRectCommands(inset, inset, Width - _borderWidth, Height - _borderWidth, Math.Max(0, _borderRadius - inset)),
-                BorderColor.Value,
-                _borderWidth,
+                RoundedRectCommands(half, half, Width - 2 * half, Height - 2 * half, Math.Max(0, radius - borderWidth / 2.0)),
+                borderColor.Value,
+                borderWidth,
                 "butt",
                 "round"));
         }

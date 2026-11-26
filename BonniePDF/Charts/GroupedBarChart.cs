@@ -10,6 +10,23 @@ namespace BonniePDF;
 /// </summary>
 public class GroupedBarChart : CartesianChartBase
 {
+    internal override bool SupportsAnnotations => true;
+
+    internal override float? AnnotationBarThickness(float slot, int seriesCount) => slot * (1 - GroupGapRatio) / seriesCount * BarWidthRatio;
+
+    internal override Point AnnotationMarkPoint(ChartSeries series, int seriesIndex, int pointIndex, IList<Point> coordinates, ChartData data, float chartAreaWidth, float chartAreaHeight, float baselineY)
+    {
+        Point p = coordinates[pointIndex];
+        int count = series.DataPoints.Count;
+        if (Orientation == ChartOrientation.Horizontal)
+        {
+            (float start, float thickness) = BarSlot(pointIndex, seriesIndex, data.Series.Count, count, baselineY - chartAreaHeight, chartAreaHeight);
+            return new Point(p.X, start + thickness / 2);
+        }
+        (float xs, float xt) = BarSlot(pointIndex, seriesIndex, data.Series.Count, count, _plotLeft, chartAreaWidth);
+        return new Point(xs + xt / 2, p.Y);
+    }
+
     protected override void DrawLegendSwatch(ICanvas canvas, float x, float y, float size, ChartSeries series)
     {
         Color color = ResolveSeriesColor(series);
@@ -54,12 +71,18 @@ public class GroupedBarChart : CartesianChartBase
                 var p = coordinates[i];
                 float barWidth = p.X - origin;
                 (float barY, float barHeight) = BarSlot(i, seriesIndex, seriesCount, categoryCount, topAreaY, chartAreaHeight);
-                ChartBars.Draw(canvas, origin, barY, barWidth, barHeight, color, BarStyle, Appearance, true, _plotLeft, topAreaY, chartAreaWidth, chartAreaHeight);
-                if (pat is not "none")
+                var paint = ResolveMarkPaint(series, i < series.DataPoints.Count ? series.DataPoints[i] : null, color);
+                int i1 = i;
+                MarkGroup(canvas, data, series, i1, new ChartGroupAnchor(origin, barY + barHeight / 2, "x"), () =>
                 {
-                    float rx = barWidth < 0 ? origin + barWidth : origin;
-                    ChartPatterns.FillRect(canvas, rx, barY, MathF.Abs(barWidth), barHeight, new ChartPatternFill(pat, Color.White));
-                }
+                    DrawBarDepth(canvas, origin, barY, barWidth, barHeight, paint.Color);
+                    ChartBars.Draw(canvas, origin, barY, barWidth, barHeight, paint.Color, BarStyle, Appearance, true, _plotLeft, topAreaY, chartAreaWidth, chartAreaHeight, paint.Fill is { } hf ? (hf, FillBoxes) : null, ResolveBarEffectsResolved(series, BarStyle.Effects));
+                    if (pat is not "none")
+                    {
+                        float rx = barWidth < 0 ? origin + barWidth : origin;
+                        ChartPatterns.FillRect(canvas, rx, barY, MathF.Abs(barWidth), barHeight, new ChartPatternFill(pat, Color.White));
+                    }
+                });
             }
         }
         else
@@ -69,12 +92,18 @@ public class GroupedBarChart : CartesianChartBase
                 var p = coordinates[i];
                 float barHeight = origin - p.Y;
                 (float barX, float barWidth) = BarSlot(i, seriesIndex, seriesCount, categoryCount, _plotLeft, chartAreaWidth);
-                ChartBars.Draw(canvas, barX, p.Y, barWidth, barHeight, color, BarStyle, Appearance, false, _plotLeft, baselineY - chartAreaHeight, chartAreaWidth, chartAreaHeight);
-                if (pat is not "none")
+                var paint = ResolveMarkPaint(series, i < series.DataPoints.Count ? series.DataPoints[i] : null, color);
+                int i2 = i;
+                MarkGroup(canvas, data, series, i2, new ChartGroupAnchor(barX + barWidth / 2, origin, "y"), () =>
                 {
-                    float ry = barHeight < 0 ? p.Y + barHeight : p.Y;
-                    ChartPatterns.FillRect(canvas, barX, ry, barWidth, MathF.Abs(barHeight), new ChartPatternFill(pat, Color.White));
-                }
+                    DrawBarDepth(canvas, barX, p.Y, barWidth, barHeight, paint.Color);
+                    ChartBars.Draw(canvas, barX, p.Y, barWidth, barHeight, paint.Color, BarStyle, Appearance, false, _plotLeft, baselineY - chartAreaHeight, chartAreaWidth, chartAreaHeight, paint.Fill is { } vf ? (vf, FillBoxes) : null, ResolveBarEffectsResolved(series, BarStyle.Effects));
+                    if (pat is not "none")
+                    {
+                        float ry = barHeight < 0 ? p.Y + barHeight : p.Y;
+                        ChartPatterns.FillRect(canvas, barX, ry, barWidth, MathF.Abs(barHeight), new ChartPatternFill(pat, Color.White));
+                    }
+                });
             }
         }
     }
@@ -107,6 +136,7 @@ public class GroupedBarChart : CartesianChartBase
             IList<Point> coordinates = CalculateSeriesCoordinates(series, data, chartAreaWidth, chartAreaHeight, baselineY);
             float offset = GetLabelVerticalOffset(series);
             Color color = ResolveSeriesColor(series);
+            Color labelColor = RawSeriesStrokeColor(series);
 
             for (int i = 0; i < categoryCount; i++)
             {
@@ -117,16 +147,18 @@ public class GroupedBarChart : CartesianChartBase
                 if (Orientation == ChartOrientation.Horizontal)
                 {
                     (float barY, float barHeight) = BarSlot(i, seriesIndex, seriesCount, categoryCount, topAreaY, chartAreaHeight);
-                    DrawBarValueLabel(canvas, origin, barY, point.X - origin, barHeight, text, color, below, offset, point.X, barY + barHeight / 2);
+                    DrawBarValueLabel(canvas, origin, barY, point.X - origin, barHeight, text, DimMark(series, i, color), below, offset, point.X, barY + barHeight / 2, true, DimMark(series, i, labelColor));
                 }
                 else
                 {
                     (float barX, float barWidth) = BarSlot(i, seriesIndex, seriesCount, categoryCount, _plotLeft, chartAreaWidth);
-                    DrawBarValueLabel(canvas, barX, point.Y, barWidth, origin - point.Y, text, color, below, offset, barX + barWidth / 2, point.Y);
+                    DrawBarValueLabel(canvas, barX, point.Y, barWidth, origin - point.Y, text, DimMark(series, i, color), below, offset, barX + barWidth / 2, point.Y, true, DimMark(series, i, labelColor));
                 }
             }
         }
     }
 
-    protected override float GetLabelVerticalOffset(ChartSeries series) => 7;
+    protected override float GetLabelVerticalOffset(ChartSeries series) => 7 + (Orientation == ChartOrientation.Horizontal ? DepthShift.Dx : DepthShift.Dy);
+
+    internal override bool SupportsDepth3d => true;
 }

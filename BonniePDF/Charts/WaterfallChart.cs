@@ -35,9 +35,9 @@ public class WaterfallChart : CartesianChartBase
         set => _totalColor = value;
     }
 
-    private Color EffectivePositiveColor => _positiveColor ?? (Appearance.StyledGeometry ? Color.FromHex("#0d9488") : Color.FromHex("#16a34a"));
-    private Color EffectiveNegativeColor => _negativeColor ?? (Appearance.StyledGeometry ? Color.FromHex("#e11d48") : Color.FromHex("#dc2626"));
-    private Color EffectiveTotalColor => _totalColor ?? (Appearance.StyledGeometry ? Color.FromHex("#2563eb") : Color.FromHex("#4f46e5"));
+    private Color EffectivePositiveColor => _positiveColor ?? Appearance.PositiveColor ?? (Appearance.StyledGeometry ? Color.FromHex("#0d9488") : Color.FromHex("#16a34a"));
+    private Color EffectiveNegativeColor => _negativeColor ?? Appearance.NegativeColor ?? (Appearance.StyledGeometry ? Color.FromHex("#e11d48") : Color.FromHex("#dc2626"));
+    private Color EffectiveTotalColor => _totalColor ?? Appearance.TotalColor ?? (Appearance.StyledGeometry ? Color.FromHex("#2563eb") : Color.FromHex("#4f46e5"));
 
     /// <summary>Corner rounding and gradient style applied to waterfall bars.</summary>
     public ChartBarStyle BarStyle { get; set; } = new();
@@ -102,6 +102,8 @@ public class WaterfallChart : CartesianChartBase
         return (min, max);
     }
 
+    internal override bool SupportsDepth3d => true;
+
     protected override void DrawAllSeries(ICanvas canvas, ChartData data,
         float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
     {
@@ -123,7 +125,11 @@ public class WaterfallChart : CartesianChartBase
             {
                 float xStart = _plotLeft + fStart * chartAreaWidth;
                 float xEnd = _plotLeft + fEnd * chartAreaWidth;
-                ChartBars.Draw(canvas, xStart, center - thickness / 2f, xEnd - xStart, thickness, color, BarStyle, Appearance, true, _plotLeft, topY, chartAreaWidth, chartAreaHeight);
+                MarkGroup(canvas, data, data.Series[0], i, new ChartGroupAnchor(xStart, center, "x"), () =>
+                {
+                    DrawBarDepth(canvas, xStart, center - thickness / 2f, xEnd - xStart, thickness, color);
+                    ChartBars.Draw(canvas, xStart, center - thickness / 2f, xEnd - xStart, thickness, color, BarStyle, Appearance, true, _plotLeft, topY, chartAreaWidth, chartAreaHeight);
+                }, b.DisplayValue);
                 if (ShowConnectors && i < bars.Count - 1)
                 {
                     float nextCenter = topY + (i + 1) * slot + slot / 2f;
@@ -134,7 +140,11 @@ public class WaterfallChart : CartesianChartBase
             {
                 float yStart = baselineY - fStart * chartAreaHeight;
                 float yEnd = baselineY - fEnd * chartAreaHeight;
-                ChartBars.Draw(canvas, center - thickness / 2f, yEnd, thickness, yStart - yEnd, color, BarStyle, Appearance, false, _plotLeft, topY, chartAreaWidth, chartAreaHeight);
+                MarkGroup(canvas, data, data.Series[0], i, new ChartGroupAnchor(center, yStart, "y"), () =>
+                {
+                    DrawBarDepth(canvas, center - thickness / 2f, yEnd, thickness, yStart - yEnd, color);
+                    ChartBars.Draw(canvas, center - thickness / 2f, yEnd, thickness, yStart - yEnd, color, BarStyle, Appearance, false, _plotLeft, topY, chartAreaWidth, chartAreaHeight);
+                }, b.DisplayValue);
                 if (ShowConnectors && i < bars.Count - 1)
                 {
                     float nextCenter = _plotLeft + (i + 1) * slot + slot / 2f;

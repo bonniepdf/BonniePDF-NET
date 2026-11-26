@@ -10,6 +10,8 @@ namespace BonniePDF;
 /// </summary>
 public class LollipopChart : CartesianChartBase
 {
+    internal override bool SupportsAnnotations => true;
+
     private const string DefaultColorHex = "#4f46e5";
     private const float DefaultHeadRadiusValue = 8;
 

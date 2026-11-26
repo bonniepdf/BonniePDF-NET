@@ -10,6 +10,25 @@ namespace BonniePDF;
 /// </summary>
 public class LineChart : CartesianChartBase
 {
+    internal override bool SupportsAnnotations => true;
+
+    internal override bool SupportsTimeAxis => true;
+
+    /// <summary>Thin lines from each point to the category axis.</summary>
+    public bool DropLines { get; set; }
+    /// <summary>A line from the lowest to the highest series value at each category (two or more series).</summary>
+    public bool HighLowLines { get; set; }
+    /// <summary>A bar between the first and the last series at each category, coloured by direction (two or more series).</summary>
+    public ChartUpDownBars? UpDownBars { get; set; }
+
+    /// <inheritdoc />
+    protected override void DrawAllSeries(ICanvas canvas, ChartData data, float chartAreaWidth, float chartAreaHeight, float baselineY, float topY)
+    {
+        DrawBandLines(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, HighLowLines, UpDownBars);
+        if (DropLines) DrawDropLines(canvas, data, chartAreaWidth, chartAreaHeight, baselineY);
+        base.DrawAllSeries(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
+    }
+
     private const string DefaultLineColorHex = "#4f46e5";
     private const float DefaultDataPointRadius = 5;
 
@@ -40,7 +59,7 @@ public class LineChart : CartesianChartBase
             base.DrawLegendSwatch(canvas, x, y, size, series);
             return;
         }
-        Color color = ResolveSeriesColor(series);
+        Color color = ResolveSeriesStrokeColor(series);
         int idx = (_renderData ?? Data).Series.IndexOf(series);
         float[]? dash = ResolveSeriesDashPattern(series, idx);
         float midY = y + size / 2;
@@ -66,7 +85,7 @@ public class LineChart : CartesianChartBase
         bool horizontal = Orientation == ChartOrientation.Horizontal;
         if (SparklineReferenceValue.HasValue)
         {
-            float frac = Math.Clamp((float)ChartValueScale.Fraction(SparklineReferenceValue.Value, _effectiveMin, _effectiveMax), 0f, 1f);
+            float frac = Math.Clamp((float)Fraction(SparklineReferenceValue.Value), 0f, 1f);
             float ry = (1f - frac) * Height;
             ChartVector.Stroke(canvas, new ChartStrokePlan([new("M", [0, ry]), new("L", [Width, ry])], ThemeAxisColor, 0.75, "butt", "miter", 10, [2, 2]));
         }
@@ -80,12 +99,12 @@ public class LineChart : CartesianChartBase
             for (int i = 0; i < series.DataPoints.Count; i++)
             {
                 float category = series.DataPoints.Count > 1 ? (float)i / (series.DataPoints.Count - 1) : 0.5f;
-                float fraction = Math.Clamp((float)ChartValueScale.Fraction(series.DataPoints[i].Value, _effectiveMin, _effectiveMax), 0f, 1f);
+                float fraction = Math.Clamp((float)Fraction(series.DataPoints[i].Value), 0f, 1f);
                 points.Add(new Point(
                     inset + (horizontal ? fraction : category) * (Width - 2 * inset),
                     inset + (horizontal ? category : 1 - fraction) * (Height - 2 * inset)));
             }
-            Color color = ResolveSeriesColor(series);
+            Color color = ResolveSeriesStrokeColor(series);
             string curve = series.Style?.Curve ?? Curve;
             float[]? dash = ResolveSeriesDashPattern(series, sIdx);
             if (SparklineFillOpacity > 0 && points.Count >= 2)
@@ -108,7 +127,7 @@ public class LineChart : CartesianChartBase
                 }
                 ChartVector.Fill(canvas, new ChartPathPlan(cmds, color.WithAlpha(SparklineFillOpacity), null));
             }
-            DrawSeriesLine(canvas, points, color, lineWidth, curve, dash);
+            DrawSeriesLine(canvas, points, color, lineWidth, curve, dash, ResolveLineEffects(series));
             if (SparklineShowEndpoints && points.Count > 0)
             {
                 canvas.FillCircle(points[0].X, points[0].Y, 2.5f, color);
@@ -137,11 +156,11 @@ public class LineChart : CartesianChartBase
         bool showMarkers = series.Style?.ShowMarkers ?? DefaultShowMarkers;
         float markerRadius = series.Style?.MarkerRadius > 0 ? series.Style.MarkerRadius : DefaultMarkerRadius;
         int seriesIdx = data.Series.IndexOf(series);
-        Color color = ResolveSeriesColor(series);
+        Color color = ResolveSeriesStrokeColor(series);
         string curve = series.Style?.Curve ?? Curve;
         float[]? dash = ResolveSeriesDashPattern(series, seriesIdx);
 
-        DrawSeriesLine(canvas, coordinates, color, lineWidth, curve, dash);
+        DrawSeriesLine(canvas, coordinates, color, lineWidth, curve, dash, ResolveLineEffects(series));
 
         if (showMarkers)
         {
