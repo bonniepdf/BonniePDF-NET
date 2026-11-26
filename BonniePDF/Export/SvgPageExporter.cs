@@ -385,7 +385,9 @@ internal static class SvgPageExporter
         }
 
         sb.Append($"<g id=\"page-{pageNumber}\" data-bonniepdf-page=\"{pageNumber}\"{groupAttrs}>");
-        sb.Append(body);
+        // Elements are separated by one LF and the last is not followed by any, as the
+        // TypeScript exporter writes it, so the page markup is identical across both.
+        sb.Append(body.EndsWith('\n') ? body[..^1] : body);
         sb.Append("</g>");
         // Overlays sit after (above) the visual group and, crucially, outside it —
         // so external anchors are valid, focusable, named siblings of the page

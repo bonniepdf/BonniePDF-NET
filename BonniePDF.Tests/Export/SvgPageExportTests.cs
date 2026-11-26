@@ -20,6 +20,16 @@ public class SvgPageExportTests
     }
 
     [Fact]
+    public void GenerateSvgPages_PageGroupEndsWithoutALineFeed()
+    {
+        // Spec 05 §5.1: elements are separated by one LF and the last is not followed by one,
+        // so the page markup is identical to the TypeScript exporter's.
+        string page = SimpleDoc().GenerateSvgPages()[0];
+        Assert.EndsWith("</g></svg>", page, StringComparison.Ordinal);
+        Assert.NotEqual('\n', page[page.Length - "</g></svg>".Length - 1]);
+    }
+
+    [Fact]
     public void GenerateSvgPages_ReturnsOneSvgPerPage()
     {
         IReadOnlyList<string> pages = SimpleDoc().GenerateSvgPages();
