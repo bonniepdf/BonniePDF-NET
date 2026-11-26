@@ -20,8 +20,10 @@ public class FacturXTests
         FontManager.RestoreBundledFonts();
     }
 
+    // The shared EN 16931 fixture (spec fixtures/factur-x): Apply checks the XML is CII and that its
+    // profile identifier matches, so a stub root element is no longer enough.
     private static byte[] InvoiceXml() =>
-        Encoding.UTF8.GetBytes("<rsm:CrossIndustryInvoice><total>42.00</total></rsm:CrossIndustryInvoice>");
+        File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "Document", "Fixtures", "factur-x", "en16931-invoice.xml"));
 
     private static string Generate(System.Action<BonniePDF.Document> populate)
     {
@@ -63,7 +65,7 @@ public class FacturXTests
         doc.Settings.Conformance = PdfAConformance.PdfA3a;
         doc.Settings.Accessibility = AccessibilityMode.PdfUa1;
         doc.Settings.Language = "en-GB";
-        FacturX.Apply(doc, InvoiceXml(), FacturXProfile.Basic);
+        FacturX.Apply(doc, InvoiceXml());
         Assert.Equal(PdfAConformance.PdfA3a, doc.Settings.Conformance);
         doc.Dispose();
     }

@@ -9,12 +9,18 @@ namespace BonniePDF;
 /// an associated file with the <c>Data</c> relationship, and registers the
 /// <c>fx:</c> XMP metadata block.
 ///
+/// <para>Before changing the document it checks only what the Factur-X claim
+/// depends on: the XML is well-formed UTF-8 CII (no DOCTYPE) and declares a
+/// recognised profile identifier (BT-24) that matches the stated profile. Any
+/// failure throws a <see cref="FacturXException"/> and leaves the document
+/// unchanged.</para>
+///
 /// <para><b>BonniePDF does not generate or validate the invoice XML.</b> The
 /// XML is a caller input — produced by an ERP or a dedicated e-invoicing
-/// toolchain (Mustangproject, the Factur-X reference libraries, …). The
-/// profile here is metadata describing that XML, not a schema the engine
-/// enforces. Validate generated files against veraPDF (PDF/A-3) <i>and</i> an
-/// independent ZUGFeRD validator before claiming conformance.</para>
+/// toolchain (Mustangproject, the Factur-X reference libraries, …). The check
+/// above does not read the CII schema, totals or VAT rules. Validate generated
+/// files against veraPDF (PDF/A-3) <i>and</i> an independent ZUGFeRD validator
+/// before claiming conformance.</para>
 /// </summary>
 public static class FacturX
 {
@@ -28,13 +34,18 @@ public static class FacturX
     /// </summary>
     /// <param name="document">The document to turn into an e-invoice.</param>
     /// <param name="invoiceXml">The caller-supplied invoice XML bytes (CII / UN-CEFACT).</param>
-    /// <param name="profile">The semantic profile the XML conforms to. Default EN 16931.</param>
+    /// <param name="profile">
+    /// The semantic profile the XML conforms to. When <c>null</c>, it is read from the XML's profile
+    /// identifier (BT-24). When given, it must match that identifier, or a
+    /// <see cref="FacturXException"/> with code <c>profile-mismatch</c> is thrown.
+    /// </param>
+    /// <exception cref="FacturXException">The XML is not well-formed UTF-8 CII, or its profile identifier is missing, unrecognised or differs from <paramref name="profile"/>.</exception>
     /// <param name="fileName">Embedded file name. Default <c>factur-x.xml</c>; must match the XMP.</param>
     /// <param name="documentType">The <c>fx:DocumentType</c> value. Default <c>"INVOICE"</c>.</param>
     public static Document Apply(
         Document document,
         byte[] invoiceXml,
-        FacturXProfile profile = FacturXProfile.En16931,
+        FacturXProfile? profile = null,
         string fileName = DefaultFileName,
         string documentType = "INVOICE")
     {
@@ -43,6 +54,15 @@ public static class FacturX
             throw new ArgumentException("Invoice XML cannot be null or empty.", nameof(invoiceXml));
         if (string.IsNullOrEmpty(fileName))
             throw new ArgumentException("File name cannot be null or empty.", nameof(fileName));
+
+        var declared = FacturXXmlCheck.Check(invoiceXml);
+        if (profile is { } stated && stated != declared.Profile)
+        {
+            throw new FacturXException(
+                "profile-mismatch",
+                $"Factur-X profile {stated.ToConformanceLevel()} was requested, but the invoice XML declares " +
+                $"{declared.Profile.ToConformanceLevel()} (\"{declared.Guideline}\")");
+        }
 
         // Factur-X is defined on PDF/A-3. Force the "b" level unless the caller
         // already selected a PDF/A-3 level (so an explicit tagged 3a choice
@@ -63,7 +83,7 @@ public static class FacturX
         {
             DocumentType = documentType,
             DocumentFileName = fileName,
-            ConformanceLevel = profile.ToConformanceLevel(),
+            ConformanceLevel = declared.Profile.ToConformanceLevel(),
         };
 
         return document;

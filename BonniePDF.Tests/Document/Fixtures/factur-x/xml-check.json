@@ -1,0 +1,320 @@
+{
+  "_fixture": {
+    "id": "factur-x/xml-check",
+    "status": "adopted",
+    "description": "Spec 04 §11.4. Each case is passed to applyFacturX / FacturX.Apply on a fresh document. `xml` is literal UTF-8 text (prefixed with a UTF-8 byte order mark when `prefixBom` is true); `bytes` is base64; `file` names a file in this folder. `statedProfile` is the profile the caller passes (canonical token, 06 §4A style); when absent the caller passes none. Accepted cases MUST bind and record `conformanceLevel` as fx:ConformanceLevel, the profile being `profile`. Rejected cases MUST throw FacturXError / FacturXException with `code` and leave the document unchanged (conformance None, no attachment, no facturX settings).",
+    "profiles": {
+      "minimum": "MINIMUM",
+      "basicWl": "BASIC WL",
+      "basic": "BASIC",
+      "en16931": "EN 16931",
+      "extended": "EXTENDED",
+      "xRechnung": "XRECHNUNG"
+    }
+  },
+  "accepted": [
+    {
+      "id": "shared-en16931-file",
+      "file": "en16931-invoice.xml",
+      "profile": "en16931",
+      "conformanceLevel": "EN 16931",
+      "why": "The shared invoice fixture, profile inferred."
+    },
+    {
+      "id": "shared-en16931-file-stated",
+      "file": "en16931-invoice.xml",
+      "statedProfile": "en16931",
+      "profile": "en16931",
+      "conformanceLevel": "EN 16931"
+    },
+    {
+      "id": "minimum",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:factur-x.eu:1p0:minimum</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "profile": "minimum",
+      "conformanceLevel": "MINIMUM"
+    },
+    {
+      "id": "basic-wl",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:factur-x.eu:1p0:basicwl</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "profile": "basicWl",
+      "conformanceLevel": "BASIC WL"
+    },
+    {
+      "id": "basic",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "statedProfile": "basic",
+      "profile": "basic",
+      "conformanceLevel": "BASIC"
+    },
+    {
+      "id": "extended",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "profile": "extended",
+      "conformanceLevel": "EXTENDED"
+    },
+    {
+      "id": "xrechnung-3-0",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "profile": "xRechnung",
+      "conformanceLevel": "XRECHNUNG"
+    },
+    {
+      "id": "xrechnung-2-3",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_2.3</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "statedProfile": "xRechnung",
+      "profile": "xRechnung",
+      "conformanceLevel": "XRECHNUNG"
+    },
+    {
+      "id": "no-declaration",
+      "xml": "<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "profile": "en16931",
+      "conformanceLevel": "EN 16931"
+    },
+    {
+      "id": "utf8-bom",
+      "prefixBom": true,
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "profile": "en16931",
+      "conformanceLevel": "EN 16931"
+    },
+    {
+      "id": "declared-lowercase-utf8",
+      "xml": "<?xml version='1.0' encoding='utf-8'?><rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "profile": "en16931",
+      "conformanceLevel": "EN 16931"
+    },
+    {
+      "id": "default-namespace-root",
+      "xml": "<CrossIndustryInvoice xmlns=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:r=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><ExchangedDocumentContext><r:GuidelineSpecifiedDocumentContextParameter><r:ID>urn:cen.eu:en16931:2017</r:ID></r:GuidelineSpecifiedDocumentContextParameter></ExchangedDocumentContext></CrossIndustryInvoice>",
+      "profile": "en16931",
+      "conformanceLevel": "EN 16931",
+      "why": "The root namespace may be the default namespace."
+    },
+    {
+      "id": "id-whitespace-and-cdata",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>\n  urn:cen.eu:<![CDATA[en16931]]>:2017\t</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "profile": "en16931",
+      "conformanceLevel": "EN 16931",
+      "why": "Text and CDATA concatenate, then XML whitespace is trimmed."
+    },
+    {
+      "id": "id-entity-reference",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017&#x23;compliant&#35;urn:factur-x.eu:1p0:basic</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "profile": "basic",
+      "conformanceLevel": "BASIC",
+      "why": "References resolve before matching."
+    },
+    {
+      "id": "comments-and-pis",
+      "xml": "<!-- before --><?pi data?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>\n<!-- after -->\n",
+      "profile": "en16931",
+      "conformanceLevel": "EN 16931"
+    },
+    {
+      "id": "first-id-wins",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:factur-x.eu:1p0:minimum</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "profile": "en16931",
+      "conformanceLevel": "EN 16931",
+      "why": "Only the first matching ID counts; a nested ID elsewhere is not BT-24."
+    },
+    {
+      "id": "gt-and-quote-in-attribute",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><ram:Note a=\"x > y\" b='say \"hi\"'/></rsm:CrossIndustryInvoice>",
+      "profile": "en16931",
+      "conformanceLevel": "EN 16931",
+      "why": "> and the other quote character are legal in attribute values."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "utf16-bom",
+      "bytes": "//48AD8AeABtAGwAIAB2AGUAcgBzAGkAbwBuAD0AIgAxAC4AMAAiACAAZQBuAGMAbwBkAGkAbgBnAD0AIgBVAFQARgAtADgAIgA/AD4ACgA8AHIAcwBtADoAQwByAG8AcwBzAEkAbgBkAHUAcwB0AHIAeQBJAG4AdgBvAGkAYwBlACAAeABtAGwAbgBzADoAcgBzAG0APQAiAHUAcgBuADoAdQBuADoAdQBuAGUAYwBlADoAdQBuAGMAZQBmAGEAYwB0ADoAZABhAHQAYQA6AHMAdABhAG4AZABhAHIAZAA6AEMAcgBvAHMAcwBJAG4AZAB1AHMAdAByAHkASQBuAHYAbwBpAGMAZQA6ADEAMAAwACIAIAB4AG0AbABuAHMAOgByAGEAbQA9ACIAdQByAG4AOgB1AG4AOgB1AG4AZQBjAGUAOgB1AG4AYwBlAGYAYQBjAHQAOgBkAGEAdABhADoAcwB0AGEAbgBkAGEAcgBkADoAUgBlAHUAcwBhAGIAbABlAEEAZwBnAHIAZQBnAGEAdABlAEIAdQBzAGkAbgBlAHMAcwBJAG4AZgBvAHIAbQBhAHQAaQBvAG4ARQBuAHQAaQB0AHkAOgAxADAAMAAiAD4APAByAHMAbQA6AEUAeABjAGgAYQBuAGcAZQBkAEQAbwBjAHUAbQBlAG4AdABDAG8AbgB0AGUAeAB0AD4APAByAGEAbQA6AEcAdQBpAGQAZQBsAGkAbgBlAFMAcABlAGMAaQBmAGkAZQBkAEQAbwBjAHUAbQBlAG4AdABDAG8AbgB0AGUAeAB0AFAAYQByAGEAbQBlAHQAZQByAD4APAByAGEAbQA6AEkARAA+AHUAcgBuADoAYwBlAG4ALgBlAHUAOgBlAG4AMQA2ADkAMwAxADoAMgAwADEANwA8AC8AcgBhAG0AOgBJAEQAPgA8AC8AcgBhAG0AOgBHAHUAaQBkAGUAbABpAG4AZQBTAHAAZQBjAGkAZgBpAGUAZABEAG8AYwB1AG0AZQBuAHQAQwBvAG4AdABlAHgAdABQAGEAcgBhAG0AZQB0AGUAcgA+ADwALwByAHMAbQA6AEUAeABjAGgAYQBuAGcAZQBkAEQAbwBjAHUAbQBlAG4AdABDAG8AbgB0AGUAeAB0AD4APAAvAHIAcwBtADoAQwByAG8AcwBzAEkAbgBkAHUAcwB0AHIAeQBJAG4AdgBvAGkAYwBlAD4A",
+      "code": "unsupported-encoding"
+    },
+    {
+      "id": "declared-latin1",
+      "xml": "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "code": "unsupported-encoding"
+    },
+    {
+      "id": "invalid-utf8",
+      "bytes": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHJzbTpDcm9zc0luZHVzdHJ5SW52/29pY2UgeG1sbnM6cnNtPSJ1cm46dW46dW5lY2U6dW5jZWZhY3Q6ZGF0YTpzdGFuZGFyZDpDcm9zc0luZHVzdHJ5SW52b2ljZToxMDAiIHhtbG5zOnJhbT0idXJuOnVuOnVuZWNlOnVuY2VmYWN0OmRhdGE6c3RhbmRhcmQ6UmV1c2FibGVBZ2dyZWdhdGVCdXNpbmVzc0luZm9ybWF0aW9uRW50aXR5OjEwMCI+PHJzbTpFeGNoYW5nZWREb2N1bWVudENvbnRleHQ+PHJhbTpHdWlkZWxpbmVTcGVjaWZpZWREb2N1bWVudENvbnRleHRQYXJhbWV0ZXI+PHJhbTpJRD51cm46Y2VuLmV1OmVuMTY5MzE6MjAxNzwvcmFtOklEPjwvcmFtOkd1aWRlbGluZVNwZWNpZmllZERvY3VtZW50Q29udGV4dFBhcmFtZXRlcj48L3JzbTpFeGNoYW5nZWREb2N1bWVudENvbnRleHQ+PC9yc206Q3Jvc3NJbmR1c3RyeUludm9pY2U+",
+      "code": "malformed-xml",
+      "why": "A 0xFF byte inside the root start tag."
+    },
+    {
+      "id": "doctype",
+      "xml": "<?xml version=\"1.0\"?>\n<!DOCTYPE x [<!ENTITY a \"b\">]>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "code": "doctype-forbidden"
+    },
+    {
+      "id": "unclosed-root",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "mismatched-end-tag",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:Id></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "two-roots",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice><x/>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "text-after-root",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>trailing",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "late-xml-declaration",
+      "xml": "\n<?xml version=\"1.0\"?><rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "unbound-prefix",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><cbc:Note/></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "duplicate-attribute",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><ram:Note a=\"1\" a=\"2\"/></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "lt-in-attribute",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><ram:Note a=\"1<2\"/></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "attribute-without-value",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><ram:Note checked/></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "attributes-without-space",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><ram:Note a=\"1\"b=\"2\"/></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "unknown-entity",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><ram:Note>&nbsp;</ram:Note></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "bare-ampersand",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><ram:Note>A & B</ram:Note></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "control-character",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><ram:Note>\u0001</ram:Note></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "control-character-reference",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><ram:Note>&#1;</ram:Note></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "unterminated-comment",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><!-- no end</rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "empty-prefix-declaration",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><ram:Note xmlns:p=\"\"/></rsm:CrossIndustryInvoice>",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "not-xml",
+      "xml": "{\"invoice\": 42}",
+      "code": "malformed-xml"
+    },
+    {
+      "id": "ubl-invoice",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Invoice xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:Invoice-2\"/>",
+      "code": "not-cii"
+    },
+    {
+      "id": "wrong-root-namespace",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:example:not-cii\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "code": "not-cii"
+    },
+    {
+      "id": "unprefixed-root-no-namespace",
+      "xml": "<CrossIndustryInvoice><total>42.00</total></CrossIndustryInvoice>",
+      "code": "not-cii",
+      "why": "The pre-fix shared test stub: right local name, no namespace."
+    },
+    {
+      "id": "no-guideline",
+      "xml": "<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocument/></rsm:CrossIndustryInvoice>",
+      "code": "guideline-missing"
+    },
+    {
+      "id": "empty-guideline",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>  </ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "code": "guideline-missing"
+    },
+    {
+      "id": "guideline-wrong-namespace",
+      "xml": "<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><rsm:ID>urn:cen.eu:en16931:2017</rsm:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "code": "guideline-missing",
+      "why": "The ID is in the root namespace, not the ram namespace."
+    },
+    {
+      "id": "guideline-not-under-root",
+      "xml": "<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:Wrapper><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:Wrapper></rsm:CrossIndustryInvoice>",
+      "code": "guideline-missing",
+      "why": "The context must be a direct child of the root."
+    },
+    {
+      "id": "zugferd-2-0",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:zugferd.de:2p0:basic</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "code": "guideline-unrecognized"
+    },
+    {
+      "id": "xrechnung-no-version",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "code": "guideline-unrecognized"
+    },
+    {
+      "id": "xrechnung-extension",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017#conformant#urn:xeinkauf.de:kosit:extension:xrechnung_3.0</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "code": "guideline-unrecognized"
+    },
+    {
+      "id": "case-differs",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>URN:CEN.EU:EN16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "code": "guideline-unrecognized"
+    },
+    {
+      "id": "basic-labelled-en16931",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "statedProfile": "en16931",
+      "code": "profile-mismatch",
+      "why": "The case the check exists for."
+    },
+    {
+      "id": "en16931-labelled-xrechnung",
+      "file": "en16931-invoice.xml",
+      "statedProfile": "xRechnung",
+      "code": "profile-mismatch"
+    },
+    {
+      "id": "order-malformed-before-root",
+      "xml": "<Invoice xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:Invoice-2\">",
+      "code": "malformed-xml",
+      "why": "Well-formedness is checked before the root."
+    },
+    {
+      "id": "order-root-before-guideline",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rsm:CrossIndustryInvoice xmlns:rsm=\"urn:example:not-cii\" xmlns:ram=\"urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100\"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext></rsm:CrossIndustryInvoice>",
+      "statedProfile": "basic",
+      "code": "not-cii"
+    }
+  ]
+}
