@@ -15,6 +15,10 @@ at the same version are the same library.
 
 - **Factur-X:** `FacturX.Apply` now checks the invoice XML before binding it. It must be well-formed UTF-8 CII with no DOCTYPE, and its profile identifier (BT-24) must be a recognised Factur-X / ZUGFeRD 2.1+ profile that matches `profile`. On failure it throws a `FacturXException` carrying a `Code` and leaves the document unchanged. `profile` is now `FacturXProfile?` and defaults to `null`, which reads the profile from the XML instead of defaulting to EN 16931. This is not business-rule validation: totals, VAT rules and the CII schema are still not checked.
 
+### Fixes
+
+- **Compliance preflight and layout snapshots:** every chart is now a figure, so preflight reports `figure-missing-alt` for every chart type. The 26 chart types added after the original 14, such as `FunnelChart`, `GanttChart`, `TreemapChart` and `SankeyChart`, were skipped. They are not Document Definition types yet.
+
 ## 2026.11.23
 
 Status: Released

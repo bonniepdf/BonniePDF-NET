@@ -359,12 +359,10 @@ internal sealed class LayoutRecorder
         return element is ICaptureMetadata meta ? meta.CaptureName : null;
     }
 
+    /// <summary>Figure-like elements that are not charts. Every chart (any <see cref="ChartBase"/>) is figure-like too.</summary>
     private static readonly HashSet<string> ImageLikeTypes = new()
     {
-        "Image", "Svg", "QRCode", "Barcode", "DataMatrix", "CanvasElement",
-        "BarChart", "GroupedBarChart", "LineChart", "AreaChart", "PieChart",
-        "DotPlotChart", "LollipopChart", "StackedBarChart", "StackedAreaChart", "ComboChart",
-        "WaterfallChart", "ScatterChart", "BulletChart", "HeatmapChart", "ChartElement", "GroupedBarChartElement"
+        "Image", "Svg", "QRCode", "Barcode", "DataMatrix", "CanvasElement", "ChartElement", "GroupedBarChartElement"
     };
 
     /// <summary>
@@ -402,7 +400,7 @@ internal sealed class LayoutRecorder
             Alt = alt,
             Decorative = decorative,
             HeadingLevel = headingLevel,
-            ImageLike = ImageLikeTypes.Contains(type) ? true : (bool?)null
+            ImageLike = ImageLikeTypes.Contains(type) || element is ChartBase ? true : (bool?)null
         };
     }
 

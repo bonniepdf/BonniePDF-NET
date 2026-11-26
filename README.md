@@ -126,7 +126,7 @@ You can pass text directly to `Document.Add`, `Page.Add` and stack `Add` methods
 | Layout | Automatic page flow, stacks, weighted rows, grids, containers, layers, clipping, rounded corners, rotation, headers, footers and page backgrounds |
 | Text | Standard PDF fonts, embedded TrueType fonts with subsetting and static CFF OpenType (.otf) fonts, Unicode, RTL (Arabic and Hebrew), colour emoji, rich text, alignment, decoration and fallback fonts |
 | Tables and lists | Weighted columns, styled cells, repeating headers, ordered/unordered lists and nested content |
-| Charts | Bar, grouped bar, line, area, pie, lollipop and dot-plot charts rendered as PDF vectors or exported as SVG |
+| Charts | 40 chart types, from bar, line and pie charts to Gantt, treemap and Sankey, rendered as PDF vectors or exported as SVG |
 | Images and codes | JPEG, PNG with alpha, SVG drawn as vectors, contain/cover/fill modes, image masking, QR, Data Matrix and linear barcodes |
 | Standards | PDF/A-1 through PDF/A-4 and PDF/A-4f, PDF/UA-1 and PDF/UA-2 tagging, XMP metadata, output intents and compliance preflight |
 | Security and exchange | AES-256 encryption, permissions, attachments and Factur-X/ZUGFeRD e-invoices |

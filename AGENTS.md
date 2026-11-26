@@ -81,6 +81,11 @@ sibling checkout. Change the authoritative source and regenerate both language
 bindings. Layout/tagging bindings preserve chart APIs and document output, and
 the generated files add no runtime dependency.
 
+`BonniePDF.Tests/Content/EveryChartTests.cs` renders the generated
+`Content/Fixtures/chart-types.json` (one case per chart type) as tagged figures,
+checks preflight, and lists the chart types Document Definition does not describe
+yet. Recognise a chart by `ChartBase`, never by a list of chart names.
+
 Driven with `dotnet` from this folder.
 
 ```bash
