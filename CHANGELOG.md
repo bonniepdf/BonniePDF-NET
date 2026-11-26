@@ -18,6 +18,7 @@ at the same version are the same library.
 ### Fixes
 
 - **Compliance preflight and layout snapshots:** every chart is now a figure, so preflight reports `figure-missing-alt` for every chart type. The 26 chart types added after the original 14, such as `FunnelChart`, `GanttChart`, `TreemapChart` and `SankeyChart`, were skipped. They are not Document Definition types yet.
+- **Document Definition:** `ToDefinition` reports chart options that Document Definition 1.0 cannot hold, such as `Pie3d`, `ExplodedSlices`, a data point's `Color`, a logarithmic axis or the `executive`, `vivid`, `pastel` and `midnight` themes, as `unrepresentable` instead of leaving them out without a word. A document that used to write with those options lost now fails by default; with `DefinitionUnrepresentable.Drop` the charts are written without them and each one is noted.
 
 ## 2026.11.23
 

@@ -614,4 +614,62 @@ public partial class DefinitionWriterTests
             ["/pages/0/content/0 unrepresentable", "/pages/0/content/1 unrepresentable", "/pages/0/content/2 unrepresentable"],
             error.Issues.Select(i => $"{i.Path} {i.Code}"), StringComparer.Ordinal);
     }
+
+    // ── chart options the format does not describe ───────────────────────────
+
+    private static JsonObject ChartOptionsFixture() =>
+        JsonNode.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Definition", "Fixtures", "unrepresentable", "chart-options.json")))!
+            .AsObject()["_expectNotes"]!.AsObject();
+
+    private static BonniePDF.Document ChartOptionsRecipe()
+    {
+        var doc = new BonniePDF.Document();
+        doc.Add(new TextBlock { Text = "Kept" });
+        doc.Add(new PieChart(new ChartData
+        {
+            Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 1 }, new() { Label = "B", Value = 2 }] }],
+        })
+        { ExplodedSlices = [0], Pie3d = new ChartPie3d { Tilt = 50 } });
+        doc.Add(new BarChart(new ChartData
+        {
+            Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 3, Color = Color.FromHex("#e11d48") }] }],
+        }));
+        doc.Add(new LineChart(new ChartData
+        {
+            YAxis = new AxisOptions { Scale = "log" },
+            Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 1 }, new() { Label = "B", Value = 10 }] }],
+        }));
+        doc.Add(new BarChart(new ChartData { Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 1 }] }] }) { Theme = "executive" });
+        return doc;
+    }
+
+    private static string[] PathsAndCodes(JsonNode? list) =>
+        [.. list!.AsArray().Select(i => $"{i!["path"]!.GetValue<string>()} {i["code"]!.GetValue<string>()}")];
+
+    [Fact]
+    public void ReportsEachChartOptionTheFormatDoesNotDescribe()
+    {
+        using BonniePDF.Document doc = ChartOptionsRecipe();
+        DefinitionException error = Assert.Throws<DefinitionException>(() => doc.ToDefinition());
+        Assert.Equal(PathsAndCodes(ChartOptionsFixture()["strict"]!["issues"]), error.Issues.Select(i => $"{i.Path} {i.Code}"), StringComparer.Ordinal);
+    }
+
+    [Fact]
+    public void WritesTheChartsWithoutThemOnRequestAndNotesEachOne()
+    {
+        using BonniePDF.Document doc = ChartOptionsRecipe();
+        JsonObject expected = ChartOptionsFixture()["drop"]!.AsObject();
+        DefinitionWriteResult result = doc.ToDefinition(new DefinitionWriteOptions { OnUnrepresentable = DefinitionUnrepresentable.Drop });
+        Assert.Equal(PathsAndCodes(expected["notes"]), result.Notes.Select(n => $"{n.Path} {n.Code}"), StringComparer.Ordinal);
+        Assert.True(JsonNode.DeepEquals(expected["definition"], JsonNode.Parse(result.ToJson())), result.ToJson());
+    }
+
+    [Fact]
+    public void IgnoresChartOptionsAtTheirDefaultsAndOnesThatDoNotChangeTheOutput()
+    {
+        using var doc = new BonniePDF.Document();
+        doc.Add(new PieChart(new ChartData { Series = [new ChartSeries { DataPoints = [new() { Label = "A", Value = 1 }] }] })
+        { ExplodedSlices = [], CaptureName = "share" });
+        Assert.NotNull(doc.ToDefinition());
+    }
 }

@@ -293,7 +293,7 @@ internal sealed partial class DefinitionWriter
     }
 
     /// <summary>Converts one stored value to its wire form; null when the value is unset.</summary>
-    private JsonNode? Wire(string kind, object? value)
+    private JsonNode? Wire(string kind, object? value, string? at = null)
     {
         if (value is null) return null;
         int colon = kind.IndexOf(':', StringComparison.Ordinal);
@@ -339,7 +339,7 @@ internal sealed partial class DefinitionWriter
             case "array":
             {
                 var array = new JsonArray();
-                foreach (object? item in (IEnumerable)value) array.Add(Wire(arg, item));
+                foreach (object? item in (IEnumerable)value) array.Add(Wire(arg, item, at is null ? null : $"{at}/{array.Count}"));
                 return array;
             }
             case "fontFeatures":
@@ -355,7 +355,7 @@ internal sealed partial class DefinitionWriter
                 return map;
             }
             case "object":
-                return Shape(value, ElementDescription.Shape(arg), Blank(value.GetType()), []);
+                return Shape(value, ElementDescription.Shape(arg), Blank(value.GetType()), [], arg, at);
             default:
                 return null;
         }
@@ -373,8 +373,12 @@ internal sealed partial class DefinitionWriter
         }
     }
 
-    /// <summary>A nested value object, writing only what differs from a fresh instance. Empty when nothing does.</summary>
-    private JsonObject Shape(object value, ShapeSpec spec, object? blank, HashSet<string> skip)
+    /// <summary>
+    /// A nested value object, writing only what differs from a fresh instance. Empty when nothing does. Given its
+    /// shape <paramref name="name"/> and its path <paramref name="at"/>, a chart value also reports the options it holds
+    /// that the shape does not describe.
+    /// </summary>
+    private JsonObject Shape(object value, ShapeSpec spec, object? blank, HashSet<string> skip, string? name = null, string? at = null)
     {
         var result = new JsonObject();
         Type type = value.GetType();
@@ -383,12 +387,86 @@ internal sealed partial class DefinitionWriter
             if (skip.Contains(key)) continue;
             PropertyInfo? property = DefinitionReader.FindProperty(type, key);
             if (property is null) continue;
-            JsonNode? wire = Wire(keySpec.Kind, property.GetValue(value));
-            if (wire is null) continue;
+            string? keyAt = at is null ? null : $"{at}/{EscapeKey(key)}";
+            JsonNode? wire = Wire(keySpec.Kind, property.GetValue(value), keyAt);
+            if (wire is null)
+            {
+                if (keyAt is not null) Untokened(keySpec.Kind, property.GetValue(value), blank is null ? null : property.GetValue(blank), keyAt, null);
+                continue;
+            }
             if (!keySpec.Required && blank is not null && Same(wire, Wire(keySpec.Kind, property.GetValue(blank)))) continue;
             result[key] = wire;
         }
+        if (at is not null && name is not null && CheckedShapes.Contains(name)) Undescribed(value, blank, ElementDescription.KeysOf(spec), skip, at, null);
         return result;
+    }
+
+    /// <summary>The chart values nested in a chart whose options are checked against their shape (15 §8.2).</summary>
+    private static readonly HashSet<string> CheckedShapes = new(StringComparer.Ordinal)
+    {
+        "Series", "DataPoint", "SeriesStyle", "Axis", "ChartBarStyle", "ChartLinearGradient", "ChartReference", "BulletRange",
+    };
+
+    /// <summary>
+    /// Chart options that are never reported: <c>captureName</c> does not change the rendered output, <c>data</c> is
+    /// checked through its shapes, and a <c>customTheme</c> is reported at <c>theme</c>.
+    /// </summary>
+    private static readonly HashSet<string> UncheckedChartOptions = new(StringComparer.Ordinal) { "captureName", "data", "customTheme" };
+
+    private static string EscapeKey(string key) =>
+        key.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
+
+    /// <summary>
+    /// Reports an enumeration value that has no token in this version, such as a theme preset added after it
+    /// (15 §8.2). Left at its default it is not reported: leaving it out changes nothing.
+    /// </summary>
+    private void Untokened(string kind, object? value, object? blank, string at, string? id)
+    {
+        if (!kind.StartsWith("enum:", StringComparison.Ordinal) || value is null || SameValue(value, blank, 0)) return;
+        string version = $"{D.Definition.Version}.{D.Definition.MinorVersion}";
+        string shown = value is string text ? $"\"{text}\"" : value.ToString() ?? "";
+        Cannot(at, id, $"{shown} is not a {kind[5..]} token in Document Definition {version}.");
+    }
+
+    /// <summary>
+    /// Reports each option of a chart value (a public settable property) that the description leaves out and that
+    /// differs from a fresh instance's, in ordinal key order (15 §8.2). Writing the value without it would render differently.
+    /// </summary>
+    private void Undescribed(object value, object? blank, Dictionary<string, KeySpec> described, HashSet<string> skip, string at, string? id)
+    {
+        IEnumerable<PropertyInfo> options = value.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => p.GetIndexParameters().Length == 0 && p.GetMethod?.IsPublic == true && p.SetMethod?.IsPublic == true);
+        string version = $"{D.Definition.Version}.{D.Definition.MinorVersion}";
+        foreach ((string key, PropertyInfo property) in options
+            .Select(p => (Key: char.ToLowerInvariant(p.Name[0]) + p.Name[1..], Property: p))
+            .OrderBy(o => o.Key, StringComparer.Ordinal))
+        {
+            if (described.ContainsKey(key) || skip.Contains(key)) continue;
+            if (SameValue(property.GetValue(value), blank is null ? null : property.GetValue(blank), 0)) continue;
+            Cannot($"{at}/{EscapeKey(key)}", id, $"`{key}` is not part of Document Definition {version}.");
+        }
+    }
+
+    /// <summary>Structural equality of two option values: scalars by value, sequences item by item, objects property by property.</summary>
+    private static bool SameValue(object? a, object? b, int depth)
+    {
+        if (ReferenceEquals(a, b)) return true;
+        if (a is null || b is null) return false;
+        Type type = a.GetType();
+        if (type != b.GetType()) return false;
+        if (a is string || type.IsValueType) return a.Equals(b);
+        if (a is IEnumerable first && b is IEnumerable second)
+        {
+            List<object?> left = [.. first.Cast<object?>()], right = [.. second.Cast<object?>()];
+            return left.Count == right.Count && left.Zip(right).All(pair => SameValue(pair.First, pair.Second, depth + 1));
+        }
+        if (depth > 8) return true;
+        foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (property.GetIndexParameters().Length > 0 || property.GetMethod?.IsPublic != true) continue;
+            if (!SameValue(property.GetValue(a), property.GetValue(b), depth + 1)) return false;
+        }
+        return true;
     }
 
     private static bool Same(JsonNode? a, JsonNode? b) => JsonNode.DeepEquals(a, b);
@@ -434,7 +512,7 @@ internal sealed partial class DefinitionWriter
 
         foreach ((string key, KeySpec keySpec) in ElementDescription.KeysOf(spec))
         {
-            string at = $"{path}/{key.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal)}";
+            string at = $"{path}/{EscapeKey(key)}";
             string head = keySpec.Kind.Split(':')[0];
 
             Slot slot = WriteSlot(type, key, element, at, id);
@@ -484,12 +562,17 @@ internal sealed partial class DefinitionWriter
 
             PropertyInfo property = DefinitionReader.FindProperty(clr, key)
                 ?? throw new InvalidOperationException($"{clr.Name} has no property for the definition key `{key}`.");
-            JsonNode? wire = Wire(keySpec.Kind, property.GetValue(element));
-            if (wire is null) continue;
+            JsonNode? wire = Wire(keySpec.Kind, property.GetValue(element), at);
+            if (wire is null)
+            {
+                Untokened(keySpec.Kind, property.GetValue(element), property.GetValue(blank), at, id);
+                continue;
+            }
             if (!keySpec.Required && !setByAuthor && Same(wire, Wire(keySpec.Kind, property.GetValue(blank)))) continue;
             if (wire is JsonObject { Count: 0 } && string.Equals(head, "object", StringComparison.Ordinal)) continue;
             node[key] = wire;
         }
+        if (element is ChartBase) Undescribed(element, blank, ElementDescription.KeysOf(spec), UncheckedChartOptions, path, id);
         return node;
     }
 
@@ -632,7 +715,7 @@ internal sealed partial class DefinitionWriter
                 or "LineChart.data" or "AreaChart.data" or "StackedAreaChart.data"
                 or "ComboChart.data" or "WaterfallChart.data" or "ScatterChart.data"
                 or "DotPlotChart.data" or "LollipopChart.data" or "PieChart.data":
-                return Slot.Write(ChartData((ChartBase)element));
+                return Slot.Write(ChartData((ChartBase)element, at));
             default:
                 if (element is ChartBase chart && string.Equals(key, "theme", StringComparison.Ordinal) && chart.CustomTheme is not null)
                 {
@@ -643,12 +726,13 @@ internal sealed partial class DefinitionWriter
         }
     }
 
-    private JsonObject ChartData(ChartBase chart)
+    private JsonObject ChartData(ChartBase chart, string at)
     {
         var series = new JsonArray();
         ShapeSpec seriesSpec = D.Shapes["Series"];
         foreach (ChartSeries s in chart.Data.Series)
         {
+            string seriesAt = $"{at}/series/{series.Count}";
             var blankSeries = new ChartSeries();
             var node = new JsonObject();
             foreach ((string key, KeySpec keySpec) in seriesSpec.Keys)
@@ -660,7 +744,7 @@ internal sealed partial class DefinitionWriter
                         var points = new JsonArray();
                         foreach (ChartDataPoint point in s.DataPoints)
                         {
-                            JsonObject pt = Shape(point, D.Shapes["DataPoint"], new ChartDataPoint(), []);
+                            JsonObject pt = Shape(point, D.Shapes["DataPoint"], new ChartDataPoint(), [], "DataPoint", $"{seriesAt}/dataPoints/{points.Count}");
                             if ((point.Kind is "delta" || point.HasExplicitValue) && !pt.ContainsKey("value"))
                                 pt["value"] = Number(point.Value);
                             points.Add(pt);
@@ -671,7 +755,7 @@ internal sealed partial class DefinitionWriter
                     case "style":
                     {
                         if (s.Style is null) break;
-                        JsonObject style = Shape(s.Style, D.Shapes["SeriesStyle"], new ChartSeriesStyle(), []);
+                        JsonObject style = Shape(s.Style, D.Shapes["SeriesStyle"], new ChartSeriesStyle(), [], "SeriesStyle", $"{seriesAt}/style");
                         if (style.Count > 0) node[key] = style;
                         break;
                     }
@@ -684,6 +768,7 @@ internal sealed partial class DefinitionWriter
                     }
                 }
             }
+            Undescribed(s, blankSeries, ElementDescription.KeysOf(seriesSpec), [], seriesAt, null);
             series.Add(node);
         }
         return new JsonObject { ["series"] = series };

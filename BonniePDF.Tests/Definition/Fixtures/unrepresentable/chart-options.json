@@ -1,0 +1,231 @@
+{
+  "_fixture": {
+    "id": "document-definition/unrepresentable/chart-options",
+    "description": "A DOCUMENT (not a definition) whose charts hold options Document Definition 1.0 does not describe: a tilted pie with an exploded slice, a bar chart data point with its own colour, a line chart on a logarithmic axis, and a bar chart in the executive theme, a preset 1.0 has no token for. Writing them without those options would render differently, so toDefinition is strict by default: it fails, listing each option at its path. With onUnrepresentable 'drop' it writes the charts without those options and returns one dropped note each. Each core builds the document from recipe in its own idiom."
+  },
+  "recipe": {
+    "pages": [
+      {
+        "content": [
+          {
+            "type": "TextBlock",
+            "text": "Kept"
+          },
+          {
+            "type": "PieChart",
+            "data": {
+              "series": [
+                {
+                  "dataPoints": [
+                    {
+                      "label": "A",
+                      "value": 1
+                    },
+                    {
+                      "label": "B",
+                      "value": 2
+                    }
+                  ]
+                }
+              ]
+            },
+            "explodedSlices": [
+              0
+            ],
+            "pie3d": {
+              "tilt": 50
+            }
+          },
+          {
+            "type": "BarChart",
+            "data": {
+              "series": [
+                {
+                  "dataPoints": [
+                    {
+                      "label": "A",
+                      "value": 3,
+                      "color": "#e11d48"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "LineChart",
+            "data": {
+              "yAxis": {
+                "scale": "log"
+              },
+              "series": [
+                {
+                  "dataPoints": [
+                    {
+                      "label": "A",
+                      "value": 1
+                    },
+                    {
+                      "label": "B",
+                      "value": 10
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "BarChart",
+            "theme": "executive",
+            "data": {
+              "series": [
+                {
+                  "dataPoints": [
+                    {
+                      "label": "A",
+                      "value": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "_expectNotes": {
+    "strict": {
+      "fails": true,
+      "issues": [
+        {
+          "path": "/pages/0/content/1/explodedSlices",
+          "code": "unrepresentable"
+        },
+        {
+          "path": "/pages/0/content/1/pie3d",
+          "code": "unrepresentable"
+        },
+        {
+          "path": "/pages/0/content/2/data/series/0/dataPoints/0/color",
+          "code": "unrepresentable"
+        },
+        {
+          "path": "/pages/0/content/3/yAxis/scale",
+          "code": "unrepresentable"
+        },
+        {
+          "path": "/pages/0/content/4/theme",
+          "code": "unrepresentable"
+        }
+      ]
+    },
+    "drop": {
+      "fails": false,
+      "notes": [
+        {
+          "path": "/pages/0/content/1/explodedSlices",
+          "code": "dropped"
+        },
+        {
+          "path": "/pages/0/content/1/pie3d",
+          "code": "dropped"
+        },
+        {
+          "path": "/pages/0/content/2/data/series/0/dataPoints/0/color",
+          "code": "dropped"
+        },
+        {
+          "path": "/pages/0/content/3/yAxis/scale",
+          "code": "dropped"
+        },
+        {
+          "path": "/pages/0/content/4/theme",
+          "code": "dropped"
+        }
+      ],
+      "definition": {
+        "version": 1,
+        "minorVersion": 0,
+        "pages": [
+          {
+            "content": [
+              {
+                "type": "TextBlock",
+                "text": "Kept"
+              },
+              {
+                "type": "PieChart",
+                "data": {
+                  "series": [
+                    {
+                      "dataPoints": [
+                        {
+                          "label": "A",
+                          "value": 1
+                        },
+                        {
+                          "label": "B",
+                          "value": 2
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "BarChart",
+                "data": {
+                  "series": [
+                    {
+                      "dataPoints": [
+                        {
+                          "label": "A",
+                          "value": 3
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "LineChart",
+                "data": {
+                  "series": [
+                    {
+                      "dataPoints": [
+                        {
+                          "label": "A",
+                          "value": 1
+                        },
+                        {
+                          "label": "B",
+                          "value": 10
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "BarChart",
+                "data": {
+                  "series": [
+                    {
+                      "dataPoints": [
+                        {
+                          "label": "A",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
